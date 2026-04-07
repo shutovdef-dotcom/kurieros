@@ -2,7 +2,8 @@ import { defineConfig } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://kurieros.ru',
+  site: 'https://shutovdef-dotcom.github.io',
+  base: '/kurieros',
   output: 'static',
   compressHTML: true,
   build: {
