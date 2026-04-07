@@ -37,6 +37,11 @@ const {
 		<link rel="canonical" href={canonicalURL} />
 		<link rel="icon" type="image/svg+xml" href="/kurieros/favicon.svg" />
 
+		<!-- Google Fonts for Logo Experiments -->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800;900&family=Playfair+Display:wght@700;900&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+
 		<!-- Theme Persistence -->
 		<script is:inline>
 			(function() {
@@ -97,8 +102,7 @@ const {
 		<script is:inline>
 			(function() {
 				const initialTheme = document.documentElement.dataset.initialTheme;
-				if (!initialTheme || initialTheme === 'theme-minimal') return;
-				document.body.className = initialTheme;
+				document.body.className = initialTheme || 'theme-minimal';
 			})();
 		</script>
 		<div class="bg-blob blob-1"></div>

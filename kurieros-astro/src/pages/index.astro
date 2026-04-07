@@ -4,6 +4,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import JobGrid from '../components/JobGrid.astro';
 import IncomeCalculator from '../components/IncomeCalculator.astro';
+import LanguageSwitcher from '../components/LanguageSwitcher.astro';
 import jobsData from '../data/jobs.json';
 import { getCitiesFromJobs, getCityNames } from '../utils/cities';
 
@@ -19,18 +20,23 @@ const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabot
 		<div class="home-shell">
 			<section class="hero hero-home">
 				<div class="hero-toolbar hero-toolbar-only">
-					<div class="city-selector-container">
-						<label class="sr-only" for="city-select">Выберите город</label>
-						<select id="city-select" class="city-select">
-							<option value="" data-t="location.all_cities">Все города</option>
-							{availableCities.map((city) => (
-								<option value={city}>{city}</option>
-							))}
-						</select>
+					<div class="toolbar-top">
+						<div class="city-selector-container">
+							<svg class="city-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+							<label class="sr-only" for="city-select">Выберите город</label>
+							<select id="city-select" class="city-select">
+								<option value="" data-t="location.all_cities">Все города</option>
+								{availableCities.map((city) => (
+									<option value={city}>{city}</option>
+								))}
+							</select>
+						</div>
+						<div class="hero-lang-switcher">
+							<LanguageSwitcher />
+						</div>
 					</div>
+					<a id="city-page-link" class="hero-city-link hidden" href="/kurieros/" data-t="location.view_jobs">Все вакансии в этом городе</a>
 				</div>
-				<p id="location-status" class="hero-status" data-t="location.detecting">Определяем ваш город...</p>
-				<a id="city-page-link" class="hero-city-link hidden" href="/kurieros/" data-t="location.view_jobs">Все вакансии в этом городе</a>
 			</section>
 
 			<JobGrid />
@@ -119,7 +125,6 @@ const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabot
 	document.addEventListener('DOMContentLoaded', () => {
 		const STORAGE_KEY = 'kurieros-selected-city';
 		const citySelect = document.getElementById('city-select');
-		const status = document.getElementById('location-status');
 		const cityPageLink = document.getElementById('city-page-link');
 
 		function updateCityLink(city) {
@@ -148,10 +153,8 @@ const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabot
 
 			if (normalizedCity) {
 				localStorage.setItem(STORAGE_KEY, normalizedCity);
-				status.innerHTML = `<span data-t="location.your_city">${getTranslation('location.your_city', 'Ваш город')}</span>: ${normalizedCity}.`;
 			} else {
 				localStorage.removeItem(STORAGE_KEY);
-				status.innerHTML = `<span data-t="filters.all">${getTranslation('filters.all', 'Все вакансии')}</span>`;
 			}
 
 			window.dispatchEvent(new CustomEvent('kurieros:city-selected', {
@@ -182,19 +185,19 @@ const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabot
 		}
 
 		async function detectCityByIP() {
-			status.innerHTML = `<span data-t="location.detecting">${getTranslation('location.detecting', 'Определяем ваш город...')}</span>`;
-
 			const ipData = await getIpData();
-
-			if (!ipData) {
-				status.textContent = 'Не удалось определить город. Выберите вручную.';
-				citySelect.focus();
-				return;
-			}
+			if (!ipData) return;
 
 			// VPN detected — country is not Russia
 			if (ipData.country && ipData.country !== 'RU') {
-				status.textContent = 'Похоже, у вас включен VPN. Выберите город вручную.';
+				// Change "Все города" to "Выбор города"
+				const allCitiesOption = citySelect.querySelector('option[value=""]');
+				if (allCitiesOption) {
+					const selectText = getTranslation('location.select_city', 'Выбор города');
+					allCitiesOption.textContent = selectText;
+					allCitiesOption.setAttribute('data-t', 'location.select_city');
+				}
+
 				citySelect.focus();
 				window.dispatchEvent(new CustomEvent('kurieros:manual-city-required'));
 				return;
@@ -206,7 +209,7 @@ const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabot
 				return;
 			}
 
-			status.textContent = 'Город не определён. Выберите вручную.';
+			// City not recognized — let user pick manually
 			citySelect.focus();
 		}
 
@@ -230,13 +233,14 @@ const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabot
 </script>
 
 <style>
+	/* --- Layout --- */
 	main {
 		max-width: 1680px;
 	}
 	.home-shell {
 		max-width: 1560px;
 		margin: 0 auto;
-		padding: 1.25rem 1rem 4rem;
+		padding: 1.25rem 1.5rem 4rem;
 	}
 	.hero-home {
 		display: grid;
@@ -244,39 +248,102 @@ const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabot
 		margin-bottom: 1rem;
 	}
 	.home-section {
+		padding: 2.25rem;
+		margin: 1.5rem auto;
+		max-width: 1560px;
+		width: 100%;
 		background: #fffdf8;
 		border: 1px solid #ebe5dc;
 		border-radius: 1.6rem;
 		box-shadow: 0 8px 24px rgba(60, 41, 20, 0.05);
 	}
+
+	/* --- Hero Toolbar --- */
 	.hero-toolbar {
 		display: flex;
-		flex-wrap: wrap;
-		gap: 0.8rem;
-		align-items: center;
-		margin-top: 0;
+		flex-direction: column;
+		gap: 0.75rem;
+		margin-top: 2rem;
+		margin-bottom: 2rem;
+		width: 100%;
+		max-width: 1000px;
+		margin-left: auto;
+		margin-right: auto;
 	}
 	.hero-toolbar-only {
 		padding: 0;
 	}
-	.city-selector-container {
+	.toolbar-top {
+		display: flex;
+		gap: 0.75rem;
+		width: 100%;
+		justify-content: center;
+	}
+	.city-selector-container,
+	.hero-lang-switcher {
 		display: flex;
 		align-items: center;
+		flex: 1;
+		min-width: 200px;
+		box-sizing: border-box;
+		margin: 0 !important;
+		border-radius: 999px;
+		transition: var(--transition);
+	}
+	.city-selector-container {
+		position: relative;
 		background: #f7f2ea;
 		border: 1px solid #ebe5dc;
-		border-radius: 999px;
-		padding: 0 0.9rem;
-		min-height: 48px;
-		min-width: 220px;
-		position: relative;
+		padding: 0 clamp(1.25rem, 5vw, 3.75rem) !important;
+		font-size: clamp(1.25rem, 1.75vw, 1.55rem);
+		box-shadow: 0 6px 16px rgba(60, 41, 20, 0.12);
+		flex: 1.6;
+	}
+	.city-selector-container:hover {
+		border-color: #d7cdbe;
+		background: #fcfaf7;
+		transform: translateY(-2px);
+		box-shadow: 0 8px 20px rgba(0,0,0,0.06);
 	}
 	.city-selector-container::after {
 		content: '▼';
 		position: absolute;
-		right: 1rem;
-		font-size: 0.55rem;
+		right: 1.5rem;
+		font-size: 0.75rem;
 		color: #8b7d70;
 		pointer-events: none;
+	}
+	.hero-lang-switcher {
+		flex: 1;
+	}
+
+	/* Inner Lang Override */
+	.hero-lang-switcher :global(.lang-toggle) {
+		height: 100% !important;
+		width: 100% !important;
+		padding: 0 clamp(1.25rem, 5vw, 3.75rem) !important;
+		border-radius: 999px !important;
+		font-size: clamp(1.25rem, 1.75vw, 1.55rem) !important;
+		font-weight: 800 !important;
+		background: #f7f2ea !important;
+		border: 1px solid #ebe5dc !important;
+		justify-content: center !important;
+		box-shadow: 0 6px 16px rgba(60, 41, 20, 0.12) !important;
+	}
+	.hero-lang-switcher :global(.lang-toggle span) {
+		font-weight: 800 !important;
+	}
+	.hero-lang-switcher :global(.flag-icon) {
+		font-size: 1.5rem !important;
+	}
+
+	/* --- City Select & Icon --- */
+	.city-icon {
+		margin-right: 0.75rem;
+		color: #8b7d70;
+		flex-shrink: 0;
+		width: 20px;
+		height: 20px;
 	}
 	.city-select {
 		width: 100%;
@@ -284,41 +351,37 @@ const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabot
 		background: transparent;
 		appearance: none;
 		font: inherit;
-		font-size: 0.94rem;
-		font-weight: 700;
+		font-size: inherit !important;
+		font-weight: 800 !important;
 		color: #2b2622;
 		padding-right: 1.25rem;
 		outline: none;
 	}
-	.hero-status {
-		margin-top: 0.4rem;
-		font-size: 0.9rem;
-		color: #8b7d70;
-	}
+
+	/* --- Hero CTA Button --- */
 	.hero-city-link {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		margin-top: 0.8rem;
-		padding: 0.75rem 1.25rem;
+		margin-top: 0.25rem;
+		padding: 1.25rem 2.5rem;
 		border-radius: 999px;
 		border: 1px solid var(--text-main);
 		background: var(--text-main);
 		color: #fff;
 		text-decoration: none;
-		font-weight: 700;
-		font-size: 0.95rem;
+		font-weight: 800;
+		font-size: 1.4rem;
 		line-height: 1.1;
 		transition: var(--transition);
+		width: 100%;
 	}
 	.hero-city-link:hover {
 		transform: translateY(-1px);
 		box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
 	}
-	.home-section {
-		padding: 1.6rem;
-		margin-top: 1.25rem;
-	}
+
+	/* --- Content Sections --- */
 	.section-heading {
 		margin-bottom: 1.1rem;
 	}
@@ -331,19 +394,20 @@ const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabot
 	}
 	:global(.reviews-section),
 	:global(.faq-section) {
-		padding-top: 0;
-		padding-bottom: 0;
-	}
-	:global(.reviews-section h2),
-	:global(.faq-section h2) {
-		text-align: left;
+		border: none !important;
+		background: transparent !important;
+		box-shadow: none !important;
+		padding: 0 !important;
 	}
 	:global(.review-card),
 	:global(.faq-item) {
-		background: #f7f2ea;
-		border: 1px solid #ebe5dc;
-		box-shadow: none;
+		background: #fffdf8 !important;
+		border: 1px solid #ebe5dc !important;
+		border-radius: 1.25rem !important;
+		box-shadow: 0 4px 12px rgba(60, 41, 20, 0.03) !important;
 	}
+
+	/* --- Utilities --- */
 	.sr-only {
 		position: absolute;
 		width: 1px;
@@ -358,6 +422,8 @@ const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabot
 	.hidden {
 		display: none;
 	}
+
+	/* --- Mobile --- */
 	@media (max-width: 768px) {
 		.home-shell {
 			padding-top: 0.75rem;
@@ -366,12 +432,21 @@ const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabot
 			padding: 1.2rem;
 			border-radius: 1.25rem;
 		}
-		.hero-toolbar {
-			flex-direction: column;
-			align-items: stretch;
+		.city-selector-container,
+		.hero-lang-switcher :global(.lang-toggle) {
+			min-width: 0;
+			flex: 1 1 auto;
+		}
+		.hero-lang-switcher :global(.lang-toggle) {
+			min-width: 110px;
 		}
 		.city-selector-container {
-			min-width: 0;
+			min-width: 180px;
+		}
+	}
+	@media (max-width: 600px) {
+		.toolbar-top {
+			flex-direction: column;
 		}
 	}
 </style>

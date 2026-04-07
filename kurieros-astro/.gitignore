@@ -22,3 +22,7 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# temp scripts & screenshots
+fix-paths.cjs
+qa_screenshots*

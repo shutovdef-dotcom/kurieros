@@ -15,6 +15,7 @@
     "local:dev": "./scripts/dev-local.sh"
   },
   "dependencies": {
+    "@astrojs/sitemap": "^3.7.2",
     "astro": "^6.1.3"
   }
 }

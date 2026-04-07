@@ -40,7 +40,8 @@ export const translations = {
       view_jobs: "Все вакансии в этом городе",
       not_defined: "Город не определен",
       manual: "Выбрать вручную",
-      all_cities: "Все города"
+      all_cities: "Все города",
+      select_city: "Выбор города"
     },
     vpn: {
       title: "Похоже, у вас включен VPN",
@@ -162,7 +163,8 @@ export const translations = {
           "view_jobs": "Barcha vakansiyalar shu shaharda",
           "not_defined": "Shahar aniqlanmadi",
           "manual": "Qo'lda tanlash",
-          "all_cities": "Barcha shaharlar"
+          "all_cities": "Barcha shaharlar",
+          "select_city": "Shaharni tanlash"
       },
       "vpn": {
           "title": "Aftidan, sizda VPN yoqilgan",
@@ -283,7 +285,8 @@ export const translations = {
           "view_jobs": "Ҳама вакансияҳо дар ин шаҳр",
           "not_defined": "Шаҳр муайян нашудааст",
           "manual": "Худам интихоб мекунам",
-          "all_cities": "Ҳама шаҳрҳо"
+          "all_cities": "Ҳама шаҳрҳо",
+          "select_city": "Интихоби шаҳр"
       },
       "vpn": {
           "title": "Дар шумо VPN фаъол аст",
@@ -404,7 +407,8 @@ export const translations = {
           "view_jobs": "Бул шаардагы бардык жумуштар",
           "not_defined": "Шаар аныкталган жок",
           "manual": "Өзүм тандайм",
-          "all_cities": "Бардык шаарлар"
+          "all_cities": "Бардык шаарлар",
+          "select_city": "Шаарды тандоо"
       },
       "vpn": {
           "title": "Сизде VPN күйгүзүлгөн",
@@ -490,7 +494,7 @@ export const translations = {
     hero: { title: "Առաքիչի աշխատանք մոտակայքում", subtitle: "Համեմատեք պայմանները Yandex, Dodo... ընկերություններում", search_placeholder: "Քաղաք, պաշտոն, ընկերություն...", find_btn: "Գտնել աշխատանք" },
     filters: { all: "Բոլորը", auto: "Ավտոմեքենայով", bicycle: "Հեծանիվով", walking: "Ոտքով", age16: "16 տարեկանից", flexible: "Ազատ գրաֆիկ" },
     calculator: { title: "Եկամտի հաշվիչ", subtitle: "Իմացեք ձեր եկամուտը", days: "Օրեր սմսական", hours: "Ժամեր օրական", city: "Ձեր քաղաքը", result: "Մոտավոր եկամուտ:", month: "դրամ/ամիս", apply: "Ընտրել հաստիք" },
-    location: { detecting: "Որոնում...", your_city: "Ձեր քաղաքը", view_jobs: "Տեսնել բոլորը", not_defined: "Չգտնվեց", manual: "Ընտրել", all_cities: "Բոլոր քաղաքները" },
+    location: { detecting: "Որոնում...", your_city: "Ձեր քաղաքը", view_jobs: "Տեսնել բոլորը", not_defined: "Չգտնվեց", manual: "Ընտրել", all_cities: "Բոլոր քաղաքները", select_city: "Ընտրել քաղաքը" },
     vpn: { title: "VPN է միացված", text: "Ընտրեք ձեր քաղաքը ցանկից:", btn_manual: "Ընտրել" },
     job: { salary: "Աշխատավարձ", schedule: "Գրաֆիկ", education: "Կրթություն", experience: "Փորձ", compare: "Համեմատել", in_compare: "Համեմատության մեջ", apply: "Լրացնել հայտը", no_experience: "Առանց փորձի", see_vacancy: "Տեսնել" },
     companies: { title: "Գործատուներ", subtitle: "Միայն վստահելի ապրանքանիշեր", active_vacancies: "ակտիվ", view_jobs: "Տեսնել", partner_title: "Դառնալ գործընկեր", partner_text: "Ուզո՞ւմ եք տեղադրել:", partner_btn: "Կապ" },
@@ -507,7 +511,7 @@ export const translations = {
     hero: { title: "Жақын маңдағы курьер жұмысы", subtitle: "Ірі компаниялардағы шарттарды салыстырыңыз: Яндекс, Додо, СДЭК...", search_placeholder: "Қалаңыз, лауазымыңыз, компанияңыз...", find_btn: "Жұмыс табу" },
     filters: { all: "Барлық бос орындар", auto: "Көлікпен", bicycle: "Велокурьер", walking: "Жаяу", age16: "16 жастан", flexible: "Еркін график" },
     calculator: { title: "Табыс калькуляторы", subtitle: "Айына қанша ата алатыныңызды біліңіз", days: "Айына жұмыс күні", hours: "Күніне сағат", city: "Сіздің қалаңыз", result: "Болжамды табыс:", month: "теңге/ай", apply: "Бос орынды таңдау" },
-    location: { detecting: "Қаланы анықтау...", your_city: "Сіздің қалаңыз", view_jobs: "Барлық бос орындар", not_defined: "Қала табылмады", manual: "Қолмен таңдау", all_cities: "Барлық қалалар" },
+    location: { detecting: "Қаланы анықтау...", your_city: "Сіздің қалаңыз", view_jobs: "Барлық бос орындар", not_defined: "Қала табылмады", manual: "Қолмен таңдау", all_cities: "Барлық қалалар", select_city: "Қаланы таңдау" },
     vpn: { title: "Орналасқан жер РФ емес", text: "Провайдерден қаланы қолмен таңдаңыз.", btn_manual: "Қолмен таңдау" },
     job: { salary: "Жалақы", schedule: "График", education: "Білімі", experience: "Тәжірибесі", compare: "Салыстыру", in_compare: "Салыстыруда", apply: "Өтінім қалдыру", no_experience: "Тәжірибесіз", see_vacancy: "Қарау" },
     companies: { title: "Жұмыс берушілер", subtitle: "Тек сенімді брендтермен.", active_vacancies: "белсенді бос жұмыс", view_jobs: "Бос орындарды көру", partner_title: "Серіктес болу", partner_text: "Компания ретінде бос орын орналастырғыңыз келе ме?", partner_btn: "Байланысу" },
@@ -524,7 +528,7 @@ export const translations = {
     hero: { title: "Yaxınlıqdakı kuryer işi", subtitle: "Yandex, Dodo və digər şirkətlərin şərtlərini müqayisə edin.", search_placeholder: "Şəhər, vəzifə, şirkət...", find_btn: "İş tap" },
     filters: { all: "Bütün vakansiyalar", auto: "Avtomobillə", bicycle: "Velokuryer", walking: "Piyada", age16: "16 yaşdan", flexible: "Sərbəst qrafik" },
     calculator: { title: "Gəlir kalkulyatoru", subtitle: "Aylıq nə qədər qazana biləcəyinizi öyrənin", days: "Ayda gün sayı", hours: "Gündə saat", city: "Sizin şəhəriniz", result: "Təxmini gəlir:", month: "manat/ay", apply: "Vakansiyanı seç" },
-    location: { detecting: "Təyin olunur...", your_city: "Sizin şəhəriniz", view_jobs: "Bütün vakansiyaları gör", not_defined: "Tapılmadı", manual: "Özün seç", all_cities: "Bütün şəhərlər" },
+    location: { detecting: "Təyin olunur...", your_city: "Sizin şəhəriniz", view_jobs: "Bütün vakansiyaları gör", not_defined: "Tapılmadı", manual: "Özün seç", all_cities: "Bütün şəhərlər", select_city: "Şəhər seçimi" },
     vpn: { title: "VPN aktivdir", text: "Siyahıdan şəhərinizi seçin.", btn_manual: "Seçim et" },
     job: { salary: "Maaş", schedule: "Qrafik", education: "Təhsil", experience: "Təcrübə", compare: "Müqayisə", in_compare: "Müqayisədə", apply: "Müraciət et", no_experience: "Təcrübəsiz", see_vacancy: "Bax" },
     companies: { title: "İşəgötürənlər", subtitle: "Yalnız etibarlı brendlər.", active_vacancies: "aktiv vakansiya", view_jobs: "Bax", partner_title: "Tərəfdaş ol", partner_text: "Vakansiya əlavə etmək istəyirsiniz?", partner_btn: "Əlaqə" },
@@ -558,7 +562,7 @@ export const translations = {
     hero: { title: "Работа кур'ерам побач", subtitle: "Параўноўвайце ўмовы ў буйных кампаніях: Яндекс, Додо, СДЭК...", search_placeholder: "Ваш горад, пасада, кампанія...", find_btn: "Знайсці працу" },
     filters: { all: "Усе вакансіі", auto: "На аўто", bicycle: "Велакур'ер", walking: "Пешы", age16: "З 16 гадоў", flexible: "Вольны графік" },
     calculator: { title: "Калькулятар даходу", subtitle: "Колькі вы можаце зарабіць", days: "Дзён у месяц", hours: "Гадзін у дзень", city: "Ваш горад", result: "Прыкладны даход:", month: "руб / міс", apply: "Выбраць вакансію" },
-    location: { detecting: "Вызначаем горад...", your_city: "Ваш горад", view_jobs: "Усе вакансіі", not_defined: "Не вызначана", manual: "Выбраць уручную", all_cities: "Усе гарады" },
+    location: { detecting: "Вызначаем горад...", your_city: "Ваш горад", view_jobs: "Усе вакансіі", not_defined: "Не вызначана", manual: "Выбраць уручную", all_cities: "Усе гарады", select_city: "Выбар горада" },
     vpn: { title: "Уключаны VPN", text: "Выберыце горад са спісу.", btn_manual: "Выбраць" },
     job: { salary: "Зарплата", schedule: "Графік", education: "Адукацыя", experience: "Вопыт", compare: "Параўнаць", in_compare: "У параўнанні", apply: "Пакінуць заяўку", no_experience: "Без вопыту", see_vacancy: "Глядзець" },
     companies: { title: "Кампаніі-працадаўцы", subtitle: "Толькі правераныя брэнды.", active_vacancies: "актыўных вакансій", view_jobs: "Глядзець вакансіі", partner_title: "Стаць партнёрам", partner_text: "Жадаеце размясціць вакансію?", partner_btn: "Звязацца" },
@@ -592,7 +596,7 @@ export const translations = {
     hero: { title: "Công việc giao hàng gần đây", subtitle: "So sánh các điều kiện ở các công ty lớn: Yandex, Dodo, CDEK...", search_placeholder: "Thành phố, vị trí, công ty...", find_btn: "Tìm việc" },
     filters: { all: "Tất cả", auto: "Bằng xe hơi", bicycle: "Xe đạp", walking: "Đi bộ", age16: "Từ 16 tuổi", flexible: "Linh hoạt" },
     calculator: { title: "Máy tính thu nhập", subtitle: "Tìm hiểu xem bạn có thể kiếm được bao nhiêu", days: "Ngày/tháng", hours: "Giờ/ngày", city: "Thành phố của bạn", result: "Thu nhập ước tính:", month: "VND / tháng", apply: "Chọn vị trí" },
-    location: { detecting: "Đang dò thành phố...", your_city: "Thành phố của bạn", view_jobs: "Xem tất cả", not_defined: "Không xác định", manual: "Chọn thủ công", all_cities: "Tất cả thành phố" },
+    location: { detecting: "Đang dò thành phố...", your_city: "Thành phố của bạn", view_jobs: "Xem tất cả", not_defined: "Không xác định", manual: "Chọn thủ công", all_cities: "Tất cả thành phố", select_city: "Chọn thành phố" },
     vpn: { title: "VPN đang bật", text: "Vui lòng chọn thành phố từ danh sách.", btn_manual: "Chọn thủ công" },
     job: { salary: "Mức lương", schedule: "Lịch trình", education: "Giáo dục", experience: "Kinh nghiệm", compare: "So sánh", in_compare: "Đang so sánh", apply: "Nộp đơn", no_experience: "Không cần KN", see_vacancy: "Xem chi tiết" },
     companies: { title: "Nhà tuyển dụng", subtitle: "Thương hiệu đáng tin cậy.", active_vacancies: "vị trí đang tuyển", view_jobs: "Xem việc làm", partner_title: "Trở thành đối tác", partner_text: "Bạn muốn đăng tin tuyển dụng?", partner_btn: "Liên hệ" },
@@ -609,7 +613,7 @@ export const translations = {
     hero: { title: "附近的快递工作", subtitle: "比较大公司的条件：Yandex、Dodo、CDEK等。", search_placeholder: "城市、职位、公司...", find_btn: "找工作" },
     filters: { all: "所有职位", auto: "开车", bicycle: "网约自行车", walking: "步行", age16: "16岁起", flexible: "弹性时间表" },
     calculator: { title: "收入计算器", subtitle: "看看您每月能赚多少", days: "每月天数", hours: "每天小时", city: "您的城市", result: "预计收入：", month: "元/月", apply: "选择职位" },
-    location: { detecting: "正在检测城市...", your_city: "您的城市", view_jobs: "查看所有职位", not_defined: "未找到", manual: "手动选择", all_cities: "所有城市" },
+    location: { detecting: "正在检测城市...", your_city: "您的城市", view_jobs: "查看所有职位", not_defined: "未找到", manual: "手动选择", all_cities: "所有城市", select_city: "选择城市" },
     vpn: { title: "VPN已开启", text: "请从列表中选择。", btn_manual: "我来选择" },
     job: { salary: "工资", schedule: "日程", education: "教育", experience: "经验", compare: "比较", in_compare: "在比较中", apply: "申请", no_experience: "无经验", see_vacancy: "查看职位" },
     companies: { title: "招聘公司", subtitle: "只有可靠的品牌。", active_vacancies: "个活跃职位", view_jobs: "查看职位", partner_title: "成为合作伙伴", partner_text: "您想发布职位吗？", partner_btn: "联系" },

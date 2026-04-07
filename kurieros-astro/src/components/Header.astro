@@ -2,11 +2,15 @@
 import LanguageSwitcher from './LanguageSwitcher.astro';
 ---
 <header>
-    <a href="/kurieros/" class="logo">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-        Курьерос
-    </a>
-    <nav>
+    <div class="header-left">
+        <a href="/kurieros/" class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            Курьерос
+        </a>
+    </div>
+    
+    <!-- Desktop Nav / Variant 3 (Pills) -->
+    <nav class="main-nav">
         <ul>
             <li><a href="/kurieros/#vacancies" data-t="nav.vacancies">Вакансии</a></li>
             <li><a href="/kurieros/companies/" data-t="nav.companies">Компании</a></li>
@@ -14,26 +18,68 @@ import LanguageSwitcher from './LanguageSwitcher.astro';
             <li><a href="/kurieros/contacts/" data-t="nav.contacts">Контакты</a></li>
             <li><a href="/kurieros/cities/" data-t="nav.cities">Города</a></li>
             <li><a href="/kurieros/compare/" class="compare-nav-link"><span data-t="nav.compare">Сравнение</span> <span class="compare-badge hidden" id="compare-badge">0</span></a></li>
-            <li><LanguageSwitcher /></li>
+            <li class="lang-switcher-li"><LanguageSwitcher /></li>
         </ul>
     </nav>
+
+    <div class="header-right-mobile">
+        <!-- Mobile Header will only show Logo for V1 -->
+    </div>
 </header>
+
+<!-- Variant 1: Bottom Navigation Bar -->
+<nav class="bottom-nav">
+    <a href="/kurieros/#vacancies" class="bn-item">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span data-t="nav.vacancies">Вакансии</span>
+    </a>
+    <a href="/kurieros/companies/" class="bn-item">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M8 10h.01"></path><path d="M16 10h.01"></path><path d="M8 14h.01"></path><path d="M16 14h.01"></path></svg>
+        <span data-t="nav.companies">Компании</span>
+    </a>
+    <a href="/kurieros/compare/" class="bn-item">
+        <div class="bn-icon-wrap">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"></path></svg>
+            <span class="bn-badge hidden" id="compare-badge-bottom">0</span>
+        </div>
+        <span data-t="nav.compare">Сравнение</span>
+    </a>
+    <a href="/kurieros/cities/" class="bn-item">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+        <span data-t="nav.cities">Города</span>
+    </a>
+    <a href="/kurieros/blog/" class="bn-item">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+        <span data-t="nav.blog">Блог</span>
+    </a>
+</nav>
 
 <script is:inline>
     function updateHeaderCompareBadge() {
         const compareList = JSON.parse(localStorage.getItem('compareList') || '[]');
-        const badge = document.getElementById('compare-badge');
-        if (badge) {
-            badge.textContent = compareList.length;
-            if (compareList.length > 0) {
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
+        const badges = [
+            document.getElementById('compare-badge'),
+            document.getElementById('compare-badge-burger'),
+            document.getElementById('compare-badge-bottom')
+        ];
+        
+        badges.forEach(badge => {
+            if (badge) {
+                badge.textContent = compareList.length;
+                if (compareList.length > 0) {
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
             }
-        }
+        });
     }
-    document.addEventListener('DOMContentLoaded', updateHeaderCompareBadge);
-    // Also listen for custom events if we want live updates across components
+    
+    // Navigation Badge Logic
+    document.addEventListener('DOMContentLoaded', () => {
+        updateHeaderCompareBadge();
+    });
+
     window.addEventListener('storage', updateHeaderCompareBadge);
     window.addEventListener('compareUpdate', updateHeaderCompareBadge);
 </script>
