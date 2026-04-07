@@ -13,7 +13,7 @@ const applyExternal = job.applyLink && job.applyLink !== '#';
 		<div class="job-content">
 			<div class="job-heading">
 				<div>
-					<a href={`/v/${job.slug}/`} class="job-title" data-t={`vacancies.${job.id}.title`}>{job.title}</a>
+					<a href={`/kurieros/v/${job.slug}/`} class="job-title" data-t={`vacancies.${job.id}.title`}>{job.title}</a>
 					<div class="company-name" data-t={`vacancies.${job.id}.company`}>{job.company}</div>
 					{job.shortDescription && <p class="job-short-desc" data-t={`vacancies.${job.id}.shortDescription`}>{job.shortDescription}</p>}
 				</div>

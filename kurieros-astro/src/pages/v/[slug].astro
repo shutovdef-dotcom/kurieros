@@ -24,7 +24,7 @@ const hasApplyLink = Boolean(job.applyLink && job.applyLink !== '#');
 	<main class="vacancy-page">
 		<div class="container container-narrow">
 			<nav class="breadcrumb">
-				<a href="/" data-t="nav.main">Главная</a> &gt; <span data-t={`vacancies.${job.id}.title`}>{job.title}</span>
+				<a href="/kurieros/" data-t="nav.main">Главная</a> &gt; <span data-t={`vacancies.${job.id}.title`}>{job.title}</span>
 			</nav>
 
 			<section class="vacancy-header">
@@ -92,7 +92,7 @@ const hasApplyLink = Boolean(job.applyLink && job.applyLink !== '#');
 							</>
 						) : (
 							<>
-								<a href="/contacts/" class="apply-btn-large apply-btn-disabled" data-t="vacancy.apply_disabled">
+								<a href="/kurieros/contacts/" class="apply-btn-large apply-btn-disabled" data-t="vacancy.apply_disabled">
 									Уточнить условия
 								</a>
 								<p class="apply-note" data-t="vacancy.apply_disabled_note">Для этой вакансии прямая ссылка пока не добавлена</p>
