@@ -1,0 +1,20 @@
+{
+  "name": "zapping-zero",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "local:build": "./scripts/build-local.sh",
+    "local:preview": "./scripts/preview-local.sh",
+    "local:dev": "./scripts/dev-local.sh"
+  },
+  "dependencies": {
+    "astro": "^6.1.3"
+  }
+}

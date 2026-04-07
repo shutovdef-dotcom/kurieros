@@ -1,0 +1,157 @@
+/* THEME-SYSTEM: 8 UNIQUE STYLES FOR KURIEROS */
+
+/* 1. Cyber-Courier (Neon Dark) */
+.theme-cyber {
+  --primary-color: #00f2ff;
+  --accent-color: #bc13fe;
+  --bg-color: #05010a;
+  --surface-color: #100b1d;
+  --text-main: #e0e0e0;
+  --text-muted: #8b8ea1;
+  --border-color: #2b1f4d;
+  --glass-bg: rgba(16, 11, 29, 0.8);
+  --glass-border: rgba(188, 19, 254, 0.3);
+  --shadow-sm: 0 0 10px rgba(0, 242, 255, 0.2);
+  --shadow-md: 0 0 20px rgba(188, 19, 254, 0.3);
+  --shadow-glass: 0 0 40px rgba(0, 242, 255, 0.1);
+  --radius-lg: 4px;
+  --radius-xl: 8px;
+  --font-main: 'Inter', sans-serif;
+  --glow-intensity: 0.8;
+}
+
+/* 2. Clean Tech (Fresh & Trusted) */
+.theme-minimal {
+  --primary-color: #3b82f6;
+  --accent-color: #10b981;
+  --bg-color: #ffffff;
+  --surface-color: #f1f5f9;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(59, 130, 246, 0.1);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-glass: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --font-main: 'Inter', system-ui;
+}
+
+/* 3. Startup Style (Vibrant Energy) */
+.theme-vibrant {
+  --primary-color: #f97316;
+  --accent-color: #facc15;
+  --bg-color: #fffaf5;
+  --surface-color: #ffffff;
+  --text-main: #431407;
+  --text-muted: #9a3412;
+  --border-color: #fed7aa;
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(249, 115, 22, 0.2);
+  --shadow-sm: 4px 4px 0 rgba(249, 115, 22, 0.1);
+  --shadow-md: 8px 8px 0 rgba(249, 115, 22, 0.1);
+  --shadow-glass: 0 12px 24px rgba(249, 115, 22, 0.15);
+  --radius-lg: 32px;
+  --radius-xl: 40px;
+  --font-main: 'Outfit', sans-serif;
+}
+
+/* 4. Eco-Friendly Urban (Green) */
+.theme-eco {
+  --primary-color: #059669;
+  --accent-color: #10b981;
+  --bg-color: #f0fdf4;
+  --surface-color: #ffffff;
+  --text-main: #064e3b;
+  --text-muted: #065f46;
+  --border-color: #d1fae5;
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(5, 150, 105, 0.2);
+  --shadow-sm: 0 2px 4px rgba(5, 150, 105, 0.05);
+  --shadow-md: 0 10px 20px rgba(5, 150, 105, 0.08);
+  --shadow-glass: 0 8px 16px rgba(5, 150, 105, 0.05);
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --font-main: 'Inter', sans-serif;
+}
+
+/* 5. Midnight Executive (Black/Gold) */
+.theme-midnight {
+  --primary-color: #c5a059;
+  --accent-color: #ffffff;
+  --bg-color: #0b0b0b;
+  --surface-color: #1a1a1a;
+  --text-main: #f3f3f3;
+  --text-muted: #999999;
+  --border-color: #2a2a2a;
+  --glass-bg: rgba(26, 26, 26, 0.9);
+  --glass-border: rgba(197, 160, 89, 0.2);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 20px 40px rgba(0, 0, 0, 0.6);
+  --shadow-glass: 0 0 30px rgba(197, 160, 89, 0.05);
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --font-main: 'Playfair Display', serif;
+}
+
+/* 6. 8-Bit Retro Game (Pixel) */
+.theme-retro {
+  --primary-color: #ffde00;
+  --accent-color: #3b4cca;
+  --bg-color: #000000;
+  --surface-color: #222222;
+  --text-main: #ffffff;
+  --text-muted: #aaaaaa;
+  --border-color: #ffffff;
+  --glass-bg: #222222;
+  --glass-border: #ffffff;
+  --shadow-sm: 4px 4px 0 #ffffff;
+  --shadow-md: 8px 8px 0 #ffffff;
+  --shadow-glass: 0 0 0 4px #ffffff;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --font-main: 'Press Start 2P', cursive;
+  --pixel-border: 4px solid #fff;
+}
+
+/* 7. Aurora Glass 2.0 (Glow) */
+.theme-aurora {
+  --primary-color: #ff00cc;
+  --accent-color: #3333ff;
+  --bg-color: #0a0e21;
+  --surface-color: rgba(255, 255, 255, 0.05);
+  --text-main: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.6);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --shadow-sm: 0 4px 10px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 20px 40px rgba(0, 0, 0, 0.4);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --font-main: 'Outfit', sans-serif;
+  --aurora-gradient: linear-gradient(45deg, #ff00cc, #3333ff, #00d2ff, #3a7bd5);
+}
+
+/* 8. Minimalist Editorial (Magazine) */
+.theme-editorial {
+  --primary-color: #000000;
+  --accent-color: #666666;
+  --bg-color: #f9f7f2;
+  --surface-color: #ffffff;
+  --text-main: #000000;
+  --text-muted: #555555;
+  --border-color: #000000;
+  --glass-bg: #ffffff;
+  --glass-border: #000000;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-glass: none;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --font-main: 'Libre Baskerville', serif;
+  --font-heading: 'Syncopate', sans-serif;
+}

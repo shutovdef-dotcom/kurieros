@@ -1,0 +1,220 @@
+---
+import '../styles/index.css';
+import '../styles/themes.css';
+import VPNModal from '../components/VPNModal.astro';
+import { translations } from '../data/translations';
+import jobTranslations from '../data/job_translations.json';
+
+Object.keys(translations).forEach(lang => {
+    if (jobTranslations[lang]) {
+        translations[lang].vacancies = jobTranslations[lang];
+    }
+});
+
+interface Props {
+	title?: string;
+	description?: string;
+	image?: string;
+	canonicalURL?: URL | string;
+}
+
+const {
+	title = "Курьерос — Вся работа здесь",
+	description = "Лучшие вакансии для курьеров в России. Работа на авто, мото, вело и пешком. Сравнивайте условия в Яндекс Еда, СДЭК, Ozon и других компаниях.",
+	image = "/favicon.svg",
+	canonicalURL = new URL(Astro.url.pathname, Astro.site),
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonicalURL} />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+		<!-- Theme Persistence -->
+		<script is:inline>
+			(function() {
+				const savedTheme = localStorage.getItem('site-theme');
+				const bodyClass = savedTheme && savedTheme !== 'default'
+					? `theme-${savedTheme}`
+					: 'theme-minimal';
+				document.documentElement.dataset.initialTheme = bodyClass;
+			})();
+		</script>
+
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content={Astro.url} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={new URL(image, Astro.url)} />
+
+		<!-- Twitter -->
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:url" content={Astro.url} />
+		<meta property="twitter:title" content={title} />
+		<meta property="twitter:description" content={description} />
+		<meta property="twitter:image" content={new URL(image, Astro.url)} />
+
+		<meta name="theme-color" content="#4F46E5" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<!-- SEO Schema.org Markup -->
+		<script type="application/ld+json">
+			{
+				"@context": "https://schema.org",
+				"@graph": [
+					{
+						"@type": "FAQPage",
+						"mainEntity": [
+							{
+								"@type": "Question",
+								"name": "Со скольки лет можно работать курьером?",
+								"acceptedAnswer": {
+									"@type": "Answer",
+									"text": "В большинстве компаний можно устроиться уже с 16 лет."
+								}
+							}
+						]
+					},
+					{
+						"@type": "WebSite",
+						"name": "Курьерос",
+						"url": "https://kurieros.ru/"
+					}
+				]
+			}
+		</script>
+	</head>
+	<body class="theme-minimal">
+		<script is:inline>
+			(function() {
+				const initialTheme = document.documentElement.dataset.initialTheme;
+				if (!initialTheme || initialTheme === 'theme-minimal') return;
+				document.body.className = initialTheme;
+			})();
+		</script>
+		<div class="bg-blob blob-1"></div>
+		<div class="bg-blob blob-2"></div>
+		
+		<slot />
+
+		<VPNModal />
+
+		<script is:inline>
+			// Global Location & VPN Detection
+			(async function() {
+				if (window.kurieros_user) return; // Prevent double execution
+				
+				async function fetchWithTimeout(resource, options = {}) {
+					const { timeout = 5000 } = options;
+					const controller = new AbortController();
+					const id = setTimeout(() => controller.abort(), timeout);
+					const response = await fetch(resource, { ...options, signal: controller.signal });
+					clearTimeout(id);
+					return response;
+				}
+
+				let data = null;
+				try {
+					// 1st Attempt: ipapi.co (detailed fields)
+					const res = await fetchWithTimeout('https://ipapi.co/json/');
+					data = await res.json();
+				} catch (e) {
+					console.warn("Primary geo-API failed, trying fallback...", e);
+					try {
+						// 2nd Attempt: ip-api.com (reliable, different endpoint)
+						const res = await fetchWithTimeout('http://ip-api.com/json/');
+						const raw = await res.json();
+						if (raw.status === 'success') {
+							data = {
+								city: raw.city,
+								country: raw.countryCode,
+								country_name: raw.country
+							};
+						}
+					} catch (e2) {
+						console.error("All geo-APIs failed.", e2);
+					}
+				}
+
+				if (data) {
+					window.kurieros_user = data;
+					window.dispatchEvent(new CustomEvent('kurieros:region-detected', { detail: data }));
+				}
+			})();
+		</script>
+		<script is:inline define:vars={{ translations }}>
+			// Global i18n Manager
+			(function() {
+				const STORAGE_KEY = 'site-lang';
+				const DEFAULT_LANG = 'ru';
+				
+				function getNestedValue(obj, path) {
+					return path.split('.').reduce((prev, curr) => prev && prev[curr], obj);
+				}
+
+				window.kurieros_i18n = {
+					currentLang: localStorage.getItem(STORAGE_KEY) || DEFAULT_LANG,
+					
+					setLanguage(lang) {
+						if (!translations[lang]) lang = DEFAULT_LANG;
+						this.currentLang = lang;
+						localStorage.setItem(STORAGE_KEY, lang);
+						this.applyTranslations();
+						window.dispatchEvent(new CustomEvent('kurieros:lang-change', { detail: { lang } }));
+					},
+
+					applyTranslations() {
+						const elements = document.querySelectorAll('[data-t]');
+						const langData = translations[this.currentLang] || translations[DEFAULT_LANG];
+						
+						elements.forEach(el => {
+							const key = el.getAttribute('data-t');
+							const translation = getNestedValue(langData, key) || getNestedValue(translations[DEFAULT_LANG], key);
+							
+							if (translation) {
+								if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+									el.placeholder = translation;
+								} else {
+									el.textContent = translation;
+								}
+							}
+						});
+						
+						// Update HTML lang attribute
+						document.documentElement.setAttribute('lang', this.currentLang);
+					}
+				};
+
+				// Initial apply
+				document.addEventListener('DOMContentLoaded', () => {
+					window.kurieros_i18n.applyTranslations();
+				});
+				
+				// Listen for region detection if we want to auto-suggest language (optional)
+				window.addEventListener('kurieros:region-detected', (e) => {
+					const countryToLang = {
+						'KZ': 'kk', 'UZ': 'uz', 'UA': 'uk', 'BY': 'be', 
+						'AM': 'hy', 'KG': 'ky', 'TJ': 'tg', 'AZ': 'az', 
+						'IN': 'hi', 'VN': 'vi', 'CN': 'zh'
+					};
+					const suggestedLang = countryToLang[e.detail.country];
+					const hasManualLang = localStorage.getItem(STORAGE_KEY);
+					
+					if (suggestedLang && !hasManualLang) {
+						// Optionally auto-switch or just suggest
+						// For now, let's just keep the manual toggle primary
+					}
+				});
+			})();
+		</script>
+	</body>
+</html>

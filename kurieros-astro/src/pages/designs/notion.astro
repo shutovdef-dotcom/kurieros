@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import HomeDesignPreview from '../../components/HomeDesignPreview.astro';
+---
+
+<BaseLayout title="Главная Concept: Notion — Курьерос" description="Preview-концепция главной страницы в стиле Notion.">
+	<Header />
+	<main class="design-page">
+		<div class="design-page-head">
+			<a href="/designs/">← Ко всем концепциям</a>
+			<h1>Notion</h1>
+		</div>
+		<HomeDesignPreview variant="notion" />
+	</main>
+	<Footer />
+</BaseLayout>
+
+<style>
+	.design-page {
+		max-width: 1360px;
+		margin: 0 auto;
+		padding: 2rem 1rem 4rem;
+	}
+	.design-page-head a {
+		text-decoration: none;
+		color: var(--text-muted);
+	}
+	.design-page-head h1 {
+		margin-top: 0.75rem;
+	}
+</style>

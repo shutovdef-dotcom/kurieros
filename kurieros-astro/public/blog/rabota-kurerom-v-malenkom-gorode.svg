@@ -1,0 +1,11 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="900" fill="#F5F5F1"/>
+  <rect x="80" y="80" width="1440" height="740" rx="42" fill="#FEFEFB" stroke="#D7D7CF"/>
+  <circle cx="1270" cy="250" r="170" fill="#E8E0D6"/>
+  <circle cx="1320" cy="680" r="220" fill="#DDE7DC"/>
+  <rect x="150" y="150" width="280" height="48" rx="24" fill="#E8E4DA"/>
+  <text x="150" y="390" fill="#161616" font-family="Arial, Helvetica, sans-serif" font-size="88" font-weight="700">Работа курьером</text>
+  <text x="150" y="500" fill="#161616" font-family="Arial, Helvetica, sans-serif" font-size="88" font-weight="700">в маленьком городе</text>
+  <text x="150" y="620" fill="#5F5F58" font-family="Arial, Helvetica, sans-serif" font-size="34">Где искать спрос, как считать доход и когда лучше</text>
+  <text x="150" y="670" fill="#5F5F58" font-family="Arial, Helvetica, sans-serif" font-size="34">смотреть в сторону другого формата занятости</text>
+</svg>

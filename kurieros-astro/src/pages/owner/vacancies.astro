@@ -1,0 +1,624 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import jobsData from '../../data/jobs.json';
+
+const nextId = Math.max(...jobsData.map((job) => job.id)) + 1;
+const adminHash = '2a4f4c5e061b8e807525ec8e325e1674c3aaccb740ba61cd92f3c91f7909391c';
+const companyExamples = jobsData.slice(0, 8).map((job) => ({
+	name: job.company,
+	logo: job.companyLogo,
+}));
+---
+
+<BaseLayout title="Owner Vacancy Admin — Курьерос" description="Закрытая страница владельца для подготовки новых вакансий.">
+	<main class="owner-page">
+		<section class="owner-shell">
+			<div class="owner-hero">
+				<p class="owner-eyebrow">Owner Access Only</p>
+				<h1>Добавление вакансий</h1>
+				<p>Страница не участвует в навигации и открывается только по прямой ссылке. После входа можно подготовить новую вакансию в формате проекта.</p>
+			</div>
+
+			<div id="owner-login" class="owner-card">
+				<h2>Вход владельца</h2>
+				<p class="muted">Введите приватный код доступа, чтобы открыть форму.</p>
+				<form id="owner-login-form" class="owner-login-form">
+					<label class="field">
+						<span>Приватный код</span>
+						<input id="owner-password" type="password" autocomplete="current-password" placeholder="Введите код доступа" required />
+					</label>
+					<button type="submit" class="btn-primary">Открыть форму</button>
+				</form>
+				<p id="owner-login-error" class="owner-error hidden">Неверный код доступа.</p>
+			</div>
+
+			<div id="owner-panel" class="owner-panel hidden">
+				<div class="owner-toolbar owner-card">
+					<div>
+						<h2>Панель владельца</h2>
+						<p class="muted">Следующий рекомендованный ID: <strong>{nextId}</strong></p>
+					</div>
+					<div class="toolbar-actions">
+						<button id="owner-save-draft" type="button" class="btn-secondary">Сохранить черновик</button>
+						<button id="owner-clear-draft" type="button" class="btn-secondary">Очистить</button>
+						<button id="owner-logout" type="button" class="btn-secondary">Выйти</button>
+					</div>
+				</div>
+
+				<div class="owner-grid">
+					<section class="owner-card">
+						<h3>Форма вакансии</h3>
+						<form id="vacancy-form" class="owner-form">
+							<div class="two-col">
+								<label class="field">
+									<span>ID</span>
+									<input id="job-id" type="number" min="1" value={String(nextId)} required />
+								</label>
+								<label class="field">
+									<span>Slug</span>
+									<input id="job-slug" type="text" placeholder="Заполнится автоматически" required />
+								</label>
+							</div>
+
+							<div class="two-col">
+								<label class="field">
+									<span>Название вакансии</span>
+									<input id="job-title" type="text" placeholder="Работа курьером на авто в Яндекс Еда" required />
+								</label>
+								<label class="field">
+									<span>Компания</span>
+									<input id="job-company" list="company-examples" type="text" placeholder="Яндекс Еда" required />
+								</label>
+							</div>
+
+							<datalist id="company-examples">
+								{companyExamples.map((company) => (
+									<option value={company.name}></option>
+								))}
+							</datalist>
+
+							<div class="two-col">
+								<label class="field">
+									<span>Логотип компании</span>
+									<input id="job-company-logo" type="url" placeholder="https://..." required />
+								</label>
+								<label class="field">
+									<span>Ссылка отклика</span>
+									<input id="job-apply-link" type="url" placeholder="https://..." />
+								</label>
+							</div>
+
+							<div class="three-col">
+								<label class="field">
+									<span>Зарплата</span>
+									<input id="job-salary" type="text" placeholder="до 180 000 ₽/мес" required />
+								</label>
+								<label class="field">
+									<span>Локация</span>
+									<input id="job-location" type="text" placeholder="Москва, Санкт-Петербург" required />
+								</label>
+								<label class="field checkbox-field">
+									<span>ТОП вакансия</span>
+									<input id="job-is-hot" type="checkbox" />
+								</label>
+							</div>
+
+							<label class="field">
+								<span>Короткое описание (для карточки)</span>
+								<input id="job-short-description" type="text" placeholder="Одно предложение для превью в списке вакансий" required />
+								<small>Показывается в карточке вакансии. Макс. 1–2 предложения.</small>
+							</label>
+
+							<label class="field">
+								<span>Полное описание</span>
+								<textarea id="job-description" rows="5" placeholder="Развернутое описание вакансии..." required></textarea>
+							</label>
+
+							<div class="two-col">
+								<label class="field">
+									<span>Теги через запятую</span>
+									<input id="job-tags" type="text" placeholder="auto, flexible, 18+" required />
+									<small>Допустимые примеры: `auto`, `foot`, `bicycle`, `flexible`, `16plus`, `18+`</small>
+								</label>
+								<label class="field">
+									<span>Бейджи через запятую</span>
+									<input id="job-labels" type="text" placeholder="На авто, Без опыта, Свободный график" required />
+								</label>
+							</div>
+
+							<div class="two-col">
+								<label class="field">
+									<span>Требования, по одному на строку</span>
+									<textarea id="job-requirements" rows="6" placeholder="Наличие автомобиля&#10;Права категории B" required></textarea>
+								</label>
+								<label class="field">
+									<span>Преимущества, по одному на строку</span>
+									<textarea id="job-benefits" rows="6" placeholder="Высокий доход&#10;Гибкий график" required></textarea>
+								</label>
+							</div>
+
+							<div class="details-grid">
+								<label class="field">
+									<span>Ставка</span>
+									<input id="detail-rate" type="text" placeholder="Оплата за заказ + бонусы" required />
+								</label>
+								<label class="field">
+									<span>График</span>
+									<input id="detail-schedule" type="text" placeholder="Свободный график" required />
+								</label>
+								<label class="field">
+									<span>Образование</span>
+									<input id="detail-education" type="text" placeholder="Не требуется" required />
+								</label>
+								<label class="field">
+									<span>Возраст</span>
+									<input id="detail-age" type="text" placeholder="от 18 лет" required />
+								</label>
+								<label class="field">
+									<span>Частота выплат</span>
+									<input id="detail-payment-freq" type="text" placeholder="Еженедельно" required />
+								</label>
+								<label class="field">
+									<span>Гражданство</span>
+									<input id="detail-citizenship" type="text" placeholder="РФ, ЕАЭС" required />
+								</label>
+								<label class="field">
+									<span>Медкнижка</span>
+									<input id="detail-medical-book" type="text" placeholder="Требуется" required />
+								</label>
+								<label class="field">
+									<span>Самозанятость</span>
+									<input id="detail-self-employed" type="text" placeholder="Обязательно" required />
+								</label>
+								<label class="field">
+									<span>Тип оформления</span>
+									<input id="detail-employment-type" type="text" placeholder="Самозанятость / ГПХ" required />
+								</label>
+								<label class="field">
+									<span>Форма</span>
+									<input id="detail-uniform" type="text" placeholder="Выдается" required />
+								</label>
+								<label class="field">
+									<span>ОС / устройство</span>
+									<input id="detail-os" type="text" placeholder="Android / iOS" required />
+								</label>
+							</div>
+
+							<label class="field">
+								<span>Поисковые теги через запятую</span>
+								<input id="job-search-tags" type="text" placeholder="#НаАвто, #БезОпыта, #ЯндексЕда" required />
+							</label>
+
+							<div class="toolbar-actions">
+								<button id="owner-generate" type="submit" class="btn-primary">Сгенерировать JSON</button>
+								<button id="owner-copy" type="button" class="btn-secondary">Копировать JSON</button>
+								<button id="owner-download" type="button" class="btn-secondary">Скачать файл</button>
+							</div>
+						</form>
+					</section>
+
+					<aside class="owner-card">
+						<h3>Готовый результат</h3>
+						<p class="muted">Скопируй JSON ниже и добавь объект в [`src/data/jobs.json`](/Users/ivan/Documents/scratch/kurieros-astro/src/data/jobs.json).</p>
+						<textarea id="job-output" class="job-output" rows="28" readonly placeholder="После заполнения формы здесь появится JSON вакансии"></textarea>
+						<p id="owner-copy-status" class="muted"></p>
+						<div class="owner-note">
+							<strong>Код доступа:</strong> хранится на этой странице в виде хэша. Для настоящей серверной защиты позже лучше вынести админку в backend или закрыть её через reverse proxy/auth.
+						</div>
+					</aside>
+				</div>
+			</div>
+		</section>
+	</main>
+</BaseLayout>
+
+<script is:inline define:vars={{ adminHash, nextId, companyExamples }}>
+	const AUTH_KEY = 'kurieros-owner-auth';
+	const DRAFT_KEY = 'kurieros-owner-vacancy-draft';
+
+	const loginCard = document.getElementById('owner-login');
+	const panel = document.getElementById('owner-panel');
+	const loginForm = document.getElementById('owner-login-form');
+	const loginError = document.getElementById('owner-login-error');
+	const vacancyForm = document.getElementById('vacancy-form');
+	const output = document.getElementById('job-output');
+	const copyStatus = document.getElementById('owner-copy-status');
+
+	function setOwnerMode(isOwner) {
+		loginCard.classList.toggle('hidden', isOwner);
+		panel.classList.toggle('hidden', !isOwner);
+	}
+
+	async function sha256(value) {
+		const data = new TextEncoder().encode(value);
+		const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+		return Array.from(new Uint8Array(hashBuffer))
+			.map((byte) => byte.toString(16).padStart(2, '0'))
+			.join('');
+	}
+
+	function slugify(value) {
+		const map = {
+			а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'e', ж: 'zh', з: 'z', и: 'i',
+			й: 'y', к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r', с: 's', т: 't',
+			у: 'u', ф: 'f', х: 'h', ц: 'ts', ч: 'ch', ш: 'sh', щ: 'sch', ъ: '', ы: 'y', ь: '',
+			э: 'e', ю: 'yu', я: 'ya'
+		};
+
+		return value
+			.trim()
+			.toLowerCase()
+			.split('')
+			.map((char) => map[char] ?? char)
+			.join('')
+			.replace(/[^a-z0-9]+/g, '-')
+			.replace(/^-+|-+$/g, '')
+			.replace(/--+/g, '-');
+	}
+
+	function splitComma(value) {
+		return value
+			.split(',')
+			.map((item) => item.trim())
+			.filter(Boolean);
+	}
+
+	function splitLines(value) {
+		return value
+			.split('\n')
+			.map((item) => item.trim())
+			.filter(Boolean);
+	}
+
+	function setFieldValue(id, value) {
+		const field = document.getElementById(id);
+		if (!field) return;
+		if (field.type === 'checkbox') {
+			field.checked = Boolean(value);
+			return;
+		}
+		field.value = value ?? '';
+	}
+
+	function readFormData() {
+		const formData = {
+			id: Number(document.getElementById('job-id').value || nextId),
+			slug: document.getElementById('job-slug').value.trim(),
+			title: document.getElementById('job-title').value.trim(),
+			company: document.getElementById('job-company').value.trim(),
+			companyLogo: document.getElementById('job-company-logo').value.trim(),
+			salary: document.getElementById('job-salary').value.trim(),
+			location: document.getElementById('job-location').value.trim(),
+			tags: splitComma(document.getElementById('job-tags').value),
+			labels: splitComma(document.getElementById('job-labels').value),
+			applyLink: document.getElementById('job-apply-link').value.trim() || '#',
+			shortDescription: document.getElementById('job-short-description').value.trim(),
+			description: document.getElementById('job-description').value.trim(),
+			requirements: splitLines(document.getElementById('job-requirements').value),
+			benefits: splitLines(document.getElementById('job-benefits').value),
+			details: {
+				rate: document.getElementById('detail-rate').value.trim(),
+				schedule: document.getElementById('detail-schedule').value.trim(),
+				education: document.getElementById('detail-education').value.trim(),
+				age: document.getElementById('detail-age').value.trim(),
+				payment_freq: document.getElementById('detail-payment-freq').value.trim(),
+				citizenship: document.getElementById('detail-citizenship').value.trim(),
+				medical_book: document.getElementById('detail-medical-book').value.trim(),
+				self_employed: document.getElementById('detail-self-employed').value.trim(),
+				employment_type: document.getElementById('detail-employment-type').value.trim(),
+				uniform: document.getElementById('detail-uniform').value.trim(),
+				os: document.getElementById('detail-os').value.trim()
+			},
+			search_tags: splitComma(document.getElementById('job-search-tags').value)
+		};
+
+		if (document.getElementById('job-is-hot').checked) {
+			formData.isHot = true;
+		}
+
+		return formData;
+	}
+
+	function saveDraft() {
+		localStorage.setItem(DRAFT_KEY, JSON.stringify(readFormData()));
+		copyStatus.textContent = 'Черновик сохранен в браузере.';
+	}
+
+	function loadDraft() {
+		const raw = localStorage.getItem(DRAFT_KEY);
+		if (!raw) {
+			return;
+		}
+
+		try {
+			const draft = JSON.parse(raw);
+			setFieldValue('job-id', draft.id ?? nextId);
+			setFieldValue('job-slug', draft.slug);
+			setFieldValue('job-title', draft.title);
+			setFieldValue('job-company', draft.company);
+			setFieldValue('job-company-logo', draft.companyLogo);
+			setFieldValue('job-salary', draft.salary);
+			setFieldValue('job-location', draft.location);
+			setFieldValue('job-tags', (draft.tags || []).join(', '));
+			setFieldValue('job-labels', (draft.labels || []).join(', '));
+			setFieldValue('job-apply-link', draft.applyLink === '#' ? '' : draft.applyLink);
+			setFieldValue('job-short-description', draft.shortDescription);
+			setFieldValue('job-description', draft.description);
+			setFieldValue('job-requirements', (draft.requirements || []).join('\n'));
+			setFieldValue('job-benefits', (draft.benefits || []).join('\n'));
+			setFieldValue('detail-rate', draft.details?.rate);
+			setFieldValue('detail-schedule', draft.details?.schedule);
+			setFieldValue('detail-education', draft.details?.education);
+			setFieldValue('detail-age', draft.details?.age);
+			setFieldValue('detail-payment-freq', draft.details?.payment_freq);
+			setFieldValue('detail-citizenship', draft.details?.citizenship);
+			setFieldValue('detail-medical-book', draft.details?.medical_book);
+			setFieldValue('detail-self-employed', draft.details?.self_employed);
+			setFieldValue('detail-employment-type', draft.details?.employment_type);
+			setFieldValue('detail-uniform', draft.details?.uniform);
+			setFieldValue('detail-os', draft.details?.os);
+			setFieldValue('job-search-tags', (draft.search_tags || []).join(', '));
+			setFieldValue('job-is-hot', Boolean(draft.isHot));
+		} catch (error) {
+			console.error('Не удалось загрузить черновик', error);
+		}
+	}
+
+	function generateJson() {
+		const vacancy = readFormData();
+		output.value = `${JSON.stringify(vacancy, null, 4)},`;
+		return vacancy;
+	}
+
+	function autofillCompanyLogo(companyName) {
+		const match = companyExamples.find((company) => company.name.toLowerCase() === companyName.toLowerCase());
+		const logoField = document.getElementById('job-company-logo');
+		if (match && logoField && !logoField.value.trim()) {
+			logoField.value = match.logo;
+		}
+	}
+
+	document.getElementById('job-title')?.addEventListener('input', () => {
+		const title = document.getElementById('job-title').value;
+		if (!document.getElementById('job-slug').dataset.manual) {
+			document.getElementById('job-slug').value = slugify(title);
+		}
+	});
+
+	document.getElementById('job-slug')?.addEventListener('input', () => {
+		document.getElementById('job-slug').dataset.manual = 'true';
+	});
+
+	document.getElementById('job-company')?.addEventListener('change', (event) => {
+		autofillCompanyLogo(event.target.value);
+	});
+
+	loginForm?.addEventListener('submit', async (event) => {
+		event.preventDefault();
+		const password = document.getElementById('owner-password').value;
+		const hash = await sha256(password);
+		const isValid = hash === adminHash;
+
+		loginError.classList.toggle('hidden', isValid);
+		if (!isValid) {
+			return;
+		}
+
+		sessionStorage.setItem(AUTH_KEY, '1');
+		setOwnerMode(true);
+		loadDraft();
+	});
+
+	vacancyForm?.addEventListener('submit', (event) => {
+		event.preventDefault();
+		generateJson();
+		copyStatus.textContent = 'JSON сгенерирован.';
+	});
+
+	document.getElementById('owner-save-draft')?.addEventListener('click', () => {
+		saveDraft();
+	});
+
+	document.getElementById('owner-clear-draft')?.addEventListener('click', () => {
+		localStorage.removeItem(DRAFT_KEY);
+		vacancyForm.reset();
+		output.value = '';
+		document.getElementById('job-id').value = nextId;
+		document.getElementById('job-slug').dataset.manual = '';
+		copyStatus.textContent = 'Черновик очищен.';
+	});
+
+	document.getElementById('owner-copy')?.addEventListener('click', async () => {
+		if (!output.value.trim()) {
+			generateJson();
+		}
+
+		try {
+			await navigator.clipboard.writeText(output.value);
+			copyStatus.textContent = 'JSON скопирован в буфер обмена.';
+		} catch (error) {
+			copyStatus.textContent = 'Не удалось скопировать автоматически. Можно скопировать вручную из окна справа.';
+		}
+	});
+
+	document.getElementById('owner-download')?.addEventListener('click', () => {
+		if (!output.value.trim()) {
+			generateJson();
+		}
+
+		const blob = new Blob([output.value], { type: 'application/json' });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = `${document.getElementById('job-slug').value || 'vacancy'}.json`;
+		link.click();
+		URL.revokeObjectURL(url);
+		copyStatus.textContent = 'JSON-файл скачан.';
+	});
+
+	document.getElementById('owner-logout')?.addEventListener('click', () => {
+		sessionStorage.removeItem(AUTH_KEY);
+		setOwnerMode(false);
+		output.value = '';
+		copyStatus.textContent = '';
+	});
+
+	if (sessionStorage.getItem(AUTH_KEY) === '1') {
+		setOwnerMode(true);
+		loadDraft();
+	}
+</script>
+
+<style>
+	.owner-page {
+		padding: 3rem 1rem 4rem;
+	}
+	.owner-shell {
+		max-width: 1440px;
+		margin: 0 auto;
+	}
+	.owner-hero {
+		margin-bottom: 2rem;
+	}
+	.owner-eyebrow {
+		font-size: 0.75rem;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: var(--accent-color);
+		font-weight: 800;
+		margin-bottom: 0.75rem;
+	}
+	.owner-card {
+		background: var(--bg-card, var(--surface-color));
+		border: 1px solid var(--border-color);
+		border-radius: 1.5rem;
+		padding: 2rem;
+		box-shadow: var(--shadow-glass);
+	}
+	.owner-login-form,
+	.owner-form {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+	.owner-panel {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+	.owner-grid {
+		display: grid;
+		grid-template-columns: 1.75fr 1fr;
+		gap: 1.5rem;
+		align-items: start;
+	}
+	.owner-toolbar {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		align-items: center;
+	}
+	.toolbar-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+	}
+	.two-col,
+	.three-col,
+	.details-grid {
+		display: grid;
+		gap: 1rem;
+	}
+	.two-col {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+	.three-col {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+	.details-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+	.field {
+		display: flex;
+		flex-direction: column;
+		gap: 0.45rem;
+	}
+	.field span {
+		font-size: 0.875rem;
+		font-weight: 700;
+	}
+	.field small {
+		color: var(--text-muted);
+		font-size: 0.75rem;
+	}
+	.field input,
+	.field textarea {
+		width: 100%;
+		border: 1px solid var(--border-color);
+		border-radius: 1rem;
+		padding: 0.9rem 1rem;
+		background: var(--bg-color);
+		color: var(--text-main);
+		font: inherit;
+	}
+	.field input:focus,
+	.field textarea:focus {
+		outline: none;
+		border-color: var(--accent-color);
+		box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.08);
+	}
+	.checkbox-field {
+		justify-content: flex-end;
+	}
+	.checkbox-field input {
+		width: 22px;
+		height: 22px;
+		padding: 0;
+	}
+	.job-output {
+		width: 100%;
+		margin-top: 1rem;
+		border: 1px solid var(--border-color);
+		border-radius: 1rem;
+		padding: 1rem;
+		background: #0f172a;
+		color: #e2e8f0;
+		font: 0.85rem/1.5 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+	}
+	.muted {
+		color: var(--text-muted);
+	}
+	.owner-error {
+		margin-top: 0.75rem;
+		color: #dc2626;
+		font-weight: 700;
+	}
+	.owner-note {
+		margin-top: 1rem;
+		padding: 1rem;
+		border-radius: 1rem;
+		background: rgba(99, 102, 241, 0.08);
+		color: var(--text-muted);
+		font-size: 0.9rem;
+	}
+	.hidden {
+		display: none;
+	}
+	@media (max-width: 1024px) {
+		.owner-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+	@media (max-width: 768px) {
+		.owner-toolbar,
+		.two-col,
+		.three-col,
+		.details-grid {
+			grid-template-columns: 1fr;
+		}
+		.owner-toolbar {
+			flex-direction: column;
+			align-items: stretch;
+		}
+	}
+</style>

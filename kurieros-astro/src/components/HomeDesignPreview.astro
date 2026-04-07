@@ -1,0 +1,284 @@
+---
+import jobsData from '../data/jobs.json';
+
+interface Props {
+	variant: 'linear' | 'raycast' | 'notion';
+}
+
+const { variant } = Astro.props;
+
+const availableCities = Array.from(
+	new Set(
+		jobsData
+			.flatMap((job) => job.location.split(','))
+			.map((city) => city.trim())
+			.filter((city) => city && city !== 'Вся Россия')
+	)
+).sort((a, b) => a.localeCompare(b, 'ru'));
+
+const featuredJobs = jobsData.slice(0, 3);
+
+const copy = {
+	linear: {
+		label: 'Linear Concept',
+		title: 'Подберите вакансию за пару минут',
+		text: 'Строгая структура, быстрый сканинг, фокус на зарплате, городе и условиях.',
+		cta: 'Смотреть вакансии'
+	},
+	raycast: {
+		label: 'Raycast Concept',
+		title: 'Найдите работу в современном ритме',
+		text: 'Технологичный интерфейс с более сильным характером и акцентом на ощущение продукта.',
+		cta: 'Открыть каталог'
+	},
+	notion: {
+		label: 'Notion Concept',
+		title: 'Спокойный способ выбрать работу',
+		text: 'Мягкий интерфейс, доверительная подача и понятные блоки без перегрузки.',
+		cta: 'Выбрать вакансию'
+	}
+}[variant];
+---
+
+<section class={`concept concept-${variant}`}>
+	<div class="concept-hero">
+		<div class="concept-copy">
+			<p class="concept-label">{copy.label}</p>
+			<h1>{copy.title}</h1>
+			<p>{copy.text}</p>
+			<div class="concept-actions">
+				<button class="concept-primary">{copy.cta}</button>
+				<div class="city-selector-container">
+					<select class="city-select">
+						<option>Все города</option>
+						{availableCities.map((city) => (
+							<option>{city}</option>
+						))}
+					</select>
+				</div>
+			</div>
+		</div>
+
+		<div class="concept-aside">
+			<div class="concept-stat">
+				<strong>{jobsData.length}</strong>
+				<span>актуальных вакансий</span>
+			</div>
+			<div class="concept-stat">
+				<strong>{availableCities.length}</strong>
+				<span>городов в каталоге</span>
+			</div>
+			<div class="concept-stat">
+				<strong>4.8/5</strong>
+				<span>оценка удобства поиска</span>
+			</div>
+		</div>
+	</div>
+
+	<div class="concept-grid">
+		{featuredJobs.map((job) => (
+			<article class="concept-card">
+				<div class="concept-card-top">
+					<div>
+						<p class="concept-company">{job.company}</p>
+						<h3>{job.title}</h3>
+					</div>
+					<span class="concept-salary">{job.salary}</span>
+				</div>
+				<p class="concept-location">{job.location}</p>
+				<div class="concept-tags">
+					{job.labels.slice(0, 3).map((label) => (
+						<span>{label}</span>
+					))}
+				</div>
+				<a href={`/v/${job.slug}/`} class="concept-link">Подробнее</a>
+			</article>
+		))}
+	</div>
+</section>
+
+<style>
+	.concept {
+		padding: 2rem 0 3rem;
+	}
+	.concept-hero {
+		display: grid;
+		grid-template-columns: 1.5fr 0.85fr;
+		gap: 1.25rem;
+		margin-bottom: 1.5rem;
+	}
+	.concept-copy,
+	.concept-aside,
+	.concept-card {
+		border-radius: 1.5rem;
+		padding: 1.5rem;
+	}
+	.concept-copy h1 {
+		font-size: clamp(2rem, 4vw, 3.3rem);
+		line-height: 1.02;
+		margin: 0.4rem 0 0.9rem;
+	}
+	.concept-copy p {
+		max-width: 52ch;
+	}
+	.concept-label {
+		font-size: 0.78rem;
+		font-weight: 800;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+	}
+	.concept-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.8rem;
+		margin-top: 1.25rem;
+		align-items: center;
+	}
+	.concept-primary {
+		border: none;
+		border-radius: 999px;
+		padding: 0.85rem 1.2rem;
+		font: inherit;
+		font-weight: 700;
+		cursor: pointer;
+	}
+	.concept-aside {
+		display: grid;
+		gap: 0.8rem;
+		align-content: start;
+	}
+	.concept-stat {
+		padding: 1rem 1.1rem;
+		border-radius: 1.1rem;
+	}
+	.concept-stat strong {
+		display: block;
+		font-size: 1.4rem;
+		margin-bottom: 0.2rem;
+	}
+	.concept-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 1rem;
+	}
+	.concept-card {
+		display: flex;
+		flex-direction: column;
+		gap: 0.85rem;
+	}
+	.concept-card-top {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		align-items: start;
+	}
+	.concept-company,
+	.concept-location {
+		font-size: 0.9rem;
+	}
+	.concept-salary {
+		white-space: nowrap;
+		font-weight: 800;
+	}
+	.concept-tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+	.concept-tags span {
+		padding: 0.38rem 0.62rem;
+		border-radius: 999px;
+		font-size: 0.8rem;
+	}
+	.concept-link {
+		text-decoration: none;
+		font-weight: 700;
+		margin-top: auto;
+	}
+
+	.concept-linear .concept-copy,
+	.concept-linear .concept-aside,
+	.concept-linear .concept-card {
+		background: #ffffff;
+		border: 1px solid #e5e7eb;
+		box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+	}
+	.concept-linear .concept-label,
+	.concept-linear .concept-company,
+	.concept-linear .concept-location {
+		color: #6b7280;
+	}
+	.concept-linear .concept-primary {
+		background: #111827;
+		color: #fff;
+	}
+	.concept-linear .concept-stat,
+	.concept-linear .concept-tags span {
+		background: #f8fafc;
+		border: 1px solid #e5e7eb;
+	}
+	.concept-linear .concept-link {
+		color: #111827;
+	}
+
+	.concept-raycast .concept-copy,
+	.concept-raycast .concept-aside,
+	.concept-raycast .concept-card {
+		background: linear-gradient(180deg, rgba(17, 24, 39, 0.94), rgba(31, 41, 55, 0.96));
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+		color: #f8fafc;
+	}
+	.concept-raycast .concept-label,
+	.concept-raycast .concept-company,
+	.concept-raycast .concept-location {
+		color: #cbd5e1;
+	}
+	.concept-raycast .concept-primary {
+		background: linear-gradient(135deg, #8b5cf6, #22c55e);
+		color: #fff;
+	}
+	.concept-raycast .concept-stat,
+	.concept-raycast .concept-tags span {
+		background: rgba(255, 255, 255, 0.06);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+	}
+	.concept-raycast .concept-link {
+		color: #d8b4fe;
+	}
+
+	.concept-notion .concept-copy,
+	.concept-notion .concept-aside,
+	.concept-notion .concept-card {
+		background: #fffdf8;
+		border: 1px solid #ebe5dc;
+		box-shadow: 0 8px 24px rgba(60, 41, 20, 0.05);
+	}
+	.concept-notion .concept-copy h1 {
+		font-family: Georgia, 'Times New Roman', serif;
+	}
+	.concept-notion .concept-label,
+	.concept-notion .concept-company,
+	.concept-notion .concept-location {
+		color: #7c6f64;
+	}
+	.concept-notion .concept-primary {
+		background: #2f2a24;
+		color: #fffdf8;
+	}
+	.concept-notion .concept-stat,
+	.concept-notion .concept-tags span {
+		background: #f7f2ea;
+		border: 1px solid #ebe5dc;
+	}
+	.concept-notion .concept-link {
+		color: #5b4636;
+	}
+
+	@media (max-width: 960px) {
+		.concept-hero,
+		.concept-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

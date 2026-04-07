@@ -1,0 +1,90 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import jobsData from '../data/jobs.json';
+import { getCitiesFromJobs } from '../utils/cities';
+
+const cities = getCitiesFromJobs(jobsData).map((city) => ({
+	...city,
+	href: `/rabota-kurerom-${city.slug}/`
+}));
+
+const getVacancyPlural = (count: number) => {
+	const mod10 = count % 10;
+	const mod100 = count % 100;
+	if (mod10 === 1 && mod100 !== 11) return { text: 'вакансия', key: 'cities.vacancies_1' };
+	if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return { text: 'вакансии', key: 'cities.vacancies_2' };
+	return { text: 'вакансий', key: 'cities.vacancies_5' };
+};
+---
+
+<BaseLayout title="Города — Курьерос" description="Выберите город и смотрите актуальные вакансии курьеров с фильтром по локации.">
+	<Header />
+	<main class="cities-page">
+		<section class="cities-hero">
+			<h1 data-t="cities.title">Города</h1>
+			<p data-t="cities.subtitle">Подборка городов из актуальных вакансий. Новые города появляются автоматически.</p>
+		</section>
+
+		<section class="cities-grid">
+			{cities.map((city) => {
+				const plural = getVacancyPlural(city.vacancyCount);
+				return (
+				<a class="city-tile" href={city.href}>
+					<strong>{city.name}</strong>
+					<span><span class="count-num">{city.vacancyCount}</span> <span data-t={plural.key}>{plural.text}</span></span>
+				</a>
+			)})}
+		</section>
+	</main>
+	<Footer />
+</BaseLayout>
+
+<style>
+	.cities-page {
+		max-width: 1360px;
+		margin: 0 auto;
+		padding: 2rem 1rem 4rem;
+	}
+	.cities-hero {
+		margin-bottom: 1.25rem;
+	}
+	.cities-hero h1 {
+		font-size: clamp(2rem, 5vw, 3rem);
+		line-height: 1.05;
+		letter-spacing: -0.03em;
+		margin-bottom: 0.45rem;
+	}
+	.cities-hero p {
+		color: var(--text-muted);
+	}
+	.cities-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+		gap: 0.8rem;
+	}
+	.city-tile {
+		display: grid;
+		gap: 0.35rem;
+		padding: 1rem;
+		border-radius: 14px;
+		border: 1px solid var(--border-color);
+		background: var(--surface-color);
+		color: var(--text-main);
+		text-decoration: none;
+		transition: var(--transition);
+	}
+	.city-tile:hover {
+		transform: translateY(-2px);
+		border-color: var(--text-main);
+		box-shadow: var(--shadow-sm);
+	}
+	.city-tile strong {
+		font-size: 1rem;
+	}
+	.city-tile span {
+		font-size: 0.88rem;
+		color: var(--text-muted);
+	}
+</style>

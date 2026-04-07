@@ -1,0 +1,64 @@
+---
+const { job, isInCompare = false } = Astro.props;
+const applyHref = job.applyLink && job.applyLink !== '#' ? job.applyLink : `/v/${job.slug}/`;
+const applyExternal = job.applyLink && job.applyLink !== '#';
+---
+
+<div class="job-card" data-tags={job.tags.join(',')} data-location={job.location}>
+	{job.isHot && <div class="hot-badge">🔥 ТОП</div>}
+	<div class="job-row job-row-main">
+		<div class="company-logo" style="width: 48px; height: 48px; overflow: hidden;">
+			<img src={job.companyLogo} alt={`${job.company} logo`} width="48" height="48" loading="lazy" decoding="async" />
+		</div>
+		<div class="job-content">
+			<div class="job-heading">
+				<div>
+					<a href={`/v/${job.slug}/`} class="job-title" data-t={`vacancies.${job.id}.title`}>{job.title}</a>
+					<div class="company-name" data-t={`vacancies.${job.id}.company`}>{job.company}</div>
+					{job.shortDescription && <p class="job-short-desc" data-t={`vacancies.${job.id}.shortDescription`}>{job.shortDescription}</p>}
+				</div>
+				<div class="salary-tag" data-t={`vacancies.${job.id}.salary`}>{job.salary}</div>
+			</div>
+			<div class="job-meta">
+				<div class="location">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+						<circle cx="12" cy="10" r="3"></circle>
+					</svg>
+					<span data-t={`vacancies.${job.id}.location`}>{job.location}</span>
+				</div>
+				<div class="tags">
+					{job.labels.map((label: string, i: number) => (
+						<span class="tag" data-t={`vacancies.${job.id}.label_${i}`}>{label}</span>
+					))}
+				</div>
+			</div>
+			<div class="job-columns">
+				<div class="job-column">
+					<span class="job-column-label" data-t="job.salary">Зарплата</span>
+					<strong data-t={`vacancies.${job.id}.salary`}>{job.salary}</strong>
+				</div>
+				<div class="job-column">
+					<span class="job-column-label" data-t="job.schedule">График</span>
+					<strong data-t={`vacancies.${job.id}.details_schedule`}>{job.details.schedule}</strong>
+				</div>
+				<div class="job-column">
+					<span class="job-column-label" data-t="job.education">Образование</span>
+					<strong data-t={`vacancies.${job.id}.details_education`}>{job.details.education}</strong>
+				</div>
+				<div class="job-column">
+					<span class="job-column-label" data-t="job.experience">Опыт</span>
+					<strong>{job.labels.includes('Без опыта') ? <span data-t="job.no_experience">Без опыта</span> : <span data-t="job.see_vacancy">См. вакансию</span>}</strong>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="job-row job-row-actions">
+		<div class="job-actions">
+			<button class={`btn-compare ${isInCompare ? 'active' : ''}`} data-id={job.id}>
+				{isInCompare ? <><span data-t="job.in_compare">В сравнении</span> ✓</> : <span data-t="job.compare">+ Сравнить</span>}
+			</button>
+			<a href={applyHref} class="apply-btn" target={applyExternal ? '_blank' : undefined} rel={applyExternal ? 'noopener noreferrer' : undefined} data-t="job.apply">Заполнить заявку</a>
+		</div>
+	</div>
+</div>

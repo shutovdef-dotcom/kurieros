@@ -1,0 +1,147 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout title="Контакты и Поддержка — Курьерос" description="Свяжитесь с нами по вопросам размещения вакансий, сотрудничества или технической поддержки. Мы всегда рады помочь курьерам и работодателям.">
+    <Header />
+
+    <main>
+        <div class="contacts-container">
+            <section class="contacts-hero">
+                <h1 data-t="contacts.title">Связаться с нами</h1>
+                <p data-t="contacts.subtitle">Мы открыты для предложений и всегда рады услышать ваш отзыв о работе платформы.</p>
+            </section>
+
+            <div class="contacts-grid">
+                <div class="contact-info">
+                    <div class="contact-card">
+                        <h3 data-t="contacts.collab">Сотрудничество</h3>
+                        <p data-t="contacts.collab_text">Для компаний и рекламных агентств</p>
+                        <a href="mailto:partners@kurieros.ru" class="contact-link">partners@kurieros.ru</a>
+                    </div>
+                    
+                    <div class="contact-card">
+                        <h3 data-t="contacts.support">Поддержка</h3>
+                        <p data-t="contacts.support_text">Для курьеров и соискателей</p>
+                        <a href="https://t.me/kurieros_support" target="_blank" class="contact-link">Написать в Telegram</a>
+                    </div>
+
+                    <div class="contact-card">
+                        <h3 data-t="contacts.editor">Редакция блога</h3>
+                        <p data-t="contacts.editor_text">Предложить статью или прислать историю</p>
+                        <a href="mailto:editor@kurieros.ru" class="contact-link">editor@kurieros.ru</a>
+                    </div>
+                </div>
+
+                <div class="contact-form-card">
+                    <h3 data-t="contacts.form_title">Отправить сообщение</h3>
+                    <form onsubmit="event.preventDefault(); alert('Сообщение отправлено! Мы свяжемся с вами в ближайшее время.'); this.reset();" class="contact-form">
+                        <div class="form-group">
+                            <label for="name" data-t="contacts.form_name">Ваше имя</label>
+                            <input type="text" id="name" required placeholder="Иван Иванов" />
+                        </div>
+                        <div class="form-group">
+                            <label for="email" data-t="contacts.form_contact">Email или Telegram</label>
+                            <input type="text" id="email" required placeholder="@username или email@example.com" />
+                        </div>
+                        <div class="form-group">
+                            <label for="message" data-t="contacts.form_msg">Сообщение</label>
+                            <textarea id="message" rows="5" required placeholder="Ваш вопрос или предложение..."></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary" data-t="contacts.form_btn">Отправить сообщение</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <Footer />
+</BaseLayout>
+
+<style>
+    .contacts-container {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding-top: 4rem;
+        padding-bottom: 4rem;
+    }
+    .contacts-hero {
+        text-align: center;
+        margin-bottom: 4rem;
+    }
+    .contacts-hero h1 { margin-bottom: 1rem; }
+    .contacts-hero p { color: var(--text-muted); font-size: 1.125rem; }
+
+    .contacts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 3rem;
+    }
+    @media (max-width: 768px) {
+        .contacts-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .contact-info {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    .contact-card {
+        background: var(--bg-card);
+        padding: 2rem;
+        border-radius: 1.5rem;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+    }
+    .contact-card h3 { margin-bottom: 0.5rem; font-size: 1.125rem; }
+    .contact-card p { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1rem; }
+    .contact-link {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .contact-form-card {
+        background: var(--bg-card);
+        padding: 3rem;
+        border-radius: 2rem;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-glass);
+    }
+    .contact-form-card h3 { margin-bottom: 2rem; font-size: 1.5rem; }
+
+    .contact-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .form-group label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-main);
+    }
+    .form-group input, .form-group textarea {
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+        padding: 1rem;
+        border-radius: 1rem;
+        font-size: 1rem;
+        font-family: inherit;
+        outline: none;
+        transition: var(--transition);
+    }
+    .form-group input:focus, .form-group textarea:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+</style>

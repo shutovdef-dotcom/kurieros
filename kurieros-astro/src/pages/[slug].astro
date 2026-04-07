@@ -1,0 +1,77 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import JobGrid from '../components/JobGrid.astro';
+import LocationBanner from '../components/LocationBanner.astro';
+import jobsData from '../data/jobs.json';
+import { CATEGORIES } from '../data/constants';
+import { getCitiesFromJobs } from '../utils/cities';
+
+export async function getStaticPaths() {
+	const paths = [];
+
+	// Add cities from vacancies
+	getCitiesFromJobs(jobsData).forEach((city) => {
+		paths.push({
+			params: { slug: `rabota-kurerom-${city.slug}` },
+			props: { 
+				type: 'city',
+				data: city,
+				title: `Работа курьером ${city.prep} — Вакансии 2026`,
+				description: `Свежие вакансии для курьеров ${city.prep}. Сравнивайте условия, выбирайте лучшие компании и зарабатывайте до 250 000 ₽.`
+			},
+		});
+	});
+
+	// Add categories
+	CATEGORIES.forEach((cat) => {
+		paths.push({
+			params: { slug: `rabota-kurerom-${cat.slug}` },
+			props: { 
+				type: 'category',
+				data: cat,
+				title: `Работа курьером: ${cat.name} — Вакансии 2026`,
+				description: `Все вакансии для курьеров категории "${cat.name}". Прямые работодатели, удобный фильтр и быстрое трудоустройство.`
+			},
+		});
+	});
+
+	return paths;
+}
+
+const { slug } = Astro.params;
+const { type, data, title, description } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+	<Header />
+
+	<main>
+		<section class="hero">
+			<LocationBanner initialCity={type === 'city' ? data.name : undefined} />
+			<h1>{title}</h1>
+			<p>
+				{type === 'city' 
+					? `Актуальные предложения о работе курьером ${data.prep}.`
+					: `Список всех доступных вакансий в категории "${data.name}".`
+				}
+			</p>
+			
+			<form class="search-bar" id="search-form" onsubmit="event.preventDefault();">
+				<input type="text" id="search-input" placeholder="Ваш город, должность, компания...">
+				<button type="submit" class="btn-primary">Найти работу</button>
+			</form>
+		</section>
+
+		<JobGrid 
+			initialCity={type === 'city' ? data.name : undefined} 
+			initialTag={type === 'category' ? data.tag : undefined}
+			initialSearch={type === 'category' ? data.query : undefined}
+		/>
+
+		<!-- FAQ logic can be added here or imported from a component -->
+	</main>
+
+	<Footer />
+</BaseLayout>

@@ -1,0 +1,324 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import articlesData from '../../data/articles.json';
+
+export function getStaticPaths() {
+	return articlesData.map((article) => ({
+		params: { slug: article.slug },
+		props: { article },
+	}));
+}
+
+const { article } = Astro.props;
+const formattedDate = new Intl.DateTimeFormat('ru-RU', {
+	day: 'numeric',
+	month: 'long',
+	year: 'numeric',
+}).format(new Date(article.date));
+const relatedArticles = articlesData
+	.filter((entry) => entry.slug !== article.slug)
+	.slice(0, 3)
+	.map((entry) => ({
+		...entry,
+		formattedDate: new Intl.DateTimeFormat('ru-RU', {
+			day: 'numeric',
+			month: 'long',
+		}).format(new Date(entry.date)),
+	}));
+---
+
+<BaseLayout title={`${article.title} — Курьерос`} description={article.description} image={article.image}>
+	<Header />
+
+	<main>
+		<article class="article-container">
+			<header class="article-header">
+				<div class="article-lead">
+					<div class="article-kicker">Журнал Курьерос</div>
+					<div class="article-meta">
+						<time datetime={article.date}>{formattedDate}</time>
+						<span aria-hidden="true">•</span>
+						<span>{article.readTime} чтения</span>
+					</div>
+					<h1>{article.title}</h1>
+					<p class="article-description">{article.description}</p>
+				</div>
+				{article.image && (
+					<div class="article-cover-frame">
+						<img src={article.image} alt={article.title} class="article-cover" loading="eager" />
+					</div>
+				)}
+			</header>
+			
+			<div class="article-body">
+				<Fragment set:html={article.content} />
+			</div>
+
+			<section class="article-footer">
+				<div class="editor-note">
+					<div class="editor-note-label">Материал подготовлен редакцией</div>
+					<h2>Курьерос Журнал</h2>
+					<p>Мы собираем практические материалы о работе курьером: сравниваем вакансии, условия и реальные сценарии заработка без рекламных обещаний.</p>
+				</div>
+
+				<div class="related-stories">
+					<div class="related-header">
+						<h2>Похожие статьи</h2>
+						<p>Ещё несколько материалов, которые стоит открыть следом.</p>
+					</div>
+					<div class="related-grid">
+						{relatedArticles.map((related) => (
+							<a href={`/blog/${related.slug}/`} class="related-card">
+								<img src={related.image} alt={related.title} class="related-image" />
+								<div class="related-copy">
+									<div class="related-meta">
+										<time datetime={related.date}>{related.formattedDate}</time>
+										<span aria-hidden="true">•</span>
+										<span>{related.readTime}</span>
+									</div>
+									<h3>{related.title}</h3>
+								</div>
+							</a>
+						))}
+					</div>
+				</div>
+			</section>
+		</article>
+	</main>
+
+	<Footer />
+</BaseLayout>
+
+<style>
+	.article-container {
+		max-width: 1320px;
+		margin: 2.5rem auto 4rem;
+		padding: 0 1rem;
+	}
+	.article-header {
+		display: grid;
+		grid-template-columns: minmax(0, 0.88fr) minmax(320px, 1fr);
+		gap: 2rem;
+		align-items: end;
+		margin-bottom: 3rem;
+		position: relative;
+		z-index: 1;
+	}
+	.article-lead {
+		padding: 2rem 0;
+		position: relative;
+		z-index: 2;
+		background: var(--bg-color);
+	}
+	.article-kicker {
+		display: inline-flex;
+		margin-bottom: 1rem;
+		font-size: 0.78rem;
+		text-transform: uppercase;
+		letter-spacing: 0.18em;
+		color: var(--text-muted);
+	}
+	.article-cover-frame {
+		overflow: clip;
+		border-radius: 32px;
+		background: #e2e8f0;
+		border: 1px solid rgba(148, 163, 184, 0.25);
+		box-shadow: 0 28px 70px rgba(15, 23, 42, 0.12);
+		position: relative;
+		z-index: 1;
+		isolation: isolate;
+		contain: paint;
+	}
+	.article-cover {
+		display: block;
+		width: 100%;
+		height: 540px;
+		object-fit: cover;
+	}
+	.article-header h1 {
+		font-size: clamp(2.4rem, 5vw, 4.8rem);
+		line-height: 0.96;
+		letter-spacing: -0.055em;
+		max-width: 11ch;
+	}
+	.article-meta {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 0.6rem;
+		color: var(--text-muted);
+		font-size: 0.98rem;
+		line-height: 1.4;
+		margin-bottom: 1rem;
+	}
+	.article-description {
+		max-width: 54ch;
+		font-size: 1.08rem;
+		line-height: 1.85;
+		color: var(--text-muted);
+		margin-top: 1rem;
+	}
+	.article-body {
+		max-width: 760px;
+		margin: 0 auto;
+		position: relative;
+		z-index: 3;
+		background: var(--bg-color);
+		font-size: 1.14rem;
+		line-height: 1.95;
+		color: var(--text-main);
+	}
+	:global(.article-body h2) {
+		margin-top: 2.75rem;
+		margin-bottom: 1rem;
+		font-size: clamp(1.6rem, 2.4vw, 2.2rem);
+		line-height: 1.2;
+		letter-spacing: -0.03em;
+	}
+	:global(.article-body p) {
+		margin-bottom: 1.35rem;
+		color: #334155;
+	}
+	:global(.article-body > p:first-of-type::first-letter) {
+		float: left;
+		font-size: 4.4rem;
+		line-height: 0.8;
+		padding-right: 0.5rem;
+		padding-top: 0.35rem;
+		font-weight: 700;
+		color: #0f172a;
+	}
+	:global(.article-body ul) {
+		margin-bottom: 1.5rem;
+		padding-left: 1.5rem;
+	}
+	:global(.article-body li) {
+		margin-bottom: 0.5rem;
+	}
+	:global(.article-body strong) {
+		color: #0f172a;
+	}
+	.article-footer {
+		max-width: 980px;
+		margin: 4rem auto 0;
+		display: grid;
+		gap: 2.5rem;
+		position: relative;
+		z-index: 3;
+		background: var(--bg-color);
+	}
+	.editor-note {
+		padding: 2rem;
+		border-radius: 28px;
+		background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(248,250,252,0.96));
+		border: 1px solid rgba(148, 163, 184, 0.18);
+		box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+	}
+	.editor-note-label {
+		font-size: 0.78rem;
+		text-transform: uppercase;
+		letter-spacing: 0.18em;
+		color: var(--text-muted);
+		margin-bottom: 0.8rem;
+	}
+	.editor-note h2 {
+		font-size: clamp(1.7rem, 2.6vw, 2.4rem);
+		letter-spacing: -0.04em;
+		margin-bottom: 0.85rem;
+	}
+	.editor-note p {
+		max-width: 62ch;
+		color: var(--text-muted);
+		line-height: 1.8;
+	}
+	.related-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: end;
+		gap: 1rem;
+		margin-bottom: 1.25rem;
+	}
+	.related-header h2 {
+		font-size: clamp(1.7rem, 2.6vw, 2.4rem);
+		letter-spacing: -0.04em;
+	}
+	.related-header p {
+		color: var(--text-muted);
+		max-width: 34ch;
+		line-height: 1.7;
+	}
+	.related-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 1rem;
+	}
+	.related-card {
+		display: grid;
+		text-decoration: none;
+		color: inherit;
+		background: rgba(255,255,255,0.88);
+		border: 1px solid rgba(148, 163, 184, 0.16);
+		border-radius: 24px;
+		overflow: hidden;
+		box-shadow: 0 18px 48px rgba(15, 23, 42, 0.07);
+	}
+	.related-image {
+		width: 100%;
+		height: 180px;
+		object-fit: cover;
+	}
+	.related-copy {
+		padding: 1rem 1rem 1.2rem;
+	}
+	.related-meta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.45rem;
+		font-size: 0.85rem;
+		color: var(--text-muted);
+		margin-bottom: 0.7rem;
+	}
+	.related-copy h3 {
+		font-size: 1.05rem;
+		line-height: 1.3;
+		letter-spacing: -0.02em;
+	}
+	@media (max-width: 768px) {
+		.article-container {
+			margin: 1rem auto 2.5rem;
+			padding: 0 1rem;
+		}
+		.article-header {
+			grid-template-columns: 1fr;
+			gap: 1.25rem;
+			margin-bottom: 2rem;
+		}
+		.article-lead {
+			padding: 0;
+		}
+		.article-cover-frame {
+			border-radius: 24px;
+		}
+		.article-cover {
+			height: 260px;
+		}
+		:global(.article-body > p:first-of-type::first-letter) {
+			font-size: 3.2rem;
+			padding-right: 0.35rem;
+			padding-top: 0.2rem;
+		}
+		.editor-note {
+			padding: 1.5rem;
+			border-radius: 22px;
+		}
+		.related-header {
+			display: grid;
+		}
+		.related-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

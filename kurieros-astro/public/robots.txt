@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /generate_article.py
+
+Sitemap: https://kurieros.ru/sitemap.xml
+
+# Яндекс
+User-agent: Yandex
+Allow: /
+Crawl-delay: 1
+
+# Google
+User-agent: Googlebot
+Allow: /

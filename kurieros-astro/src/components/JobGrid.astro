@@ -1,0 +1,179 @@
+---
+import JobCard from './JobCard.astro';
+import jobsData from '../data/jobs.json';
+
+interface Props {
+	initialCity?: string;
+	initialTag?: string;
+	initialSearch?: string;
+}
+
+const { initialCity = "", initialTag = "all", initialSearch = "" } = Astro.props;
+
+// Server-side filter for initial render (SEO and performance)
+const filteredJobs = jobsData.filter((job) => {
+    const searchTerm = initialSearch.toLowerCase();
+    const matchesCity = !initialCity || job.location.toLowerCase().includes(initialCity.toLowerCase()) || job.location === "Вся Россия";
+    const matchesTag = initialTag === "all" || job.tags.includes(initialTag);
+    const matchesSearch =
+        !searchTerm ||
+        job.title.toLowerCase().includes(searchTerm) ||
+        job.company.toLowerCase().includes(searchTerm) ||
+        job.location.toLowerCase().includes(searchTerm) ||
+        job.salary.toLowerCase().includes(searchTerm);
+
+    return matchesCity && matchesTag && matchesSearch;
+});
+---
+
+<div class="job-grid-container">
+	<section class="filters" id="filters-container">
+		<button class={`filter-chip ${initialTag === 'all' ? 'active' : ''}`} data-filter="all" data-t="filters.all">Все вакансии</button>
+		<button class={`filter-chip ${initialTag === 'auto' ? 'active' : ''}`} data-filter="auto" data-t="filters.auto">На авто</button>
+		<button class={`filter-chip ${initialTag === 'bicycle' ? 'active' : ''}`} data-filter="bicycle" data-t="filters.bicycle">Велокурьер</button>
+		<button class={`filter-chip ${initialTag === 'foot' ? 'active' : ''}`} data-filter="foot" data-t="filters.walking">Пеший</button>
+		<button class={`filter-chip ${initialTag === '16plus' ? 'active' : ''}`} data-filter="16plus" data-t="filters.age16">С 16 лет</button>
+		<button class={`filter-chip ${initialTag === 'flexible' ? 'active' : ''}`} data-filter="flexible" data-t="filters.flexible">Свободно</button>
+	</section>
+
+	<section id="vacancies">
+		<div class="jobs-grid" id="jobs-grid">
+			{filteredJobs.length > 0 ? (
+				filteredJobs.map((job) => (
+					<JobCard job={job} />
+				))
+			) : (
+				<div class="no-results">
+					<h3 data-t="jobgrid.empty_title">Ничего не найдено</h3>
+					<p data-t="jobgrid.empty_desc">Попробуйте сбросить фильтры или изменить поиск.</p>
+					<a class="btn-secondary" href="/" data-t="jobgrid.reset">Сбросить всё</a>
+				</div>
+			)}
+		</div>
+	</section>
+</div>
+
+<style>
+    .no-results {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 4rem;
+        background: var(--bg-card);
+        border-radius: 2rem;
+        border: 1px dashed var(--border-color);
+    }
+</style>
+
+<script is:inline define:vars={{ initialCity, initialTag, initialSearch }}>
+	// This script will run on the client
+	let compareList = JSON.parse(localStorage.getItem('compareList') || '[]');
+	let selectedCity = initialCity || '';
+
+	function getTranslation(key, defaultText) {
+		const lang = window.kurieros_i18n?.currentLang || 'ru';
+		const dict = window.translations ? (window.translations[lang] || window.translations['ru']) : null;
+		if (!dict) return defaultText;
+		return key.split('.').reduce((prev, curr) => prev && prev[curr], dict) || defaultText;
+	}
+
+	function updateCompareBadge() {
+		const badges = document.querySelectorAll('#compare-badge');
+		badges.forEach(badge => {
+			badge.textContent = compareList.length;
+			if (compareList.length > 0) {
+				badge.classList.remove('hidden');
+			} else {
+				badge.classList.add('hidden');
+			}
+		});
+	}
+
+	function toggleCompare(id) {
+		const index = compareList.indexOf(id);
+		if (index === -1) {
+			if (compareList.length >= 4) {
+				alert(getTranslation('compare.limit_reached', 'Можно сравнивать не более 4 вакансий одновременно.'));
+				return;
+			}
+			compareList.push(id);
+		} else {
+			compareList.splice(index, 1);
+		}
+		
+		localStorage.setItem('compareList', JSON.stringify(compareList));
+		updateCompareBadge();
+		window.dispatchEvent(new CustomEvent('compareUpdate'));
+		
+		const btn = document.querySelector(`.btn-compare[data-id="${id}"]`);
+		if (btn) {
+			btn.classList.toggle('active');
+			btn.innerHTML = compareList.includes(id) 
+				? `<span data-t="job.in_compare">${getTranslation('job.in_compare', 'В сравнении')}</span> ✓` 
+				: `<span data-t="job.compare">${getTranslation('job.compare', '+ Сравнить')}</span>`;
+		}
+	}
+
+	// Initialize button states
+	document.addEventListener('DOMContentLoaded', () => {
+		updateCompareBadge();
+		document.querySelectorAll('.btn-compare').forEach(btn => {
+			const id = parseInt(btn.dataset.id);
+			if (compareList.includes(id)) {
+				btn.classList.add('active');
+				btn.innerHTML = `<span data-t="job.in_compare">${getTranslation('job.in_compare', 'В сравнении')}</span> ✓`;
+			}
+			btn.addEventListener('click', (e) => {
+				e.preventDefault();
+				toggleCompare(id);
+			});
+		});
+
+		// Filtering logic
+		const filterChips = document.querySelectorAll('.filter-chip');
+		const jobCards = document.querySelectorAll('.job-card');
+		const searchInput = document.getElementById('search-input');
+
+		window.addEventListener('kurieros:city-selected', (event) => {
+			selectedCity = event.detail?.city || '';
+			filterJobs();
+		});
+
+		function filterJobs() {
+			const activeChip = document.querySelector('.filter-chip.active');
+			const filter = activeChip ? activeChip.dataset.filter : 'all';
+			const term = searchInput ? searchInput.value.toLowerCase().trim() : initialSearch.toLowerCase();
+
+			jobCards.forEach(card => {
+				const tags = (card.dataset.tags || '').split(',');
+				const location = (card.dataset.location || '').toLowerCase();
+				const title = card.querySelector('.job-title')?.textContent?.toLowerCase() || '';
+				const company = card.querySelector('.company-name')?.textContent?.toLowerCase() || '';
+				const matchesCity = !selectedCity || location.includes(selectedCity.toLowerCase()) || location === 'вся россия';
+
+				const matchesFilter = filter === 'all' || tags.includes(filter);
+				const matchesSearch = !term || title.includes(term) || company.includes(term) || location.includes(term);
+
+				if (matchesFilter && matchesSearch && matchesCity) {
+					card.style.display = 'flex';
+				} else {
+					card.style.display = 'none';
+				}
+			});
+		}
+
+		filterChips.forEach(chip => {
+			chip.addEventListener('click', () => {
+				filterChips.forEach(c => c.classList.remove('active'));
+				chip.classList.add('active');
+				filterJobs();
+			});
+		});
+
+		if (searchInput) {
+			searchInput.addEventListener('input', filterJobs);
+		}
+
+		// Initial filter
+		filterJobs();
+	});
+</script>

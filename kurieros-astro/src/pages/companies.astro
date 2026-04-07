@@ -1,0 +1,122 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import jobsData from '../data/jobs.json';
+
+const companies = [
+    { name: "Яндекс Еда", logo: "https://yastatic.net/s3/home/services/block/eda_new.svg" },
+    { name: "Самокат", logo: "https://samokat.ru/images/logo/logo-green.svg" },
+    { name: "СДЭК", logo: "https://cdek.ru/build/images/logo.svg" },
+    { name: "Ozon", logo: "https://ir.ozon.com/storage/c/2021/03/10/1615413346123490_31.png" },
+    { name: "Додо Пицца", logo: "https://dodopizza-a.akamaihd.net/site-static/dist/assets/f6bfebf435bda59be512.svg" },
+    { name: "Купер (Сбермаркет)", logo: "https://sbermarket.ru/images/new_menu/kuper_logo.svg" },
+    { name: "Т-Банк", logo: "https://acdn.tinkoff.ru/static/documents/ba8dcada-f2a8-4e35-af3f-544ef4aeb1f4.svg" },
+    { name: "Альфа-Банк", logo: "https://alfabank.ru/media/logo-header-5744f4e.svg" }
+].map((company) => {
+    const companyJobs = jobsData.filter((job) => job.company === company.name);
+    return {
+        ...company,
+        count: companyJobs.length,
+        href: companyJobs[0] ? `/v/${companyJobs[0].slug}/` : '/contacts/'
+    };
+});
+---
+
+<BaseLayout title="Компании-работодатели — Работа курьером" description="Список всех крупных компаний-работодателей для курьеров. Узнайте условия, прочитайте отзывы и выберите лучшую компанию для себя.">
+    <Header />
+
+    <main>
+        <section class="hero hero-small">
+            <h1 data-t="companies.title">Компании-работодатели</h1>
+            <p data-t="companies.subtitle">Мы сотрудничаем только с проверенными брендами, гарантирующими стабильные выплаты и честные условия.</p>
+        </section>
+
+        <div class="companies-grid">
+            {companies.map(company => (
+                <div class="company-listing-card">
+                    <div class="company-logo-large">
+                        <img src={company.logo} alt={company.name} />
+                    </div>
+                    <h2>{company.name}</h2>
+                    <p class="company-meta"><strong>{company.count}</strong> <span data-t="companies.active_vacancies">активных вакансий</span></p>
+                    <a href={company.href} class="btn-primary" data-t="companies.view_jobs">Смотреть вакансии</a>
+                </div>
+            ))}
+        </div>
+
+        <section class="partner-section">
+            <div class="partner-card">
+                <h2 data-t="companies.partner_title">Стать партнером</h2>
+                <p data-t="companies.partner_text">Вы представляете компанию и хотите разместить свои вакансии? Свяжитесь с нами.</p>
+                <a href="/contacts" class="btn-secondary" style="max-width: 250px; margin: 0 auto; display: block;" data-t="companies.partner_btn">Связаться</a>
+            </div>
+        </section>
+    </main>
+
+    <Footer />
+</BaseLayout>
+
+<style>
+    .hero-small {
+        padding: 3rem 1rem;
+        text-align: center;
+    }
+    .companies-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-bottom: 4rem;
+    }
+    .company-listing-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        padding: 2.5rem 1.5rem;
+        border-radius: 2rem;
+        text-align: center;
+        box-shadow: var(--shadow-sm);
+        transition: transform 0.3s;
+    }
+    .company-listing-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-md);
+    }
+    .company-logo-large {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 1.5rem auto;
+        background: white;
+        padding: 1rem;
+        border-radius: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .company-logo-large img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+    .company-listing-card h2 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+    .company-meta {
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+    }
+    .partner-section {
+        margin-bottom: 4rem;
+    }
+    .partner-card {
+        background: var(--surface-color);
+        border: 1px solid var(--border-color);
+        padding: 3rem;
+        border-radius: 2rem;
+        text-align: center;
+    }
+    .partner-card h2 { margin-bottom: 1rem; }
+    .partner-card p { color: var(--text-muted); margin-bottom: 2rem; }
+</style>

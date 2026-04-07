@@ -1,0 +1,40 @@
+export const CITIES = [
+    { name: "Москва", slug: "moskva", prep: "в Москве" },
+    { name: "Санкт-Петербург", slug: "spb", prep: "в Санкт-Петербурге" },
+    { name: "Екатеринбург", slug: "ekaterinburg", prep: "в Екатеринбурге" },
+    { name: "Новосибирск", slug: "novosibirsk", prep: "в Новосибирске" },
+    { name: "Казань", slug: "kazan", prep: "в Казани" },
+    { name: "Нижний Новгород", slug: "nizhniy-novgorod", prep: "в Нижнем Новгороде" },
+    { name: "Челябинск", slug: "chelyabinsk", prep: "в Челябинске" },
+    { name: "Самара", slug: "samara", prep: "в Самаре" },
+    { name: "Омск", slug: "omsk", prep: "в Омске" },
+    { name: "Ростов-на-Дону", slug: "rostov-na-donu", prep: "в Ростове-на-Дону" },
+    { name: "Уфа", slug: "ufa", prep: "в Уфе" },
+    { name: "Красноярск", slug: "krasnoyarsk", prep: "в Красноярске" },
+    { name: "Воронеж", slug: "voronezh", prep: "в Воронеже" },
+    { name: "Пермь", slug: "perm", prep: "в Перми" },
+    { name: "Волгоград", slug: "volgograd", prep: "в Волгограде" }
+];
+
+export const CATEGORIES = [
+    { name: "Еда", query: "Еда", slug: "eda" },
+    { name: "СберМаркет (Купер)", query: "Купер", slug: "kuper" },
+    { name: "Ozon", query: "Ozon", slug: "ozon" },
+    { name: "СДЭК", query: "СДЭК", slug: "cdek" },
+    { name: "Самокат", query: "Самокат", slug: "samokat" },
+    { name: "На авто", tag: "auto", slug: "na-avto" },
+    { name: "Пешком", tag: "foot", slug: "peshkom" },
+    { name: "Для студентов", tag: "16plus", slug: "dlya-studentov" },
+    { name: "Подработка", tag: "flexible", slug: "podrabotka" },
+    { name: "На выходные", tag: "flexible", slug: "na-vyhodnye" },
+    { name: "На велосипеде", tag: "bicycle", slug: "na-velosipede" },
+    { name: "На самокате", tag: "bicycle", slug: "na-samokate" },
+    { name: "С ежедневной оплатой", query: "Ежеднев", slug: "ezhednevnaya-oplata" },
+    { name: "С еженедельной оплатой", query: "Еженед", slug: "ezhenedelnaya-oplata" },
+    { name: "Работа курьером женщине", tag: "flexible", slug: "zhenshchine" },
+    { name: "Курьер 16 лет", tag: "16plus", slug: "16-let" },
+    { name: "Курьер 18 лет", tag: "18+", slug: "18-let" },
+    { name: "Вечерняя подработка", tag: "flexible", slug: "vecherom" },
+    { name: "Ночная смена", tag: "flexible", slug: "nochyu" },
+    { name: "Свободный график", tag: "flexible", slug: "svobodny-grafik" }
+];

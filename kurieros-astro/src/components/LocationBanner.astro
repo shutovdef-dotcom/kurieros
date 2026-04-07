@@ -1,0 +1,138 @@
+---
+const { initialCity } = Astro.props;
+
+const cityRoutes = {
+	'москва': 'moskva',
+	'moscow': 'moskva',
+	'санкт-петербург': 'spb',
+	'saint petersburg': 'spb',
+	'st. petersburg': 'spb',
+	'екатеринбург': 'ekaterinburg',
+	'yekaterinburg': 'ekaterinburg',
+	'новосибирск': 'novosibirsk',
+	'kazan': 'kazan',
+	'казань': 'kazan',
+	'нижний новгород': 'nizhniy-novgorod',
+	'chelyabinsk': 'chelyabinsk',
+	'челябинск': 'chelyabinsk',
+	'самара': 'samara',
+	'samara': 'samara',
+	'омск': 'omsk',
+	'omsk': 'omsk',
+	'ростов-на-дону': 'rostov-na-donu',
+	'rostov-on-don': 'rostov-na-donu',
+	'уфа': 'ufa',
+	'ufa': 'ufa',
+	'красноярск': 'krasnoyarsk',
+	'krasnoyarsk': 'krasnoyarsk',
+	'воронеж': 'voronezh',
+	'voronezh': 'voronezh',
+	'пермь': 'perm',
+	'perm': 'perm',
+	'волгоград': 'volgograd',
+	'volgograd': 'volgograd'
+};
+---
+<div id="user-location-banner" class="location-banner placeholder">
+	<div class="banner-content">
+		<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+			<circle cx="12" cy="10" r="3"></circle>
+		</svg>
+		<span id="user-city-text">{initialCity ? `📍 Работа курьером ${initialCity}` : <span data-t="location.detecting">Определяем город...</span>}</span>
+	</div>
+</div>
+
+<style>
+	.location-banner {
+		min-height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-bottom: 1.5rem;
+		transition: opacity 0.3s ease;
+	}
+	.location-banner.placeholder .banner-content {
+		opacity: 0.7;
+	}
+	.banner-content {
+		background: rgba(6, 182, 212, 0.1);
+		color: var(--accent-color);
+		padding: 0.5rem 1rem;
+		border-radius: var(--radius-lg);
+		font-size: 0.875rem;
+		font-weight: 600;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+</style>
+
+<script is:inline define:vars={{ initialCity, cityRoutes }}>
+	function getTranslation(key, defaultText) {
+		const lang = window.kurieros_i18n?.currentLang || 'ru';
+		const dict = window.translations ? (window.translations[lang] || window.translations['ru']) : null;
+		if (!dict) return defaultText;
+		return key.split('.').reduce((prev, curr) => prev && prev[curr], dict) || defaultText;
+	}
+
+	function createBannerLink(city) {
+		const link = document.createElement('a');
+		const normalizedCity = city.trim().toLowerCase();
+		const citySlug = cityRoutes[normalizedCity];
+
+		if (!citySlug) {
+			link.href = '/';
+			link.setAttribute('data-t', 'location.view_jobs');
+			link.textContent = getTranslation('location.view_jobs', 'Смотреть все вакансии');
+			return link;
+		}
+
+		link.href = `/rabota-kurerom-${citySlug}/`;
+		link.style.color = 'inherit';
+		link.style.textDecoration = 'underline';
+		link.style.marginLeft = '0.5rem';
+		link.setAttribute('data-t', 'location.view_jobs');
+		link.textContent = getTranslation('location.view_jobs', 'Все вакансии в этом городе');
+		return link;
+	}
+
+	function updateBanner(data) {
+		if (initialCity) return; // Don't override if manually set via URL
+
+		const banner = document.getElementById('user-location-banner');
+		const text = document.getElementById('user-city-text');
+		if (banner && text && data.city) {
+			text.innerHTML = `📍 <span data-t="location.your_city">${getTranslation('location.your_city', 'Ваш город')}</span>: ${data.city}. `;
+			text.append(createBannerLink(data.city));
+			banner.classList.remove('placeholder');
+		} else if (banner && text) {
+			// Detection failed or no city
+			text.innerHTML = `📍 <span data-t="location.not_defined">${getTranslation('location.not_defined', 'Город не определен')}</span>. `;
+			const button = document.createElement('button');
+			button.id = 'btn-show-selector';
+			button.style.background = 'none';
+			button.style.border = 'none';
+			button.style.color = 'inherit';
+			button.style.textDecoration = 'underline';
+			button.style.fontWeight = '700';
+			button.style.cursor = 'pointer';
+			button.setAttribute('data-t', 'location.manual');
+			button.textContent = getTranslation('location.manual', 'Выбрать вручную');
+			text.append(button);
+			banner.classList.remove('placeholder');
+			button.addEventListener('click', () => {
+				document.querySelector('.city-selector-container')?.scrollIntoView({ behavior: 'smooth' });
+			});
+		}
+	}
+
+	window.addEventListener('kurieros:region-detected', (e) => {
+		updateBanner(e.detail);
+	});
+
+	// If already detected (e.g. script in BaseLayout finished early)
+	if (window.kurieros_user) {
+		updateBanner(window.kurieros_user);
+	}
+</script>

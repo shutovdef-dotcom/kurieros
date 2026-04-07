@@ -1,0 +1,12 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="900" fill="#F1F5F3"/>
+  <rect x="80" y="80" width="1440" height="740" rx="42" fill="#FBFEFC" stroke="#CDD9D2"/>
+  <circle cx="1290" cy="240" r="165" fill="#D6E7E0"/>
+  <circle cx="1340" cy="675" r="220" fill="#E5E0F0"/>
+  <rect x="150" y="150" width="370" height="48" rx="24" fill="#DBEAE4"/>
+  <text x="150" y="370" fill="#132019" font-family="Arial, Helvetica, sans-serif" font-size="82" font-weight="700">Как перейти</text>
+  <text x="150" y="470" fill="#132019" font-family="Arial, Helvetica, sans-serif" font-size="82" font-weight="700">из подработки</text>
+  <text x="150" y="570" fill="#132019" font-family="Arial, Helvetica, sans-serif" font-size="82" font-weight="700">в полный график курьером</text>
+  <text x="150" y="680" fill="#4F5B54" font-family="Arial, Helvetica, sans-serif" font-size="34">Когда это выгодно, как подготовиться и на что смотреть,</text>
+  <text x="150" y="728" fill="#4F5B54" font-family="Arial, Helvetica, sans-serif" font-size="34">чтобы рост часов действительно дал рост дохода</text>
+</svg>

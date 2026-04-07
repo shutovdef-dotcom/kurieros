@@ -1,0 +1,88 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+const variants = [
+	{
+		name: 'Linear',
+		slug: 'linear',
+		text: 'Строгий, чистый и быстрый интерфейс для сканирования вакансий.'
+	},
+	{
+		name: 'Raycast',
+		slug: 'raycast',
+		text: 'Более технологичный, премиальный и продуктовый характер.'
+	},
+	{
+		name: 'Notion',
+		slug: 'notion',
+		text: 'Спокойный, мягкий и доверительный визуальный язык.'
+	}
+];
+---
+
+<BaseLayout title="Дизайн-концепции главной — Курьерос" description="Три концепции главной страницы для выбора направления редизайна.">
+	<Header />
+	<main class="design-hub">
+		<section class="design-hub-head">
+			<h1>3 варианта главной</h1>
+			<p>Открой любую концепцию и скажи, какую берём в работу.</p>
+		</section>
+		<div class="design-hub-grid">
+			{variants.map((item) => (
+				<a href={`/designs/${item.slug}/`} class="design-hub-card">
+					<strong>{item.name}</strong>
+					<p>{item.text}</p>
+					<span>Открыть концепцию</span>
+				</a>
+			))}
+		</div>
+	</main>
+	<Footer />
+</BaseLayout>
+
+<style>
+	.design-hub {
+		max-width: 1280px;
+		margin: 0 auto;
+		padding: 3rem 1rem 4rem;
+	}
+	.design-hub-head {
+		text-align: center;
+		margin-bottom: 2rem;
+	}
+	.design-hub-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 1rem;
+	}
+	.design-hub-card {
+		display: block;
+		text-decoration: none;
+		color: inherit;
+		padding: 1.5rem;
+		border-radius: 1.5rem;
+		background: var(--surface-color);
+		border: 1px solid var(--border-color);
+		box-shadow: var(--shadow-sm);
+	}
+	.design-hub-card strong {
+		display: block;
+		font-size: 1.2rem;
+		margin-bottom: 0.75rem;
+	}
+	.design-hub-card p {
+		color: var(--text-muted);
+		margin-bottom: 1rem;
+	}
+	.design-hub-card span {
+		font-weight: 700;
+		color: var(--primary-color);
+	}
+	@media (max-width: 900px) {
+		.design-hub-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

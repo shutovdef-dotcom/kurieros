@@ -1,0 +1,39 @@
+---
+import LanguageSwitcher from './LanguageSwitcher.astro';
+---
+<header>
+    <a href="/" class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        Курьерос
+    </a>
+    <nav>
+        <ul>
+            <li><a href="/#vacancies" data-t="nav.vacancies">Вакансии</a></li>
+            <li><a href="/companies/" data-t="nav.companies">Компании</a></li>
+            <li><a href="/blog/" data-t="nav.blog">Блог</a></li>
+            <li><a href="/contacts/" data-t="nav.contacts">Контакты</a></li>
+            <li><a href="/cities/" data-t="nav.cities">Города</a></li>
+            <li><a href="/compare/" class="compare-nav-link"><span data-t="nav.compare">Сравнение</span> <span class="compare-badge hidden" id="compare-badge">0</span></a></li>
+            <li><LanguageSwitcher /></li>
+        </ul>
+    </nav>
+</header>
+
+<script is:inline>
+    function updateHeaderCompareBadge() {
+        const compareList = JSON.parse(localStorage.getItem('compareList') || '[]');
+        const badge = document.getElementById('compare-badge');
+        if (badge) {
+            badge.textContent = compareList.length;
+            if (compareList.length > 0) {
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+    }
+    document.addEventListener('DOMContentLoaded', updateHeaderCompareBadge);
+    // Also listen for custom events if we want live updates across components
+    window.addEventListener('storage', updateHeaderCompareBadge);
+    window.addEventListener('compareUpdate', updateHeaderCompareBadge);
+</script>

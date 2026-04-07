@@ -1,0 +1,153 @@
+---
+const languages = [
+    { code: 'ru', name: 'Русский', flag: '🇷🇺' },
+    { code: 'kk', name: 'Қазақ', flag: '🇰🇿' },
+    { code: 'uz', name: 'O\'zbek', flag: '🇺🇿' },
+    { code: 'uk', name: 'Українська', flag: '🇺🇦' },
+    { code: 'be', name: 'Беларуская', flag: '🇧🇾' },
+    { code: 'hy', name: 'Հայերեն', flag: '🇦🇲' },
+    { code: 'ky', name: 'Кыргызча', flag: '🇰🇬' },
+    { code: 'tg', name: 'Тоҷикӣ', flag: '🇹🇯' },
+    { code: 'az', name: 'Azərbaycan', flag: '🇦🇿' },
+    { code: 'hi', name: 'हिन्दी', flag: '🇮🇳' },
+    { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' },
+    { code: 'zh', name: '中文', flag: '🇨🇳' },
+];
+---
+
+<div class="lang-switcher">
+    <button class="lang-toggle" id="lang-toggle-btn">
+        <span id="current-lang-flag">🇷🇺</span>
+        <span id="current-lang-code">RU</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    
+    <div class="lang-dropdown hidden" id="lang-dropdown">
+        {languages.map(lang => (
+            <button class="lang-option" data-lang={lang.code}>
+                <span class="flag">{lang.flag}</span>
+                <span class="name">{lang.name}</span>
+            </button>
+        ))}
+    </div>
+</div>
+
+<script is:inline>
+    (function() {
+        const btn = document.getElementById('lang-toggle-btn');
+        const dropdown = document.getElementById('lang-dropdown');
+        const flagEl = document.getElementById('current-lang-flag');
+        const codeEl = document.getElementById('current-lang-code');
+        
+        const languages = {
+            ru: '🇷🇺', kk: '🇰🇿', uz: '🇺🇿', uk: '🇺🇦', be: '🇧🇾', 
+            hy: '🇦🇲', ky: '🇰🇬', tg: '🇹🇯', az: '🇦🇿', hi: '🇮🇳', 
+            vi: '🇻🇳', zh: '🇨🇳'
+        };
+
+        function updateUI(lang) {
+            if (flagEl) flagEl.textContent = languages[lang] || '🇷🇺';
+            if (codeEl) codeEl.textContent = lang.toUpperCase();
+        }
+
+        // Initialize UI from current lang
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentLang = window.kurieros_i18n?.currentLang || 'ru';
+            updateUI(currentLang);
+        });
+
+        btn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown?.classList.toggle('hidden');
+        });
+
+        document.querySelectorAll('.lang-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                const lang = opt.getAttribute('data-lang');
+                window.kurieros_i18n?.setLanguage(lang);
+                updateUI(lang);
+                dropdown?.classList.add('hidden');
+            });
+        });
+
+        document.addEventListener('click', () => {
+            dropdown?.classList.add('hidden');
+        });
+    })();
+</script>
+
+<style>
+    .lang-switcher {
+        position: relative;
+        font-family: var(--font-main);
+    }
+    .lang-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--surface-color);
+        border: 1px solid var(--border-color);
+        padding: 0.4rem 0.75rem;
+        border-radius: 50px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-main);
+        transition: var(--transition);
+        box-shadow: var(--shadow-sm);
+    }
+    .lang-toggle:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-1px);
+    }
+    .lang-dropdown {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        background: var(--surface-color);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        box-shadow: var(--shadow-md);
+        z-index: 1000;
+        width: 180px;
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .lang-dropdown.hidden {
+        display: none;
+    }
+    .lang-option {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.6rem 0.75rem;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        color: var(--text-main);
+        transition: var(--transition);
+    }
+    .lang-option:hover {
+        background: var(--bg-color);
+        color: var(--primary-color);
+    }
+    .flag {
+        font-size: 1.1rem;
+    }
+    /* Simple scrollbar */
+    .lang-dropdown::-webkit-scrollbar {
+        width: 4px;
+    }
+    .lang-dropdown::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 10px;
+    }
+</style>

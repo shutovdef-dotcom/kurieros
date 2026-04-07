@@ -1,0 +1,315 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import articlesData from '../data/articles.json';
+
+const formatDate = (value) =>
+	new Intl.DateTimeFormat('ru-RU', {
+		day: 'numeric',
+		month: 'long',
+		year: 'numeric',
+	}).format(new Date(value));
+
+const posts = articlesData.map((article) => ({
+    ...article,
+    excerpt: article.description,
+    image: article.image,
+    author: 'Редакция Курьерос',
+    formattedDate: formatDate(article.date),
+}));
+const [featuredPost, ...secondaryPosts] = posts;
+---
+
+<BaseLayout title="Блог Курьерос — Полезные статьи и советы для курьеров" description="Узнайте все секреты работы курьером: как увеличить доход, выбрать компанию и оптимизировать маршруты.">
+	<Header />
+
+	<main>
+		<section class="blog-hero">
+			<div class="blog-hero-copy">
+				<span class="eyebrow">Редакция Курьерос</span>
+				<h1>Журнал о работе курьером</h1>
+				<p>Практические разборы дохода, компаний и форматов доставки без рекламного шума и пустых обещаний.</p>
+			</div>
+			<div class="blog-hero-note">
+				<span>15 материалов</span>
+				<span>Обновлено {featuredPost.formattedDate}</span>
+			</div>
+		</section>
+
+		<a href={`/blog/${featuredPost.slug}/`} class="featured-story">
+			<div class="featured-story-copy">
+				<div class="blog-meta">
+					<time datetime={featuredPost.date}>{featuredPost.formattedDate}</time>
+					<span aria-hidden="true">•</span>
+					<span>{featuredPost.readTime}</span>
+				</div>
+				<h2>{featuredPost.title}</h2>
+				<p>{featuredPost.excerpt}</p>
+				<span class="featured-link">Открыть материал</span>
+			</div>
+			<img src={featuredPost.image} alt={featuredPost.title} class="featured-story-image" />
+		</a>
+
+		<section class="blog-section">
+			<div class="section-heading">
+				<h2>Последние материалы</h2>
+				<p>Выборка по доходу, условиям работы и реальному опыту курьеров.</p>
+			</div>
+
+			<div class="blog-grid">
+				{secondaryPosts.map(post => (
+					<article class="blog-card">
+						<a href={`/blog/${post.slug}/`} class="blog-card-link">
+							<img src={post.image} alt={post.title} class="blog-image" />
+							<div class="blog-content">
+								<div class="blog-meta">
+									<time datetime={post.date}>{post.formattedDate}</time>
+									<span aria-hidden="true">•</span>
+									<span>{post.readTime}</span>
+								</div>
+								<h3 class="blog-title">{post.title}</h3>
+								<p class="blog-excerpt">{post.excerpt}</p>
+								<span class="btn-text">Читать статью</span>
+							</div>
+						</a>
+					</article>
+				))}
+			</div>
+		</section>
+
+        <section class="newsletter">
+            <div class="newsletter-content">
+                <h2>Подпишитесь на новые статьи</h2>
+                <p>Получайте лучшие советы по заработку раз в неделю прямо в Telegram.</p>
+                <a href="/contacts/" class="btn-primary" style="max-width: 300px; margin: 0 auto; display: block;">Подписаться в Telegram</a>
+            </div>
+        </section>
+	</main>
+
+	<Footer />
+</BaseLayout>
+
+<style>
+    .blog-hero {
+        max-width: 1360px;
+        margin: 0 auto 2rem;
+        padding: 3rem 1rem 1.5rem;
+        display: grid;
+        gap: 1.5rem;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: end;
+    }
+    .blog-hero-copy h1 {
+        font-size: clamp(2.6rem, 5vw, 4.8rem);
+        line-height: 0.95;
+        letter-spacing: -0.05em;
+        max-width: 10ch;
+        margin-bottom: 1rem;
+    }
+    .blog-hero-copy p {
+        max-width: 60ch;
+        color: var(--text-muted);
+        font-size: 1.05rem;
+        line-height: 1.8;
+    }
+    .eyebrow {
+        display: inline-flex;
+        margin-bottom: 1rem;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: var(--text-muted);
+    }
+    .blog-hero-note {
+        display: grid;
+        gap: 0.5rem;
+        justify-items: end;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
+    .featured-story {
+        max-width: 1360px;
+        margin: 0 auto 4rem;
+        padding: 1rem;
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+        gap: 1.5rem;
+        align-items: stretch;
+        text-decoration: none;
+        color: inherit;
+    }
+    .featured-story-copy {
+        background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(248,250,252,0.96));
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: 32px;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+        padding: 2rem;
+        display: grid;
+        align-content: end;
+        gap: 1rem;
+    }
+    .featured-story-copy h2 {
+        font-size: clamp(2rem, 4vw, 3.4rem);
+        line-height: 1.02;
+        letter-spacing: -0.05em;
+        max-width: 11ch;
+    }
+    .featured-story-copy p {
+        max-width: 54ch;
+        color: var(--text-muted);
+        font-size: 1.02rem;
+        line-height: 1.8;
+    }
+    .featured-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+    .featured-story-image {
+        width: 100%;
+        height: 100%;
+        min-height: 440px;
+        object-fit: cover;
+        border-radius: 32px;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+    }
+    .blog-section {
+        max-width: 1360px;
+        margin: 0 auto 4rem;
+        padding: 0 1rem;
+    }
+    .section-heading {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: end;
+        margin-bottom: 1.75rem;
+    }
+    .section-heading h2 {
+        font-size: clamp(1.6rem, 2.4vw, 2.3rem);
+        letter-spacing: -0.04em;
+    }
+    .section-heading p {
+        max-width: 44ch;
+        color: var(--text-muted);
+        line-height: 1.7;
+    }
+    .blog-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.5rem;
+    }
+    .blog-card {
+        background: rgba(255, 255, 255, 0.86);
+        border-radius: 28px;
+        overflow: hidden;
+        box-shadow: 0 18px 50px rgba(15, 23, 42, 0.07);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        border: 1px solid rgba(148, 163, 184, 0.16);
+    }
+    .blog-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.09);
+    }
+    .blog-card-link {
+        display: grid;
+        grid-template-columns: 220px minmax(0, 1fr);
+        min-height: 100%;
+        text-decoration: none;
+        color: inherit;
+    }
+    .blog-image {
+        width: 100%;
+        height: 100%;
+        min-height: 220px;
+        object-fit: cover;
+    }
+    .blog-content {
+        padding: 1.5rem 1.5rem 1.6rem;
+        display: grid;
+        align-content: start;
+    }
+    .blog-meta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        margin-bottom: 0.75rem;
+        line-height: 1.4;
+    }
+    .blog-title {
+        font-size: 1.55rem;
+        margin-bottom: 0.9rem;
+        line-height: 1.12;
+        letter-spacing: -0.03em;
+    }
+    .blog-excerpt {
+        color: var(--text-muted);
+        font-size: 0.98rem;
+        margin-bottom: 1.4rem;
+        line-height: 1.7;
+    }
+    .btn-text {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.92rem;
+    }
+    .newsletter {
+        max-width: 1360px;
+        margin: 0 auto 4rem;
+        background: linear-gradient(135deg, #111827, #1f2937);
+        color: white;
+        padding: 4rem 2rem;
+        border-radius: 2rem;
+        text-align: center;
+    }
+    .newsletter h2 { color: white; margin-bottom: 1rem; }
+    .newsletter p { color: rgba(255,255,255,0.9); margin-bottom: 2rem; }
+    @media (max-width: 960px) {
+        .blog-hero,
+        .featured-story,
+        .section-heading {
+            grid-template-columns: 1fr;
+        }
+        .blog-hero-note {
+            justify-items: start;
+        }
+        .blog-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    @media (max-width: 720px) {
+        .featured-story {
+            padding: 0 1rem;
+        }
+        .featured-story-copy {
+            order: 2;
+            padding: 1.5rem;
+            border-radius: 24px;
+        }
+        .featured-story-image {
+            min-height: 280px;
+            border-radius: 24px;
+        }
+        .blog-card-link {
+            grid-template-columns: 1fr;
+        }
+        .blog-image {
+            min-height: 200px;
+        }
+        .blog-title {
+            font-size: 1.35rem;
+        }
+        .newsletter {
+            margin-left: 1rem;
+            margin-right: 1rem;
+            padding: 3rem 1.25rem;
+        }
+    }
+</style>
