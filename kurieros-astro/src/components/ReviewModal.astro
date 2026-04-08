@@ -1,0 +1,319 @@
+---
+// ReviewModal.astro
+---
+
+<div id="review-modal" class="modal-overlay hidden">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h3 data-t="reviews.leave_review">Оставить отзыв</h3>
+      <button class="close-modal-btn" aria-label="Закрыть">&times;</button>
+    </div>
+    
+    <div class="modal-body" id="review-form-body">
+      <form id="review-form" class="review-form">
+        <div class="form-group">
+          <label for="review-name" data-t="form.name">Ваше имя</label>
+          <input type="text" id="review-name" required placeholder="Например, Алексей" />
+        </div>
+        
+        <div class="form-group">
+          <label for="review-city" data-t="form.city">Город</label>
+          <input type="text" id="review-city" required placeholder="Например, Москва" />
+        </div>
+        
+        <div class="form-group">
+          <label for="review-pros" data-t="form.pros">Достоинства</label>
+          <textarea id="review-pros" rows="2" placeholder="Что вам понравилось?"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="review-cons" data-t="form.cons">Недостатки</label>
+          <textarea id="review-cons" rows="2" placeholder="Что можно улучшить?"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="review-comment" data-t="form.comment">Комментарий</label>
+          <textarea id="review-comment" rows="3" required placeholder="Общее впечатление о работе"></textarea>
+        </div>
+
+        <div class="form-group rating-group">
+          <label data-t="form.rating">Оценка</label>
+          <div class="stars-select" id="stars-select">
+            <span data-value="1">★</span>
+            <span data-value="2">★</span>
+            <span data-value="3">★</span>
+            <span data-value="4">★</span>
+            <span data-value="5" class="active">★</span>
+          </div>
+          <input type="hidden" id="review-rating" value="5" />
+        </div>
+
+        <button type="submit" class="btn-primary" data-t="form.submit">Отправить отзыв</button>
+      </form>
+    </div>
+    
+    <div class="modal-body hidden" id="review-success-body">
+      <div class="success-icon">✓</div>
+      <h3 data-t="form.success_title">Спасибо за отзыв!</h3>
+      <p data-t="form.success_desc">Ваш отзыв успешно отправлен и будет опубликован после проверки модератором.</p>
+      <button class="btn-secondary" id="close-success-btn" data-t="form.close">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    opacity: 1;
+    transition: var(--transition);
+  }
+  
+  .modal-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .modal-container {
+    background: var(--surface-color);
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 500px;
+    box-shadow: var(--shadow-glass);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    transform: translateY(0);
+    transition: var(--transition);
+  }
+  
+  .modal-overlay.hidden .modal-container {
+    transform: translateY(20px);
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+  }
+
+  .close-modal-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: var(--transition);
+  }
+
+  .close-modal-btn:hover {
+    color: var(--text-main);
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  .review-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .form-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+
+  .form-group input,
+  .form-group textarea {
+    padding: 0.8rem 1rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    background: var(--bg-color);
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 1rem;
+    outline: none;
+    transition: var(--transition);
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus {
+    border-color: var(--text-main);
+  }
+
+  .stars-select {
+    display: flex;
+    gap: 0.25rem;
+    font-size: 1.8rem;
+    cursor: pointer;
+  }
+
+  .stars-select span {
+    color: #cbd5e1;
+    transition: color 0.2s;
+  }
+
+  .stars-select span.active,
+  .stars-select span.selected {
+    color: #fbbf24;
+  }
+
+  #review-success-body {
+    text-align: center;
+    padding: 2rem 1.5rem;
+  }
+
+  .success-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #10b981;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin: 0 auto 1.5rem;
+  }
+
+  #review-success-body h3 {
+    margin-bottom: 0.5rem;
+  }
+
+  #review-success-body p {
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('review-modal');
+    const openBtns = document.querySelectorAll('.open-review-modal');
+    const closeBtns = document.querySelectorAll('.close-modal-btn, #close-success-btn');
+    const form = document.getElementById('review-form');
+    const formBody = document.getElementById('review-form-body');
+    const successBody = document.getElementById('review-success-body');
+    
+    // Rating logic
+    const stars = document.querySelectorAll('#stars-select span');
+    const ratingInput = document.getElementById('review-rating');
+
+    stars.forEach(star => {
+      star.addEventListener('mouseover', function() {
+        const value = parseInt(this.getAttribute('data-value') || '0');
+        stars.forEach(s => {
+          if (parseInt(s.getAttribute('data-value') || '0') <= value) {
+            s.classList.add('active');
+          } else {
+            s.classList.remove('active');
+          }
+        });
+      });
+
+      star.addEventListener('mouseout', function() {
+        stars.forEach(s => s.classList.remove('active'));
+        const selectedValue = parseInt(ratingInput?.value || '0');
+        stars.forEach(s => {
+          if (parseInt(s.getAttribute('data-value') || '0') <= selectedValue) {
+            s.classList.add('selected');
+          } else {
+            s.classList.remove('selected');
+          }
+        });
+      });
+
+      star.addEventListener('click', function() {
+        const value = this.getAttribute('data-value');
+        if (ratingInput && value) {
+          ratingInput.value = value;
+          stars.forEach(s => {
+            if (parseInt(s.getAttribute('data-value') || '0') <= parseInt(value)) {
+              s.classList.add('selected');
+            } else {
+              s.classList.remove('selected');
+            }
+          });
+        }
+      });
+    });
+
+    // Initialize stars
+    const initEvent = new Event('mouseout');
+    if(stars.length) stars[0].dispatchEvent(initEvent);
+
+    function openModal() {
+      if (modal) {
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closeModal() {
+      if (modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+    }
+
+    openBtns.forEach(btn => btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openModal();
+    }));
+
+    closeBtns.forEach(btn => btn.addEventListener('click', closeModal));
+
+    modal?.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeModal();
+      }
+    });
+
+    form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // Имитация отправки формы
+      setTimeout(() => {
+        formBody?.classList.add('hidden');
+        successBody?.classList.remove('hidden');
+      }, 500);
+    });
+    
+    // Reset modal on close
+    document.getElementById('close-success-btn')?.addEventListener('click', () => {
+      setTimeout(() => {
+        formBody?.classList.remove('hidden');
+        successBody?.classList.add('hidden');
+        if (form instanceof HTMLFormElement) form.reset();
+        if (ratingInput) ratingInput.value = '5';
+        if(stars.length) stars[0].dispatchEvent(new Event('mouseout'));
+      }, 300);
+    });
+  });
+</script>

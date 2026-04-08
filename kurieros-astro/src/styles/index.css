@@ -261,14 +261,25 @@ header {
 
 @media (min-width: 769px) {
   header {
-    justify-content: flex-start;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    justify-content: unset;
+  }
+  .header-left {
+    display: flex;
+    justify-content: center;
   }
   .logo {
     width: auto;
-    font-size: 2.75rem;
-    margin-right: 20vw;
-    justify-content: flex-start;
-    text-align: left;
+    font-size: 3.4rem;
+    justify-content: center;
+    text-align: center;
+    flex-shrink: unset;
+  }
+  .main-nav {
+    flex-grow: 0;
+    width: 100%;
   }
 }
 
@@ -1175,78 +1186,4 @@ footer {
   border: 1px solid var(--border-color);
 }
 
-/* Reviews Section */
-.reviews-section {
-  padding: 4rem 1rem;
-  max-width: 1360px;
-  margin: 0 auto;
-}
-.reviews-section h2 {
-  text-align: center;
-  margin-bottom: 2rem;
-  font-size: 2rem;
-  font-weight: 800;
-  color: var(--text-color);
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-.reviews-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-.review-card {
-  background: var(--surface-color);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  padding: 1.5rem;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  backdrop-filter: blur(10px);
-}
-.review-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-md);
-  border-color: rgba(79, 70, 229, 0.3);
-}
-.review-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-.review-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--gradient-primary);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 1.25rem;
-}
-.review-avatar.bg-ozon {
-  background: linear-gradient(135deg, #005bff, #0088ff);
-}
-.review-avatar.bg-sdek {
-  background: linear-gradient(135deg, #00bd22, #00d235);
-}
-.review-meta {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-  margin-top: 0.25rem;
-}
-.review-text {
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: var(--text-color);
-  margin-bottom: 1rem;
-}
-.review-rating {
-  color: #fbbf24;
-  font-size: 1.25rem;
-  letter-spacing: 2px;
-}
+

@@ -1,0 +1,120 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import IncomeCalculator from '../components/IncomeCalculator.astro';
+---
+
+<BaseLayout title="Калькулятор дохода курьера — Рассчитать заработок в месяц" description="Узнайте, сколько вы сможете заработать в Яндекс Еда, Самокате и других компаниях. Учитываются город, количество часов и дней работы.">
+    <Header />
+
+    <main class="page-shell">
+        <section class="calculator-hero">
+            <h1 data-t="calculator.title">Калькулятор дохода курьера</h1>
+            <p data-t="calculator.subtitle">Узнайте, сколько вы можете заработать в месяц в вашем городе</p>
+        </section>
+
+        <div class="calculator-standalone-wrapper">
+            <IncomeCalculator />
+        </div>
+
+        <section class="calc-info-section">
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>Как мы считаем?</h3>
+                    <p>Наши алгоритмы используют актуальные данные о средних ставках курьеров в разных городах России, включая бонусы и доплаты за высокий спрос.</p>
+                </div>
+                <div class="info-card">
+                    <h3>Можно ли заработать больше?</h3>
+                    <p>Да! Использование электровелосипеда или автомобиля, работа в часы пик и выполнение целей по количеству заказов могут увеличить доход на 30-50%.</p>
+                </div>
+                <div class="info-card">
+                    <h3>Когда придут деньги?</h3>
+                    <p>Большинство компаний-партнеров (Яндекс, Самокат, Додо) выплачивают вознаграждение ежедневно или еженедельно на карту любого банка.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <Footer />
+</BaseLayout>
+
+<style>
+    .page-shell {
+        max-width: 1560px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+    
+    .calculator-hero {
+        padding: 4rem 1rem 3rem 1rem;
+        text-align: center;
+    }
+    
+    .calculator-hero h1 {
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        font-weight: 900;
+        letter-spacing: -0.05em;
+        margin-bottom: 1rem;
+        color: #2b2622;
+    }
+    
+    .calculator-hero p {
+        font-size: 1.25rem;
+        color: #8b7d70;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .calculator-standalone-wrapper {
+        margin-bottom: 4rem;
+    }
+
+    /* Additional info section */
+    .calc-info-section {
+        margin-bottom: 6rem;
+    }
+    
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+    
+    .info-card {
+        background: #fdfcfb;
+        border: 1px solid #ebe5dc;
+        padding: 2.5rem;
+        border-radius: 2rem;
+        transition: transform 0.3s ease;
+    }
+    
+    .info-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .info-card h3 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        color: #2b2622;
+    }
+    
+    .info-card p {
+        color: #8b7d70;
+        line-height: 1.6;
+        font-size: 1.05rem;
+    }
+
+    @media (max-width: 768px) {
+        .page-shell {
+            padding: 0 1rem;
+        }
+        .calculator-hero {
+            padding: 3rem 1rem 2rem 1rem;
+        }
+        .info-card {
+            padding: 1.5rem;
+        }
+    }
+</style>

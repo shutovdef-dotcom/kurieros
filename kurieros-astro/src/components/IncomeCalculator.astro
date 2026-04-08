@@ -1,7 +1,6 @@
 ---
 import { CITIES } from '../data/constants';
 
-// Define base rates per city
 const cityRates: Record<string, number> = {
     'moskva': 520,
     'spb': 460,
@@ -16,56 +15,72 @@ const ratesJson = JSON.stringify(cityRates);
 ---
 
 <section class="calculator-section home-section" id="income-calculator">
-    <div class="calculator-card">
-        <div class="calc-header">
-            <h2 data-t="calculator.title">Калькулятор дохода курьера</h2>
-            <p data-t="calculator.subtitle">Узнайте, сколько вы можете заработать в месяц</p>
-        </div>
+    <div class="section-heading">
+        <h2 data-t="calculator.title">Калькулятор дохода курьера</h2>
+        <p data-t="calculator.subtitle">Узнайте, сколько вы можете заработать в месяц</p>
+    </div>
 
-        <div class="calc-grid">
-            <div class="calc-inputs">
-                <div class="input-group">
-                    <div class="label-row">
-                        <label for="days-range" data-t="calculator.days">Дней в месяц</label>
-                        <span class="value-badge" id="days-val">22</span>
-                    </div>
-                    <input type="range" id="days-range" min="1" max="30" value="22" class="range-input">
+    <div class="calc-card">
+        <div class="calc-inputs">
+            <div class="calc-field">
+                <div class="field-header">
+                    <label for="days-range" data-t="calculator.days">Дней в месяц</label>
+                    <span class="value-badge" id="days-val">22</span>
+                </div>
+                <div class="range-wrapper">
+                    <input type="range" id="days-range" min="1" max="30" value="22" step="1">
                     <div class="range-labels">
                         <span>1</span>
                         <span>30</span>
                     </div>
                 </div>
+            </div>
 
-                <div class="input-group">
-                    <div class="label-row">
-                        <label for="hours-range" data-t="calculator.hours">Часов в день</label>
-                        <span class="value-badge" id="hours-val">8</span>
-                    </div>
-                    <input type="range" id="hours-range" min="1" max="16" value="8" class="range-input">
+            <div class="calc-field">
+                <div class="field-header">
+                    <label for="hours-range" data-t="calculator.hours">Часов в день</label>
+                    <span class="value-badge" id="hours-val">8</span>
+                </div>
+                <div class="range-wrapper">
+                    <input type="range" id="hours-range" min="1" max="16" value="8" step="1">
                     <div class="range-labels">
                         <span>1</span>
                         <span>16</span>
                     </div>
                 </div>
+            </div>
 
-                <div class="input-group">
-                    <label for="calc-city-select" data-t="calculator.city">Ваш город</label>
-                    <select id="calc-city-select" class="city-select">
+            <div class="calc-field">
+                <label for="calc-city-select" data-t="calculator.city">Ваш город</label>
+                <div class="select-wrapper">
+                    <select id="calc-city-select" class="calc-select">
                         {CITIES.map(city => (
                             <option value={city.slug}>{city.name}</option>
                         ))}
                     </select>
                 </div>
             </div>
+        </div>
 
-            <div class="calc-result">
-                <div class="result-title" data-t="calculator.result">Примерный заработок:</div>
-                <div class="total-amount" id="total-amount">0 ₽</div>
-                <div class="result-footer">
-                    *Расчет произведен на основе средних показателей по городу. <br>
-                    Реальный доход зависит от компании и типа транспорта.
+        <div class="calc-divider"></div>
+
+        <div class="calc-result">
+            <div class="result-box">
+                <span class="result-label" data-t="calculator.result">Примерный доход</span>
+                <div class="amount-container">
+                    <span class="amount" id="total-amount">0</span>
+                    <span class="currency">₽</span>
                 </div>
-                <a href="/kurieros/#vacancies/" class="apply-btn-calc" data-t="calculator.apply">Выбрать вакансию</a>
+            </div>
+            
+            <div class="calc-actions">
+                <a href="/kurieros/#vacancies/" class="calc-cta-btn" data-t="calculator.apply">
+                    Подобрать вакансию
+                </a>
+                <p class="disclaimer">
+                    *Расчет носит информационный характер и зависит от плотности заказов.<br />
+                    *Расчет включает чаевые и надбавки за большое кол-во заказов.
+                </p>
             </div>
         </div>
     </div>
@@ -86,163 +101,226 @@ const ratesJson = JSON.stringify(cityRates);
         const days = parseInt(daysRange.value);
         const hours = parseInt(hoursRange.value);
         const citySlug = citySelect.value;
-        
         const rate = rates[citySlug] || rates['default'];
-        const total = days * hours * rate;
-
+        
+        let total = days * hours * rate;
+        total = total * 1.2; // +20% for bonuses/tips
+        
         daysVal.textContent = days;
         hoursVal.textContent = hours;
         
-        // Formatted number with spaces
-        totalAmount.textContent = total.toLocaleString('ru-RU') + ' ₽';
+        // Simple counter animation
+        const currentAmount = parseInt(totalAmount.textContent.replace(/\s/g, '')) || 0;
+        const targetAmount = total;
+        
+        totalAmount.textContent = targetAmount.toLocaleString('ru-RU');
     }
 
-    daysRange.addEventListener('input', calculate);
-    hoursRange.addEventListener('input', calculate);
-    citySelect.addEventListener('change', calculate);
-
-    // Initial calc
+    daysRange?.addEventListener('input', calculate);
+    hoursRange?.addEventListener('input', calculate);
+    citySelect?.addEventListener('change', calculate);
+    
+    // Init
     document.addEventListener('DOMContentLoaded', calculate);
 </script>
 
 <style>
-    .calculator-section {
-        border: 1px solid #ebe5dc !important;
-        background: #fffdf8 !important;
-        box-shadow: 0 8px 24px rgba(60, 41, 20, 0.05) !important;
+    /* Section uses .home-section from index.astro (creamy bg) */
+
+    .calc-card {
+        background: #ffffff;
+        border: 1px solid #ebe5dc;
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        display: flex;
+        gap: 3rem;
+        box-shadow: 0 4px 20px rgba(60, 41, 20, 0.04);
+        margin-top: 1.5rem;
     }
-    .calculator-card {
-        width: 100%;
+
+    /* Left Side: Inputs */
+    .calc-inputs {
+        flex: 1.4;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
     }
-    .calc-header {
-        text-align: left;
-        margin-bottom: 2.5rem;
+
+    .calc-field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
     }
-    .calc-header h2 {
-        font-size: 2rem;
-        font-weight: 800;
-        letter-spacing: -0.04em;
-        margin-bottom: 0.5rem;
-        color: #2b2622;
-    }
-    .calc-header p {
-        color: #7c6f64;
-        font-size: 1.05rem;
-    }
-    .calc-grid {
-        display: grid;
-        grid-template-columns: 1.1fr 0.9fr;
-        gap: 4rem;
-        align-items: center;
-    }
-    @media (max-width: 992px) {
-        .calc-grid {
-            grid-template-columns: 1fr;
-            gap: 2.5rem;
-        }
-    }
-    .input-group {
-        margin-bottom: 1.75rem;
-    }
-    .label-row {
+
+    .field-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.85rem;
     }
-    label {
+
+    .field-header label {
+        font-size: 1.1rem;
         font-weight: 700;
         color: #2b2622;
-        font-size: 1.05rem;
     }
+
     .value-badge {
         background: #f7f2ea;
         color: #2b2622;
-        padding: 0.35rem 1rem;
-        border-radius: 10px;
-        font-size: 1rem;
+        padding: 0.4rem 1rem;
+        border-radius: 99px;
         font-weight: 800;
+        font-size: 1rem;
         border: 1px solid #ebe5dc;
     }
-    .range-input {
-        width: 100%;
-        accent-color: #2b2622;
-        cursor: pointer;
+
+    .range-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
     }
+
+    input[type="range"] {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 8px;
+        background: #f0ede8;
+        border-radius: 5px;
+        outline: none;
+        margin: 10px 0;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 24px;
+        height: 24px;
+        background: #2b2622;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid #ffffff;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        transition: transform 0.1s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+        transform: scale(1.1);
+    }
+
     .range-labels {
         display: flex;
         justify-content: space-between;
         font-size: 0.85rem;
-        color: #8b7d70;
-        margin-top: 0.6rem;
+        color: #a39587;
+        font-weight: 500;
     }
-    .city-select {
+
+    .calc-select {
         width: 100%;
-        padding: 1rem;
+        padding: 1rem 1.25rem;
         border-radius: 12px;
         border: 1px solid #ebe5dc;
-        background: white;
+        background: #fdfcfb;
         color: #2b2622;
-        margin-top: 0.5rem;
         font-size: 1.05rem;
-        font-weight: 600;
+        font-weight: 700;
         cursor: pointer;
         outline: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%232b2622' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 5 3 3 3-3'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1.25rem center;
     }
+
+    /* Vertical Divider */
+    .calc-divider {
+        width: 1px;
+        background: #ebe5dc;
+        align-self: stretch;
+    }
+
+    /* Right Side: Result */
     .calc-result {
-        background: #fffdf8;
-        padding: 3rem 2rem;
-        border-radius: 1.5rem;
-        color: #2b2622;
-        text-align: center;
-        border: 1px solid #ebe5dc;
-        box-shadow: 0 8px 24px rgba(60, 41, 20, 0.05);
+        flex: 1;
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: space-between;
+        padding: 0.5rem 0;
     }
-    .result-title {
+
+    .result-box {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .result-label {
         font-size: 1.2rem;
-        font-weight: 700;
+        font-weight: 600;
         color: #8b7d70;
-        margin-bottom: 1rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
     }
-    .total-amount {
+
+    .amount-container {
         font-family: 'Outfit', sans-serif;
-        font-size: 4rem;
-        font-weight: 900;
-        margin-bottom: 1.5rem;
-        letter-spacing: -2px;
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
         color: #2b2622;
     }
-    @media (max-width: 480px) {
-        .total-amount {
-            font-size: 3rem;
-        }
+
+    .amount {
+        font-size: 4rem;
+        font-weight: 900;
+        letter-spacing: -2px;
+        line-height: 1;
     }
-    .result-footer {
-        font-size: 0.85rem;
-        color: #8b7d70;
-        line-height: 1.5;
-        margin-bottom: 2.25rem;
-    }
-    .apply-btn-calc {
-        display: inline-flex;
-        background: #2b2622;
-        color: #fff;
-        padding: 1.1rem 2.5rem;
-        border-radius: 12px;
+
+    .currency {
+        font-size: 2rem;
         font-weight: 800;
-        text-decoration: none;
-        transition: all 0.3s ease;
-        font-size: 1.1rem;
-        justify-content: center;
+        color: #8b7d70;
     }
-    .apply-btn-calc:hover {
-        transform: translateY(-3px);
-        background: #000;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+
+    .calc-cta-btn {
+        display: block;
+        background: #2b2622;
+        color: #ffffff;
+        text-align: center;
+        padding: 1.25rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 800;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        margin-top: 2rem;
+    }
+
+    .calc-cta-btn:hover {
+        background: #000000;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    .disclaimer {
+        margin-top: 1rem;
+        font-size: 0.8rem;
+        color: #a39587;
+        line-height: 1.4;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .calc-card {
+            flex-direction: column;
+            gap: 2rem;
+            padding: 1.5rem;
+        }
+        .calc-divider {
+            height: 1px;
+            width: 100%;
+        }
+        .amount {
+            font-size: 3.5rem;
+        }
     }
 </style>

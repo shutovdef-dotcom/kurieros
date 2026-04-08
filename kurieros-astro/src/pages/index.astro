@@ -5,12 +5,13 @@ import Footer from '../components/Footer.astro';
 import JobGrid from '../components/JobGrid.astro';
 import IncomeCalculator from '../components/IncomeCalculator.astro';
 import LanguageSwitcher from '../components/LanguageSwitcher.astro';
+import ReviewsBlock from '../components/ReviewsBlock.astro';
 import jobsData from '../data/jobs.json';
 import { getCitiesFromJobs, getCityNames } from '../utils/cities';
 
 const cities = getCitiesFromJobs(jobsData);
 const availableCities = getCityNames(jobsData);
-const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabota-kurerom-${city.slug}/`]));
+const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/kurieros/rabota-kurerom-${city.slug}/`]));
 ---
 
 <BaseLayout title="Курьерос — Работа курьером рядом" description="Выберите город, сравните условия и быстро найдите вакансию курьера с понятной оплатой и графиком.">
@@ -43,47 +44,7 @@ const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabot
 
 			<IncomeCalculator />
 
-			<section class="reviews-section home-section">
-				<div class="section-heading">
-					<h2 data-t="reviews.title">Отзывы курьеров</h2>
-					<p data-t="reviews.subtitle">Коротко о том, как вакансии ощущаются в реальной работе.</p>
-				</div>
-				<div class="reviews-grid">
-					<div class="review-card">
-						<div class="review-header">
-							<div class="review-avatar">М</div>
-							<div>
-								<strong>Максим, 21 год</strong>
-								<div class="review-meta">Яндекс Еда • На авто</div>
-							</div>
-						</div>
-						<p class="review-text">Удобное приложение, свободный график. Часто выхожу на смену после учебы. На авто получается от 4000 рублей за вечер. Выплаты без задержек.</p>
-						<div class="review-rating">★★★★★</div>
-					</div>
-					<div class="review-card">
-						<div class="review-header">
-							<div class="review-avatar bg-ozon">А</div>
-							<div>
-								<strong>Александр, 35 лет</strong>
-								<div class="review-meta">Ozon • На авто</div>
-							</div>
-						</div>
-						<p class="review-text">Работы много, загружают по полной. Платят достойно. Главный плюс — стабильность. Машина должна быть вместительной, иначе сложно забирать все посылки.</p>
-						<div class="review-rating">★★★★☆</div>
-					</div>
-					<div class="review-card">
-						<div class="review-header">
-							<div class="review-avatar bg-sdek">Е</div>
-							<div>
-								<strong>Екатерина, 25 лет</strong>
-								<div class="review-meta">СДЭК • Пешком</div>
-							</div>
-						</div>
-						<p class="review-text">Хорошая подработка в выходные. Выдают форму, заказы обычно в одном районе, не приходится бегать через весь город. Оплата раз в неделю.</p>
-						<div class="review-rating">★★★★★</div>
-					</div>
-				</div>
-			</section>
+			<ReviewsBlock />
 
 			<section class="faq-section home-section">
 				<div class="section-heading">
@@ -279,25 +240,22 @@ const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabot
 		width: 100%;
 		justify-content: center;
 	}
-	.city-selector-container,
-	.hero-lang-switcher {
+	.city-selector-container {
 		display: flex;
 		align-items: center;
-		flex: 1;
-		min-width: 200px;
-		box-sizing: border-box;
-		margin: 0 !important;
-		border-radius: 999px;
-		transition: var(--transition);
-	}
-	.city-selector-container {
-		position: relative;
+		padding: 0 1.25rem;
+		/* Removing padding-right: 2.75rem; as we'll use absolute pos for arrow */
 		background: #f7f2ea;
 		border: 1px solid #ebe5dc;
-		padding: 0 clamp(1.25rem, 5vw, 3.75rem) !important;
-		font-size: clamp(1.25rem, 1.75vw, 1.55rem);
+		font-size: 1.4rem;
 		box-shadow: 0 6px 16px rgba(60, 41, 20, 0.12);
-		flex: 1.6;
+		flex: 1.3;
+		height: 4.8rem;
+		box-sizing: border-box;
+		border-radius: 999px;
+		cursor: pointer;
+		position: relative;
+		transition: var(--transition);
 	}
 	.city-selector-container:hover {
 		border-color: #d7cdbe;
@@ -319,16 +277,17 @@ const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabot
 
 	/* Inner Lang Override */
 	.hero-lang-switcher :global(.lang-toggle) {
-		height: 100% !important;
+		height: 4.8rem !important;
 		width: 100% !important;
-		padding: 0 clamp(1.25rem, 5vw, 3.75rem) !important;
+		padding: 0 1.25rem !important;
 		border-radius: 999px !important;
-		font-size: clamp(1.25rem, 1.75vw, 1.55rem) !important;
+		font-size: 1.4rem !important;
 		font-weight: 800 !important;
 		background: #f7f2ea !important;
 		border: 1px solid #ebe5dc !important;
 		justify-content: center !important;
 		box-shadow: 0 6px 16px rgba(60, 41, 20, 0.12) !important;
+		box-sizing: border-box !important;
 	}
 	.hero-lang-switcher :global(.lang-toggle span) {
 		font-weight: 800 !important;
@@ -339,11 +298,14 @@ const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabot
 
 	/* --- City Select & Icon --- */
 	.city-icon {
-		margin-right: 0.75rem;
+		position: absolute;
+		left: 1.25rem;
 		color: #8b7d70;
 		flex-shrink: 0;
 		width: 20px;
 		height: 20px;
+		pointer-events: none;
+		z-index: 2;
 	}
 	.city-select {
 		width: 100%;
@@ -354,8 +316,11 @@ const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabot
 		font-size: inherit !important;
 		font-weight: 800 !important;
 		color: #2b2622;
-		padding-right: 1.25rem;
+		padding: 0 2.5rem;
 		outline: none;
+		text-align: center;
+		text-align-last: center;
+		cursor: pointer;
 	}
 
 	/* --- Hero CTA Button --- */
@@ -364,15 +329,16 @@ const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabot
 		align-items: center;
 		justify-content: center;
 		margin-top: 0.25rem;
-		padding: 1.25rem 2.5rem;
+		padding: 0 2.5rem;
+		height: 4.8rem;
+		box-sizing: border-box;
 		border-radius: 999px;
 		border: 1px solid var(--text-main);
 		background: var(--text-main);
 		color: #fff;
 		text-decoration: none;
-		font-weight: 800;
-		font-size: 1.4rem;
-		line-height: 1.1;
+		font-size: clamp(1.1rem, 4.5vw, 1.4rem);
+		line-height: 1.2;
 		transition: var(--transition);
 		width: 100%;
 	}
@@ -432,21 +398,35 @@ const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabot
 			padding: 1.2rem;
 			border-radius: 1.25rem;
 		}
-		.city-selector-container,
-		.hero-lang-switcher :global(.lang-toggle) {
-			min-width: 0;
-			flex: 1 1 auto;
-		}
-		.hero-lang-switcher :global(.lang-toggle) {
-			min-width: 110px;
+		.toolbar-top {
+			flex-direction: row;
+			gap: 0.5rem;
+			width: 100%;
 		}
 		.city-selector-container {
-			min-width: 180px;
+			flex: 2;
+			min-width: 0;
+			height: 4.8rem;
+			padding: 0 0.5rem !important;
+			padding-right: 1.5rem !important;
+		}
+		.hero-lang-switcher {
+			flex: 1;
+			min-width: 0;
+		}
+		.hero-lang-switcher :global(.lang-toggle) {
+			height: 4.8rem !important;
+			width: 100% !important;
+			padding: 0 0.5rem !important;
+			font-size: 1.1rem !important;
+			justify-content: center;
+		}
+		.city-select {
+			padding: 0 1.25rem 0 0.5rem;
+			font-size: 1.1rem !important;
 		}
 	}
 	@media (max-width: 600px) {
-		.toolbar-top {
-			flex-direction: column;
-		}
+		/* Buttons stay in row as defined in @media 768px */
 	}
 </style>

@@ -1,0 +1,525 @@
+---
+import reviewsData from '../data/reviews.json';
+import ReviewModal from './ReviewModal.astro';
+
+export interface Props {
+  jobId?: number; // Optional: If provided, filter by job. If not, show random 3
+  compact?: boolean; // Optional: If true, show smaller block for homepage
+}
+
+const { jobId, compact = false } = Astro.props;
+
+// Helper to shuffle array
+const shuffle = (arr: any[]) => [...arr].sort(() => 0.5 - Math.random());
+
+// Filter and prepare display data
+let displayReviews = [];
+let overallRating = 0;
+let totalReviewsCount = 0;
+
+if (jobId) {
+  displayReviews = reviewsData.filter((r: any) => r.jobId === jobId);
+  totalReviewsCount = displayReviews.length;
+  if (totalReviewsCount > 0) {
+    const sum = displayReviews.reduce((acc: number, r: any) => acc + r.rating, 0);
+    overallRating = Number((sum / totalReviewsCount).toFixed(1));
+  }
+} else {
+  // Homepage logic: 3 random
+  displayReviews = shuffle(reviewsData).slice(0, 3);
+  totalReviewsCount = reviewsData.length;
+}
+
+// Function to render stars
+const renderStars = (rating: number) => {
+  const fullStars = Math.floor(rating);
+  const halfStar = rating % 1 >= 0.5 ? 1 : 0;
+  const emptyStars = 5 - fullStars - halfStar;
+  return '★'.repeat(fullStars) + (halfStar ? '½' : '') + '☆'.repeat(emptyStars);
+};
+---
+
+<section class="dyn-reviews-section">
+  <div class="reviews-header-wrap">
+    <div class="section-heading">
+      <h2>{jobId ? 'Отзывы о вакансии' : 'Отзывы курьеров'}</h2>
+      {jobId ? (
+        <div class="company-rating">
+          <span class="rating-number">{overallRating > 0 ? overallRating : '-'}</span>
+          <span class="rating-stars">{overallRating > 0 ? renderStars(overallRating) : '☆☆☆☆☆'}</span>
+          <span class="rating-count">({totalReviewsCount} отзывов)</span>
+        </div>
+      ) : (
+        <p>Коротко о том, как вакансии ощущаются в реальной работе.</p>
+      )}
+    </div>
+    <button class="btn-primary open-review-modal" data-job-id={jobId || ''}>Оставить отзыв</button>
+  </div>
+
+  {displayReviews.length === 0 ? (
+    <div class="no-reviews-box" id={`reviews-container-${jobId || 'main'}`}>
+      <p>Пока нет отзывов для этой вакансии. Будьте первым!</p>
+    </div>
+  ) : (
+    <div class="reviews-grid" id={`reviews-container-${jobId || 'main'}`}>
+      {displayReviews.map((review: any) => (
+        <div class="review-card" data-review-id={review.id}>
+          <div class="review-header">
+            <div class="review-avatar">{review.name.charAt(0)}</div>
+            <div class="review-meta-info">
+              <div class="r-name-city">
+                <strong>{review.name}</strong>
+                <span class="r-city">{review.city}</span>
+              </div>
+              <div class="r-job-info">
+                {!jobId && <span class="r-company">{review.company}</span>}
+                <span class="r-rating" title={`Оценка: ${review.rating}`}>
+                  {renderStars(review.rating)}
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="review-content">
+            <div class="r-block r-pros">
+              <span class="r-icon">+</span>
+              <p>{review.pros}</p>
+            </div>
+            
+            <div class="r-block r-cons">
+              <span class="r-icon">-</span>
+              <p>{review.cons}</p>
+            </div>
+            
+            <div class="r-block r-comment">
+              <span class="r-icon">💬</span>
+              <p>"{review.comment}"</p>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+
+  <!-- Template for new client-side reviews to be cloned -->
+  <template id="review-card-template">
+    <div class="review-card new-added-review">
+      <div class="review-header">
+        <div class="review-avatar">?</div>
+        <div class="review-meta-info">
+          <div class="r-name-city">
+            <strong class="t-name">Name</strong>
+            <span class="r-city t-city">City</span>
+          </div>
+          <div class="r-job-info">
+            <span class="r-rating t-rating">★★★★★</span>
+          </div>
+        </div>
+      </div>
+      <div class="review-content">
+        <div class="r-block r-pros">
+          <span class="r-icon">+</span>
+          <p class="t-pros">Pros here</p>
+        </div>
+        <div class="r-block r-cons">
+          <span class="r-icon">-</span>
+          <p class="t-cons">Cons here</p>
+        </div>
+        <div class="r-block r-comment">
+          <span class="r-icon">💬</span>
+          <p class="t-comment">"Comment here"</p>
+        </div>
+      </div>
+      <div class="new-label">Новый отзыв</div>
+    </div>
+  </template>
+
+  <ReviewModal />
+</section>
+
+<style>
+  .dyn-reviews-section {
+    padding: 2.5rem;
+    margin: 1.5rem auto;
+    max-width: 1560px;
+    width: 100%;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 1.6rem;
+    box-shadow: 0 8px 24px rgba(60, 41, 20, 0.03);
+  }
+
+  .reviews-header-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .section-heading h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .section-heading p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .company-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #fff8f0;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    border: 1px solid #ffe8cc;
+  }
+
+  .rating-number {
+    font-weight: 900;
+    font-size: 1.2rem;
+    color: #eab308; /* Yellow 500 */
+  }
+
+  .rating-stars {
+    color: #facc15;
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+  }
+
+  .rating-count {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+
+  .reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .review-card {
+    background: #fffdf8;
+    border: 1px solid #ebe5dc;
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(60, 41, 20, 0.03);
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    position: relative;
+  }
+
+  .review-card:hover {
+    box-shadow: 0 8px 24px rgba(60, 41, 20, 0.08);
+    transform: translateY(-2px);
+  }
+
+  .review-header {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .review-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--text-main);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+
+  .review-meta-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    width: 100%;
+  }
+
+  .r-name-city {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .r-name-city strong {
+    font-size: 1.1rem;
+    color: var(--text-main);
+  }
+
+  .r-city {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    background: var(--bg-color);
+    padding: 0.1rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+  }
+
+  .r-job-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .r-company {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .r-rating {
+    color: #facc15;
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+  }
+
+  .review-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .r-block {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .r-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  .r-pros .r-icon {
+    background: #dcfce7;
+    color: #16a34a;
+  }
+
+  .r-cons .r-icon {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  .r-comment .r-icon {
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 0.75rem;
+  }
+
+  .r-block p {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text-main);
+    margin: 0;
+    padding-top: 0.15rem; /* align with icon */
+  }
+
+  .r-comment p {
+    font-style: italic;
+    color: var(--text-muted);
+  }
+  
+  .new-label {
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    background: #10b981;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    text-transform: uppercase;
+  }
+
+  .no-reviews-box {
+    text-align: center;
+    padding: 3rem;
+    background: #f8fafc;
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-lg);
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 768px) {
+    .dyn-reviews-section {
+      padding: 1.5rem;
+      border-radius: 1.25rem;
+    }
+    
+    .reviews-header-wrap {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>
+
+<script>
+  // Скрипт для обработки добавления отзывов через LocalStorage 
+  // и визуального апдейта на странице без перезагрузки
+  document.addEventListener('DOMContentLoaded', () => {
+    // Escaping basic HTML to prevent XSS
+    function escapeHTML(str) {
+      if (!str) return '';
+      return str.replace(/[&<>'"]/g, 
+        tag => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          "'": '&#39;',
+          '"': '&quot;'
+        }[tag] || tag)
+      );
+    }
+    
+    function renderStars(ratingStr) {
+      const rating = parseFloat(ratingStr) || 5;
+      const fullStars = Math.floor(rating);
+      const halfStar = rating % 1 >= 0.5 ? 1 : 0;
+      const emptyStars = 5 - fullStars - halfStar;
+      return '★'.repeat(fullStars) + (halfStar ? '½' : '') + '☆'.repeat(emptyStars);
+    }
+
+    const form = document.getElementById('review-form');
+    // Мы привязываем обработчик на документе, чтобы перехватывать событие отправки
+    // При сабмите ReviewModal он покажет окно успешной отправки, 
+    // но мы ДОЛЖНЫ добавить логику вставки в DOM
+    
+    form?.addEventListener('submit', (e) => {
+      // Это выполнится до setTimeout в ReviewModal.astro
+      const nameElem = document.getElementById('review-name');
+      const cityElem = document.getElementById('review-city');
+      const prosElem = document.getElementById('review-pros');
+      const consElem = document.getElementById('review-cons');
+      const commentElem = document.getElementById('review-comment');
+      const ratingElem = document.getElementById('review-rating');
+      
+      const newReview = {
+        name: nameElem ? nameElem.value : 'Аноним',
+        city: cityElem ? cityElem.value : 'Город',
+        pros: prosElem ? prosElem.value : '',
+        cons: consElem ? consElem.value : '',
+        comment: commentElem ? commentElem.value : '',
+        rating: ratingElem ? ratingElem.value : '5',
+        date: new Date().toISOString()
+      };
+
+      // 1. Поиск контейнера с отзывами
+      // Мы ищем первую попавшуюся секцию, так как у нас может быть jobId в кнопке
+      const container = document.querySelector('.reviews-grid, .no-reviews-box');
+      if (!container) return;
+
+      const template = document.getElementById('review-card-template');
+      if (!template) return;
+
+      const clone = template.content.cloneNode(true);
+      
+      // Заполняем данные
+      const tName = clone.querySelector('.t-name');
+      const tCity = clone.querySelector('.t-city');
+      const tRating = clone.querySelector('.t-rating');
+      const tPros = clone.querySelector('.t-pros');
+      const tCons = clone.querySelector('.t-cons');
+      const tComment = clone.querySelector('.t-comment');
+      const tAvatar = clone.querySelector('.review-avatar');
+
+      if (tName) tName.textContent = newReview.name;
+      if (tCity) tCity.textContent = newReview.city;
+      if (tRating) {
+        tRating.textContent = renderStars(newReview.rating);
+        tRating.setAttribute('title', `Оценка: ${newReview.rating}`);
+      }
+      if (tPros) tPros.textContent = newReview.pros;
+      if (tCons) tCons.textContent = newReview.cons;
+      if (tComment) tComment.textContent = `"${newReview.comment}"`;
+      if (tAvatar) tAvatar.textContent = newReview.name.charAt(0).toUpperCase();
+
+      // Заменяем блок с "Нет отзывов", если он есть
+      if (container.classList.contains('no-reviews-box')) {
+        const newGrid = document.createElement('div');
+        newGrid.className = 'reviews-grid';
+        newGrid.id = container.id;
+        newGrid.appendChild(clone);
+        container.parentNode.replaceChild(newGrid, container);
+      } else {
+        // Вставляем первым элементом
+        container.insertBefore(clone, container.firstChild);
+      }
+
+      // Сохранение в LocalStorage
+      const savedReviews = JSON.parse(localStorage.getItem('kurieros_local_reviews') || '[]');
+      // Если мы на странице конкретной вакансии (можем узнать по кнопке)
+      const openBtn = document.querySelector('.open-review-modal');
+      const jobId = openBtn ? openBtn.getAttribute('data-job-id') : null;
+      newReview.jobId = jobId;
+      savedReviews.push(newReview);
+      localStorage.setItem('kurieros_local_reviews', JSON.stringify(savedReviews));
+    });
+
+    // Загрузка локальных отзывов при рендере страницы
+    const savedReviews = JSON.parse(localStorage.getItem('kurieros_local_reviews') || '[]');
+    if (savedReviews.length > 0) {
+      const openBtn = document.querySelector('.open-review-modal');
+      const currentJobId = openBtn ? openBtn.getAttribute('data-job-id') : null;
+      
+      const targetReviews = savedReviews.filter(r => currentJobId ? r.jobId === currentJobId : true);
+      const container = document.querySelector('.reviews-grid, .no-reviews-box');
+      const template = document.getElementById('review-card-template');
+      
+      if (container && template && targetReviews.length > 0) {
+        let activeContainer = container;
+        if (activeContainer.classList.contains('no-reviews-box')) {
+          const newGrid = document.createElement('div');
+          newGrid.className = 'reviews-grid';
+          newGrid.id = container.id;
+          container.parentNode.replaceChild(newGrid, container);
+          activeContainer = newGrid;
+        }
+
+        // Если это главная (currentJobId === null или пустой), лимитируем показ?
+        // Для упрощения, просто покажем последние оставленные
+        targetReviews.slice(-3).forEach(review => {
+          const clone = template.content.cloneNode(true);
+          const tName = clone.querySelector('.t-name');
+          const tCity = clone.querySelector('.t-city');
+          const tRating = clone.querySelector('.t-rating');
+          const tPros = clone.querySelector('.t-pros');
+          const tCons = clone.querySelector('.t-cons');
+          const tComment = clone.querySelector('.t-comment');
+          const tAvatar = clone.querySelector('.review-avatar');
+
+          if (tName) tName.textContent = review.name;
+          if (tCity) tCity.textContent = review.city;
+          if (tRating) tRating.textContent = renderStars(review.rating);
+          if (tPros) tPros.textContent = review.pros;
+          if (tCons) tCons.textContent = review.cons;
+          if (tComment) tComment.textContent = `"${review.comment}"`;
+          if (tAvatar) tAvatar.textContent = review.name.charAt(0).toUpperCase();
+
+          activeContainer.insertBefore(clone, activeContainer.firstChild);
+        });
+      }
+    }
+  });
+</script>

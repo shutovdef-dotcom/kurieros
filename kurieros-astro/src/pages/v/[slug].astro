@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
+import ReviewsBlock from '../../components/ReviewsBlock.astro';
 import jobsData from '../../data/jobs.json';
 
 export async function getStaticPaths() {
@@ -101,6 +102,8 @@ const hasApplyLink = Boolean(job.applyLink && job.applyLink !== '#');
 					</div>
 				</aside>
 			</div>
+
+			<ReviewsBlock jobId={job.id} />
 		</div>
 	</main>
 

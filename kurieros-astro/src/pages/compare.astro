@@ -2,356 +2,392 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import jobsData from '../data/jobs.json';
 
-const allJobs = JSON.stringify(jobsData);
+// Test data for 4 jobs
+const compareJobs = [
+  {
+    id: 1,
+    title: "Курьер на авто",
+    company: "Яндекс Еда",
+    logoColor: "#FFCC00",
+    salary: "до 160 000 ₽",
+    location: "Любой район",
+    transport: "Авто",
+    contract: "Самозанятость",
+    payout: "Ежедневно",
+    bonus: "Быстрый старт",
+    link: "#"
+  },
+  {
+    id: 2,
+    title: "Водитель-курьер",
+    company: "Ozon",
+    logoColor: "#005BFF",
+    salary: "до 180 000 ₽",
+    location: "Склады ПВЗ",
+    transport: "Грузовик",
+    contract: "ИП / Самозанятость",
+    payout: "Раз в неделю",
+    bonus: "Стабильный доход",
+    link: "#"
+  },
+  {
+    id: 3,
+    title: "Велокурьер",
+    company: "Самокат",
+    logoColor: "#FF4063",
+    salary: "до 120 000 ₽",
+    location: "Даркстор",
+    transport: "Велосипед",
+    contract: "ГПХ / Самозанятость",
+    payout: "Раз в неделю",
+    bonus: "Форма бесплатно",
+    link: "#"
+  },
+  {
+    id: 4,
+    title: "Пеший курьер",
+    company: "СДЭК",
+    logoColor: "#00B050",
+    salary: "до 90 000 ₽",
+    location: "Один район",
+    transport: "Пешком",
+    contract: "ТК РФ",
+    payout: "2 раза в месяц",
+    bonus: "Скидки от партнеров",
+    link: "#"
+  }
+];
+
+const features = [
+  { key: 'salary', name: 'Зарплата' },
+  { key: 'location', name: 'Район работы' },
+  { key: 'transport', name: 'Транспорт' },
+  { key: 'contract', name: 'Оформление' },
+  { key: 'payout', name: 'Выплаты' },
+  { key: 'bonus', name: 'Особенности' }
+];
 ---
 
-<BaseLayout title="Сравнение вакансий курьеров — Курьерос" description="Сравните условия работы в разных компаниях: зарплату, график, требования и преимущества. Выберите лучшее предложение для себя.">
-    <Header />
+<BaseLayout title="Сравнение вакансий курьеров">
+  <Header />
 
-    <main>
-        <div class="compare-page">
-            <section class="compare-hero">
-                <span class="compare-eyebrow" data-t="compare.eyebrow">Сравнение вакансий</span>
-                <h1 data-t="compare.title">Сравните условия и выберите лучший вариант</h1>
-                <p id="compare-count-text" data-t="compare.subtitle">Выберите до 4 вакансий для детального сравнения условий.</p>
-            </section>
+  <main class="compare-page">
+    <div class="compare-container">
+      <div class="compare-header">
+        <h1>Сравнение вакансий</h1>
+        <a href="/kurieros/" class="back-link">← К списку вакансий</a>
+      </div>
 
-            <section id="compare-empty" class="compare-empty hidden">
-                <div class="compare-empty-mark">+</div>
-                <h2 data-t="compare.empty_title">Список сравнения пока пуст</h2>
-                <p data-t="compare.empty_text">Добавьте несколько вакансий из общей ленты, чтобы сравнить зарплату, график, выплаты и оформление в одном месте.</p>
-                <a href="/kurieros/" class="btn-primary compare-empty-link" data-t="compare.empty_btn">Вернуться к вакансиям</a>
-            </section>
-
-            <section id="compare-table-shell" class="compare-table-shell hidden">
-                <div class="compare-table-wrap">
-                    <table class="compare-table" id="compare-table">
-                        <thead id="compare-head"></thead>
-                        <tbody id="compare-body"></tbody>
-                    </table>
+      <div class="compare-table-wrapper">
+        <div class="compare-grid">
+          
+          <!-- Шапка таблицы -->
+          <div class="compare-row compare-head">
+            <div class="compare-cell feature-col empty-cell">
+              Параметры
+            </div>
+            {compareJobs.map((job, index) => (
+              <div class="compare-cell job-col" data-col={index}>
+                <div class="job-card-mini">
+                  <button class="remove-col-btn" aria-label="Удалить" title="Удалить из сравнения" data-col-target={index}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  </button>
+                  <div class="company-logo" style={`background: ${job.logoColor}20`}>
+                    <span style={`color: ${job.logoColor}; font-weight: 800; font-size: 1.25rem;`}>
+                      {job.company.charAt(0)}
+                    </span>
+                  </div>
+                  <h3>{job.title}</h3>
+                  <span class="company-name">{job.company}</span>
                 </div>
-            </section>
-        </div>
-    </main>
+              </div>
+            ))}
+          </div>
 
-    <Footer />
+          <!-- Строки с характеристиками -->
+          {features.map((feature) => (
+            <div class="compare-row">
+              <div class="compare-cell feature-col">
+                {feature.name}
+              </div>
+              {compareJobs.map((job, index) => (
+                <div class="compare-cell job-col" data-col={index}>
+                  {job[feature.key as keyof typeof job]}
+                </div>
+              ))}
+            </div>
+          ))}
+
+          <!-- Строка с кнопками -->
+          <div class="compare-row compare-actions">
+            <div class="compare-cell feature-col"></div>
+            {compareJobs.map((job, index) => (
+              <div class="compare-cell job-col" data-col={index}>
+                <a href={job.link} class="btn-primary">Откликнуться</a>
+              </div>
+            ))}
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
 </BaseLayout>
 
-<script is:inline define:vars={{ allJobs }}>
-    const jobs = JSON.parse(allJobs);
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const grid = document.querySelector('.compare-grid');
+    if (!grid) return;
 
-    const compareRows = [
-        { label: 'Зарплата', key: 'salary', highlight: true },
-        { label: 'Локация', key: 'location' },
-        { label: 'График', path: 'details.schedule' },
-        { label: 'Ставка', path: 'details.rate' },
-        { label: 'Опыт', getValue: (job) => job.labels.includes('Без опыта') ? 'Без опыта' : 'См. вакансию' },
-        { label: 'Возраст', path: 'details.age' },
-        { label: 'Выплаты', path: 'details.payment_freq' },
-        { label: 'Оформление', path: 'details.employment_type' },
-        { label: 'Самозанятость', path: 'details.self_employed' },
-        { label: 'Гражданство', path: 'details.citizenship' },
-        { label: 'Мед. книжка', path: 'details.medical_book' },
-        { label: 'Форма', path: 'details.uniform' },
-        { label: 'Устройство', path: 'details.os' }
-    ];
+    // Ищем все уникальные индексы колонок
+    const allJobCols = document.querySelectorAll('.compare-head .job-col');
+    let totalCols = allJobCols.length;
 
-    function getValue(job, row) {
-        if (typeof row.getValue === 'function') return row.getValue(job);
-        if (row.path) return row.path.split('.').reduce((acc, key) => acc?.[key], job);
-        return job[row.key];
-    }
+    const updateGridState = () => {
+      grid.style.setProperty('--cols', totalCols.toString());
+      
+      // Если все удалены, показываем сообщение
+      if (totalCols === 0) {
+        grid.innerHTML = `
+          <div style="padding: 3rem; text-align: center; grid-column: 1 / -1; background: var(--surface-color);">
+            <h3 style="margin-bottom: 1rem;">Нет вакансий для сравнения</h3>
+            <a href="/kurieros/" class="btn-primary" style="display: inline-block; width: auto;">Вернуться к списку</a>
+          </div>
+        `;
+      }
+    };
 
-    function createElement(tag, className, text) {
-        const element = document.createElement(tag);
-        if (className) element.className = className;
-        if (text !== undefined) element.textContent = text;
-        return element;
-    }
+    grid.style.setProperty('--cols', totalCols.toString());
 
-    function updateCompareBadge(compareList) {
-        document.querySelectorAll('#compare-badge').forEach((badge) => {
-            badge.textContent = compareList.length;
-            badge.classList.toggle('hidden', compareList.length === 0);
-        });
-    }
-
-    function getTranslation(key, defaultText) {
-        const lang = window.kurieros_i18n?.currentLang || 'ru';
-        const dict = window.translations ? (window.translations[lang] || window.translations['ru']) : null;
-        if (!dict) return defaultText;
-        return key.split('.').reduce((prev, curr) => prev && prev[curr], dict) || defaultText;
-    }
-
-    function renderHeader(selectedJobs) {
-        const thead = document.getElementById('compare-head');
-        const row = document.createElement('tr');
-
-        const first = createElement('th', 'compare-stub');
-        first.scope = 'col';
-        first.append(createElement('strong', 'compare-stub-title', getTranslation('job.compare', 'Что сравниваем')));
-        row.append(first);
-
-        selectedJobs.forEach((job) => {
-            const th = createElement('th', 'compare-job-head');
-            th.scope = 'col';
-            const titleLink = createElement('a', 'compare-job-title-link', job.title);
-            titleLink.href = `/v/${job.slug}/`;
-            th.append(titleLink);
-            row.append(th);
-        });
-
-        thead.replaceChildren(row);
-    }
-
-    function renderBody(selectedJobs) {
-        const tbody = document.getElementById('compare-body');
-        tbody.replaceChildren();
-
-        compareRows.forEach((rowConfig) => {
-            const tr = document.createElement('tr');
-
-            const labelCell = createElement('th', 'compare-label-cell', rowConfig.label);
-            labelCell.scope = 'row';
-            tr.append(labelCell);
-
-            selectedJobs.forEach((job) => {
-                const value = getValue(job, rowConfig) || '—';
-                const td = createElement('td', rowConfig.highlight ? 'compare-value-cell compare-value-highlight' : 'compare-value-cell');
-                td.append(createElement('span', 'compare-value-text', value));
-                tr.append(td);
-            });
-
-            tbody.append(tr);
-        });
-    }
-
-    function initCompare() {
-        const compareList = JSON.parse(localStorage.getItem('compareList') || '[]');
-        const emptyState = document.getElementById('compare-empty');
-        const tableShell = document.getElementById('compare-table-shell');
-        const countText = document.getElementById('compare-count-text');
-
-        if (compareList.length === 0) {
-            tableShell.classList.add('hidden');
-            emptyState.classList.remove('hidden');
-            countText.innerHTML = `<span data-t="compare.empty_title">${getTranslation('compare.empty_title', 'Список пуст')}</span>`;
-            updateCompareBadge(compareList);
-            return;
-        }
-
-        const selectedJobs = jobs.filter((job) => compareList.includes(job.id)).slice(0, 4);
-        tableShell.classList.remove('hidden');
-        emptyState.classList.add('hidden');
-        countText.innerHTML = `<span data-t="compare.subtitle">${getTranslation('compare.subtitle', 'В сравнении')}</span>: ${selectedJobs.length}`;
-
-        renderHeader(selectedJobs);
-        renderBody(selectedJobs);
-        updateCompareBadge(compareList);
-    }
-
-    document.addEventListener('DOMContentLoaded', initCompare);
-    window.addEventListener('compareUpdate', initCompare);
+    // Делегирование событий для кнопок удаления (крестиков)
+    grid.addEventListener('click', (e) => {
+      const btn = e.target.closest('.remove-col-btn');
+      if (!btn) return;
+      
+      const targetCol = btn.getAttribute('data-col-target');
+      if (targetCol === null) return;
+      
+      // Удаляем все ячейки с данным data-col (для каждой строки)
+      const cells = document.querySelectorAll(`.compare-cell[data-col="${targetCol}"]`);
+      cells.forEach(cell => cell.remove());
+      
+      totalCols--;
+      updateGridState();
+    });
+  });
 </script>
 
 <style>
+  .compare-page {
+    padding: 2.5rem 1.5rem;
+    max-width: 1560px;
+    margin: 0 auto;
+    width: 100%;
+    flex: 1;
+  }
+
+  .compare-container {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .compare-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .compare-header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0;
+  }
+
+  .back-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.05rem;
+    transition: var(--transition);
+  }
+
+  .back-link:hover {
+    color: var(--primary-color);
+  }
+
+  .compare-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    background: var(--surface-color);
+  }
+
+  /* Сетка на CSS Grid */
+  .compare-grid {
+    --cols: 4;
+    display: grid;
+    /* 1 колонка характеристик + var(--cols) колонок вакансий */
+    grid-template-columns: minmax(160px, 200px) repeat(var(--cols), minmax(220px, 1fr));
+    min-width: max(100%, calc(160px + var(--cols) * 220px)); /* динамическая ширина */
+    background: var(--border-color); /* линии будут формироваться gaps, либо border-bottom/right */
+    gap: 1px; /* Тонкая линия разделения через gap! Более надежно, чем рамки */
+  }
+
+  .compare-row {
+    display: contents; /* Позволяет детям становиться грид-элементами .compare-grid */
+  }
+
+  .compare-cell {
+    padding: 1.5rem;
+    background: var(--surface-color); /* Фон ячеек нужен из-за gap: 1px, который дает цвет бордера */
+    display: flex;
+    align-items: center;
+    color: var(--text-main);
+  }
+
+  .feature-col {
+    font-weight: 700;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    background: #fdfdfd;
+    position: sticky;
+    left: 0;
+    z-index: 10;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .feature-col {
+      background: #151e2e;
+    }
+  }
+
+  .compare-head .compare-cell {
+    align-items: flex-start;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .compare-head .feature-col {
+    z-index: 15;
+  }
+
+  .empty-cell {
+    display: flex;
+    align-items: center;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+  }
+
+  .job-card-mini {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    position: relative;
+  }
+
+  .remove-col-btn {
+    position: absolute;
+    top: -0.75rem;
+    right: -0.75rem;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    z-index: 10;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .remove-col-btn:hover {
+    color: #ef4444; /* red-500 */
+    border-color: #ef4444;
+    background: #fef2f2;
+    transform: scale(1.1);
+  }
+
+  .company-logo {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+  }
+
+  .job-card-mini h3 {
+    font-size: 1.15rem;
+    line-height: 1.3;
+    font-weight: 800;
+    margin: 0;
+  }
+
+  .company-name {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  .compare-actions .compare-cell {
+    padding-bottom: 1.5rem;
+  }
+
+  /* Измененный мобильный вид (до 768px): скрываем 4-ю вакансию (это 5-я колонка во всех строках) */
+  @media (max-width: 768px) {
     .compare-page {
-        max-width: 1440px;
-        margin: 0 auto;
-        padding: 2rem 1rem 4rem;
+      padding: 1.5rem 1rem;
     }
-    .compare-hero {
-        display: grid;
-        gap: 0.8rem;
-        max-width: 780px;
-        margin: 0 auto 2rem;
-        text-align: center;
+    
+    .compare-container {
+      padding: 1rem;
     }
-    .compare-eyebrow {
-        font-size: 0.78rem;
-        text-transform: uppercase;
-        letter-spacing: 0.18em;
-        color: var(--text-muted);
+
+    .compare-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
     }
-    .compare-hero h1 {
-        font-size: clamp(2.2rem, 4vw, 3.8rem);
-        line-height: 0.98;
-        letter-spacing: -0.05em;
+    
+    .compare-grid {
+      /* Для 3 вакансий + 1 колонка параметров (если меньше, то сжимается) */
+      --mobile-cols: min(var(--cols), 3);
+      grid-template-columns: minmax(110px, 130px) repeat(var(--mobile-cols), minmax(180px, 1fr));
+      min-width: unset; /* Контейнер прокручивается */
     }
-    .compare-hero p {
-        color: var(--text-muted);
-        font-size: 1.02rem;
-        line-height: 1.75;
+
+    /* Скрываем 4-ю и последующие вакансии на мобайле (5-й и далее элементы в DOM) */
+    .compare-row .compare-cell:nth-child(n+5) {
+      display: none;
     }
-    .compare-empty {
-        max-width: 720px;
-        margin: 0 auto;
-        padding: 3rem 1.5rem;
-        border-radius: 32px;
-        border: 1px solid rgba(148, 163, 184, 0.18);
-        background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(248,250,252,0.98));
-        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
-        text-align: center;
+
+    .compare-cell {
+      padding: 1rem;
+      font-size: 0.95rem;
     }
-    .compare-empty-mark {
-        width: 72px;
-        height: 72px;
-        border-radius: 999px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2rem;
-        font-weight: 600;
-        background: #f7f2ea;
-        border: 1px solid var(--border-color);
-        margin-bottom: 1.25rem;
+  }
+
+  @media (max-width: 480px) {
+    .compare-grid {
+      grid-template-columns: minmax(100px, 120px) repeat(3, minmax(160px, 1fr));
     }
-    .compare-empty h2 {
-        font-size: 2rem;
-        line-height: 1.05;
-        letter-spacing: -0.04em;
-        margin-bottom: 0.85rem;
+    .company-logo {
+      width: 42px;
+      height: 42px;
     }
-    .compare-empty p {
-        max-width: 56ch;
-        margin: 0 auto;
-        color: var(--text-muted);
-        line-height: 1.8;
-    }
-    .compare-empty-link {
-        max-width: 260px;
-        margin: 1.75rem auto 0;
-    }
-    .compare-table-wrap {
-        overflow-x: auto;
-        padding-bottom: 0.5rem;
-        -webkit-overflow-scrolling: touch;
-    }
-    .compare-table {
-        width: 100%;
-        min-width: 920px;
-        border-collapse: separate;
-        border-spacing: 0;
-        border: 1px solid rgba(148, 163, 184, 0.35);
-        border-radius: 16px;
-        overflow: hidden;
-        background: #fff;
-    }
-    .compare-table th,
-    .compare-table td {
-        vertical-align: top;
-    }
-    .compare-stub,
-    .compare-label-cell {
-        width: 170px;
-        min-width: 170px;
-        position: sticky;
-        left: 0;
-        z-index: 3;
-        background: #fff;
-    }
-    .compare-stub {
-        padding-right: 1rem;
-    }
-    .compare-stub-title {
-        display: block;
-        font-size: 1rem;
-        line-height: 1.2;
-        letter-spacing: -0.01em;
-    }
-    .compare-job-head,
-    .compare-value-cell {
-        min-width: 180px;
-        padding-left: 0.65rem;
-    }
-    .compare-job-title-link {
-        display: block;
-        padding: 0.9rem;
-        font-size: 1.02rem;
-        font-weight: 700;
-        line-height: 1.3;
-        color: #1d4ed8;
-        text-decoration: underline;
-        overflow-wrap: anywhere;
-    }
-    .compare-job-title-link:hover {
-        color: #1e40af;
-    }
-    .compare-label-cell,
-    .compare-value-cell {
-        padding: 0.8rem 0.9rem;
-        border-top: 1px solid rgba(148, 163, 184, 0.3);
-        border-left: 1px solid rgba(148, 163, 184, 0.3);
-        box-shadow: none;
-        background: #fff;
-    }
-    .compare-label-cell {
-        font-size: 0.85rem;
-        font-weight: 800;
-        line-height: 1.35;
-        color: var(--text-main);
-        border-left: none;
-        background: #f8fafc;
-    }
-    .compare-value-text {
-        font-size: 0.91rem;
-        line-height: 1.4;
-        color: #334155;
-        overflow-wrap: anywhere;
-    }
-    .compare-value-highlight .compare-value-text {
-        font-size: 0.98rem;
-        font-weight: 800;
-        color: #0f172a;
-    }
-    #compare-body tr {
-        background: transparent;
-    }
-    .hidden {
-        display: none;
-    }
-    @media (max-width: 1100px) {
-        .compare-page {
-            padding-top: 1.25rem;
-        }
-        .compare-hero h1 {
-            font-size: clamp(1.9rem, 5vw, 2.7rem);
-        }
-        .compare-table {
-            min-width: 760px;
-        }
-        .compare-stub,
-        .compare-label-cell {
-            width: 150px;
-            min-width: 150px;
-        }
-        .compare-job-head,
-        .compare-value-cell {
-            min-width: 150px;
-            padding-left: 0.45rem;
-        }
-        .compare-job-title-link {
-            font-size: 0.92rem;
-            padding: 0.65rem;
-        }
-    }
-    @media (max-width: 860px) {
-        .compare-page {
-            padding-top: 1.25rem;
-        }
-        .compare-table {
-            min-width: 700px;
-        }
-        .compare-stub,
-        .compare-label-cell {
-            width: 130px;
-            min-width: 130px;
-        }
-        .compare-job-head,
-        .compare-value-cell {
-            min-width: 140px;
-        }
-    }
+  }
 </style>

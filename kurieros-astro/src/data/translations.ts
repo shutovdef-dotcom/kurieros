@@ -7,6 +7,7 @@ export const translations = {
       contacts: "Контакты",
       cities: "Города",
       compare: "Сравнение",
+      calculator: "Калькулятор",
       post_job: "Разместить вакансию",
       design: "Витрина Дизайнов"
     },
@@ -130,6 +131,7 @@ export const translations = {
           "contacts": "Aloqa",
           "cities": "Shaharlar",
           "compare": "Taqqoslash",
+          "calculator": "Kalkulyator",
           "post_job": "Vakansiya joylashtirish",
           "design": "Dizayn vitrinasi"
       },
@@ -252,6 +254,7 @@ export const translations = {
           "contacts": "Тамос",
           "cities": "Шаҳрҳо",
           "compare": "Муқоиса",
+          "calculator": "Ҳисобкунак",
           "post_job": "Ҷойгир кардани вакансия",
           "design": "Витринаи дизайн"
       },
@@ -374,6 +377,7 @@ export const translations = {
           "contacts": "Байланыш",
           "cities": "Шаарлар",
           "compare": "Салыштыруу",
+          "calculator": "Калькулятор",
           "post_job": "Вакансия кошуу",
           "design": "Дизайн витринасы"
       },
@@ -490,7 +494,7 @@ export const translations = {
   }
 ,
   hy: {
-    nav: { vacancies: "Թափուր աշխատատեղեր", companies: "Ընկերություններ", blog: "Բլոգ", contacts: "Կոնտակտներ", cities: "Քաղաքներ", compare: "Համեմատություն", post_job: "Տեղադրել", design: "Դիզայն" },
+    nav: { vacancies: "Թափուր աշխատատեղեր", companies: "Ընկերություններ", blog: "Բլոգ", contacts: "Կոնտակտներ", cities: "Քաղաքներ", compare: "Համեմատություն", calculator: "Հաշվիչ", post_job: "Տեղադրել", design: "Դիզայն" },
     hero: { title: "Առաքիչի աշխատանք մոտակայքում", subtitle: "Համեմատեք պայմանները Yandex, Dodo... ընկերություններում", search_placeholder: "Քաղաք, պաշտոն, ընկերություն...", find_btn: "Գտնել աշխատանք" },
     filters: { all: "Բոլորը", auto: "Ավտոմեքենայով", bicycle: "Հեծանիվով", walking: "Ոտքով", age16: "16 տարեկանից", flexible: "Ազատ գրաֆիկ" },
     calculator: { title: "Եկամտի հաշվիչ", subtitle: "Իմացեք ձեր եկամուտը", days: "Օրեր սմսական", hours: "Ժամեր օրական", city: "Ձեր քաղաքը", result: "Մոտավոր եկամուտ:", month: "դրամ/ամիս", apply: "Ընտրել հաստիք" },
@@ -507,7 +511,7 @@ export const translations = {
     footer: { desc: "Աշխատանքի որոնում:", nav_title: "Ընտրացանկ", social_title: "Սոցիալական ցանցեր" }
   },
   kk: {
-    nav: { vacancies: "Жұмыс орындары", companies: "Компаниялар", blog: "Блог", contacts: "Байланыс", cities: "Қалалар", compare: "Салыстыру", post_job: "Жұмыс жариялау", design: "Дизайн" },
+    nav: { vacancies: "Жұмыс орындары", companies: "Компаниялар", blog: "Блог", contacts: "Байланыс", cities: "Қалалар", compare: "Салыстыру", calculator: "Калькулятор", post_job: "Жұмыс жариялау", design: "Дизайн" },
     hero: { title: "Жақын маңдағы курьер жұмысы", subtitle: "Ірі компаниялардағы шарттарды салыстырыңыз: Яндекс, Додо, СДЭК...", search_placeholder: "Қалаңыз, лауазымыңыз, компанияңыз...", find_btn: "Жұмыс табу" },
     filters: { all: "Барлық бос орындар", auto: "Көлікпен", bicycle: "Велокурьер", walking: "Жаяу", age16: "16 жастан", flexible: "Еркін график" },
     calculator: { title: "Табыс калькуляторы", subtitle: "Айына қанша ата алатыныңызды біліңіз", days: "Айына жұмыс күні", hours: "Күніне сағат", city: "Сіздің қалаңыз", result: "Болжамды табыс:", month: "теңге/ай", apply: "Бос орынды таңдау" },
@@ -524,7 +528,7 @@ export const translations = {
     footer: { desc: "Курьерлерге арналған анықтамалық.", nav_title: "Навигация", social_title: "Біз әлеуметтік желілерде" }
   },
   az: {
-    nav: { vacancies: "Vakansiyalar", companies: "Şirkətlər", blog: "Bloq", contacts: "Əlaqə", cities: "Şəhərlər", compare: "Müqayisə", post_job: "Elan ver", design: "Dizayn" },
+    nav: { vacancies: "Vakansiyalar", companies: "Şirkətlər", blog: "Bloq", contacts: "Əlaqə", cities: "Şəhərlər", compare: "Müqayisə", calculator: "Kalkulyator", post_job: "Elan ver", design: "Dizayn" },
     hero: { title: "Yaxınlıqdakı kuryer işi", subtitle: "Yandex, Dodo və digər şirkətlərin şərtlərini müqayisə edin.", search_placeholder: "Şəhər, vəzifə, şirkət...", find_btn: "İş tap" },
     filters: { all: "Bütün vakansiyalar", auto: "Avtomobillə", bicycle: "Velokuryer", walking: "Piyada", age16: "16 yaşdan", flexible: "Sərbəst qrafik" },
     calculator: { title: "Gəlir kalkulyatoru", subtitle: "Aylıq nə qədər qazana biləcəyinizi öyrənin", days: "Ayda gün sayı", hours: "Gündə saat", city: "Sizin şəhəriniz", result: "Təxmini gəlir:", month: "manat/ay", apply: "Vakansiyanı seç" },
@@ -541,7 +545,7 @@ export const translations = {
     footer: { desc: "Kuryerlər üçün etibarlı bələdçi.", nav_title: "Naviqasiya", social_title: "Sosial şəbəkələrdə" }
   },
   uk: {
-    nav: { vacancies: "Вакансії", companies: "Компанії", blog: "Блог", contacts: "Контакти", cities: "Міста", compare: "Порівняння", post_job: "Розмістити вакансію", design: "Дизайн" },
+    nav: { vacancies: "Вакансії", companies: "Компанії", blog: "Блог", contacts: "Контакти", cities: "Міста", compare: "Порівняння", calculator: "Калькулятор", post_job: "Розмістити вакансію", design: "Дизайн" },
     hero: { title: "Робота кур'єром поруч", subtitle: "Порівнюйте умови у великих компаніях: Яндекс, Додо, СДЭК та інших.", search_placeholder: "Ваше місто, посада, компанія...", find_btn: "Знайти роботу" },
     filters: { all: "Всі вакансії", auto: "На авто", bicycle: "Велокур'єр", walking: "Піший", age16: "З 16 років", flexible: "Вільний графік" },
     calculator: { title: "Калькулятор доходу", subtitle: "Дізнайтесь свій потенційний дохід", days: "Днів на місяць", hours: "Годин на день", city: "Ваше місто", result: "Приблизний дохід:", month: "грн / міс", apply: "Обрати вакансію" },
@@ -558,7 +562,7 @@ export const translations = {
     footer: { desc: "Надійний довідник кур'єра.", nav_title: "Навігація", social_title: "Ми у соцмережах" }
   },
   be: {
-    nav: { vacancies: "Вакансіі", companies: "Кампаніі", blog: "Блог", contacts: "Кантакты", cities: "Гарады", compare: "Параўнанне", post_job: "Размясціць вакансію", design: "Дызайн" },
+    nav: { vacancies: "Вакансіі", companies: "Кампаніі", blog: "Блог", contacts: "Кантакты", cities: "Гарады", compare: "Параўнанне", calculator: "Калькулятар", post_job: "Размясціць вакансію", design: "Дызайн" },
     hero: { title: "Работа кур'ерам побач", subtitle: "Параўноўвайце ўмовы ў буйных кампаніях: Яндекс, Додо, СДЭК...", search_placeholder: "Ваш горад, пасада, кампанія...", find_btn: "Знайсці працу" },
     filters: { all: "Усе вакансіі", auto: "На аўто", bicycle: "Велакур'ер", walking: "Пешы", age16: "З 16 гадоў", flexible: "Вольны графік" },
     calculator: { title: "Калькулятар даходу", subtitle: "Колькі вы можаце зарабіць", days: "Дзён у месяц", hours: "Гадзін у дзень", city: "Ваш горад", result: "Прыкладны даход:", month: "руб / міс", apply: "Выбраць вакансію" },
@@ -575,7 +579,7 @@ export const translations = {
     footer: { desc: "Даведнік для кур'ераў.", nav_title: "Навігацыя", social_title: "Сацыяльныя сеткі" }
   },
   hi: {
-    nav: { vacancies: "रिक्तियां", companies: "कंपनियां", blog: "ब्लॉग", contacts: "संपर्क", cities: "शहर", compare: "तुलना", post_job: "नौकरी पोस्ट करें", design: "डिज़ाइन शोकेस" },
+    nav: { vacancies: "रिक्तियां", companies: "कंपनियां", blog: "ब्लॉग", contacts: "संपर्क", cities: "शहर", compare: "तुलना", calculator: "कैलकुलेटर", post_job: "नौकरी पोस्ट करें", design: "डिज़ाइन शोकेस" },
     hero: { title: "आसपास कूरियर की नौकरी", subtitle: "Yandex, Dodo, CDEK जैसी बड़ी कंपनियों में शर्तों की तुलना करें।", search_placeholder: "आपका शहर, पद, कंपनी...", find_btn: "नौकरी खोजें" },
     filters: { all: "सभी नौकरियां", auto: "कार से", bicycle: "साइकिल कूरियर", walking: "पैदल", age16: "16 साल से", flexible: "लचीला समय" },
     calculator: { title: "आय कैलकुलेटर", subtitle: "जानें कि आप महीने में कितना कमा सकते हैं", days: "प्रति माह दिन", hours: "प्रति दिन घंटे", city: "आपका शहर", result: "अनुमानित आय:", month: "रुपये / माह", apply: "रिक्ति चुनें" },
@@ -592,7 +596,7 @@ export const translations = {
     footer: { desc: "कूरियर के लिए विश्वसनीय गाइड।", nav_title: "नेविगेशन", social_title: "सामाजिक नेटवर्क" }
   },
   vi: {
-    nav: { vacancies: "Vị trí tuyển dụng", companies: "Công ty", blog: "Blog", contacts: "Liên hệ", cities: "Thành phố", compare: "So sánh", post_job: "Đăng tin", design: "Thiết kế" },
+    nav: { vacancies: "Vị trí tuyển dụng", companies: "Công ty", blog: "Blog", contacts: "Liên hệ", cities: "Thành phố", compare: "So sánh", calculator: "Máy tính", post_job: "Đăng tin", design: "Thiết kế" },
     hero: { title: "Công việc giao hàng gần đây", subtitle: "So sánh các điều kiện ở các công ty lớn: Yandex, Dodo, CDEK...", search_placeholder: "Thành phố, vị trí, công ty...", find_btn: "Tìm việc" },
     filters: { all: "Tất cả", auto: "Bằng xe hơi", bicycle: "Xe đạp", walking: "Đi bộ", age16: "Từ 16 tuổi", flexible: "Linh hoạt" },
     calculator: { title: "Máy tính thu nhập", subtitle: "Tìm hiểu xem bạn có thể kiếm được bao nhiêu", days: "Ngày/tháng", hours: "Giờ/ngày", city: "Thành phố của bạn", result: "Thu nhập ước tính:", month: "VND / tháng", apply: "Chọn vị trí" },
@@ -609,7 +613,7 @@ export const translations = {
     footer: { desc: "Hướng dẫn tìm việc.", nav_title: "Điều hướng", social_title: "Mạng xã hội" }
   },
   zh: {
-    nav: { vacancies: "职位空缺", companies: "公司", blog: "博客", contacts: "联系", cities: "城市", compare: "比较", post_job: "发布职位", design: "设计展示" },
+    nav: { vacancies: "职位空缺", companies: "公司", blog: "博客", contacts: "联系", cities: "城市", compare: "比较", calculator: "计算器", post_job: "发布职位", design: "设计展示" },
     hero: { title: "附近的快递工作", subtitle: "比较大公司的条件：Yandex、Dodo、CDEK等。", search_placeholder: "城市、职位、公司...", find_btn: "找工作" },
     filters: { all: "所有职位", auto: "开车", bicycle: "网约自行车", walking: "步行", age16: "16岁起", flexible: "弹性时间表" },
     calculator: { title: "收入计算器", subtitle: "看看您每月能赚多少", days: "每月天数", hours: "每天小时", city: "您的城市", result: "预计收入：", month: "元/月", apply: "选择职位" },
