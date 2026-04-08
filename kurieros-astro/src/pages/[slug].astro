@@ -3,7 +3,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import JobGrid from '../components/JobGrid.astro';
-import LocationBanner from '../components/LocationBanner.astro';
 import jobsData from '../data/jobs.json';
 import { CATEGORIES } from '../data/constants';
 import { getCitiesFromJobs } from '../utils/cities';
@@ -40,7 +39,6 @@ export async function getStaticPaths() {
 	return paths;
 }
 
-const { slug } = Astro.params;
 const { type, data, title, description } = Astro.props;
 ---
 
@@ -48,8 +46,7 @@ const { type, data, title, description } = Astro.props;
 	<Header />
 
 	<main>
-		<section class="hero">
-			<LocationBanner initialCity={type === 'city' ? data.name : undefined} />
+		<section class="hero listing-hero">
 			<h1>{title}</h1>
 			<p>
 				{type === 'city' 
@@ -57,11 +54,6 @@ const { type, data, title, description } = Astro.props;
 					: `Список всех доступных вакансий в категории "${data.name}".`
 				}
 			</p>
-			
-			<form class="search-bar" id="search-form" onsubmit="event.preventDefault();">
-				<input type="text" id="search-input" placeholder="Ваш город, должность, компания...">
-				<button type="submit" class="btn-primary">Найти работу</button>
-			</form>
 		</section>
 
 		<JobGrid 
@@ -69,9 +61,37 @@ const { type, data, title, description } = Astro.props;
 			initialTag={type === 'category' ? data.tag : undefined}
 			initialSearch={type === 'category' ? data.query : undefined}
 		/>
-
-		<!-- FAQ logic can be added here or imported from a component -->
 	</main>
 
 	<Footer />
 </BaseLayout>
+
+<style>
+	.listing-hero {
+		max-width: 980px;
+		padding: 1.5rem 1rem 0.75rem;
+		margin: 0 auto 1.5rem;
+	}
+
+	.listing-hero h1 {
+		max-width: 980px;
+		margin-inline: auto;
+		margin-bottom: 0.75rem;
+		text-wrap: balance;
+	}
+
+	.listing-hero p {
+		max-width: 720px;
+		margin-inline: auto;
+		margin-bottom: 0;
+		font-size: clamp(1rem, 1.2vw + 0.85rem, 1.15rem);
+		line-height: 1.6;
+	}
+
+	@media (min-width: 768px) {
+		.listing-hero {
+			padding: 2.5rem 1rem 1rem;
+			margin-bottom: 2rem;
+		}
+	}
+</style>

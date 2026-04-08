@@ -65,9 +65,9 @@ const filteredJobs = jobsData.filter((job) => {
 </style>
 
 <script is:inline define:vars={{ initialCity, initialTag, initialSearch }}>
-	// This script will run on the client
 	let compareList = JSON.parse(localStorage.getItem('compareList') || '[]');
 	let selectedCity = initialCity || '';
+	const normalizedInitialSearch = initialSearch.toLowerCase();
 
 	function getTranslation(key, defaultText) {
 		const lang = window.kurieros_i18n?.currentLang || 'ru';
@@ -76,16 +76,26 @@ const filteredJobs = jobsData.filter((job) => {
 		return key.split('.').reduce((prev, curr) => prev && prev[curr], dict) || defaultText;
 	}
 
-	function updateCompareBadge() {
-		const badges = document.querySelectorAll('#compare-badge');
-		badges.forEach(badge => {
-			badge.textContent = compareList.length;
-			if (compareList.length > 0) {
-				badge.classList.remove('hidden');
-			} else {
-				badge.classList.add('hidden');
-			}
-		});
+	function getCompareButtonLabel(isActive) {
+		return isActive
+			? `<span data-t="job.in_compare">${getTranslation('job.in_compare', 'В сравнении')}</span> ✓`
+			: `<span data-t="job.compare">${getTranslation('job.compare', '+ Сравнить')}</span>`;
+	}
+
+	function setCompareButtonState(button, isActive) {
+		if (!button) return;
+		button.classList.toggle('active', isActive);
+		button.innerHTML = getCompareButtonLabel(isActive);
+	}
+
+	function matchesSearch(card, searchTerm) {
+		if (!searchTerm) return true;
+
+		const title = card.querySelector('.job-title')?.textContent?.toLowerCase() || '';
+		const company = card.querySelector('.company-name')?.textContent?.toLowerCase() || '';
+		const location = (card.dataset.location || '').toLowerCase();
+
+		return title.includes(searchTerm) || company.includes(searchTerm) || location.includes(searchTerm);
 	}
 
 	function toggleCompare(id) {
@@ -101,37 +111,27 @@ const filteredJobs = jobsData.filter((job) => {
 		}
 		
 		localStorage.setItem('compareList', JSON.stringify(compareList));
-		updateCompareBadge();
 		window.dispatchEvent(new CustomEvent('compareUpdate'));
 		
-		const btn = document.querySelector(`.btn-compare[data-id="${id}"]`);
-		if (btn) {
-			btn.classList.toggle('active');
-			btn.innerHTML = compareList.includes(id) 
-				? `<span data-t="job.in_compare">${getTranslation('job.in_compare', 'В сравнении')}</span> ✓` 
-				: `<span data-t="job.compare">${getTranslation('job.compare', '+ Сравнить')}</span>`;
-		}
+		setCompareButtonState(
+			document.querySelector(`.btn-compare[data-id="${id}"]`),
+			compareList.includes(id)
+		);
 	}
 
 	// Initialize button states
 	document.addEventListener('DOMContentLoaded', () => {
-		updateCompareBadge();
+		const filterChips = document.querySelectorAll('.filter-chip');
+		const jobCards = document.querySelectorAll('.job-card');
+
 		document.querySelectorAll('.btn-compare').forEach(btn => {
-			const id = parseInt(btn.dataset.id);
-			if (compareList.includes(id)) {
-				btn.classList.add('active');
-				btn.innerHTML = `<span data-t="job.in_compare">${getTranslation('job.in_compare', 'В сравнении')}</span> ✓`;
-			}
+			const id = Number.parseInt(btn.dataset.id || '', 10);
+			setCompareButtonState(btn, compareList.includes(id));
 			btn.addEventListener('click', (e) => {
 				e.preventDefault();
 				toggleCompare(id);
 			});
 		});
-
-		// Filtering logic
-		const filterChips = document.querySelectorAll('.filter-chip');
-		const jobCards = document.querySelectorAll('.job-card');
-		const searchInput = document.getElementById('search-input');
 
 		window.addEventListener('kurieros:city-selected', (event) => {
 			selectedCity = event.detail?.city || '';
@@ -141,19 +141,16 @@ const filteredJobs = jobsData.filter((job) => {
 		function filterJobs() {
 			const activeChip = document.querySelector('.filter-chip.active');
 			const filter = activeChip ? activeChip.dataset.filter : 'all';
-			const term = searchInput ? searchInput.value.toLowerCase().trim() : initialSearch.toLowerCase();
+			const term = normalizedInitialSearch;
 
 			jobCards.forEach(card => {
 				const tags = (card.dataset.tags || '').split(',');
 				const location = (card.dataset.location || '').toLowerCase();
-				const title = card.querySelector('.job-title')?.textContent?.toLowerCase() || '';
-				const company = card.querySelector('.company-name')?.textContent?.toLowerCase() || '';
 				const matchesCity = !selectedCity || location.includes(selectedCity.toLowerCase()) || location === 'вся россия';
-
 				const matchesFilter = filter === 'all' || tags.includes(filter);
-				const matchesSearch = !term || title.includes(term) || company.includes(term) || location.includes(term);
+				const matchesSearchTerm = matchesSearch(card, term);
 
-				if (matchesFilter && matchesSearch && matchesCity) {
+				if (matchesFilter && matchesSearchTerm && matchesCity) {
 					card.style.display = 'flex';
 				} else {
 					card.style.display = 'none';
@@ -168,10 +165,6 @@ const filteredJobs = jobsData.filter((job) => {
 				filterJobs();
 			});
 		});
-
-		if (searchInput) {
-			searchInput.addEventListener('input', filterJobs);
-		}
 
 		// Initial filter
 		filterJobs();

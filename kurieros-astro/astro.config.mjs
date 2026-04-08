@@ -1,8 +1,6 @@
 import { defineConfig } from 'astro/config';
-
 import sitemap from '@astrojs/sitemap';
 
-// https://astro.build/config
 export default defineConfig({
   site: 'https://shutovdef-dotcom.github.io',
   base: '/kurieros',
@@ -10,7 +8,7 @@ export default defineConfig({
   compressHTML: true,
 
   build: {
-    format: 'directory', // This ensures clean URLs like /rabota-kurerom-moskva/
+    format: 'directory',
     inlineStylesheets: 'always'
   },
 

@@ -93,8 +93,8 @@ const features = [
                   <button class="remove-col-btn" aria-label="Удалить" title="Удалить из сравнения" data-col-target={index}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                   </button>
-                  <div class="company-logo" style={`background: ${job.logoColor}20`}>
-                    <span style={`color: ${job.logoColor}; font-weight: 800; font-size: 1.25rem;`}>
+                  <div class="company-logo" style={`--compare-logo-bg: ${job.logoColor}20; --compare-logo-color: ${job.logoColor};`}>
+                    <span class="company-logo-letter">
                       {job.company.charAt(0)}
                     </span>
                   </div>
@@ -152,9 +152,9 @@ const features = [
       // Если все удалены, показываем сообщение
       if (totalCols === 0) {
         grid.innerHTML = `
-          <div style="padding: 3rem; text-align: center; grid-column: 1 / -1; background: var(--surface-color);">
-            <h3 style="margin-bottom: 1rem;">Нет вакансий для сравнения</h3>
-            <a href="/kurieros/" class="btn-primary" style="display: inline-block; width: auto;">Вернуться к списку</a>
+          <div class="compare-empty-state">
+            <h3>Нет вакансий для сравнения</h3>
+            <a href="/kurieros/" class="btn-primary compare-empty-state-link">Вернуться к списку</a>
           </div>
         `;
       }
@@ -331,6 +331,7 @@ const features = [
   }
 
   .company-logo {
+    background: var(--compare-logo-bg);
     width: 56px;
     height: 56px;
     border-radius: 14px;
@@ -338,6 +339,12 @@ const features = [
     align-items: center;
     justify-content: center;
     margin-bottom: 0.75rem;
+  }
+
+  .company-logo-letter {
+    color: var(--compare-logo-color);
+    font-weight: 800;
+    font-size: 1.25rem;
   }
 
   .job-card-mini h3 {
@@ -358,6 +365,22 @@ const features = [
 
   .compare-actions .compare-cell {
     padding-bottom: 1.5rem;
+  }
+
+  .compare-empty-state {
+    grid-column: 1 / -1;
+    padding: 3rem;
+    text-align: center;
+    background: var(--surface-color);
+  }
+
+  .compare-empty-state h3 {
+    margin-bottom: 1rem;
+  }
+
+  .compare-empty-state-link {
+    display: inline-block;
+    width: auto;
   }
 
   /* На мобильных экранах таблица становится плотнее, а лишние вакансии уходят в горизонтальный скролл */

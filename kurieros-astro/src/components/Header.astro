@@ -8,7 +8,6 @@
         </a>
     </div>
     
-    <!-- Desktop Nav / Variant 3 (Pills) -->
     <nav class="main-nav">
         <ul>
             <li><a href="/kurieros/#vacancies" data-t="nav.vacancies">Вакансии</a></li>
@@ -22,11 +21,9 @@
     </nav>
 
     <div class="header-right-mobile">
-        <!-- Mobile Header will only show Logo for V1 -->
     </div>
 </header>
 
-<!-- Variant 1: Bottom Navigation Bar -->
 <nav class="bottom-nav">
     <a href="/kurieros/#vacancies" class="bn-item">
         <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
@@ -62,7 +59,6 @@
         const compareList = JSON.parse(localStorage.getItem('compareList') || '[]');
         const badges = [
             document.getElementById('compare-badge'),
-            document.getElementById('compare-badge-burger'),
             document.getElementById('compare-badge-bottom')
         ];
         
@@ -78,7 +74,6 @@
         });
     }
     
-    // Navigation Badge Logic
     document.addEventListener('DOMContentLoaded', () => {
         updateHeaderCompareBadge();
     });

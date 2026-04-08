@@ -43,7 +43,7 @@ const hasApplyLink = Boolean(job.applyLink && job.applyLink !== '#');
 				<div class="vacancy-main">
 					<section class="vacancy-section">
 						<h2 data-t="vacancy.desc_title">Описание вакансии</h2>
-						<p style="white-space: pre-wrap;" data-t={`vacancies.${job.id}.description`}>{job.description}</p>
+						<p class="vacancy-description" data-t={`vacancies.${job.id}.description`}>{job.description}</p>
 					</section>
 
 					<section class="vacancy-section">
@@ -158,6 +158,9 @@ const hasApplyLink = Boolean(job.applyLink && job.applyLink !== '#');
 		border-radius: 2rem;
 		font-weight: 800;
 		font-size: 1.25rem;
+	}
+	.vacancy-description {
+		white-space: pre-wrap;
 	}
 	.vacancy-content-grid {
 		display: grid;

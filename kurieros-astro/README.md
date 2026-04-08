@@ -1,68 +1,82 @@
 # Kurieros Astro
 
-Проект использует локально распакованный Node.js из папки [`/Users/ivan/Documents/scratch/node-v22.14.0-darwin-arm64`](/Users/ivan/Documents/scratch/node-v22.14.0-darwin-arm64), поэтому его можно запускать даже без системного `node` и `npm`.
+Статический Astro-проект для сайта `kurieros` с вакансиями курьеров, страницами городов и категорий, сравнением вакансий и блогом.
 
-## Локальные команды
+## Стек
 
-Из папки [`/Users/ivan/Documents/scratch/kurieros-astro`](/Users/ivan/Documents/scratch/kurieros-astro):
+- `Astro`
+- `@astrojs/sitemap`
+- локальный `Node.js` из `/Users/ivan/Documents/scratch/node-v22.14.0-darwin-arm64`
+
+## Основные команды
+
+Из папки `/Users/ivan/Documents/scratch/kurieros/kurieros-astro`:
+
+```sh
+npm install
+npm run build
+npm run dev
+npm run preview
+```
+
+Локальные скрипты через встроенный Node:
 
 ```sh
 ./scripts/build-local.sh
-./scripts/preview-local.sh
 ./scripts/dev-local.sh
+./scripts/preview-local.sh
 ```
 
-Если `npm` уже доступен через этот локальный Node, можно и так:
+## Локальная проверка
 
-```sh
-npm run local:build
-npm run local:preview
-npm run local:dev
-```
+- `build`: собирает статический сайт в `dist/`
+- `dev`: запускает dev-сервер Astro
+- `preview`: поднимает локальный preview production-сборки
 
-## Примечание
+Если нужен локальный Node из репозитория, он добавляется через скрипты в `scripts/`.
 
-- `preview` по умолчанию запускается на `127.0.0.1:4321`
-- `dev` запускается с `--host 0.0.0.0`, чтобы сервер было проще открыть локально
-
-```sh
-npm create astro@latest -- --template minimal
-```
-
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
+## Структура проекта
 
 ```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+src/
+  components/   UI-компоненты и клиентские скрипты
+  data/         вакансии, переводы, статьи, отзывы
+  layouts/      базовый layout
+  pages/        страницы сайта и динамические маршруты
+  styles/       глобальные стили и темы
+  utils/        вспомогательные функции
+
+public/         статические файлы
+scripts/        локальные команды сборки и dev-preview
+docs/           вспомогательные заметки
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## Важные поверхности
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+- `src/pages/[slug].astro` — страницы городов и категорий
+- `src/components/JobGrid.astro` — фильтрация и вывод сетки вакансий
+- `src/components/JobCard.astro` — карточка вакансии
+- `src/pages/compare.astro` — страница сравнения вакансий
+- `src/layouts/BaseLayout.astro` — общий layout и глобальные модалки
+- `src/styles/index.css` — глобальные стили
 
-Any static assets, like images, can be placed in the `public/` directory.
+## Данные
 
-## 🧞 Commands
+- `src/data/jobs.json` — вакансии
+- `src/data/translations.ts` и `src/data/job_translations.json` — переводы
+- `src/data/articles.json` — блог
+- `src/data/reviews.json` — отзывы
 
-All commands are run from the root of the project, from a terminal:
+## Checklist перед merge
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+```sh
+npm run build
+```
 
-## 👀 Want to learn more?
+Для UI-правок стоит отдельно проверить:
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+- главную страницу
+- одну страницу города
+- одну страницу категории
+- страницу сравнения
+- одну страницу вакансии

@@ -115,7 +115,7 @@ const {
 		<script is:inline>
 			// Global Location & VPN Detection
 			(async function() {
-				if (window.kurieros_user) return; // Prevent double execution
+				if (window.kurieros_user) return;
 				
 				async function fetchWithTimeout(resource, options = {}) {
 					const { timeout = 5000 } = options;
@@ -203,21 +203,6 @@ const {
 					window.kurieros_i18n.applyTranslations();
 				});
 				
-				// Listen for region detection if we want to auto-suggest language (optional)
-				window.addEventListener('kurieros:region-detected', (e) => {
-					const countryToLang = {
-						'KZ': 'kk', 'UZ': 'uz', 'UA': 'uk', 'BY': 'be', 
-						'AM': 'hy', 'KG': 'ky', 'TJ': 'tg', 'AZ': 'az', 
-						'IN': 'hi', 'VN': 'vi', 'CN': 'zh'
-					};
-					const suggestedLang = countryToLang[e.detail.country];
-					const hasManualLang = localStorage.getItem(STORAGE_KEY);
-					
-					if (suggestedLang && !hasManualLang) {
-						// Optionally auto-switch or just suggest
-						// For now, let's just keep the manual toggle primary
-					}
-				});
 			})();
 		</script>
 	</body>

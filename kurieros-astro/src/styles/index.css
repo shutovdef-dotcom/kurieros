@@ -414,45 +414,6 @@ main {
   margin-bottom: 2rem;
 }
 
-/* Location Banner */
-.location-banner {
-  background: rgba(6, 182, 212, 0.1);
-  color: var(--accent-color);
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-lg);
-  font-size: 0.875rem;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  transition: var(--transition);
-}
-.location-banner.hidden {
-  display: none;
-}
-
-.search-bar {
-  display: flex;
-  flex-direction: column;
-  background: var(--surface-color);
-  padding: 0.5rem;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-glass);
-  border: 1px solid var(--border-color);
-  gap: 0.5rem;
-}
-
-.search-bar input {
-  width: 100%;
-  border: none;
-  background: transparent;
-  padding: 1rem;
-  font-size: 1rem;
-  color: var(--text-main);
-  outline: none;
-}
-
 .btn-primary {
   background-color: var(--text-main);
   color: white;
@@ -798,6 +759,25 @@ footer {
   font-size: 0.875rem;
 }
 
+.footer-description {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.footer-city-link-wrap {
+  margin-top: 0.7rem;
+}
+
+.footer-city-link {
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.footer-design-link {
+  color: var(--accent-color) !important;
+  font-weight: 700;
+}
+
 .footer-bottom {
   margin-top: 2rem;
   padding-top: 1.5rem;
@@ -898,24 +878,6 @@ footer {
     font-size: 1.25rem;
     max-width: 600px;
     margin: 0 auto 2.5rem auto;
-  }
-
-  .search-bar {
-    flex-direction: row;
-    max-width: 700px;
-    margin: 0 auto;
-    border-radius: 999px;
-    padding: 0.5rem;
-  }
-
-  .search-bar input {
-    padding: 1rem 1.5rem;
-  }
-
-  .search-bar .btn-primary {
-    width: auto;
-    padding: 1rem 2rem;
-    border-radius: 999px;
   }
 
   .btn-primary:hover {
@@ -1114,7 +1076,6 @@ footer {
 
 .theme-retro .job-card, 
 .theme-retro .btn-primary,
-.theme-retro .search-bar,
 .theme-retro .filter-chip {
   border: var(--pixel-border) !important;
   box-shadow: var(--shadow-md) !important;
@@ -1185,5 +1146,3 @@ footer {
   color: var(--text-muted);
   border: 1px solid var(--border-color);
 }
-
-

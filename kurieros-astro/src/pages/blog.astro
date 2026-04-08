@@ -82,7 +82,7 @@ const [featuredPost, ...secondaryPosts] = posts;
             <div class="newsletter-content">
                 <h2>Подпишитесь на новые статьи</h2>
                 <p>Получайте лучшие советы по заработку раз в неделю прямо в Telegram.</p>
-                <a href="/kurieros/contacts/" class="btn-primary" style="max-width: 300px; margin: 0 auto; display: block;">Подписаться в Telegram</a>
+                <a href="/kurieros/contacts/" class="btn-primary newsletter-link">Подписаться в Telegram</a>
             </div>
         </section>
 	</main>
@@ -201,6 +201,11 @@ const [featuredPost, ...secondaryPosts] = posts;
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 1.5rem;
+    }
+    .newsletter-link {
+        max-width: 300px;
+        margin: 0 auto;
+        display: block;
     }
     .blog-card {
         background: rgba(255, 255, 255, 0.86);

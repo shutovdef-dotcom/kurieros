@@ -7,7 +7,7 @@ const applyExternal = job.applyLink && job.applyLink !== '#';
 <div class="job-card" data-tags={job.tags.join(',')} data-location={job.location}>
 	{job.isHot && <div class="hot-badge">🔥 ТОП</div>}
 	<div class="job-row job-row-main">
-		<div class="company-logo" style="width: 48px; height: 48px; overflow: hidden;">
+		<div class="company-logo company-logo-image">
 			<img src={job.companyLogo} alt={`${job.company} logo`} width="48" height="48" loading="lazy" decoding="async" />
 		</div>
 		<div class="job-content">

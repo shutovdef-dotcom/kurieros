@@ -13,26 +13,44 @@
 </div>
 
 <script is:inline>
+    const VPN_MODAL_SESSION_KEY = 'vpn-modal-shown';
+
+    function getVPNModal() {
+        return document.getElementById('vpn-modal');
+    }
+
+    function isVPNModalDismissed() {
+        return sessionStorage.getItem(VPN_MODAL_SESSION_KEY);
+    }
+
+    function showVPNModal() {
+        const modal = getVPNModal();
+        if (modal && !isVPNModalDismissed()) {
+            modal.classList.remove('hidden');
+        }
+    }
+
+    function hideVPNModal() {
+        getVPNModal()?.classList.add('hidden');
+        sessionStorage.setItem(VPN_MODAL_SESSION_KEY, 'true');
+    }
+
+    function focusCitySelector() {
+        const selector = document.querySelector('.city-selector-container') || document.getElementById('city-select');
+        if (!selector) return;
+
+        selector.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => document.getElementById('city-select')?.focus(), 400);
+    }
+
     function checkVPN(data) {
-        if (!data || !data.country) return;
-        
-        if (data.country !== 'RU') {
-            const modal = document.getElementById('vpn-modal');
-            const shownThisSession = sessionStorage.getItem('vpn-modal-shown');
-            if (modal && !shownThisSession) {
-                modal.classList.remove('hidden');
-            }
+        if (data?.country && data.country !== 'RU') {
+            showVPNModal();
         }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        window.addEventListener('kurieros:manual-city-required', () => {
-            const modal = document.getElementById('vpn-modal');
-            const shownThisSession = sessionStorage.getItem('vpn-modal-shown');
-            if (modal && !shownThisSession) {
-                modal.classList.remove('hidden');
-            }
-        });
+        window.addEventListener('kurieros:manual-city-required', showVPNModal);
 
         window.addEventListener('kurieros:region-detected', (e) => {
             checkVPN(e.detail);
@@ -43,13 +61,8 @@
         }
         
         document.getElementById('btn-vpn-ok')?.addEventListener('click', () => {
-            document.getElementById('vpn-modal')?.classList.add('hidden');
-            sessionStorage.setItem('vpn-modal-shown', 'true');
-            const selector = document.querySelector('.city-selector-container') || document.getElementById('city-select');
-            if (selector) {
-                selector.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                setTimeout(() => document.getElementById('city-select')?.focus(), 400);
-            }
+            hideVPNModal();
+            focusCitySelector();
         });
     });
 </script>
