@@ -11,7 +11,7 @@ import { getCitiesFromJobs, getCityNames } from '../utils/cities';
 
 const cities = getCitiesFromJobs(jobsData);
 const availableCities = getCityNames(jobsData);
-const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/kurieros/rabota-kurerom-${city.slug}/`]));
+const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabota-kurerom-${city.slug}/`]));
 ---
 
 <BaseLayout title="Курьерос — Работа курьером рядом" description="Выберите город, сравните условия и быстро найдите вакансию курьера с понятной оплатой и графиком.">
@@ -36,7 +36,7 @@ const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/kurie
 							<LanguageSwitcher />
 						</div>
 					</div>
-					<a id="city-page-link" class="hero-city-link hidden" href="/kurieros/" data-t="location.view_jobs">Все вакансии в этом городе</a>
+					<a id="city-page-link" class="hero-city-link hidden" href="/" data-t="location.view_jobs">Все вакансии в этом городе</a>
 				</div>
 			</section>
 

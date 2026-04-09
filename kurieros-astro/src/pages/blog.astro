@@ -37,7 +37,7 @@ const [featuredPost, ...secondaryPosts] = posts;
 			</div>
 		</section>
 
-		<a href={`/kurieros/blog/${featuredPost.slug}/`} class="featured-story">
+		<a href={`/blog/${featuredPost.slug}/`} class="featured-story">
 			<div class="featured-story-copy">
 				<div class="blog-meta">
 					<time datetime={featuredPost.date}>{featuredPost.formattedDate}</time>
@@ -60,7 +60,7 @@ const [featuredPost, ...secondaryPosts] = posts;
 			<div class="blog-grid">
 				{secondaryPosts.map(post => (
 					<article class="blog-card">
-						<a href={`/kurieros/blog/${post.slug}/`} class="blog-card-link">
+						<a href={`/blog/${post.slug}/`} class="blog-card-link">
 							<img src={post.image} alt={post.title} class="blog-image" />
 							<div class="blog-content">
 								<div class="blog-meta">
@@ -82,7 +82,7 @@ const [featuredPost, ...secondaryPosts] = posts;
             <div class="newsletter-content">
                 <h2>Подпишитесь на новые статьи</h2>
                 <p>Получайте лучшие советы по заработку раз в неделю прямо в Telegram.</p>
-                <a href="/kurieros/contacts/" class="btn-primary newsletter-link">Подписаться в Telegram</a>
+                <a href="/contacts/" class="btn-primary newsletter-link">Подписаться в Telegram</a>
             </div>
         </section>
 	</main>

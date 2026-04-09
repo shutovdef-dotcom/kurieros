@@ -7,7 +7,7 @@ import { getCitiesFromJobs } from '../utils/cities';
 
 const cities = getCitiesFromJobs(jobsData).map((city) => ({
 	...city,
-	href: `/kurieros/rabota-kurerom-${city.slug}/`
+	href: `/rabota-kurerom-${city.slug}/`
 }));
 
 const getVacancyPlural = (count: number) => {

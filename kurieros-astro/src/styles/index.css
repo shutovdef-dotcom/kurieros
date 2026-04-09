@@ -557,13 +557,9 @@ main {
   content: none;
 }
 
-.job-row {
+.job-row-main {
   display: flex;
   gap: 1rem;
-  align-items: center;
-}
-
-.job-row-main {
   align-items: flex-start;
   flex: 1;
 }
@@ -691,6 +687,7 @@ main {
 }
 
 .job-row-actions {
+  display: flex;
   justify-content: center;
   padding-left: 1rem;
   border-left: 1px solid var(--border-color);
@@ -953,7 +950,6 @@ footer {
     flex-direction: column;
   }
 
-  .job-row,
   .job-heading,
   .job-meta,
   .job-columns {

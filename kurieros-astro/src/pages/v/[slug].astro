@@ -14,6 +14,40 @@ export async function getStaticPaths() {
 
 const { job } = Astro.props;
 const hasApplyLink = Boolean(job.applyLink && job.applyLink !== '#');
+const factCards = [
+	{ label: 'Доход', value: job.salary },
+	{ label: 'График', value: job.details.schedule },
+	{ label: 'Возраст', value: job.details.age },
+	{ label: 'Выплаты', value: job.details.payment_freq },
+	{ label: 'Гражданство', value: job.details.citizenship },
+	{ label: 'Оформление', value: job.details.employment_type },
+];
+const fitPoints = [
+	`Тем, кто хочет рассмотреть работу в ${job.company} без долгого отбора условий.`,
+	`Кандидатам, которым важны ${job.details.schedule.toLowerCase()} и понятный формат оформления.`,
+	`Соискателям, которые сравнивают вакансии курьера по выплатам, требованиям и графику.`,
+];
+const importantPoints = [
+	`Перед откликом проверьте актуальные условия по выплатам: для этой вакансии указано "${job.details.payment_freq}".`,
+	`Уточните требования к оформлению: сейчас в карточке указано "${job.details.employment_type}".`,
+	`Если условия на сайте работодателя отличаются от карточки, ориентируйтесь на финальные условия при подключении.`,
+];
+const faqItems = [
+	{
+		question: `Кому подходит вакансия "${job.title}"?`,
+		answer: `Эта вакансия подходит кандидатам, которые рассматривают работу в ${job.company}, готовы к формату "${job.details.schedule}" и хотят заранее сравнить доход, требования и оформление.`,
+	},
+	{
+		question: 'Что нужно проверить перед откликом?',
+		answer: `Перед откликом стоит проверить график, выплаты, требования к возрасту, гражданству и оформлению. Для этой вакансии указаны выплаты: ${job.details.payment_freq}.`,
+	},
+	{
+		question: 'Куда ведёт кнопка отклика?',
+		answer: hasApplyLink
+			? 'Кнопка отклика ведёт на внешний сайт работодателя или партнёра, где нужно заполнить анкету и подтвердить актуальные условия.'
+			: 'Для этой вакансии прямая ссылка пока не добавлена, поэтому кнопка ведёт на страницу контактов для уточнения условий.',
+	},
+];
 ---
 
 <BaseLayout 
@@ -25,18 +59,54 @@ const hasApplyLink = Boolean(job.applyLink && job.applyLink !== '#');
 	<main class="vacancy-page">
 		<div class="container container-narrow">
 			<nav class="breadcrumb">
-				<a href="/kurieros/" data-t="nav.main">Главная</a> &gt; <span data-t={`vacancies.${job.id}.title`}>{job.title}</span>
+				<a href="/" data-t="nav.main">Главная</a> &gt; <span data-t={`vacancies.${job.id}.title`}>{job.title}</span>
 			</nav>
 
 			<section class="vacancy-header">
-				<div class="vacancy-company-info">
-					<img src={job.companyLogo} alt={job.company} class="vacancy-logo" width="80" height="80" loading="eager" decoding="async" />
-					<div>
-						<h1 data-t={`vacancies.${job.id}.title`}>{job.title}</h1>
-						<div class="vacancy-company-name" data-t={`vacancies.${job.id}.company`}>{job.company}</div>
+				<div class="vacancy-hero-main">
+					<div class="vacancy-company-info">
+						<img src={job.companyLogo} alt={job.company} class="vacancy-logo" width="80" height="80" loading="eager" decoding="async" />
+						<div>
+							<div class="vacancy-kicker">AI-ready карточка вакансии</div>
+							<h1 data-t={`vacancies.${job.id}.title`}>{job.title}</h1>
+							<div class="vacancy-company-name" data-t={`vacancies.${job.id}.company`}>{job.company}</div>
+						</div>
+					</div>
+					<p class="vacancy-ai-summary">
+						{job.title} в {job.company} — это вакансия для кандидатов, которые хотят заранее понять доход, график,
+						требования и формат оформления перед переходом к отклику.
+					</p>
+					<div class="vacancy-hero-actions">
+						<a href="#vacancy-facts" class="hero-link">Краткие факты</a>
+						<a href="#vacancy-faq" class="hero-link">FAQ перед откликом</a>
 					</div>
 				</div>
-                <div class="vacancy-salary-badge" data-t={`vacancies.${job.id}.salary`}>{job.salary}</div>
+				<div class="vacancy-salary-card">
+					<span>Доход</span>
+					<strong data-t={`vacancies.${job.id}.salary`}>{job.salary}</strong>
+					<small>Финальные условия уточняются при отклике</small>
+				</div>
+			</section>
+
+			<section class="vacancy-answer-panel" aria-label="Краткий вывод по вакансии">
+				<div>
+					<p class="section-eyebrow">Короткий вывод</p>
+					<h2>Что важно знать об этой вакансии?</h2>
+				</div>
+				<p>
+					{job.title} подходит тем, кто ищет работу курьером с условиями "{job.details.schedule}" и хочет заранее сравнить
+					доход, оформление, возрастные требования и частоту выплат. На этой странице собраны основные факты, чтобы
+					решение об отклике было быстрее и спокойнее.
+				</p>
+			</section>
+
+			<section class="vacancy-facts" id="vacancy-facts" aria-label="Краткие факты о вакансии">
+				{factCards.map((fact) => (
+					<div class="fact-card">
+						<span>{fact.label}</span>
+						<strong>{fact.value}</strong>
+					</div>
+				))}
 			</section>
 
 			<div class="vacancy-content-grid">
@@ -62,6 +132,39 @@ const hasApplyLink = Boolean(job.applyLink && job.applyLink !== '#');
 								<li data-t={`vacancies.${job.id}.ben_${idx}`}>{benefit}</li>
 							))}
 						</ul>
+					</section>
+
+					<section class="vacancy-section ai-geo-section">
+						<p class="section-eyebrow">AI GEO блок</p>
+						<h2>Кому лучше всего подходит эта вакансия?</h2>
+						<div class="answer-grid">
+							{fitPoints.map((point) => (
+								<div class="answer-card">{point}</div>
+							))}
+						</div>
+					</section>
+
+					<section class="vacancy-section ai-geo-section">
+						<p class="section-eyebrow">Перед откликом</p>
+						<h2>Что проверить до заполнения анкеты?</h2>
+						<ol class="vacancy-list numbered-list">
+							{importantPoints.map((point) => (
+								<li>{point}</li>
+							))}
+						</ol>
+					</section>
+
+					<section class="vacancy-section ai-geo-section" id="vacancy-faq">
+						<p class="section-eyebrow">FAQ</p>
+						<h2>Короткие ответы перед откликом</h2>
+						<div class="faq-stack">
+							{faqItems.map((item) => (
+								<article class="faq-item">
+									<h3>{item.question}</h3>
+									<p>{item.answer}</p>
+								</article>
+							))}
+						</div>
 					</section>
 				</div>
 
@@ -93,7 +196,7 @@ const hasApplyLink = Boolean(job.applyLink && job.applyLink !== '#');
 							</>
 						) : (
 							<>
-								<a href="/kurieros/contacts/" class="apply-btn-large apply-btn-disabled" data-t="vacancy.apply_disabled">
+								<a href="/contacts/" class="apply-btn-large apply-btn-disabled" data-t="vacancy.apply_disabled">
 									Уточнить условия
 								</a>
 								<p class="apply-note" data-t="vacancy.apply_disabled_note">Для этой вакансии прямая ссылка пока не добавлена</p>
@@ -112,7 +215,10 @@ const hasApplyLink = Boolean(job.applyLink && job.applyLink !== '#');
 
 <style>
 	.vacancy-page {
-		padding: 2rem 0;
+		padding: 2rem 0 4rem;
+		background:
+			radial-gradient(circle at 12% 8%, rgba(79, 70, 229, 0.08), transparent 28rem),
+			radial-gradient(circle at 88% 18%, rgba(34, 197, 94, 0.1), transparent 26rem);
 	}
 	.container-narrow {
 		max-width: 1240px;
@@ -129,19 +235,40 @@ const hasApplyLink = Boolean(job.applyLink && job.applyLink !== '#');
 		text-decoration: none;
 	}
 	.vacancy-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: flex-start;
-		background: var(--bg-card);
-		padding: 2rem;
-		border-radius: 1.5rem;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(250px, 0.32fr);
+		gap: 2rem;
+		align-items: stretch;
+		background:
+			linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(248, 250, 252, 0.86)),
+			var(--bg-card);
+		padding: clamp(1.5rem, 3vw, 2.75rem);
+		border: 1px solid rgba(148, 163, 184, 0.18);
+		border-radius: 2rem;
 		margin-bottom: 2rem;
-		box-shadow: var(--shadow-sm);
+		box-shadow: 0 26px 80px rgba(15, 23, 42, 0.08);
+		position: relative;
+		overflow: hidden;
+	}
+	.vacancy-header::after {
+		content: "";
+		position: absolute;
+		inset: auto -6rem -8rem auto;
+		width: 18rem;
+		height: 18rem;
+		background: radial-gradient(circle, rgba(79, 70, 229, 0.13), transparent 68%);
+		pointer-events: none;
+	}
+	.vacancy-hero-main {
+		position: relative;
+		z-index: 1;
+		display: grid;
+		gap: 1.25rem;
 	}
 	.vacancy-company-info {
 		display: flex;
 		gap: 1.5rem;
-		align-items: center;
+		align-items: flex-start;
 	}
 	.vacancy-logo {
 		width: 80px;
@@ -150,14 +277,118 @@ const hasApplyLink = Boolean(job.applyLink && job.applyLink !== '#');
 		border-radius: 1rem;
 		background: white;
 		padding: 0.5rem;
+		box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
 	}
-	.vacancy-salary-badge {
-		background: var(--accent-color);
-		color: white;
-		padding: 0.75rem 1.5rem;
-		border-radius: 2rem;
+	.vacancy-kicker,
+	.section-eyebrow {
+		margin-bottom: 0.55rem;
+		font-size: 0.74rem;
+		font-weight: 900;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: var(--accent-color);
+	}
+	.vacancy-header h1 {
+		max-width: 13ch;
+		margin-bottom: 0.35rem;
+		font-size: clamp(2rem, 4.2vw, 4.25rem);
+		line-height: 0.98;
+		letter-spacing: -0.055em;
+		text-wrap: balance;
+	}
+	.vacancy-ai-summary {
+		max-width: 70ch;
+		margin: 0;
+		color: var(--text-muted);
+		font-size: clamp(1rem, 0.8vw + 0.9rem, 1.2rem);
+		line-height: 1.75;
+	}
+	.vacancy-hero-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+	}
+	.hero-link {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.6rem;
+		padding: 0.65rem 1rem;
+		border: 1px solid rgba(99, 102, 241, 0.16);
+		border-radius: 999px;
+		background: rgba(99, 102, 241, 0.08);
+		color: var(--text-main);
+		text-decoration: none;
 		font-weight: 800;
-		font-size: 1.25rem;
+	}
+	.vacancy-salary-card {
+		position: relative;
+		z-index: 1;
+		display: grid;
+		align-content: center;
+		gap: 0.45rem;
+		min-height: 100%;
+		padding: 1.5rem;
+		border-radius: 1.5rem;
+		background: linear-gradient(160deg, #111827, #1f2937);
+		color: white;
+		box-shadow: 0 20px 55px rgba(15, 23, 42, 0.18);
+	}
+	.vacancy-salary-card span,
+	.vacancy-salary-card small {
+		color: rgba(255, 255, 255, 0.72);
+	}
+	.vacancy-salary-card strong {
+		font-size: clamp(1.6rem, 2.6vw, 2.4rem);
+		line-height: 1;
+		letter-spacing: -0.04em;
+	}
+	.vacancy-answer-panel {
+		display: grid;
+		grid-template-columns: minmax(220px, 0.36fr) minmax(0, 1fr);
+		gap: 1.5rem;
+		align-items: start;
+		margin-bottom: 1rem;
+		padding: 1.5rem;
+		border: 1px solid rgba(148, 163, 184, 0.16);
+		border-radius: 1.5rem;
+		background: rgba(255, 255, 255, 0.74);
+		box-shadow: var(--shadow-sm);
+	}
+	.vacancy-answer-panel h2,
+	.vacancy-answer-panel p {
+		margin: 0;
+	}
+	.vacancy-answer-panel p {
+		color: var(--text-muted);
+		line-height: 1.8;
+	}
+	.vacancy-facts {
+		display: grid;
+		grid-template-columns: repeat(6, minmax(0, 1fr));
+		gap: 0.8rem;
+		margin-bottom: 2rem;
+	}
+	.fact-card {
+		display: grid;
+		gap: 0.35rem;
+		min-height: 7.25rem;
+		padding: 1rem;
+		border: 1px solid rgba(148, 163, 184, 0.16);
+		border-radius: 1.2rem;
+		background: rgba(255, 255, 255, 0.82);
+		box-shadow: var(--shadow-sm);
+	}
+	.fact-card span {
+		font-size: 0.72rem;
+		font-weight: 900;
+		letter-spacing: 0.11em;
+		text-transform: uppercase;
+		color: var(--text-muted);
+	}
+	.fact-card strong {
+		align-self: end;
+		font-size: 0.98rem;
+		line-height: 1.35;
 	}
 	.vacancy-description {
 		white-space: pre-wrap;
@@ -193,6 +424,47 @@ const hasApplyLink = Boolean(job.applyLink && job.applyLink !== '#');
 	}
 	.vacancy-list li {
 		margin-bottom: 0.5rem;
+	}
+	.ai-geo-section {
+		border: 1px solid rgba(99, 102, 241, 0.12);
+		background:
+			linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.96)),
+			var(--bg-card);
+	}
+	.answer-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 1rem;
+	}
+	.answer-card {
+		padding: 1rem;
+		border-radius: 1rem;
+		background: rgba(99, 102, 241, 0.07);
+		color: var(--text-main);
+		line-height: 1.6;
+	}
+	.numbered-list li::marker {
+		color: var(--accent-color);
+		font-weight: 900;
+	}
+	.faq-stack {
+		display: grid;
+		gap: 1rem;
+	}
+	.faq-item {
+		padding: 1.1rem;
+		border: 1px solid rgba(148, 163, 184, 0.16);
+		border-radius: 1rem;
+		background: rgba(255, 255, 255, 0.72);
+	}
+	.faq-item h3 {
+		margin: 0 0 0.45rem;
+		font-size: 1rem;
+	}
+	.faq-item p {
+		margin: 0;
+		color: var(--text-muted);
+		line-height: 1.7;
 	}
 	.vacancy-card-sidebar {
 		background: var(--bg-card);
@@ -237,5 +509,30 @@ const hasApplyLink = Boolean(job.applyLink && job.applyLink !== '#');
 		font-size: 0.75rem;
 		color: var(--text-muted);
 		margin-top: 0.5rem;
+	}
+	@media (max-width: 1100px) {
+		.vacancy-facts {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+		.answer-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+	@media (max-width: 768px) {
+		.vacancy-header,
+		.vacancy-answer-panel {
+			grid-template-columns: 1fr;
+		}
+		.vacancy-facts {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+	@media (max-width: 520px) {
+		.vacancy-company-info {
+			flex-direction: column;
+		}
+		.vacancy-facts {
+			grid-template-columns: 1fr;
+		}
 	}
 </style>
