@@ -23,7 +23,7 @@ jobs:
       - name: Install, build, and upload Astro site
         uses: withastro/action@v3
         env:
-          SITE_URL: https://kyrieros.ru
+          SITE_URL: https://kurerok.ru
           SITE_BASE: /
         with:
           path: ./kurieros-astro
