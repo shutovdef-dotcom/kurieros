@@ -1,0 +1,658 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import jobsData from '../../data/jobs.json';
+import reviewsData from '../../data/reviews.json';
+import { getCompaniesFromJobs } from '../../utils/companies';
+
+export async function getStaticPaths() {
+  return getCompaniesFromJobs(jobsData, reviewsData).map((company) => ({
+    params: { slug: company.slug },
+    props: { company },
+  }));
+}
+
+const { company } = Astro.props;
+const latestReviewTimestamp = company.reviews.length
+  ? Math.max(...company.reviews.map((review) => new Date(review.date).getTime()))
+  : Date.now();
+const updatedDate = new Intl.DateTimeFormat('ru-RU', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+}).format(new Date(latestReviewTimestamp));
+const featuredReviews = [...company.reviews]
+  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  .slice(0, 4);
+const factCards = [
+  { label: 'Активные вакансии', value: String(company.vacancyCount) },
+  { label: 'Города', value: company.topCities.length ? company.topCities.join(', ') : 'Зависят от вакансий' },
+  { label: 'Формат', value: company.transportModes.join(', ') || 'Смешанный формат' },
+  { label: 'Выплаты', value: company.paymentPreview.join(', ') || 'Уточняются по вакансии' },
+  { label: 'Доход', value: company.maxSalary ? `до ${company.maxSalary.toLocaleString('ru-RU')} ₽/мес` : 'См. карточки' },
+  { label: 'Отзывы', value: company.rating ? `${company.rating} / 5 (${company.reviewCount})` : 'Пока мало данных' },
+];
+const verdictPoints = [
+  `${company.name} стоит открыть в первую очередь, если вам важен формат ${company.primaryTransport.toLowerCase()} и вы хотите быстро увидеть все вакансии бренда на одной странице.`,
+  company.paymentPreview.length
+    ? `По текущим карточкам бренда чаще всего встречаются выплаты: ${company.paymentPreview.join(', ')}.`
+    : 'Формат выплат зависит от конкретной вакансии, поэтому лучше открыть 1-2 карточки и сравнить детали.',
+  company.topCities.length
+    ? `Сильнее всего бренд уже представлен в городах: ${company.topCities.join(', ')}.`
+    : 'География зависит от конкретных карточек вакансий и может расширяться по мере обновления сайта.',
+];
+const methodologyPoints = [
+  `Страница обновлена ${updatedDate} на основе карточек вакансий и отзывов, которые уже есть на сайте.`,
+  'Хаб бренда помогает быстро понять общий контекст работодателя, но не заменяет проверку конкретной вакансии перед откликом.',
+  'Если условия на стороне работодателя отличаются от карточки, ориентируйтесь на финальные условия в анкете или в прямом канале бренда.',
+];
+const faqItems = company.faqItems;
+const pageSchemaGraph = [
+  {
+    '@type': 'Organization',
+    name: company.name,
+    url: Astro.url.href,
+    logo: company.logo,
+    description: company.shortIntro,
+    areaServed: company.cities.length ? company.cities : ['Россия'],
+    ...(company.rating
+      ? {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: company.rating,
+            reviewCount: company.reviewCount,
+            bestRating: 5,
+            worstRating: 1,
+          },
+        }
+      : {}),
+  },
+  {
+    '@type': 'CollectionPage',
+    name: `${company.name} — вакансии, отзывы и условия`,
+    description: company.shortIntro,
+    url: Astro.url.href,
+    dateModified: new Date(latestReviewTimestamp).toISOString(),
+    about: {
+      '@type': 'Organization',
+      name: company.name,
+      url: Astro.url.href,
+    },
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: company.jobs.map((job, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: job.title,
+        url: new URL(`/v/${job.slug}/`, Astro.site).toString(),
+      })),
+    },
+  },
+  {
+    '@type': 'FAQPage',
+    mainEntity: faqItems.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer,
+      },
+    })),
+  },
+];
+---
+
+<BaseLayout
+  title={`${company.name} — вакансии, отзывы и условия работы`}
+  description={company.shortIntro}
+  schemaGraph={pageSchemaGraph}
+>
+  <Header />
+
+  <main class="company-page">
+    <div class="company-container">
+      <nav class="breadcrumb">
+        <a href="/">Главная</a> &gt; <a href="/companies/">Компании</a> &gt; <span>{company.name}</span>
+      </nav>
+
+      <section class="company-header">
+        <div class="company-hero-main">
+          <div class="company-brand-row">
+            <div class="company-logo-wrap">
+              <img src={company.logo} alt={company.name} class="company-logo" width="96" height="96" loading="eager" decoding="async" />
+            </div>
+            <div>
+              <div class="company-kicker">AI-ready entity page</div>
+              <h1>Работа в {company.name}</h1>
+              <p class="company-subtitle">Вакансии, отзывы, города, формат выплат и ключевые ограничения перед откликом.</p>
+            </div>
+          </div>
+          <p class="company-summary">{company.shortIntro}</p>
+          <div class="company-meta-row">
+            <span class="meta-pill">Обновлено {updatedDate}</span>
+            <span class="meta-pill">{company.vacancyCount} активных вакансий</span>
+            <span class="meta-pill">{company.reviewCount ? `${company.reviewCount} отзывов` : 'Отзывы пополняются'}</span>
+          </div>
+          <div class="company-action-row">
+            <a href="#company-vacancies" class="hero-link">Смотреть вакансии</a>
+            <a href="#company-faq" class="hero-link">FAQ по бренду</a>
+          </div>
+        </div>
+        <aside class="company-score-card">
+          <span>Быстрый ориентир</span>
+          <strong>{company.rating ? `${company.rating} / 5` : 'Новый бренд'}</strong>
+          <small>{company.primaryTransport}</small>
+          <p>{company.paymentPreview[0] || 'Формат выплат смотрите в карточках вакансий'}</p>
+        </aside>
+      </section>
+
+      <section class="company-answer-panel">
+        <div>
+          <p class="section-eyebrow">Короткий вывод</p>
+          <h2>Когда стоит открывать эту страницу бренда?</h2>
+        </div>
+        <div class="company-answer-copy">
+          {verdictPoints.map((point) => (
+            <p>{point}</p>
+          ))}
+        </div>
+      </section>
+
+      <section class="company-facts" aria-label="Факты о бренде">
+        {factCards.map((fact) => (
+          <article class="fact-card">
+            <span>{fact.label}</span>
+            <strong>{fact.value}</strong>
+          </article>
+        ))}
+      </section>
+
+      <section class="company-geo-grid">
+        <article class="geo-card">
+          <p class="section-eyebrow">Кому подходит</p>
+          <h2>Кому полезно смотреть вакансии {company.name}?</h2>
+          <ul class="info-list">
+            {company.fitPoints.map((point) => (
+              <li>{point}</li>
+            ))}
+          </ul>
+        </article>
+
+        <article class="geo-card geo-card-warning">
+          <p class="section-eyebrow">Что уточнить</p>
+          <h2>Что нельзя решать только по странице бренда?</h2>
+          <ol class="info-list numbered-list">
+            {company.cautionPoints.map((point) => (
+              <li>{point}</li>
+            ))}
+          </ol>
+        </article>
+      </section>
+
+      <section class="company-section" id="company-vacancies">
+        <div class="section-topline">
+          <div>
+            <p class="section-eyebrow">Вакансии бренда</p>
+            <h2>Что уже можно открыть по {company.name}</h2>
+          </div>
+          <a href="/compare/" class="hero-link">Сравнить в таблице</a>
+        </div>
+        <div class="vacancies-grid">
+          {company.jobs.map((job) => (
+            <article class="job-card">
+              <div class="job-card-top">
+                <span class="job-salary">{job.salary}</span>
+                <span class="job-city">{job.location}</span>
+              </div>
+              <h3><a href={`/v/${job.slug}/`}>{job.title}</a></h3>
+              <p>{job.shortDescription || job.title}</p>
+              <div class="chip-row">
+                {job.labels.slice(0, 3).map((label) => (
+                  <span class="chip">{label}</span>
+                ))}
+              </div>
+              <a class="job-link" href={`/v/${job.slug}/`}>Открыть карточку вакансии</a>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="company-section">
+        <div class="section-topline">
+          <div>
+            <p class="section-eyebrow">Отзывы</p>
+            <h2>Что говорят о работе в {company.name}</h2>
+          </div>
+        </div>
+        {featuredReviews.length ? (
+          <div class="reviews-grid">
+            {featuredReviews.map((review) => (
+              <article class="review-card">
+                <div class="review-topline">
+                  <strong>{review.name}</strong>
+                  <span>{review.city}</span>
+                </div>
+                <div class="review-rating">Оценка: {review.rating} / 5</div>
+                <p class="review-comment">{review.comment}</p>
+                <div class="review-meta">
+                  <div><span>Плюсы:</span> {review.pros}</div>
+                  <div><span>Минусы:</span> {review.cons}</div>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div class="empty-card">По этой компании пока мало отзывов. Страница всё равно полезна для быстрого сравнения вакансий и условий.</div>
+        )}
+      </section>
+
+      <section class="company-section" id="company-faq">
+        <p class="section-eyebrow">FAQ</p>
+        <h2>Короткие ответы по бренду</h2>
+        <div class="faq-grid">
+          {faqItems.map((item) => (
+            <article class="faq-item">
+              <h3>{item.question}</h3>
+              <p>{item.answer}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="company-section company-trust-panel">
+        <div>
+          <p class="section-eyebrow">Прозрачность</p>
+          <h2>Как использовать страницу бренда правильно</h2>
+        </div>
+        <div class="trust-stack">
+          {methodologyPoints.map((point) => (
+            <div class="trust-item">{point}</div>
+          ))}
+          <div class="trust-links">
+            <a href="/companies/" class="hero-link">Назад в каталог компаний</a>
+            <a href="/compare/" class="hero-link">Открыть сравнение вакансий</a>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  .company-page {
+    padding: 2rem 0 4rem;
+    background:
+      radial-gradient(circle at 12% 8%, rgba(79, 70, 229, 0.08), transparent 28rem),
+      radial-gradient(circle at 88% 18%, rgba(34, 197, 94, 0.08), transparent 24rem);
+  }
+
+  .company-container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .breadcrumb {
+    margin-bottom: 2rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+
+  .breadcrumb a {
+    color: var(--accent-color);
+    text-decoration: none;
+  }
+
+  .company-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(250px, 0.32fr);
+    gap: 2rem;
+    margin-bottom: 2rem;
+    padding: clamp(1.5rem, 3vw, 2.75rem);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 2rem;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(248, 250, 252, 0.86));
+    box-shadow: 0 26px 80px rgba(15, 23, 42, 0.08);
+  }
+
+  .company-hero-main {
+    display: grid;
+    gap: 1.2rem;
+  }
+
+  .company-brand-row {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+  }
+
+  .company-logo-wrap {
+    display: grid;
+    place-items: center;
+    width: 96px;
+    height: 96px;
+    border-radius: 1.35rem;
+    background: white;
+    box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
+  }
+
+  .company-logo {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+  }
+
+  .company-kicker,
+  .section-eyebrow {
+    margin: 0 0 0.55rem;
+    font-size: 0.74rem;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent-color);
+  }
+
+  .company-header h1,
+  .company-section h2 {
+    margin: 0;
+  }
+
+  .company-header h1 {
+    font-size: clamp(2rem, 4vw, 4rem);
+    line-height: 0.98;
+    letter-spacing: -0.05em;
+    text-wrap: balance;
+  }
+
+  .company-subtitle,
+  .company-summary,
+  .company-answer-copy p,
+  .faq-item p,
+  .job-card p,
+  .empty-card,
+  .review-comment,
+  .review-meta,
+  .trust-item {
+    color: var(--text-muted);
+  }
+
+  .company-subtitle,
+  .company-summary {
+    margin: 0;
+    line-height: 1.8;
+  }
+
+  .company-meta-row,
+  .company-action-row,
+  .chip-row,
+  .trust-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+  }
+
+  .meta-pill,
+  .chip,
+  .hero-link,
+  .job-salary,
+  .job-city {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.25rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .meta-pill,
+  .job-city {
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--text-muted);
+  }
+
+  .hero-link,
+  .chip,
+  .job-salary {
+    border: 1px solid rgba(99, 102, 241, 0.16);
+    background: rgba(99, 102, 241, 0.08);
+    color: var(--text-main);
+    text-decoration: none;
+  }
+
+  .company-score-card,
+  .company-answer-panel,
+  .fact-card,
+  .geo-card,
+  .company-section,
+  .faq-item,
+  .job-card,
+  .review-card,
+  .empty-card {
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 1.5rem;
+    background: rgba(255, 255, 255, 0.82);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .company-score-card {
+    display: grid;
+    align-content: center;
+    gap: 0.45rem;
+    padding: 1.5rem;
+    background: linear-gradient(160deg, #111827, #1f2937);
+    color: white;
+  }
+
+  .company-score-card span,
+  .company-score-card small,
+  .company-score-card p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  .company-score-card strong {
+    font-size: clamp(1.6rem, 2.6vw, 2.4rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .company-answer-panel,
+  .company-trust-panel {
+    display: grid;
+    grid-template-columns: minmax(220px, 0.34fr) minmax(0, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 1.25rem;
+    padding: 1.5rem;
+  }
+
+  .company-answer-copy {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .company-answer-copy p {
+    margin: 0;
+    line-height: 1.8;
+  }
+
+  .company-facts,
+  .company-geo-grid,
+  .vacancies-grid,
+  .reviews-grid,
+  .faq-grid {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .company-facts {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .fact-card {
+    display: grid;
+    gap: 0.35rem;
+    min-height: 7rem;
+    padding: 1rem;
+  }
+
+  .fact-card span {
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .fact-card strong {
+    align-self: end;
+    font-size: 0.98rem;
+    line-height: 1.35;
+  }
+
+  .company-geo-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .geo-card,
+  .company-section {
+    padding: 1.5rem;
+  }
+
+  .geo-card-warning {
+    border-color: rgba(249, 115, 22, 0.16);
+  }
+
+  .info-list {
+    margin: 0;
+    padding-left: 1.3rem;
+  }
+
+  .info-list li {
+    margin-bottom: 0.7rem;
+    line-height: 1.7;
+  }
+
+  .numbered-list li::marker {
+    color: var(--accent-color);
+    font-weight: 900;
+  }
+
+  .section-topline {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+
+  .vacancies-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+
+  .job-card {
+    display: grid;
+    gap: 0.9rem;
+    padding: 1.25rem;
+  }
+
+  .job-card-top,
+  .review-topline {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .job-card h3,
+  .faq-item h3 {
+    margin: 0;
+  }
+
+  .job-card h3 a,
+  .job-link {
+    color: var(--text-main);
+    text-decoration: none;
+    font-weight: 800;
+  }
+
+  .job-link {
+    color: var(--accent-color);
+  }
+
+  .reviews-grid,
+  .faq-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+
+  .review-card,
+  .faq-item,
+  .empty-card {
+    padding: 1.25rem;
+  }
+
+  .review-rating {
+    font-weight: 800;
+    color: #d97706;
+  }
+
+  .review-meta {
+    display: grid;
+    gap: 0.55rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .review-meta span {
+    color: var(--text-main);
+    font-weight: 800;
+  }
+
+  .trust-stack {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .trust-item {
+    padding: 1rem 1.1rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(99, 102, 241, 0.12);
+    background: rgba(99, 102, 241, 0.05);
+    line-height: 1.75;
+  }
+
+  @media (max-width: 1100px) {
+    .company-facts {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 900px) {
+    .company-header,
+    .company-answer-panel,
+    .company-trust-panel,
+    .company-geo-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .company-brand-row,
+    .section-topline {
+      flex-direction: column;
+    }
+
+    .company-facts,
+    .vacancies-grid,
+    .reviews-grid,
+    .faq-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

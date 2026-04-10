@@ -4,6 +4,7 @@ import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import ReviewsBlock from '../../components/ReviewsBlock.astro';
 import jobsData from '../../data/jobs.json';
+import { slugifyCompany } from '../../utils/companies';
 
 export async function getStaticPaths() {
 	return jobsData.map((job) => ({
@@ -14,6 +15,7 @@ export async function getStaticPaths() {
 
 const { job } = Astro.props;
 const hasApplyLink = Boolean(job.applyLink && job.applyLink !== '#');
+const companyUrl = `/companies/${slugifyCompany(job.company)}/`;
 const factCards = [
 	{ label: 'Доход', value: job.salary },
 	{ label: 'График', value: job.details.schedule },
@@ -32,6 +34,11 @@ const importantPoints = [
 	`Уточните требования к оформлению: сейчас в карточке указано "${job.details.employment_type}".`,
 	`Если условия на сайте работодателя отличаются от карточки, ориентируйтесь на финальные условия при подключении.`,
 ];
+const antiFitPoints = [
+	`Если вам не подходит формат оформления "${job.details.employment_type}", лучше сразу сравнить эту вакансию с альтернативами.`,
+	`Если критичны точные ограничения по возрасту, гражданству или медкнижке, подтверждайте эти условия до перехода к анкете.`,
+	`Если нужен строго официальный формат по ТК РФ или другой тип выплат, карточку стоит сравнить с более подходящими вариантами.`,
+];
 const faqItems = [
 	{
 		question: `Кому подходит вакансия "${job.title}"?`,
@@ -48,11 +55,49 @@ const faqItems = [
 			: 'Для этой вакансии прямая ссылка пока не добавлена, поэтому кнопка ведёт на страницу контактов для уточнения условий.',
 	},
 ];
+const updatedDate = new Intl.DateTimeFormat('ru-RU', {
+	day: 'numeric',
+	month: 'long',
+	year: 'numeric',
+}).format(new Date());
+const methodologyPoints = [
+	`Карточка обновлена ${updatedDate} и помогает быстро сравнить доход, график, оформление и ограничения до отклика.`,
+	hasApplyLink
+		? 'Кнопка отклика ведёт на внешний сайт работодателя или партнёра, где нужно ещё раз проверить актуальные условия.'
+		: 'Прямая ссылка на внешний отклик пока не добавлена, поэтому условия стоит уточнять через страницу контактов.',
+	'Если данные в анкете работодателя отличаются от карточки, ориентируйтесь на финальные условия при подключении.',
+];
+const pageSchemaGraph = [
+	{
+		'@type': 'WebPage',
+		name: `${job.title} — Вакансия в ${job.company}`,
+		description: job.description.substring(0, 160),
+		url: Astro.url.href,
+		dateModified: new Date().toISOString(),
+		about: {
+			'@type': 'Organization',
+			name: job.company,
+			url: new URL(companyUrl, Astro.site).toString(),
+		},
+	},
+	{
+		'@type': 'FAQPage',
+		mainEntity: faqItems.map((item) => ({
+			'@type': 'Question',
+			name: item.question,
+			acceptedAnswer: {
+				'@type': 'Answer',
+				text: item.answer,
+			},
+		})),
+	},
+];
 ---
 
 <BaseLayout 
 	title={`${job.title} — Вакансия в ${job.company}`} 
 	description={job.description.substring(0, 160)}
+	schemaGraph={pageSchemaGraph}
 >
 	<Header />
 
@@ -69,13 +114,18 @@ const faqItems = [
 						<div>
 							<div class="vacancy-kicker">AI-ready карточка вакансии</div>
 							<h1 data-t={`vacancies.${job.id}.title`}>{job.title}</h1>
-							<div class="vacancy-company-name" data-t={`vacancies.${job.id}.company`}>{job.company}</div>
+							<a href={companyUrl} class="vacancy-company-name" data-t={`vacancies.${job.id}.company`}>{job.company}</a>
 						</div>
 					</div>
 					<p class="vacancy-ai-summary">
 						{job.title} в {job.company} — это вакансия для кандидатов, которые хотят заранее понять доход, график,
 						требования и формат оформления перед переходом к отклику.
 					</p>
+					<div class="vacancy-meta-row">
+						<span class="meta-pill">Обновлено {updatedDate}</span>
+						<span class="meta-pill">{hasApplyLink ? 'Есть прямая ссылка на отклик' : 'Ссылка на отклик уточняется'}</span>
+						<span class="meta-pill">Финальные условия подтверждаются при отклике</span>
+					</div>
 					<div class="vacancy-hero-actions">
 						<a href="#vacancy-facts" class="hero-link">Краткие факты</a>
 						<a href="#vacancy-faq" class="hero-link">FAQ перед откликом</a>
@@ -145,6 +195,16 @@ const faqItems = [
 					</section>
 
 					<section class="vacancy-section ai-geo-section">
+						<p class="section-eyebrow">Когда сравнить ещё варианты</p>
+						<h2>Кому эта вакансия может не подойти?</h2>
+						<div class="answer-grid answer-grid-two">
+							{antiFitPoints.map((point) => (
+								<div class="answer-card answer-card-warning">{point}</div>
+							))}
+						</div>
+					</section>
+
+					<section class="vacancy-section ai-geo-section">
 						<p class="section-eyebrow">Перед откликом</p>
 						<h2>Что проверить до заполнения анкеты?</h2>
 						<ol class="vacancy-list numbered-list">
@@ -164,6 +224,20 @@ const faqItems = [
 									<p>{item.answer}</p>
 								</article>
 							))}
+						</div>
+					</section>
+
+					<section class="vacancy-section ai-geo-section">
+						<p class="section-eyebrow">Прозрачность</p>
+						<h2>Как собрана эта карточка?</h2>
+						<div class="trust-stack">
+							{methodologyPoints.map((point) => (
+								<div class="trust-item">{point}</div>
+							))}
+						</div>
+						<div class="trust-links">
+							<a href="/compare/" class="hero-link">Сравнить с другими вакансиями</a>
+							<a href={companyUrl} class="hero-link">Открыть страницу компании</a>
 						</div>
 					</section>
 				</div>
@@ -296,12 +370,40 @@ const faqItems = [
 		letter-spacing: -0.055em;
 		text-wrap: balance;
 	}
+	.vacancy-company-name {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		color: var(--accent-color);
+		text-decoration: none;
+		font-weight: 800;
+	}
+	.vacancy-company-name:hover {
+		text-decoration: underline;
+	}
 	.vacancy-ai-summary {
 		max-width: 70ch;
 		margin: 0;
 		color: var(--text-muted);
 		font-size: clamp(1rem, 0.8vw + 0.9rem, 1.2rem);
 		line-height: 1.75;
+	}
+	.vacancy-meta-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.65rem;
+	}
+	.meta-pill {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.25rem;
+		padding: 0.45rem 0.8rem;
+		border-radius: 999px;
+		border: 1px solid rgba(148, 163, 184, 0.16);
+		background: rgba(255, 255, 255, 0.72);
+		color: var(--text-muted);
+		font-size: 0.82rem;
+		font-weight: 700;
 	}
 	.vacancy-hero-actions {
 		display: flex;
@@ -443,6 +545,12 @@ const faqItems = [
 		color: var(--text-main);
 		line-height: 1.6;
 	}
+	.answer-grid-two {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+	.answer-card-warning {
+		background: rgba(249, 115, 22, 0.08);
+	}
 	.numbered-list li::marker {
 		color: var(--accent-color);
 		font-weight: 900;
@@ -465,6 +573,24 @@ const faqItems = [
 		margin: 0;
 		color: var(--text-muted);
 		line-height: 1.7;
+	}
+	.trust-stack {
+		display: grid;
+		gap: 0.9rem;
+		margin-bottom: 1rem;
+	}
+	.trust-item {
+		padding: 1rem;
+		border: 1px solid rgba(148, 163, 184, 0.16);
+		border-radius: 1rem;
+		background: rgba(255, 255, 255, 0.72);
+		line-height: 1.7;
+		color: var(--text-main);
+	}
+	.trust-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
 	}
 	.vacancy-card-sidebar {
 		background: var(--bg-card);
@@ -514,7 +640,8 @@ const faqItems = [
 		.vacancy-facts {
 			grid-template-columns: repeat(3, minmax(0, 1fr));
 		}
-		.answer-grid {
+		.answer-grid,
+		.answer-grid-two {
 			grid-template-columns: 1fr;
 		}
 	}

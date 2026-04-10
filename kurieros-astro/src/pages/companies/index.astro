@@ -1,0 +1,504 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import jobsData from '../../data/jobs.json';
+import reviewsData from '../../data/reviews.json';
+import { getCompaniesFromJobs } from '../../utils/companies';
+
+const companies = getCompaniesFromJobs(jobsData, reviewsData);
+const updatedDate = new Intl.DateTimeFormat('ru-RU', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+}).format(new Date());
+const topBrands = companies.slice(0, 6).map((company) => company.name);
+const totalVacancies = companies.reduce((sum, company) => sum + company.vacancyCount, 0);
+const topRatedCompany = companies
+  .filter((company) => company.rating)
+  .sort((a, b) => (b.rating || 0) - (a.rating || 0))[0];
+const faqItems = [
+  {
+    question: 'Что есть на странице компаний?',
+    answer: `На этой странице собраны ${companies.length} брендов и ${totalVacancies} вакансий. Здесь удобно быстро выбрать работодателя, а затем перейти в его отдельную страницу с фактами и активными вакансиями.`,
+  },
+  {
+    question: 'Зачем открывать страницу конкретной компании?',
+    answer: 'Страница компании помогает быстро понять формат работы, города присутствия, выплаты, отзывы и ограничения до перехода в отдельные карточки вакансий.',
+  },
+  {
+    question: 'Что проверять перед откликом?',
+    answer: 'Даже на странице бренда финальные выплаты, возрастной порог, гражданство и тип оформления нужно уточнять в конкретной вакансии или на стороне работодателя.',
+  },
+];
+const pageSchemaGraph = [
+  {
+    '@type': 'CollectionPage',
+    name: 'Компании-работодатели — Работа курьером',
+    description: 'Каталог брендов с вакансиями курьеров, краткими фактами и переходом в отдельные страницы компаний.',
+    url: Astro.url.href,
+    dateModified: new Date().toISOString(),
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: companies.map((company, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: company.name,
+        url: new URL(company.href, Astro.site).toString(),
+      })),
+    },
+  },
+  {
+    '@type': 'FAQPage',
+    mainEntity: faqItems.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer,
+      },
+    })),
+  },
+];
+---
+
+<BaseLayout title="Компании-работодатели — Работа курьером" description="Список компаний с вакансиями курьеров, GEO-ready фактами и переходом в отдельные страницы брендов." schemaGraph={pageSchemaGraph}>
+  <Header />
+
+  <main class="companies-page">
+    <section class="hero hero-small companies-hero">
+      <h1 data-t="companies.title">Компании-работодатели</h1>
+      <p data-t="companies.subtitle">Мы сотрудничаем только с проверенными брендами, гарантирующими стабильные выплаты и честные условия.</p>
+    </section>
+
+    <section class="companies-answer-panel">
+      <div>
+        <p class="section-eyebrow">AI GEO TL;DR</p>
+        <h2>Что важно знать о компаниях на Курьерос?</h2>
+      </div>
+      <p>
+        На этой странице собраны бренды, у которых уже есть вакансии на сайте. Сначала стоит выбрать работодателя по типу
+        доставки, городам и формату выплат, а потом открыть отдельную страницу компании, чтобы быстро понять контекст бренда
+        и перейти только в подходящие вакансии.
+      </p>
+    </section>
+
+    <section class="companies-fact-grid" aria-label="Ключевые факты по компаниям">
+      <article class="companies-fact-card">
+        <span>Компании</span>
+        <strong>{companies.length}</strong>
+      </article>
+      <article class="companies-fact-card">
+        <span>Вакансии</span>
+        <strong>{totalVacancies}</strong>
+      </article>
+      <article class="companies-fact-card">
+        <span>Сильные бренды</span>
+        <strong>{topBrands.slice(0, 3).join(', ')}</strong>
+      </article>
+      <article class="companies-fact-card">
+        <span>Лидер по отзывам</span>
+        <strong>{topRatedCompany ? `${topRatedCompany.name} · ${topRatedCompany.rating}` : 'Отзывы пополняются'}</strong>
+      </article>
+    </section>
+
+    <section class="companies-geo-grid">
+      <article class="companies-geo-card">
+        <p class="section-eyebrow">Кому подходит</p>
+        <h2>Когда этот хаб особенно полезен?</h2>
+        <ul class="companies-list">
+          <li>Когда вы хотите сначала выбрать бренд, а уже потом разбираться в конкретных карточках вакансий.</li>
+          <li>Когда важно сравнить компании по типу доставки, выплатам, географии и общему стилю занятости.</li>
+          <li>Когда нужно быстро отсечь бренды, которые не подходят по транспорту, оформлению или возрастному порогу.</li>
+        </ul>
+      </article>
+
+      <article class="companies-geo-card companies-geo-card-caution">
+        <p class="section-eyebrow">Что уточнить</p>
+        <h2>Что не стоит решать только по хабу?</h2>
+        <ol class="companies-list numbered-list">
+          <li>Финальные выплаты и график зависят от конкретной вакансии, города и формата работы.</li>
+          <li>Тип оформления, гражданство, медкнижка и возрастной порог нужно проверять уже внутри карточки вакансии.</li>
+          <li>Даже если бренд выглядит подходящим, перед откликом всё равно лучше открыть 1-2 карточки и сравнить детали.</li>
+        </ol>
+      </article>
+    </section>
+
+    <section class="companies-grid">
+      {companies.map((company) => (
+        <article class="company-listing-card">
+          <a class="company-card-link" href={company.href} aria-label={`Открыть страницу компании ${company.name}`}></a>
+          <div class="company-logo-large">
+            <img src={company.logo} alt={company.name} />
+          </div>
+          <h2>{company.name}</h2>
+          <p class="company-meta"><strong>{company.vacancyCount}</strong> <span data-t="companies.active_vacancies">активных вакансий</span></p>
+          <p class="company-snippet">{company.shortIntro}</p>
+          <div class="company-chip-row">
+            <span class="company-chip">{company.primaryTransport}</span>
+            {company.paymentPreview[0] && <span class="company-chip">{company.paymentPreview[0]}</span>}
+          </div>
+          <a href={company.href} class="btn-primary" data-t="companies.view_jobs">Смотреть компанию</a>
+        </article>
+      ))}
+    </section>
+
+    <section class="companies-faq-section">
+      <p class="section-eyebrow">FAQ</p>
+      <h2>Короткие ответы о брендах и работодателях</h2>
+      <div class="companies-faq-grid">
+        {faqItems.map((item) => (
+          <article class="companies-faq-item">
+            <h3>{item.question}</h3>
+            <p>{item.answer}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="companies-trust-panel">
+      <div>
+        <p class="section-eyebrow">Прозрачность</p>
+        <h2>Как использовать страницы брендов</h2>
+      </div>
+      <p>
+        Хаб обновлен {updatedDate}. Он помогает выбрать бренд для дальнейшего изучения, но не заменяет карточку вакансии.
+        После выбора компании откройте её страницу, а затем 1-2 релевантные вакансии и проверьте выплаты, ограничения,
+        оформление и ссылку на отклик уже по фактическим условиям.
+      </p>
+    </section>
+
+    <section class="partner-section">
+      <div class="partner-card">
+        <h2 data-t="companies.partner_title">Стать партнером</h2>
+        <p data-t="companies.partner_text">Вы представляете компанию и хотите разместить свои вакансии? Свяжитесь с нами.</p>
+        <a href="/contacts/" class="btn-secondary partner-link" data-t="companies.partner_btn">Связаться</a>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  .companies-page {
+    padding-bottom: 4rem;
+  }
+
+  .hero-small {
+    padding: 3rem 1rem;
+    text-align: center;
+  }
+
+  .section-eyebrow {
+    margin: 0 0 0.55rem;
+    font-size: 0.74rem;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent-color);
+  }
+
+  .companies-answer-panel,
+  .companies-trust-panel {
+    max-width: 1180px;
+    margin: 0 auto 1rem;
+    display: grid;
+    grid-template-columns: minmax(220px, 0.32fr) minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+    padding: 1.5rem;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 1.5rem;
+    background: rgba(255, 255, 255, 0.74);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .companies-answer-panel h2,
+  .companies-answer-panel p,
+  .companies-trust-panel h2,
+  .companies-trust-panel p {
+    margin: 0;
+  }
+
+  .companies-answer-panel p,
+  .companies-trust-panel p {
+    color: var(--text-muted);
+    line-height: 1.8;
+  }
+
+  .companies-fact-grid,
+  .companies-geo-grid,
+  .companies-faq-grid,
+  .companies-grid {
+    max-width: 1180px;
+    margin: 0 auto 1.5rem;
+    display: grid;
+    gap: 1rem;
+    padding: 0 1rem;
+  }
+
+  .companies-fact-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .companies-fact-card,
+  .companies-geo-card,
+  .companies-faq-item,
+  .company-listing-card {
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 1.5rem;
+    background: rgba(255, 255, 255, 0.82);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .companies-fact-card {
+    display: grid;
+    gap: 0.45rem;
+    min-height: 7rem;
+    padding: 1rem;
+  }
+
+  .companies-fact-card span {
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .companies-fact-card strong {
+    align-self: end;
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+
+  .companies-geo-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .companies-geo-card {
+    padding: 1.5rem;
+    border: 1px solid rgba(99, 102, 241, 0.12);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.96)),
+      var(--bg-card);
+  }
+
+  .companies-geo-card-caution {
+    border-color: rgba(249, 115, 22, 0.16);
+  }
+
+  .companies-geo-card h2,
+  .companies-faq-section h2 {
+    margin: 0 0 1rem;
+  }
+
+  .companies-list {
+    margin: 0;
+    padding-left: 1.35rem;
+  }
+
+  .companies-list li {
+    margin-bottom: 0.7rem;
+    line-height: 1.7;
+  }
+
+  .numbered-list li::marker {
+    color: var(--accent-color);
+    font-weight: 900;
+  }
+
+  .companies-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .company-listing-card {
+    position: relative;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    transition: transform 0.3s;
+    overflow: hidden;
+  }
+
+  .company-listing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .company-card-link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .company-logo-large {
+    width: 88px;
+    height: 88px;
+    margin: 0 auto 1.25rem;
+    background: white;
+    padding: 1rem;
+    border-radius: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  .company-logo-large img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .company-listing-card h2,
+  .company-listing-card p,
+  .company-chip-row,
+  .company-listing-card .btn-primary,
+  .company-logo-large {
+    position: relative;
+    z-index: 2;
+  }
+
+  .company-listing-card h2 {
+    font-size: 1.35rem;
+    margin-bottom: 0.45rem;
+  }
+
+  .company-meta {
+    color: var(--text-muted);
+    margin-bottom: 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .company-snippet {
+    margin: 0 0 1rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .company-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .company-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.12);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .companies-faq-section,
+  .partner-section {
+    max-width: 1180px;
+    margin: 0 auto 1.5rem;
+    padding: 0 1rem;
+  }
+
+  .companies-faq-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 0;
+  }
+
+  .companies-faq-item {
+    padding: 1.25rem;
+  }
+
+  .companies-faq-item h3 {
+    margin: 0 0 0.45rem;
+    font-size: 1rem;
+  }
+
+  .companies-faq-item p {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .partner-card {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    padding: 3rem;
+    border-radius: 2rem;
+    text-align: center;
+  }
+
+  .partner-link {
+    max-width: 250px;
+    margin: 0 auto;
+    display: block;
+  }
+
+  .partner-card h2 { margin-bottom: 1rem; }
+  .partner-card p { color: var(--text-muted); margin-bottom: 2rem; }
+
+  @media (max-width: 960px) {
+    .companies-fact-grid,
+    .companies-faq-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .companies-geo-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .companies-answer-panel,
+    .companies-trust-panel {
+      grid-template-columns: 1fr;
+    }
+
+    .companies-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+
+    .company-listing-card {
+      padding: 1rem 0.75rem;
+      border-radius: 1.25rem;
+    }
+
+    .company-logo-large {
+      width: 50px;
+      height: 50px;
+      margin-bottom: 0.75rem;
+      border-radius: 0.75rem;
+    }
+
+    .company-listing-card h2 {
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .company-meta,
+    .company-snippet {
+      font-size: 0.75rem;
+    }
+
+    .company-listing-card .btn-primary {
+      padding: 0.5rem 0.5rem;
+      font-size: 0.8rem;
+      border-radius: 0.75rem;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .companies-fact-grid,
+    .companies-faq-grid,
+    .companies-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

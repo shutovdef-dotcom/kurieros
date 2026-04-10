@@ -2,62 +2,44 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import jobsData from '../data/jobs.json';
 
-// Test data for 4 jobs
-const compareJobs = [
-  {
-    id: 1,
-    title: "Курьер на авто",
-    company: "Яндекс Еда",
-    logoColor: "#FFCC00",
-    salary: "до 160 000 ₽",
-    location: "Любой район",
-    transport: "Авто",
-    contract: "Самозанятость",
-    payout: "Ежедневно",
-    bonus: "Быстрый старт",
-    link: "#"
-  },
-  {
-    id: 2,
-    title: "Водитель-курьер",
-    company: "Ozon",
-    logoColor: "#005BFF",
-    salary: "до 180 000 ₽",
-    location: "Склады ПВЗ",
-    transport: "Грузовик",
-    contract: "ИП / Самозанятость",
-    payout: "Раз в неделю",
-    bonus: "Стабильный доход",
-    link: "#"
-  },
-  {
-    id: 3,
-    title: "Велокурьер",
-    company: "Самокат",
-    logoColor: "#FF4063",
-    salary: "до 120 000 ₽",
-    location: "Даркстор",
-    transport: "Велосипед",
-    contract: "ГПХ / Самозанятость",
-    payout: "Раз в неделю",
-    bonus: "Форма бесплатно",
-    link: "#"
-  },
-  {
-    id: 4,
-    title: "Пеший курьер",
-    company: "СДЭК",
-    logoColor: "#00B050",
-    salary: "до 90 000 ₽",
-    location: "Один район",
-    transport: "Пешком",
-    contract: "ТК РФ",
-    payout: "2 раза в месяц",
-    bonus: "Скидки от партнеров",
-    link: "#"
-  }
-];
+const companyColors: Record<string, string> = {
+  'Яндекс Еда': '#FFCC00',
+  'Ozon': '#005BFF',
+  'Самокат': '#FF4063',
+  'СДЭК': '#00B050',
+  'ВкусВилл': '#1A9A50',
+  'ВТБ': '#0A2896',
+};
+
+const transportLabelMap: Record<string, string> = {
+  auto: 'Авто',
+  bicycle: 'Велосипед / самокат',
+  foot: 'Пешком',
+};
+
+const parseSalary = (salary: string) => Number(salary.replace(/[^\d]/g, '')) || 0;
+const getTransportLabel = (tags: string[]) =>
+  tags.find((tag) => tag in transportLabelMap)
+    ? transportLabelMap[tags.find((tag) => tag in transportLabelMap) as string]
+    : 'Смешанный формат';
+
+const compareJobs = jobsData.slice(0, 4).map((job) => ({
+  id: job.id,
+  slug: job.slug,
+  title: job.title,
+  company: job.company,
+  logoColor: companyColors[job.company] || '#6366F1',
+  salary: job.salary,
+  location: job.location,
+  transport: getTransportLabel(job.tags),
+  contract: job.details.employment_type,
+  payout: job.details.payment_freq,
+  bonus: job.benefits[0] || 'Условия уточняются при отклике',
+  age: job.details.age,
+  link: `/v/${job.slug}/`,
+}));
 
 const features = [
   { key: 'salary', name: 'Зарплата' },
@@ -65,24 +47,139 @@ const features = [
   { key: 'transport', name: 'Транспорт' },
   { key: 'contract', name: 'Оформление' },
   { key: 'payout', name: 'Выплаты' },
-  { key: 'bonus', name: 'Особенности' }
+  { key: 'bonus', name: 'Особенности' },
+];
+
+const topIncomeJob = [...compareJobs].sort((a, b) => parseSalary(b.salary) - parseSalary(a.salary))[0];
+const studentFriendlyJob = compareJobs.find((job) => job.age.includes('16')) || compareJobs[0];
+const stableContractJob = compareJobs.find((job) => /тк|официаль/i.test(job.contract)) || compareJobs[0];
+
+const verdictCards = [
+  {
+    label: 'Лучше для дохода',
+    title: topIncomeJob.title,
+    text: `${topIncomeJob.company} выглядит самым сильным вариантом по верхней планке дохода, но финальные цифры всё равно нужно подтверждать перед откликом.`,
+  },
+  {
+    label: 'Лучше для старта',
+    title: studentFriendlyJob.title,
+    text: `${studentFriendlyJob.company} лучше подходит тем, кто ищет вход в профессию с более мягким возрастным порогом и понятным стартом.`,
+  },
+  {
+    label: 'Лучше для стабильности',
+    title: stableContractJob.title,
+    text: `${stableContractJob.company} стоит смотреть тем, кому важнее понятное оформление и предсказуемый формат занятости.`,
+  },
+];
+
+const fitPoints = [
+  'Сравнение полезно тем, кто уже выбрал 2-4 похожих вакансии и хочет быстро увидеть разницу по выплатам, транспорту и оформлению.',
+  'Такой экран особенно помогает перед откликом, когда нужно отсечь неподходящие условия без лишних переходов между страницами.',
+  'Если выбор уже сузился до одной компании, после сравнения лучше открыть её карточку и проверить ограничения детально.',
+];
+
+const cautionPoints = [
+  'Верхняя зарплатная планка не равна гарантированному доходу: проверяйте формулу выплат и частоту начислений.',
+  'Если для вас критичны ТК РФ, гражданство, медкнижка или точный район, эти пункты лучше сверять в карточке вакансии.',
+  'Сравнение помогает принять решение быстрее, но финальные условия подтверждаются уже у работодателя или в анкете партнера.',
+];
+
+const faqItems = [
+  {
+    question: 'Как читать это сравнение вакансий?',
+    answer: 'Сначала посмотрите на формат транспорта, выплаты и оформление, а затем откройте подходящие карточки вакансий, чтобы проверить ограничения и детали отклика.',
+  },
+  {
+    question: 'Что сравнивать в первую очередь?',
+    answer: 'Обычно первыми стоит сравнить выплаты, формат занятости, требования к транспорту и возрастной порог. Именно эти параметры быстрее всего отсеивают неподходящие варианты.',
+  },
+  {
+    question: 'Можно ли выбирать только по зарплате?',
+    answer: 'Нет. Верхняя планка дохода без графика, условий оформления и частоты выплат почти всегда даёт неполную картину, поэтому лучше смотреть на набор факторов сразу.',
+  },
+];
+
+const pageSchemaGraph = [
+  {
+    '@type': 'WebPage',
+    name: 'Сравнение вакансий курьеров',
+    description: 'Сравнение условий по нескольким вакансиям курьеров: выплаты, транспорт, оформление и особенности работы.',
+    url: Astro.url.href,
+    dateModified: new Date().toISOString(),
+  },
+  {
+    '@type': 'FAQPage',
+    mainEntity: faqItems.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer,
+      },
+    })),
+  },
 ];
 ---
 
-<BaseLayout title="Сравнение вакансий курьеров">
+<BaseLayout title="Сравнение вакансий курьеров" description="Сравните вакансии курьеров по выплатам, транспорту, оформлению и ключевым условиям перед откликом." schemaGraph={pageSchemaGraph}>
   <Header />
 
   <main class="compare-page">
     <div class="compare-container">
       <div class="compare-header">
-        <h1>Сравнение вакансий</h1>
+        <div>
+          <h1>Сравнение вакансий</h1>
+          <p class="compare-subtitle">Сначала короткий вывод и правила выбора, потом детальная таблица по условиям.</p>
+        </div>
         <a href="/" class="back-link">← К списку вакансий</a>
       </div>
 
+      <section class="compare-answer-panel">
+        <div>
+          <p class="section-eyebrow">AI GEO TL;DR</p>
+          <h2>Что важнее всего в этом сравнении?</h2>
+        </div>
+        <p>
+          Это экран для быстрого выбора между похожими вакансиями курьера. Сначала сравните выплаты, формат транспорта и
+          оформление, а затем переходите только в те карточки, которые подходят вам по реальным ограничениям, а не только
+          по верхней зарплатной вилке.
+        </p>
+      </section>
+
+      <section class="compare-verdict-grid" aria-label="Быстрые выводы по сравнению">
+        {verdictCards.map((card) => (
+          <article class="compare-verdict-card">
+            <span>{card.label}</span>
+            <h3>{card.title}</h3>
+            <p>{card.text}</p>
+          </article>
+        ))}
+      </section>
+
+      <section class="compare-geo-grid">
+        <article class="compare-geo-card">
+          <p class="section-eyebrow">Кому подходит</p>
+          <h2>Когда это сравнение реально полезно?</h2>
+          <ul class="compare-list">
+            {fitPoints.map((point) => (
+              <li>{point}</li>
+            ))}
+          </ul>
+        </article>
+
+        <article class="compare-geo-card compare-geo-card-caution">
+          <p class="section-eyebrow">Что уточнить</p>
+          <h2>Что проверить перед откликом?</h2>
+          <ol class="compare-list numbered-list">
+            {cautionPoints.map((point) => (
+              <li>{point}</li>
+            ))}
+          </ol>
+        </article>
+      </section>
+
       <div class="compare-table-wrapper">
         <div class="compare-grid">
-          
-          <!-- Шапка таблицы -->
           <div class="compare-row compare-head">
             <div class="compare-cell feature-col empty-cell">
               Параметры
@@ -105,7 +202,6 @@ const features = [
             ))}
           </div>
 
-          <!-- Строки с характеристиками -->
           {features.map((feature) => (
             <div class="compare-row">
               <div class="compare-cell feature-col">
@@ -119,18 +215,41 @@ const features = [
             </div>
           ))}
 
-          <!-- Строка с кнопками -->
           <div class="compare-row compare-actions">
             <div class="compare-cell feature-col"></div>
             {compareJobs.map((job, index) => (
               <div class="compare-cell job-col" data-col={index}>
-                <a href={job.link} class="btn-primary">Откликнуться</a>
+                <a href={job.link} class="btn-primary">Открыть карточку</a>
               </div>
             ))}
           </div>
-
         </div>
       </div>
+
+      <section class="compare-faq-section">
+        <p class="section-eyebrow">FAQ</p>
+        <h2>Короткие ответы перед выбором вакансии</h2>
+        <div class="compare-faq-grid">
+          {faqItems.map((item) => (
+            <article class="compare-faq-item">
+              <h3>{item.question}</h3>
+              <p>{item.answer}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="compare-trust-panel">
+        <div>
+          <p class="section-eyebrow">Прозрачность</p>
+          <h2>Как использовать это сравнение</h2>
+        </div>
+        <p>
+          Эта страница помогает быстро понять различия между форматами работы, но не заменяет карточку вакансии. После выбора
+          подходящего варианта откройте его страницу и подтвердите выплаты, оформление, возрастной порог и ограничения уже по
+          актуальным условиям работодателя.
+        </p>
+      </section>
     </div>
   </main>
 
@@ -142,14 +261,12 @@ const features = [
     const grid = document.querySelector('.compare-grid');
     if (!grid) return;
 
-    // Ищем все уникальные индексы колонок
     const allJobCols = document.querySelectorAll('.compare-head .job-col');
     let totalCols = allJobCols.length;
 
     const updateGridState = () => {
       grid.style.setProperty('--cols', totalCols.toString());
-      
-      // Если все удалены, показываем сообщение
+
       if (totalCols === 0) {
         grid.innerHTML = `
           <div class="compare-empty-state">
@@ -162,18 +279,16 @@ const features = [
 
     grid.style.setProperty('--cols', totalCols.toString());
 
-    // Делегирование событий для кнопок удаления (крестиков)
     grid.addEventListener('click', (e) => {
       const btn = e.target.closest('.remove-col-btn');
       if (!btn) return;
-      
+
       const targetCol = btn.getAttribute('data-col-target');
       if (targetCol === null) return;
-      
-      // Удаляем все ячейки с данным data-col (для каждой строки)
+
       const cells = document.querySelectorAll(`.compare-cell[data-col="${targetCol}"]`);
       cells.forEach(cell => cell.remove());
-      
+
       totalCols--;
       updateGridState();
     });
@@ -200,14 +315,31 @@ const features = [
   .compare-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
   }
 
   .compare-header h1 {
     font-size: 2rem;
     font-weight: 800;
+    margin: 0 0 0.35rem;
+  }
+
+  .compare-subtitle {
     margin: 0;
+    color: var(--text-muted);
+    line-height: 1.7;
+    max-width: 60ch;
+  }
+
+  .section-eyebrow {
+    margin: 0 0 0.55rem;
+    font-size: 0.74rem;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent-color);
   }
 
   .back-link {
@@ -222,15 +354,117 @@ const features = [
     color: var(--primary-color);
   }
 
+  .compare-answer-panel,
+  .compare-trust-panel {
+    display: grid;
+    grid-template-columns: minmax(220px, 0.32fr) minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+    margin-bottom: 1rem;
+    padding: 1.5rem;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 1.5rem;
+    background: rgba(255, 255, 255, 0.74);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .compare-answer-panel h2,
+  .compare-answer-panel p,
+  .compare-trust-panel h2,
+  .compare-trust-panel p {
+    margin: 0;
+  }
+
+  .compare-answer-panel p,
+  .compare-trust-panel p {
+    color: var(--text-muted);
+    line-height: 1.8;
+  }
+
+  .compare-verdict-grid,
+  .compare-geo-grid,
+  .compare-faq-grid {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .compare-verdict-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .compare-verdict-card,
+  .compare-geo-card,
+  .compare-faq-item {
+    padding: 1.25rem;
+    border-radius: 1.25rem;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .compare-verdict-card span {
+    display: inline-block;
+    margin-bottom: 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .compare-verdict-card h3,
+  .compare-geo-card h2,
+  .compare-faq-section h2 {
+    margin: 0 0 0.7rem;
+  }
+
+  .compare-verdict-card p,
+  .compare-faq-item p {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .compare-geo-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .compare-geo-card {
+    border: 1px solid rgba(99, 102, 241, 0.12);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.96)),
+      var(--bg-card);
+  }
+
+  .compare-geo-card-caution {
+    border-color: rgba(249, 115, 22, 0.16);
+  }
+
+  .compare-list {
+    margin: 0;
+    padding-left: 1.35rem;
+  }
+
+  .compare-list li {
+    margin-bottom: 0.7rem;
+    line-height: 1.7;
+  }
+
+  .numbered-list li::marker {
+    color: var(--accent-color);
+    font-weight: 900;
+  }
+
   .compare-table-wrapper {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
     background: var(--surface-color);
+    margin-bottom: 1.5rem;
   }
 
-  /* Сетка на CSS Grid */
   .compare-grid {
     --cols: 4;
     --feature-col-width: 160px;
@@ -240,20 +474,19 @@ const features = [
     --mobile-feature-col-width-narrow: 80px;
     --mobile-job-col-width-narrow: 76px;
     display: grid;
-    /* 1 колонка характеристик + var(--cols) колонок вакансий */
     grid-template-columns: minmax(var(--feature-col-width), 200px) repeat(var(--cols), minmax(var(--job-col-width), 1fr));
-    min-width: max(100%, calc(var(--feature-col-width) + var(--cols) * var(--job-col-width))); /* динамическая ширина */
-    background: var(--border-color); /* линии будут формироваться gaps, либо border-bottom/right */
-    gap: 1px; /* Тонкая линия разделения через gap! Более надежно, чем рамки */
+    min-width: max(100%, calc(var(--feature-col-width) + var(--cols) * var(--job-col-width)));
+    background: var(--border-color);
+    gap: 1px;
   }
 
   .compare-row {
-    display: contents; /* Позволяет детям становиться грид-элементами .compare-grid */
+    display: contents;
   }
 
   .compare-cell {
     padding: 1.5rem;
-    background: var(--surface-color); /* Фон ячеек нужен из-за gap: 1px, который дает цвет бордера */
+    background: var(--surface-color);
     display: flex;
     align-items: center;
     color: var(--text-main);
@@ -324,7 +557,7 @@ const features = [
   }
 
   .remove-col-btn:hover {
-    color: #ef4444; /* red-500 */
+    color: #ef4444;
     border-color: #ef4444;
     background: #fef2f2;
     transform: scale(1.1);
@@ -367,6 +600,19 @@ const features = [
     padding-bottom: 1.5rem;
   }
 
+  .compare-faq-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .compare-faq-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .compare-faq-item h3 {
+    margin: 0 0 0.45rem;
+    font-size: 1rem;
+  }
+
   .compare-empty-state {
     grid-column: 1 / -1;
     padding: 3rem;
@@ -383,22 +629,35 @@ const features = [
     width: auto;
   }
 
-  /* На мобильных экранах таблица становится плотнее, а лишние вакансии уходят в горизонтальный скролл */
+  @media (max-width: 960px) {
+    .compare-verdict-grid,
+    .compare-faq-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .compare-geo-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
   @media (max-width: 768px) {
     .compare-page {
       padding: 1rem 0.5rem;
     }
-    
+
     .compare-container {
       padding: 0.75rem;
     }
 
-    .compare-header {
+    .compare-header,
+    .compare-answer-panel,
+    .compare-trust-panel {
+      grid-template-columns: 1fr;
       flex-direction: column;
       align-items: flex-start;
       gap: 1rem;
     }
-    
+
     .compare-grid {
       grid-template-columns: var(--mobile-feature-col-width) repeat(var(--cols), var(--mobile-job-col-width));
       min-width: calc(var(--mobile-feature-col-width) + var(--cols) * var(--mobile-job-col-width));
@@ -432,6 +691,13 @@ const features = [
     .btn-primary {
       font-size: 0.74rem;
       padding: 0.65rem 0.35rem;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .compare-verdict-grid,
+    .compare-faq-grid {
+      grid-template-columns: 1fr;
     }
   }
 

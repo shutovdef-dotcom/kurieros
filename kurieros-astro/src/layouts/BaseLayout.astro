@@ -16,6 +16,7 @@ interface Props {
 	description?: string;
 	image?: string;
 	canonicalURL?: URL | string;
+	schemaGraph?: Record<string, any> | Array<Record<string, any>>;
 }
 
 const {
@@ -23,7 +24,27 @@ const {
 	description = "Лучшие вакансии для курьеров в России. Работа на авто, мото, вело и пешком. Сравнивайте условия в Яндекс Еда, СДЭК, Ozon и других компаниях.",
 	image = "/favicon.svg",
 	canonicalURL = new URL(Astro.url.pathname, Astro.site),
+	schemaGraph = [],
 } = Astro.props;
+
+const websiteSchema = {
+	"@type": "WebSite",
+	name: "Курьерос",
+	url: "https://kurerok.ru/",
+};
+
+const normalizedSchemaGraph = Array.isArray(schemaGraph)
+	? schemaGraph
+	: [schemaGraph];
+
+const structuredData = JSON.stringify(
+	{
+		"@context": "https://schema.org",
+		"@graph": [websiteSchema, ...normalizedSchemaGraph.filter(Boolean)],
+	},
+	null,
+	2,
+);
 ---
 
 <!doctype html>
@@ -74,31 +95,7 @@ const {
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
 		<!-- SEO Schema.org Markup -->
-		<script type="application/ld+json">
-			{
-				"@context": "https://schema.org",
-				"@graph": [
-					{
-						"@type": "FAQPage",
-						"mainEntity": [
-							{
-								"@type": "Question",
-								"name": "Со скольки лет можно работать курьером?",
-								"acceptedAnswer": {
-									"@type": "Answer",
-									"text": "В большинстве компаний можно устроиться уже с 16 лет."
-								}
-							}
-						]
-					},
-					{
-						"@type": "WebSite",
-						"name": "Курьерос",
-						"url": "https://kurerok.ru/"
-					}
-				]
-			}
-		</script>
+		<script type="application/ld+json" set:html={structuredData}></script>
 	</head>
 	<body class="theme-minimal">
 		<script is:inline>

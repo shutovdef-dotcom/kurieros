@@ -10,28 +10,26 @@ import { getCitiesFromJobs } from '../utils/cities';
 export async function getStaticPaths() {
 	const paths = [];
 
-	// Add cities from vacancies
 	getCitiesFromJobs(jobsData).forEach((city) => {
 		paths.push({
 			params: { slug: `rabota-kurerom-${city.slug}` },
-			props: { 
+			props: {
 				type: 'city',
 				data: city,
 				title: `Работа курьером ${city.prep} — Вакансии 2026`,
-				description: `Свежие вакансии для курьеров ${city.prep}. Сравнивайте условия, выбирайте лучшие компании и зарабатывайте до 250 000 ₽.`
+				description: `Свежие вакансии для курьеров ${city.prep}. Сравнивайте условия, выбирайте лучшие компании и зарабатывайте до 250 000 ₽.`,
 			},
 		});
 	});
 
-	// Add categories
 	CATEGORIES.forEach((cat) => {
 		paths.push({
 			params: { slug: `rabota-kurerom-${cat.slug}` },
-			props: { 
+			props: {
 				type: 'category',
 				data: cat,
 				title: `Работа курьером: ${cat.name} — Вакансии 2026`,
-				description: `Все вакансии для курьеров категории "${cat.name}". Прямые работодатели, удобный фильтр и быстрое трудоустройство.`
+				description: `Все вакансии для курьеров категории "${cat.name}". Прямые работодатели, удобный фильтр и быстрое трудоустройство.`,
 			},
 		});
 	});
@@ -40,24 +38,231 @@ export async function getStaticPaths() {
 }
 
 const { type, data, title, description } = Astro.props;
+const searchTerm = type === 'category' ? (data.query || '').toLowerCase() : '';
+const tagFilter = type === 'category' ? data.tag || 'all' : 'all';
+
+const filteredJobs = jobsData.filter((job) => {
+	const matchesCity =
+		type !== 'city' ||
+		job.location.toLowerCase().includes(data.name.toLowerCase()) ||
+		job.location === 'Вся Россия';
+	const matchesTag = tagFilter === 'all' || job.tags.includes(tagFilter);
+	const matchesSearch =
+		!searchTerm ||
+		job.title.toLowerCase().includes(searchTerm) ||
+		job.company.toLowerCase().includes(searchTerm) ||
+		job.location.toLowerCase().includes(searchTerm) ||
+		job.salary.toLowerCase().includes(searchTerm);
+
+	return matchesCity && matchesTag && matchesSearch;
+});
+
+const companyNames = Array.from(new Set(filteredJobs.map((job) => job.company)));
+const paymentTypes = Array.from(new Set(filteredJobs.map((job) => job.details.payment_freq)));
+const transportLabelMap: Record<string, string> = {
+	auto: 'На авто',
+	bicycle: 'На велосипеде или самокате',
+	foot: 'Пеший формат',
+};
+const transportTypes = Array.from(
+	new Set(
+		filteredJobs.flatMap((job) =>
+			job.tags
+				.filter((tag) => tag in transportLabelMap)
+				.map((tag) => transportLabelMap[tag]),
+		),
+	),
+);
+const updatedDate = new Intl.DateTimeFormat('ru-RU', {
+	day: 'numeric',
+	month: 'long',
+	year: 'numeric',
+}).format(new Date());
+
+const introSummary =
+	type === 'city'
+		? `В подборке ${data.prep} сейчас ${filteredJobs.length} вакансий курьера от ${companyNames.length} компаний. Здесь удобно быстро понять, какие бренды активны, какие форматы работы доступны и что важно проверить перед откликом.`
+		: `Подборка "${data.name}" сейчас включает ${filteredJobs.length} вакансий от ${companyNames.length} компаний. Это страница для быстрого сравнения форматов работы, условий выплат и базовых требований до перехода к карточкам вакансий.`;
+
+const factCards = [
+	{ label: 'Вакансии', value: `${filteredJobs.length}` },
+	{ label: 'Компании', value: `${companyNames.length}` },
+	{ label: 'Форматы', value: transportTypes.join(', ') || 'Смешанные форматы' },
+	{ label: 'Выплаты', value: paymentTypes.slice(0, 2).join(' / ') || 'Уточняются в карточке' },
+];
+
+const fitPoints =
+	type === 'city'
+		? [
+			`Тем, кто ищет работу курьером ${data.prep} и хочет быстро понять, какие компании активны прямо сейчас.`,
+			`Кандидатам, которые сравнивают форматы доставки по графику, выплатам и требованиям к оформлению.`,
+			`Тем, кто хочет сначала выбрать подходящую карточку вакансии, а уже потом переходить к отклику.`,
+		]
+		: [
+			`Тем, кто рассматривает формат "${data.name}" и хочет увидеть несколько вариантов на одной странице.`,
+			`Кандидатам, которым важно сравнить выплаты, требования и тип занятости до перехода к анкете.`,
+			`Тем, кто хочет быстро отсечь неподходящие вакансии и открыть только релевантные карточки.`,
+		];
+
+const cautionPoints = [
+	'Финальные условия по выплатам, возрасту, гражданству и оформлению подтверждайте уже на странице вакансии или у работодателя.',
+	'Если вам принципиальны конкретный район, официальный ТК РФ или точный график смен, открывайте карточки вакансий и сравнивайте детали поштучно.',
+	'Часть ссылок может вести на внешнюю анкету работодателя или партнера, поэтому условия перед откликом стоит перепроверять еще раз.',
+];
+
+const faqItems =
+	type === 'city'
+		? [
+			{
+				question: `Какие вакансии курьера есть ${data.prep}?`,
+				answer: `На этой странице собраны ${filteredJobs.length} вакансий от ${companyNames.length} компаний. В подборке есть форматы ${transportTypes.join(', ').toLowerCase() || 'с разными типами занятости'} и разные графики работы.`,
+			},
+			{
+				question: `Кому подходит работа курьером ${data.prep}?`,
+				answer: `Подборка подходит тем, кто хочет быстро сравнить локальные вакансии по выплатам, требованиям и компаниям, а затем перейти только в подходящие карточки.`,
+			},
+			{
+				question: 'Что проверить перед откликом?',
+				answer: 'Перед откликом стоит открыть карточку вакансии и уточнить выплаты, оформление, возрастной порог, гражданство, медкнижку и формат занятости.',
+			},
+		]
+		: [
+			{
+				question: `Что входит в подборку "${data.name}"?`,
+				answer: `На странице собраны ${filteredJobs.length} вакансий от ${companyNames.length} компаний, которые совпадают с фильтром "${data.name}" по тегу или поисковому запросу.`,
+			},
+			{
+				question: `Кому подходит формат "${data.name}"?`,
+				answer: `Эта подборка подходит тем, кто хочет сравнить один конкретный формат работы курьером и выбрать вакансию по графику, выплатам и базовым требованиям.`,
+			},
+			{
+				question: 'Нужно ли сразу откликаться?',
+				answer: 'Нет. Сначала стоит открыть карточки вакансий, проверить ограничения и только потом переходить по ссылке отклика на сайт работодателя или партнера.',
+			},
+		];
+
+const pageSchemaGraph = [
+	{
+		'@type': 'CollectionPage',
+		name: title,
+		description,
+		url: Astro.url.href,
+		dateModified: new Date().toISOString(),
+		mainEntity: {
+			'@type': 'ItemList',
+			itemListElement: filteredJobs.slice(0, 10).map((job, index) => ({
+				'@type': 'ListItem',
+				position: index + 1,
+				name: job.title,
+				url: new URL(`/v/${job.slug}/`, Astro.site).toString(),
+			})),
+		},
+	},
+	{
+		'@type': 'FAQPage',
+		mainEntity: faqItems.map((item) => ({
+			'@type': 'Question',
+			name: item.question,
+			acceptedAnswer: {
+				'@type': 'Answer',
+				text: item.answer,
+			},
+		})),
+	},
+];
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} schemaGraph={pageSchemaGraph}>
 	<Header />
 
 	<main>
 		<section class="hero listing-hero">
 			<h1>{title}</h1>
 			<p>
-				{type === 'city' 
+				{type === 'city'
 					? `Актуальные предложения о работе курьером ${data.prep}.`
-					: `Список всех доступных вакансий в категории "${data.name}".`
-				}
+					: `Список всех доступных вакансий в категории "${data.name}".`}
 			</p>
 		</section>
 
-		<JobGrid 
-			initialCity={type === 'city' ? data.name : undefined} 
+		<section class="listing-answer-panel">
+			<div>
+				<p class="section-eyebrow">AI GEO TL;DR</p>
+				<h2>
+					{type === 'city'
+						? `Что важно знать о работе курьером ${data.prep}?`
+						: `Что важно знать о подборке "${data.name}"?`}
+				</h2>
+			</div>
+			<p>{introSummary}</p>
+		</section>
+
+		<section class="listing-fact-grid" aria-label="Ключевые факты по подборке">
+			{factCards.map((fact) => (
+				<article class="listing-fact-card">
+					<span>{fact.label}</span>
+					<strong>{fact.value}</strong>
+				</article>
+			))}
+		</section>
+
+		<section class="listing-geo-grid">
+			<article class="listing-geo-card">
+				<p class="section-eyebrow">Кому подходит</p>
+				<h2>
+					{type === 'city'
+						? `Кому подходит подборка вакансий ${data.prep}?`
+						: `Кому подходит формат "${data.name}"?`}
+				</h2>
+				<ul class="listing-bullet-list">
+					{fitPoints.map((point) => (
+						<li>{point}</li>
+					))}
+				</ul>
+			</article>
+
+			<article class="listing-geo-card listing-geo-card-caution">
+				<p class="section-eyebrow">Что уточнить</p>
+				<h2>Что нужно проверить перед откликом?</h2>
+				<ol class="listing-bullet-list numbered-list">
+					{cautionPoints.map((point) => (
+						<li>{point}</li>
+					))}
+				</ol>
+			</article>
+		</section>
+
+		<section class="listing-faq-section" aria-label="Частые вопросы по подборке">
+			<p class="section-eyebrow">FAQ</p>
+			<h2>
+				{type === 'city'
+					? `Короткие ответы о работе курьером ${data.prep}`
+					: `Короткие ответы по формату "${data.name}"`}
+			</h2>
+			<div class="listing-faq-grid">
+				{faqItems.map((item) => (
+					<article class="listing-faq-item">
+						<h3>{item.question}</h3>
+						<p>{item.answer}</p>
+					</article>
+				))}
+			</div>
+		</section>
+
+		<section class="listing-trust-panel">
+			<div>
+				<p class="section-eyebrow">Прозрачность</p>
+				<h2>Как читать эту страницу</h2>
+			</div>
+			<p>
+				Подборка обновлена {updatedDate}. Это навигационная страница для быстрого сравнения вакансий: она помогает понять
+				контекст, но финальные условия, выплаты и ограничения всегда стоит уточнять уже в карточке вакансии и на стороне
+				работодателя.
+			</p>
+		</section>
+
+		<JobGrid
+			initialCity={type === 'city' ? data.name : undefined}
 			initialTag={type === 'category' ? data.tag : undefined}
 			initialSearch={type === 'category' ? data.query : undefined}
 		/>
@@ -67,10 +272,19 @@ const { type, data, title, description } = Astro.props;
 </BaseLayout>
 
 <style>
+	.listing-hero,
+	.listing-answer-panel,
+	.listing-fact-grid,
+	.listing-geo-grid,
+	.listing-faq-section,
+	.listing-trust-panel {
+		max-width: 1180px;
+		margin-inline: auto;
+	}
+
 	.listing-hero {
-		max-width: 980px;
 		padding: 1.5rem 1rem 0.75rem;
-		margin: 0 auto 1.5rem;
+		margin-bottom: 1.5rem;
 	}
 
 	.listing-hero h1 {
@@ -88,10 +302,202 @@ const { type, data, title, description } = Astro.props;
 		line-height: 1.6;
 	}
 
+	.section-eyebrow {
+		margin: 0 0 0.55rem;
+		font-size: 0.74rem;
+		font-weight: 900;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: var(--accent-color);
+	}
+
+	.listing-answer-panel,
+	.listing-trust-panel {
+		display: grid;
+		grid-template-columns: minmax(220px, 0.32fr) minmax(0, 1fr);
+		gap: 1.5rem;
+		align-items: start;
+		margin-bottom: 1rem;
+		padding: 1.5rem;
+		border: 1px solid rgba(148, 163, 184, 0.16);
+		border-radius: 1.5rem;
+		background: rgba(255, 255, 255, 0.74);
+		box-shadow: var(--shadow-sm);
+	}
+
+	.listing-answer-panel h2,
+	.listing-answer-panel p,
+	.listing-trust-panel h2,
+	.listing-trust-panel p {
+		margin: 0;
+	}
+
+	.listing-answer-panel p,
+	.listing-trust-panel p {
+		color: var(--text-muted);
+		line-height: 1.8;
+	}
+
+	.listing-fact-grid {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 0.8rem;
+		margin-bottom: 1.5rem;
+		padding: 0 1rem;
+	}
+
+	.listing-fact-card {
+		display: grid;
+		gap: 0.45rem;
+		min-height: 7.25rem;
+		padding: 1rem;
+		border: 1px solid rgba(148, 163, 184, 0.16);
+		border-radius: 1.2rem;
+		background: rgba(255, 255, 255, 0.82);
+		box-shadow: var(--shadow-sm);
+	}
+
+	.listing-fact-card span {
+		font-size: 0.72rem;
+		font-weight: 900;
+		letter-spacing: 0.11em;
+		text-transform: uppercase;
+		color: var(--text-muted);
+	}
+
+	.listing-fact-card strong {
+		align-self: end;
+		font-size: 1rem;
+		line-height: 1.4;
+	}
+
+	.listing-geo-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1rem;
+		margin-bottom: 1.5rem;
+		padding: 0 1rem;
+	}
+
+	.listing-geo-card,
+	.listing-faq-section {
+		padding: 1.5rem;
+		border-radius: 1.5rem;
+		background: var(--bg-card);
+		box-shadow: var(--shadow-sm);
+	}
+
+	.listing-geo-card {
+		border: 1px solid rgba(99, 102, 241, 0.12);
+		background:
+			linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.96)),
+			var(--bg-card);
+	}
+
+	.listing-geo-card-caution {
+		border-color: rgba(249, 115, 22, 0.16);
+	}
+
+	.listing-geo-card h2,
+	.listing-faq-section h2 {
+		margin-top: 0;
+		margin-bottom: 1rem;
+		font-size: clamp(1.3rem, 2vw, 1.75rem);
+	}
+
+	.listing-bullet-list {
+		margin: 0;
+		padding-left: 1.35rem;
+		color: var(--text-main);
+	}
+
+	.listing-bullet-list li {
+		margin-bottom: 0.7rem;
+		line-height: 1.7;
+	}
+
+	.numbered-list li::marker {
+		color: var(--accent-color);
+		font-weight: 900;
+	}
+
+	.listing-faq-section {
+		margin: 0 1rem 1.5rem;
+	}
+
+	.listing-faq-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 1rem;
+	}
+
+	.listing-faq-item {
+		padding: 1.1rem;
+		border: 1px solid rgba(148, 163, 184, 0.16);
+		border-radius: 1rem;
+		background: rgba(255, 255, 255, 0.72);
+	}
+
+	.listing-faq-item h3 {
+		margin: 0 0 0.45rem;
+		font-size: 1rem;
+	}
+
+	.listing-faq-item p {
+		margin: 0;
+		color: var(--text-muted);
+		line-height: 1.7;
+	}
+
+	.listing-trust-panel {
+		margin: 0 1rem 2rem;
+	}
+
 	@media (min-width: 768px) {
 		.listing-hero {
 			padding: 2.5rem 1rem 1rem;
 			margin-bottom: 2rem;
+		}
+	}
+
+	@media (max-width: 960px) {
+		.listing-fact-grid,
+		.listing-faq-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.listing-geo-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.listing-answer-panel,
+		.listing-trust-panel {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.listing-fact-grid,
+		.listing-faq-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.listing-hero,
+		.listing-fact-grid,
+		.listing-geo-grid,
+		.listing-faq-section,
+		.listing-trust-panel {
+			padding-inline: 1rem;
+		}
+
+		.listing-fact-grid,
+		.listing-geo-grid,
+		.listing-faq-section,
+		.listing-trust-panel {
+			padding-left: 1rem;
+			padding-right: 1rem;
 		}
 	}
 </style>

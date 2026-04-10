@@ -1,0 +1,681 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const adminHash = '2a4f4c5e061b8e807525ec8e325e1674c3aaccb740ba61cd92f3c91f7909391c';
+const starterChecks = [
+  'Проверить брендовый запрос: "работа в Самокат курьером"',
+  'Проверить city-intent запрос: "работа курьером Москва какая лучше"',
+  'Проверить compare-intent запрос: "самокат или яндекс еда курьер что лучше"',
+  'Зафиксировать, цитирует ли ИИ сам сайт, конкретную страницу и какую формулировку он использует',
+];
+---
+
+<BaseLayout title="Owner GEO AI Audit — Курьерос" description="Закрытая страница владельца для ручного AI GEO аудита и журнала наблюдений.">
+  <main class="owner-page">
+    <section class="owner-shell">
+      <div class="owner-hero">
+        <p class="owner-eyebrow">Owner Access Only</p>
+        <h1>AI GEO audit center</h1>
+        <p>Закрытая страница для ручной проверки того, как ChatGPT, Perplexity, Yandex Нейро и Google AI формулируют ответы про вакансии, города и бренды с сайта.</p>
+      </div>
+
+      <div id="owner-login" class="owner-card">
+        <h2>Вход владельца</h2>
+        <p class="muted">Введите приватный код доступа, чтобы открыть prompt pack и журнал наблюдений.</p>
+        <form id="owner-login-form" class="owner-login-form">
+          <label class="field">
+            <span>Приватный код</span>
+            <input id="owner-password" type="password" autocomplete="current-password" placeholder="Введите код доступа" required />
+          </label>
+          <button type="submit" class="btn-primary">Открыть панель</button>
+        </form>
+        <p id="owner-login-error" class="owner-error hidden">Неверный код доступа.</p>
+      </div>
+
+      <div id="owner-panel" class="owner-panel hidden">
+        <div class="owner-toolbar owner-card">
+          <div>
+            <h2>Панель ручного AI GEO аудита</h2>
+            <p class="muted">Сначала обновите контекст страницы, затем копируйте нужный prompt и фиксируйте выдачу в журнале.</p>
+          </div>
+          <div class="toolbar-actions">
+            <button id="owner-export-journal" type="button" class="btn-secondary">Скачать журнал</button>
+            <button id="owner-clear-journal" type="button" class="btn-secondary">Очистить журнал</button>
+            <button id="owner-logout" type="button" class="btn-secondary">Выйти</button>
+          </div>
+        </div>
+
+        <div class="owner-grid audit-grid">
+          <section class="owner-stack">
+            <div class="owner-card">
+              <h3>Контекст проверки</h3>
+              <form id="audit-context-form" class="owner-form">
+                <div class="two-col">
+                  <label class="field">
+                    <span>Целевая страница</span>
+                    <input id="audit-target-url" type="url" value="https://kurerok.ru/compare/" required />
+                  </label>
+                  <label class="field">
+                    <span>Тип страницы</span>
+                    <select id="audit-page-type">
+                      <option value="compare">Compare</option>
+                      <option value="company">Company</option>
+                      <option value="city">City</option>
+                      <option value="vacancy">Vacancy</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div class="three-col">
+                  <label class="field">
+                    <span>Бренд / сущность</span>
+                    <input id="audit-entity" type="text" value="Самокат" placeholder="Самокат" />
+                  </label>
+                  <label class="field">
+                    <span>Город</span>
+                    <input id="audit-city" type="text" value="Москва" placeholder="Москва" />
+                  </label>
+                  <label class="field">
+                    <span>Угол запроса</span>
+                    <select id="audit-intent">
+                      <option value="best">Лучшая вакансия</option>
+                      <option value="compare">Сравнение брендов</option>
+                      <option value="entry">Как начать</option>
+                      <option value="city">Работа в городе</option>
+                    </select>
+                  </label>
+                </div>
+              </form>
+            </div>
+
+            <div class="owner-card">
+              <h3>Мини-чеклист запуска</h3>
+              <ul class="info-list">
+                {starterChecks.map((item) => (
+                  <li>{item}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div class="owner-card">
+              <div class="section-head">
+                <div>
+                  <p class="owner-eyebrow">Prompt Pack</p>
+                  <h3>Канальные промпты для ручной проверки</h3>
+                </div>
+                <button id="refresh-prompts" type="button" class="btn-secondary">Обновить промпты</button>
+              </div>
+              <div class="prompt-grid">
+                <article class="prompt-card" data-channel="chatgpt">
+                  <div class="prompt-head">
+                    <h4>ChatGPT / SearchGPT</h4>
+                    <button type="button" class="btn-secondary prompt-copy">Копировать</button>
+                  </div>
+                  <p class="muted">Проверяем, всплывает ли страница в conversational answer и в каком виде.</p>
+                  <textarea class="prompt-output" readonly></textarea>
+                </article>
+
+                <article class="prompt-card" data-channel="perplexity">
+                  <div class="prompt-head">
+                    <h4>Perplexity</h4>
+                    <button type="button" class="btn-secondary prompt-copy">Копировать</button>
+                  </div>
+                  <p class="muted">Проверяем цитирование URL и насколько точно пересказывается тезис страницы.</p>
+                  <textarea class="prompt-output" readonly></textarea>
+                </article>
+
+                <article class="prompt-card" data-channel="yandex">
+                  <div class="prompt-head">
+                    <h4>Yandex Нейро</h4>
+                    <button type="button" class="btn-secondary prompt-copy">Копировать</button>
+                  </div>
+                  <p class="muted">Проверяем русскоязычную формулировку, локальный интент и близость к Яндекс-поиску.</p>
+                  <textarea class="prompt-output" readonly></textarea>
+                </article>
+
+                <article class="prompt-card" data-channel="google">
+                  <div class="prompt-head">
+                    <h4>Google AI / Gemini</h4>
+                    <button type="button" class="btn-secondary prompt-copy">Копировать</button>
+                  </div>
+                  <p class="muted">Проверяем answer-first выдачу и наличие ссылочного или смыслового заимствования.</p>
+                  <textarea class="prompt-output" readonly></textarea>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <aside class="owner-stack">
+            <div class="owner-card">
+              <h3>Добавить наблюдение</h3>
+              <form id="journal-form" class="owner-form">
+                <div class="two-col">
+                  <label class="field">
+                    <span>Платформа</span>
+                    <select id="journal-platform" required>
+                      <option value="ChatGPT">ChatGPT</option>
+                      <option value="Perplexity">Perplexity</option>
+                      <option value="Yandex Нейро">Yandex Нейро</option>
+                      <option value="Google AI">Google AI</option>
+                    </select>
+                  </label>
+                  <label class="field">
+                    <span>Тип наблюдения</span>
+                    <select id="journal-observation-type" required>
+                      <option value="quote">Цитирует страницу</option>
+                      <option value="mention">Упоминает без ссылки</option>
+                      <option value="miss">Не находит страницу</option>
+                    </select>
+                  </label>
+                </div>
+
+                <label class="field">
+                  <span>Запрос / prompt</span>
+                  <textarea id="journal-query" rows="3" placeholder="Какой запрос был отправлен в AI?" required></textarea>
+                </label>
+
+                <div class="three-col">
+                  <label class="field">
+                    <span>Страница surfaced?</span>
+                    <select id="journal-surfaced">
+                      <option value="yes">Да</option>
+                      <option value="partial">Частично</option>
+                      <option value="no">Нет</option>
+                    </select>
+                  </label>
+                  <label class="field">
+                    <span>Есть ссылка / citation?</span>
+                    <select id="journal-cited">
+                      <option value="yes">Да</option>
+                      <option value="no">Нет</option>
+                    </select>
+                  </label>
+                  <label class="field">
+                    <span>Позиция / приоритет</span>
+                    <input id="journal-rank" type="text" placeholder="Например: top 1, block 2" />
+                  </label>
+                </div>
+
+                <label class="field">
+                  <span>Целевая страница</span>
+                  <input id="journal-url" type="url" placeholder="https://kurerok.ru/companies/samokat/" required />
+                </label>
+
+                <label class="field">
+                  <span>Цитируемый URL или источник AI</span>
+                  <input id="journal-citation-url" type="url" placeholder="https://..." />
+                </label>
+
+                <label class="field">
+                  <span>Краткий summary ответа</span>
+                  <textarea id="journal-summary" rows="4" placeholder="Что именно написал AI и как сформулировал ответ?" required></textarea>
+                </label>
+
+                <label class="field">
+                  <span>Следующее действие</span>
+                  <textarea id="journal-next-step" rows="3" placeholder="Что улучшить на странице или в контенте после этого наблюдения?"></textarea>
+                </label>
+
+                <button type="submit" class="btn-primary">Сохранить наблюдение</button>
+              </form>
+              <p id="journal-status" class="muted status-line"></p>
+            </div>
+
+            <div class="owner-card">
+              <div class="section-head">
+                <div>
+                  <p class="owner-eyebrow">Journal</p>
+                  <h3>Журнал цитирования и ответов</h3>
+                </div>
+                <span id="journal-count" class="pill-count">0 записей</span>
+              </div>
+              <div id="journal-list" class="journal-list"></div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
+
+<script is:inline define:vars={{ adminHash }}>
+  const AUTH_KEY = 'kurieros-owner-auth';
+  const JOURNAL_KEY = 'kurieros-owner-geo-ai-journal';
+
+  const loginCard = document.getElementById('owner-login');
+  const panel = document.getElementById('owner-panel');
+  const loginForm = document.getElementById('owner-login-form');
+  const loginError = document.getElementById('owner-login-error');
+  const journalForm = document.getElementById('journal-form');
+  const journalList = document.getElementById('journal-list');
+  const journalCount = document.getElementById('journal-count');
+  const journalStatus = document.getElementById('journal-status');
+
+  function setOwnerMode(isOwner) {
+    loginCard.classList.toggle('hidden', isOwner);
+    panel.classList.toggle('hidden', !isOwner);
+  }
+
+  async function sha256(value) {
+    const data = new TextEncoder().encode(value);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(hashBuffer))
+      .map((byte) => byte.toString(16).padStart(2, '0'))
+      .join('');
+  }
+
+  function readContext() {
+    return {
+      targetUrl: document.getElementById('audit-target-url').value.trim(),
+      pageType: document.getElementById('audit-page-type').value,
+      entity: document.getElementById('audit-entity').value.trim(),
+      city: document.getElementById('audit-city').value.trim(),
+      intent: document.getElementById('audit-intent').value,
+    };
+  }
+
+  function buildPrompt(channel, context) {
+    const targetUrl = context.targetUrl || 'https://kurerok.ru/';
+    const entity = context.entity || 'Курьерос';
+    const city = context.city || 'Москва';
+    const intentLabels = {
+      best: `какая работа курьером лучше в ${city}`,
+      compare: `${entity} или Яндекс Еда курьер что лучше`,
+      entry: `как начать работать курьером в ${entity}`,
+      city: `работа курьером ${city}`,
+    };
+    const query = intentLabels[context.intent] || `работа курьером ${city}`;
+
+    const sharedBrief = [
+      `Представь, что пользователь ищет ответ на запрос: "${query}".`,
+      `Меня особенно интересует страница ${targetUrl}.`,
+      `Проверь, появится ли эта страница или её тезисы в ответе, и если нет — почему.`,
+      `Если страница подходит, процитируй или перескажи, что именно из неё стоит использовать в ответе.`,
+      'В конце дай короткий вердикт: surfaced / partial / missed.',
+    ].join(' ');
+
+    if (channel === 'chatgpt') {
+      return `Ответь как поисковый AI для русскоязычного пользователя. ${sharedBrief} Отдельно перечисли: 1) был ли явный source mention, 2) какой тезис страницы оказался самым quoteable, 3) что нужно добавить на страницу, чтобы её цитировали чаще.`;
+    }
+
+    if (channel === 'perplexity') {
+      return `Сделай web-backed ответ в стиле Perplexity. ${sharedBrief} Затем перечисли источники, которые ты бы процитировал, и скажи, присутствует ли ${targetUrl} среди них.`;
+    }
+
+    if (channel === 'yandex') {
+      return `Сформируй ответ в стиле Яндекс Нейро для запроса "${query}". Используй русский язык и локальный контекст. ${sharedBrief} Дополнительно отметь, какие формулировки звучат наиболее естественно для Яндекс-поиска и нейроответа.`;
+    }
+
+    return `Сделай answer-first ответ в стиле Google AI Overview или Gemini на запрос "${query}". ${sharedBrief} После ответа коротко оцени, подходит ли ${targetUrl} под блок answer engine и какую micro-summary лучше добавить в первый экран страницы.`;
+  }
+
+  function updatePrompts() {
+    const context = readContext();
+    document.querySelectorAll('.prompt-card').forEach((card) => {
+      const channel = card.dataset.channel;
+      const output = card.querySelector('.prompt-output');
+      output.value = buildPrompt(channel, context);
+    });
+  }
+
+  function loadJournal() {
+    try {
+      return JSON.parse(localStorage.getItem(JOURNAL_KEY) || '[]');
+    } catch (error) {
+      console.error('Не удалось прочитать журнал', error);
+      return [];
+    }
+  }
+
+  function saveJournal(entries) {
+    localStorage.setItem(JOURNAL_KEY, JSON.stringify(entries));
+  }
+
+  function renderJournal() {
+    const entries = loadJournal().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    journalCount.textContent = `${entries.length} ${entries.length === 1 ? 'запись' : 'записей'}`;
+
+    if (!entries.length) {
+      journalList.innerHTML = '<div class="empty-card">Журнал пока пуст. После первой ручной проверки здесь появятся наблюдения по AI-ответам и цитированиям.</div>';
+      return;
+    }
+
+    journalList.innerHTML = entries.map((entry) => `
+      <article class="journal-card" data-id="${entry.id}">
+        <div class="journal-head">
+          <div>
+            <strong>${entry.platform}</strong>
+            <span>${new Date(entry.createdAt).toLocaleString('ru-RU')}</span>
+          </div>
+          <button type="button" class="btn-secondary journal-delete">Удалить</button>
+        </div>
+        <div class="journal-pills">
+          <span class="chip">${entry.observationType}</span>
+          <span class="chip">${entry.surfaced}</span>
+          <span class="chip">${entry.cited}</span>
+          ${entry.rank ? `<span class="chip">${entry.rank}</span>` : ''}
+        </div>
+        <p><strong>Запрос:</strong> ${entry.query}</p>
+        <p><strong>Целевая страница:</strong> <a href="${entry.url}" target="_blank" rel="noopener noreferrer">${entry.url}</a></p>
+        ${entry.citationUrl ? `<p><strong>Цитируемый URL:</strong> <a href="${entry.citationUrl}" target="_blank" rel="noopener noreferrer">${entry.citationUrl}</a></p>` : ''}
+        <p><strong>Summary:</strong> ${entry.summary}</p>
+        ${entry.nextStep ? `<p><strong>Следующий шаг:</strong> ${entry.nextStep}</p>` : ''}
+      </article>
+    `).join('');
+
+    journalList.querySelectorAll('.journal-delete').forEach((button) => {
+      button.addEventListener('click', (event) => {
+        const card = event.currentTarget.closest('.journal-card');
+        const id = card?.dataset.id;
+        if (!id) return;
+        const nextEntries = loadJournal().filter((entry) => entry.id !== id);
+        saveJournal(nextEntries);
+        renderJournal();
+      });
+    });
+  }
+
+  loginForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const password = document.getElementById('owner-password').value;
+    const hash = await sha256(password);
+    const isValid = hash === adminHash;
+
+    loginError.classList.toggle('hidden', isValid);
+    if (!isValid) {
+      return;
+    }
+
+    sessionStorage.setItem(AUTH_KEY, '1');
+    setOwnerMode(true);
+    updatePrompts();
+    renderJournal();
+  });
+
+  document.getElementById('refresh-prompts')?.addEventListener('click', updatePrompts);
+  document.getElementById('audit-context-form')?.addEventListener('input', updatePrompts);
+
+  document.querySelectorAll('.prompt-copy').forEach((button) => {
+    button.addEventListener('click', async (event) => {
+      const card = event.currentTarget.closest('.prompt-card');
+      const output = card?.querySelector('.prompt-output');
+      if (!output?.value) return;
+
+      try {
+        await navigator.clipboard.writeText(output.value);
+        journalStatus.textContent = 'Промпт скопирован в буфер обмена.';
+      } catch (error) {
+        journalStatus.textContent = 'Не удалось скопировать автоматически. Можно выделить текст вручную.';
+      }
+    });
+  });
+
+  journalForm?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const entries = loadJournal();
+    const entry = {
+      id: String(Date.now()),
+      createdAt: new Date().toISOString(),
+      platform: document.getElementById('journal-platform').value,
+      observationType: document.getElementById('journal-observation-type').value,
+      query: document.getElementById('journal-query').value.trim(),
+      surfaced: document.getElementById('journal-surfaced').value,
+      cited: document.getElementById('journal-cited').value,
+      rank: document.getElementById('journal-rank').value.trim(),
+      url: document.getElementById('journal-url').value.trim(),
+      citationUrl: document.getElementById('journal-citation-url').value.trim(),
+      summary: document.getElementById('journal-summary').value.trim(),
+      nextStep: document.getElementById('journal-next-step').value.trim(),
+    };
+
+    entries.push(entry);
+    saveJournal(entries);
+    renderJournal();
+    journalForm.reset();
+    document.getElementById('journal-url').value = readContext().targetUrl;
+    journalStatus.textContent = 'Наблюдение сохранено в журнале браузера.';
+  });
+
+  document.getElementById('owner-export-journal')?.addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(loadJournal(), null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'geo-ai-audit-journal.json';
+    link.click();
+    URL.revokeObjectURL(url);
+    journalStatus.textContent = 'Журнал скачан.';
+  });
+
+  document.getElementById('owner-clear-journal')?.addEventListener('click', () => {
+    localStorage.removeItem(JOURNAL_KEY);
+    renderJournal();
+    journalStatus.textContent = 'Журнал очищен.';
+  });
+
+  document.getElementById('owner-logout')?.addEventListener('click', () => {
+    sessionStorage.removeItem(AUTH_KEY);
+    setOwnerMode(false);
+    journalStatus.textContent = '';
+  });
+
+  if (sessionStorage.getItem(AUTH_KEY) === '1') {
+    setOwnerMode(true);
+    updatePrompts();
+    renderJournal();
+  }
+
+  updatePrompts();
+</script>
+
+<style>
+  .owner-page {
+    padding: 3rem 1rem 4rem;
+  }
+
+  .owner-shell {
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  .owner-hero {
+    margin-bottom: 2rem;
+  }
+
+  .owner-eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent-color);
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+  }
+
+  .owner-card {
+    background: var(--bg-card, var(--surface-color));
+    border: 1px solid var(--border-color);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    box-shadow: var(--shadow-glass);
+  }
+
+  .owner-panel,
+  .owner-stack,
+  .journal-list {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .audit-grid {
+    grid-template-columns: 1.4fr 1fr;
+    align-items: start;
+  }
+
+  .owner-login-form,
+  .owner-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .owner-toolbar,
+  .section-head,
+  .prompt-head,
+  .journal-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .toolbar-actions,
+  .prompt-grid,
+  .journal-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .two-col,
+  .three-col {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .two-col {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .three-col {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .field span {
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+
+  .field input,
+  .field textarea,
+  .field select,
+  .prompt-output {
+    width: 100%;
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 0.9rem 1rem;
+    background: var(--bg-color);
+    color: var(--text-main);
+    font: inherit;
+  }
+
+  .field input:focus,
+  .field textarea:focus,
+  .field select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.08);
+  }
+
+  .prompt-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .prompt-card,
+  .journal-card,
+  .empty-card {
+    border: 1px solid var(--border-color);
+    border-radius: 1.25rem;
+    padding: 1.25rem;
+    background: rgba(255, 255, 255, 0.78);
+  }
+
+  .prompt-card h4,
+  .journal-card p {
+    margin: 0;
+  }
+
+  .prompt-output {
+    min-height: 12rem;
+    resize: vertical;
+    background: #0f172a;
+    color: #e2e8f0;
+    font: 0.85rem/1.55 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+
+  .muted,
+  .journal-head span,
+  .status-line {
+    color: var(--text-muted);
+  }
+
+  .pill-count,
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.12);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .info-list {
+    margin: 0;
+    padding-left: 1.4rem;
+  }
+
+  .info-list li {
+    margin-bottom: 0.65rem;
+    line-height: 1.7;
+  }
+
+  .journal-card {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .journal-card a {
+    color: var(--accent-color);
+    word-break: break-all;
+  }
+
+  .owner-error {
+    margin-top: 0.75rem;
+    color: #dc2626;
+    font-weight: 700;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  @media (max-width: 1100px) {
+    .audit-grid,
+    .prompt-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .owner-toolbar,
+    .section-head,
+    .prompt-head,
+    .journal-head,
+    .two-col,
+    .three-col {
+      grid-template-columns: 1fr;
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>
