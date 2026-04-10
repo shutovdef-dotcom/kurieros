@@ -24,7 +24,7 @@ const formatVacancyCount = (count: number) => {
   if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return `${count} вакансии`;
   return `${count} вакансий`;
 };
-const companyTitle = `Работа в ${company.name}: вакансии, отзывы, условия | Курьерос`;
+const companyTitle = `Работа в ${company.name}: вакансии, отзывы, условия | Курьерок`;
 const companyDescription = `${company.name}: ${formatVacancyCount(company.vacancyCount)}, ${company.primaryTransport.toLowerCase()}, ${company.paymentPreview[0] || 'формат выплат уточняйте в карточках'}. Сравните условия и отзывы перед откликом.`.slice(0, 170);
 const latestReviewTimestamp = company.reviews.length
   ? Math.max(...company.reviews.map((review) => new Date(review.date).getTime()))

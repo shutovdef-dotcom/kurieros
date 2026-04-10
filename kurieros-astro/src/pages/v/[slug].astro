@@ -48,7 +48,7 @@ const scoredRelatedJobs = jobsData
 	.sort((a, b) => b.score - a.score || parseSalaryValue(b.salary) - parseSalaryValue(a.salary));
 const prioritizedRelatedJobs = scoredRelatedJobs.filter((item) => item.score > 0);
 const relatedJobs = prioritizedRelatedJobs.length ? prioritizedRelatedJobs.slice(0, 4) : scoredRelatedJobs.slice(0, 4);
-const vacancyTitle = `${job.title} — зарплата, условия и отклик | Курьерос`;
+const vacancyTitle = `${job.title} — зарплата, условия и отклик | Курьерок`;
 const vacancyDescription = `Вакансия "${job.title}" в ${job.company}: ${job.salary}, ${job.details.schedule.toLowerCase()}, ${job.details.payment_freq.toLowerCase()}. Сравните условия и переходите к отклику.`.slice(0, 170);
 const jobLocationSchema = (jobCities.length ? jobCities : ['Россия']).map((city) => ({
 	'@type': 'Place',
@@ -128,7 +128,7 @@ const pageSchemaGraph = [
 		description: job.description,
 		identifier: {
 			'@type': 'PropertyValue',
-			name: 'Курьерос',
+			name: 'Курьерок',
 			value: job.slug,
 		},
 		datePosted: new Date().toISOString(),

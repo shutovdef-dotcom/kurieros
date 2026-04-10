@@ -84,7 +84,7 @@ const features = [
 const topIncomeJob = [...compareJobs].sort((a, b) => parseSalary(b.salary) - parseSalary(a.salary))[0];
 const studentFriendlyJob = compareJobs.find((job) => job.age.includes('16')) || compareJobs[0];
 const stableContractJob = compareJobs.find((job) => /тк|официаль/i.test(job.contract)) || compareJobs[0];
-const compareTitle = 'Сравнение вакансий курьеров: что лучше выбрать | Курьерос';
+const compareTitle = 'Сравнение вакансий курьеров: что лучше выбрать | Курьерок';
 const compareDescription = 'Сравнение вакансий курьеров по зарплате, выплатам, транспорту и оформлению. Смотрите, что лучше для дохода, старта и стабильности.';
 
 const verdictCards = [

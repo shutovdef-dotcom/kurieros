@@ -10,7 +10,7 @@ const starterChecks = [
 ];
 ---
 
-<BaseLayout title="Owner GEO AI Audit — Курьерос" description="Закрытая страница владельца для ручного AI GEO аудита и журнала наблюдений.">
+<BaseLayout title="Owner GEO AI Audit — Курьерок" description="Закрытая страница владельца для ручного AI GEO аудита и журнала наблюдений.">
   <main class="owner-page">
     <section class="owner-shell">
       <div class="owner-hero">
@@ -276,7 +276,7 @@ const starterChecks = [
 
   function buildPrompt(channel, context) {
     const targetUrl = context.targetUrl || 'https://kurerok.ru/';
-    const entity = context.entity || 'Курьерос';
+    const entity = context.entity || 'Курьерок';
     const city = context.city || 'Москва';
     const intentLabels = {
       best: `какая работа курьером лучше в ${city}`,

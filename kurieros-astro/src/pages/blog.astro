@@ -17,14 +17,14 @@ const posts = articlesData.map((article) => ({
 	...article,
 	excerpt: article.description,
 	image: article.image,
-	author: 'Редакция Курьерос',
+	author: 'Редакция Курьерок',
 	formattedDate: formatDate(article.date),
 }));
 const [featuredPost, ...secondaryPosts] = posts;
 const topicGroups = getArticleTopicGroups(posts).slice(0, 4);
 const faqItems = [
 	{
-		question: 'Что публикуется в блоге Курьерос?',
+		question: 'Что публикуется в блоге Курьерок?',
 		answer: 'В блоге выходят практические материалы о работе курьером: доход, форматы занятости, сравнение брендов, городские сценарии и реальные ограничения перед откликом.',
 	},
 	{
@@ -32,13 +32,13 @@ const faqItems = [
 		answer: 'Сначала можно прочитать обзор или разбор формата, затем перейти в сравнение вакансий, каталог компаний или нужный город и выбрать уже подходящий сценарий отклика.',
 	},
 ];
-const blogTitle = 'Блог о работе курьером: доход, компании, форматы | Курьерос';
+const blogTitle = 'Блог о работе курьером: доход, компании, форматы | Курьерок';
 const blogDescription = `Блог о работе курьером: ${posts.length} практических материалов про доход, подработку, компании, города и реальные условия отклика.`.slice(0, 170);
 
 const pageSchemaGraph = [
 	{
 		'@type': 'CollectionPage',
-		name: 'Блог Курьерос',
+		name: 'Блог Курьерок',
 		description: blogDescription,
 		url: Astro.url.href,
 		dateModified: new Date(featuredPost.date).toISOString(),
@@ -83,7 +83,7 @@ const pageSchemaGraph = [
 	<main>
 		<section class="blog-hero">
 			<div class="blog-hero-copy">
-				<span class="eyebrow">Редакция Курьерос</span>
+				<span class="eyebrow">Редакция Курьерок</span>
 				<h1>Журнал о работе курьером</h1>
 				<p>Практические разборы дохода, компаний и форматов доставки без рекламного шума и пустых обещаний.</p>
 			</div>

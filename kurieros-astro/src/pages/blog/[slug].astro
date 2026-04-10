@@ -41,11 +41,11 @@ const pageSchemaGraph = [
 		image: article.image ? [new URL(article.image, Astro.site).toString()] : undefined,
 		author: {
 			'@type': 'Organization',
-			name: 'Редакция Курьерос',
+			name: 'Редакция Курьерок',
 		},
 		publisher: {
 			'@type': 'Organization',
-			name: 'Курьерос',
+			name: 'Курьерок',
 			url: Astro.site,
 		},
 	},
@@ -61,7 +61,7 @@ const pageSchemaGraph = [
 ---
 
 <BaseLayout
-	title={`${article.title} | Блог Курьерос`}
+	title={`${article.title} | Блог Курьерок`}
 	description={article.description}
 	image={article.image}
 	schemaGraph={pageSchemaGraph}
@@ -72,7 +72,7 @@ const pageSchemaGraph = [
 		<article class="article-container">
 			<header class="article-header">
 				<div class="article-lead">
-					<div class="article-kicker">Журнал Курьерос</div>
+					<div class="article-kicker">Журнал Курьерок</div>
 					<div class="article-meta">
 						<time datetime={article.date}>{formattedDate}</time>
 						<span aria-hidden="true">•</span>
@@ -118,7 +118,7 @@ const pageSchemaGraph = [
 			<section class="article-footer">
 				<div class="editor-note">
 					<div class="editor-note-label">Материал подготовлен редакцией</div>
-					<h2>Курьерос Журнал</h2>
+					<h2>Курьерок Журнал</h2>
 					<p>Мы собираем практические материалы о работе курьером: сравниваем вакансии, условия и реальные сценарии заработка без рекламных обещаний.</p>
 				</div>
 

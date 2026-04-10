@@ -190,8 +190,8 @@ const updatedDate = new Intl.DateTimeFormat('ru-RU', {
 }).format(new Date());
 const seoTitle =
 	type === 'city'
-		? `Работа курьером ${data.prep}: вакансии и зарплата | Курьерос`
-		: `Работа курьером ${data.name.toLowerCase()}: вакансии и условия | Курьерос`;
+		? `Работа курьером ${data.prep}: вакансии и зарплата | Курьерок`
+		: `Работа курьером ${data.name.toLowerCase()}: вакансии и условия | Курьерок`;
 const seoDescription = (
 	type === 'city'
 		? `Работа курьером ${data.prep}: ${filteredJobs.length} вакансий от ${companyNames.length} компаний, выплаты ${paymentTypes.slice(0, 2).join(' / ') || 'уточняются в карточках'}. Сравните условия и откройте подходящие отклики.`

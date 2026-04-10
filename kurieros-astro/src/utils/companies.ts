@@ -185,7 +185,7 @@ export const getCompaniesFromJobs = (jobs: JobLike[], reviews: ReviewLike[] = []
       const paymentPreview = Array.from(company.payments).slice(0, 2);
       const employmentPreview = Array.from(company.employmentTypes).slice(0, 2);
       const agePreview = Array.from(company.ages).slice(0, 2);
-      const shortIntro = `${company.name} на Курьерос — это ${companyTypeLabel(company.name)} с ${company.jobs.length} ваканс${company.jobs.length === 1 ? 'ией' : 'иями'}, где можно быстро сравнить формат работы, выплаты и ограничения до отклика.`;
+      const shortIntro = `${company.name} на Курьерок — это ${companyTypeLabel(company.name)} с ${company.jobs.length} ваканс${company.jobs.length === 1 ? 'ией' : 'иями'}, где можно быстро сравнить формат работы, выплаты и ограничения до отклика.`;
 
       return {
         name: company.name,

@@ -21,7 +21,7 @@ interface Props {
 }
 
 const {
-	title = "Курьерос — Вся работа здесь",
+	title = "Курьерок — Вся работа здесь",
 	description = "Лучшие вакансии для курьеров в России. Работа на авто, мото, вело и пешком. Сравнивайте условия в Яндекс Еда, СДЭК, Ozon и других компаниях.",
 	image = "/favicon.svg",
 	canonicalURL = new URL(Astro.url.pathname, Astro.site),
@@ -35,7 +35,7 @@ const resolvedImageUrl = new URL(image, socialBaseUrl).toString();
 
 const websiteSchema = {
 	"@type": "WebSite",
-	name: "Курьерос",
+	name: "Курьерок",
 	url: "https://kurerok.ru/",
 };
 
@@ -86,7 +86,7 @@ const structuredData = JSON.stringify(
 
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content="website" />
-		<meta property="og:site_name" content="Курьерос" />
+		<meta property="og:site_name" content="Курьерок" />
 		<meta property="og:locale" content="ru_RU" />
 		<meta property="og:url" content={resolvedCanonicalUrl} />
 		<meta property="og:title" content={title} />
