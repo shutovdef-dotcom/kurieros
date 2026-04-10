@@ -6,6 +6,7 @@ import jobsData from '../../data/jobs.json';
 import reviewsData from '../../data/reviews.json';
 import { getCompaniesFromJobs } from '../../utils/companies';
 import { getCityHref } from '../../utils/cities';
+import { buildBreadcrumbSchema } from '../../utils/schema';
 
 export async function getStaticPaths() {
   return getCompaniesFromJobs(jobsData, reviewsData).map((company) => ({
@@ -15,6 +16,16 @@ export async function getStaticPaths() {
 }
 
 const { company } = Astro.props;
+const formatVacancyCount = (count: number) => {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+
+  if (mod10 === 1 && mod100 !== 11) return `${count} вакансия`;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return `${count} вакансии`;
+  return `${count} вакансий`;
+};
+const companyTitle = `Работа в ${company.name}: вакансии, отзывы, условия | Курьерос`;
+const companyDescription = `${company.name}: ${formatVacancyCount(company.vacancyCount)}, ${company.primaryTransport.toLowerCase()}, ${company.paymentPreview[0] || 'формат выплат уточняйте в карточках'}. Сравните условия и отзывы перед откликом.`.slice(0, 170);
 const latestReviewTimestamp = company.reviews.length
   ? Math.max(...company.reviews.map((review) => new Date(review.date).getTime()))
   : Date.now();
@@ -48,6 +59,20 @@ const methodologyPoints = [
   'Хаб бренда помогает быстро понять общий контекст работодателя, но не заменяет проверку конкретной вакансии перед откликом.',
   'Если условия на стороне работодателя отличаются от карточки, ориентируйтесь на финальные условия в анкете или в прямом канале бренда.',
 ];
+const relatedCompanies = getCompaniesFromJobs(jobsData, reviewsData)
+  .filter((item) => item.slug !== company.slug)
+  .map((item) => {
+    const sharedCities = item.cities.filter((city) => company.cities.includes(city)).length;
+    const sharedPayments = item.paymentPreview.filter((payment) => company.paymentPreview.includes(payment)).length;
+    const score =
+      (item.primaryTransport === company.primaryTransport ? 3 : 0) +
+      sharedCities * 2 +
+      sharedPayments;
+
+    return { ...item, score };
+  })
+  .sort((a, b) => b.score - a.score || b.vacancyCount - a.vacancyCount)
+  .slice(0, 4);
 const faqItems = company.faqItems;
 const pageSchemaGraph = [
   {
@@ -55,7 +80,7 @@ const pageSchemaGraph = [
     name: company.name,
     url: Astro.url.href,
     logo: company.logo,
-    description: company.shortIntro,
+    description: companyDescription,
     areaServed: company.cities.length ? company.cities : ['Россия'],
     ...(company.rating
       ? {
@@ -72,7 +97,7 @@ const pageSchemaGraph = [
   {
     '@type': 'CollectionPage',
     name: `${company.name} — вакансии, отзывы и условия`,
-    description: company.shortIntro,
+    description: companyDescription,
     url: Astro.url.href,
     dateModified: new Date(latestReviewTimestamp).toISOString(),
     about: {
@@ -101,12 +126,20 @@ const pageSchemaGraph = [
       },
     })),
   },
+  buildBreadcrumbSchema(
+    [
+      { name: 'Главная', url: '/' },
+      { name: 'Компании', url: '/companies/' },
+      { name: company.name, url: Astro.url.pathname },
+    ],
+    Astro.site,
+  ),
 ];
 ---
 
 <BaseLayout
-  title={`${company.name} — вакансии, отзывы и условия работы`}
-  description={company.shortIntro}
+  title={companyTitle}
+  description={companyDescription}
   schemaGraph={pageSchemaGraph}
 >
   <Header />
@@ -230,6 +263,23 @@ const pageSchemaGraph = [
           <div class="chip-row">
             {company.cities.map((city) => (
               <a href={getCityHref(city)} class="chip">{city}</a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {relatedCompanies.length > 0 && (
+        <section class="company-section">
+          <div class="section-topline">
+            <div>
+              <p class="section-eyebrow">Смежные бренды</p>
+              <h2>Какие компании стоит сравнить с {company.name}</h2>
+            </div>
+            <a href="/compare/" class="hero-link">Открыть сравнение</a>
+          </div>
+          <div class="chip-row">
+            {relatedCompanies.map((item) => (
+              <a href={item.href} class="chip">{item.name}</a>
             ))}
           </div>
         </section>

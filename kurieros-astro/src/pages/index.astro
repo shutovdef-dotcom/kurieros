@@ -6,12 +6,66 @@ import JobGrid from '../components/JobGrid.astro';
 import IncomeCalculator from '../components/IncomeCalculator.astro';
 import LanguageSwitcher from '../components/LanguageSwitcher.astro';
 import ReviewsBlock from '../components/ReviewsBlock.astro';
+import { CATEGORIES } from '../data/constants';
 import jobsData from '../data/jobs.json';
+import { getCompaniesFromJobs } from '../utils/companies';
 import { getCitiesFromJobs, getCityNames } from '../utils/cities';
 
 const cities = getCitiesFromJobs(jobsData);
 const availableCities = getCityNames(jobsData);
 const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabota-kurerom-${city.slug}/`]));
+const companies = getCompaniesFromJobs(jobsData);
+const totalVacancies = jobsData.length;
+const topCities = [...cities]
+	.sort((a, b) => b.vacancyCount - a.vacancyCount)
+	.slice(0, 6)
+	.map((city) => ({
+		name: city.name,
+		vacancyCount: city.vacancyCount,
+		href: `/rabota-kurerom-${city.slug}/`,
+	}));
+const featuredCompanies = [...companies]
+	.sort((a, b) => b.vacancyCount - a.vacancyCount)
+	.slice(0, 6)
+	.map((company) => ({
+		name: company.name,
+		href: company.href,
+	}));
+const featuredFormats = ['na-avto', 'peshkom', 'dlya-studentov', 'ezhednevnaya-oplata', 'samokat', 'kuper']
+	.map((slug) => CATEGORIES.find((category) => category.slug === slug))
+	.filter(Boolean)
+	.map((category) => ({
+		name: category!.name,
+		href: `/rabota-kurerom-${category!.slug}/`,
+	}));
+const routeCards = [
+	{
+		title: 'Нужна подработка',
+		text: 'Сразу перейти в гибкие графики, вечерние слоты и выходные смены.',
+		href: '/rabota-kurerom-podrabotka/',
+	},
+	{
+		title: 'Ищу работу с 16 лет',
+		text: 'Открыть подборку для старта без авто и с мягкими входными условиями.',
+		href: '/rabota-kurerom-16-let/',
+	},
+	{
+		title: 'Есть автомобиль',
+		text: 'Смотреть автоформаты с более высоким потенциалом дохода.',
+		href: '/rabota-kurerom-na-avto/',
+	},
+	{
+		title: 'Хочу выбрать бренд',
+		text: 'Сначала сравнить компании, а потом уже вакансии внутри бренда.',
+		href: '/companies/',
+	},
+];
+const heroFacts = [
+	{ label: 'Вакансии', value: `${totalVacancies}` },
+	{ label: 'Компании', value: `${companies.length}` },
+	{ label: 'Города', value: `${cities.length}` },
+	{ label: 'Сценарии', value: 'Авто, пешком, подработка' },
+];
 const faqItems = [
 	{
 		question: 'Со скольки лет можно работать курьером?',
@@ -51,12 +105,13 @@ const hubLinks = [
 		text: 'Разобраться в доходе, форматах работы и скрытых условиях.',
 	},
 ];
+const homepageTitle = 'Работа курьером: вакансии, компании и сравнение | Курьерос';
+const homepageDescription = `Работа курьером в России: ${totalVacancies} вакансий, ${companies.length} компаний, города, сравнение и статьи перед откликом.`.slice(0, 170);
 const pageSchemaGraph = [
 	{
 		'@type': 'CollectionPage',
-		name: 'Курьерос — Работа курьером рядом',
-		description:
-			'Главный хаб вакансий курьеров с переходом в сравнение, компании, города и полезные статьи перед откликом.',
+		name: homepageTitle,
+		description: homepageDescription,
 		url: Astro.url.href,
 		dateModified: new Date().toISOString(),
 		mainEntity: {
@@ -73,8 +128,7 @@ const pageSchemaGraph = [
 		'@type': 'Organization',
 		name: 'Курьерос',
 		url: Astro.site,
-		description:
-			'Каталог вакансий курьеров, сравнений, компаний и городских хабов для быстрого выбора подходящей работы.',
+		description: 'Каталог вакансий курьеров, сравнений, компаний и городских хабов для быстрого выбора подходящей работы.',
 	},
 	{
 		'@type': 'FAQPage',
@@ -90,12 +144,37 @@ const pageSchemaGraph = [
 ];
 ---
 
-<BaseLayout title="Курьерос — Работа курьером рядом" description="Выберите город, сравните условия и быстро найдите вакансию курьера с понятной оплатой и графиком." schemaGraph={pageSchemaGraph}>
+<BaseLayout title={homepageTitle} description={homepageDescription} schemaGraph={pageSchemaGraph}>
 	<Header />
 
 	<main>
 		<div class="home-shell">
 			<section class="hero hero-home">
+				<div class="home-hero-panel">
+					<div class="home-hero-copy">
+						<p class="home-kicker">Вакансии курьеров 2026</p>
+						<h1>Работа курьером: вакансии, компании и сравнение условий</h1>
+						<p class="home-hero-summary">
+							На Курьерос можно быстро выбрать работу курьером по городу, формату доставки, бренду и частоте выплат.
+							Сначала посмотрите короткий маршрут, затем откройте подборку, сравнение или страницу компании и переходите
+							только в подходящие карточки вакансий.
+						</p>
+						<div class="home-hero-actions">
+							<a href="/compare/" class="home-hero-link">Сравнить вакансии</a>
+							<a href="/companies/" class="home-hero-link home-hero-link-secondary">Открыть компании</a>
+						</div>
+					</div>
+
+					<div class="home-hero-facts">
+						{heroFacts.map((fact) => (
+							<article class="home-hero-fact">
+								<span>{fact.label}</span>
+								<strong>{fact.value}</strong>
+							</article>
+						))}
+					</div>
+				</div>
+
 				<div class="hero-toolbar hero-toolbar-only">
 					<div class="toolbar-top">
 						<div class="city-selector-container">
@@ -116,6 +195,21 @@ const pageSchemaGraph = [
 				</div>
 			</section>
 
+			<section class="home-section">
+				<div class="section-heading">
+					<h2>Популярные маршруты поиска</h2>
+					<p>Быстрые входы в самые частые сценарии: подработка, старт, автоформат и выбор бренда.</p>
+				</div>
+				<div class="home-route-grid">
+					{routeCards.map((route) => (
+						<a href={route.href} class="home-route-card">
+							<h3>{route.title}</h3>
+							<p>{route.text}</p>
+						</a>
+					))}
+				</div>
+			</section>
+
 			<section class="home-section home-hub-section">
 				<div class="section-heading">
 					<h2>Быстрые маршруты по сайту</h2>
@@ -128,6 +222,41 @@ const pageSchemaGraph = [
 							<p>{link.text}</p>
 						</a>
 					))}
+				</div>
+			</section>
+
+			<section class="home-section">
+				<div class="section-heading">
+					<h2>Главные посадочные для входа в тему</h2>
+					<p>Города, форматы и бренды, через которые проще всего начать поиск и не потеряться в вакансиях.</p>
+				</div>
+				<div class="home-surface-grid">
+					<article class="home-surface-card">
+						<h3>Популярные города</h3>
+						<div class="home-chip-row">
+							{topCities.map((city) => (
+								<a href={city.href} class="home-chip-link">{city.name} · {city.vacancyCount}</a>
+							))}
+						</div>
+					</article>
+
+					<article class="home-surface-card">
+						<h3>Популярные форматы</h3>
+						<div class="home-chip-row">
+							{featuredFormats.map((format) => (
+								<a href={format.href} class="home-chip-link">{format.name}</a>
+							))}
+						</div>
+					</article>
+
+					<article class="home-surface-card">
+						<h3>Сильные бренды</h3>
+						<div class="home-chip-row">
+							{featuredCompanies.map((company) => (
+								<a href={company.href} class="home-chip-link">{company.name}</a>
+							))}
+						</div>
+					</article>
 				</div>
 			</section>
 
@@ -292,6 +421,102 @@ const pageSchemaGraph = [
 		display: grid;
 		gap: 0.6rem;
 		margin-bottom: 1rem;
+	}
+	.home-hero-panel {
+		display: grid;
+		grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+		gap: 1rem;
+		padding: 2rem;
+		border: 1px solid #ebe5dc;
+		border-radius: 1.8rem;
+		background:
+			radial-gradient(circle at top right, rgba(240, 203, 120, 0.22), transparent 18rem),
+			linear-gradient(180deg, #fffefb 0%, #f8f1e7 100%);
+		box-shadow: 0 14px 36px rgba(60, 41, 20, 0.08);
+	}
+	.home-hero-copy {
+		display: grid;
+		gap: 1rem;
+		align-content: start;
+	}
+	.home-kicker {
+		margin: 0;
+		font-size: 0.78rem;
+		font-weight: 900;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: #8b5e34;
+	}
+	.home-hero-copy h1 {
+		margin: 0;
+		font-size: clamp(2.2rem, 4.2vw, 4.6rem);
+		line-height: 0.95;
+		letter-spacing: -0.06em;
+		max-width: 12ch;
+		text-wrap: balance;
+	}
+	.home-hero-summary {
+		max-width: 62ch;
+		margin: 0;
+		color: #6f6257;
+		font-size: clamp(1rem, 1vw + 0.9rem, 1.18rem);
+		line-height: 1.8;
+	}
+	.home-hero-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.8rem;
+	}
+	.home-hero-link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 3rem;
+		padding: 0.8rem 1.2rem;
+		border-radius: 999px;
+		background: #1f2937;
+		border: 1px solid #1f2937;
+		color: white;
+		text-decoration: none;
+		font-weight: 800;
+		transition: var(--transition);
+	}
+	.home-hero-link-secondary {
+		background: rgba(255, 255, 255, 0.86);
+		color: #2b2622;
+		border-color: #d9d0c3;
+	}
+	.home-hero-link:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 10px 24px rgba(60, 41, 20, 0.08);
+	}
+	.home-hero-facts {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.85rem;
+	}
+	.home-hero-fact {
+		display: grid;
+		gap: 0.35rem;
+		min-height: 8rem;
+		padding: 1rem;
+		border-radius: 1.2rem;
+		border: 1px solid #e8ddcf;
+		background: rgba(255, 255, 255, 0.82);
+		box-shadow: 0 6px 18px rgba(60, 41, 20, 0.05);
+	}
+	.home-hero-fact span {
+		font-size: 0.72rem;
+		font-weight: 900;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: #8b7d70;
+	}
+	.home-hero-fact strong {
+		align-self: end;
+		font-size: 1rem;
+		line-height: 1.35;
+		color: #2b2622;
 	}
 	.home-section {
 		padding: 2.25rem;
@@ -462,6 +687,12 @@ const pageSchemaGraph = [
 		grid-template-columns: repeat(4, minmax(0, 1fr));
 		gap: 1rem;
 	}
+	.home-route-grid {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 1rem;
+	}
+	.home-route-card,
 	.home-hub-card {
 		display: grid;
 		gap: 0.55rem;
@@ -474,20 +705,68 @@ const pageSchemaGraph = [
 		color: #2b2622;
 		transition: var(--transition);
 	}
+	.home-route-card {
+		background:
+			radial-gradient(circle at top right, rgba(99, 102, 241, 0.1), transparent 10rem),
+			linear-gradient(180deg, #fffefb 0%, #eef3ff 100%);
+	}
+	.home-route-card:hover,
 	.home-hub-card:hover {
 		transform: translateY(-2px);
 		box-shadow: 0 10px 24px rgba(60, 41, 20, 0.08);
 	}
+	.home-route-card h3,
 	.home-hub-card h3,
+	.home-route-card p,
 	.home-hub-card p {
 		margin: 0;
 	}
+	.home-route-card h3,
 	.home-hub-card h3 {
 		font-size: 1rem;
 	}
+	.home-route-card p,
 	.home-hub-card p {
 		color: #7c6f64;
 		line-height: 1.6;
+	}
+	.home-surface-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 1rem;
+	}
+	.home-surface-card {
+		padding: 1.35rem;
+		border-radius: 1.25rem;
+		border: 1px solid #ebe5dc;
+		background: linear-gradient(180deg, #fffefb 0%, #f8f1e7 100%);
+		box-shadow: 0 6px 18px rgba(60, 41, 20, 0.05);
+	}
+	.home-surface-card h3 {
+		margin: 0 0 0.8rem;
+		font-size: 1rem;
+	}
+	.home-chip-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.7rem;
+	}
+	.home-chip-link {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.35rem;
+		padding: 0.55rem 0.85rem;
+		border-radius: 999px;
+		border: 1px solid #ddd3c5;
+		background: rgba(255, 255, 255, 0.86);
+		color: #2b2622;
+		font-weight: 700;
+		text-decoration: none;
+		transition: var(--transition);
+	}
+	.home-chip-link:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 8px 18px rgba(60, 41, 20, 0.07);
 	}
 
 	/* --- Utilities --- */
@@ -510,6 +789,13 @@ const pageSchemaGraph = [
 	@media (max-width: 768px) {
 		.home-shell {
 			padding-top: 0.75rem;
+		}
+		.home-hero-panel {
+			grid-template-columns: 1fr;
+			padding: 1.25rem;
+		}
+		.home-hero-facts {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
 		.home-section {
 			padding: 1.2rem;
@@ -542,12 +828,20 @@ const pageSchemaGraph = [
 			padding: 0 1.25rem 0 0.5rem;
 			font-size: 1.1rem !important;
 		}
-		.home-hub-grid {
+		.home-hub-grid,
+		.home-route-grid,
+		.home-surface-grid {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
 	}
 	@media (max-width: 600px) {
-		.home-hub-grid {
+		.home-hero-copy h1 {
+			max-width: none;
+		}
+		.home-hero-facts,
+		.home-hub-grid,
+		.home-route-grid,
+		.home-surface-grid {
 			grid-template-columns: 1fr;
 		}
 	}

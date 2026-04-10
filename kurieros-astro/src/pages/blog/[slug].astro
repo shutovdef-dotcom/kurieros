@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import articlesData from '../../data/articles.json';
+import { getArticleRouteLinks, getArticleTopics, getRelatedArticles } from '../../utils/articles';
 import { buildBreadcrumbSchema } from '../../utils/schema';
 
 export function getStaticPaths() {
@@ -18,9 +19,9 @@ const formattedDate = new Intl.DateTimeFormat('ru-RU', {
 	month: 'long',
 	year: 'numeric',
 }).format(new Date(article.date));
-const relatedArticles = articlesData
-	.filter((entry) => entry.slug !== article.slug)
-	.slice(0, 3)
+const articleTopics = getArticleTopics(article);
+const routeLinks = getArticleRouteLinks(article);
+const relatedArticles = getRelatedArticles(articlesData, article, 3)
 	.map((entry) => ({
 		...entry,
 		formattedDate: new Intl.DateTimeFormat('ru-RU', {
@@ -60,7 +61,7 @@ const pageSchemaGraph = [
 ---
 
 <BaseLayout
-	title={`${article.title} — Курьерос`}
+	title={`${article.title} | Блог Курьерос`}
 	description={article.description}
 	image={article.image}
 	schemaGraph={pageSchemaGraph}
@@ -76,6 +77,11 @@ const pageSchemaGraph = [
 						<time datetime={article.date}>{formattedDate}</time>
 						<span aria-hidden="true">•</span>
 						<span>{article.readTime} чтения</span>
+					</div>
+					<div class="article-topic-row">
+						{articleTopics.map((topic) => (
+							<a href={topic.href} class="article-topic-chip">{topic.label}</a>
+						))}
 					</div>
 					<h1>{article.title}</h1>
 					<p class="article-description">{article.description}</p>
@@ -100,9 +106,9 @@ const pageSchemaGraph = [
 			</section>
 
 			<section class="article-hub-links">
-				<a href="/compare/" class="hub-link">Сравнение вакансий</a>
-				<a href="/companies/" class="hub-link">Каталог компаний</a>
-				<a href="/cities/" class="hub-link">Города</a>
+				{routeLinks.map((link) => (
+					<a href={link.href} class="hub-link">{link.title}</a>
+				))}
 			</section>
 			
 			<div class="article-body">
@@ -122,18 +128,12 @@ const pageSchemaGraph = [
 						<p>Следующий логичный шаг после статьи — перейти в одну из рабочих поверхностей сайта.</p>
 					</div>
 					<div class="next-grid">
-						<a href="/compare/" class="next-card">
-							<strong>Сравнение вакансий</strong>
-							<span>Смотреть условия рядом и выбирать формат быстрее.</span>
-						</a>
-						<a href="/companies/" class="next-card">
-							<strong>Компании</strong>
-							<span>Сначала выбрать бренд, потом открыть его вакансии и отзывы.</span>
-						</a>
-						<a href="/cities/" class="next-card">
-							<strong>Города</strong>
-							<span>Перейти в локальные подборки и посмотреть, где уже есть вакансии.</span>
-						</a>
+						{routeLinks.map((link) => (
+							<a href={link.href} class="next-card">
+								<strong>{link.title}</strong>
+								<span>{link.text}</span>
+							</a>
+						))}
 					</div>
 				</div>
 
@@ -237,6 +237,25 @@ const pageSchemaGraph = [
 		font-size: 1.08rem;
 		line-height: 1.85;
 		margin-top: 1rem;
+	}
+	.article-topic-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.65rem;
+		margin-bottom: 1rem;
+	}
+	.article-topic-chip {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.2rem;
+		padding: 0.45rem 0.8rem;
+		border-radius: 999px;
+		border: 1px solid rgba(99, 102, 241, 0.14);
+		background: rgba(99, 102, 241, 0.08);
+		color: var(--text-main);
+		text-decoration: none;
+		font-weight: 800;
+		font-size: 0.82rem;
 	}
 	.article-answer-panel {
 		max-width: 980px;
@@ -362,8 +381,13 @@ const pageSchemaGraph = [
 	.next-grid,
 	.related-grid {
 		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
 		gap: 1rem;
+	}
+	.next-grid {
+		grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	}
+	.related-grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
 	.next-card {
 		display: grid;

@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import articlesData from '../data/articles.json';
+import { getArticleTopicGroups } from '../utils/articles';
 import { buildBreadcrumbSchema } from '../utils/schema';
 
 const formatDate = (value) =>
@@ -20,6 +21,7 @@ const posts = articlesData.map((article) => ({
 	formattedDate: formatDate(article.date),
 }));
 const [featuredPost, ...secondaryPosts] = posts;
+const topicGroups = getArticleTopicGroups(posts).slice(0, 4);
 const faqItems = [
 	{
 		question: 'Что публикуется в блоге Курьерос?',
@@ -30,12 +32,14 @@ const faqItems = [
 		answer: 'Сначала можно прочитать обзор или разбор формата, затем перейти в сравнение вакансий, каталог компаний или нужный город и выбрать уже подходящий сценарий отклика.',
 	},
 ];
+const blogTitle = 'Блог о работе курьером: доход, компании, форматы | Курьерос';
+const blogDescription = `Блог о работе курьером: ${posts.length} практических материалов про доход, подработку, компании, города и реальные условия отклика.`.slice(0, 170);
 
 const pageSchemaGraph = [
 	{
 		'@type': 'CollectionPage',
 		name: 'Блог Курьерос',
-		description: 'Журнал о работе курьером: доход, форматы, компании, подработка и практические советы.',
+		description: blogDescription,
 		url: Astro.url.href,
 		dateModified: new Date(featuredPost.date).toISOString(),
 		mainEntity: {
@@ -70,8 +74,8 @@ const pageSchemaGraph = [
 ---
 
 <BaseLayout
-	title="Блог Курьерос — Полезные статьи и советы для курьеров"
-	description="Узнайте все секреты работы курьером: как увеличить доход, выбрать компанию и оптимизировать маршруты."
+	title={blogTitle}
+	description={blogDescription}
 	schemaGraph={pageSchemaGraph}
 >
 	<Header />
@@ -105,6 +109,30 @@ const pageSchemaGraph = [
 			<a href="/compare/" class="hub-link">Сравнение вакансий</a>
 			<a href="/companies/" class="hub-link">Компании</a>
 			<a href="/cities/" class="hub-link">Города</a>
+		</section>
+
+		<section class="blog-topic-section">
+			<div class="section-heading">
+				<h2>Читать по теме</h2>
+				<p>Самые сильные кластеры блога, чтобы не листать статьи подряд, а идти по нужному сценарию.</p>
+			</div>
+			<div class="blog-topic-grid">
+				{topicGroups.map((topic) => (
+					<article class="blog-topic-card">
+						<div class="blog-topic-head">
+							<span class="blog-topic-count">{topic.articles.length} материалов</span>
+							<a href={topic.href} class="blog-topic-link">Открыть хаб</a>
+						</div>
+						<h3>{topic.label}</h3>
+						<p>{topic.description}</p>
+						<div class="blog-topic-stack">
+							{topic.articles.slice(0, 2).map((post) => (
+								<a href={`/blog/${post.slug}/`} class="blog-topic-article">{post.title}</a>
+							))}
+						</div>
+					</article>
+				))}
+			</div>
 		</section>
 
 		<a href={`/blog/${featuredPost.slug}/`} class="featured-story">
@@ -255,6 +283,66 @@ const pageSchemaGraph = [
 		color: var(--text-main);
 		text-decoration: none;
 		font-weight: 800;
+	}
+	.blog-topic-section {
+		max-width: 1360px;
+		margin: 0 auto 1.5rem;
+		padding: 0 1rem;
+	}
+	.blog-topic-grid {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 1rem;
+	}
+	.blog-topic-card {
+		display: grid;
+		gap: 0.85rem;
+		padding: 1.25rem;
+		border-radius: 1.4rem;
+		border: 1px solid rgba(148, 163, 184, 0.16);
+		background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(248,250,252,0.96));
+		box-shadow: 0 18px 48px rgba(15, 23, 42, 0.07);
+	}
+	.blog-topic-head {
+		display: flex;
+		justify-content: space-between;
+		gap: 0.75rem;
+		align-items: center;
+	}
+	.blog-topic-count {
+		font-size: 0.74rem;
+		font-weight: 900;
+		letter-spacing: 0.11em;
+		text-transform: uppercase;
+		color: var(--text-muted);
+	}
+	.blog-topic-link {
+		color: var(--primary-color);
+		text-decoration: none;
+		font-weight: 800;
+		font-size: 0.9rem;
+	}
+	.blog-topic-card h3,
+	.blog-topic-card p {
+		margin: 0;
+	}
+	.blog-topic-card p {
+		color: var(--text-muted);
+		line-height: 1.7;
+	}
+	.blog-topic-stack {
+		display: grid;
+		gap: 0.65rem;
+	}
+	.blog-topic-article {
+		padding: 0.75rem 0.9rem;
+		border-radius: 1rem;
+		background: rgba(255,255,255,0.78);
+		border: 1px solid rgba(148, 163, 184, 0.16);
+		text-decoration: none;
+		font-weight: 700;
+		line-height: 1.5;
+		color: var(--text-main);
 	}
 	.featured-story {
 		max-width: 1360px;
@@ -416,6 +504,9 @@ const pageSchemaGraph = [
 		.blog-hero-note {
 			justify-items: start;
 		}
+		.blog-topic-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
 		.blog-grid,
 		.faq-grid {
 			grid-template-columns: 1fr;
@@ -442,6 +533,9 @@ const pageSchemaGraph = [
 		}
 		.blog-title {
 			font-size: 1.35rem;
+		}
+		.blog-topic-grid {
+			grid-template-columns: 1fr;
 		}
 		.newsletter {
 			margin-left: 1rem;

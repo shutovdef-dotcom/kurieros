@@ -2,12 +2,30 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
+import { CATEGORIES } from '../../data/constants';
 import jobsData from '../../data/jobs.json';
 import reviewsData from '../../data/reviews.json';
 import { getCompaniesFromJobs } from '../../utils/companies';
+import { getCitiesFromJobs } from '../../utils/cities';
 import { buildBreadcrumbSchema } from '../../utils/schema';
 
-const companies = getCompaniesFromJobs(jobsData, reviewsData);
+const companies = getCompaniesFromJobs(jobsData, reviewsData)
+  .sort((a, b) => b.vacancyCount - a.vacancyCount || (b.rating || 0) - (a.rating || 0));
+const cities = getCitiesFromJobs(jobsData)
+  .sort((a, b) => b.vacancyCount - a.vacancyCount)
+  .slice(0, 6)
+  .map((city) => ({
+    name: city.name,
+    href: `/rabota-kurerom-${city.slug}/`,
+    vacancyCount: city.vacancyCount,
+  }));
+const brandFormats = ['na-avto', 'peshkom', 'dlya-studentov', 'podrabotka', 'samokat', 'kuper']
+  .map((slug) => CATEGORIES.find((category) => category.slug === slug))
+  .filter(Boolean)
+  .map((category) => ({
+    name: category!.name,
+    href: `/rabota-kurerom-${category!.slug}/`,
+  }));
 const updatedDate = new Intl.DateTimeFormat('ru-RU', {
   day: 'numeric',
   month: 'long',
@@ -18,6 +36,30 @@ const totalVacancies = companies.reduce((sum, company) => sum + company.vacancyC
 const topRatedCompany = companies
   .filter((company) => company.rating)
   .sort((a, b) => (b.rating || 0) - (a.rating || 0))[0];
+const routeCards = [
+  {
+    title: 'Хочу сначала выбрать бренд',
+    text: 'Смотреть крупные компании, отзывы и контекст работодателя до открытия отдельных вакансий.',
+    href: '/companies/',
+  },
+  {
+    title: 'Сначала сравнить условия',
+    text: 'Если важнее не бренд, а выплаты и оформление, лучше начать со сравнения вакансий.',
+    href: '/compare/',
+  },
+  {
+    title: 'Нужна подработка',
+    text: 'Открыть гибкие сценарии и смотреть, какие бренды чаще встречаются в подработке.',
+    href: '/rabota-kurerom-podrabotka/',
+  },
+  {
+    title: 'Есть авто',
+    text: 'Перейти в автоформат и уже там сравнить компании с высоким доходным потолком.',
+    href: '/rabota-kurerom-na-avto/',
+  },
+];
+const companiesTitle = 'Работа курьером по компаниям: бренды и вакансии | Курьерос';
+const companiesDescription = `Компании с вакансиями курьеров: ${companies.length} брендов и ${totalVacancies} вакансий. Выберите работодателя, сравните бренды и переходите в подходящие карточки.`.slice(0, 170);
 const faqItems = [
   {
     question: 'Что есть на странице компаний?',
@@ -35,8 +77,8 @@ const faqItems = [
 const pageSchemaGraph = [
   {
     '@type': 'CollectionPage',
-    name: 'Компании-работодатели — Работа курьером',
-    description: 'Каталог брендов с вакансиями курьеров, краткими фактами и переходом в отдельные страницы компаний.',
+    name: companiesTitle,
+    description: companiesDescription,
     url: Astro.url.href,
     dateModified: new Date().toISOString(),
     mainEntity: {
@@ -70,7 +112,7 @@ const pageSchemaGraph = [
 ];
 ---
 
-<BaseLayout title="Компании-работодатели — Работа курьером" description="Список компаний с вакансиями курьеров, GEO-ready фактами и переходом в отдельные страницы брендов." schemaGraph={pageSchemaGraph}>
+<BaseLayout title={companiesTitle} description={companiesDescription} schemaGraph={pageSchemaGraph}>
   <Header />
 
   <main class="companies-page">
@@ -82,6 +124,15 @@ const pageSchemaGraph = [
       </nav>
       <h1 data-t="companies.title">Компании-работодатели</h1>
       <p data-t="companies.subtitle">Мы сотрудничаем только с проверенными брендами, гарантирующими стабильные выплаты и честные условия.</p>
+    </section>
+
+    <section class="companies-route-grid" aria-label="Маршруты выбора">
+      {routeCards.map((route) => (
+        <a href={route.href} class="companies-route-card">
+          <h2>{route.title}</h2>
+          <p>{route.text}</p>
+        </a>
+      ))}
     </section>
 
     <section class="companies-answer-panel">
@@ -100,6 +151,35 @@ const pageSchemaGraph = [
       <a href="/compare/" class="companies-link-pill">Сравнение вакансий</a>
       <a href="/cities/" class="companies-link-pill">Города</a>
       <a href="/blog/" class="companies-link-pill">Блог</a>
+    </section>
+
+    <section class="companies-surface-grid" aria-label="Маршруты по компаниям">
+      <article class="companies-surface-card">
+        <h2>Сильные бренды</h2>
+        <div class="companies-chip-row">
+          {companies.slice(0, 6).map((company) => (
+            <a href={company.href} class="companies-chip-link">{company.name}</a>
+          ))}
+        </div>
+      </article>
+
+      <article class="companies-surface-card">
+        <h2>Города, где проще стартовать</h2>
+        <div class="companies-chip-row">
+          {cities.map((city) => (
+            <a href={city.href} class="companies-chip-link">{city.name} · {city.vacancyCount}</a>
+          ))}
+        </div>
+      </article>
+
+      <article class="companies-surface-card">
+        <h2>Форматы и сценарии</h2>
+        <div class="companies-chip-row">
+          {brandFormats.map((format) => (
+            <a href={format.href} class="companies-chip-link">{format.name}</a>
+          ))}
+        </div>
+      </article>
     </section>
 
     <section class="companies-fact-grid" aria-label="Ключевые факты по компаниям">
@@ -262,6 +342,67 @@ const pageSchemaGraph = [
   .companies-trust-panel p {
     color: var(--text-muted);
     line-height: 1.8;
+  }
+
+  .companies-route-grid,
+  .companies-surface-grid {
+    max-width: 1180px;
+    margin: 0 auto 1.5rem;
+    display: grid;
+    gap: 1rem;
+    padding: 0 1rem;
+  }
+
+  .companies-route-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .companies-route-card,
+  .companies-surface-card {
+    padding: 1.25rem;
+    border-radius: 1.5rem;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    background: rgba(255, 255, 255, 0.82);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .companies-route-card {
+    background:
+      radial-gradient(circle at top right, rgba(99, 102, 241, 0.12), transparent 10rem),
+      linear-gradient(180deg, rgba(255,255,255,0.94), rgba(244,247,255,0.96));
+  }
+
+  .companies-route-card h2,
+  .companies-surface-card h2 {
+    margin: 0 0 0.7rem;
+    font-size: 1.1rem;
+  }
+
+  .companies-route-card p {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .companies-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+  }
+
+  .companies-chip-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.35rem;
+    padding: 0.55rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid rgba(99, 102, 241, 0.14);
+    background: rgba(99, 102, 241, 0.08);
+    color: var(--text-main);
+    text-decoration: none;
+    font-weight: 700;
   }
 
   .companies-fact-grid,
@@ -511,8 +652,10 @@ const pageSchemaGraph = [
   .partner-card p { color: var(--text-muted); margin-bottom: 2rem; }
 
   @media (max-width: 960px) {
+    .companies-route-grid,
     .companies-fact-grid,
-    .companies-faq-grid {
+    .companies-faq-grid,
+    .companies-surface-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
@@ -562,9 +705,11 @@ const pageSchemaGraph = [
   }
 
   @media (max-width: 560px) {
+    .companies-route-grid,
     .companies-fact-grid,
     .companies-faq-grid,
-    .companies-grid {
+    .companies-grid,
+    .companies-surface-grid {
       grid-template-columns: 1fr;
     }
   }

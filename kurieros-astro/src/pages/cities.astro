@@ -3,7 +3,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import jobsData from '../data/jobs.json';
+import { CATEGORIES } from '../data/constants';
 import { getCitiesFromJobs } from '../utils/cities';
+import { getCompaniesFromJobs } from '../utils/companies';
 import { buildBreadcrumbSchema } from '../utils/schema';
 
 const cities = getCitiesFromJobs(jobsData).map((city) => ({
@@ -13,10 +15,63 @@ const cities = getCitiesFromJobs(jobsData).map((city) => ({
 
 const totalVacancies = cities.reduce((sum, city) => sum + city.vacancyCount, 0);
 const topCities = [...cities].sort((a, b) => b.vacancyCount - a.vacancyCount).slice(0, 4);
+const topCompanies = getCompaniesFromJobs(jobsData)
+	.sort((a, b) => b.vacancyCount - a.vacancyCount || b.maxSalary - a.maxSalary)
+	.slice(0, 5);
+const featuredCategories = CATEGORIES.filter((category) =>
+	['na-avto', 'peshkom', 'dlya-studentov', 'podrabotka', 'samokat', 'eda'].includes(category.slug),
+).map((category) => ({
+	name: category.name,
+	href: `/rabota-kurerom-${category.slug}/`,
+}));
+const citySnapshots = topCities.map((city) => {
+	const localJobs = jobsData.filter(
+		(job) => job.location.toLowerCase().includes(city.name.toLowerCase()) || job.location === 'Вся Россия',
+	);
+	const localCompanies = Array.from(new Set(localJobs.map((job) => job.company)));
+	const localFormats = Array.from(
+		new Set(
+			localJobs.flatMap((job) =>
+				job.tags
+					.filter((tag) => ['auto', 'foot', 'bicycle', 'flexible', '16plus'].includes(tag))
+					.map((tag) => {
+						if (tag === 'auto') return 'На авто';
+						if (tag === 'foot') return 'Пешком';
+						if (tag === 'bicycle') return 'Вело / самокат';
+						if (tag === '16plus') return 'С 16 лет';
+						return 'Подработка';
+					}),
+			),
+		),
+	);
+
+	return {
+		...city,
+		companyCount: localCompanies.length,
+		formats: localFormats.slice(0, 3),
+	};
+});
+
+const getVacancyPlural = (count: number) => {
+	const mod10 = count % 10;
+	const mod100 = count % 100;
+	if (mod10 === 1 && mod100 !== 11) return { text: 'вакансия', key: 'cities.vacancies_1' };
+	if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return { text: 'вакансии', key: 'cities.vacancies_2' };
+	return { text: 'вакансий', key: 'cities.vacancies_5' };
+};
+
+const getCompanyPlural = (count: number) => {
+	const mod10 = count % 10;
+	const mod100 = count % 100;
+	if (mod10 === 1 && mod100 !== 11) return 'компания';
+	if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'компании';
+	return 'компаний';
+};
+
 const faqItems = [
 	{
 		question: 'Что есть на странице городов?',
-		answer: `На странице собраны ${cities.length} городов, где уже есть ${totalVacancies} вакансий курьеров. Это стартовая навигационная точка для перехода в локальные подборки.`,
+		answer: `На странице собраны ${cities.length} городов, где уже есть ${totalVacancies} ${getVacancyPlural(totalVacancies).text} курьеров. Это стартовая навигационная точка для перехода в локальные подборки.`,
 	},
 	{
 		question: 'Какой следующий шаг после выбора города?',
@@ -27,7 +82,6 @@ const faqItems = [
 		answer: 'Он помогает собрать локальный интент в одной точке: пользователь, поиск и AI-системы быстрее понимают, в каких городах сайт уже закрывает запросы о работе курьером.',
 	},
 ];
-
 const pageSchemaGraph = [
 	{
 		'@type': 'CollectionPage',
@@ -64,19 +118,11 @@ const pageSchemaGraph = [
 		Astro.site,
 	),
 ];
-
-const getVacancyPlural = (count: number) => {
-	const mod10 = count % 10;
-	const mod100 = count % 100;
-	if (mod10 === 1 && mod100 !== 11) return { text: 'вакансия', key: 'cities.vacancies_1' };
-	if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return { text: 'вакансии', key: 'cities.vacancies_2' };
-	return { text: 'вакансий', key: 'cities.vacancies_5' };
-};
 ---
 
 <BaseLayout
-	title="Города — работа курьером по России"
-	description="Выберите город и откройте локальную подборку вакансий курьеров. Городские страницы помогают быстро найти компании, выплаты и формат работы."
+	title="Работа курьером по городам России: вакансии и компании | Курьерос"
+	description="Выберите город и откройте локальную подборку вакансий курьеров: компании, форматы работы, выплаты и быстрые маршруты по городам России."
 	schemaGraph={pageSchemaGraph}
 >
 	<Header />
@@ -84,8 +130,10 @@ const getVacancyPlural = (count: number) => {
 	<main class="cities-page">
 		<section class="cities-hero">
 			<p class="section-eyebrow">City Hub</p>
-			<h1 data-t="cities.title">Города</h1>
-			<p data-t="cities.subtitle">Подборка городов из актуальных вакансий. Новые города появляются автоматически.</p>
+			<h1 data-t="cities.title">Работа курьером по городам России</h1>
+			<p data-t="cities.subtitle">
+				Выберите город, посмотрите активные бренды, затем откройте локальную подборку вакансий и подходящий формат работы.
+			</p>
 		</section>
 
 		<section class="cities-answer-panel">
@@ -94,9 +142,9 @@ const getVacancyPlural = (count: number) => {
 				<h2>Зачем нужен отдельный хаб по городам?</h2>
 			</div>
 			<p>
-				Эта страница собирает локальный спрос в одном месте: сначала вы выбираете город, затем переходите в его подборку,
-				сравниваете компании и уже внутри города открываете конкретные вакансии. Для поиска и AI это понятный вход в
-				региональный слой сайта.
+				Эта страница собирает региональный интент в одном месте: сначала вы выбираете город, затем видите локальные компании,
+				форматы и маршруты выбора. Для поиска и AI это понятный вход в слой "работа курьером по городам", а для пользователя
+				это короткий путь от города к нужной вакансии.
 			</p>
 		</section>
 
@@ -125,6 +173,42 @@ const getVacancyPlural = (count: number) => {
 			<a href="/blog/" class="quick-link">Блог о работе курьером</a>
 		</section>
 
+		<section class="cities-route-grid" aria-label="Маршруты по сайту">
+			<article class="route-card">
+				<p class="section-eyebrow">Шаг 1</p>
+				<h2>Выбрать сильный город</h2>
+				<p>Если нужен быстрый старт, начинайте с городов, где уже видны несколько брендов и больше карточек вакансий.</p>
+			</article>
+			<article class="route-card">
+				<p class="section-eyebrow">Шаг 2</p>
+				<h2>Понять, кто активен</h2>
+				<p>После выбора города переходите в локальную страницу и смотрите, какие компании, выплаты и форматы уже есть в подборке.</p>
+			</article>
+			<article class="route-card">
+				<p class="section-eyebrow">Шаг 3</p>
+				<h2>Сузить сценарий</h2>
+				<p>Если важны авто, подработка или старт с 16 лет, дальше открывайте тематические страницы и сравнивайте уже внутри формата.</p>
+			</article>
+		</section>
+
+		<section class="cities-spotlight" aria-label="Приоритетные города">
+			<div class="cities-section-head">
+				<p class="section-eyebrow">Локальный спрос</p>
+				<h2>С каких городов логично начинать</h2>
+			</div>
+			<div class="cities-spotlight-grid">
+				{citySnapshots.map((city) => (
+					<a href={city.href} class="spotlight-card">
+						<strong>{city.name}</strong>
+						<span>
+							{city.vacancyCount} {getVacancyPlural(city.vacancyCount).text} и {city.companyCount} {getCompanyPlural(city.companyCount)}
+						</span>
+						<small>Чаще видны: {city.formats.join(', ') || 'смешанные форматы'}</small>
+					</a>
+				))}
+			</div>
+		</section>
+
 		<section class="cities-grid">
 			{cities.map((city) => {
 				const plural = getVacancyPlural(city.vacancyCount);
@@ -135,6 +219,28 @@ const getVacancyPlural = (count: number) => {
 					</a>
 				);
 			})}
+		</section>
+
+		<section class="cities-surfaces" aria-label="Поверхности выбора">
+			<article class="surface-card">
+				<p class="section-eyebrow">Бренды</p>
+				<h2>Какие компании чаще встречаются на сайте</h2>
+				<div class="surface-chip-row">
+					{topCompanies.map((company) => (
+						<a href={company.href} class="quick-link">{company.name}</a>
+					))}
+				</div>
+			</article>
+
+			<article class="surface-card">
+				<p class="section-eyebrow">Форматы</p>
+				<h2>Какие сценарии стоит открыть после города</h2>
+				<div class="surface-chip-row">
+					{featuredCategories.map((category) => (
+						<a href={category.href} class="quick-link">{category.name}</a>
+					))}
+				</div>
+			</article>
 		</section>
 
 		<section class="cities-faq-section">
@@ -211,11 +317,18 @@ const getVacancyPlural = (count: number) => {
 		line-height: 1.8;
 	}
 	.cities-facts,
-	.cities-faq-grid {
+	.cities-faq-grid,
+	.cities-route-grid,
+	.cities-surfaces {
 		display: grid;
 		grid-template-columns: repeat(4, minmax(0, 1fr));
 		gap: 1rem;
 		margin-bottom: 1rem;
+	}
+	.cities-route-grid,
+	.cities-surfaces {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		margin-bottom: 1.5rem;
 	}
 	.fact-card {
 		display: grid;
@@ -244,6 +357,7 @@ const getVacancyPlural = (count: number) => {
 	.quick-link {
 		display: inline-flex;
 		align-items: center;
+		justify-content: center;
 		min-height: 2.5rem;
 		padding: 0.65rem 1rem;
 		border-radius: 999px;
@@ -258,6 +372,62 @@ const getVacancyPlural = (count: number) => {
 		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 		gap: 0.8rem;
 		margin-bottom: 1.5rem;
+	}
+	.route-card,
+	.surface-card,
+	.spotlight-card {
+		display: grid;
+		gap: 0.55rem;
+		padding: 1.25rem;
+		border: 1px solid rgba(148, 163, 184, 0.16);
+		border-radius: 1.5rem;
+		background: rgba(255, 255, 255, 0.82);
+		box-shadow: var(--shadow-sm);
+	}
+	.route-card h2,
+	.surface-card h2,
+	.cities-section-head h2 {
+		margin: 0;
+		font-size: clamp(1.25rem, 2vw, 1.6rem);
+	}
+	.route-card p:last-child,
+	.surface-card p:last-child,
+	.spotlight-card span,
+	.spotlight-card small {
+		color: var(--text-muted);
+		line-height: 1.7;
+	}
+	.cities-spotlight {
+		margin-bottom: 1.5rem;
+	}
+	.cities-section-head {
+		margin-bottom: 0.9rem;
+	}
+	.cities-spotlight-grid {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 1rem;
+	}
+	.spotlight-card {
+		color: var(--text-main);
+		text-decoration: none;
+		transition: var(--transition);
+	}
+	.spotlight-card:hover {
+		transform: translateY(-2px);
+		border-color: var(--text-main);
+		box-shadow: var(--shadow-md);
+	}
+	.spotlight-card strong {
+		font-size: 1.05rem;
+	}
+	.surface-card {
+		grid-column: span 1;
+	}
+	.surface-chip-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
 	}
 	.city-tile {
 		display: grid;
@@ -288,7 +458,10 @@ const getVacancyPlural = (count: number) => {
 	@media (max-width: 960px) {
 		.cities-answer-panel,
 		.cities-facts,
-		.cities-faq-grid {
+		.cities-faq-grid,
+		.cities-route-grid,
+		.cities-spotlight-grid,
+		.cities-surfaces {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
 	}
@@ -300,7 +473,10 @@ const getVacancyPlural = (count: number) => {
 	@media (max-width: 560px) {
 		.cities-facts,
 		.cities-faq-grid,
-		.cities-grid {
+		.cities-grid,
+		.cities-route-grid,
+		.cities-spotlight-grid,
+		.cities-surfaces {
 			grid-template-columns: 1fr;
 		}
 	}

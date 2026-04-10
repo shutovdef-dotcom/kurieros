@@ -2,8 +2,10 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { CATEGORIES } from '../data/constants';
 import jobsData from '../data/jobs.json';
 import articlesData from '../data/articles.json';
+import { getCitiesFromJobs } from '../utils/cities';
 import { slugifyCompany } from '../utils/companies';
 import { buildBreadcrumbSchema } from '../utils/schema';
 
@@ -48,6 +50,20 @@ const compareJobs = jobsData.slice(0, 4).map((job) => ({
 const compareCompanies = Array.from(
   new Map(compareJobs.map((job) => [job.company, { name: job.company, href: job.companyHref }])).values(),
 );
+const compareCities = getCitiesFromJobs(compareJobs)
+  .sort((a, b) => b.vacancyCount - a.vacancyCount)
+  .slice(0, 4)
+  .map((city) => ({
+    name: city.name,
+    href: `/rabota-kurerom-${city.slug}/`,
+  }));
+const compareFormats = ['na-avto', 'peshkom', 'dlya-studentov', 'ezhednevnaya-oplata']
+  .map((slug) => CATEGORIES.find((category) => category.slug === slug))
+  .filter(Boolean)
+  .map((category) => ({
+    name: category!.name,
+    href: `/rabota-kurerom-${category!.slug}/`,
+  }));
 const relatedArticles = articlesData
   .filter((article) => /срав|выбрать|курьер|доход|компан/i.test(`${article.title} ${article.description}`))
   .slice(0, 3)
@@ -68,6 +84,8 @@ const features = [
 const topIncomeJob = [...compareJobs].sort((a, b) => parseSalary(b.salary) - parseSalary(a.salary))[0];
 const studentFriendlyJob = compareJobs.find((job) => job.age.includes('16')) || compareJobs[0];
 const stableContractJob = compareJobs.find((job) => /тк|официаль/i.test(job.contract)) || compareJobs[0];
+const compareTitle = 'Сравнение вакансий курьеров: что лучше выбрать | Курьерос';
+const compareDescription = 'Сравнение вакансий курьеров по зарплате, выплатам, транспорту и оформлению. Смотрите, что лучше для дохода, старта и стабильности.';
 
 const verdictCards = [
   {
@@ -84,6 +102,26 @@ const verdictCards = [
     label: 'Лучше для стабильности',
     title: stableContractJob.title,
     text: `${stableContractJob.company} стоит смотреть тем, кому важнее понятное оформление и предсказуемый формат занятости.`,
+  },
+];
+const routeCards = [
+  {
+    label: 'Лучше для дохода',
+    title: topIncomeJob.title,
+    text: `Если сейчас важнее потенциал заработка, начните с карточки ${topIncomeJob.company} и проверьте формулу выплат уже в вакансии.`,
+    href: topIncomeJob.link,
+  },
+  {
+    label: 'Лучше для старта',
+    title: studentFriendlyJob.title,
+    text: 'Этот маршрут полезен тем, кто хочет войти в доставку быстрее и с более мягкими входными требованиями.',
+    href: studentFriendlyJob.link,
+  },
+  {
+    label: 'Лучше для стабильности',
+    title: stableContractJob.title,
+    text: 'Если вы выбираете по оформлению и предсказуемости занятости, стоит начать именно с этого варианта.',
+    href: stableContractJob.link,
   },
 ];
 
@@ -116,11 +154,20 @@ const faqItems = [
 
 const pageSchemaGraph = [
   {
-    '@type': 'WebPage',
+    '@type': 'CollectionPage',
     name: 'Сравнение вакансий курьеров',
-    description: 'Сравнение условий по нескольким вакансиям курьеров: выплаты, транспорт, оформление и особенности работы.',
+    description: compareDescription,
     url: Astro.url.href,
     dateModified: new Date().toISOString(),
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: compareJobs.map((job, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: job.title,
+        url: new URL(job.link, Astro.site).toString(),
+      })),
+    },
   },
   {
     '@type': 'FAQPage',
@@ -143,7 +190,7 @@ const pageSchemaGraph = [
 ];
 ---
 
-<BaseLayout title="Сравнение вакансий курьеров" description="Сравните вакансии курьеров по выплатам, транспорту, оформлению и ключевым условиям перед откликом." schemaGraph={pageSchemaGraph}>
+<BaseLayout title={compareTitle} description={compareDescription} schemaGraph={pageSchemaGraph}>
   <Header />
 
   <main class="compare-page">
@@ -156,7 +203,7 @@ const pageSchemaGraph = [
             <span>Сравнение вакансий</span>
           </nav>
           <h1>Сравнение вакансий</h1>
-          <p class="compare-subtitle">Сначала короткий вывод и правила выбора, потом детальная таблица по условиям.</p>
+          <p class="compare-subtitle">Сначала короткий вывод и маршруты выбора, потом детальная таблица по условиям.</p>
         </div>
         <a href="/" class="back-link">← К списку вакансий</a>
       </div>
@@ -225,6 +272,30 @@ const pageSchemaGraph = [
             ))}
           </div>
         </article>
+
+        <article class="compare-link-card">
+          <p class="section-eyebrow">По интенту</p>
+          <h2>Куда идти, если сценарий уже понятен?</h2>
+          <div class="compare-chip-row">
+            {compareFormats.map((format) => (
+              <a href={format.href} class="compare-chip-link">{format.name}</a>
+            ))}
+            {compareCities.map((city) => (
+              <a href={city.href} class="compare-chip-link">{city.name}</a>
+            ))}
+          </div>
+        </article>
+      </section>
+
+      <section class="compare-route-grid" aria-label="Маршруты выбора после сравнения">
+        {routeCards.map((card) => (
+          <article class="compare-route-card">
+            <span>{card.label}</span>
+            <h2>{card.title}</h2>
+            <p>{card.text}</p>
+            <a href={card.href} class="compare-route-link">Открыть маршрут</a>
+          </article>
+        ))}
       </section>
 
       <div class="compare-table-wrapper">
@@ -451,6 +522,7 @@ const pageSchemaGraph = [
   .compare-verdict-grid,
   .compare-geo-grid,
   .compare-link-grid,
+  .compare-route-grid,
   .compare-faq-grid {
     display: grid;
     gap: 1rem;
@@ -501,7 +573,11 @@ const pageSchemaGraph = [
   }
 
   .compare-link-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .compare-route-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .compare-geo-card {
@@ -520,6 +596,57 @@ const pageSchemaGraph = [
     background:
       linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 247, 255, 0.96)),
       var(--bg-card);
+  }
+
+  .compare-route-card {
+    padding: 1.25rem;
+    border-radius: 1.25rem;
+    border: 1px solid rgba(99, 102, 241, 0.14);
+    background:
+      radial-gradient(circle at top right, rgba(99, 102, 241, 0.12), transparent 10rem),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 247, 255, 0.96));
+    box-shadow: var(--shadow-sm);
+  }
+
+  .compare-route-card span {
+    display: inline-block;
+    margin-bottom: 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .compare-route-card h2 {
+    margin: 0 0 0.7rem;
+    font-size: 1.12rem;
+  }
+
+  .compare-route-card p {
+    margin: 0 0 1rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .compare-route-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
+    padding: 0.6rem 0.95rem;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 800;
+    color: var(--text-main);
+    border: 1px solid rgba(99, 102, 241, 0.16);
+    background: rgba(99, 102, 241, 0.08);
+    transition: var(--transition);
+  }
+
+  .compare-route-link:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+    color: var(--primary-color);
   }
 
   .compare-chip-row {
@@ -758,6 +885,7 @@ const pageSchemaGraph = [
   @media (max-width: 960px) {
     .compare-verdict-grid,
     .compare-link-grid,
+    .compare-route-grid,
     .compare-faq-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -824,6 +952,7 @@ const pageSchemaGraph = [
   @media (max-width: 560px) {
     .compare-verdict-grid,
     .compare-link-grid,
+    .compare-route-grid,
     .compare-faq-grid {
       grid-template-columns: 1fr;
     }

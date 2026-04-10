@@ -71,6 +71,21 @@ const transportLabelMap: Record<string, string> = {
 	bicycle: 'На велосипеде или самокате',
 	foot: 'Пеший формат',
 };
+const parseSalary = (salary: string) => Number(salary.replace(/[^\d]/g, '')) || 0;
+const formatMoney = (value: number) => new Intl.NumberFormat('ru-RU').format(value);
+const humanJoin = (items: string[]) => {
+	if (items.length === 0) return '';
+	if (items.length === 1) return items[0];
+	if (items.length === 2) return `${items[0]} и ${items[1]}`;
+	return `${items.slice(0, -1).join(', ')} и ${items.at(-1)}`;
+};
+const getVacancyPluralText = (count: number) => {
+	const mod10 = count % 10;
+	const mod100 = count % 100;
+	if (mod10 === 1 && mod100 !== 11) return 'вакансия';
+	if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'вакансии';
+	return 'вакансий';
+};
 const transportTypes = Array.from(
 	new Set(
 		filteredJobs.flatMap((job) =>
@@ -80,11 +95,108 @@ const transportTypes = Array.from(
 		),
 	),
 );
+const availableTags = new Set(filteredJobs.flatMap((job) => job.tags));
+const hasDailyPayments = paymentTypes.some((payment) => payment.toLowerCase().includes('ежеднев'));
+const hasWeeklyPayments = paymentTypes.some((payment) => payment.toLowerCase().includes('еженед'));
+const cityScenarioRoutes =
+	type === 'city'
+		? ['na-avto', 'peshkom', 'na-velosipede', 'dlya-studentov', 'podrabotka', 'ezhednevnaya-oplata', 'ezhenedelnaya-oplata']
+			.filter((slug) => {
+				if (slug === 'na-avto') return availableTags.has('auto');
+				if (slug === 'peshkom') return availableTags.has('foot');
+				if (slug === 'na-velosipede') return availableTags.has('bicycle');
+				if (slug === 'dlya-studentov') return availableTags.has('16plus');
+				if (slug === 'podrabotka') return availableTags.has('flexible');
+				if (slug === 'ezhednevnaya-oplata') return hasDailyPayments;
+				if (slug === 'ezhenedelnaya-oplata') return hasWeeklyPayments;
+				return false;
+			})
+			.map((slug) => CATEGORIES.find((category) => category.slug === slug))
+			.filter(Boolean)
+			.slice(0, 5)
+			.map((category) => ({
+				name: category!.name,
+				href: `/rabota-kurerom-${category!.slug}/`,
+			}))
+		: [];
+const cityCompanyCards =
+	type === 'city'
+		? Array.from(
+			filteredJobs.reduce(
+				(map, job) => {
+					const existing = map.get(job.company) ?? {
+						name: job.company,
+						href: `/companies/${slugifyCompany(job.company)}/`,
+						vacancyCount: 0,
+						maxSalary: 0,
+						payments: new Set<string>(),
+						transports: new Set<string>(),
+					};
+
+					existing.vacancyCount += 1;
+					existing.maxSalary = Math.max(existing.maxSalary, parseSalary(job.salary));
+					existing.payments.add(job.details.payment_freq);
+					job.tags
+						.filter((tag) => tag in transportLabelMap)
+						.forEach((tag) => existing.transports.add(transportLabelMap[tag]));
+
+					map.set(job.company, existing);
+					return map;
+				},
+				new Map<
+					string,
+					{
+						name: string;
+						href: string;
+						vacancyCount: number;
+						maxSalary: number;
+						payments: Set<string>;
+						transports: Set<string>;
+					}
+				>(),
+			).values(),
+		)
+			.map((company) => ({
+				name: company.name,
+				href: company.href,
+				vacancyCount: company.vacancyCount,
+				maxSalary: company.maxSalary,
+				paymentPreview: Array.from(company.payments).slice(0, 2),
+				transportPreview: Array.from(company.transports).slice(0, 2),
+			}))
+			.sort((a, b) => b.vacancyCount - a.vacancyCount || b.maxSalary - a.maxSalary)
+			.slice(0, 4)
+		: [];
+const salaryLeader =
+	type === 'city' ? [...cityCompanyCards].sort((a, b) => b.maxSalary - a.maxSalary)[0] : null;
+const localStartPoints =
+	type === 'city'
+		? [
+			cityCompanyCards[0]
+				? `Больше всего карточек сейчас у ${cityCompanyCards[0].name}, поэтому с этого бренда удобно начать сравнение ${data.prep}.`
+				: `В подборке ${data.prep} уже есть несколько карточек вакансий, поэтому сначала стоит открыть бренды с наибольшим числом позиций.`,
+			salaryLeader
+				? `Самый высокий потолок дохода в текущей подборке даёт ${salaryLeader.name} — до ${formatMoney(salaryLeader.maxSalary)} ₽.`
+				: 'Потолок дохода зависит от конкретной вакансии, поэтому стоит сравнить 2-3 карточки до отклика.',
+			transportTypes.length
+				? `В городе уже видны сценарии ${humanJoin(transportTypes).toLowerCase()}, поэтому можно сразу сузить поиск по транспорту и графику.`
+				: 'Форматы зависят от конкретных работодателей, поэтому после города полезно открыть и тематические страницы по типу работы.',
+		]
+		: [];
 const updatedDate = new Intl.DateTimeFormat('ru-RU', {
 	day: 'numeric',
 	month: 'long',
 	year: 'numeric',
 }).format(new Date());
+const seoTitle =
+	type === 'city'
+		? `Работа курьером ${data.prep}: вакансии и зарплата | Курьерос`
+		: `Работа курьером ${data.name.toLowerCase()}: вакансии и условия | Курьерос`;
+const seoDescription = (
+	type === 'city'
+		? `Работа курьером ${data.prep}: ${filteredJobs.length} вакансий от ${companyNames.length} компаний, выплаты ${paymentTypes.slice(0, 2).join(' / ') || 'уточняются в карточках'}. Сравните условия и откройте подходящие отклики.`
+		: `Подборка "${data.name}": ${filteredJobs.length} вакансий от ${companyNames.length} компаний, форматы ${transportTypes.join(', ') || 'разные'}. Сравните условия и выберите подходящую карточку вакансии.`
+).slice(0, 170);
 const relatedArticles = articlesData
 	.filter((article) => {
 		const haystack = `${article.title} ${article.description}`.toLowerCase();
@@ -94,6 +206,28 @@ const relatedArticles = articlesData
 		return haystack.includes(data.name.toLowerCase()) || haystack.includes(searchTerm) || haystack.includes('курьер');
 	})
 	.slice(0, 3);
+const routeLinks =
+	type === 'city'
+		? [
+			{ name: 'Сравнение вакансий', href: '/compare/' },
+			{ name: 'Компании', href: '/companies/' },
+			...CATEGORIES.filter((cat) => cat.slug !== data.slug).slice(0, 4).map((cat) => ({
+				name: cat.name,
+				href: `/rabota-kurerom-${cat.slug}/`,
+			})),
+		]
+		: [
+			{ name: 'Сравнение вакансий', href: '/compare/' },
+			{ name: 'Города', href: '/cities/' },
+			...getCitiesFromJobs(jobsData)
+				.filter((city) => city.name !== data.name)
+				.sort((a, b) => b.vacancyCount - a.vacancyCount)
+				.slice(0, 4)
+				.map((city) => ({
+					name: city.name,
+					href: `/rabota-kurerom-${city.slug}/`,
+				})),
+		];
 
 const introSummary =
 	type === 'city'
@@ -161,7 +295,7 @@ const pageSchemaGraph = [
 	{
 		'@type': 'CollectionPage',
 		name: title,
-		description,
+		description: seoDescription,
 		url: Astro.url.href,
 		dateModified: new Date().toISOString(),
 		mainEntity: {
@@ -201,7 +335,7 @@ const pageSchemaGraph = [
 ];
 ---
 
-<BaseLayout title={title} description={description} schemaGraph={pageSchemaGraph}>
+<BaseLayout title={seoTitle} description={seoDescription} schemaGraph={pageSchemaGraph}>
 	<Header />
 
 	<main>
@@ -245,6 +379,56 @@ const pageSchemaGraph = [
 				</article>
 			))}
 		</section>
+
+		{type === 'city' && (
+			<>
+				<section class="listing-local-grid">
+					<article class="listing-local-card">
+						<p class="section-eyebrow">Старт в городе</p>
+						<h2>Как быстрее сузить выбор {data.prep}?</h2>
+						<ul class="listing-bullet-list">
+							{localStartPoints.map((point) => (
+								<li>{point}</li>
+							))}
+						</ul>
+					</article>
+
+					{cityScenarioRoutes.length > 0 && (
+						<article class="listing-local-card">
+							<p class="section-eyebrow">Сценарии</p>
+							<h2>Какие маршруты уже доступны {data.prep}?</h2>
+							<div class="link-chip-row">
+								{cityScenarioRoutes.map((route) => (
+									<a href={route.href} class="link-chip">{route.name}</a>
+								))}
+							</div>
+						</article>
+					)}
+				</section>
+
+				{cityCompanyCards.length > 0 && (
+					<section class="listing-company-section" aria-label="Компании в городе">
+						<p class="section-eyebrow">Локальные бренды</p>
+						<h2>Какие компании уже активны {data.prep}?</h2>
+						<div class="listing-company-grid">
+							{cityCompanyCards.map((company) => (
+								<a href={company.href} class="listing-company-card">
+									<strong>{company.name}</strong>
+									<span>{company.vacancyCount} {getVacancyPluralText(company.vacancyCount)} в подборке</span>
+									<small>
+										До {formatMoney(company.maxSalary)} ₽
+										{company.paymentPreview.length ? ` · ${company.paymentPreview.join(' / ')}` : ''}
+									</small>
+									<small>
+										Форматы: {company.transportPreview.length ? company.transportPreview.join(', ') : 'смешанные'}
+									</small>
+								</a>
+							))}
+						</div>
+					</section>
+				)}
+			</>
+		)}
 
 		<section class="listing-geo-grid">
 			<article class="listing-geo-card">
@@ -325,6 +509,20 @@ const pageSchemaGraph = [
 					))}
 				</div>
 			</article>
+
+			<article class="listing-link-card">
+				<p class="section-eyebrow">Маршруты</p>
+				<h2>
+					{type === 'city'
+						? `Куда перейти после страницы ${data.prep}?`
+						: `Какие ещё хабы открыть после "${data.name}"?`}
+				</h2>
+				<div class="link-chip-row">
+					{routeLinks.map((link) => (
+						<a href={link.href} class="link-chip">{link.name}</a>
+					))}
+				</div>
+			</article>
 		</section>
 
 		<JobGrid
@@ -342,6 +540,7 @@ const pageSchemaGraph = [
 	.listing-answer-panel,
 	.listing-fact-grid,
 	.listing-geo-grid,
+	.listing-local-grid,
 	.listing-faq-section,
 	.listing-trust-panel {
 		max-width: 1180px;
@@ -460,7 +659,16 @@ const pageSchemaGraph = [
 		padding: 0 1rem;
 	}
 
+	.listing-local-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1rem;
+		margin-bottom: 1.5rem;
+		padding: 0 1rem;
+	}
+
 	.listing-geo-card,
+	.listing-local-card,
 	.listing-faq-section {
 		padding: 1.5rem;
 		border-radius: 1.5rem;
@@ -475,11 +683,18 @@ const pageSchemaGraph = [
 			var(--bg-card);
 	}
 
+	.listing-local-card {
+		border: 1px solid rgba(148, 163, 184, 0.16);
+		background: rgba(255, 255, 255, 0.82);
+		box-shadow: var(--shadow-sm);
+	}
+
 	.listing-geo-card-caution {
 		border-color: rgba(249, 115, 22, 0.16);
 	}
 
 	.listing-geo-card h2,
+	.listing-local-card h2,
 	.listing-faq-section h2 {
 		margin-top: 0;
 		margin-bottom: 1rem;
@@ -504,6 +719,48 @@ const pageSchemaGraph = [
 
 	.listing-faq-section {
 		margin: 0 1rem 1.5rem;
+	}
+
+	.listing-company-section {
+		max-width: 1180px;
+		margin: 0 auto 1.5rem;
+		padding: 0 1rem;
+	}
+
+	.listing-company-section h2 {
+		margin: 0 0 1rem;
+		font-size: clamp(1.3rem, 2vw, 1.75rem);
+	}
+
+	.listing-company-grid {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 1rem;
+	}
+
+	.listing-company-card {
+		display: grid;
+		gap: 0.45rem;
+		padding: 1.2rem;
+		border: 1px solid rgba(148, 163, 184, 0.16);
+		border-radius: 1.2rem;
+		background: rgba(255, 255, 255, 0.82);
+		box-shadow: var(--shadow-sm);
+		color: var(--text-main);
+		text-decoration: none;
+		transition: var(--transition);
+	}
+
+	.listing-company-card:hover {
+		transform: translateY(-2px);
+		border-color: var(--text-main);
+		box-shadow: var(--shadow-md);
+	}
+
+	.listing-company-card span,
+	.listing-company-card small {
+		color: var(--text-muted);
+		line-height: 1.6;
 	}
 
 	.listing-faq-grid {
@@ -585,12 +842,14 @@ const pageSchemaGraph = [
 
 	@media (max-width: 960px) {
 		.listing-fact-grid,
-		.listing-faq-grid {
+		.listing-faq-grid,
+		.listing-company-grid {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
 
 		.listing-geo-grid,
-		.listing-link-grid {
+		.listing-link-grid,
+		.listing-local-grid {
 			grid-template-columns: 1fr;
 		}
 	}
@@ -604,12 +863,14 @@ const pageSchemaGraph = [
 
 	@media (max-width: 640px) {
 		.listing-fact-grid,
-		.listing-faq-grid {
+		.listing-faq-grid,
+		.listing-company-grid {
 			grid-template-columns: 1fr;
 		}
 
 		.listing-hero,
 		.listing-fact-grid,
+		.listing-local-grid,
 		.listing-geo-grid,
 		.listing-faq-section,
 		.listing-trust-panel,
@@ -618,6 +879,7 @@ const pageSchemaGraph = [
 		}
 
 		.listing-fact-grid,
+		.listing-local-grid,
 		.listing-geo-grid,
 		.listing-faq-section,
 		.listing-trust-panel,

@@ -17,6 +17,7 @@ interface Props {
 	image?: string;
 	canonicalURL?: URL | string;
 	schemaGraph?: Record<string, any> | Array<Record<string, any>>;
+	robots?: string;
 }
 
 const {
@@ -25,7 +26,12 @@ const {
 	image = "/favicon.svg",
 	canonicalURL = new URL(Astro.url.pathname, Astro.site),
 	schemaGraph = [],
+	robots = "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
 } = Astro.props;
+
+const resolvedCanonicalUrl = canonicalURL instanceof URL ? canonicalURL : new URL(canonicalURL, Astro.site);
+const socialBaseUrl = Astro.site || resolvedCanonicalUrl;
+const resolvedImageUrl = new URL(image, socialBaseUrl).toString();
 
 const websiteSchema = {
 	"@type": "WebSite",
@@ -55,10 +61,12 @@ const structuredData = JSON.stringify(
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 		<meta name="description" content={description} />
-		<link rel="canonical" href={canonicalURL} />
+		<meta name="robots" content={robots} />
+		<link rel="canonical" href={resolvedCanonicalUrl} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="yandex-verification" content="30c6a3b60b31cae1" />
 		<meta name="google-site-verification" content="VzCdNteici0zCzN4iBE8dXeeWTC_6k4UAxT4EwNwlPY" />
+		<meta name="format-detection" content="telephone=no" />
 
 		<!-- Google Fonts for Logo Experiments -->
 		<link rel="preconnect" href="https://fonts.googleapis.com">
@@ -78,17 +86,19 @@ const structuredData = JSON.stringify(
 
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content={Astro.url} />
+		<meta property="og:site_name" content="Курьерос" />
+		<meta property="og:locale" content="ru_RU" />
+		<meta property="og:url" content={resolvedCanonicalUrl} />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
-		<meta property="og:image" content={new URL(image, Astro.url)} />
+		<meta property="og:image" content={resolvedImageUrl} />
 
 		<!-- Twitter -->
 		<meta property="twitter:card" content="summary_large_image" />
-		<meta property="twitter:url" content={Astro.url} />
+		<meta property="twitter:url" content={resolvedCanonicalUrl} />
 		<meta property="twitter:title" content={title} />
 		<meta property="twitter:description" content={description} />
-		<meta property="twitter:image" content={new URL(image, Astro.url)} />
+		<meta property="twitter:image" content={resolvedImageUrl} />
 
 		<meta name="theme-color" content="#4F46E5" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />

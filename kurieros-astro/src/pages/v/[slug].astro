@@ -5,6 +5,8 @@ import Footer from '../../components/Footer.astro';
 import ReviewsBlock from '../../components/ReviewsBlock.astro';
 import jobsData from '../../data/jobs.json';
 import { slugifyCompany } from '../../utils/companies';
+import { getCityHref } from '../../utils/cities';
+import { buildBreadcrumbSchema } from '../../utils/schema';
 
 export async function getStaticPaths() {
 	return jobsData.map((job) => ({
@@ -16,6 +18,46 @@ export async function getStaticPaths() {
 const { job } = Astro.props;
 const hasApplyLink = Boolean(job.applyLink && job.applyLink !== '#');
 const companyUrl = `/companies/${slugifyCompany(job.company)}/`;
+const parseSalaryValue = (salary: string) => Number(salary.replace(/[^\d]/g, '')) || 0;
+const salaryValue = parseSalaryValue(job.salary);
+const jobCities = job.location
+	.split(',')
+	.map((city: string) => city.trim())
+	.filter((city: string) => city && city !== 'Вся Россия');
+const cityLinks = jobCities.map((city) => ({
+	name: city,
+	href: getCityHref(city),
+}));
+const primaryTransportTag = job.tags.find((tag: string) => ['auto', 'bicycle', 'foot'].includes(tag));
+const currentCitySet = new Set(jobCities);
+const scoredRelatedJobs = jobsData
+	.filter((item) => item.slug !== job.slug)
+	.map((item) => {
+		const itemCities = item.location
+			.split(',')
+			.map((city) => city.trim())
+			.filter((city) => city && city !== 'Вся Россия');
+		const score =
+			(item.company === job.company ? 5 : 0) +
+			(primaryTransportTag && item.tags.includes(primaryTransportTag) ? 3 : 0) +
+			(itemCities.some((city) => currentCitySet.has(city)) ? 2 : 0) +
+			(item.details.payment_freq === job.details.payment_freq ? 1 : 0);
+
+		return { ...item, score };
+	})
+	.sort((a, b) => b.score - a.score || parseSalaryValue(b.salary) - parseSalaryValue(a.salary));
+const prioritizedRelatedJobs = scoredRelatedJobs.filter((item) => item.score > 0);
+const relatedJobs = prioritizedRelatedJobs.length ? prioritizedRelatedJobs.slice(0, 4) : scoredRelatedJobs.slice(0, 4);
+const vacancyTitle = `${job.title} — зарплата, условия и отклик | Курьерос`;
+const vacancyDescription = `Вакансия "${job.title}" в ${job.company}: ${job.salary}, ${job.details.schedule.toLowerCase()}, ${job.details.payment_freq.toLowerCase()}. Сравните условия и переходите к отклику.`.slice(0, 170);
+const jobLocationSchema = (jobCities.length ? jobCities : ['Россия']).map((city) => ({
+	'@type': 'Place',
+	address: {
+		'@type': 'PostalAddress',
+		...(city !== 'Россия' ? { addressLocality: city } : {}),
+		addressCountry: 'RU',
+	},
+}));
 const factCards = [
 	{ label: 'Доход', value: job.salary },
 	{ label: 'График', value: job.details.schedule },
@@ -71,7 +113,7 @@ const pageSchemaGraph = [
 	{
 		'@type': 'WebPage',
 		name: `${job.title} — Вакансия в ${job.company}`,
-		description: job.description.substring(0, 160),
+		description: vacancyDescription,
 		url: Astro.url.href,
 		dateModified: new Date().toISOString(),
 		about: {
@@ -79,6 +121,39 @@ const pageSchemaGraph = [
 			name: job.company,
 			url: new URL(companyUrl, Astro.site).toString(),
 		},
+	},
+	{
+		'@type': 'JobPosting',
+		title: job.title,
+		description: job.description,
+		identifier: {
+			'@type': 'PropertyValue',
+			name: 'Курьерос',
+			value: job.slug,
+		},
+		datePosted: new Date().toISOString(),
+		employmentType: job.details.employment_type,
+		hiringOrganization: {
+			'@type': 'Organization',
+			name: job.company,
+			sameAs: new URL(companyUrl, Astro.site).toString(),
+			logo: job.companyLogo,
+		},
+		jobLocation: jobLocationSchema,
+		directApply: hasApplyLink,
+		jobBenefits: job.benefits.join('; '),
+		qualifications: job.requirements.join('; '),
+		baseSalary: salaryValue
+			? {
+				'@type': 'MonetaryAmount',
+				currency: 'RUB',
+				value: {
+					'@type': 'QuantitativeValue',
+					maxValue: salaryValue,
+					unitText: 'MONTH',
+				},
+			}
+			: undefined,
 	},
 	{
 		'@type': 'FAQPage',
@@ -91,20 +166,29 @@ const pageSchemaGraph = [
 			},
 		})),
 	},
+	buildBreadcrumbSchema(
+		[
+			{ name: 'Главная', url: '/' },
+			{ name: 'Компании', url: '/companies/' },
+			{ name: job.company, url: companyUrl },
+			{ name: job.title, url: Astro.url.pathname },
+		],
+		Astro.site,
+	),
 ];
 ---
 
 <BaseLayout 
-	title={`${job.title} — Вакансия в ${job.company}`} 
-	description={job.description.substring(0, 160)}
+	title={vacancyTitle}
+	description={vacancyDescription}
 	schemaGraph={pageSchemaGraph}
 >
 	<Header />
 
 	<main class="vacancy-page">
 		<div class="container container-narrow">
-			<nav class="breadcrumb">
-				<a href="/" data-t="nav.main">Главная</a> &gt; <span data-t={`vacancies.${job.id}.title`}>{job.title}</span>
+			<nav class="breadcrumb" aria-label="Breadcrumb">
+				<a href="/" data-t="nav.main">Главная</a> &gt; <a href="/companies/">Компании</a> &gt; <a href={companyUrl}>{job.company}</a> &gt; <span data-t={`vacancies.${job.id}.title`}>{job.title}</span>
 			</nav>
 
 			<section class="vacancy-header">
@@ -125,6 +209,9 @@ const pageSchemaGraph = [
 						<span class="meta-pill">Обновлено {updatedDate}</span>
 						<span class="meta-pill">{hasApplyLink ? 'Есть прямая ссылка на отклик' : 'Ссылка на отклик уточняется'}</span>
 						<span class="meta-pill">Финальные условия подтверждаются при отклике</span>
+						{cityLinks.slice(0, 2).map((city) => (
+							<a href={city.href} class="meta-pill meta-pill-link">{city.name}</a>
+						))}
 					</div>
 					<div class="vacancy-hero-actions">
 						<a href="#vacancy-facts" class="hero-link">Краткие факты</a>
@@ -238,6 +325,40 @@ const pageSchemaGraph = [
 						<div class="trust-links">
 							<a href="/compare/" class="hero-link">Сравнить с другими вакансиями</a>
 							<a href={companyUrl} class="hero-link">Открыть страницу компании</a>
+						</div>
+					</section>
+
+					<section class="vacancy-section ai-geo-section">
+						<p class="section-eyebrow">Маршруты по сайту</p>
+						<h2>Что ещё открыть после этой вакансии?</h2>
+						<div class="vacancy-route-grid">
+							<article class="route-card">
+								<h3>Полезные хабы</h3>
+								<div class="route-chip-row">
+									<a href="/compare/" class="hero-link">Сравнение вакансий</a>
+									<a href={companyUrl} class="hero-link">Страница компании</a>
+									<a href="/companies/" class="hero-link">Все компании</a>
+									{cityLinks.map((city) => (
+										<a href={city.href} class="hero-link">Работа курьером в {city.name}</a>
+									))}
+								</div>
+							</article>
+
+							<article class="route-card">
+								<h3>Похожие вакансии для сравнения</h3>
+								<div class="related-jobs-grid">
+									{relatedJobs.map((relatedJob) => (
+										<a href={`/v/${relatedJob.slug}/`} class="related-job-card">
+											<strong>{relatedJob.title}</strong>
+											<span>{relatedJob.company}</span>
+											<div class="related-job-meta">
+												<span>{relatedJob.salary}</span>
+												<span>{relatedJob.location}</span>
+											</div>
+										</a>
+									))}
+								</div>
+							</article>
 						</div>
 					</section>
 				</div>
@@ -404,6 +525,10 @@ const pageSchemaGraph = [
 		color: var(--text-muted);
 		font-size: 0.82rem;
 		font-weight: 700;
+	}
+	.meta-pill-link {
+		text-decoration: none;
+		color: var(--text-main);
 	}
 	.vacancy-hero-actions {
 		display: flex;
@@ -592,6 +717,49 @@ const pageSchemaGraph = [
 		flex-wrap: wrap;
 		gap: 0.75rem;
 	}
+	.vacancy-route-grid {
+		display: grid;
+		grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+		gap: 1rem;
+	}
+	.route-card {
+		padding: 1rem;
+		border: 1px solid rgba(148, 163, 184, 0.16);
+		border-radius: 1rem;
+		background: rgba(255, 255, 255, 0.72);
+	}
+	.route-card h3 {
+		margin: 0 0 0.9rem;
+		font-size: 1rem;
+	}
+	.route-chip-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+	}
+	.related-jobs-grid {
+		display: grid;
+		gap: 0.75rem;
+	}
+	.related-job-card {
+		display: grid;
+		gap: 0.4rem;
+		padding: 0.95rem 1rem;
+		border-radius: 1rem;
+		border: 1px solid rgba(99, 102, 241, 0.14);
+		background: rgba(99, 102, 241, 0.06);
+		text-decoration: none;
+		color: var(--text-main);
+	}
+	.related-job-card span {
+		color: var(--text-muted);
+	}
+	.related-job-meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.6rem;
+		font-size: 0.85rem;
+	}
 	.vacancy-card-sidebar {
 		background: var(--bg-card);
 		padding: 2rem;
@@ -641,7 +809,8 @@ const pageSchemaGraph = [
 			grid-template-columns: repeat(3, minmax(0, 1fr));
 		}
 		.answer-grid,
-		.answer-grid-two {
+		.answer-grid-two,
+		.vacancy-route-grid {
 			grid-template-columns: 1fr;
 		}
 	}
