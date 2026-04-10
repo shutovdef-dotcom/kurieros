@@ -12,9 +12,85 @@ import { getCitiesFromJobs, getCityNames } from '../utils/cities';
 const cities = getCitiesFromJobs(jobsData);
 const availableCities = getCityNames(jobsData);
 const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabota-kurerom-${city.slug}/`]));
+const faqItems = [
+	{
+		question: 'Со скольки лет можно работать курьером?',
+		answer:
+			'В большинстве компаний можно устроиться пешим курьером или велокурьером уже с 16 лет. Для работы на автомобиле обычно нужен возраст 18+ и права категории B.',
+	},
+	{
+		question: 'Сколько реально зарабатывает курьер в 2026 году?',
+		answer:
+			'Доход зависит от города, транспорта, графика и компании. Пешие курьеры обычно зарабатывают меньше, а вело- и автоформаты дают более высокий потенциал дохода.',
+	},
+	{
+		question: 'Нужна ли собственная термосумка?',
+		answer:
+			'Чаще всего нет: агрегаторы и сервисы доставки выдают экипировку и термосумку после подключения или короткого обучения.',
+	},
+];
+const hubLinks = [
+	{
+		href: '/compare/',
+		title: 'Сравнение вакансий',
+		text: 'Быстро сравнить выплаты, транспорт и оформление перед откликом.',
+	},
+	{
+		href: '/companies/',
+		title: 'Компании',
+		text: 'Сначала выбрать бренд, потом перейти в конкретные вакансии.',
+	},
+	{
+		href: '/cities/',
+		title: 'Города',
+		text: 'Открыть городские хабы и локальные сценарии поиска работы.',
+	},
+	{
+		href: '/blog/',
+		title: 'Блог',
+		text: 'Разобраться в доходе, форматах работы и скрытых условиях.',
+	},
+];
+const pageSchemaGraph = [
+	{
+		'@type': 'CollectionPage',
+		name: 'Курьерос — Работа курьером рядом',
+		description:
+			'Главный хаб вакансий курьеров с переходом в сравнение, компании, города и полезные статьи перед откликом.',
+		url: Astro.url.href,
+		dateModified: new Date().toISOString(),
+		mainEntity: {
+			'@type': 'ItemList',
+			itemListElement: hubLinks.map((link, index) => ({
+				'@type': 'ListItem',
+				position: index + 1,
+				name: link.title,
+				url: new URL(link.href, Astro.site).toString(),
+			})),
+		},
+	},
+	{
+		'@type': 'Organization',
+		name: 'Курьерос',
+		url: Astro.site,
+		description:
+			'Каталог вакансий курьеров, сравнений, компаний и городских хабов для быстрого выбора подходящей работы.',
+	},
+	{
+		'@type': 'FAQPage',
+		mainEntity: faqItems.map((item) => ({
+			'@type': 'Question',
+			name: item.question,
+			acceptedAnswer: {
+				'@type': 'Answer',
+				text: item.answer,
+			},
+		})),
+	},
+];
 ---
 
-<BaseLayout title="Курьерос — Работа курьером рядом" description="Выберите город, сравните условия и быстро найдите вакансию курьера с понятной оплатой и графиком.">
+<BaseLayout title="Курьерос — Работа курьером рядом" description="Выберите город, сравните условия и быстро найдите вакансию курьера с понятной оплатой и графиком." schemaGraph={pageSchemaGraph}>
 	<Header />
 
 	<main>
@@ -40,6 +116,21 @@ const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabot
 				</div>
 			</section>
 
+			<section class="home-section home-hub-section">
+				<div class="section-heading">
+					<h2>Быстрые маршруты по сайту</h2>
+					<p>Главные хабы, которые помогают выбрать вакансию, работодателя, город или сначала разобраться в условиях.</p>
+				</div>
+				<div class="home-hub-grid">
+					{hubLinks.map((link) => (
+						<a href={link.href} class="home-hub-card">
+							<h3>{link.title}</h3>
+							<p>{link.text}</p>
+						</a>
+					))}
+				</div>
+			</section>
+
 			<JobGrid />
 
 			<IncomeCalculator />
@@ -53,27 +144,21 @@ const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabot
 				</div>
 				<div class="faq-item">
 					<div class="faq-question">
-						<span data-t="faq.q1">Со скольки лет можно работать курьером?</span> <span>+</span>
+						<span data-t="faq.q1">{faqItems[0].question}</span> <span>+</span>
 					</div>
-					<div class="faq-answer" data-t="faq.a1">
-						В большинстве компаний можно устроиться пешим курьером или велокурьером уже <strong>с 16 лет</strong>. Для работы на автомобиле обычно нужен возраст 18+ и права категории B.
-					</div>
+					<div class="faq-answer" data-t="faq.a1">{faqItems[0].answer}</div>
 				</div>
 				<div class="faq-item">
 					<div class="faq-question">
-						<span data-t="faq.q2">Сколько реально зарабатывает курьер в 2026 году?</span> <span>+</span>
+						<span data-t="faq.q2">{faqItems[1].question}</span> <span>+</span>
 					</div>
-					<div class="faq-answer" data-t="faq.a2">
-						Доход зависит от города, транспорта, графика и компании. Пешие курьеры обычно зарабатывают меньше, вело и автоформаты заметно увеличивают итоговый доход.
-					</div>
+					<div class="faq-answer" data-t="faq.a2">{faqItems[1].answer}</div>
 				</div>
 				<div class="faq-item">
 					<div class="faq-question">
-						<span data-t="faq.q3">Нужна ли собственная термосумка?</span> <span>+</span>
+						<span data-t="faq.q3">{faqItems[2].question}</span> <span>+</span>
 					</div>
-					<div class="faq-answer" data-t="faq.a3">
-						Чаще всего нет: агрегаторы и сервисы доставки выдают экипировку и термосумку после подключения или короткого обучения.
-					</div>
+					<div class="faq-answer" data-t="faq.a3">{faqItems[2].answer}</div>
 				</div>
 			</section>
 		</div>
@@ -372,6 +457,38 @@ const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabot
 		border-radius: 1.25rem !important;
 		box-shadow: 0 4px 12px rgba(60, 41, 20, 0.03) !important;
 	}
+	.home-hub-grid {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 1rem;
+	}
+	.home-hub-card {
+		display: grid;
+		gap: 0.55rem;
+		padding: 1.25rem;
+		border-radius: 1.25rem;
+		border: 1px solid #ebe5dc;
+		background: linear-gradient(180deg, #fffefb 0%, #f8f1e7 100%);
+		box-shadow: 0 6px 18px rgba(60, 41, 20, 0.05);
+		text-decoration: none;
+		color: #2b2622;
+		transition: var(--transition);
+	}
+	.home-hub-card:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 10px 24px rgba(60, 41, 20, 0.08);
+	}
+	.home-hub-card h3,
+	.home-hub-card p {
+		margin: 0;
+	}
+	.home-hub-card h3 {
+		font-size: 1rem;
+	}
+	.home-hub-card p {
+		color: #7c6f64;
+		line-height: 1.6;
+	}
 
 	/* --- Utilities --- */
 	.sr-only {
@@ -425,8 +542,13 @@ const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabot
 			padding: 0 1.25rem 0 0.5rem;
 			font-size: 1.1rem !important;
 		}
+		.home-hub-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
 	}
 	@media (max-width: 600px) {
-		/* Buttons stay in row as defined in @media 768px */
+		.home-hub-grid {
+			grid-template-columns: 1fr;
+		}
 	}
 </style>
