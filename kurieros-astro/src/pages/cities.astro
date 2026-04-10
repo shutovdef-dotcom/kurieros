@@ -4,11 +4,66 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import jobsData from '../data/jobs.json';
 import { getCitiesFromJobs } from '../utils/cities';
+import { buildBreadcrumbSchema } from '../utils/schema';
 
 const cities = getCitiesFromJobs(jobsData).map((city) => ({
 	...city,
-	href: `/rabota-kurerom-${city.slug}/`
+	href: `/rabota-kurerom-${city.slug}/`,
 }));
+
+const totalVacancies = cities.reduce((sum, city) => sum + city.vacancyCount, 0);
+const topCities = [...cities].sort((a, b) => b.vacancyCount - a.vacancyCount).slice(0, 4);
+const faqItems = [
+	{
+		question: 'Что есть на странице городов?',
+		answer: `На странице собраны ${cities.length} городов, где уже есть ${totalVacancies} вакансий курьеров. Это стартовая навигационная точка для перехода в локальные подборки.`,
+	},
+	{
+		question: 'Какой следующий шаг после выбора города?',
+		answer: 'Откройте страницу нужного города, посмотрите активные вакансии, сравните компании и только потом переходите к карточкам конкретных работодателей.',
+	},
+	{
+		question: 'Чем полезен городской хаб для SEO и AI?',
+		answer: 'Он помогает собрать локальный интент в одной точке: пользователь, поиск и AI-системы быстрее понимают, в каких городах сайт уже закрывает запросы о работе курьером.',
+	},
+];
+
+const pageSchemaGraph = [
+	{
+		'@type': 'CollectionPage',
+		name: 'Города — работа курьером',
+		description: 'Каталог городов с локальными подборками вакансий курьеров и быстрым переходом в нужный город.',
+		url: Astro.url.href,
+		dateModified: new Date().toISOString(),
+		mainEntity: {
+			'@type': 'ItemList',
+			itemListElement: cities.map((city, index) => ({
+				'@type': 'ListItem',
+				position: index + 1,
+				name: city.name,
+				url: new URL(city.href, Astro.site).toString(),
+			})),
+		},
+	},
+	{
+		'@type': 'FAQPage',
+		mainEntity: faqItems.map((item) => ({
+			'@type': 'Question',
+			name: item.question,
+			acceptedAnswer: {
+				'@type': 'Answer',
+				text: item.answer,
+			},
+		})),
+	},
+	buildBreadcrumbSchema(
+		[
+			{ name: 'Главная', url: '/' },
+			{ name: 'Города', url: '/cities/' },
+		],
+		Astro.site,
+	),
+];
 
 const getVacancyPlural = (count: number) => {
 	const mod10 = count % 10;
@@ -19,36 +74,102 @@ const getVacancyPlural = (count: number) => {
 };
 ---
 
-<BaseLayout title="Города — Курьерос" description="Выберите город и смотрите актуальные вакансии курьеров с фильтром по локации.">
+<BaseLayout
+	title="Города — работа курьером по России"
+	description="Выберите город и откройте локальную подборку вакансий курьеров. Городские страницы помогают быстро найти компании, выплаты и формат работы."
+	schemaGraph={pageSchemaGraph}
+>
 	<Header />
+
 	<main class="cities-page">
 		<section class="cities-hero">
+			<p class="section-eyebrow">City Hub</p>
 			<h1 data-t="cities.title">Города</h1>
 			<p data-t="cities.subtitle">Подборка городов из актуальных вакансий. Новые города появляются автоматически.</p>
+		</section>
+
+		<section class="cities-answer-panel">
+			<div>
+				<p class="section-eyebrow">SEO / GEO TL;DR</p>
+				<h2>Зачем нужен отдельный хаб по городам?</h2>
+			</div>
+			<p>
+				Эта страница собирает локальный спрос в одном месте: сначала вы выбираете город, затем переходите в его подборку,
+				сравниваете компании и уже внутри города открываете конкретные вакансии. Для поиска и AI это понятный вход в
+				региональный слой сайта.
+			</p>
+		</section>
+
+		<section class="cities-facts" aria-label="Ключевые факты по городам">
+			<article class="fact-card">
+				<span>Города</span>
+				<strong>{cities.length}</strong>
+			</article>
+			<article class="fact-card">
+				<span>Вакансии</span>
+				<strong>{totalVacancies}</strong>
+			</article>
+			<article class="fact-card">
+				<span>Топ города</span>
+				<strong>{topCities.map((city) => city.name).join(', ')}</strong>
+			</article>
+			<article class="fact-card">
+				<span>Следующий шаг</span>
+				<strong>Открыть город и сравнить вакансии</strong>
+			</article>
+		</section>
+
+		<section class="cities-link-strip" aria-label="Быстрые переходы">
+			<a href="/compare/" class="quick-link">Сравнение вакансий</a>
+			<a href="/companies/" class="quick-link">Каталог компаний</a>
+			<a href="/blog/" class="quick-link">Блог о работе курьером</a>
 		</section>
 
 		<section class="cities-grid">
 			{cities.map((city) => {
 				const plural = getVacancyPlural(city.vacancyCount);
 				return (
-				<a class="city-tile" href={city.href}>
-					<strong>{city.name}</strong>
-					<span><span class="count-num">{city.vacancyCount}</span> <span data-t={plural.key}>{plural.text}</span></span>
-				</a>
-			)})}
+					<a class="city-tile" href={city.href}>
+						<strong>{city.name}</strong>
+						<span><span class="count-num">{city.vacancyCount}</span> <span data-t={plural.key}>{plural.text}</span></span>
+					</a>
+				);
+			})}
+		</section>
+
+		<section class="cities-faq-section">
+			<p class="section-eyebrow">FAQ</p>
+			<h2>Короткие ответы по городским страницам</h2>
+			<div class="cities-faq-grid">
+				{faqItems.map((item) => (
+					<article class="faq-card">
+						<h3>{item.question}</h3>
+						<p>{item.answer}</p>
+					</article>
+				))}
+			</div>
 		</section>
 	</main>
+
 	<Footer />
 </BaseLayout>
 
 <style>
 	.cities-page {
-		max-width: 1360px;
+		max-width: 1240px;
 		margin: 0 auto;
 		padding: 2rem 1rem 4rem;
 	}
 	.cities-hero {
-		margin-bottom: 1.25rem;
+		margin-bottom: 1.5rem;
+	}
+	.section-eyebrow {
+		margin: 0 0 0.55rem;
+		font-size: 0.74rem;
+		font-weight: 900;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: var(--accent-color);
 	}
 	.cities-hero h1 {
 		font-size: clamp(2rem, 5vw, 3rem);
@@ -56,21 +177,92 @@ const getVacancyPlural = (count: number) => {
 		letter-spacing: -0.03em;
 		margin-bottom: 0.45rem;
 	}
-	.cities-hero p {
+	.cities-hero p,
+	.cities-answer-panel p,
+	.faq-card p,
+	.city-tile span {
 		color: var(--text-muted);
+	}
+	.cities-answer-panel,
+	.fact-card,
+	.city-tile,
+	.faq-card {
+		border: 1px solid rgba(148, 163, 184, 0.16);
+		border-radius: 1.5rem;
+		background: rgba(255, 255, 255, 0.82);
+		box-shadow: var(--shadow-sm);
+	}
+	.cities-answer-panel {
+		display: grid;
+		grid-template-columns: minmax(220px, 0.34fr) minmax(0, 1fr);
+		gap: 1.5rem;
+		align-items: start;
+		margin-bottom: 1rem;
+		padding: 1.5rem;
+	}
+	.cities-answer-panel h2,
+	.cities-answer-panel p,
+	.faq-card h3,
+	.faq-card p {
+		margin: 0;
+	}
+	.cities-answer-panel p,
+	.faq-card p {
+		line-height: 1.8;
+	}
+	.cities-facts,
+	.cities-faq-grid {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 1rem;
+		margin-bottom: 1rem;
+	}
+	.fact-card {
+		display: grid;
+		gap: 0.35rem;
+		min-height: 7rem;
+		padding: 1rem;
+	}
+	.fact-card span {
+		font-size: 0.72rem;
+		font-weight: 900;
+		letter-spacing: 0.11em;
+		text-transform: uppercase;
+		color: var(--text-muted);
+	}
+	.fact-card strong {
+		align-self: end;
+		font-size: 0.98rem;
+		line-height: 1.35;
+	}
+	.cities-link-strip {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+		margin-bottom: 1rem;
+	}
+	.quick-link {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.5rem;
+		padding: 0.65rem 1rem;
+		border-radius: 999px;
+		border: 1px solid rgba(99, 102, 241, 0.16);
+		background: rgba(99, 102, 241, 0.08);
+		color: var(--text-main);
+		text-decoration: none;
+		font-weight: 800;
 	}
 	.cities-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 		gap: 0.8rem;
+		margin-bottom: 1.5rem;
 	}
 	.city-tile {
 		display: grid;
 		gap: 0.35rem;
 		padding: 1rem;
-		border-radius: 14px;
-		border: 1px solid var(--border-color);
-		background: var(--surface-color);
 		color: var(--text-main);
 		text-decoration: none;
 		transition: var(--transition);
@@ -78,13 +270,38 @@ const getVacancyPlural = (count: number) => {
 	.city-tile:hover {
 		transform: translateY(-2px);
 		border-color: var(--text-main);
-		box-shadow: var(--shadow-sm);
+		box-shadow: var(--shadow-md);
 	}
 	.city-tile strong {
 		font-size: 1rem;
 	}
-	.city-tile span {
-		font-size: 0.88rem;
-		color: var(--text-muted);
+	.cities-faq-section {
+		margin-top: 1.5rem;
+	}
+	.faq-card {
+		padding: 1.25rem;
+	}
+	.faq-card h3 {
+		margin-bottom: 0.45rem;
+		font-size: 1rem;
+	}
+	@media (max-width: 960px) {
+		.cities-answer-panel,
+		.cities-facts,
+		.cities-faq-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+	@media (max-width: 768px) {
+		.cities-answer-panel {
+			grid-template-columns: 1fr;
+		}
+	}
+	@media (max-width: 560px) {
+		.cities-facts,
+		.cities-faq-grid,
+		.cities-grid {
+			grid-template-columns: 1fr;
+		}
 	}
 </style>

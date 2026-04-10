@@ -5,6 +5,7 @@ import Footer from '../../components/Footer.astro';
 import jobsData from '../../data/jobs.json';
 import reviewsData from '../../data/reviews.json';
 import { getCompaniesFromJobs } from '../../utils/companies';
+import { getCityHref } from '../../utils/cities';
 
 export async function getStaticPaths() {
   return getCompaniesFromJobs(jobsData, reviewsData).map((company) => ({
@@ -217,6 +218,22 @@ const pageSchemaGraph = [
           ))}
         </div>
       </section>
+
+      {company.cities.length > 0 && (
+        <section class="company-section">
+          <div class="section-topline">
+            <div>
+              <p class="section-eyebrow">Города</p>
+              <h2>Где у {company.name} уже есть вакансии</h2>
+            </div>
+          </div>
+          <div class="chip-row">
+            {company.cities.map((city) => (
+              <a href={getCityHref(city)} class="chip">{city}</a>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section class="company-section">
         <div class="section-topline">

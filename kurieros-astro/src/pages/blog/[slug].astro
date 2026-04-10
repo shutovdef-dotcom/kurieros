@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import articlesData from '../../data/articles.json';
+import { buildBreadcrumbSchema } from '../../utils/schema';
 
 export function getStaticPaths() {
 	return articlesData.map((article) => ({
@@ -27,9 +28,43 @@ const relatedArticles = articlesData
 			month: 'long',
 		}).format(new Date(entry.date)),
 	}));
+
+const pageSchemaGraph = [
+	{
+		'@type': 'BlogPosting',
+		headline: article.title,
+		description: article.description,
+		datePublished: new Date(article.date).toISOString(),
+		dateModified: new Date(article.date).toISOString(),
+		mainEntityOfPage: Astro.url.href,
+		image: article.image ? [new URL(article.image, Astro.site).toString()] : undefined,
+		author: {
+			'@type': 'Organization',
+			name: 'Редакция Курьерос',
+		},
+		publisher: {
+			'@type': 'Organization',
+			name: 'Курьерос',
+			url: Astro.site,
+		},
+	},
+	buildBreadcrumbSchema(
+		[
+			{ name: 'Главная', url: '/' },
+			{ name: 'Блог', url: '/blog/' },
+			{ name: article.title, url: `/blog/${article.slug}/` },
+		],
+		Astro.site,
+	),
+];
 ---
 
-<BaseLayout title={`${article.title} — Курьерос`} description={article.description} image={article.image}>
+<BaseLayout
+	title={`${article.title} — Курьерос`}
+	description={article.description}
+	image={article.image}
+	schemaGraph={pageSchemaGraph}
+>
 	<Header />
 
 	<main>
@@ -51,6 +86,24 @@ const relatedArticles = articlesData
 					</div>
 				)}
 			</header>
+
+			<section class="article-answer-panel">
+				<div>
+					<div class="article-kicker">SEO / GEO TL;DR</div>
+					<h2>Что делать после прочтения?</h2>
+				</div>
+				<p>
+					Этот материал помогает разобраться в теме, но следующее полезное действие обычно уже практическое: открыть
+					сравнение вакансий, выбрать компанию или перейти в нужный город и посмотреть, как выводы статьи выглядят в
+					реальных карточках вакансий.
+				</p>
+			</section>
+
+			<section class="article-hub-links">
+				<a href="/compare/" class="hub-link">Сравнение вакансий</a>
+				<a href="/companies/" class="hub-link">Каталог компаний</a>
+				<a href="/cities/" class="hub-link">Города</a>
+			</section>
 			
 			<div class="article-body">
 				<Fragment set:html={article.content} />
@@ -61,6 +114,27 @@ const relatedArticles = articlesData
 					<div class="editor-note-label">Материал подготовлен редакцией</div>
 					<h2>Курьерос Журнал</h2>
 					<p>Мы собираем практические материалы о работе курьером: сравниваем вакансии, условия и реальные сценарии заработка без рекламных обещаний.</p>
+				</div>
+
+				<div class="article-next">
+					<div class="related-header">
+						<h2>Куда перейти дальше</h2>
+						<p>Следующий логичный шаг после статьи — перейти в одну из рабочих поверхностей сайта.</p>
+					</div>
+					<div class="next-grid">
+						<a href="/compare/" class="next-card">
+							<strong>Сравнение вакансий</strong>
+							<span>Смотреть условия рядом и выбирать формат быстрее.</span>
+						</a>
+						<a href="/companies/" class="next-card">
+							<strong>Компании</strong>
+							<span>Сначала выбрать бренд, потом открыть его вакансии и отзывы.</span>
+						</a>
+						<a href="/cities/" class="next-card">
+							<strong>Города</strong>
+							<span>Перейти в локальные подборки и посмотреть, где уже есть вакансии.</span>
+						</a>
+					</div>
 				</div>
 
 				<div class="related-stories">
@@ -102,7 +176,7 @@ const relatedArticles = articlesData
 		grid-template-columns: minmax(0, 0.88fr) minmax(320px, 1fr);
 		gap: 2rem;
 		align-items: end;
-		margin-bottom: 3rem;
+		margin-bottom: 2rem;
 		position: relative;
 		z-index: 1;
 	}
@@ -153,12 +227,55 @@ const relatedArticles = articlesData
 		line-height: 1.4;
 		margin-bottom: 1rem;
 	}
+	.article-description,
+	.article-answer-panel p,
+	.next-card span {
+		color: var(--text-muted);
+	}
 	.article-description {
 		max-width: 54ch;
 		font-size: 1.08rem;
 		line-height: 1.85;
-		color: var(--text-muted);
 		margin-top: 1rem;
+	}
+	.article-answer-panel {
+		max-width: 980px;
+		margin: 0 auto 1rem;
+		display: grid;
+		grid-template-columns: minmax(220px, 0.35fr) minmax(0, 1fr);
+		gap: 1.5rem;
+		align-items: start;
+		padding: 1.5rem;
+		border-radius: 1.5rem;
+		border: 1px solid rgba(148, 163, 184, 0.16);
+		background: rgba(255, 255, 255, 0.82);
+		box-shadow: var(--shadow-sm);
+	}
+	.article-answer-panel h2,
+	.article-answer-panel p {
+		margin: 0;
+	}
+	.article-answer-panel p {
+		line-height: 1.8;
+	}
+	.article-hub-links {
+		max-width: 980px;
+		margin: 0 auto 2rem;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+	}
+	.hub-link {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.5rem;
+		padding: 0.65rem 1rem;
+		border-radius: 999px;
+		border: 1px solid rgba(99, 102, 241, 0.16);
+		background: rgba(99, 102, 241, 0.08);
+		color: var(--text-main);
+		text-decoration: none;
+		font-weight: 800;
 	}
 	.article-body {
 		max-width: 760px;
@@ -209,7 +326,8 @@ const relatedArticles = articlesData
 		z-index: 3;
 		background: var(--bg-color);
 	}
-	.editor-note {
+	.editor-note,
+	.next-card {
 		padding: 2rem;
 		border-radius: 28px;
 		background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(248,250,252,0.96));
@@ -223,12 +341,13 @@ const relatedArticles = articlesData
 		color: var(--text-muted);
 		margin-bottom: 0.8rem;
 	}
-	.editor-note h2 {
+	.editor-note h2,
+	.related-header h2 {
 		font-size: clamp(1.7rem, 2.6vw, 2.4rem);
 		letter-spacing: -0.04em;
-		margin-bottom: 0.85rem;
 	}
-	.editor-note p {
+	.editor-note p,
+	.related-header p {
 		max-width: 62ch;
 		color: var(--text-muted);
 		line-height: 1.8;
@@ -240,19 +359,24 @@ const relatedArticles = articlesData
 		gap: 1rem;
 		margin-bottom: 1.25rem;
 	}
-	.related-header h2 {
-		font-size: clamp(1.7rem, 2.6vw, 2.4rem);
-		letter-spacing: -0.04em;
-	}
-	.related-header p {
-		color: var(--text-muted);
-		max-width: 34ch;
-		line-height: 1.7;
-	}
+	.next-grid,
 	.related-grid {
 		display: grid;
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 		gap: 1rem;
+	}
+	.next-card {
+		display: grid;
+		gap: 0.6rem;
+		text-decoration: none;
+		color: inherit;
+		padding: 1.4rem;
+	}
+	.next-card strong,
+	.related-copy h3 {
+		font-size: 1.05rem;
+		line-height: 1.3;
+		letter-spacing: -0.02em;
 	}
 	.related-card {
 		display: grid;
@@ -281,10 +405,13 @@ const relatedArticles = articlesData
 		color: var(--text-muted);
 		margin-bottom: 0.7rem;
 	}
-	.related-copy h3 {
-		font-size: 1.05rem;
-		line-height: 1.3;
-		letter-spacing: -0.02em;
+	@media (max-width: 960px) {
+		.article-header,
+		.article-answer-panel,
+		.next-grid,
+		.related-grid {
+			grid-template-columns: 1fr;
+		}
 	}
 	@media (max-width: 768px) {
 		.article-container {
@@ -292,7 +419,6 @@ const relatedArticles = articlesData
 			padding: 0 1rem;
 		}
 		.article-header {
-			grid-template-columns: 1fr;
 			gap: 1.25rem;
 			margin-bottom: 2rem;
 		}
@@ -316,9 +442,6 @@ const relatedArticles = articlesData
 		}
 		.related-header {
 			display: grid;
-		}
-		.related-grid {
-			grid-template-columns: 1fr;
 		}
 	}
 </style>

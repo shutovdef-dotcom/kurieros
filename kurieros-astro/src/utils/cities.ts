@@ -49,3 +49,9 @@ export const getCitiesFromJobs = (jobs: JobLike[]) => {
 
 export const getCityNames = (jobs: JobLike[]) =>
 	getCitiesFromJobs(jobs).map((city) => city.name);
+
+export const getCityHref = (name: string) => {
+	const known = KNOWN_CITIES.get(name);
+	const slug = known?.slug ?? slugifyCity(name);
+	return `/rabota-kurerom-${slug}/`;
+};
