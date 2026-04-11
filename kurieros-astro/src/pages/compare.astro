@@ -9,15 +9,6 @@ import { getCitiesFromJobs } from '../utils/cities';
 import { slugifyCompany } from '../utils/companies';
 import { buildBreadcrumbSchema } from '../utils/schema';
 
-const companyColors: Record<string, string> = {
-  'Яндекс Еда': '#FFCC00',
-  'Ozon': '#005BFF',
-  'Самокат': '#FF4063',
-  'СДЭК': '#00B050',
-  'ВкусВилл': '#1A9A50',
-  'ВТБ': '#0A2896',
-};
-
 const transportLabelMap: Record<string, string> = {
   auto: 'Авто',
   bicycle: 'Велосипед / самокат',
@@ -35,8 +26,8 @@ const compareJobs = jobsData.slice(0, 4).map((job) => ({
   slug: job.slug,
   title: job.title,
   company: job.company,
+  companySlug: slugifyCompany(job.company),
   companyHref: `/companies/${slugifyCompany(job.company)}/`,
-  logoColor: companyColors[job.company] || '#6366F1',
   salary: job.salary,
   location: job.location,
   transport: getTransportLabel(job.tags),
@@ -87,43 +78,30 @@ const stableContractJob = compareJobs.find((job) => /тк|официаль/i.tes
 const compareTitle = 'Сравнение вакансий курьеров: что лучше выбрать | Курьерок';
 const compareDescription = 'Сравнение вакансий курьеров по зарплате, выплатам, транспорту и оформлению. Смотрите, что лучше для дохода, старта и стабильности.';
 
-const verdictCards = [
+const decisionCards = [
   {
     label: 'Лучше для дохода',
     title: topIncomeJob.title,
-    text: `${topIncomeJob.company} выглядит самым сильным вариантом по верхней планке дохода, но финальные цифры всё равно нужно подтверждать перед откликом.`,
-  },
-  {
-    label: 'Лучше для старта',
-    title: studentFriendlyJob.title,
-    text: `${studentFriendlyJob.company} лучше подходит тем, кто ищет вход в профессию с более мягким возрастным порогом и понятным стартом.`,
-  },
-  {
-    label: 'Лучше для стабильности',
-    title: stableContractJob.title,
-    text: `${stableContractJob.company} стоит смотреть тем, кому важнее понятное оформление и предсказуемый формат занятости.`,
-  },
-];
-const routeCards = [
-  {
-    label: 'Лучше для дохода',
-    title: topIncomeJob.title,
+    hint: 'Сильнее по верхней вилке дохода.',
     text: `Если сейчас важнее потенциал заработка, начните с карточки ${topIncomeJob.company} и проверьте формулу выплат уже в вакансии.`,
     href: topIncomeJob.link,
   },
   {
     label: 'Лучше для старта',
     title: studentFriendlyJob.title,
+    hint: 'Мягче для входа в профессию.',
     text: 'Этот маршрут полезен тем, кто хочет войти в доставку быстрее и с более мягкими входными требованиями.',
     href: studentFriendlyJob.link,
   },
   {
     label: 'Лучше для стабильности',
     title: stableContractJob.title,
+    hint: 'Понятнее по оформлению и занятости.',
     text: 'Если вы выбираете по оформлению и предсказуемости занятости, стоит начать именно с этого варианта.',
     href: stableContractJob.link,
   },
 ];
+const answerFocusPoints = ['Выплаты', 'Транспорт', 'Оформление', 'Возрастной порог'];
 
 const fitPoints = [
   'Сравнение полезно тем, кто уже выбрал 2-4 похожих вакансии и хочет быстро увидеть разницу по выплатам, транспорту и оформлению.',
@@ -196,36 +174,94 @@ const pageSchemaGraph = [
   <main class="compare-page">
     <div class="compare-container">
       <div class="compare-header">
-        <div>
+        <div class="compare-header-copy">
           <nav class="compare-breadcrumb" aria-label="Breadcrumb">
             <a href="/">Главная</a>
             <span>/</span>
             <span>Сравнение вакансий</span>
           </nav>
           <h1>Сравнение вакансий</h1>
-          <p class="compare-subtitle">Сначала короткий вывод и маршруты выбора, потом детальная таблица по условиям.</p>
+          <p class="compare-subtitle">Сравните базовые условия, а потом открывайте только те карточки, которые действительно подходят.</p>
         </div>
-        <a href="/" class="back-link">← К списку вакансий</a>
+        <div class="compare-header-actions">
+          <a href="#compare-table" class="compare-table-link">К таблице</a>
+          <a href="/" class="back-link">← К вакансиям</a>
+        </div>
       </div>
 
       <section class="compare-answer-panel">
         <div>
-          <p class="section-eyebrow">AI GEO TL;DR</p>
-          <h2>Что важнее всего в этом сравнении?</h2>
+          <p class="section-eyebrow">Короткий вывод</p>
+          <h2>Сначала сравните ключевые условия</h2>
         </div>
-        <p>
-          Это экран для быстрого выбора между похожими вакансиями курьера. Сначала сравните выплаты, формат транспорта и
-          оформление, а затем переходите только в те карточки, которые подходят вам по реальным ограничениям, а не только
-          по верхней зарплатной вилке.
-        </p>
+        <div class="compare-answer-copy">
+          <p>
+            Сначала смотрите выплаты, транспорт и оформление. Если по этим трем пунктам вакансия подходит, уже потом
+            открывайте полную карточку.
+          </p>
+          <div class="compare-chip-row compare-answer-chip-row">
+            {answerFocusPoints.map((point) => (
+              <span class="compare-chip-link compare-chip-static">{point}</span>
+            ))}
+          </div>
+        </div>
       </section>
 
-      <section class="compare-verdict-grid" aria-label="Быстрые выводы по сравнению">
-        {verdictCards.map((card) => (
-          <article class="compare-verdict-card">
+      <div class="compare-table-wrapper" id="compare-table">
+        <div class="compare-grid">
+          <div class="compare-row compare-head">
+            <div class="compare-cell feature-col empty-cell">
+              Параметры
+            </div>
+            {compareJobs.map((job, index) => (
+              <div class="compare-cell job-col" data-col={index}>
+                <div class="job-card-mini">
+                  <button class="remove-col-btn" aria-label="Удалить" title="Удалить из сравнения" data-col-target={index} type="button">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  </button>
+                  <div class={`company-logo company-logo-${job.companySlug}`}>
+                    <span class="company-logo-letter">
+                      {job.company.charAt(0)}
+                    </span>
+                  </div>
+                  <h3>{job.title}</h3>
+                  <span class="company-name">{job.company}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {features.map((feature) => (
+            <div class="compare-row">
+              <div class="compare-cell feature-col">
+                {feature.name}
+              </div>
+              {compareJobs.map((job, index) => (
+                <div class="compare-cell job-col" data-col={index}>
+                  {job[feature.key as keyof typeof job]}
+                </div>
+              ))}
+            </div>
+          ))}
+
+          <div class="compare-row compare-actions">
+            <div class="compare-cell feature-col"></div>
+            {compareJobs.map((job, index) => (
+              <div class="compare-cell job-col" data-col={index}>
+                <a href={job.link} class="btn-primary">Открыть карточку</a>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <section class="compare-route-grid" aria-label="Маршруты выбора после сравнения">
+        {decisionCards.map((card) => (
+          <article class="compare-route-card">
             <span>{card.label}</span>
-            <h3>{card.title}</h3>
+            <h2>{card.title}</h2>
             <p>{card.text}</p>
+            <a href={card.href} class="compare-route-link">Открыть маршрут</a>
           </article>
         ))}
       </section>
@@ -286,65 +322,6 @@ const pageSchemaGraph = [
           </div>
         </article>
       </section>
-
-      <section class="compare-route-grid" aria-label="Маршруты выбора после сравнения">
-        {routeCards.map((card) => (
-          <article class="compare-route-card">
-            <span>{card.label}</span>
-            <h2>{card.title}</h2>
-            <p>{card.text}</p>
-            <a href={card.href} class="compare-route-link">Открыть маршрут</a>
-          </article>
-        ))}
-      </section>
-
-      <div class="compare-table-wrapper">
-        <div class="compare-grid">
-          <div class="compare-row compare-head">
-            <div class="compare-cell feature-col empty-cell">
-              Параметры
-            </div>
-            {compareJobs.map((job, index) => (
-              <div class="compare-cell job-col" data-col={index}>
-                <div class="job-card-mini">
-                  <button class="remove-col-btn" aria-label="Удалить" title="Удалить из сравнения" data-col-target={index}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                  </button>
-                  <div class="company-logo" style={`--compare-logo-bg: ${job.logoColor}20; --compare-logo-color: ${job.logoColor};`}>
-                    <span class="company-logo-letter">
-                      {job.company.charAt(0)}
-                    </span>
-                  </div>
-                  <h3>{job.title}</h3>
-                  <span class="company-name">{job.company}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {features.map((feature) => (
-            <div class="compare-row">
-              <div class="compare-cell feature-col">
-                {feature.name}
-              </div>
-              {compareJobs.map((job, index) => (
-                <div class="compare-cell job-col" data-col={index}>
-                  {job[feature.key as keyof typeof job]}
-                </div>
-              ))}
-            </div>
-          ))}
-
-          <div class="compare-row compare-actions">
-            <div class="compare-cell feature-col"></div>
-            {compareJobs.map((job, index) => (
-              <div class="compare-cell job-col" data-col={index}>
-                <a href={job.link} class="btn-primary">Открыть карточку</a>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
 
       <section class="compare-faq-section">
         <p class="section-eyebrow">FAQ</p>
@@ -440,6 +417,11 @@ const pageSchemaGraph = [
     margin-bottom: 1.5rem;
   }
 
+  .compare-header-copy {
+    display: grid;
+    gap: 0.35rem;
+  }
+
   .compare-header h1 {
     font-size: 2rem;
     font-weight: 800;
@@ -450,7 +432,7 @@ const pageSchemaGraph = [
     margin: 0;
     color: var(--text-muted);
     line-height: 1.7;
-    max-width: 60ch;
+    max-width: 52ch;
   }
 
   .compare-breadcrumb {
@@ -492,6 +474,34 @@ const pageSchemaGraph = [
     color: var(--primary-color);
   }
 
+  .compare-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .compare-table-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.8rem;
+    padding: 0.7rem 1rem;
+    border-radius: 999px;
+    background: #1f2937;
+    border: 1px solid #1f2937;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 800;
+    transition: var(--transition);
+  }
+
+  .compare-table-link:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+
   .compare-answer-panel,
   .compare-trust-panel {
     display: grid;
@@ -519,7 +529,11 @@ const pageSchemaGraph = [
     line-height: 1.8;
   }
 
-  .compare-verdict-grid,
+  .compare-answer-copy {
+    display: grid;
+    gap: 1rem;
+  }
+
   .compare-geo-grid,
   .compare-link-grid,
   .compare-route-grid,
@@ -529,11 +543,6 @@ const pageSchemaGraph = [
     margin-bottom: 1.5rem;
   }
 
-  .compare-verdict-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .compare-verdict-card,
   .compare-geo-card,
   .compare-link-card,
   .compare-faq-item {
@@ -544,24 +553,12 @@ const pageSchemaGraph = [
     box-shadow: var(--shadow-sm);
   }
 
-  .compare-verdict-card span {
-    display: inline-block;
-    margin-bottom: 0.6rem;
-    font-size: 0.72rem;
-    font-weight: 900;
-    letter-spacing: 0.11em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-
-  .compare-verdict-card h3,
   .compare-geo-card h2,
   .compare-link-card h2,
   .compare-faq-section h2 {
     margin: 0 0 0.7rem;
   }
 
-  .compare-verdict-card p,
   .compare-faq-item p {
     margin: 0;
     color: var(--text-muted);
@@ -655,6 +652,10 @@ const pageSchemaGraph = [
     gap: 0.65rem;
   }
 
+  .compare-answer-chip-row {
+    gap: 0.55rem;
+  }
+
   .compare-chip-link {
     display: inline-flex;
     align-items: center;
@@ -674,6 +675,16 @@ const pageSchemaGraph = [
     transform: translateY(-1px);
     box-shadow: var(--shadow-sm);
     color: var(--primary-color);
+  }
+
+  .compare-chip-static {
+    cursor: default;
+  }
+
+  .compare-chip-static:hover {
+    transform: none;
+    box-shadow: none;
+    color: var(--text-main);
   }
 
   .compare-article-stack {
@@ -715,17 +726,18 @@ const pageSchemaGraph = [
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
     background: var(--surface-color);
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.75rem;
+    scroll-snap-type: x proximity;
   }
 
   .compare-grid {
     --cols: 4;
     --feature-col-width: 160px;
     --job-col-width: 220px;
-    --mobile-feature-col-width: 96px;
-    --mobile-job-col-width: 94px;
-    --mobile-feature-col-width-narrow: 80px;
-    --mobile-job-col-width-narrow: 76px;
+    --mobile-feature-col-width: 104px;
+    --mobile-job-col-width: 110px;
+    --mobile-feature-col-width-narrow: 84px;
+    --mobile-job-col-width-narrow: 92px;
     display: grid;
     grid-template-columns: minmax(var(--feature-col-width), 200px) repeat(var(--cols), minmax(var(--job-col-width), 1fr));
     min-width: max(100%, calc(var(--feature-col-width) + var(--cols) * var(--job-col-width)));
@@ -746,6 +758,8 @@ const pageSchemaGraph = [
     min-width: 0;
     overflow-wrap: anywhere;
     word-break: break-word;
+    hyphens: auto;
+    scroll-snap-align: start;
   }
 
   .feature-col {
@@ -756,6 +770,7 @@ const pageSchemaGraph = [
     position: sticky;
     left: 0;
     z-index: 10;
+    box-shadow: 10px 0 18px rgba(15, 23, 42, 0.06);
   }
 
   @media (prefers-color-scheme: dark) {
@@ -817,7 +832,7 @@ const pageSchemaGraph = [
   }
 
   .company-logo {
-    background: var(--compare-logo-bg);
+    background: rgba(99, 102, 241, 0.12);
     width: 56px;
     height: 56px;
     border-radius: 14px;
@@ -827,10 +842,58 @@ const pageSchemaGraph = [
     margin-bottom: 0.75rem;
   }
 
+  .company-logo-yandex-eda {
+    background: rgba(255, 204, 0, 0.14);
+  }
+
+  .company-logo-ozon {
+    background: rgba(0, 91, 255, 0.12);
+  }
+
+  .company-logo-samokat {
+    background: rgba(255, 64, 99, 0.12);
+  }
+
+  .company-logo-cdek {
+    background: rgba(0, 176, 80, 0.12);
+  }
+
+  .company-logo-vkusvill {
+    background: rgba(26, 154, 80, 0.12);
+  }
+
+  .company-logo-vtb {
+    background: rgba(10, 40, 150, 0.12);
+  }
+
   .company-logo-letter {
-    color: var(--compare-logo-color);
+    color: #6366f1;
     font-weight: 800;
     font-size: 1.25rem;
+  }
+
+  .company-logo-yandex-eda .company-logo-letter {
+    color: #c48a00;
+  }
+
+  .company-logo-ozon .company-logo-letter {
+    color: #005bff;
+  }
+
+  .company-logo-samokat .company-logo-letter {
+    color: #ff4063;
+  }
+
+  .company-logo-cdek .company-logo-letter {
+    color: #00b050;
+  }
+
+  .company-logo-vkusvill .company-logo-letter {
+    color: #1a9a50;
+  }
+
+  .company-logo-vtb .company-logo-letter {
+    color: #0a2896;
   }
 
   .job-card-mini h3 {
@@ -883,7 +946,6 @@ const pageSchemaGraph = [
   }
 
   @media (max-width: 960px) {
-    .compare-verdict-grid,
     .compare-link-grid,
     .compare-route-grid,
     .compare-faq-grid {
@@ -904,6 +966,10 @@ const pageSchemaGraph = [
       padding: 0.75rem;
     }
 
+    .compare-breadcrumb {
+      display: none;
+    }
+
     .compare-header,
     .compare-answer-panel,
     .compare-trust-panel {
@@ -911,6 +977,28 @@ const pageSchemaGraph = [
       flex-direction: column;
       align-items: flex-start;
       gap: 1rem;
+    }
+
+    .compare-header-actions {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    .compare-answer-panel,
+    .compare-trust-panel {
+      padding: 1.15rem;
+    }
+
+    .compare-answer-panel p,
+    .compare-trust-panel p {
+      font-size: 0.97rem;
+      line-height: 1.65;
+    }
+
+    .compare-chip-link {
+      min-height: 2.05rem;
+      padding: 0.38rem 0.72rem;
+      font-size: 0.94rem;
     }
 
     .compare-grid {
@@ -950,7 +1038,6 @@ const pageSchemaGraph = [
   }
 
   @media (max-width: 560px) {
-    .compare-verdict-grid,
     .compare-link-grid,
     .compare-route-grid,
     .compare-faq-grid {
@@ -970,6 +1057,12 @@ const pageSchemaGraph = [
 
     .compare-header {
       margin-bottom: 1rem;
+    }
+
+    .compare-answer-panel,
+    .compare-trust-panel {
+      padding: 1rem;
+      border-radius: 1.25rem;
     }
 
     .compare-grid {

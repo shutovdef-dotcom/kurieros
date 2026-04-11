@@ -4,7 +4,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 ---
 
-<BaseLayout title="Контакты и Поддержка — Курьерок" description="Свяжитесь с нами по вопросам размещения вакансий, сотрудничества или технической поддержки. Мы всегда рады помочь курьерам и работодателям.">
+<BaseLayout title="Контакты и поддержка — Курьерок" description="Свяжитесь с нами по вопросам размещения вакансий, сотрудничества или технической поддержки. Мы всегда рады помочь курьерам и работодателям.">
     <Header />
 
     <main>
@@ -12,6 +12,7 @@ import Footer from '../components/Footer.astro';
             <section class="contacts-hero">
                 <h1 data-t="contacts.title">Связаться с нами</h1>
                 <p data-t="contacts.subtitle">Мы открыты для предложений и всегда рады услышать ваш отзыв о работе платформы.</p>
+                <p class="contacts-helper">Для быстрого ответа лучше использовать прямые каналы ниже. Форма справа помогает подготовить сообщение без серверной отправки.</p>
             </section>
 
             <div class="contacts-grid">
@@ -36,8 +37,9 @@ import Footer from '../components/Footer.astro';
                 </div>
 
                 <div class="contact-form-card">
-                    <h3 data-t="contacts.form_title">Отправить сообщение</h3>
-                    <form onsubmit="event.preventDefault(); alert('Сообщение отправлено! Мы свяжемся с вами в ближайшее время.'); this.reset();" class="contact-form">
+                    <h3 data-t="contacts.form_title">Подготовить сообщение</h3>
+                    <p class="contact-form-note">После заполнения мы покажем удобные варианты связи: Telegram для быстрых вопросов и email для более подробного запроса.</p>
+                    <form class="contact-form" id="contact-form">
                         <div class="form-group">
                             <label for="name" data-t="contacts.form_name">Ваше имя</label>
                             <input type="text" id="name" required placeholder="Иван Иванов" />
@@ -50,8 +52,17 @@ import Footer from '../components/Footer.astro';
                             <label for="message" data-t="contacts.form_msg">Сообщение</label>
                             <textarea id="message" rows="5" required placeholder="Ваш вопрос или предложение..."></textarea>
                         </div>
-                        <button type="submit" class="btn-primary" data-t="contacts.form_btn">Отправить сообщение</button>
+                        <button type="submit" class="btn-primary" data-t="contacts.form_btn">Показать варианты связи</button>
                     </form>
+                    <div class="contact-success hidden" id="contact-success" aria-live="polite">
+                        <h4>Сообщение подготовлено</h4>
+                        <p>Для вопросов по вакансиям быстрее Telegram. Для сотрудничества и редакционных тем удобнее email.</p>
+                        <pre class="contact-preview" id="contact-preview"></pre>
+                        <div class="contact-success-actions">
+                            <a href="https://t.me/kurieros_support" target="_blank" rel="noopener noreferrer" class="btn-primary">Написать в Telegram</a>
+                            <a href="mailto:partners@kurerok.ru" class="btn-secondary" id="contact-email-link">Открыть email</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -59,6 +70,44 @@ import Footer from '../components/Footer.astro';
 
     <Footer />
 </BaseLayout>
+
+<script is:inline>
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('contact-form');
+        const successBox = document.getElementById('contact-success');
+        const preview = document.getElementById('contact-preview');
+        const emailLink = document.getElementById('contact-email-link');
+
+        form?.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const name = document.getElementById('name')?.value?.trim() || 'Без имени';
+            const contact = document.getElementById('email')?.value?.trim() || 'Контакт не указан';
+            const message = document.getElementById('message')?.value?.trim() || 'Сообщение не заполнено';
+
+            const preparedMessage = [
+                `Имя: ${name}`,
+                `Контакт: ${contact}`,
+                '',
+                'Сообщение:',
+                message,
+            ].join('\n');
+
+            if (preview) {
+                preview.textContent = preparedMessage;
+            }
+
+            if (emailLink) {
+                const subject = encodeURIComponent(`Сообщение с сайта от ${name}`);
+                const body = encodeURIComponent(preparedMessage);
+                emailLink.href = `mailto:partners@kurerok.ru?subject=${subject}&body=${body}`;
+            }
+
+            successBox?.classList.remove('hidden');
+            successBox?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+    });
+</script>
 
 <style>
     .contacts-container {
@@ -73,6 +122,11 @@ import Footer from '../components/Footer.astro';
     }
     .contacts-hero h1 { margin-bottom: 1rem; }
     .contacts-hero p { color: var(--text-muted); font-size: 1.125rem; }
+    .contacts-helper {
+        max-width: 720px;
+        margin: 1rem auto 0;
+        line-height: 1.7;
+    }
 
     .contacts-grid {
         display: grid;
@@ -114,6 +168,11 @@ import Footer from '../components/Footer.astro';
         box-shadow: var(--shadow-glass);
     }
     .contact-form-card h3 { margin-bottom: 2rem; font-size: 1.5rem; }
+    .contact-form-note {
+        margin: -1rem 0 1.5rem;
+        color: var(--text-muted);
+        line-height: 1.7;
+    }
 
     .contact-form {
         display: flex;
@@ -143,5 +202,58 @@ import Footer from '../components/Footer.astro';
     .form-group input:focus, .form-group textarea:focus {
         border-color: var(--primary-color);
         box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+    .contact-success {
+        margin-top: 1.5rem;
+        padding: 1.5rem;
+        border-radius: 1.5rem;
+        border: 1px solid var(--border-color);
+        background: rgba(255, 255, 255, 0.72);
+    }
+    .contact-success.hidden {
+        display: none;
+    }
+    .contact-success h4 {
+        margin-bottom: 0.75rem;
+        font-size: 1.05rem;
+    }
+    .contact-success p {
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+    .contact-preview {
+        margin: 0 0 1rem;
+        padding: 1rem;
+        border-radius: 1rem;
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+        font-family: var(--font-main);
+        font-size: 0.92rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+    .contact-success-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+    .contact-success-actions .btn-primary,
+    .contact-success-actions .btn-secondary {
+        width: auto;
+    }
+    @media (max-width: 768px) {
+        .contacts-container {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        .contact-form-card {
+            padding: 2rem 1.25rem;
+        }
+        .contact-success-actions .btn-primary,
+        .contact-success-actions .btn-secondary {
+            width: 100%;
+        }
     }
 </style>

@@ -28,13 +28,14 @@ const filteredJobs = jobsData.filter((job) => {
 
 <div class="job-grid-container">
 	<section class="filters" id="filters-container">
-		<button class={`filter-chip ${initialTag === 'all' ? 'active' : ''}`} data-filter="all" data-t="filters.all">Все вакансии</button>
-		<button class={`filter-chip ${initialTag === 'auto' ? 'active' : ''}`} data-filter="auto" data-t="filters.auto">На авто</button>
-		<button class={`filter-chip ${initialTag === 'bicycle' ? 'active' : ''}`} data-filter="bicycle" data-t="filters.bicycle">Велокурьер</button>
-		<button class={`filter-chip ${initialTag === 'foot' ? 'active' : ''}`} data-filter="foot" data-t="filters.walking">Пеший</button>
-		<button class={`filter-chip ${initialTag === '16plus' ? 'active' : ''}`} data-filter="16plus" data-t="filters.age16">С 16 лет</button>
-		<button class={`filter-chip ${initialTag === 'flexible' ? 'active' : ''}`} data-filter="flexible" data-t="filters.flexible">Свободно</button>
+		<button class={`filter-chip ${initialTag === 'all' ? 'active' : ''}`} data-filter="all" data-t="filters.all" type="button">Все вакансии</button>
+		<button class={`filter-chip ${initialTag === 'auto' ? 'active' : ''}`} data-filter="auto" data-t="filters.auto" type="button">На авто</button>
+		<button class={`filter-chip ${initialTag === 'bicycle' ? 'active' : ''}`} data-filter="bicycle" data-t="filters.bicycle" type="button">Велокурьер</button>
+		<button class={`filter-chip ${initialTag === 'foot' ? 'active' : ''}`} data-filter="foot" data-t="filters.walking" type="button">Пеший</button>
+		<button class={`filter-chip ${initialTag === '16plus' ? 'active' : ''}`} data-filter="16plus" data-t="filters.age16" type="button">С 16 лет</button>
+		<button class={`filter-chip ${initialTag === 'flexible' ? 'active' : ''}`} data-filter="flexible" data-t="filters.flexible" type="button">Свободно</button>
 	</section>
+	<div class="compare-inline-alert hidden" id="compare-limit-message" aria-live="polite"></div>
 
 	<section id="vacancies">
 		<div class="jobs-grid" id="jobs-grid">
@@ -54,6 +55,22 @@ const filteredJobs = jobsData.filter((job) => {
 </div>
 
 <style>
+    .compare-inline-alert {
+        margin-bottom: 1rem;
+        padding: 0.85rem 1rem;
+        border-radius: 1rem;
+        border: 1px solid rgba(244, 63, 94, 0.22);
+        background: rgba(255, 241, 242, 0.9);
+        color: #9f1239;
+        font-size: 0.92rem;
+        font-weight: 600;
+        line-height: 1.5;
+    }
+
+    .compare-inline-alert.hidden {
+        display: none;
+    }
+
     .no-results {
         grid-column: 1 / -1;
         text-align: center;
@@ -68,6 +85,7 @@ const filteredJobs = jobsData.filter((job) => {
 	let compareList = JSON.parse(localStorage.getItem('compareList') || '[]');
 	let selectedCity = initialCity || '';
 	const normalizedInitialSearch = initialSearch.toLowerCase();
+    let compareNoticeTimeout = null;
 
 	function getTranslation(key, defaultText) {
 		const lang = window.kurieros_i18n?.currentLang || 'ru';
@@ -75,6 +93,22 @@ const filteredJobs = jobsData.filter((job) => {
 		if (!dict) return defaultText;
 		return key.split('.').reduce((prev, curr) => prev && prev[curr], dict) || defaultText;
 	}
+
+    function showCompareNotice(message) {
+        const compareNotice = document.getElementById('compare-limit-message');
+        if (!compareNotice) return;
+
+        compareNotice.textContent = message;
+        compareNotice.classList.remove('hidden');
+
+        if (compareNoticeTimeout) {
+            window.clearTimeout(compareNoticeTimeout);
+        }
+
+        compareNoticeTimeout = window.setTimeout(() => {
+            compareNotice.classList.add('hidden');
+        }, 3200);
+    }
 
 	function getCompareButtonLabel(isActive) {
 		return isActive
@@ -102,7 +136,7 @@ const filteredJobs = jobsData.filter((job) => {
 		const index = compareList.indexOf(id);
 		if (index === -1) {
 			if (compareList.length >= 4) {
-				alert(getTranslation('compare.limit_reached', 'Можно сравнивать не более 4 вакансий одновременно.'));
+				showCompareNotice(getTranslation('compare.limit_reached', 'Можно сравнивать не более 4 вакансий одновременно.'));
 				return;
 			}
 			compareList.push(id);

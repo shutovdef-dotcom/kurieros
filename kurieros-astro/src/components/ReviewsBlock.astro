@@ -53,7 +53,7 @@ const renderStars = (rating: number) => {
         <p>Коротко о том, как вакансии ощущаются в реальной работе.</p>
       )}
     </div>
-    <button class="btn-primary open-review-modal" data-job-id={jobId || ''}>Оставить отзыв</button>
+    <button class="btn-primary open-review-modal" data-job-id={jobId || ''} type="button">Оставить отзыв</button>
   </div>
 
   {displayReviews.length === 0 ? (

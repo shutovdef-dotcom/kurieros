@@ -16,7 +16,7 @@ const languages = [
 ---
 
 <div class="lang-switcher">
-    <button class="lang-toggle" id="lang-toggle-btn">
+    <button class="lang-toggle" id="lang-toggle-btn" type="button">
         <span id="current-lang-flag">🇷🇺</span>
         <span id="current-lang-code">RU</span>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
@@ -24,7 +24,7 @@ const languages = [
     
     <div class="lang-dropdown hidden" id="lang-dropdown">
         {languages.map(lang => (
-            <button class="lang-option" data-lang={lang.code}>
+            <button class="lang-option" data-lang={lang.code} type="button">
                 <span class="flag">{lang.flag}</span>
                 <span class="name">{lang.name}</span>
             </button>
@@ -80,7 +80,7 @@ const languages = [
     .lang-switcher {
         position: relative;
         font-family: var(--font-main);
-        height: 103%; /* Stretch to parent HERO height */
+        height: 100%;
     }
     .lang-toggle {
         display: flex;

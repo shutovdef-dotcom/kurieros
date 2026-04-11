@@ -125,6 +125,14 @@ const structuredData = JSON.stringify(
 			// Global Location & VPN Detection
 			(async function() {
 				if (window.kurieros_user) return;
+
+				const isGeoDebugHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+				function logGeoDebug(level, ...args) {
+					if (isGeoDebugHost) {
+						console[level](...args);
+					}
+				}
 				
 				async function fetchWithTimeout(resource, options = {}) {
 					const { timeout = 5000 } = options;
@@ -135,26 +143,43 @@ const structuredData = JSON.stringify(
 					return response;
 				}
 
+				function normalizeGeoData(raw) {
+					if (!raw) return null;
+
+					if (raw.country) {
+						return {
+							city: raw.city,
+							country: raw.country,
+							country_name: raw.country_name,
+						};
+					}
+
+					if (raw.success !== false && raw.country_code) {
+						return {
+							city: raw.city,
+							country: raw.country_code,
+							country_name: raw.country,
+						};
+					}
+
+					return null;
+				}
+
 				let data = null;
 				try {
-					// 1st Attempt: ipapi.co (detailed fields)
 					const res = await fetchWithTimeout('https://ipapi.co/json/');
-					data = await res.json();
+					if (res.ok) {
+						data = normalizeGeoData(await res.json());
+					}
 				} catch (e) {
-					console.warn("Primary geo-API failed, trying fallback...", e);
+					logGeoDebug('warn', 'Primary geo API failed, trying fallback...', e);
 					try {
-						// 2nd Attempt: ip-api.com (reliable, different endpoint)
-						const res = await fetchWithTimeout('http://ip-api.com/json/');
-						const raw = await res.json();
-						if (raw.status === 'success') {
-							data = {
-								city: raw.city,
-								country: raw.countryCode,
-								country_name: raw.country
-							};
+						const res = await fetchWithTimeout('https://ipwho.is/');
+						if (res.ok) {
+							data = normalizeGeoData(await res.json());
 						}
 					} catch (e2) {
-						console.error("All geo-APIs failed.", e2);
+						logGeoDebug('warn', 'All geo APIs failed.', e2);
 					}
 				}
 
@@ -169,6 +194,7 @@ const structuredData = JSON.stringify(
 			(function() {
 				const STORAGE_KEY = 'site-lang';
 				const DEFAULT_LANG = 'ru';
+				window.translations = translations;
 				
 				function getNestedValue(obj, path) {
 					return path.split('.').reduce((prev, curr) => prev && prev[curr], obj);

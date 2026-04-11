@@ -55,7 +55,7 @@ const applyExternal = job.applyLink && job.applyLink !== '#';
 	</div>
 	<div class="job-row-actions">
 		<div class="job-actions">
-			<button class={`btn-compare ${isInCompare ? 'active' : ''}`} data-id={job.id}>
+			<button class={`btn-compare ${isInCompare ? 'active' : ''}`} data-id={job.id} type="button">
 				{isInCompare ? <><span data-t="job.in_compare">В сравнении</span> ✓</> : <span data-t="job.compare">+ Сравнить</span>}
 			</button>
 			<a href={applyHref} class="apply-btn" target={applyExternal ? '_blank' : undefined} rel={applyExternal ? 'noopener noreferrer' : undefined} data-t="job.apply">Заполнить заявку</a>

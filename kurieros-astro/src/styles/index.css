@@ -283,13 +283,7 @@ header {
   }
 }
 
-.header-right-mobile {
-  display: none;
-  align-items: center;
-  gap: 1rem;
-}
 @media (max-width: 768px) {
-  .header-right-mobile { display: flex; }
   .lang-switcher-li { display: none !important; }
 }
 

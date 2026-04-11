@@ -27,15 +27,15 @@ export async function getStaticPaths() {
 
 	CATEGORIES.forEach((cat) => {
 		paths.push({
-			params: { slug: `rabota-kurerom-${cat.slug}` },
-			props: {
-				type: 'category',
-				data: cat,
-				title: `Работа курьером: ${cat.name} — Вакансии 2026`,
-				description: `Все вакансии для курьеров категории "${cat.name}". Прямые работодатели, удобный фильтр и быстрое трудоустройство.`,
-			},
+				params: { slug: `rabota-kurerom-${cat.slug}` },
+				props: {
+					type: 'category',
+					data: cat,
+					title: `Работа курьером: ${cat.name} — Вакансии 2026`,
+					description: `Все вакансии для курьеров категории "${cat.name}". Удобный фильтр, сравнение условий и быстрый переход в карточки вакансий.`,
+				},
+			});
 		});
-	});
 
 	return paths;
 }
@@ -229,11 +229,26 @@ const routeLinks =
 				})),
 		];
 
-const introSummary =
+const quickLaunchLinks =
 	type === 'city'
-		? `В подборке ${data.prep} сейчас ${filteredJobs.length} вакансий курьера от ${companyNames.length} компаний. Здесь удобно быстро понять, какие бренды активны, какие форматы работы доступны и что важно проверить перед откликом.`
-		: `Подборка "${data.name}" сейчас включает ${filteredJobs.length} вакансий от ${companyNames.length} компаний. Это страница для быстрого сравнения форматов работы, условий выплат и базовых требований до перехода к карточкам вакансий.`;
-
+		? [
+			...cityScenarioRoutes.slice(0, 4),
+			{ name: 'Компании', href: '/companies/' },
+			{ name: 'Сравнение', href: '/compare/' },
+		]
+		: [
+			{ name: 'Сравнение', href: '/compare/' },
+			{ name: 'Города', href: '/cities/' },
+			...routeLinks.slice(2, 5),
+		];
+const heroIntro =
+	type === 'city'
+		? `Сначала откройте ленту вакансий ${data.prep}, затем при необходимости сузьте выбор по компании, транспорту или выплатам.`
+		: `Сначала посмотрите подходящие вакансии в этой подборке, а дополнительные маршруты используйте только если нужно сузить выбор.`;
+const launchSummary =
+	type === 'city'
+		? `Ниже уже отфильтрованы вакансии ${data.prep}: смотрите карточки, сравнивайте условия и открывайте только подходящие варианты.`
+		: 'Ниже уже отфильтрованы подходящие вакансии: сначала проверьте карточки, а затем переходите в дополнительные хабы.';
 const factCards = [
 	{ label: 'Вакансии', value: `${filteredJobs.length}` },
 	{ label: 'Компании', value: `${companyNames.length}` },
@@ -340,45 +355,57 @@ const pageSchemaGraph = [
 
 	<main>
 		<section class="hero listing-hero">
-			<nav class="listing-breadcrumb">
-				<a href="/">Главная</a>
-				{type === 'city' && (
-					<>
-						<span>&gt;</span>
-						<a href="/cities/">Города</a>
-					</>
-				)}
-				<span>&gt;</span>
-				<span>{type === 'city' ? `Работа курьером ${data.prep}` : data.name}</span>
-			</nav>
-			<h1>{title}</h1>
-			<p>
-				{type === 'city'
-					? `Актуальные предложения о работе курьером ${data.prep}.`
-					: `Список всех доступных вакансий в категории "${data.name}".`}
-			</p>
-		</section>
-
-		<section class="listing-answer-panel">
-			<div>
-				<p class="section-eyebrow">AI GEO TL;DR</p>
-				<h2>
-					{type === 'city'
-						? `Что важно знать о работе курьером ${data.prep}?`
-						: `Что важно знать о подборке "${data.name}"?`}
-				</h2>
+			<div class="listing-hero-panel">
+				<nav class="listing-breadcrumb" aria-label="Хлебные крошки">
+					<a href="/">Главная</a>
+					{type === 'city' && (
+						<>
+							<span>&gt;</span>
+							<a href="/cities/">Города</a>
+						</>
+					)}
+					<span>&gt;</span>
+					<span>{type === 'city' ? `Работа курьером ${data.prep}` : data.name}</span>
+				</nav>
+				<p class="section-eyebrow">{type === 'city' ? 'Вакансии по городу' : 'Подборка вакансий'}</p>
+				<h1>{title}</h1>
+				<p>{heroIntro}</p>
+				<div class="listing-hero-actions">
+					<a href="#vacancies" class="listing-primary-link">Смотреть вакансии</a>
+					<a href="/compare/" class="listing-secondary-link">Сравнить условия</a>
+				</div>
+				<div class="listing-fact-grid listing-fact-grid-hero">
+					{factCards.map((fact) => (
+						<article class="listing-fact-card">
+							<span>{fact.label}</span>
+							<strong>{fact.value}</strong>
+						</article>
+					))}
+				</div>
 			</div>
-			<p>{introSummary}</p>
 		</section>
 
-		<section class="listing-fact-grid" aria-label="Ключевые факты по подборке">
-			{factCards.map((fact) => (
-				<article class="listing-fact-card">
-					<span>{fact.label}</span>
-					<strong>{fact.value}</strong>
-				</article>
-			))}
+		<section class="listing-vacancy-launch">
+			<div class="listing-vacancy-launch-copy">
+				<p class="section-eyebrow">Сначала вакансии</p>
+				<h2>Лента начинается сразу ниже</h2>
+				<p>{launchSummary}</p>
+			</div>
+			<div class="listing-vacancy-launch-actions">
+				<a href="#vacancies" class="listing-primary-link">Перейти к ленте</a>
+				<div class="link-chip-row">
+					{quickLaunchLinks.map((link) => (
+						<a href={link.href} class="link-chip">{link.name}</a>
+					))}
+				</div>
+			</div>
 		</section>
+
+		<JobGrid
+			initialCity={type === 'city' ? data.name : undefined}
+			initialTag={type === 'category' ? data.tag : undefined}
+			initialSearch={type === 'category' ? data.query : undefined}
+		/>
 
 		{type === 'city' && (
 			<>
@@ -494,9 +521,13 @@ const pageSchemaGraph = [
 						: `Какие бренды встречаются в подборке "${data.name}"?`}
 				</h2>
 				<div class="link-chip-row">
-					{relatedCompanies.map((company) => (
-						<a href={company.href} class="link-chip">{company.name}</a>
-					))}
+					{relatedCompanies.length > 0 ? (
+						relatedCompanies.map((company) => (
+							<a href={company.href} class="link-chip">{company.name}</a>
+						))
+					) : (
+						<p class="listing-empty-note">Подходящие бренды для быстрого перехода появятся по мере расширения подборки.</p>
+					)}
 				</div>
 			</article>
 
@@ -504,9 +535,13 @@ const pageSchemaGraph = [
 				<p class="section-eyebrow">Статьи</p>
 				<h2>Что полезно прочитать перед откликом?</h2>
 				<div class="related-article-stack">
-					{relatedArticles.map((article) => (
-						<a href={`/blog/${article.slug}/`} class="related-article-link">{article.title}</a>
-					))}
+					{relatedArticles.length > 0 ? (
+						relatedArticles.map((article) => (
+							<a href={`/blog/${article.slug}/`} class="related-article-link">{article.title}</a>
+						))
+					) : (
+						<p class="listing-empty-note">Подходящие статьи скоро появятся в блоге.</p>
+					)}
 				</div>
 			</article>
 
@@ -524,12 +559,6 @@ const pageSchemaGraph = [
 				</div>
 			</article>
 		</section>
-
-		<JobGrid
-			initialCity={type === 'city' ? data.name : undefined}
-			initialTag={type === 'category' ? data.tag : undefined}
-			initialSearch={type === 'category' ? data.query : undefined}
-		/>
 	</main>
 
 	<Footer />
@@ -537,7 +566,7 @@ const pageSchemaGraph = [
 
 <style>
 	.listing-hero,
-	.listing-answer-panel,
+	.listing-vacancy-launch,
 	.listing-fact-grid,
 	.listing-geo-grid,
 	.listing-local-grid,
@@ -548,8 +577,19 @@ const pageSchemaGraph = [
 	}
 
 	.listing-hero {
-		padding: 1.5rem 1rem 0.75rem;
-		margin-bottom: 1.5rem;
+		padding: 1.25rem 1rem 0.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.listing-hero-panel {
+		padding: 1.65rem;
+		text-align: left;
+		border: 1px solid #ebe5dc;
+		border-radius: 1.8rem;
+		background:
+			radial-gradient(circle at top right, rgba(240, 203, 120, 0.2), transparent 17rem),
+			linear-gradient(180deg, #fffefb 0%, #f8f1e7 100%);
+		box-shadow: 0 14px 36px rgba(60, 41, 20, 0.08);
 	}
 
 	.listing-breadcrumb {
@@ -557,7 +597,7 @@ const pageSchemaGraph = [
 		flex-wrap: wrap;
 		gap: 0.45rem;
 		align-items: center;
-		margin-bottom: 1rem;
+		margin-bottom: 0.85rem;
 		font-size: 0.9rem;
 		color: var(--text-muted);
 	}
@@ -568,16 +608,17 @@ const pageSchemaGraph = [
 	}
 
 	.listing-hero h1 {
-		max-width: 980px;
-		margin-inline: auto;
-		margin-bottom: 0.75rem;
+		max-width: 14ch;
+		margin: 0 0 0.7rem;
+		font-size: clamp(2.2rem, 4vw, 4.25rem);
+		line-height: 0.94;
+		letter-spacing: -0.055em;
 		text-wrap: balance;
 	}
 
-	.listing-hero p {
+	.listing-hero-panel > p:not(.section-eyebrow) {
 		max-width: 720px;
-		margin-inline: auto;
-		margin-bottom: 0;
+		margin: 0;
 		font-size: clamp(1rem, 1.2vw + 0.85rem, 1.15rem);
 		line-height: 1.6;
 	}
@@ -591,7 +632,6 @@ const pageSchemaGraph = [
 		color: var(--accent-color);
 	}
 
-	.listing-answer-panel,
 	.listing-trust-panel {
 		display: grid;
 		grid-template-columns: minmax(220px, 0.32fr) minmax(0, 1fr);
@@ -605,33 +645,101 @@ const pageSchemaGraph = [
 		box-shadow: var(--shadow-sm);
 	}
 
-	.listing-answer-panel h2,
-	.listing-answer-panel p,
 	.listing-trust-panel h2,
 	.listing-trust-panel p {
 		margin: 0;
 	}
 
-	.listing-answer-panel p,
 	.listing-trust-panel p {
 		color: var(--text-muted);
 		line-height: 1.8;
 	}
 
+	.listing-hero-actions,
+	.listing-vacancy-launch-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.8rem;
+		align-items: center;
+		margin-top: 1rem;
+	}
+
+	.listing-primary-link,
+	.listing-secondary-link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 3rem;
+		padding: 0.8rem 1.15rem;
+		border-radius: 999px;
+		text-decoration: none;
+		font-weight: 800;
+		transition: var(--transition);
+	}
+
+	.listing-primary-link {
+		background: #1f2937;
+		border: 1px solid #1f2937;
+		color: #fff;
+	}
+
+	.listing-secondary-link {
+		background: rgba(255, 255, 255, 0.86);
+		border: 1px solid #d9d0c3;
+		color: #2b2622;
+	}
+
+	.listing-primary-link:hover,
+	.listing-secondary-link:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 10px 24px rgba(60, 41, 20, 0.08);
+	}
+
+	.listing-vacancy-launch {
+		display: grid;
+		grid-template-columns: minmax(260px, 0.42fr) minmax(0, 1fr);
+		gap: 1rem;
+		align-items: start;
+		margin-bottom: 1rem;
+		padding: 1.35rem;
+		border: 1px solid rgba(148, 163, 184, 0.16);
+		border-radius: 1.4rem;
+		background: rgba(255, 255, 255, 0.82);
+		box-shadow: var(--shadow-sm);
+	}
+
+	.listing-vacancy-launch h2,
+	.listing-vacancy-launch p {
+		margin: 0;
+	}
+
+	.listing-vacancy-launch-copy {
+		display: grid;
+		gap: 0.55rem;
+	}
+
+	.listing-vacancy-launch-copy p:not(.section-eyebrow) {
+		color: var(--text-muted);
+		line-height: 1.65;
+	}
+
+	.listing-vacancy-launch-actions {
+		margin-top: 0;
+	}
+
 	.listing-fact-grid {
 		display: grid;
 		grid-template-columns: repeat(4, minmax(0, 1fr));
-		gap: 0.8rem;
-		margin-bottom: 1.5rem;
-		padding: 0 1rem;
+		gap: 0.75rem;
+		margin: 1rem 0 0;
 	}
 
 	.listing-fact-card {
 		display: grid;
-		gap: 0.45rem;
-		min-height: 7.25rem;
-		padding: 1rem;
-		border: 1px solid rgba(148, 163, 184, 0.16);
+		gap: 0.25rem;
+		min-height: auto;
+		padding: 0.8rem 0.9rem;
+		border: 1px solid #e8ddcf;
 		border-radius: 1.2rem;
 		background: rgba(255, 255, 255, 0.82);
 		box-shadow: var(--shadow-sm);
@@ -646,9 +754,9 @@ const pageSchemaGraph = [
 	}
 
 	.listing-fact-card strong {
-		align-self: end;
+		align-self: start;
 		font-size: 1rem;
-		line-height: 1.4;
+		line-height: 1.32;
 	}
 
 	.listing-geo-grid {
@@ -833,10 +941,16 @@ const pageSchemaGraph = [
 		gap: 0.7rem;
 	}
 
+	.listing-empty-note {
+		margin: 0;
+		color: var(--text-muted);
+		line-height: 1.7;
+	}
+
 	@media (min-width: 768px) {
 		.listing-hero {
-			padding: 2.5rem 1rem 1rem;
-			margin-bottom: 2rem;
+			padding: 2rem 1rem 0.75rem;
+			margin-bottom: 1rem;
 		}
 	}
 
@@ -855,21 +969,37 @@ const pageSchemaGraph = [
 	}
 
 	@media (max-width: 768px) {
-		.listing-answer-panel,
+		.listing-vacancy-launch,
 		.listing-trust-panel {
 			grid-template-columns: 1fr;
+		}
+
+		.listing-breadcrumb {
+			display: none;
 		}
 	}
 
 	@media (max-width: 640px) {
-		.listing-fact-grid,
 		.listing-faq-grid,
 		.listing-company-grid {
 			grid-template-columns: 1fr;
 		}
 
+		.listing-hero-panel {
+			padding: 1rem;
+			border-radius: 1.35rem;
+		}
+
+		.listing-fact-grid {
+			display: none;
+		}
+
+		.listing-hero h1 {
+			font-size: clamp(2rem, 11vw, 3.5rem);
+		}
+
 		.listing-hero,
-		.listing-fact-grid,
+		.listing-vacancy-launch,
 		.listing-local-grid,
 		.listing-geo-grid,
 		.listing-faq-section,
@@ -878,7 +1008,7 @@ const pageSchemaGraph = [
 			padding-inline: 1rem;
 		}
 
-		.listing-fact-grid,
+		.listing-vacancy-launch,
 		.listing-local-grid,
 		.listing-geo-grid,
 		.listing-faq-section,

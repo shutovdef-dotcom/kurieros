@@ -60,6 +60,13 @@ const routeCards = [
 		href: '/companies/',
 	},
 ];
+const quickStartLinks = [
+	{ label: 'Подработка', href: '/rabota-kurerom-podrabotka/' },
+	{ label: 'С 16 лет', href: '/rabota-kurerom-16-let/' },
+	{ label: 'На авто', href: '/rabota-kurerom-na-avto/' },
+	{ label: 'Компании', href: '/companies/' },
+	{ label: 'Сравнение', href: '/compare/' },
+];
 const heroFacts = [
 	{ label: 'Вакансии', value: `${totalVacancies}` },
 	{ label: 'Компании', value: `${companies.length}` },
@@ -104,6 +111,18 @@ const hubLinks = [
 		title: 'Блог',
 		text: 'Разобраться в доходе, форматах работы и скрытых условиях.',
 	},
+];
+const discoveryCards = [
+	...routeCards.map((card) => ({
+		...card,
+		kicker: 'Быстрый сценарий',
+		variant: 'route',
+	})),
+	...hubLinks.map((card) => ({
+		...card,
+		kicker: 'Навигация',
+		variant: 'hub',
+	})),
 ];
 const homepageTitle = 'Работа курьером: вакансии, компании и сравнение | Курьерок';
 const homepageDescription = `Работа курьером в России: ${totalVacancies} вакансий, ${companies.length} компаний, города, сравнение и статьи перед откликом.`.slice(0, 170);
@@ -156,28 +175,28 @@ const pageSchemaGraph = [
 						<h1>Работа курьером: вакансии, компании и сравнение условий</h1>
 						<p class="home-hero-summary">
 							На Курьерок можно быстро выбрать работу курьером по городу, формату доставки, бренду и частоте выплат.
-							Сначала посмотрите короткий маршрут, затем откройте подборку, сравнение или страницу компании и переходите
-							только в подходящие карточки вакансий.
+							Сначала откройте сам список вакансий, а уже потом переходите в сравнение, компании и дополнительные хабы,
+							если нужно сузить выбор.
 						</p>
 						<div class="home-hero-actions">
-							<a href="/compare/" class="home-hero-link">Сравнить вакансии</a>
-							<a href="/companies/" class="home-hero-link home-hero-link-secondary">Открыть компании</a>
+							<a href="#vacancies" class="home-hero-link">Смотреть вакансии</a>
+							<a href="/compare/" class="home-hero-link home-hero-link-secondary">Сравнить условия</a>
 						</div>
-					</div>
 
-					<div class="home-hero-facts">
-						{heroFacts.map((fact) => (
-							<article class="home-hero-fact">
-								<span>{fact.label}</span>
-								<strong>{fact.value}</strong>
-							</article>
-						))}
+						<div class="home-hero-facts">
+							{heroFacts.map((fact) => (
+								<article class="home-hero-fact">
+									<span>{fact.label}</span>
+									<strong>{fact.value}</strong>
+								</article>
+							))}
+						</div>
 					</div>
 				</div>
 
 				<div class="hero-toolbar hero-toolbar-only">
 					<div class="toolbar-top">
-						<div class="city-selector-container">
+						<div class="city-selector-container" data-region-autoprompt="manual-only">
 							<svg class="city-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
 							<label class="sr-only" for="city-select">Выберите город</label>
 							<select id="city-select" class="city-select">
@@ -195,40 +214,36 @@ const pageSchemaGraph = [
 				</div>
 			</section>
 
-			<section class="home-section">
+			<section class="home-section home-vacancy-launch">
 				<div class="section-heading">
-					<h2>Популярные маршруты поиска</h2>
-					<p>Быстрые входы в самые частые сценарии: подработка, старт, автоформат и выбор бренда.</p>
+					<h2>Сначала посмотрите вакансии</h2>
+					<p>Лента начинается сразу ниже. Эти быстрые входы нужны только если вы уже точно знаете формат поиска и хотите сократить путь.</p>
 				</div>
-				<div class="home-route-grid">
-					{routeCards.map((route) => (
-						<a href={route.href} class="home-route-card">
-							<h3>{route.title}</h3>
-							<p>{route.text}</p>
-						</a>
-					))}
+				<div class="home-vacancy-launch-bar">
+					<a href="#vacancies" class="home-vacancy-launch-link">Перейти к ленте вакансий</a>
+					<div class="home-quick-chip-row">
+						{quickStartLinks.map((link) => (
+							<a href={link.href} class="home-chip-link">{link.label}</a>
+						))}
+					</div>
 				</div>
 			</section>
 
-			<section class="home-section home-hub-section">
+			<JobGrid />
+
+			<section class="home-section home-discovery-section">
 				<div class="section-heading">
-					<h2>Быстрые маршруты по сайту</h2>
-					<p>Главные хабы, которые помогают выбрать вакансию, работодателя, город или сначала разобраться в условиях.</p>
+					<h2>Если хотите сузить выбор дальше</h2>
+					<p>После просмотра ленты можно перейти в быстрые сценарии, компании, города и популярные подборки.</p>
 				</div>
-				<div class="home-hub-grid">
-					{hubLinks.map((link) => (
-						<a href={link.href} class="home-hub-card">
-							<h3>{link.title}</h3>
-							<p>{link.text}</p>
+				<div class="home-navigation-grid">
+					{discoveryCards.map((card) => (
+						<a href={card.href} class={`home-navigation-card ${card.variant === 'route' ? 'home-navigation-card-route' : ''}`}>
+							<span>{card.kicker}</span>
+							<h3>{card.title}</h3>
+							<p>{card.text}</p>
 						</a>
 					))}
-				</div>
-			</section>
-
-			<section class="home-section">
-				<div class="section-heading">
-					<h2>Главные посадочные для входа в тему</h2>
-					<p>Города, форматы и бренды, через которые проще всего начать поиск и не потеряться в вакансиях.</p>
 				</div>
 				<div class="home-surface-grid">
 					<article class="home-surface-card">
@@ -259,8 +274,6 @@ const pageSchemaGraph = [
 					</article>
 				</div>
 			</section>
-
-			<JobGrid />
 
 			<IncomeCalculator />
 
@@ -301,6 +314,8 @@ const pageSchemaGraph = [
 		const STORAGE_KEY = 'kurieros-selected-city';
 		const citySelect = document.getElementById('city-select');
 		const cityPageLink = document.getElementById('city-page-link');
+		const citySelectorContainer = citySelect?.closest('.city-selector-container');
+		const shouldAutoPromptRegion = citySelectorContainer?.dataset.regionAutoprompt !== 'manual-only';
 
 		function updateCityLink(city) {
 			const href = cityRouteMap[city];
@@ -373,8 +388,10 @@ const pageSchemaGraph = [
 					allCitiesOption.setAttribute('data-t', 'location.select_city');
 				}
 
-				citySelect.focus();
-				window.dispatchEvent(new CustomEvent('kurieros:manual-city-required'));
+				if (shouldAutoPromptRegion) {
+					citySelect.focus();
+					window.dispatchEvent(new CustomEvent('kurieros:manual-city-required'));
+				}
 				return;
 			}
 
@@ -424,9 +441,9 @@ const pageSchemaGraph = [
 	}
 	.home-hero-panel {
 		display: grid;
-		grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
-		gap: 1rem;
-		padding: 2rem;
+		grid-template-columns: 1fr;
+		gap: 1.35rem;
+		padding: 1.75rem;
 		border: 1px solid #ebe5dc;
 		border-radius: 1.8rem;
 		background:
@@ -436,8 +453,9 @@ const pageSchemaGraph = [
 	}
 	.home-hero-copy {
 		display: grid;
-		gap: 1rem;
+		gap: 0.9rem;
 		align-content: start;
+		max-width: 74rem;
 	}
 	.home-kicker {
 		margin: 0;
@@ -449,10 +467,10 @@ const pageSchemaGraph = [
 	}
 	.home-hero-copy h1 {
 		margin: 0;
-		font-size: clamp(2.2rem, 4.2vw, 4.6rem);
-		line-height: 0.95;
+		font-size: clamp(2.2rem, 3.8vw, 4.2rem);
+		line-height: 0.94;
 		letter-spacing: -0.06em;
-		max-width: 12ch;
+		max-width: 15ch;
 		text-wrap: balance;
 	}
 	.home-hero-summary {
@@ -460,7 +478,7 @@ const pageSchemaGraph = [
 		margin: 0;
 		color: #6f6257;
 		font-size: clamp(1rem, 1vw + 0.9rem, 1.18rem);
-		line-height: 1.8;
+		line-height: 1.72;
 	}
 	.home-hero-actions {
 		display: flex;
@@ -492,14 +510,14 @@ const pageSchemaGraph = [
 	}
 	.home-hero-facts {
 		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 0.85rem;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 0.75rem;
 	}
 	.home-hero-fact {
 		display: grid;
-		gap: 0.35rem;
-		min-height: 8rem;
-		padding: 1rem;
+		gap: 0.2rem;
+		min-height: auto;
+		padding: 0.8rem 0.9rem;
 		border-radius: 1.2rem;
 		border: 1px solid #e8ddcf;
 		background: rgba(255, 255, 255, 0.82);
@@ -513,9 +531,9 @@ const pageSchemaGraph = [
 		color: #8b7d70;
 	}
 	.home-hero-fact strong {
-		align-self: end;
-		font-size: 1rem;
-		line-height: 1.35;
+		align-self: start;
+		font-size: 1.02rem;
+		line-height: 1.3;
 		color: #2b2622;
 	}
 	.home-section {
@@ -527,6 +545,43 @@ const pageSchemaGraph = [
 		border: 1px solid #ebe5dc;
 		border-radius: 1.6rem;
 		box-shadow: 0 8px 24px rgba(60, 41, 20, 0.05);
+	}
+	.home-vacancy-launch {
+		margin-top: 0.5rem;
+	}
+	.home-vacancy-launch-bar {
+		display: grid;
+		grid-template-columns: minmax(240px, 0.44fr) minmax(0, 1fr);
+		gap: 1rem;
+		align-items: start;
+	}
+	.home-vacancy-launch-link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 3.1rem;
+		padding: 0.85rem 1.2rem;
+		border-radius: 999px;
+		background: #1f2937;
+		border: 1px solid #1f2937;
+		color: white;
+		text-decoration: none;
+		font-weight: 800;
+		transition: var(--transition);
+	}
+	.home-vacancy-launch-link:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+	}
+	.home-quick-chip-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.7rem;
+		align-items: center;
+	}
+	.home-discovery-section {
+		display: grid;
+		gap: 1.5rem;
 	}
 
 	/* --- Hero Toolbar --- */
@@ -682,18 +737,12 @@ const pageSchemaGraph = [
 		border-radius: 1.25rem !important;
 		box-shadow: 0 4px 12px rgba(60, 41, 20, 0.03) !important;
 	}
-	.home-hub-grid {
+	.home-navigation-grid {
 		display: grid;
 		grid-template-columns: repeat(4, minmax(0, 1fr));
 		gap: 1rem;
 	}
-	.home-route-grid {
-		display: grid;
-		grid-template-columns: repeat(4, minmax(0, 1fr));
-		gap: 1rem;
-	}
-	.home-route-card,
-	.home-hub-card {
+	.home-navigation-card {
 		display: grid;
 		gap: 0.55rem;
 		padding: 1.25rem;
@@ -705,28 +754,31 @@ const pageSchemaGraph = [
 		color: #2b2622;
 		transition: var(--transition);
 	}
-	.home-route-card {
+	.home-navigation-card-route {
 		background:
 			radial-gradient(circle at top right, rgba(99, 102, 241, 0.1), transparent 10rem),
 			linear-gradient(180deg, #fffefb 0%, #eef3ff 100%);
 	}
-	.home-route-card:hover,
-	.home-hub-card:hover {
+	.home-navigation-card:hover {
 		transform: translateY(-2px);
 		box-shadow: 0 10px 24px rgba(60, 41, 20, 0.08);
 	}
-	.home-route-card h3,
-	.home-hub-card h3,
-	.home-route-card p,
-	.home-hub-card p {
+	.home-navigation-card span,
+	.home-navigation-card h3,
+	.home-navigation-card p {
 		margin: 0;
 	}
-	.home-route-card h3,
-	.home-hub-card h3 {
+	.home-navigation-card span {
+		font-size: 0.72rem;
+		font-weight: 900;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: #8b7d70;
+	}
+	.home-navigation-card h3 {
 		font-size: 1rem;
 	}
-	.home-route-card p,
-	.home-hub-card p {
+	.home-navigation-card p {
 		color: #7c6f64;
 		line-height: 1.6;
 	}
@@ -792,14 +844,29 @@ const pageSchemaGraph = [
 		}
 		.home-hero-panel {
 			grid-template-columns: 1fr;
-			padding: 1.25rem;
+			padding: 1rem;
+			gap: 0.75rem;
+		}
+		.home-hero-copy {
+			gap: 0.85rem;
+		}
+		.home-hero-summary {
+			font-size: 1rem;
+			line-height: 1.6;
 		}
 		.home-hero-facts {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
+			display: none;
 		}
 		.home-section {
 			padding: 1.2rem;
 			border-radius: 1.25rem;
+		}
+		.hero-toolbar {
+			margin-top: 1rem;
+			margin-bottom: 1rem;
+		}
+		.home-vacancy-launch-bar {
+			grid-template-columns: 1fr;
 		}
 		.toolbar-top {
 			flex-direction: row;
@@ -813,6 +880,11 @@ const pageSchemaGraph = [
 			padding: 0 0.5rem !important;
 			padding-right: 1.5rem !important;
 		}
+		.city-icon {
+			left: 0.9rem;
+			width: 18px;
+			height: 18px;
+		}
 		.hero-lang-switcher {
 			flex: 1;
 			min-width: 0;
@@ -825,11 +897,12 @@ const pageSchemaGraph = [
 			justify-content: center;
 		}
 		.city-select {
-			padding: 0 1.25rem 0 0.5rem;
+			padding: 0 1.25rem 0 1.9rem;
 			font-size: 1.1rem !important;
+			text-align: left;
+			text-align-last: left;
 		}
-		.home-hub-grid,
-		.home-route-grid,
+		.home-navigation-grid,
 		.home-surface-grid {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
@@ -837,10 +910,10 @@ const pageSchemaGraph = [
 	@media (max-width: 600px) {
 		.home-hero-copy h1 {
 			max-width: none;
+			font-size: clamp(2rem, 11vw, 3.6rem);
+			line-height: 0.98;
 		}
-		.home-hero-facts,
-		.home-hub-grid,
-		.home-route-grid,
+		.home-navigation-grid,
 		.home-surface-grid {
 			grid-template-columns: 1fr;
 		}

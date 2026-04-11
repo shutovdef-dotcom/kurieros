@@ -146,7 +146,7 @@ const pageSchemaGraph = [
 
   <main class="company-page">
     <div class="company-container">
-      <nav class="breadcrumb">
+      <nav class="breadcrumb" aria-label="Хлебные крошки">
         <a href="/">Главная</a> &gt; <a href="/companies/">Компании</a> &gt; <span>{company.name}</span>
       </nav>
 
@@ -157,7 +157,7 @@ const pageSchemaGraph = [
               <img src={company.logo} alt={company.name} class="company-logo" width="96" height="96" loading="eager" decoding="async" />
             </div>
             <div>
-              <div class="company-kicker">AI-ready entity page</div>
+              <div class="company-kicker">Карточка работодателя</div>
               <h1>Работа в {company.name}</h1>
               <p class="company-subtitle">Вакансии, отзывы, города, формат выплат и ключевые ограничения перед откликом.</p>
             </div>
