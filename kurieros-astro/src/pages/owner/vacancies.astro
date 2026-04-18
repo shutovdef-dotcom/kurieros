@@ -158,6 +158,15 @@ const companyExamples = jobsData.slice(0, 8).map((job) => ({
 								</label>
 							</div>
 
+							<label class="field">
+								<span>Транспортное средство</span>
+								<select id="job-transport-provision">
+									<option value="own">Нужно своё транспортное средство (по умолчанию)</option>
+									<option value="company">Компания выдает транспортное средство</option>
+								</select>
+								<small>Если оставить по умолчанию, поле в офферах не записывается и считается, что нужен свой транспорт.</small>
+							</label>
+
 							<div class="two-col">
 								<label class="field">
 									<span>Требования, по одному на строку</span>
@@ -228,7 +237,7 @@ const companyExamples = jobsData.slice(0, 8).map((job) => ({
 								</label>
 								<label class="field">
 									<span>ОС / устройство</span>
-									<input id="detail-os" type="text" placeholder="Android / iOS" required />
+									<input id="detail-os" type="text" placeholder="Android или iOS" required />
 								</label>
 							</div>
 
@@ -376,6 +385,11 @@ const companyExamples = jobsData.slice(0, 8).map((job) => ({
 		return map[normalized] || normalized;
 	}
 
+	function normalizeTransportProvision(value) {
+		const normalized = value.trim().toLowerCase();
+		return normalized === 'company' ? 'company' : 'own';
+	}
+
 	function readAgeFrom(value) {
 		const match = value.match(/\d+/);
 		return match ? Number(match[0]) : 18;
@@ -418,6 +432,7 @@ const companyExamples = jobsData.slice(0, 8).map((job) => ({
 			.filter(Boolean);
 		const cities = splitComma(document.getElementById('job-location').value);
 		const transports = splitComma(document.getElementById('job-tags').value).map(normalizeTransport).filter(Boolean);
+		const transportProvision = normalizeTransportProvision(document.getElementById('job-transport-provision').value);
 		const monthlyPay = readMoneyRange(document.getElementById('job-salary').value);
 		const cityDistricts = splitComma(document.getElementById('job-city-districts').value);
 		const priorityRaw = Number(document.getElementById('job-priority').value);
@@ -486,6 +501,7 @@ const companyExamples = jobsData.slice(0, 8).map((job) => ({
 					employmentFormats: employmentFormats.length ? employmentFormats : ['self_employed'],
 					schedule: document.getElementById('detail-schedule').value.trim(),
 					applyLink,
+					...(transportProvision === 'company' ? { transportProvision } : {}),
 					...(cityDistricts.length ? { cityDistricts } : {}),
 					...(Number.isFinite(priorityRaw) && priorityRaw > 0 ? { priority: priorityRaw } : {}),
 					...(requirementsOverride.length ? { requirementsOverride } : {}),
@@ -526,6 +542,7 @@ const companyExamples = jobsData.slice(0, 8).map((job) => ({
 			setFieldValue('job-location', Array.from(new Set((draft.offers || []).map((offer) => offer.city))).join(', ') || (draft.hiring?.cities || []).map((city) => city.name).join(', ') || draft.location);
 			setFieldValue('job-tags', Array.from(new Set((draft.offers || []).map((offer) => offer.transport))).join(', ') || (draft.transport || draft.tags || []).join(', '));
 			setFieldValue('job-labels', (draftContent.labels || draft.labels || []).join(', '));
+			setFieldValue('job-transport-provision', firstOffer.transportProvision ?? 'own');
 			setFieldValue('job-apply-link', firstOffer.applyLink === '#' ? '' : firstOffer.applyLink ?? (draft.applyLink === '#' ? '' : draft.applyLink));
 			setFieldValue('job-source-url', firstOffer.sourceUrl);
 			setFieldValue('job-updated-at', firstOffer.updatedAt);
@@ -745,7 +762,8 @@ const companyExamples = jobsData.slice(0, 8).map((job) => ({
 		font-size: 0.75rem;
 	}
 	.field input,
-	.field textarea {
+	.field textarea,
+	.field select {
 		width: 100%;
 		border: 1px solid var(--border-color);
 		border-radius: 1rem;
@@ -755,7 +773,8 @@ const companyExamples = jobsData.slice(0, 8).map((job) => ({
 		font: inherit;
 	}
 	.field input:focus,
-	.field textarea:focus {
+	.field textarea:focus,
+	.field select:focus {
 		outline: none;
 		border-color: var(--accent-color);
 		box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.08);

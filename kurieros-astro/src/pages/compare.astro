@@ -21,6 +21,22 @@ const getTransportLabel = (tags: string[]) =>
     ? transportLabelMap[tags.find((tag) => tag in transportLabelMap) as string]
     : 'Смешанный формат';
 
+const getTransportProvisionLabel = (provision: 'own' | 'company') =>
+  provision === 'company'
+    ? 'Компания выдает транспортное средство'
+    : 'Нужно своё транспортное средство';
+
+const normalizeOsRequirement = (value?: string) => {
+  const normalized = String(value ?? '').trim().toLowerCase();
+  const hasAndroid = /android|андроид/.test(normalized);
+  const hasIos = /(?:^|[^a-z])ios(?:[^a-z]|$)|iphone|ipad|айос|айфон/.test(normalized);
+
+  if (hasAndroid && hasIos) return 'Android или iOS';
+  if (hasIos) return 'iOS';
+  if (hasAndroid) return 'Android';
+  return 'Android или iOS';
+};
+
 const mapCompareJob = (job: typeof jobsData[number]) => ({
   id: job.id,
   slug: job.slug,
@@ -31,10 +47,12 @@ const mapCompareJob = (job: typeof jobsData[number]) => ({
   salary: job.salary,
   location: job.location,
   transport: getTransportLabel(job.tags),
+  transport_provision: getTransportProvisionLabel(job.transportProvision),
   contract: job.details.employment_type,
   payout: job.details.payment_freq,
   bonus: job.benefits[0] || 'Условия уточняются при отклике',
   age: job.details.age,
+  os: normalizeOsRequirement(job.details.os),
   link: `/v/${job.slug}/`,
 });
 
@@ -70,6 +88,9 @@ const features = [
   { key: 'salary', name: 'Зарплата' },
   { key: 'location', name: 'Район работы' },
   { key: 'transport', name: 'Транспорт' },
+  { key: 'transport_provision', name: 'Транспортное средство' },
+  { key: 'age', name: 'Возраст' },
+  { key: 'os', name: 'Операционная система' },
   { key: 'contract', name: 'Оформление' },
   { key: 'payout', name: 'Выплаты' },
   { key: 'bonus', name: 'Особенности' },
@@ -414,18 +435,22 @@ const pageSchemaGraph = [
       return Number(String(salary).replace(/[^\d]/g, '')) || 0;
     }
 
-    function readCompareIds() {
+    function readStoredCompareIds() {
       try {
         const rawList = JSON.parse(localStorage.getItem('compareList') || '[]');
         if (!Array.isArray(rawList)) return [];
 
         return rawList
           .map((id) => Number.parseInt(String(id), 10))
-          .filter((id, index, ids) => Number.isFinite(id) && jobsById.has(id) && ids.indexOf(id) === index)
+          .filter((id, index, ids) => Number.isFinite(id) && ids.indexOf(id) === index)
           .slice(0, 4);
       } catch {
         return [];
       }
+    }
+
+    function readCompareIds() {
+      return readStoredCompareIds().filter((id) => jobsById.has(id));
     }
 
     function writeCompareIds(ids) {
@@ -434,7 +459,14 @@ const pageSchemaGraph = [
     }
 
     function getSelectedJobs() {
-      return readCompareIds().map((id) => jobsById.get(id)).filter(Boolean);
+      const storedIds = readStoredCompareIds();
+      const validIds = storedIds.filter((id) => jobsById.has(id));
+
+      if (JSON.stringify(storedIds) !== JSON.stringify(validIds)) {
+        writeCompareIds(validIds);
+      }
+
+      return validIds.map((id) => jobsById.get(id)).filter(Boolean);
     }
 
     function renderEmptyState() {
@@ -604,11 +636,6 @@ const pageSchemaGraph = [
 
     function renderSelectedComparison() {
       const jobs = getSelectedJobs();
-      const safeIds = jobs.map((job) => job.id);
-
-      if (JSON.stringify(safeIds) !== JSON.stringify(readCompareIds())) {
-        writeCompareIds(safeIds);
-      }
 
       renderComparisonTable(jobs);
       renderDecisionCards(jobs);

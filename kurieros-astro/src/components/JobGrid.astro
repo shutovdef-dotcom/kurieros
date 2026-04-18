@@ -9,6 +9,7 @@ interface Props {
 }
 
 const { initialCity = '', initialTag = 'all', initialSearch = '' } = Astro.props;
+const availableJobIds = jobsData.map((job) => job.id);
 
 const filteredJobs = jobsData.filter((job) => {
 	const searchTerm = initialSearch.toLowerCase();
@@ -80,11 +81,46 @@ const hasVacancies = jobsData.length > 0;
 	}
 </style>
 
-<script is:inline define:vars={{ initialCity, initialTag, initialSearch }}>
-	let compareList = JSON.parse(localStorage.getItem('compareList') || '[]');
+<script is:inline define:vars={{ initialCity, initialTag, initialSearch, availableJobIds }}>
+	let compareList = [];
+	const availableJobIdSet = new Set(availableJobIds);
 	let selectedCity = initialCity || '';
 	const normalizedInitialSearch = initialSearch.toLowerCase();
 	let compareNoticeTimeout = null;
+
+	function parseStoredCompareList() {
+		try {
+			const rawList = JSON.parse(localStorage.getItem('compareList') || '[]');
+			if (!Array.isArray(rawList)) return [];
+
+			return rawList
+				.map((id) => Number.parseInt(String(id), 10))
+				.filter((id) => Number.isFinite(id));
+		} catch {
+			return [];
+		}
+	}
+
+	function normalizeCompareList(ids) {
+		return ids
+			.filter((id, index, list) => availableJobIdSet.has(id) && list.indexOf(id) === index)
+			.slice(0, 4);
+	}
+
+	function syncCompareList({ emitEvent = true } = {}) {
+		const rawList = parseStoredCompareList();
+		const normalizedList = normalizeCompareList(rawList);
+		compareList = normalizedList;
+
+		if (JSON.stringify(rawList) !== JSON.stringify(normalizedList)) {
+			localStorage.setItem('compareList', JSON.stringify(normalizedList));
+			if (emitEvent) {
+				window.dispatchEvent(new CustomEvent('compareUpdate'));
+			}
+		}
+
+		return normalizedList;
+	}
 
 	function getTranslation(key, defaultText) {
 		const lang = window.kurieros_i18n?.currentLang || 'ru';
@@ -131,7 +167,24 @@ const hasVacancies = jobsData.length > 0;
 		return title.includes(searchTerm) || company.includes(searchTerm) || location.includes(searchTerm);
 	}
 
+	function mapAgeFilterToTag(value) {
+		if (value === '16plus') return '16plus';
+		if (value === '18plus') return '18+';
+		return 'all';
+	}
+
+	function hasTag(card, tag) {
+		if (!tag || tag === 'all') return true;
+		const tags = (card.dataset.tags || '')
+			.split(',')
+			.map((item) => item.trim().toLowerCase())
+			.filter(Boolean);
+
+		return tags.includes(tag.toLowerCase());
+	}
+
 	function toggleCompare(id) {
+		syncCompareList({ emitEvent: false });
 		const index = compareList.indexOf(id);
 		if (index === -1) {
 			if (compareList.length >= 4) {
@@ -154,6 +207,9 @@ const hasVacancies = jobsData.length > 0;
 
 	document.addEventListener('DOMContentLoaded', () => {
 		const jobCards = document.querySelectorAll('.job-card');
+		const ageFilterSelect = document.getElementById('vacancy-age-filter');
+		const transportFilterSelect = document.getElementById('vacancy-transport-filter');
+		syncCompareList();
 
 		document.querySelectorAll('.btn-compare').forEach((btn) => {
 			const id = Number.parseInt(btn.dataset.id || '', 10);
@@ -169,15 +225,36 @@ const hasVacancies = jobsData.length > 0;
 			filterJobs();
 		});
 
+		window.addEventListener('storage', (event) => {
+			if (event.key !== 'compareList') return;
+			syncCompareList({ emitEvent: false });
+			document.querySelectorAll('.btn-compare').forEach((btn) => {
+				const id = Number.parseInt(btn.dataset.id || '', 10);
+				setCompareButtonState(btn, compareList.includes(id));
+			});
+		});
+
+		ageFilterSelect?.addEventListener('change', () => {
+			filterJobs();
+		});
+
+		transportFilterSelect?.addEventListener('change', () => {
+			filterJobs();
+		});
+
 		function filterJobs() {
 			const term = normalizedInitialSearch;
+			const selectedAgeTag = mapAgeFilterToTag(ageFilterSelect?.value || 'all');
+			const selectedTransportTag = transportFilterSelect?.value || 'all';
 
 			jobCards.forEach((card) => {
 				const location = (card.dataset.location || '').toLowerCase();
 				const matchesCity = !selectedCity || location.includes(selectedCity.toLowerCase()) || location === 'вся россия';
 				const matchesSearchTerm = matchesSearch(card, term);
+				const matchesAge = hasTag(card, selectedAgeTag);
+				const matchesTransport = hasTag(card, selectedTransportTag);
 
-				if (matchesSearchTerm && matchesCity) {
+				if (matchesSearchTerm && matchesCity && matchesAge && matchesTransport) {
 					card.style.display = 'flex';
 				} else {
 					card.style.display = 'none';

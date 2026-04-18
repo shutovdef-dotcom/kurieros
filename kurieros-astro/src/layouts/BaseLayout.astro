@@ -232,17 +232,46 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 		</script>
 		<script is:inline define:vars={{ translations, supportedLanguages, vacancyTranslationPaths }}>
 			// Global i18n Manager
-			(function() {
-				const STORAGE_KEY = 'site-lang';
-				const DEFAULT_LANG = 'ru';
-				const SUPPORTED_LANGS = supportedLanguages;
-				const VACANCY_TRANSLATION_PATHS = vacancyTranslationPaths;
-				const loadedVacancyTranslations = new Set();
-				window.translations = translations;
-				
-				function getSafeLang(lang) {
-					return SUPPORTED_LANGS.includes(lang) ? lang : DEFAULT_LANG;
-				}
+				(function() {
+					const STORAGE_KEY = 'site-lang';
+					const DEFAULT_LANG = 'ru';
+					const SUPPORTED_LANGS = supportedLanguages;
+					const VACANCY_TRANSLATION_PATHS = vacancyTranslationPaths;
+					const loadedVacancyTranslations = new Set();
+					window.translations = translations;
+					
+					function getSafeLang(lang) {
+						return SUPPORTED_LANGS.includes(lang) ? lang : DEFAULT_LANG;
+					}
+
+					function detectSystemLanguage() {
+						const candidates = [];
+						if (Array.isArray(navigator.languages)) {
+							candidates.push(...navigator.languages);
+						}
+						if (navigator.language) {
+							candidates.push(navigator.language);
+						}
+
+						for (const locale of candidates) {
+							if (!locale || typeof locale !== 'string') continue;
+							const normalizedLocale = locale.trim().toLowerCase();
+							if (!normalizedLocale) continue;
+
+							const fullMatch = getSafeLang(normalizedLocale);
+							if (fullMatch === normalizedLocale) {
+								return fullMatch;
+							}
+
+							const baseLang = normalizedLocale.split(/[-_]/)[0];
+							const safeBase = getSafeLang(baseLang);
+							if (safeBase === baseLang) {
+								return safeBase;
+							}
+						}
+
+						return DEFAULT_LANG;
+					}
 
 				function pageHasVacancyTranslationKeys() {
 					return Boolean(document.querySelector('[data-t^="vacancies."]'));
@@ -284,11 +313,37 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 					return path.split('.').reduce((prev, curr) => prev && prev[curr], obj);
 				}
 
-				const savedLang = localStorage.getItem(STORAGE_KEY);
-				const initialLang = getSafeLang(savedLang || DEFAULT_LANG);
-				if (savedLang !== initialLang) {
-					localStorage.setItem(STORAGE_KEY, initialLang);
+				function cacheOriginalTranslations() {
+					const elements = document.querySelectorAll('[data-t]');
+					const contentElements = document.querySelectorAll('[data-t-content]');
+					const titleElement = document.querySelector('[data-t-title]');
+
+					elements.forEach((el) => {
+						if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+							if (el.dataset.tOriginalPlaceholder === undefined) {
+								el.dataset.tOriginalPlaceholder = el.placeholder || '';
+							}
+							return;
+						}
+
+						if (el.dataset.tOriginalText === undefined) {
+							el.dataset.tOriginalText = el.textContent || '';
+						}
+					});
+
+					contentElements.forEach((el) => {
+						if (el.dataset.tOriginalContent === undefined) {
+							el.dataset.tOriginalContent = el.getAttribute('content') || '';
+						}
+					});
+
+					if (titleElement && titleElement.dataset.tOriginalTitle === undefined) {
+						titleElement.dataset.tOriginalTitle = titleElement.textContent || document.title || '';
+					}
 				}
+
+					const initialLang = detectSystemLanguage();
+					localStorage.setItem(STORAGE_KEY, initialLang);
 
 				window.kurieros_i18n = {
 					currentLang: initialLang,
@@ -304,42 +359,55 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 					},
 
 					applyTranslations() {
+						cacheOriginalTranslations();
 						const elements = document.querySelectorAll('[data-t]');
 						const contentElements = document.querySelectorAll('[data-t-content]');
 						const titleElement = document.querySelector('[data-t-title]');
 						const lang = getSafeLang(this.currentLang);
 						const langData = translations[lang] || translations[DEFAULT_LANG];
 						
-						elements.forEach(el => {
+						elements.forEach((el) => {
 							const key = el.getAttribute('data-t');
-							const translation = getNestedValue(langData, key) || getNestedValue(translations[DEFAULT_LANG], key);
-							
-							if (translation) {
-								if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-									el.placeholder = translation;
-								} else {
-									el.textContent = translation;
-								}
+							if (!key) {
+								return;
 							}
+
+							const translation = getNestedValue(langData, key);
+							const defaultTranslation = getNestedValue(translations[DEFAULT_LANG], key);
+
+							if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+								const fallback = defaultTranslation ?? el.dataset.tOriginalPlaceholder ?? '';
+								const nextValue = translation ?? fallback;
+								el.placeholder = nextValue;
+								return;
+							}
+
+							const fallback = defaultTranslation ?? el.dataset.tOriginalText ?? '';
+							const nextValue = translation ?? fallback;
+							el.textContent = nextValue;
 						});
 
-						contentElements.forEach(el => {
+						contentElements.forEach((el) => {
 							const key = el.getAttribute('data-t-content');
-							const translation = getNestedValue(langData, key) || getNestedValue(translations[DEFAULT_LANG], key);
-
-							if (translation) {
-								el.setAttribute('content', translation);
+							if (!key) {
+								return;
 							}
+
+							const translation = getNestedValue(langData, key);
+							const defaultTranslation = getNestedValue(translations[DEFAULT_LANG], key);
+							const fallback = defaultTranslation ?? el.dataset.tOriginalContent ?? '';
+							const nextValue = translation ?? fallback;
+							el.setAttribute('content', nextValue);
 						});
 
 						if (titleElement) {
 							const key = titleElement.getAttribute('data-t-title');
-							const translation = getNestedValue(langData, key) || getNestedValue(translations[DEFAULT_LANG], key);
-
-							if (translation) {
-								titleElement.textContent = translation;
-								document.title = translation;
-							}
+							const translation = key ? getNestedValue(langData, key) : undefined;
+							const defaultTranslation = key ? getNestedValue(translations[DEFAULT_LANG], key) : undefined;
+							const fallback = defaultTranslation ?? titleElement.dataset.tOriginalTitle ?? document.title;
+							const nextValue = translation ?? fallback;
+							titleElement.textContent = nextValue;
+							document.title = nextValue;
 						}
 						
 						document.documentElement.setAttribute('lang', lang);

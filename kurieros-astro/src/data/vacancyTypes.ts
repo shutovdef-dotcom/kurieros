@@ -1,6 +1,7 @@
 import type { SupportedLanguage } from './translations';
 
 export type TransportMode = 'foot' | 'auto' | 'bicycle';
+export type TransportProvision = 'own' | 'company';
 
 export type EmploymentFormat =
   | 'gph'
@@ -41,6 +42,7 @@ export type PayModel = {
 export type VacancyOffer = {
   city: string;
   transport: TransportMode;
+  transportProvision?: TransportProvision;
   pay: PayModel;
   isActive: boolean;
   updatedAt: string;
@@ -121,12 +123,14 @@ export type GeneratedJob = {
     medical_book: string;
     self_employed: string;
     employment_type: string;
+    transport_provision: string;
     uniform: string;
     os: string;
   };
   search_tags: string[];
   shortDescription: string;
   transport: TransportMode;
+  transportProvision: TransportProvision;
   salaryConfidence: SalaryConfidence;
   currency: CurrencyCode;
   sourceUrl?: string;

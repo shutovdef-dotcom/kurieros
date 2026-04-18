@@ -6,6 +6,7 @@ import type {
   GeneratedJob,
   MedicalBookRequirement,
   PayModel,
+  TransportProvision,
   TransportMode,
   VacancyOffer,
   VacancySource,
@@ -48,6 +49,21 @@ const TRANSPORT_TITLES: LocalizedLabels<TransportMode> = {
   hi: { foot: 'पैदल कूरियर', auto: 'कार कूरियर', bicycle: 'साइकिल कूरियर' },
   vi: { foot: 'Shipper đi bộ', auto: 'Shipper ô tô', bicycle: 'Shipper xe đạp' },
   zh: { foot: '步行配送员', auto: '汽车配送员', bicycle: '自行车配送员' },
+};
+
+const TRANSPORT_PROVISION_LABELS: LocalizedLabels<TransportProvision> = {
+  ru: { own: 'Нужно своё транспортное средство', company: 'Компания выдает транспортное средство' },
+  uz: { own: "Shaxsiy transport kerak", company: 'Transportni kompaniya beradi' },
+  tg: { own: 'Нақлиёти шахсӣ лозим', company: 'Нақлиётро ширкат медиҳад' },
+  ky: { own: 'Өз транспорту керек', company: 'Транспортту компания берет' },
+  hy: { own: 'Պետք է սեփական տրանսպորտ', company: 'Տրանսպորտը տրամադրում է ընկերությունը' },
+  kk: { own: 'Өз көлігі қажет', company: 'Көлікті компания береді' },
+  az: { own: 'Şəxsi nəqliyyat tələb olunur', company: 'Nəqliyyatı şirkət verir' },
+  uk: { own: 'Потрібен власний транспорт', company: 'Транспорт надає компанія' },
+  be: { own: 'Патрэбны ўласны транспарт', company: 'Транспарт прадастаўляе кампанія' },
+  hi: { own: 'अपना वाहन आवश्यक', company: 'कंपनी वाहन उपलब्ध कराती है' },
+  vi: { own: 'Cần phương tiện cá nhân', company: 'Công ty cấp phương tiện' },
+  zh: { own: '需要自有交通工具', company: '公司提供交通工具' },
 };
 
 const TRANSPORT_ID_PARTS: Record<TransportMode, number> = {
@@ -268,6 +284,9 @@ const getCitizenship = (source: VacancySource, offer: VacancyOffer) =>
 const getEmploymentFormats = (source: VacancySource, offer: VacancyOffer) =>
   offer.employmentFormats?.length ? offer.employmentFormats : source.defaults.employmentFormats;
 
+const getTransportProvision = (offer: VacancyOffer): TransportProvision =>
+  offer.transportProvision ?? 'own';
+
 const getSchedule = (source: VacancySource, offer: VacancyOffer, language: SupportedLanguage) => {
   const schedule = offer.schedule ?? source.defaults.schedule;
 
@@ -378,6 +397,7 @@ export const buildJobsFromVacancies = (
       const ageFrom = getAgeFrom(source, offer);
       const transport = offer.transport;
       const formats = getEmploymentFormats(source, offer);
+      const transportProvision = getTransportProvision(offer);
       const medicalBook = getMedicalBook(source, offer);
       const salary = getSalaryText(offer.pay, language);
       const applyLink = offer.applyLink ?? '#';
@@ -416,12 +436,14 @@ export const buildJobsFromVacancies = (
           medical_book: getLocalizedLabel(MEDICAL_BOOK_LABELS, language, medicalBook),
           self_employed: formats.includes('self_employed') ? COMMON_LABELS[language].yes : COMMON_LABELS[language].notRequired,
           employment_type: formats.map((format) => getLocalizedLabel(EMPLOYMENT_LABELS, language, format)).join(' / '),
+          transport_provision: getLocalizedLabel(TRANSPORT_PROVISION_LABELS, language, transportProvision),
           uniform: source.defaults.uniform ?? 'Уточняется',
-          os: source.defaults.os ?? 'Android / iOS',
+          os: source.defaults.os ?? 'Android или iOS',
         },
         search_tags: content.searchTags ?? [],
         shortDescription: interpolate(content.shortDescription, offer, language),
         transport,
+        transportProvision,
         salaryConfidence: offer.salaryConfidence,
         currency: offer.pay.currency,
         ...(offer.sourceUrl ? { sourceUrl: offer.sourceUrl } : {}),
@@ -461,6 +483,7 @@ export const buildJobTranslations = (sources: VacancySource[]) =>
             details_citizenship: job.details.citizenship,
             details_rate: job.details.rate,
             details_employment_type: job.details.employment_type,
+            details_transport_provision: job.details.transport_provision,
           },
         ]),
       ),

@@ -1,10 +1,14 @@
 import { CITIES } from '../data/constants';
+import { CITY_POPULATION_ORDER } from '../data/cityPopulationOrder';
 
 type JobLike = {
 	location?: string;
 };
 
 const KNOWN_CITIES = new Map(CITIES.map((city) => [city.name, city]));
+const CITY_POPULATION_RANK = new Map(
+	CITY_POPULATION_ORDER.map((city, index) => [city.toLowerCase().replace(/ё/g, 'е'), CITY_POPULATION_ORDER.length - index]),
+);
 
 const SLUG_MAP: Record<string, string> = {
 	а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'e', ж: 'zh', з: 'z',
@@ -55,3 +59,11 @@ export const getCityHref = (name: string) => {
 	const slug = known?.slug ?? slugifyCity(name);
 	return `/rabota-kurerom-${slug}/`;
 };
+
+const getPopulationRank = (name: string) => CITY_POPULATION_RANK.get(name.toLowerCase().replace(/ё/g, 'е')) ?? 0;
+
+export const compareCityNamesByPopulation = (a: string, b: string) =>
+	getPopulationRank(b) - getPopulationRank(a) || a.localeCompare(b, 'ru');
+
+export const sortCityNamesByPopulation = (names: string[]) =>
+	[...names].sort(compareCityNamesByPopulation);

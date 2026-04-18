@@ -1,5 +1,6 @@
 ---
 import jobsData from '../data/jobs';
+import { sortCityNamesByPopulation } from '../utils/cities';
 
 interface Props {
 	variant: 'linear' | 'raycast' | 'notion';
@@ -7,14 +8,14 @@ interface Props {
 
 const { variant } = Astro.props;
 
-const availableCities = Array.from(
+const availableCities = sortCityNamesByPopulation(Array.from(
 	new Set(
 		jobsData
 			.flatMap((job) => job.location.split(','))
 			.map((city) => city.trim())
 			.filter((city) => city && city !== 'Вся Россия')
 	)
-).sort((a, b) => a.localeCompare(b, 'ru'));
+));
 
 const featuredJobs = jobsData.slice(0, 3);
 

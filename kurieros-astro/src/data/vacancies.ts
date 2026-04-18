@@ -1,7 +1,10 @@
 import descriptionTranslationsSource from './vacancy-description-translations.json';
+import kuperPayRatesSource from './kuper-pay-rates.json';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from './translations';
+import { slugifyCity } from '../utils/cities';
 import type {
   EmploymentFormat,
+  VacancyContent,
   LocalizedVacancyContent,
   TransportMode,
   VacancyOffer,
@@ -12,6 +15,25 @@ const YANDEX_EDA_APPLY_LINK = 'https://my2go.ru/mitpJ?erid=2VtzqwSDctu';
 const YANDEX_EDA_PAY_SOURCE_URL =
   'https://docs.google.com/spreadsheets/d/17gBp0k07GCPS3Ugf7JACHogCoYpZtYZRsQnnEhIedwY/edit?gid=1115757494#gid=1115757494';
 const UPDATED_AT = '2026-04-17';
+
+const KUPER_COMPANY_NAME = 'Купер (ex. СберМаркет)';
+const KUPER_COMPANY_LOGO =
+  'https://agents.pampadu.ru/api/file/ViewFile?type=1&name=c0a42c37-73f4-4de0-a4f9-fd0689380a79.png';
+const KUPER_FOOT_AND_BIKE_APPLY_LINK =
+  'https://trk.ppdu.ru/click/qHQDwLuc?erid=2SDnjeL6Zwp&landingId=2739';
+const KUPER_PACKER_APPLY_LINK =
+  'https://trk.ppdu.ru/click/qHQDwLuc?erid=2SDnjeL6Zwp&landingId=2740';
+const KUPER_AUTO_APPLY_LINK =
+  'https://trk.ppdu.ru/click/qHQDwLuc?erid=2SDnjeL6Zwp&landingId=2741';
+const KUPER_DEFAULT_CITIZENSHIP = 'РФ / ЕАЭС / страны вне ЕАЭС при наличии ВНЖ и патента';
+
+type KuperPayRates = {
+  sourceUrl: string;
+  exportedAt: string;
+  footAndBikeShiftByCity: Record<string, number>;
+  autoShiftByCity: Record<string, number>;
+  packerShiftByCity: Record<string, number>;
+};
 
 const TRANSPORT_MODES = ['foot', 'bicycle', 'auto'] satisfies TransportMode[];
 const TRANSPORT_PRIORITY: Record<TransportMode, number> = {
@@ -28,6 +50,19 @@ const LIGHT_MODE_STRIDE = Math.max(1, Math.round(100 / LIGHT_MODE_KEEP_PERCENT))
 
 const YANDEX_EDA_EMPLOYMENT_FORMATS = ['gph', 'self_employed'] satisfies EmploymentFormat[];
 
+const buildYandexEdaApplyLink = (city: string, transport: TransportMode) => {
+  const url = new URL(YANDEX_EDA_APPLY_LINK);
+  const citySlug = slugifyCity(city);
+
+  // Preserve partner URL and attach vacancy-specific markers for per-offer routing/analytics.
+  url.searchParams.set('utm_source', 'kurerok');
+  url.searchParams.set('utm_medium', 'vacancy');
+  url.searchParams.set('utm_campaign', 'yandex-eda-courier');
+  url.searchParams.set('utm_content', `${citySlug}-${transport}`);
+
+  return url.toString();
+};
+
 type DescriptionTranslation = {
   shortDescription: string;
   description: string;
@@ -40,6 +75,7 @@ type YandexEdaCityRate = {
 };
 
 const descriptionTranslations = descriptionTranslationsSource as Record<SupportedLanguage, DescriptionTranslation>;
+const kuperPayRates = kuperPayRatesSource as KuperPayRates;
 
 const yandexEdaCityRates: YandexEdaCityRate[] = [
   { city: 'Адлер', citizenship: 'РФ', rates: { foot: 445, bicycle: 440, auto: 672 } },
@@ -297,11 +333,253 @@ const createOffer = (
     medicalBook: 'required',
     employmentFormats: [...YANDEX_EDA_EMPLOYMENT_FORMATS],
     schedule: 'Свободный график от 2 часов',
-    applyLink: YANDEX_EDA_APPLY_LINK,
+    applyLink: buildYandexEdaApplyLink(cityRate.city, transport),
     priority: 2000 - cityIndex * 10 + TRANSPORT_PRIORITY[transport],
     requiredDocumentsOverride: getRequiredDocumentOverrides(cityRate.citizenship),
   };
 };
+
+const KUPER_PAY_SOURCE_URL = kuperPayRates.sourceUrl;
+const KUPER_UPDATED_AT = kuperPayRates.exportedAt;
+const KUPER_EMPLOYMENT_FORMATS = ['self_employed'] satisfies EmploymentFormat[];
+const yandexCitizenshipByCity = new Map(
+  yandexEdaCityRates.map((cityRate) => [cityRate.city, cityRate.citizenship]),
+);
+
+const getKuperCitizenship = (city: string) =>
+  yandexCitizenshipByCity.get(city) ?? KUPER_DEFAULT_CITIZENSHIP;
+
+const toHourlyFromShift = (shiftPer12Hours: number) => {
+  const raw = shiftPer12Hours / 12;
+  return Number.isInteger(raw) ? raw : Number(raw.toFixed(2));
+};
+
+const buildKuperApplyLink = (baseLink: string, city: string, role: 'foot' | 'bike' | 'auto' | 'packer') => {
+  const url = new URL(baseLink);
+  const citySlug = slugifyCity(city);
+
+  url.searchParams.set('utm_source', 'kurerok');
+  url.searchParams.set('utm_medium', 'vacancy');
+  url.searchParams.set('utm_campaign', `kuper-${role}`);
+  url.searchParams.set('utm_content', `${citySlug}-${role}`);
+
+  return url.toString();
+};
+
+const createKuperLocalizedContent = (ruContent: VacancyContent): LocalizedVacancyContent =>
+  Object.fromEntries(
+    SUPPORTED_LANGUAGES.map((language) => [
+      language,
+      {
+        ...ruContent,
+        title: language === 'ru'
+          ? ruContent.title
+          : ruContent.title.replace('{cityPrep}', '— {city}'),
+        requirements: [...ruContent.requirements],
+        benefits: [...ruContent.benefits],
+        requiredDocuments: [...ruContent.requiredDocuments],
+        labels: ruContent.labels ? [...ruContent.labels] : undefined,
+        searchTags: ruContent.searchTags ? [...ruContent.searchTags] : undefined,
+      },
+    ]),
+  ) as LocalizedVacancyContent;
+
+type KuperRole = 'foot' | 'bike' | 'auto' | 'packer';
+
+const createKuperOffer = ({
+  city,
+  shiftPer12Hours,
+  cityIndex,
+  transport,
+  role,
+  baseApplyLink,
+  priorityBase,
+  schedule,
+  benefitsOverride,
+  transportProvision,
+}: {
+  city: string;
+  shiftPer12Hours: number;
+  cityIndex: number;
+  transport: TransportMode;
+  role: KuperRole;
+  baseApplyLink: string;
+  priorityBase: number;
+  schedule: string;
+  benefitsOverride?: string[];
+  transportProvision?: VacancyOffer['transportProvision'];
+}): VacancyOffer => {
+  const citizenship = getKuperCitizenship(city);
+
+  return {
+    city,
+    transport,
+    pay: buildPay(toHourlyFromShift(shiftPer12Hours)),
+    isActive: true,
+    updatedAt: KUPER_UPDATED_AT,
+    sourceUrl: KUPER_PAY_SOURCE_URL,
+    salaryConfidence: 'partner',
+    ageFrom: 18,
+    citizenship,
+    medicalBook: 'required',
+    employmentFormats: [...KUPER_EMPLOYMENT_FORMATS],
+    schedule,
+    applyLink: buildKuperApplyLink(baseApplyLink, city, role),
+    priority: priorityBase - cityIndex * 10 + TRANSPORT_PRIORITY[transport],
+    requiredDocumentsOverride: getRequiredDocumentOverrides(citizenship),
+    ...(benefitsOverride?.length ? { benefitsOverride } : {}),
+    ...(transportProvision ? { transportProvision } : {}),
+  };
+};
+
+const kuperRequiredDocuments = [
+  'Для граждан РФ: паспорт с пропиской и медицинская книжка; оформление через самозанятость.',
+];
+
+const kuperCommonBenefits = [
+  'Еженедельные выплаты на карту.',
+  'Гибкий график: можно выбирать удобные слоты и район.',
+  'Скидки и бонусы от сервисов Купера и партнёров.',
+  'Брендированная форма по условиям точки.',
+  'Бонус за приглашённых друзей (по реферальной программе).',
+];
+
+const kuperFootContent = createKuperLocalizedContent({
+  title: 'Пеший курьер в Купер {cityPrep}',
+  shortDescription: 'Курьер Купера: доставляйте заказы рядом с домом пешком или на велосипеде.',
+  description:
+    'Купер — крупнейший онлайн-сервис покупок. На позиции пешего курьера можно доставлять заказы из магазинов и ресторанов рядом с домом.',
+  requirements: [
+    'Доставлять заказы клиентам из магазинов и ресторанов в радиусе до 3 км.',
+    'Пользоваться приложением для получения маршрута и статуса заказа.',
+    'Быть вежливым при передаче заказа клиенту.',
+  ],
+  benefits: [
+    ...kuperCommonBenefits,
+    'Можно выполнять доставки пешком, на велосипеде или самокате.',
+  ],
+  requiredDocuments: [...kuperRequiredDocuments],
+  labels: ['Пеший курьер', 'Можно на велосипеде', 'Еженедельные выплаты'],
+  searchTags: ['Купер', 'пеший курьер', 'доставка', 'подработка'],
+});
+
+const kuperBikeContent = createKuperLocalizedContent({
+  title: 'Велокурьер в Купер {cityPrep}',
+  shortDescription: 'Доставляйте заказы на велосипеде или самокате в удобном районе.',
+  description:
+    'Купер ищет велокурьеров для быстрой доставки. Работа в удобном районе, со слотами под ваш график.',
+  requirements: [
+    'Доставлять заказы клиентам на велосипеде или самокате.',
+    'Следить за качеством и сохранностью заказа во время доставки.',
+    'Использовать приложение Купера для маршрутизации и статусов.',
+  ],
+  benefits: [
+    ...kuperCommonBenefits,
+    'Во всех городах доступна аренда электровелосипеда за 0 ₽.',
+  ],
+  requiredDocuments: [...kuperRequiredDocuments],
+  labels: ['Велокурьер', 'Аренда электровелосипеда 0 ₽', 'Еженедельные выплаты'],
+  searchTags: ['Купер', 'велокурьер', 'самокат', 'доставка'],
+});
+
+const kuperAutoContent = createKuperLocalizedContent({
+  title: 'Автокурьер в Купер {cityPrep}',
+  shortDescription: 'Плановая и быстрая доставка заказов на авто с еженедельными выплатами.',
+  description:
+    'Вакансия автокурьера в Купере: доставляйте заказы на автомобиле, выбирайте удобный район и получайте выплаты каждую неделю.',
+  requirements: [
+    'Доставлять собранные заказы клиентам по маршруту из приложения.',
+    'Соблюдать тайм-слоты плановой доставки и правила передачи заказа.',
+    'Поддерживать связь с поддержкой и клиентом через приложение при необходимости.',
+  ],
+  benefits: [
+    ...kuperCommonBenefits,
+    'Для Москвы доступна аренда автомобиля компании.',
+  ],
+  requiredDocuments: [...kuperRequiredDocuments],
+  labels: ['Автокурьер', 'Плановая доставка', 'Еженедельные выплаты'],
+  searchTags: ['Купер', 'автокурьер', 'доставка на авто', 'плановая доставка'],
+});
+
+const kuperPackerContent = createKuperLocalizedContent({
+  title: 'Сборщик заказов в Купер {cityPrep}',
+  shortDescription: 'Собирайте интернет-заказы в магазинах METRO, «Лента Онлайн» и других партнёров.',
+  description:
+    'Сборщик заказов в Купере отвечает за точную и аккуратную сборку клиентских заказов для плановой доставки.',
+  requirements: [
+    'Собирать товары по списку клиента в приложении.',
+    'Проверять сроки годности и внешний вид товаров.',
+    'Передавать собранные заказы курьеру в рамках тайм-слота.',
+  ],
+  benefits: [...kuperCommonBenefits],
+  requiredDocuments: [...kuperRequiredDocuments],
+  labels: ['Сборщик заказов', 'Плановая доставка', 'Еженедельные выплаты'],
+  searchTags: ['Купер', 'сборщик заказов', 'магазин', 'плановая доставка'],
+});
+
+const kuperFootAndBikeShiftByCity = Object.entries(kuperPayRates.footAndBikeShiftByCity);
+// For auto profile use "Плановая" shifts where they exist, and fallback to "Быстрая".
+const kuperAutoShiftByCity = Object.entries(kuperPayRates.autoShiftByCity);
+const kuperPackerShiftByCity = Object.entries(kuperPayRates.packerShiftByCity);
+
+const kuperFootOffers = kuperFootAndBikeShiftByCity.map(([city, shift], cityIndex) =>
+  createKuperOffer({
+    city,
+    shiftPer12Hours: shift,
+    cityIndex,
+    transport: 'foot',
+    role: 'foot',
+    baseApplyLink: KUPER_FOOT_AND_BIKE_APPLY_LINK,
+    priorityBase: 1900,
+    schedule: 'Смена до 12 часов, гибкий график от 3 часов в день',
+  }),
+);
+
+const kuperBikeOffers = kuperFootAndBikeShiftByCity.map(([city, shift], cityIndex) =>
+  createKuperOffer({
+    city,
+    shiftPer12Hours: shift,
+    cityIndex,
+    transport: 'bicycle',
+    role: 'bike',
+    baseApplyLink: KUPER_FOOT_AND_BIKE_APPLY_LINK,
+    priorityBase: 1950,
+    schedule: 'Смена до 12 часов, гибкий график от 3 часов в день',
+    benefitsOverride: ['Во всех городах доступна аренда электровелосипеда за 0 ₽.'],
+  }),
+);
+
+const kuperAutoOffers = kuperAutoShiftByCity.map(([city, shift], cityIndex) =>
+  createKuperOffer({
+    city,
+    shiftPer12Hours: shift,
+    cityIndex,
+    transport: 'auto',
+    role: 'auto',
+    baseApplyLink: KUPER_AUTO_APPLY_LINK,
+    priorityBase: 2000,
+    schedule: 'Смена до 12 часов, гибкий график от 3 часов в день',
+    ...(city === 'Москва'
+      ? {
+          transportProvision: 'company' as const,
+          benefitsOverride: ['Для автокурьера в Москве доступна аренда автомобиля компании.'],
+        }
+      : {}),
+  }),
+);
+
+const kuperPackerOffers = kuperPackerShiftByCity.map(([city, shift], cityIndex) =>
+  createKuperOffer({
+    city,
+    shiftPer12Hours: shift,
+    cityIndex,
+    transport: 'foot',
+    role: 'packer',
+    baseApplyLink: KUPER_PACKER_APPLY_LINK,
+    priorityBase: 1850,
+    schedule: 'Смена до 12 часов',
+  }),
+);
 
 export const vacancySources = [
   {
@@ -320,12 +598,100 @@ export const vacancySources = [
       education: 'Не требуется',
       citizenship: 'РФ / ЕАЭС / страны вне ЕАЭС при наличии ВНЖ и патента',
       uniform: 'Специализированная одежда для доставок',
-      os: 'Android / iOS',
+      os: 'Android или iOS',
     },
     offers: yandexEdaCityRates.flatMap((cityRate, cityIndex) =>
       TRANSPORT_MODES.map((transport) => createOffer(cityRate, transport, cityIndex)),
     ),
     extraTags: ['flexible', 'food_delivery', 'yandex_eda', 'source:google-sheet'],
+    isHot: true,
+  },
+  {
+    id: 2,
+    slug: 'kuper-foot-courier',
+    company: {
+      name: KUPER_COMPANY_NAME,
+      logo: KUPER_COMPANY_LOGO,
+    },
+    content: kuperFootContent,
+    defaults: {
+      ageFrom: 18,
+      medicalBook: 'required',
+      employmentFormats: [...KUPER_EMPLOYMENT_FORMATS],
+      schedule: 'Смена до 12 часов, гибкий график от 3 часов в день',
+      education: 'Не требуется',
+      citizenship: KUPER_DEFAULT_CITIZENSHIP,
+      uniform: 'Брендированная форма по условиям точки',
+      os: 'Android или iOS',
+    },
+    offers: kuperFootOffers,
+    extraTags: ['kuper', 'courier', 'foot', 'source:google-sheet'],
+    isHot: true,
+  },
+  {
+    id: 3,
+    slug: 'kuper-bike-courier',
+    company: {
+      name: KUPER_COMPANY_NAME,
+      logo: KUPER_COMPANY_LOGO,
+    },
+    content: kuperBikeContent,
+    defaults: {
+      ageFrom: 18,
+      medicalBook: 'required',
+      employmentFormats: [...KUPER_EMPLOYMENT_FORMATS],
+      schedule: 'Смена до 12 часов, гибкий график от 3 часов в день',
+      education: 'Не требуется',
+      citizenship: KUPER_DEFAULT_CITIZENSHIP,
+      uniform: 'Брендированная форма по условиям точки',
+      os: 'Android или iOS',
+    },
+    offers: kuperBikeOffers,
+    extraTags: ['kuper', 'courier', 'bike', 'source:google-sheet'],
+    isHot: true,
+  },
+  {
+    id: 4,
+    slug: 'kuper-auto-courier',
+    company: {
+      name: KUPER_COMPANY_NAME,
+      logo: KUPER_COMPANY_LOGO,
+    },
+    content: kuperAutoContent,
+    defaults: {
+      ageFrom: 18,
+      medicalBook: 'required',
+      employmentFormats: [...KUPER_EMPLOYMENT_FORMATS],
+      schedule: 'Смена до 12 часов, гибкий график от 3 часов в день',
+      education: 'Не требуется',
+      citizenship: KUPER_DEFAULT_CITIZENSHIP,
+      uniform: 'Брендированная форма по условиям точки',
+      os: 'Android или iOS',
+    },
+    offers: kuperAutoOffers,
+    extraTags: ['kuper', 'courier', 'auto', 'source:google-sheet'],
+    isHot: true,
+  },
+  {
+    id: 5,
+    slug: 'kuper-order-picker',
+    company: {
+      name: KUPER_COMPANY_NAME,
+      logo: KUPER_COMPANY_LOGO,
+    },
+    content: kuperPackerContent,
+    defaults: {
+      ageFrom: 18,
+      medicalBook: 'required',
+      employmentFormats: [...KUPER_EMPLOYMENT_FORMATS],
+      schedule: 'Смена до 12 часов',
+      education: 'Не требуется',
+      citizenship: KUPER_DEFAULT_CITIZENSHIP,
+      uniform: 'Брендированная форма по условиям точки',
+      os: 'Android или iOS',
+    },
+    offers: kuperPackerOffers,
+    extraTags: ['kuper', 'picker', 'store', 'source:google-sheet'],
     isHot: true,
   },
 ] satisfies VacancySource[];

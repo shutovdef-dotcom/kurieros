@@ -57,8 +57,28 @@ import LanguageSwitcher from './LanguageSwitcher.astro';
 </nav>
 
 <script is:inline>
+    function readCompareList() {
+        try {
+            const rawList = JSON.parse(localStorage.getItem('compareList') || '[]');
+            if (!Array.isArray(rawList)) return [];
+
+            const normalizedList = rawList
+                .map((id) => Number.parseInt(String(id), 10))
+                .filter((id, index, list) => Number.isFinite(id) && list.indexOf(id) === index)
+                .slice(0, 4);
+
+            if (JSON.stringify(rawList) !== JSON.stringify(normalizedList)) {
+                localStorage.setItem('compareList', JSON.stringify(normalizedList));
+            }
+
+            return normalizedList;
+        } catch {
+            return [];
+        }
+    }
+
     function updateHeaderCompareBadge() {
-        const compareList = JSON.parse(localStorage.getItem('compareList') || '[]');
+        const compareList = readCompareList();
         const badges = [
             document.getElementById('compare-badge'),
             document.getElementById('compare-badge-bottom')

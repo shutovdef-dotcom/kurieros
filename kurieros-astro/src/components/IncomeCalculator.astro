@@ -1,17 +1,35 @@
 ---
-import { CITIES } from '../data/constants';
+import { vacancySources } from '../data/jobs';
+import { sortCityNamesByPopulation } from '../utils/cities';
 
-const cityRates: Record<string, number> = {
-    'moskva': 520,
-    'spb': 460,
-    'ekaterinburg': 410,
-    'kazan': 390,
-    'novosibirsk': 380,
-    'default': 350
-};
+const yandexAutoOffers = vacancySources
+    .filter((source) => /яндекс|yandex/i.test(source.company.name) || /yandex/i.test(source.slug))
+    .flatMap((source) => source.offers)
+    .filter((offer) => offer.isActive && offer.transport === 'auto');
 
-const citiesJson = JSON.stringify(CITIES);
+const rateByCity = new Map<string, number>();
+
+for (const offer of yandexAutoOffers) {
+    const hourlyCandidates = [offer.pay.hourly?.max, offer.pay.hourly?.min];
+    const hourlyRate = hourlyCandidates.find((value) => Number.isFinite(value));
+    if (typeof hourlyRate !== 'number') continue;
+
+    const currentBest = rateByCity.get(offer.city) ?? 0;
+    if (hourlyRate > currentBest) {
+        rateByCity.set(offer.city, hourlyRate);
+    }
+}
+
+const fallbackRate =
+    rateByCity.size > 0
+        ? Math.round(Array.from(rateByCity.values()).reduce((sum, value) => sum + value, 0) / rateByCity.size)
+        : 350;
+
+const sortedCities = sortCityNamesByPopulation(Array.from(rateByCity.keys()));
+const cityRates = Object.fromEntries(rateByCity.entries()) as Record<string, number>;
+
 const ratesJson = JSON.stringify(cityRates);
+const fallbackRateJson = JSON.stringify(fallbackRate);
 ---
 
 <section class="calculator-section home-section" id="income-calculator">
@@ -54,8 +72,8 @@ const ratesJson = JSON.stringify(cityRates);
                 <label for="calc-city-select" data-t="calculator.city">Ваш город</label>
                 <div class="select-wrapper">
                     <select id="calc-city-select" class="calc-select">
-                        {CITIES.map(city => (
-                            <option value={city.slug}>{city.name}</option>
+                        {sortedCities.map((city) => (
+                            <option value={city}>{city}</option>
                         ))}
                     </select>
                 </div>
@@ -86,9 +104,9 @@ const ratesJson = JSON.stringify(cityRates);
     </div>
 </section>
 
-<script is:inline define:vars={{ citiesJson, ratesJson }}>
-    const cities = JSON.parse(citiesJson);
+<script is:inline define:vars={{ ratesJson, fallbackRateJson }}>
     const rates = JSON.parse(ratesJson);
+    const fallbackRate = JSON.parse(fallbackRateJson);
 
     const daysRange = document.getElementById('days-range');
     const hoursRange = document.getElementById('hours-range');
@@ -100,8 +118,8 @@ const ratesJson = JSON.stringify(cityRates);
     function calculate() {
         const days = Number.parseInt(daysRange.value, 10);
         const hours = Number.parseInt(hoursRange.value, 10);
-        const citySlug = citySelect.value;
-        const rate = rates[citySlug] || rates['default'];
+        const cityName = citySelect.value;
+        const rate = Number(rates[cityName]) || fallbackRate;
         const total = days * hours * rate * 1.2;
         
         daysVal.textContent = days;
