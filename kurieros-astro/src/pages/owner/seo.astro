@@ -1,0 +1,329 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const fallbackOwnerHash = '2a4f4c5e061b8e807525ec8e325e1674c3aaccb740ba61cd92f3c91f7909391c';
+const ownerSeoHash = String(import.meta.env.PUBLIC_OWNER_SEO_HASH ?? '').trim() || fallbackOwnerHash;
+
+const ga4MeasurementId = String(import.meta.env.PUBLIC_GA4_MEASUREMENT_ID ?? '').trim();
+const yandexMetrikaId = String(import.meta.env.PUBLIC_YANDEX_METRIKA_ID ?? '').trim();
+const googleSearchConsoleProperty = String(import.meta.env.PUBLIC_GSC_PROPERTY_URL ?? '').trim();
+const yandexWebmasterHost = String(import.meta.env.PUBLIC_YANDEX_WEBMASTER_HOST ?? '').trim();
+
+const links = {
+  metrika: yandexMetrikaId
+    ? `https://metrika.yandex.ru/dashboard?id=${yandexMetrikaId}`
+    : 'https://metrika.yandex.ru/',
+  ga4: 'https://analytics.google.com/analytics/web/',
+  gsc: googleSearchConsoleProperty
+    ? `https://search.google.com/search-console?resource_id=${encodeURIComponent(googleSearchConsoleProperty)}`
+    : 'https://search.google.com/search-console',
+  webmaster: yandexWebmasterHost
+    ? `https://webmaster.yandex.ru/site/${encodeURIComponent(yandexWebmasterHost)}/`
+    : 'https://webmaster.yandex.ru/',
+};
+---
+
+<BaseLayout title="Owner SEO Dashboard — Курьерок" description="Закрытая страница для отслеживания SEO-метрик и переходов из поиска.">
+  <main class="owner-page">
+    <section class="owner-shell">
+      <div class="owner-hero">
+        <p class="owner-eyebrow">Owner Access Only</p>
+        <h1>SEO dashboard</h1>
+        <p>Закрытая панель для контроля SEO: органический трафик, страницы входа, источники, CTR и позиции.</p>
+      </div>
+
+      <div id="owner-login" class="owner-card">
+        <h2>Вход владельца</h2>
+        <p class="muted">Введите код доступа, чтобы открыть панель SEO-метрик.</p>
+        <form id="owner-login-form" class="owner-login-form">
+          <label class="field">
+            <span>Код доступа</span>
+            <input id="owner-password" type="password" autocomplete="current-password" placeholder="Введите код" required />
+          </label>
+          <button type="submit" class="btn-primary">Открыть панель</button>
+        </form>
+        <p id="owner-login-error" class="owner-error hidden">Неверный код доступа.</p>
+      </div>
+
+      <div id="owner-panel" class="owner-panel hidden">
+        <div class="owner-toolbar owner-card">
+          <div>
+            <h2>Панель SEO-метрик</h2>
+            <p class="muted">Скрипты Метрики и GA4 работают только в production, статистика доступна только в ваших кабинетах.</p>
+          </div>
+          <button id="owner-logout" type="button" class="btn-secondary">Выйти</button>
+        </div>
+
+        <div class="owner-grid metrics-grid">
+          <article class="owner-card metric-card">
+            <p class="metric-label">Google Analytics 4</p>
+            <strong>{ga4MeasurementId ? `Подключен (${ga4MeasurementId})` : 'Не подключен'}</strong>
+            <a href={links.ga4} class="owner-link" target="_blank" rel="noopener noreferrer">Открыть GA4</a>
+          </article>
+
+          <article class="owner-card metric-card">
+            <p class="metric-label">Яндекс.Метрика</p>
+            <strong>{yandexMetrikaId ? `Подключена (${yandexMetrikaId})` : 'Не подключена'}</strong>
+            <a href={links.metrika} class="owner-link" target="_blank" rel="noopener noreferrer">Открыть Метрику</a>
+          </article>
+
+          <article class="owner-card metric-card">
+            <p class="metric-label">Google Search Console</p>
+            <strong>{googleSearchConsoleProperty || 'Свойство не задано'}</strong>
+            <a href={links.gsc} class="owner-link" target="_blank" rel="noopener noreferrer">Открыть Search Console</a>
+          </article>
+
+          <article class="owner-card metric-card">
+            <p class="metric-label">Яндекс.Вебмастер</p>
+            <strong>{yandexWebmasterHost || 'Хост не задан'}</strong>
+            <a href={links.webmaster} class="owner-link" target="_blank" rel="noopener noreferrer">Открыть Вебмастер</a>
+          </article>
+        </div>
+
+        <div class="owner-grid report-grid">
+          <article class="owner-card">
+            <h3>Органический трафик</h3>
+            <p class="muted">Смотрите динамику переходов из Google/Yandex в GA4 и Метрике.</p>
+            <div class="link-row">
+              <a href={links.ga4} class="owner-link" target="_blank" rel="noopener noreferrer">GA4: Acquisition</a>
+              <a href={links.metrika} class="owner-link" target="_blank" rel="noopener noreferrer">Метрика: Источники</a>
+            </div>
+          </article>
+
+          <article class="owner-card">
+            <h3>Страницы входа</h3>
+            <p class="muted">Контролируйте, какие страницы получают органический вход и где проседает вовлечение.</p>
+            <div class="link-row">
+              <a href={links.ga4} class="owner-link" target="_blank" rel="noopener noreferrer">GA4: Landing pages</a>
+              <a href={links.metrika} class="owner-link" target="_blank" rel="noopener noreferrer">Метрика: Страницы входа</a>
+            </div>
+          </article>
+
+          <article class="owner-card">
+            <h3>Источники</h3>
+            <p class="muted">Сравнивайте долю Google, Яндекс и прочих каналов, чтобы видеть реальный вклад SEO.</p>
+            <div class="link-row">
+              <a href={links.ga4} class="owner-link" target="_blank" rel="noopener noreferrer">GA4: Traffic acquisition</a>
+              <a href={links.metrika} class="owner-link" target="_blank" rel="noopener noreferrer">Метрика: Каналы</a>
+            </div>
+          </article>
+
+          <article class="owner-card">
+            <h3>CTR и позиции</h3>
+            <p class="muted">Проверяйте запросы, CTR и средние позиции в Search Console и Яндекс.Вебмастере.</p>
+            <div class="link-row">
+              <a href={links.gsc} class="owner-link" target="_blank" rel="noopener noreferrer">Search Console: Queries</a>
+              <a href={links.webmaster} class="owner-link" target="_blank" rel="noopener noreferrer">Вебмастер: Поисковые запросы</a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
+
+<script is:inline define:vars={{ ownerSeoHash }}>
+  const AUTH_KEY = 'kurieros-owner-seo-auth';
+
+  const loginCard = document.getElementById('owner-login');
+  const panel = document.getElementById('owner-panel');
+  const loginForm = document.getElementById('owner-login-form');
+  const loginError = document.getElementById('owner-login-error');
+  const logoutButton = document.getElementById('owner-logout');
+
+  function setOwnerMode(isOwner) {
+    loginCard.classList.toggle('hidden', isOwner);
+    panel.classList.toggle('hidden', !isOwner);
+  }
+
+  async function sha256(value) {
+    const data = new TextEncoder().encode(value);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(hashBuffer))
+      .map((byte) => byte.toString(16).padStart(2, '0'))
+      .join('');
+  }
+
+  async function tryLogin(password) {
+    const hash = await sha256(password);
+    const isValid = hash === ownerSeoHash;
+    setOwnerMode(isValid);
+    loginError.classList.toggle('hidden', isValid);
+    if (isValid) {
+      localStorage.setItem(AUTH_KEY, '1');
+    }
+  }
+
+  loginForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const password = document.getElementById('owner-password')?.value || '';
+    await tryLogin(password);
+  });
+
+  logoutButton?.addEventListener('click', () => {
+    localStorage.removeItem(AUTH_KEY);
+    setOwnerMode(false);
+    loginError.classList.add('hidden');
+  });
+
+  setOwnerMode(localStorage.getItem(AUTH_KEY) === '1');
+</script>
+
+<style>
+  .owner-page {
+    padding: 1.25rem 1rem 2rem;
+  }
+  .owner-shell {
+    max-width: 1120px;
+    margin: 0 auto;
+    display: grid;
+    gap: 1rem;
+  }
+  .owner-hero {
+    padding: 1.25rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.82);
+    box-shadow: var(--shadow-sm);
+  }
+  .owner-eyebrow {
+    margin: 0 0 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--accent-color);
+  }
+  .owner-hero h1 {
+    margin: 0 0 0.5rem;
+    font-size: 1.9rem;
+  }
+  .owner-hero p {
+    margin: 0;
+    color: var(--text-muted);
+  }
+  .owner-card {
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.88);
+    box-shadow: var(--shadow-sm);
+    display: grid;
+    gap: 0.7rem;
+  }
+  .owner-panel {
+    display: grid;
+    gap: 1rem;
+  }
+  .owner-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+  .owner-toolbar h2 {
+    margin: 0 0 0.3rem;
+    font-size: 1.2rem;
+  }
+  .owner-grid {
+    display: grid;
+    gap: 0.8rem;
+  }
+  .metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .report-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .metric-card strong {
+    font-size: 1rem;
+    line-height: 1.3;
+  }
+  .metric-label {
+    margin: 0;
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 800;
+  }
+  .owner-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    text-decoration: none;
+    color: var(--primary-color);
+    font-weight: 700;
+  }
+  .link-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+  }
+  .owner-login-form {
+    display: grid;
+    gap: 0.65rem;
+  }
+  .field {
+    display: grid;
+    gap: 0.4rem;
+  }
+  .field span {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-muted);
+  }
+  .field input {
+    width: 100%;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font: inherit;
+    background: #fff;
+  }
+  .btn-primary,
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.5rem;
+    padding: 0.65rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: var(--text-main);
+    color: #fff;
+    border-color: var(--text-main);
+  }
+  .btn-secondary {
+    background: rgba(246, 250, 248, 0.8);
+    color: var(--text-main);
+  }
+  .owner-error {
+    margin: 0;
+    color: #dc2626;
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+  .muted {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+  .hidden {
+    display: none !important;
+  }
+  @media (max-width: 900px) {
+    .metrics-grid,
+    .report-grid {
+      grid-template-columns: 1fr;
+    }
+    .owner-toolbar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>

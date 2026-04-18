@@ -4,10 +4,11 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import JobGrid from '../components/JobGrid.astro';
 import articlesData from '../data/articles.json';
-import jobsData from '../data/jobs.json';
+import jobsData from '../data/jobs';
 import { CATEGORIES } from '../data/constants';
 import { getCitiesFromJobs } from '../utils/cities';
 import { slugifyCompany } from '../utils/companies';
+import { formatMoney, getVacancyPluralText, humanJoin, parseSalary } from '../utils/format';
 import { buildBreadcrumbSchema } from '../utils/schema';
 
 export async function getStaticPaths() {
@@ -20,22 +21,22 @@ export async function getStaticPaths() {
 				type: 'city',
 				data: city,
 				title: `Работа курьером ${city.prep} — Вакансии 2026`,
-				description: `Свежие вакансии для курьеров ${city.prep}. Сравнивайте условия, выбирайте лучшие компании и зарабатывайте до 250 000 ₽.`,
+				description: `Свежие вакансии для курьеров ${city.prep}. Сравнивайте условия, компании и выплаты до отклика.`,
 			},
 		});
 	});
 
 	CATEGORIES.forEach((cat) => {
 		paths.push({
-				params: { slug: `rabota-kurerom-${cat.slug}` },
-				props: {
-					type: 'category',
-					data: cat,
-					title: `Работа курьером: ${cat.name} — Вакансии 2026`,
-					description: `Все вакансии для курьеров категории "${cat.name}". Удобный фильтр, сравнение условий и быстрый переход в карточки вакансий.`,
-				},
-			});
+			params: { slug: `rabota-kurerom-${cat.slug}` },
+			props: {
+				type: 'category',
+				data: cat,
+				title: `Работа курьером: ${cat.name} — Вакансии 2026`,
+				description: `Вакансии курьеров в формате "${cat.name}": выплаты, компании, требования и быстрый переход к подходящим вариантам.`,
+			},
 		});
+	});
 
 	return paths;
 }
@@ -70,21 +71,6 @@ const transportLabelMap: Record<string, string> = {
 	auto: 'На авто',
 	bicycle: 'На велосипеде или самокате',
 	foot: 'Пеший формат',
-};
-const parseSalary = (salary: string) => Number(salary.replace(/[^\d]/g, '')) || 0;
-const formatMoney = (value: number) => new Intl.NumberFormat('ru-RU').format(value);
-const humanJoin = (items: string[]) => {
-	if (items.length === 0) return '';
-	if (items.length === 1) return items[0];
-	if (items.length === 2) return `${items[0]} и ${items[1]}`;
-	return `${items.slice(0, -1).join(', ')} и ${items.at(-1)}`;
-};
-const getVacancyPluralText = (count: number) => {
-	const mod10 = count % 10;
-	const mod100 = count % 100;
-	if (mod10 === 1 && mod100 !== 11) return 'вакансия';
-	if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'вакансии';
-	return 'вакансий';
 };
 const transportTypes = Array.from(
 	new Set(
@@ -173,14 +159,14 @@ const localStartPoints =
 	type === 'city'
 		? [
 			cityCompanyCards[0]
-				? `Больше всего карточек сейчас у ${cityCompanyCards[0].name}, поэтому с этого бренда удобно начать сравнение ${data.prep}.`
-				: `В подборке ${data.prep} уже есть несколько карточек вакансий, поэтому сначала стоит открыть бренды с наибольшим числом позиций.`,
+				? `Больше всего вариантов сейчас у ${cityCompanyCards[0].name}. Начните с этой компании, если хотите быстро понять рынок ${data.prep}.`
+				: `В подборке ${data.prep} уже есть несколько вакансий. Сначала посмотрите компании, где больше открытых позиций.`,
 			salaryLeader
-				? `Самый высокий потолок дохода в текущей подборке даёт ${salaryLeader.name} — до ${formatMoney(salaryLeader.maxSalary)} ₽.`
-				: 'Потолок дохода зависит от конкретной вакансии, поэтому стоит сравнить 2-3 карточки до отклика.',
+				? `Самая высокая заявленная сумма сейчас у ${salaryLeader.name}: до ${formatMoney(salaryLeader.maxSalary)} ₽. Проверьте, из чего складывается эта цифра.`
+				: 'Доход зависит от смен, района и транспорта, поэтому лучше сравнить несколько вакансий перед откликом.',
 			transportTypes.length
-				? `В городе уже видны сценарии ${humanJoin(transportTypes).toLowerCase()}, поэтому можно сразу сузить поиск по транспорту и графику.`
-				: 'Форматы зависят от конкретных работодателей, поэтому после города полезно открыть и тематические страницы по типу работы.',
+				? `В городе есть варианты: ${humanJoin(transportTypes).toLowerCase()}. Можно сразу сузить список по транспорту и графику.`
+				: 'Формат работы зависит от работодателя, поэтому после выбора города полезно открыть страницы по типу доставки.',
 		]
 		: [];
 const updatedDate = new Intl.DateTimeFormat('ru-RU', {
@@ -243,12 +229,12 @@ const quickLaunchLinks =
 		];
 const heroIntro =
 	type === 'city'
-		? `Сначала откройте ленту вакансий ${data.prep}, затем при необходимости сузьте выбор по компании, транспорту или выплатам.`
-		: `Сначала посмотрите подходящие вакансии в этой подборке, а дополнительные маршруты используйте только если нужно сузить выбор.`;
+		? `Ниже собраны вакансии ${data.prep}. Смотрите оплату, транспорт, оформление и переходите только в те варианты, где условия похожи на ваши.`
+		: `Ниже собраны вакансии по этому формату. Сначала проверьте оплату и требования, затем переходите к компаниям или городам.`;
 const launchSummary =
 	type === 'city'
-		? `Ниже уже отфильтрованы вакансии ${data.prep}: смотрите карточки, сравнивайте условия и открывайте только подходящие варианты.`
-		: 'Ниже уже отфильтрованы подходящие вакансии: сначала проверьте карточки, а затем переходите в дополнительные хабы.';
+		? `Мы уже оставили в списке только предложения ${data.prep}. Используйте фильтры, если важен конкретный транспорт или график.`
+		: 'Мы уже применили нужный фильтр. Остаётся сравнить несколько вакансий и открыть те, где условия подходят.';
 const factCards = [
 	{ label: 'Вакансии', value: `${filteredJobs.length}` },
 	{ label: 'Компании', value: `${companyNames.length}` },
@@ -259,20 +245,20 @@ const factCards = [
 const fitPoints =
 	type === 'city'
 		? [
-			`Тем, кто ищет работу курьером ${data.prep} и хочет быстро понять, какие компании активны прямо сейчас.`,
-			`Кандидатам, которые сравнивают форматы доставки по графику, выплатам и требованиям к оформлению.`,
-			`Тем, кто хочет сначала выбрать подходящую карточку вакансии, а уже потом переходить к отклику.`,
+			`Тем, кто ищет работу курьером ${data.prep} и хочет увидеть активные компании в одном списке.`,
+			`Кандидатам, которые выбирают между пешей доставкой, велосипедом, самокатом или автомобилем.`,
+			`Тем, кто хочет сначала спокойно сравнить условия, а уже потом переходить к анкете работодателя.`,
 		]
 		: [
-			`Тем, кто рассматривает формат "${data.name}" и хочет увидеть несколько вариантов на одной странице.`,
-			`Кандидатам, которым важно сравнить выплаты, требования и тип занятости до перехода к анкете.`,
-			`Тем, кто хочет быстро отсечь неподходящие вакансии и открыть только релевантные карточки.`,
+			`Тем, кто рассматривает формат "${data.name}" и хочет увидеть несколько вариантов без ручного поиска.`,
+			`Кандидатам, которым важно сравнить выплаты, требования и занятость до перехода к анкете.`,
+			`Тем, кто хочет отсечь неподходящие вакансии и открыть только близкие по условиям.`,
 		];
 
 const cautionPoints = [
-	'Финальные условия по выплатам, возрасту, гражданству и оформлению подтверждайте уже на странице вакансии или у работодателя.',
+	'Финальные условия по выплатам, возрасту, гражданству и оформлению подтверждайте на странице вакансии или у работодателя.',
 	'Если вам принципиальны конкретный район, официальный ТК РФ или точный график смен, открывайте карточки вакансий и сравнивайте детали поштучно.',
-	'Часть ссылок может вести на внешнюю анкету работодателя или партнера, поэтому условия перед откликом стоит перепроверять еще раз.',
+	'Часть ссылок ведёт на внешнюю анкету работодателя или партнёра. Перед отправкой заявки ещё раз проверьте условия.',
 ];
 
 const faqItems =
@@ -284,7 +270,7 @@ const faqItems =
 			},
 			{
 				question: `Кому подходит работа курьером ${data.prep}?`,
-				answer: `Подборка подходит тем, кто хочет быстро сравнить локальные вакансии по выплатам, требованиям и компаниям, а затем перейти только в подходящие карточки.`,
+				answer: `Страница подходит тем, кто хочет сравнить локальные вакансии по выплатам, требованиям и компаниям, а затем открыть только подходящие варианты.`,
 			},
 			{
 				question: 'Что проверить перед откликом?',
@@ -294,7 +280,7 @@ const faqItems =
 		: [
 			{
 				question: `Что входит в подборку "${data.name}"?`,
-				answer: `На странице собраны ${filteredJobs.length} вакансий от ${companyNames.length} компаний, которые совпадают с фильтром "${data.name}" по тегу или поисковому запросу.`,
+				answer: `На странице собраны ${filteredJobs.length} вакансий от ${companyNames.length} компаний, которые подходят под формат "${data.name}".`,
 			},
 			{
 				question: `Кому подходит формат "${data.name}"?`,
@@ -302,7 +288,7 @@ const faqItems =
 			},
 			{
 				question: 'Нужно ли сразу откликаться?',
-				answer: 'Нет. Сначала стоит открыть карточки вакансий, проверить ограничения и только потом переходить по ссылке отклика на сайт работодателя или партнера.',
+				answer: 'Нет. Сначала стоит открыть карточки вакансий, проверить ограничения и только потом переходить по ссылке отклика на сайт работодателя или партнёра.',
 			},
 		];
 
@@ -367,7 +353,7 @@ const pageSchemaGraph = [
 					<span>&gt;</span>
 					<span>{type === 'city' ? `Работа курьером ${data.prep}` : data.name}</span>
 				</nav>
-				<p class="section-eyebrow">{type === 'city' ? 'Вакансии по городу' : 'Подборка вакансий'}</p>
+				<p class="section-eyebrow">{type === 'city' ? 'Вакансии в городе' : 'Готовый фильтр'}</p>
 				<h1>{title}</h1>
 				<p>{heroIntro}</p>
 				<div class="listing-hero-actions">
@@ -387,8 +373,8 @@ const pageSchemaGraph = [
 
 		<section class="listing-vacancy-launch">
 			<div class="listing-vacancy-launch-copy">
-				<p class="section-eyebrow">Сначала вакансии</p>
-				<h2>Лента начинается сразу ниже</h2>
+				<p class="section-eyebrow">Список вакансий</p>
+				<h2>Начните с условий, а не с обещаний</h2>
 				<p>{launchSummary}</p>
 			</div>
 			<div class="listing-vacancy-launch-actions">
@@ -422,8 +408,8 @@ const pageSchemaGraph = [
 
 					{cityScenarioRoutes.length > 0 && (
 						<article class="listing-local-card">
-							<p class="section-eyebrow">Сценарии</p>
-							<h2>Какие маршруты уже доступны {data.prep}?</h2>
+							<p class="section-eyebrow">Форматы работы</p>
+							<h2>Какие варианты уже есть {data.prep}?</h2>
 							<div class="link-chip-row">
 								{cityScenarioRoutes.map((route) => (
 									<a href={route.href} class="link-chip">{route.name}</a>
@@ -435,7 +421,7 @@ const pageSchemaGraph = [
 
 				{cityCompanyCards.length > 0 && (
 					<section class="listing-company-section" aria-label="Компании в городе">
-						<p class="section-eyebrow">Локальные бренды</p>
+						<p class="section-eyebrow">Компании</p>
 						<h2>Какие компании уже активны {data.prep}?</h2>
 						<div class="listing-company-grid">
 							{cityCompanyCards.map((company) => (
@@ -462,8 +448,8 @@ const pageSchemaGraph = [
 				<p class="section-eyebrow">Кому подходит</p>
 				<h2>
 					{type === 'city'
-						? `Кому подходит подборка вакансий ${data.prep}?`
-						: `Кому подходит формат "${data.name}"?`}
+						? `Кому подойдут вакансии ${data.prep}?`
+						: `Кому подойдёт формат "${data.name}"?`}
 				</h2>
 				<ul class="listing-bullet-list">
 					{fitPoints.map((point) => (
@@ -502,13 +488,12 @@ const pageSchemaGraph = [
 
 		<section class="listing-trust-panel">
 			<div>
-				<p class="section-eyebrow">Прозрачность</p>
+				<p class="section-eyebrow">Важно помнить</p>
 				<h2>Как читать эту страницу</h2>
 			</div>
 			<p>
-				Подборка обновлена {updatedDate}. Это навигационная страница для быстрого сравнения вакансий: она помогает понять
-				контекст, но финальные условия, выплаты и ограничения всегда стоит уточнять уже в карточке вакансии и на стороне
-				работодателя.
+				Данные на странице обновлены {updatedDate}. Мы показываем удобную сводку, но условия могут отличаться по городу,
+				району и смене. Перед откликом откройте карточку вакансии и проверьте выплаты, оформление и ограничения.
 			</p>
 		</section>
 
@@ -517,8 +502,8 @@ const pageSchemaGraph = [
 				<p class="section-eyebrow">Компании</p>
 				<h2>
 					{type === 'city'
-						? `Какие бренды уже видны ${data.prep}?`
-						: `Какие бренды встречаются в подборке "${data.name}"?`}
+						? `Какие компании есть ${data.prep}?`
+						: `Какие компании есть в формате "${data.name}"?`}
 				</h2>
 				<div class="link-chip-row">
 					{relatedCompanies.length > 0 ? (
@@ -526,7 +511,7 @@ const pageSchemaGraph = [
 							<a href={company.href} class="link-chip">{company.name}</a>
 						))
 					) : (
-						<p class="listing-empty-note">Подходящие бренды для быстрого перехода появятся по мере расширения подборки.</p>
+						<p class="listing-empty-note">Компании появятся здесь, когда в подборке станет больше вакансий.</p>
 					)}
 				</div>
 			</article>
@@ -546,11 +531,11 @@ const pageSchemaGraph = [
 			</article>
 
 			<article class="listing-link-card">
-				<p class="section-eyebrow">Маршруты</p>
+				<p class="section-eyebrow">Дальше</p>
 				<h2>
 					{type === 'city'
 						? `Куда перейти после страницы ${data.prep}?`
-						: `Какие ещё хабы открыть после "${data.name}"?`}
+						: `Что ещё посмотреть после "${data.name}"?`}
 				</h2>
 				<div class="link-chip-row">
 					{routeLinks.map((link) => (
@@ -584,12 +569,10 @@ const pageSchemaGraph = [
 	.listing-hero-panel {
 		padding: 1.65rem;
 		text-align: left;
-		border: 1px solid #ebe5dc;
-		border-radius: 1.8rem;
-		background:
-			radial-gradient(circle at top right, rgba(240, 203, 120, 0.2), transparent 17rem),
-			linear-gradient(180deg, #fffefb 0%, #f8f1e7 100%);
-		box-shadow: 0 14px 36px rgba(60, 41, 20, 0.08);
+		border: 1px solid #d9e2d6;
+		border-radius: 8px;
+		background: linear-gradient(135deg, rgba(245, 249, 242, 0.96) 0%, rgba(255, 255, 255, 0.98) 58%, rgba(242, 250, 253, 0.96) 100%);
+		box-shadow: 0 14px 36px rgba(24, 45, 34, 0.07);
 	}
 
 	.listing-breadcrumb {
@@ -610,16 +593,16 @@ const pageSchemaGraph = [
 	.listing-hero h1 {
 		max-width: 14ch;
 		margin: 0 0 0.7rem;
-		font-size: clamp(2.2rem, 4vw, 4.25rem);
-		line-height: 0.94;
-		letter-spacing: -0.055em;
+		font-size: 3.8rem;
+		line-height: 0.97;
+		letter-spacing: 0;
 		text-wrap: balance;
 	}
 
 	.listing-hero-panel > p:not(.section-eyebrow) {
 		max-width: 720px;
 		margin: 0;
-		font-size: clamp(1rem, 1.2vw + 0.85rem, 1.15rem);
+		font-size: 1.08rem;
 		line-height: 1.6;
 	}
 
@@ -627,7 +610,7 @@ const pageSchemaGraph = [
 		margin: 0 0 0.55rem;
 		font-size: 0.74rem;
 		font-weight: 900;
-		letter-spacing: 0.16em;
+		letter-spacing: 0;
 		text-transform: uppercase;
 		color: var(--accent-color);
 	}
@@ -640,7 +623,7 @@ const pageSchemaGraph = [
 		margin-bottom: 1rem;
 		padding: 1.5rem;
 		border: 1px solid rgba(148, 163, 184, 0.16);
-		border-radius: 1.5rem;
+		border-radius: 8px;
 		background: rgba(255, 255, 255, 0.74);
 		box-shadow: var(--shadow-sm);
 	}
@@ -671,28 +654,28 @@ const pageSchemaGraph = [
 		justify-content: center;
 		min-height: 3rem;
 		padding: 0.8rem 1.15rem;
-		border-radius: 999px;
+		border-radius: 8px;
 		text-decoration: none;
 		font-weight: 800;
 		transition: var(--transition);
 	}
 
 	.listing-primary-link {
-		background: #1f2937;
-		border: 1px solid #1f2937;
+		background: #163d2b;
+		border: 1px solid #163d2b;
 		color: #fff;
 	}
 
 	.listing-secondary-link {
 		background: rgba(255, 255, 255, 0.86);
-		border: 1px solid #d9d0c3;
-		color: #2b2622;
+		border: 1px solid #a8c8b5;
+		color: #163d2b;
 	}
 
 	.listing-primary-link:hover,
 	.listing-secondary-link:hover {
 		transform: translateY(-1px);
-		box-shadow: 0 10px 24px rgba(60, 41, 20, 0.08);
+		box-shadow: 0 10px 24px rgba(22, 61, 43, 0.12);
 	}
 
 	.listing-vacancy-launch {
@@ -703,7 +686,7 @@ const pageSchemaGraph = [
 		margin-bottom: 1rem;
 		padding: 1.35rem;
 		border: 1px solid rgba(148, 163, 184, 0.16);
-		border-radius: 1.4rem;
+		border-radius: 8px;
 		background: rgba(255, 255, 255, 0.82);
 		box-shadow: var(--shadow-sm);
 	}
@@ -739,8 +722,8 @@ const pageSchemaGraph = [
 		gap: 0.25rem;
 		min-height: auto;
 		padding: 0.8rem 0.9rem;
-		border: 1px solid #e8ddcf;
-		border-radius: 1.2rem;
+		border: 1px solid #d9e2d6;
+		border-radius: 8px;
 		background: rgba(255, 255, 255, 0.82);
 		box-shadow: var(--shadow-sm);
 	}
@@ -748,7 +731,7 @@ const pageSchemaGraph = [
 	.listing-fact-card span {
 		font-size: 0.72rem;
 		font-weight: 900;
-		letter-spacing: 0.11em;
+		letter-spacing: 0;
 		text-transform: uppercase;
 		color: var(--text-muted);
 	}
@@ -779,15 +762,15 @@ const pageSchemaGraph = [
 	.listing-local-card,
 	.listing-faq-section {
 		padding: 1.5rem;
-		border-radius: 1.5rem;
+		border-radius: 8px;
 		background: var(--bg-card);
 		box-shadow: var(--shadow-sm);
 	}
 
 	.listing-geo-card {
-		border: 1px solid rgba(99, 102, 241, 0.12);
+		border: 1px solid rgba(22, 115, 76, 0.16);
 		background:
-			linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.96)),
+			linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(247, 251, 248, 0.96)),
 			var(--bg-card);
 	}
 
@@ -806,7 +789,7 @@ const pageSchemaGraph = [
 	.listing-faq-section h2 {
 		margin-top: 0;
 		margin-bottom: 1rem;
-		font-size: clamp(1.3rem, 2vw, 1.75rem);
+		font-size: 1.55rem;
 	}
 
 	.listing-bullet-list {
@@ -837,7 +820,7 @@ const pageSchemaGraph = [
 
 	.listing-company-section h2 {
 		margin: 0 0 1rem;
-		font-size: clamp(1.3rem, 2vw, 1.75rem);
+		font-size: 1.55rem;
 	}
 
 	.listing-company-grid {
@@ -851,7 +834,7 @@ const pageSchemaGraph = [
 		gap: 0.45rem;
 		padding: 1.2rem;
 		border: 1px solid rgba(148, 163, 184, 0.16);
-		border-radius: 1.2rem;
+		border-radius: 8px;
 		background: rgba(255, 255, 255, 0.82);
 		box-shadow: var(--shadow-sm);
 		color: var(--text-main);
@@ -880,7 +863,7 @@ const pageSchemaGraph = [
 	.listing-faq-item {
 		padding: 1.1rem;
 		border: 1px solid rgba(148, 163, 184, 0.16);
-		border-radius: 1rem;
+		border-radius: 8px;
 		background: rgba(255, 255, 255, 0.72);
 	}
 
@@ -910,7 +893,7 @@ const pageSchemaGraph = [
 
 	.listing-link-card {
 		padding: 1.5rem;
-		border-radius: 1.5rem;
+		border-radius: 8px;
 		border: 1px solid rgba(148, 163, 184, 0.16);
 		background: rgba(255, 255, 255, 0.82);
 		box-shadow: var(--shadow-sm);
@@ -928,9 +911,9 @@ const pageSchemaGraph = [
 		align-items: center;
 		min-height: 2.4rem;
 		padding: 0.65rem 0.9rem;
-		border-radius: 999px;
-		border: 1px solid rgba(99, 102, 241, 0.16);
-		background: rgba(99, 102, 241, 0.08);
+		border-radius: 8px;
+		border: 1px solid rgba(22, 115, 76, 0.18);
+		background: rgba(22, 115, 76, 0.08);
 		color: var(--text-main);
 		text-decoration: none;
 		font-weight: 800;
@@ -987,7 +970,7 @@ const pageSchemaGraph = [
 
 		.listing-hero-panel {
 			padding: 1rem;
-			border-radius: 1.35rem;
+			border-radius: 8px;
 		}
 
 		.listing-fact-grid {
@@ -995,7 +978,7 @@ const pageSchemaGraph = [
 		}
 
 		.listing-hero h1 {
-			font-size: clamp(2rem, 11vw, 3.5rem);
+			font-size: 2.4rem;
 		}
 
 		.listing-hero,

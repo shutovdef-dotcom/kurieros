@@ -1,6 +1,6 @@
 ---
 import JobCard from './JobCard.astro';
-import jobsData from '../data/jobs.json';
+import jobsData from '../data/jobs';
 
 interface Props {
 	initialCity?: string;
@@ -8,33 +8,26 @@ interface Props {
 	initialSearch?: string;
 }
 
-const { initialCity = "", initialTag = "all", initialSearch = "" } = Astro.props;
+const { initialCity = '', initialTag = 'all', initialSearch = '' } = Astro.props;
 
-// Server-side filter for initial render (SEO and performance)
 const filteredJobs = jobsData.filter((job) => {
-    const searchTerm = initialSearch.toLowerCase();
-    const matchesCity = !initialCity || job.location.toLowerCase().includes(initialCity.toLowerCase()) || job.location === "Вся Россия";
-    const matchesTag = initialTag === "all" || job.tags.includes(initialTag);
-    const matchesSearch =
-        !searchTerm ||
-        job.title.toLowerCase().includes(searchTerm) ||
-        job.company.toLowerCase().includes(searchTerm) ||
-        job.location.toLowerCase().includes(searchTerm) ||
-        job.salary.toLowerCase().includes(searchTerm);
+	const searchTerm = initialSearch.toLowerCase();
+	const cityTerm = initialCity.toLowerCase();
+	const matchesCity = !initialCity || job.location.toLowerCase().includes(cityTerm) || job.location === 'Вся Россия';
+	const matchesTag = initialTag === 'all' || job.tags.includes(initialTag);
+	const matchesSearch =
+		!searchTerm ||
+		job.title.toLowerCase().includes(searchTerm) ||
+		job.company.toLowerCase().includes(searchTerm) ||
+		job.location.toLowerCase().includes(searchTerm) ||
+		job.salary.toLowerCase().includes(searchTerm);
 
-    return matchesCity && matchesTag && matchesSearch;
+	return matchesCity && matchesTag && matchesSearch;
 });
+const hasVacancies = jobsData.length > 0;
 ---
 
 <div class="job-grid-container">
-	<section class="filters" id="filters-container">
-		<button class={`filter-chip ${initialTag === 'all' ? 'active' : ''}`} data-filter="all" data-t="filters.all" type="button">Все вакансии</button>
-		<button class={`filter-chip ${initialTag === 'auto' ? 'active' : ''}`} data-filter="auto" data-t="filters.auto" type="button">На авто</button>
-		<button class={`filter-chip ${initialTag === 'bicycle' ? 'active' : ''}`} data-filter="bicycle" data-t="filters.bicycle" type="button">Велокурьер</button>
-		<button class={`filter-chip ${initialTag === 'foot' ? 'active' : ''}`} data-filter="foot" data-t="filters.walking" type="button">Пеший</button>
-		<button class={`filter-chip ${initialTag === '16plus' ? 'active' : ''}`} data-filter="16plus" data-t="filters.age16" type="button">С 16 лет</button>
-		<button class={`filter-chip ${initialTag === 'flexible' ? 'active' : ''}`} data-filter="flexible" data-t="filters.flexible" type="button">Свободно</button>
-	</section>
 	<div class="compare-inline-alert hidden" id="compare-limit-message" aria-live="polite"></div>
 
 	<section id="vacancies">
@@ -45,9 +38,15 @@ const filteredJobs = jobsData.filter((job) => {
 				))
 			) : (
 				<div class="no-results">
-					<h3 data-t="jobgrid.empty_title">Ничего не найдено</h3>
-					<p data-t="jobgrid.empty_desc">Попробуйте сбросить фильтры или изменить поиск.</p>
-					<a class="btn-secondary" href="/" data-t="jobgrid.reset">Сбросить всё</a>
+					<h3 data-t={hasVacancies ? 'jobgrid.empty_title' : undefined}>
+						{hasVacancies ? 'Ничего не найдено' : 'Вакансии пока не опубликованы'}
+					</h3>
+					<p data-t={hasVacancies ? 'jobgrid.empty_desc' : undefined}>
+						{hasVacancies
+							? 'Попробуйте сбросить фильтры или изменить поиск.'
+							: 'Текущий список очищен. Новые карточки появятся после публикации вакансий.'}
+					</p>
+					{hasVacancies && <a class="btn-secondary" href="/" data-t="jobgrid.reset">Сбросить всё</a>}
 				</div>
 			)}
 		</div>
@@ -55,37 +54,37 @@ const filteredJobs = jobsData.filter((job) => {
 </div>
 
 <style>
-    .compare-inline-alert {
-        margin-bottom: 1rem;
-        padding: 0.85rem 1rem;
-        border-radius: 1rem;
-        border: 1px solid rgba(244, 63, 94, 0.22);
-        background: rgba(255, 241, 242, 0.9);
-        color: #9f1239;
-        font-size: 0.92rem;
-        font-weight: 600;
-        line-height: 1.5;
-    }
+	.compare-inline-alert {
+		margin-bottom: 1rem;
+		padding: 0.85rem 1rem;
+		border-radius: 8px;
+		border: 1px solid rgba(244, 63, 94, 0.22);
+		background: rgba(255, 241, 242, 0.9);
+		color: #9f1239;
+		font-size: 0.92rem;
+		font-weight: 600;
+		line-height: 1.5;
+	}
 
-    .compare-inline-alert.hidden {
-        display: none;
-    }
+	.compare-inline-alert.hidden {
+		display: none;
+	}
 
-    .no-results {
-        grid-column: 1 / -1;
-        text-align: center;
-        padding: 4rem;
-        background: var(--bg-card);
-        border-radius: 2rem;
-        border: 1px dashed var(--border-color);
-    }
+	.no-results {
+		grid-column: 1 / -1;
+		text-align: center;
+		padding: 4rem;
+		background: var(--bg-card);
+		border-radius: 8px;
+		border: 1px dashed var(--border-color);
+	}
 </style>
 
 <script is:inline define:vars={{ initialCity, initialTag, initialSearch }}>
 	let compareList = JSON.parse(localStorage.getItem('compareList') || '[]');
 	let selectedCity = initialCity || '';
 	const normalizedInitialSearch = initialSearch.toLowerCase();
-    let compareNoticeTimeout = null;
+	let compareNoticeTimeout = null;
 
 	function getTranslation(key, defaultText) {
 		const lang = window.kurieros_i18n?.currentLang || 'ru';
@@ -94,21 +93,21 @@ const filteredJobs = jobsData.filter((job) => {
 		return key.split('.').reduce((prev, curr) => prev && prev[curr], dict) || defaultText;
 	}
 
-    function showCompareNotice(message) {
-        const compareNotice = document.getElementById('compare-limit-message');
-        if (!compareNotice) return;
+	function showCompareNotice(message) {
+		const compareNotice = document.getElementById('compare-limit-message');
+		if (!compareNotice) return;
 
-        compareNotice.textContent = message;
-        compareNotice.classList.remove('hidden');
+		compareNotice.textContent = message;
+		compareNotice.classList.remove('hidden');
 
-        if (compareNoticeTimeout) {
-            window.clearTimeout(compareNoticeTimeout);
-        }
+		if (compareNoticeTimeout) {
+			window.clearTimeout(compareNoticeTimeout);
+		}
 
-        compareNoticeTimeout = window.setTimeout(() => {
-            compareNotice.classList.add('hidden');
-        }, 3200);
-    }
+		compareNoticeTimeout = window.setTimeout(() => {
+			compareNotice.classList.add('hidden');
+		}, 3200);
+	}
 
 	function getCompareButtonLabel(isActive) {
 		return isActive
@@ -139,26 +138,24 @@ const filteredJobs = jobsData.filter((job) => {
 				showCompareNotice(getTranslation('compare.limit_reached', 'Можно сравнивать не более 4 вакансий одновременно.'));
 				return;
 			}
-			compareList.push(id);
+			compareList = [...compareList, id];
 		} else {
-			compareList.splice(index, 1);
+			compareList = compareList.filter((item) => item !== id);
 		}
-		
+
 		localStorage.setItem('compareList', JSON.stringify(compareList));
 		window.dispatchEvent(new CustomEvent('compareUpdate'));
-		
+
 		setCompareButtonState(
 			document.querySelector(`.btn-compare[data-id="${id}"]`),
 			compareList.includes(id)
 		);
 	}
 
-	// Initialize button states
 	document.addEventListener('DOMContentLoaded', () => {
-		const filterChips = document.querySelectorAll('.filter-chip');
 		const jobCards = document.querySelectorAll('.job-card');
 
-		document.querySelectorAll('.btn-compare').forEach(btn => {
+		document.querySelectorAll('.btn-compare').forEach((btn) => {
 			const id = Number.parseInt(btn.dataset.id || '', 10);
 			setCompareButtonState(btn, compareList.includes(id));
 			btn.addEventListener('click', (e) => {
@@ -173,18 +170,14 @@ const filteredJobs = jobsData.filter((job) => {
 		});
 
 		function filterJobs() {
-			const activeChip = document.querySelector('.filter-chip.active');
-			const filter = activeChip ? activeChip.dataset.filter : 'all';
 			const term = normalizedInitialSearch;
 
-			jobCards.forEach(card => {
-				const tags = (card.dataset.tags || '').split(',');
+			jobCards.forEach((card) => {
 				const location = (card.dataset.location || '').toLowerCase();
 				const matchesCity = !selectedCity || location.includes(selectedCity.toLowerCase()) || location === 'вся россия';
-				const matchesFilter = filter === 'all' || tags.includes(filter);
 				const matchesSearchTerm = matchesSearch(card, term);
 
-				if (matchesFilter && matchesSearchTerm && matchesCity) {
+				if (matchesSearchTerm && matchesCity) {
 					card.style.display = 'flex';
 				} else {
 					card.style.display = 'none';
@@ -192,15 +185,6 @@ const filteredJobs = jobsData.filter((job) => {
 			});
 		}
 
-		filterChips.forEach(chip => {
-			chip.addEventListener('click', () => {
-				filterChips.forEach(c => c.classList.remove('active'));
-				chip.classList.add('active');
-				filterJobs();
-			});
-		});
-
-		// Initial filter
 		filterJobs();
 	});
 </script>

@@ -1,0 +1,50 @@
+{
+  "ru": {
+    "shortDescription": "Доставка заказов через Я.Про рядом с домом, свободный график от 2 часов и прозрачный доход.",
+    "description": "Яндекс Еда набирает курьеров. Город подключения: {city}. Вы доставляете заказы по понятным маршрутам через приложение «Я.Про»: можно выбирать район, выходить на слоты от 2 часов, брать паузы и видеть доход по заказам заранее."
+  },
+  "uz": {
+    "shortDescription": "Yaqin hududda Ya.Pro orqali buyurtmalarni yetkazish, 2 soatdan erkin grafik va shaffof daromad.",
+    "description": "Yandex Eats kuryerlarni ishga taklif qiladi. Ulanish shahri: {city}. Buyurtmalarni Ya.Pro ilovasi orqali tushunarli marshrutlar bo‘yicha yetkazasiz: hududni tanlash, 2 soatdan smenaga chiqish, tanaffus qilish va buyurtma daromadini oldindan ko‘rish mumkin."
+  },
+  "tg": {
+    "shortDescription": "Расонидани фармоишҳо тавассути Ya.Pro наздики хона, ҷадвали озод аз 2 соат ва даромади шаффоф.",
+    "description": "Yandex Eats курерҳоро қабул мекунад. Шаҳри пайвастшавӣ: {city}. Шумо фармоишҳоро тавассути барномаи Ya.Pro аз рӯи масирҳои фаҳмо мерасонед: метавонед ноҳияро интихоб кунед, аз 2 соат ба слот бароед, танаффус гиред ва даромади фармоишҳоро пешакӣ бинед."
+  },
+  "ky": {
+    "shortDescription": "Ya.Pro аркылуу үйгө жакын буйрутмаларды жеткирүү, 2 сааттан эркин график жана ачык киреше.",
+    "description": "Yandex Eats курьерлерди кабыл алат. Туташуу шаары: {city}. Буйрутмаларды Ya.Pro тиркемеси аркылуу түшүнүктүү маршруттар менен жеткиресиз: районду тандап, 2 сааттан слотко чыгып, тыныгуу алып, буйрутма кирешесин алдын ала көрө аласыз."
+  },
+  "hy": {
+    "shortDescription": "Պատվերների առաքում Ya.Pro-ով տան մոտ, ազատ գրաֆիկ 2 ժամից և թափանցիկ եկամուտ։",
+    "description": "Yandex Eats-ը հրավիրում է սուրհանդակների։ Միացման քաղաք՝ {city}։ Պատվերները հասցնում եք Ya.Pro հավելվածով՝ պարզ երթուղիներով. կարող եք ընտրել շրջանը, դուրս գալ հերթափոխի 2 ժամից, դադար վերցնել և նախապես տեսնել պատվերի եկամուտը։"
+  },
+  "kk": {
+    "shortDescription": "Ya.Pro арқылы үйге жақын тапсырыстарды жеткізу, 2 сағаттан еркін график және ашық табыс.",
+    "description": "Yandex Eats курьерлерді қабылдайды. Қосылу қаласы: {city}. Тапсырыстарды Ya.Pro қолданбасы арқылы түсінікті маршруттармен жеткізесіз: ауданды таңдауға, 2 сағаттан бастап слотқа шығуға, үзіліс алуға және тапсырыс табысын алдын ала көруге болады."
+  },
+  "az": {
+    "shortDescription": "Ya.Pro ilə evə yaxın sifarişlərin çatdırılması, 2 saatdan sərbəst qrafik və şəffaf gəlir.",
+    "description": "Yandex Eats kuryerləri işə dəvət edir. Qoşulma şəhəri: {city}. Sifarişləri Ya.Pro tətbiqi ilə aydın marşrutlar üzrə çatdırırsınız: rayon seçmək, 2 saatdan növbəyə çıxmaq, fasilə götürmək və sifariş gəlirini əvvəlcədən görmək mümkündür."
+  },
+  "uk": {
+    "shortDescription": "Доставка замовлень через Ya.Pro поруч із домом, вільний графік від 2 годин і прозорий дохід.",
+    "description": "Yandex Eats набирає кур’єрів. Місто підключення: {city}. Ви доставляєте замовлення зрозумілими маршрутами через застосунок Ya.Pro: можна обирати район, виходити на слоти від 2 годин, брати паузи й бачити дохід за замовленнями заздалегідь."
+  },
+  "be": {
+    "shortDescription": "Дастаўка заказаў праз Ya.Pro побач з домам, вольны графік ад 2 гадзін і празрысты даход.",
+    "description": "Yandex Eats набірае кур’ераў. Горад падключэння: {city}. Вы дастаўляеце заказы па зразумелых маршрутах праз дадатак Ya.Pro: можна выбіраць раён, выходзіць на слоты ад 2 гадзін, браць паўзы і загадзя бачыць даход па заказах."
+  },
+  "hi": {
+    "shortDescription": "घर के पास Ya.Pro के जरिए ऑर्डर डिलीवरी, 2 घंटे से लचीला शेड्यूल और पारदर्शी आय।",
+    "description": "Yandex Eats कूरियर भर्ती कर रहा है। जुड़ने का शहर: {city}। आप Ya.Pro ऐप के जरिए साफ मार्गों पर ऑर्डर डिलीवर करते हैं: इलाका चुन सकते हैं, 2 घंटे से स्लॉट ले सकते हैं, ब्रेक ले सकते हैं और ऑर्डर की आय पहले से देख सकते हैं।"
+  },
+  "vi": {
+    "shortDescription": "Giao đơn qua Ya.Pro gần nhà, lịch linh hoạt từ 2 giờ và thu nhập minh bạch.",
+    "description": "Yandex Eats đang tuyển shipper. Thành phố kết nối: {city}. Bạn giao đơn theo tuyến rõ ràng qua ứng dụng Ya.Pro: có thể chọn khu vực, nhận ca từ 2 giờ, tạm nghỉ và xem trước thu nhập của đơn."
+  },
+  "zh": {
+    "shortDescription": "通过 Ya.Pro 在家附近配送订单，2小时起弹性时间，收入透明。",
+    "description": "Yandex Eats 正在招聘配送员。接入城市：{city}。您通过 Ya.Pro 应用按清晰路线配送订单：可选择区域，2小时起接单，随时暂停，并提前看到订单收入。"
+  }
+}

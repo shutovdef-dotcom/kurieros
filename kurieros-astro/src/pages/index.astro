@@ -7,7 +7,7 @@ import IncomeCalculator from '../components/IncomeCalculator.astro';
 import LanguageSwitcher from '../components/LanguageSwitcher.astro';
 import ReviewsBlock from '../components/ReviewsBlock.astro';
 import { CATEGORIES } from '../data/constants';
-import jobsData from '../data/jobs.json';
+import jobsData from '../data/jobs';
 import { getCompaniesFromJobs } from '../utils/companies';
 import { getCitiesFromJobs, getCityNames } from '../utils/cities';
 
@@ -40,23 +40,23 @@ const featuredFormats = ['na-avto', 'peshkom', 'dlya-studentov', 'ezhednevnaya-o
 	}));
 const routeCards = [
 	{
-		title: 'Нужна подработка',
-		text: 'Сразу перейти в гибкие графики, вечерние слоты и выходные смены.',
+		title: 'Подработка после дел',
+		text: 'Вечерние смены, выходные и варианты без полного графика.',
 		href: '/rabota-kurerom-podrabotka/',
 	},
 	{
-		title: 'Ищу работу с 16 лет',
-		text: 'Открыть подборку для старта без авто и с мягкими входными условиями.',
+		title: 'Можно с 16 лет',
+		text: 'Пешие и вело-варианты, где не нужен автомобиль.',
 		href: '/rabota-kurerom-16-let/',
 	},
 	{
 		title: 'Есть автомобиль',
-		text: 'Смотреть автоформаты с более высоким потенциалом дохода.',
+		text: 'Посмотреть, где машина правда помогает заработать больше.',
 		href: '/rabota-kurerom-na-avto/',
 	},
 	{
-		title: 'Хочу выбрать бренд',
-		text: 'Сначала сравнить компании, а потом уже вакансии внутри бренда.',
+		title: 'Хочу выбрать компанию',
+		text: 'Сравнить сервисы по выплатам, требованиям и городам.',
 		href: '/companies/',
 	},
 ];
@@ -71,7 +71,7 @@ const heroFacts = [
 	{ label: 'Вакансии', value: `${totalVacancies}` },
 	{ label: 'Компании', value: `${companies.length}` },
 	{ label: 'Города', value: `${cities.length}` },
-	{ label: 'Сценарии', value: 'Авто, пешком, подработка' },
+	{ label: 'Форматы', value: 'Авто, пешком, подработка' },
 ];
 const faqItems = [
 	{
@@ -94,38 +94,38 @@ const hubLinks = [
 	{
 		href: '/compare/',
 		title: 'Сравнение вакансий',
-		text: 'Быстро сравнить выплаты, транспорт и оформление перед откликом.',
+		text: 'Поставить рядом зарплату, выплаты, транспорт и оформление.',
 	},
 	{
 		href: '/companies/',
 		title: 'Компании',
-		text: 'Сначала выбрать бренд, потом перейти в конкретные вакансии.',
+		text: 'Посмотреть, чем отличаются сервисы доставки и банки.',
 	},
 	{
 		href: '/cities/',
 		title: 'Города',
-		text: 'Открыть городские хабы и локальные сценарии поиска работы.',
+		text: 'Найти вакансии в своём городе без лишнего списка.',
 	},
 	{
 		href: '/blog/',
 		title: 'Блог',
-		text: 'Разобраться в доходе, форматах работы и скрытых условиях.',
+		text: 'Разобраться в доходе, расходах и частых ошибках новичков.',
 	},
 ];
 const discoveryCards = [
 	...routeCards.map((card) => ({
 		...card,
-		kicker: 'Быстрый сценарий',
+		kicker: 'Частый запрос',
 		variant: 'route',
 	})),
 	...hubLinks.map((card) => ({
 		...card,
-		kicker: 'Навигация',
+		kicker: 'Раздел сайта',
 		variant: 'hub',
 	})),
 ];
 const homepageTitle = 'Работа курьером: вакансии, компании и сравнение | Курьерок';
-const homepageDescription = `Работа курьером в России: ${totalVacancies} вакансий, ${companies.length} компаний, города, сравнение и статьи перед откликом.`.slice(0, 170);
+const homepageDescription = `Работа курьером в России: ${totalVacancies} вакансий, ${companies.length} компаний, города, сравнение условий и понятные разборы перед откликом.`.slice(0, 170);
 const pageSchemaGraph = [
 	{
 		'@type': 'CollectionPage',
@@ -147,7 +147,7 @@ const pageSchemaGraph = [
 		'@type': 'Organization',
 		name: 'Курьерок',
 		url: Astro.site,
-		description: 'Каталог вакансий курьеров, сравнений, компаний и городских хабов для быстрого выбора подходящей работы.',
+		description: 'Каталог вакансий курьеров, компаний, городов и практических разборов для спокойного выбора работы.',
 	},
 	{
 		'@type': 'FAQPage',
@@ -171,12 +171,11 @@ const pageSchemaGraph = [
 			<section class="hero hero-home">
 				<div class="home-hero-panel">
 					<div class="home-hero-copy">
-						<p class="home-kicker">Вакансии курьеров 2026</p>
-						<h1>Работа курьером: вакансии, компании и сравнение условий</h1>
+						<p class="home-kicker">Курьерская работа без лишнего шума</p>
+						<h1>Найдите работу курьером с понятными условиями</h1>
 						<p class="home-hero-summary">
-							На Курьерок можно быстро выбрать работу курьером по городу, формату доставки, бренду и частоте выплат.
-							Сначала откройте сам список вакансий, а уже потом переходите в сравнение, компании и дополнительные хабы,
-							если нужно сузить выбор.
+							Смотрите вакансии по городу, транспорту, выплатам и компании. Мы выносим важные условия на поверхность,
+							чтобы перед откликом было понятно, куда вы идёте и что стоит уточнить.
 						</p>
 						<div class="home-hero-actions">
 							<a href="#vacancies" class="home-hero-link">Смотреть вакансии</a>
@@ -192,6 +191,13 @@ const pageSchemaGraph = [
 							))}
 						</div>
 					</div>
+					<figure class="home-hero-visual">
+						<img src="/blog/skolko-zarabatyvaet-kurer-yandex-eda-2026.jpg" alt="Курьер уточняет условия заказа у стойки выдачи" loading="eager" decoding="async" />
+						<figcaption>
+							<strong>Сначала условия, потом отклик.</strong>
+							<span>Зарплата, график, транспорт и оформление рядом, без прыжков по десяткам вкладок.</span>
+						</figcaption>
+					</figure>
 				</div>
 
 				<div class="hero-toolbar hero-toolbar-only">
@@ -216,8 +222,8 @@ const pageSchemaGraph = [
 
 			<section class="home-section home-vacancy-launch">
 				<div class="section-heading">
-					<h2>Сначала посмотрите вакансии</h2>
-					<p>Лента начинается сразу ниже. Эти быстрые входы нужны только если вы уже точно знаете формат поиска и хотите сократить путь.</p>
+					<h2>Начните с живого списка</h2>
+					<p>Ниже все вакансии. Если уже знаете, что ищете, выберите быстрый фильтр или готовую подборку.</p>
 				</div>
 				<div class="home-vacancy-launch-bar">
 					<a href="#vacancies" class="home-vacancy-launch-link">Перейти к ленте вакансий</a>
@@ -233,8 +239,8 @@ const pageSchemaGraph = [
 
 			<section class="home-section home-discovery-section">
 				<div class="section-heading">
-					<h2>Если хотите сузить выбор дальше</h2>
-					<p>После просмотра ленты можно перейти в быстрые сценарии, компании, города и популярные подборки.</p>
+					<h2>Когда список слишком широкий</h2>
+					<p>Отфильтруйте поиск по ситуации: подработка, возраст, свой автомобиль, конкретная компания или город.</p>
 				</div>
 				<div class="home-navigation-grid">
 					{discoveryCards.map((card) => (
@@ -265,7 +271,7 @@ const pageSchemaGraph = [
 					</article>
 
 					<article class="home-surface-card">
-						<h3>Сильные бренды</h3>
+						<h3>Компании в подборке</h3>
 						<div class="home-chip-row">
 							{featuredCompanies.map((company) => (
 								<a href={company.href} class="home-chip-link">{company.name}</a>
@@ -282,7 +288,7 @@ const pageSchemaGraph = [
 			<section class="faq-section home-section">
 				<div class="section-heading">
 					<h2 data-t="faq.title">Частые вопросы</h2>
-					<p data-t="faq.subtitle">Главное перед тем, как откликаться на вакансию.</p>
+					<p data-t="faq.subtitle">Коротко о том, что обычно важно перед первым откликом.</p>
 				</div>
 				<div class="faq-item">
 					<div class="faq-question">
@@ -441,43 +447,42 @@ const pageSchemaGraph = [
 	}
 	.home-hero-panel {
 		display: grid;
-		grid-template-columns: 1fr;
-		gap: 1.35rem;
-		padding: 1.75rem;
-		border: 1px solid #ebe5dc;
-		border-radius: 1.8rem;
-		background:
-			radial-gradient(circle at top right, rgba(240, 203, 120, 0.22), transparent 18rem),
-			linear-gradient(180deg, #fffefb 0%, #f8f1e7 100%);
-		box-shadow: 0 14px 36px rgba(60, 41, 20, 0.08);
+		grid-template-columns: minmax(0, 1.05fr) minmax(340px, 0.95fr);
+		gap: 1rem;
+		padding: 1rem;
+		border: 1px solid #d9e2d6;
+		border-radius: 8px;
+		background: linear-gradient(135deg, rgba(245, 249, 242, 0.96) 0%, rgba(255, 255, 255, 0.98) 54%, rgba(242, 250, 253, 0.96) 100%);
+		box-shadow: 0 18px 44px rgba(24, 45, 34, 0.08);
 	}
 	.home-hero-copy {
 		display: grid;
 		gap: 0.9rem;
-		align-content: start;
+		align-content: center;
 		max-width: 74rem;
+		padding: 1rem;
 	}
 	.home-kicker {
 		margin: 0;
 		font-size: 0.78rem;
 		font-weight: 900;
-		letter-spacing: 0.14em;
+		letter-spacing: 0;
 		text-transform: uppercase;
-		color: #8b5e34;
+		color: #16734c;
 	}
 	.home-hero-copy h1 {
 		margin: 0;
-		font-size: clamp(2.2rem, 3.8vw, 4.2rem);
-		line-height: 0.94;
-		letter-spacing: -0.06em;
-		max-width: 15ch;
+		font-size: 4rem;
+		line-height: 0.96;
+		letter-spacing: 0;
+		max-width: 16ch;
 		text-wrap: balance;
 	}
 	.home-hero-summary {
 		max-width: 62ch;
 		margin: 0;
-		color: #6f6257;
-		font-size: clamp(1rem, 1vw + 0.9rem, 1.18rem);
+		color: #51635c;
+		font-size: 1.12rem;
 		line-height: 1.72;
 	}
 	.home-hero-actions {
@@ -491,22 +496,61 @@ const pageSchemaGraph = [
 		justify-content: center;
 		min-height: 3rem;
 		padding: 0.8rem 1.2rem;
-		border-radius: 999px;
-		background: #1f2937;
-		border: 1px solid #1f2937;
+		border-radius: 8px;
+		background: #163d2b;
+		border: 1px solid #163d2b;
 		color: white;
 		text-decoration: none;
 		font-weight: 800;
 		transition: var(--transition);
 	}
 	.home-hero-link-secondary {
-		background: rgba(255, 255, 255, 0.86);
-		color: #2b2622;
-		border-color: #d9d0c3;
+		background: #fff;
+		color: #163d2b;
+		border-color: #a8c8b5;
 	}
 	.home-hero-link:hover {
 		transform: translateY(-1px);
-		box-shadow: 0 10px 24px rgba(60, 41, 20, 0.08);
+		box-shadow: 0 10px 24px rgba(22, 61, 43, 0.12);
+	}
+	.home-hero-visual {
+		position: relative;
+		min-height: 100%;
+		margin: 0;
+		overflow: hidden;
+		border: 1px solid #d9e2d6;
+		border-radius: 8px;
+		background: #eef6f0;
+	}
+	.home-hero-visual img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		min-height: 430px;
+		object-fit: cover;
+	}
+	.home-hero-visual figcaption {
+		position: absolute;
+		left: 1rem;
+		right: 1rem;
+		bottom: 1rem;
+		display: grid;
+		gap: 0.25rem;
+		padding: 0.9rem;
+		border: 1px solid rgba(255, 255, 255, 0.72);
+		border-radius: 8px;
+		background: rgba(255, 255, 255, 0.9);
+		box-shadow: 0 14px 30px rgba(11, 31, 22, 0.12);
+		backdrop-filter: blur(12px);
+		color: #1d2b24;
+	}
+	.home-hero-visual figcaption strong,
+	.home-hero-visual figcaption span {
+		margin: 0;
+	}
+	.home-hero-visual figcaption span {
+		color: #51635c;
+		line-height: 1.45;
 	}
 	.home-hero-facts {
 		display: grid;
@@ -518,33 +562,33 @@ const pageSchemaGraph = [
 		gap: 0.2rem;
 		min-height: auto;
 		padding: 0.8rem 0.9rem;
-		border-radius: 1.2rem;
-		border: 1px solid #e8ddcf;
-		background: rgba(255, 255, 255, 0.82);
-		box-shadow: 0 6px 18px rgba(60, 41, 20, 0.05);
+		border-radius: 8px;
+		border: 1px solid #d9e2d6;
+		background: rgba(255, 255, 255, 0.9);
+		box-shadow: 0 6px 18px rgba(24, 45, 34, 0.04);
 	}
 	.home-hero-fact span {
 		font-size: 0.72rem;
 		font-weight: 900;
-		letter-spacing: 0.1em;
+		letter-spacing: 0;
 		text-transform: uppercase;
-		color: #8b7d70;
+		color: #61746b;
 	}
 	.home-hero-fact strong {
 		align-self: start;
 		font-size: 1.02rem;
 		line-height: 1.3;
-		color: #2b2622;
+		color: #1d2b24;
 	}
 	.home-section {
 		padding: 2.25rem;
 		margin: 1.5rem auto;
 		max-width: 1560px;
 		width: 100%;
-		background: #fffdf8;
-		border: 1px solid #ebe5dc;
-		border-radius: 1.6rem;
-		box-shadow: 0 8px 24px rgba(60, 41, 20, 0.05);
+		background: #ffffff;
+		border: 1px solid #dfe7dd;
+		border-radius: 8px;
+		box-shadow: 0 8px 24px rgba(24, 45, 34, 0.04);
 	}
 	.home-vacancy-launch {
 		margin-top: 0.5rem;
@@ -561,9 +605,9 @@ const pageSchemaGraph = [
 		justify-content: center;
 		min-height: 3.1rem;
 		padding: 0.85rem 1.2rem;
-		border-radius: 999px;
-		background: #1f2937;
-		border: 1px solid #1f2937;
+		border-radius: 8px;
+		background: #163d2b;
+		border: 1px solid #163d2b;
 		color: white;
 		text-decoration: none;
 		font-weight: 800;
@@ -571,7 +615,7 @@ const pageSchemaGraph = [
 	}
 	.home-vacancy-launch-link:hover {
 		transform: translateY(-1px);
-		box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+		box-shadow: 0 10px 24px rgba(22, 61, 43, 0.12);
 	}
 	.home-quick-chip-row {
 		display: flex;
@@ -603,6 +647,8 @@ const pageSchemaGraph = [
 		display: flex;
 		gap: 0.75rem;
 		width: 100%;
+		max-width: 640px;
+		margin: 0 auto;
 		justify-content: center;
 	}
 	.city-selector-container {
@@ -610,21 +656,21 @@ const pageSchemaGraph = [
 		align-items: center;
 		padding: 0 1.25rem;
 		/* Removing padding-right: 2.75rem; as we'll use absolute pos for arrow */
-		background: #f7f2ea;
-		border: 1px solid #ebe5dc;
+		background: #f5faf6;
+		border: 1px solid #d9e2d6;
 		font-size: 1.4rem;
-		box-shadow: 0 6px 16px rgba(60, 41, 20, 0.12);
-		flex: 1.3;
+		box-shadow: 0 6px 16px rgba(24, 45, 34, 0.08);
+		flex: 1;
 		height: 4.8rem;
 		box-sizing: border-box;
-		border-radius: 999px;
+		border-radius: 8px;
 		cursor: pointer;
 		position: relative;
 		transition: var(--transition);
 	}
 	.city-selector-container:hover {
-		border-color: #d7cdbe;
-		background: #fcfaf7;
+		border-color: #a8c8b5;
+		background: #ffffff;
 		transform: translateY(-2px);
 		box-shadow: 0 8px 20px rgba(0,0,0,0.06);
 	}
@@ -633,39 +679,32 @@ const pageSchemaGraph = [
 		position: absolute;
 		right: 1.5rem;
 		font-size: 0.75rem;
-		color: #8b7d70;
+		color: #61746b;
 		pointer-events: none;
 	}
 	.hero-lang-switcher {
-		flex: 1;
+		flex: 0 0 7.5rem;
+		min-width: 0;
 	}
-
-	/* Inner Lang Override */
 	.hero-lang-switcher :global(.lang-toggle) {
-		height: 4.8rem !important;
-		width: 100% !important;
-		padding: 0 1.25rem !important;
-		border-radius: 999px !important;
-		font-size: 1.4rem !important;
-		font-weight: 800 !important;
-		background: #f7f2ea !important;
-		border: 1px solid #ebe5dc !important;
-		justify-content: center !important;
-		box-shadow: 0 6px 16px rgba(60, 41, 20, 0.12) !important;
-		box-sizing: border-box !important;
+		width: 100%;
+		min-height: 4.8rem;
+		background: #f5faf6;
+		border-color: #d9e2d6;
+		box-shadow: 0 6px 16px rgba(24, 45, 34, 0.08);
+		font-size: 1.05rem;
+		font-weight: 900;
 	}
-	.hero-lang-switcher :global(.lang-toggle span) {
-		font-weight: 800 !important;
+	.hero-lang-switcher :global(.lang-toggle:hover),
+	.hero-lang-switcher :global(.lang-toggle:focus-visible) {
+		border-color: #a8c8b5;
+		background: #ffffff;
 	}
-	.hero-lang-switcher :global(.flag-icon) {
-		font-size: 1.5rem !important;
-	}
-
 	/* --- City Select & Icon --- */
 	.city-icon {
 		position: absolute;
 		left: 1.25rem;
-		color: #8b7d70;
+		color: #61746b;
 		flex-shrink: 0;
 		width: 20px;
 		height: 20px;
@@ -680,7 +719,7 @@ const pageSchemaGraph = [
 		font: inherit;
 		font-size: inherit !important;
 		font-weight: 800 !important;
-		color: #2b2622;
+		color: #1d2b24;
 		padding: 0 2.5rem;
 		outline: none;
 		text-align: center;
@@ -697,19 +736,19 @@ const pageSchemaGraph = [
 		padding: 0 2.5rem;
 		height: 4.8rem;
 		box-sizing: border-box;
-		border-radius: 999px;
-		border: 1px solid var(--text-main);
-		background: var(--text-main);
+		border-radius: 8px;
+		border: 1px solid #163d2b;
+		background: #163d2b;
 		color: #fff;
 		text-decoration: none;
-		font-size: clamp(1.1rem, 4.5vw, 1.4rem);
+		font-size: 1.2rem;
 		line-height: 1.2;
 		transition: var(--transition);
 		width: 100%;
 	}
 	.hero-city-link:hover {
 		transform: translateY(-1px);
-		box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+		box-shadow: 0 10px 24px rgba(22, 61, 43, 0.12);
 	}
 
 	/* --- Content Sections --- */
@@ -718,10 +757,10 @@ const pageSchemaGraph = [
 	}
 	.section-heading h2 {
 		margin-bottom: 0.35rem;
-		letter-spacing: -0.03em;
+		letter-spacing: 0;
 	}
 	.section-heading p {
-		color: #7c6f64;
+		color: #51635c;
 	}
 	:global(.reviews-section),
 	:global(.faq-section) {
@@ -732,10 +771,10 @@ const pageSchemaGraph = [
 	}
 	:global(.review-card),
 	:global(.faq-item) {
-		background: #fffdf8 !important;
-		border: 1px solid #ebe5dc !important;
-		border-radius: 1.25rem !important;
-		box-shadow: 0 4px 12px rgba(60, 41, 20, 0.03) !important;
+		background: #ffffff !important;
+		border: 1px solid #dfe7dd !important;
+		border-radius: 8px !important;
+		box-shadow: 0 4px 12px rgba(24, 45, 34, 0.03) !important;
 	}
 	.home-navigation-grid {
 		display: grid;
@@ -746,22 +785,20 @@ const pageSchemaGraph = [
 		display: grid;
 		gap: 0.55rem;
 		padding: 1.25rem;
-		border-radius: 1.25rem;
-		border: 1px solid #ebe5dc;
-		background: linear-gradient(180deg, #fffefb 0%, #f8f1e7 100%);
-		box-shadow: 0 6px 18px rgba(60, 41, 20, 0.05);
+		border-radius: 8px;
+		border: 1px solid #dfe7dd;
+		background: linear-gradient(180deg, #ffffff 0%, #f7fbf8 100%);
+		box-shadow: 0 6px 18px rgba(24, 45, 34, 0.04);
 		text-decoration: none;
-		color: #2b2622;
+		color: #1d2b24;
 		transition: var(--transition);
 	}
 	.home-navigation-card-route {
-		background:
-			radial-gradient(circle at top right, rgba(99, 102, 241, 0.1), transparent 10rem),
-			linear-gradient(180deg, #fffefb 0%, #eef3ff 100%);
+		background: linear-gradient(180deg, #ffffff 0%, #eff8f4 100%);
 	}
 	.home-navigation-card:hover {
 		transform: translateY(-2px);
-		box-shadow: 0 10px 24px rgba(60, 41, 20, 0.08);
+		box-shadow: 0 10px 24px rgba(24, 45, 34, 0.08);
 	}
 	.home-navigation-card span,
 	.home-navigation-card h3,
@@ -771,15 +808,15 @@ const pageSchemaGraph = [
 	.home-navigation-card span {
 		font-size: 0.72rem;
 		font-weight: 900;
-		letter-spacing: 0.1em;
+		letter-spacing: 0;
 		text-transform: uppercase;
-		color: #8b7d70;
+		color: #61746b;
 	}
 	.home-navigation-card h3 {
 		font-size: 1rem;
 	}
 	.home-navigation-card p {
-		color: #7c6f64;
+		color: #51635c;
 		line-height: 1.6;
 	}
 	.home-surface-grid {
@@ -789,10 +826,10 @@ const pageSchemaGraph = [
 	}
 	.home-surface-card {
 		padding: 1.35rem;
-		border-radius: 1.25rem;
-		border: 1px solid #ebe5dc;
-		background: linear-gradient(180deg, #fffefb 0%, #f8f1e7 100%);
-		box-shadow: 0 6px 18px rgba(60, 41, 20, 0.05);
+		border-radius: 8px;
+		border: 1px solid #dfe7dd;
+		background: linear-gradient(180deg, #ffffff 0%, #f7fbf8 100%);
+		box-shadow: 0 6px 18px rgba(24, 45, 34, 0.04);
 	}
 	.home-surface-card h3 {
 		margin: 0 0 0.8rem;
@@ -808,17 +845,17 @@ const pageSchemaGraph = [
 		align-items: center;
 		min-height: 2.35rem;
 		padding: 0.55rem 0.85rem;
-		border-radius: 999px;
-		border: 1px solid #ddd3c5;
-		background: rgba(255, 255, 255, 0.86);
-		color: #2b2622;
+		border-radius: 8px;
+		border: 1px solid #c9dccf;
+		background: #ffffff;
+		color: #1d2b24;
 		font-weight: 700;
 		text-decoration: none;
 		transition: var(--transition);
 	}
 	.home-chip-link:hover {
 		transform: translateY(-1px);
-		box-shadow: 0 8px 18px rgba(60, 41, 20, 0.07);
+		box-shadow: 0 8px 18px rgba(24, 45, 34, 0.07);
 	}
 
 	/* --- Utilities --- */
@@ -854,12 +891,15 @@ const pageSchemaGraph = [
 			font-size: 1rem;
 			line-height: 1.6;
 		}
+		.home-hero-visual img {
+			min-height: 280px;
+		}
 		.home-hero-facts {
 			display: none;
 		}
 		.home-section {
 			padding: 1.2rem;
-			border-radius: 1.25rem;
+			border-radius: 8px;
 		}
 		.hero-toolbar {
 			margin-top: 1rem;
@@ -869,32 +909,27 @@ const pageSchemaGraph = [
 			grid-template-columns: 1fr;
 		}
 		.toolbar-top {
-			flex-direction: row;
-			gap: 0.5rem;
+			flex-direction: column;
 			width: 100%;
 		}
 		.city-selector-container {
-			flex: 2;
+			width: 100%;
 			min-width: 0;
-			height: 4.8rem;
+			height: 4.2rem;
 			padding: 0 0.5rem !important;
 			padding-right: 1.5rem !important;
+		}
+		.hero-lang-switcher {
+			flex-basis: auto;
+			width: 100%;
+		}
+		.hero-lang-switcher :global(.lang-toggle) {
+			min-height: 4.2rem;
 		}
 		.city-icon {
 			left: 0.9rem;
 			width: 18px;
 			height: 18px;
-		}
-		.hero-lang-switcher {
-			flex: 1;
-			min-width: 0;
-		}
-		.hero-lang-switcher :global(.lang-toggle) {
-			height: 4.8rem !important;
-			width: 100% !important;
-			padding: 0 0.5rem !important;
-			font-size: 1.1rem !important;
-			justify-content: center;
 		}
 		.city-select {
 			padding: 0 1.25rem 0 1.9rem;
@@ -910,7 +945,7 @@ const pageSchemaGraph = [
 	@media (max-width: 600px) {
 		.home-hero-copy h1 {
 			max-width: none;
-			font-size: clamp(2rem, 11vw, 3.6rem);
+			font-size: 2.45rem;
 			line-height: 0.98;
 		}
 		.home-navigation-grid,

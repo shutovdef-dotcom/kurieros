@@ -3,7 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import ReviewsBlock from '../../components/ReviewsBlock.astro';
-import jobsData from '../../data/jobs.json';
+import jobsData from '../../data/jobs';
 import { slugifyCompany } from '../../utils/companies';
 import { getCityHref } from '../../utils/cities';
 import { buildBreadcrumbSchema } from '../../utils/schema';
@@ -59,12 +59,12 @@ const jobLocationSchema = (jobCities.length ? jobCities : ['Россия']).map(
 	},
 }));
 const factCards = [
-	{ label: 'Доход', value: job.salary },
-	{ label: 'График', value: job.details.schedule },
-	{ label: 'Возраст', value: job.details.age },
-	{ label: 'Выплаты', value: job.details.payment_freq },
-	{ label: 'Гражданство', value: job.details.citizenship },
-	{ label: 'Оформление', value: job.details.employment_type },
+	{ label: 'Доход', labelKey: 'vacancy.fact_income', value: job.salary, valueKey: `vacancies.${job.id}.salary` },
+	{ label: 'График', labelKey: 'vacancy.fact_schedule', value: job.details.schedule, valueKey: `vacancies.${job.id}.details_schedule` },
+	{ label: 'Возраст', labelKey: 'vacancy.fact_age', value: job.details.age, valueKey: `vacancies.${job.id}.details_age` },
+	{ label: 'Выплаты', labelKey: 'vacancy.fact_payments', value: job.details.payment_freq, valueKey: `vacancies.${job.id}.details_payment_freq` },
+	{ label: 'Гражданство', labelKey: 'vacancy.fact_citizenship', value: job.details.citizenship, valueKey: `vacancies.${job.id}.details_citizenship` },
+	{ label: 'Оформление', labelKey: 'vacancy.fact_employment', value: job.details.employment_type, valueKey: `vacancies.${job.id}.details_employment_type` },
 ];
 const fitPoints = [
 	`Тем, кто хочет рассмотреть работу в ${job.company} без долгого отбора условий.`,
@@ -142,7 +142,7 @@ const pageSchemaGraph = [
 		jobLocation: jobLocationSchema,
 		directApply: hasApplyLink,
 		jobBenefits: job.benefits.join('; '),
-		qualifications: job.requirements.join('; '),
+		qualifications: [...job.requirements, ...job.requiredDocuments].join('; '),
 		baseSalary: salaryValue
 			? {
 				'@type': 'MonetaryAmount',
@@ -180,7 +180,9 @@ const pageSchemaGraph = [
 
 <BaseLayout 
 	title={vacancyTitle}
+	titleKey={`vacancies.${job.id}.page_title`}
 	description={vacancyDescription}
+	descriptionKey={`vacancies.${job.id}.page_description`}
 	schemaGraph={pageSchemaGraph}
 >
 	<Header />
@@ -188,7 +190,7 @@ const pageSchemaGraph = [
 	<main class="vacancy-page">
 		<div class="container container-narrow">
 			<nav class="breadcrumb" aria-label="Breadcrumb">
-				<a href="/" data-t="nav.main">Главная</a> &gt; <a href="/companies/">Компании</a> &gt; <a href={companyUrl}>{job.company}</a> &gt; <span data-t={`vacancies.${job.id}.title`}>{job.title}</span>
+				<a href="/" data-t="nav.main">Главная</a> &gt; <a href="/companies/" data-t="nav.companies">Компании</a> &gt; <a href={companyUrl} data-t={`vacancies.${job.id}.company`}>{job.company}</a> &gt; <span data-t={`vacancies.${job.id}.title`}>{job.title}</span>
 			</nav>
 
 			<section class="vacancy-header">
@@ -196,164 +198,168 @@ const pageSchemaGraph = [
 					<div class="vacancy-company-info">
 						<img src={job.companyLogo} alt={job.company} class="vacancy-logo" width="80" height="80" loading="eager" decoding="async" />
 						<div>
-							<div class="vacancy-kicker">AI-ready карточка вакансии</div>
+							<div class="vacancy-kicker" data-t="vacancy.card_kicker">Карточка вакансии</div>
 							<h1 data-t={`vacancies.${job.id}.title`}>{job.title}</h1>
 							<a href={companyUrl} class="vacancy-company-name" data-t={`vacancies.${job.id}.company`}>{job.company}</a>
 						</div>
 					</div>
-					<p class="vacancy-ai-summary">
+					<p class="vacancy-ai-summary" data-t="vacancy.hero_summary">
 						{job.title} в {job.company} — это вакансия для кандидатов, которые хотят заранее понять доход, график,
 						требования и формат оформления перед переходом к отклику.
 					</p>
 					<div class="vacancy-meta-row">
-						<span class="meta-pill">Обновлено {updatedDate}</span>
-						<span class="meta-pill">{hasApplyLink ? 'Есть прямая ссылка на отклик' : 'Ссылка на отклик уточняется'}</span>
-						<span class="meta-pill">Финальные условия подтверждаются при отклике</span>
+						<span class="meta-pill"><span data-t="vacancy.updated">Обновлено</span>&nbsp;<span data-t={`vacancies.${job.id}.updated_date`}>{updatedDate}</span></span>
 						{cityLinks.slice(0, 2).map((city) => (
 							<a href={city.href} class="meta-pill meta-pill-link">{city.name}</a>
 						))}
 					</div>
-					<div class="vacancy-hero-actions">
-						<a href="#vacancy-facts" class="hero-link">Краткие факты</a>
-						<a href="#vacancy-faq" class="hero-link">FAQ перед откликом</a>
-					</div>
 				</div>
-				<div class="vacancy-salary-card">
-					<span>Доход</span>
-					<strong data-t={`vacancies.${job.id}.salary`}>{job.salary}</strong>
-					<small>Финальные условия уточняются при отклике</small>
+					<div class="vacancy-salary-card">
+						<span data-t="vacancy.income">Доход</span>
+						<strong data-t={`vacancies.${job.id}.salary`}>{job.salary}</strong>
+						<small class="salary-rate" data-t={`vacancies.${job.id}.details_rate`}>{job.details.rate}</small>
+						<small data-t="vacancy.final_terms_short">Финальные условия уточняются при отклике</small>
+						{hasApplyLink ? (
+							<a href={job.applyLink} target="_blank" rel="noopener noreferrer" class="apply-btn-large apply-btn-hero" data-t="vacancy.apply">
+								Откликнуться сейчас
+						</a>
+					) : (
+						<a href="/contacts/" class="apply-btn-large apply-btn-hero apply-btn-disabled" data-t="vacancy.apply_disabled">
+							Уточнить условия
+						</a>
+					)}
+					<p class="apply-note apply-note-hero" data-t={hasApplyLink ? 'vacancy.apply_note_hero' : 'vacancy.apply_disabled_note_hero'}>{hasApplyLink ? 'Переход на анкету работодателя или партнёра' : 'Оставьте контакт, чтобы уточнить условия'}</p>
 				</div>
-			</section>
-
-			<section class="vacancy-answer-panel" aria-label="Краткий вывод по вакансии">
-				<div>
-					<p class="section-eyebrow">Короткий вывод</p>
-					<h2>Что важно знать об этой вакансии?</h2>
-				</div>
-				<p>
-					{job.title} подходит тем, кто ищет работу курьером с условиями "{job.details.schedule}" и хочет заранее сравнить
-					доход, оформление, возрастные требования и частоту выплат. На этой странице собраны основные факты, чтобы
-					решение об отклике было быстрее и спокойнее.
-				</p>
 			</section>
 
 			<section class="vacancy-facts" id="vacancy-facts" aria-label="Краткие факты о вакансии">
 				{factCards.map((fact) => (
 					<div class="fact-card">
-						<span>{fact.label}</span>
-						<strong>{fact.value}</strong>
+						<span data-t={fact.labelKey}>{fact.label}</span>
+						<strong data-t={fact.valueKey}>{fact.value}</strong>
 					</div>
 				))}
 			</section>
 
 			<div class="vacancy-content-grid">
 				<div class="vacancy-main">
-					<section class="vacancy-section">
+					<section class="vacancy-section vacancy-description-section">
 						<h2 data-t="vacancy.desc_title">Описание вакансии</h2>
 						<p class="vacancy-description" data-t={`vacancies.${job.id}.description`}>{job.description}</p>
+
+						<div class="vacancy-subsection">
+							<h3 data-t="vacancy.req_title">Требования</h3>
+							<ul class="vacancy-list">
+								{job.requirements.map((req: string, idx: number) => (
+									<li data-t={`vacancies.${job.id}.req_${idx}`}>{req}</li>
+								))}
+							</ul>
+						</div>
+
+						{job.requiredDocuments.length > 0 && (
+							<div class="vacancy-subsection">
+								<h3 data-t="vacancy.docs_title">Документы для оформления</h3>
+								<ul class="vacancy-list">
+									{job.requiredDocuments.map((document: string, idx: number) => (
+										<li data-t={`vacancies.${job.id}.doc_${idx}`}>{document}</li>
+									))}
+								</ul>
+							</div>
+						)}
+
+						<div class="vacancy-subsection">
+							<h3 data-t="vacancy.ben_title">Преимущества</h3>
+							<ul class="vacancy-list">
+								{job.benefits.map((benefit: string, idx: number) => (
+									<li data-t={`vacancies.${job.id}.ben_${idx}`}>{benefit}</li>
+								))}
+							</ul>
+						</div>
 					</section>
 
-					<section class="vacancy-section">
-						<h2 data-t="vacancy.req_title">Требования</h2>
-						<ul class="vacancy-list">
-							{job.requirements.map((req: string, idx: number) => (
-								<li data-t={`vacancies.${job.id}.req_${idx}`}>{req}</li>
-							))}
-						</ul>
-					</section>
-
-					<section class="vacancy-section">
-						<h2 data-t="vacancy.ben_title">Преимущества</h2>
-						<ul class="vacancy-list">
-							{job.benefits.map((benefit: string, idx: number) => (
-								<li data-t={`vacancies.${job.id}.ben_${idx}`}>{benefit}</li>
-							))}
-						</ul>
-					</section>
-
-					<section class="vacancy-section ai-geo-section">
-						<p class="section-eyebrow">AI GEO блок</p>
-						<h2>Кому лучше всего подходит эта вакансия?</h2>
+					<section class="vacancy-section vacancy-guidance-section">
+						<p class="section-eyebrow" data-t="vacancy.fit_eyebrow">Кому подходит</p>
+						<h2 data-t="vacancy.fit_title">Кому лучше всего подходит эта вакансия?</h2>
 						<div class="answer-grid">
-							{fitPoints.map((point) => (
-								<div class="answer-card">{point}</div>
+							{['fit_point_0', 'fit_point_1', 'fit_point_2'].map((key, index) => (
+								<div class="answer-card" data-t={`vacancy.${key}`}>{fitPoints[index]}</div>
 							))}
 						</div>
 					</section>
 
-					<section class="vacancy-section ai-geo-section">
-						<p class="section-eyebrow">Когда сравнить ещё варианты</p>
-						<h2>Кому эта вакансия может не подойти?</h2>
+					<section class="vacancy-section vacancy-guidance-section">
+						<p class="section-eyebrow" data-t="vacancy.anti_eyebrow">Когда сравнить ещё варианты</p>
+						<h2 data-t="vacancy.anti_title">Кому эта вакансия может не подойти?</h2>
 						<div class="answer-grid answer-grid-two">
-							{antiFitPoints.map((point) => (
-								<div class="answer-card answer-card-warning">{point}</div>
+							{['anti_point_0', 'anti_point_1', 'anti_point_2'].map((key, index) => (
+								<div class="answer-card answer-card-warning" data-t={`vacancy.${key}`}>{antiFitPoints[index]}</div>
 							))}
 						</div>
 					</section>
 
-					<section class="vacancy-section ai-geo-section">
-						<p class="section-eyebrow">Перед откликом</p>
-						<h2>Что проверить до заполнения анкеты?</h2>
+					<section class="vacancy-section vacancy-guidance-section">
+						<p class="section-eyebrow" data-t="vacancy.check_eyebrow">Перед откликом</p>
+						<h2 data-t="vacancy.check_title">Что проверить до заполнения анкеты?</h2>
 						<ol class="vacancy-list numbered-list">
-							{importantPoints.map((point) => (
-								<li>{point}</li>
+							{['check_point_0', 'check_point_1', 'check_point_2'].map((key, index) => (
+								<li data-t={`vacancy.${key}`}>{importantPoints[index]}</li>
 							))}
 						</ol>
 					</section>
 
-					<section class="vacancy-section ai-geo-section" id="vacancy-faq">
-						<p class="section-eyebrow">FAQ</p>
-						<h2>Короткие ответы перед откликом</h2>
+					<section class="vacancy-section vacancy-guidance-section" id="vacancy-faq">
+						<p class="section-eyebrow" data-t="vacancy.faq_eyebrow">FAQ</p>
+						<h2 data-t="vacancy.faq_title">Короткие ответы перед откликом</h2>
 						<div class="faq-stack">
-							{faqItems.map((item) => (
+							{faqItems.map((item, index) => (
 								<article class="faq-item">
-									<h3>{item.question}</h3>
-									<p>{item.answer}</p>
+									<h3 data-t={`vacancy.faq_q_${index}`}>{item.question}</h3>
+									<p data-t={index === 2 ? (hasApplyLink ? 'vacancy.faq_a_2_apply' : 'vacancy.faq_a_2_no') : `vacancy.faq_a_${index}`}>{item.answer}</p>
 								</article>
 							))}
 						</div>
 					</section>
 
-					<section class="vacancy-section ai-geo-section">
-						<p class="section-eyebrow">Прозрачность</p>
-						<h2>Как собрана эта карточка?</h2>
+					<section class="vacancy-section vacancy-guidance-section">
+						<p class="section-eyebrow" data-t="vacancy.transparency_eyebrow">Прозрачность</p>
+						<h2 data-t="vacancy.transparency_title">Как собрана эта карточка?</h2>
 						<div class="trust-stack">
-							{methodologyPoints.map((point) => (
-								<div class="trust-item">{point}</div>
+							{methodologyPoints.map((point, index) => (
+								<div class="trust-item" data-t={index === 1 ? (hasApplyLink ? 'vacancy.methodology_1_apply' : 'vacancy.methodology_1_no') : `vacancy.methodology_${index}`}>{point}</div>
 							))}
 						</div>
 						<div class="trust-links">
-							<a href="/compare/" class="hero-link">Сравнить с другими вакансиями</a>
-							<a href={companyUrl} class="hero-link">Открыть страницу компании</a>
+							<a href="/compare/" class="hero-link" data-t="vacancy.compare_jobs">Сравнить с другими вакансиями</a>
+							<a href={companyUrl} class="hero-link" data-t="vacancy.open_company">Открыть страницу компании</a>
 						</div>
 					</section>
 
-					<section class="vacancy-section ai-geo-section">
-						<p class="section-eyebrow">Маршруты по сайту</p>
-						<h2>Что ещё открыть после этой вакансии?</h2>
+					<section class="vacancy-section vacancy-guidance-section">
+						<p class="section-eyebrow" data-t="vacancy.next_eyebrow">Дальше</p>
+						<h2 data-t="vacancy.next_title">Что ещё открыть после этой вакансии?</h2>
 						<div class="vacancy-route-grid">
 							<article class="route-card">
-								<h3>Полезные хабы</h3>
+								<h3 data-t="vacancy.useful_sections">Полезные разделы</h3>
 								<div class="route-chip-row">
-									<a href="/compare/" class="hero-link">Сравнение вакансий</a>
-									<a href={companyUrl} class="hero-link">Страница компании</a>
-									<a href="/companies/" class="hero-link">Все компании</a>
+									<a href="/compare/" class="hero-link" data-t="nav.compare">Сравнение вакансий</a>
+									<a href={companyUrl} class="hero-link" data-t="vacancy.open_company">Страница компании</a>
+									<a href="/companies/" class="hero-link" data-t="vacancy.all_companies">Все компании</a>
 									{cityLinks.map((city) => (
-										<a href={city.href} class="hero-link">Работа курьером в {city.name}</a>
+										<a href={city.href} class="hero-link"><span data-t="vacancy.city_jobs_prefix">Работа курьером в</span> {city.name}</a>
 									))}
 								</div>
 							</article>
 
 							<article class="route-card">
-								<h3>Похожие вакансии для сравнения</h3>
+								<h3 data-t="vacancy.related_jobs">Похожие вакансии для сравнения</h3>
 								<div class="related-jobs-grid">
 									{relatedJobs.map((relatedJob) => (
 										<a href={`/v/${relatedJob.slug}/`} class="related-job-card">
-											<strong>{relatedJob.title}</strong>
-											<span>{relatedJob.company}</span>
+											<strong data-t={`vacancies.${relatedJob.id}.title`}>{relatedJob.title}</strong>
+											<span data-t={`vacancies.${relatedJob.id}.company`}>{relatedJob.company}</span>
 											<div class="related-job-meta">
-												<span>{relatedJob.salary}</span>
-												<span>{relatedJob.location}</span>
+												<span data-t={`vacancies.${relatedJob.id}.salary`}>{relatedJob.salary}</span>
+												<span data-t={`vacancies.${relatedJob.id}.location`}>{relatedJob.location}</span>
 											</div>
 										</a>
 									))}
@@ -402,6 +408,18 @@ const pageSchemaGraph = [
 			</div>
 
 			<ReviewsBlock jobId={job.id} />
+
+			<section class="vacancy-answer-panel vacancy-answer-panel-bottom" aria-label="Краткий вывод по вакансии">
+				<div>
+					<p class="section-eyebrow" data-t="vacancy.short_output">Короткий вывод</p>
+					<h2 data-t="vacancy.important_title">Что важно знать об этой вакансии?</h2>
+				</div>
+				<p data-t="vacancy.answer_summary">
+					{job.title} подходит тем, кто ищет работу курьером с условиями "{job.details.schedule}" и хочет заранее сравнить
+					доход, оформление, возрастные требования и частоту выплат. На этой странице собраны основные факты, чтобы
+					решение об отклике было быстрее и спокойнее.
+				</p>
+			</section>
 		</div>
 	</main>
 
@@ -411,9 +429,7 @@ const pageSchemaGraph = [
 <style>
 	.vacancy-page {
 		padding: 2rem 0 4rem;
-		background:
-			radial-gradient(circle at 12% 8%, rgba(79, 70, 229, 0.08), transparent 28rem),
-			radial-gradient(circle at 88% 18%, rgba(34, 197, 94, 0.1), transparent 26rem);
+		background: linear-gradient(180deg, #ffffff 0%, #f6faf8 100%);
 	}
 	.container-narrow {
 		max-width: 1240px;
@@ -437,9 +453,9 @@ const pageSchemaGraph = [
 		background:
 			linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(248, 250, 252, 0.86)),
 			var(--bg-card);
-		padding: clamp(1.5rem, 3vw, 2.75rem);
+		padding: 2.25rem;
 		border: 1px solid rgba(148, 163, 184, 0.18);
-		border-radius: 2rem;
+		border-radius: 8px;
 		margin-bottom: 2rem;
 		box-shadow: 0 26px 80px rgba(15, 23, 42, 0.08);
 		position: relative;
@@ -451,7 +467,7 @@ const pageSchemaGraph = [
 		inset: auto -6rem -8rem auto;
 		width: 18rem;
 		height: 18rem;
-		background: radial-gradient(circle, rgba(79, 70, 229, 0.13), transparent 68%);
+		background: rgba(22, 115, 76, 0.08);
 		pointer-events: none;
 	}
 	.vacancy-hero-main {
@@ -469,7 +485,7 @@ const pageSchemaGraph = [
 		width: 80px;
 		height: 80px;
 		object-fit: contain;
-		border-radius: 1rem;
+		border-radius: 8px;
 		background: white;
 		padding: 0.5rem;
 		box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
@@ -479,16 +495,16 @@ const pageSchemaGraph = [
 		margin-bottom: 0.55rem;
 		font-size: 0.74rem;
 		font-weight: 900;
-		letter-spacing: 0.16em;
+		letter-spacing: 0;
 		text-transform: uppercase;
 		color: var(--accent-color);
 	}
 	.vacancy-header h1 {
 		max-width: 13ch;
 		margin-bottom: 0.35rem;
-		font-size: clamp(2rem, 4.2vw, 4.25rem);
+		font-size: 3.8rem;
 		line-height: 0.98;
-		letter-spacing: -0.055em;
+		letter-spacing: 0;
 		text-wrap: balance;
 	}
 	.vacancy-company-name {
@@ -506,7 +522,7 @@ const pageSchemaGraph = [
 		max-width: 70ch;
 		margin: 0;
 		color: var(--text-muted);
-		font-size: clamp(1rem, 0.8vw + 0.9rem, 1.2rem);
+		font-size: 1.12rem;
 		line-height: 1.75;
 	}
 	.vacancy-meta-row {
@@ -519,7 +535,7 @@ const pageSchemaGraph = [
 		align-items: center;
 		min-height: 2.25rem;
 		padding: 0.45rem 0.8rem;
-		border-radius: 999px;
+		border-radius: 8px;
 		border: 1px solid rgba(148, 163, 184, 0.16);
 		background: rgba(255, 255, 255, 0.72);
 		color: var(--text-muted);
@@ -540,9 +556,9 @@ const pageSchemaGraph = [
 		align-items: center;
 		min-height: 2.6rem;
 		padding: 0.65rem 1rem;
-		border: 1px solid rgba(99, 102, 241, 0.16);
-		border-radius: 999px;
-		background: rgba(99, 102, 241, 0.08);
+		border: 1px solid rgba(22, 115, 76, 0.16);
+		border-radius: 8px;
+		background: rgba(22, 115, 76, 0.08);
 		color: var(--text-main);
 		text-decoration: none;
 		font-weight: 800;
@@ -551,12 +567,12 @@ const pageSchemaGraph = [
 		position: relative;
 		z-index: 1;
 		display: grid;
-		align-content: center;
-		gap: 0.45rem;
+		align-content: start;
+		gap: 0.65rem;
 		min-height: 100%;
 		padding: 1.5rem;
-		border-radius: 1.5rem;
-		background: linear-gradient(160deg, #111827, #1f2937);
+		border-radius: 8px;
+		background: linear-gradient(160deg, #123b2a, #16734c);
 		color: white;
 		box-shadow: 0 20px 55px rgba(15, 23, 42, 0.18);
 	}
@@ -565,9 +581,13 @@ const pageSchemaGraph = [
 		color: rgba(255, 255, 255, 0.72);
 	}
 	.vacancy-salary-card strong {
-		font-size: clamp(1.6rem, 2.6vw, 2.4rem);
+		font-size: 2.1rem;
 		line-height: 1;
-		letter-spacing: -0.04em;
+		letter-spacing: 0;
+	}
+	.salary-rate {
+		line-height: 1.35;
+		opacity: 0.92;
 	}
 	.vacancy-answer-panel {
 		display: grid;
@@ -577,7 +597,7 @@ const pageSchemaGraph = [
 		margin-bottom: 1rem;
 		padding: 1.5rem;
 		border: 1px solid rgba(148, 163, 184, 0.16);
-		border-radius: 1.5rem;
+		border-radius: 8px;
 		background: rgba(255, 255, 255, 0.74);
 		box-shadow: var(--shadow-sm);
 	}
@@ -589,36 +609,58 @@ const pageSchemaGraph = [
 		color: var(--text-muted);
 		line-height: 1.8;
 	}
+	.vacancy-answer-panel-bottom {
+		margin-top: 1.5rem;
+		margin-bottom: 0;
+	}
 	.vacancy-facts {
 		display: grid;
 		grid-template-columns: repeat(6, minmax(0, 1fr));
 		gap: 0.8rem;
 		margin-bottom: 2rem;
 	}
-	.fact-card {
-		display: grid;
-		gap: 0.35rem;
-		min-height: 7.25rem;
-		padding: 1rem;
-		border: 1px solid rgba(148, 163, 184, 0.16);
-		border-radius: 1.2rem;
-		background: rgba(255, 255, 255, 0.82);
-		box-shadow: var(--shadow-sm);
-	}
-	.fact-card span {
-		font-size: 0.72rem;
-		font-weight: 900;
-		letter-spacing: 0.11em;
-		text-transform: uppercase;
-		color: var(--text-muted);
-	}
-	.fact-card strong {
-		align-self: end;
-		font-size: 0.98rem;
-		line-height: 1.35;
-	}
+		.fact-card {
+			display: grid;
+			gap: 0.22rem;
+			min-height: 5.35rem;
+			padding: 0.72rem 0.82rem;
+			border: 1px solid rgba(148, 163, 184, 0.16);
+			border-radius: 8px;
+			background: rgba(255, 255, 255, 0.82);
+			box-shadow: var(--shadow-sm);
+		}
+		.fact-card span {
+			font-size: 0.68rem;
+			font-weight: 900;
+			letter-spacing: 0;
+			text-transform: uppercase;
+			line-height: 1.2;
+			color: var(--text-muted);
+		}
+		.fact-card strong {
+			align-self: start;
+			font-size: 0.9rem;
+			line-height: 1.28;
+		}
 	.vacancy-description {
 		white-space: pre-wrap;
+	}
+	.vacancy-description-section {
+		display: grid;
+		gap: 1.5rem;
+	}
+	.vacancy-description-section h2 {
+		margin-bottom: 0;
+	}
+	.vacancy-subsection {
+		padding-top: 1.35rem;
+		border-top: 1px solid rgba(148, 163, 184, 0.16);
+	}
+	.vacancy-subsection h3 {
+		margin: 0 0 0.9rem;
+		font-size: 1.08rem;
+		line-height: 1.3;
+		color: var(--text-main);
 	}
 	.vacancy-content-grid {
 		display: grid;
@@ -637,7 +679,7 @@ const pageSchemaGraph = [
 	.vacancy-section {
 		background: var(--bg-card);
 		padding: 2rem;
-		border-radius: 1.5rem;
+		border-radius: 8px;
 		margin-bottom: 1.5rem;
 		box-shadow: var(--shadow-sm);
 	}
@@ -652,11 +694,9 @@ const pageSchemaGraph = [
 	.vacancy-list li {
 		margin-bottom: 0.5rem;
 	}
-	.ai-geo-section {
-		border: 1px solid rgba(99, 102, 241, 0.12);
-		background:
-			linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.96)),
-			var(--bg-card);
+	.vacancy-guidance-section {
+		border: 1px solid rgba(22, 115, 76, 0.12);
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(246, 250, 248, 0.96));
 	}
 	.answer-grid {
 		display: grid;
@@ -665,8 +705,8 @@ const pageSchemaGraph = [
 	}
 	.answer-card {
 		padding: 1rem;
-		border-radius: 1rem;
-		background: rgba(99, 102, 241, 0.07);
+		border-radius: 8px;
+		background: rgba(22, 115, 76, 0.07);
 		color: var(--text-main);
 		line-height: 1.6;
 	}
@@ -687,7 +727,7 @@ const pageSchemaGraph = [
 	.faq-item {
 		padding: 1.1rem;
 		border: 1px solid rgba(148, 163, 184, 0.16);
-		border-radius: 1rem;
+		border-radius: 8px;
 		background: rgba(255, 255, 255, 0.72);
 	}
 	.faq-item h3 {
@@ -707,7 +747,7 @@ const pageSchemaGraph = [
 	.trust-item {
 		padding: 1rem;
 		border: 1px solid rgba(148, 163, 184, 0.16);
-		border-radius: 1rem;
+		border-radius: 8px;
 		background: rgba(255, 255, 255, 0.72);
 		line-height: 1.7;
 		color: var(--text-main);
@@ -725,7 +765,7 @@ const pageSchemaGraph = [
 	.route-card {
 		padding: 1rem;
 		border: 1px solid rgba(148, 163, 184, 0.16);
-		border-radius: 1rem;
+		border-radius: 8px;
 		background: rgba(255, 255, 255, 0.72);
 	}
 	.route-card h3 {
@@ -745,9 +785,9 @@ const pageSchemaGraph = [
 		display: grid;
 		gap: 0.4rem;
 		padding: 0.95rem 1rem;
-		border-radius: 1rem;
-		border: 1px solid rgba(99, 102, 241, 0.14);
-		background: rgba(99, 102, 241, 0.06);
+		border-radius: 8px;
+		border: 1px solid rgba(22, 115, 76, 0.14);
+		background: rgba(22, 115, 76, 0.06);
 		text-decoration: none;
 		color: var(--text-main);
 	}
@@ -763,7 +803,7 @@ const pageSchemaGraph = [
 	.vacancy-card-sidebar {
 		background: var(--bg-card);
 		padding: 2rem;
-		border-radius: 1.5rem;
+		border-radius: 8px;
 		box-shadow: var(--shadow-sm);
 		position: sticky;
 		top: 2rem;
@@ -777,18 +817,33 @@ const pageSchemaGraph = [
 	.apply-btn-large {
 		display: block;
 		width: 100%;
-		background: var(--accent-gradient);
-		color: white;
+		background: #ffe033;
+		color: #111827;
 		text-align: center;
-		padding: 1rem;
-		border-radius: 1rem;
-		font-weight: 700;
+		padding: 1.15rem 1.1rem;
+		border-radius: 8px;
+		border: 2px solid rgba(17, 24, 39, 0.08);
+		font-weight: 900;
 		margin-top: 2rem;
 		text-decoration: none;
-		transition: transform 0.2s;
+		box-shadow:
+			0 18px 42px rgba(255, 224, 51, 0.36),
+			0 10px 26px rgba(15, 23, 42, 0.18);
+		transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
 	}
 	.apply-btn-large:hover {
-		transform: scale(1.02);
+		transform: translateY(-2px);
+		filter: saturate(1.05);
+		box-shadow:
+			0 24px 54px rgba(255, 224, 51, 0.44),
+			0 14px 30px rgba(15, 23, 42, 0.22);
+	}
+	.apply-btn-large:focus-visible {
+		outline: 3px solid rgba(255, 224, 51, 0.45);
+		outline-offset: 3px;
+	}
+	.apply-btn-hero {
+		margin-top: 1rem;
 	}
 	.apply-btn-disabled {
 		background: var(--surface-color);
@@ -803,6 +858,11 @@ const pageSchemaGraph = [
 		font-size: 0.75rem;
 		color: var(--text-muted);
 		margin-top: 0.5rem;
+	}
+	.apply-note-hero {
+		margin: 0;
+		color: rgba(255, 255, 255, 0.78);
+		line-height: 1.45;
 	}
 	@media (max-width: 1100px) {
 		.vacancy-facts {
@@ -819,11 +879,23 @@ const pageSchemaGraph = [
 		.vacancy-answer-panel {
 			grid-template-columns: 1fr;
 		}
+		.vacancy-salary-card {
+			order: -1;
+		}
 		.vacancy-facts {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
 	}
 	@media (max-width: 520px) {
+		.vacancy-header {
+			padding: 1.25rem;
+		}
+
+		.vacancy-header h1 {
+			font-size: 2.35rem;
+			max-width: 14ch;
+		}
+
 		.vacancy-company-info {
 			flex-direction: column;
 		}

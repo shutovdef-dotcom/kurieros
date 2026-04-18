@@ -1,8 +1,10 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import jobsData from '../../data/jobs.json';
+import jobsData, { vacancySources } from '../../data/jobs';
+import { SUPPORTED_LANGUAGES } from '../../data/translations';
 
-const nextId = Math.max(...jobsData.map((job) => job.id)) + 1;
+const nextId = vacancySources.reduce((maxId, vacancy) => Math.max(maxId, vacancy.id), 0) + 1;
+const supportedLanguages = SUPPORTED_LANGUAGES;
 const adminHash = '2a4f4c5e061b8e807525ec8e325e1674c3aaccb740ba61cd92f3c91f7909391c';
 const companyExamples = jobsData.slice(0, 8).map((job) => ({
 	name: job.company,
@@ -94,12 +96,42 @@ const companyExamples = jobsData.slice(0, 8).map((job) => ({
 									<input id="job-salary" type="text" placeholder="до 180 000 ₽/мес" required />
 								</label>
 								<label class="field">
-									<span>Локация</span>
+									<span>Города найма</span>
 									<input id="job-location" type="text" placeholder="Москва, Санкт-Петербург" required />
 								</label>
 								<label class="field checkbox-field">
 									<span>ТОП вакансия</span>
 									<input id="job-is-hot" type="checkbox" />
+								</label>
+							</div>
+
+							<div class="three-col">
+								<label class="field">
+									<span>Источник условий</span>
+									<input id="job-source-url" type="url" placeholder="https://..." />
+								</label>
+								<label class="field">
+									<span>Дата обновления</span>
+									<input id="job-updated-at" type="date" />
+								</label>
+								<label class="field">
+									<span>Точность зарплаты</span>
+									<select id="job-salary-confidence">
+										<option value="partner">partner</option>
+										<option value="official">official</option>
+										<option value="estimated">estimated</option>
+									</select>
+								</label>
+							</div>
+
+							<div class="two-col">
+								<label class="field">
+									<span>Районы города через запятую</span>
+									<input id="job-city-districts" type="text" placeholder="ЦАО, ЮАО, рядом с метро" />
+								</label>
+								<label class="field">
+									<span>Приоритет оффера</span>
+									<input id="job-priority" type="number" min="0" step="1" placeholder="100" />
 								</label>
 							</div>
 
@@ -116,9 +148,9 @@ const companyExamples = jobsData.slice(0, 8).map((job) => ({
 
 							<div class="two-col">
 								<label class="field">
-									<span>Теги через запятую</span>
-									<input id="job-tags" type="text" placeholder="auto, flexible, 18+" required />
-									<small>Допустимые примеры: `auto`, `foot`, `bicycle`, `flexible`, `16plus`, `18+`</small>
+									<span>Транспорт через запятую</span>
+									<input id="job-tags" type="text" placeholder="auto, foot, bicycle" required />
+									<small>Можно писать кодами или словами: `auto`, `foot`, `bicycle`, авто, пеший, вело.</small>
 								</label>
 								<label class="field">
 									<span>Бейджи через запятую</span>
@@ -134,6 +166,26 @@ const companyExamples = jobsData.slice(0, 8).map((job) => ({
 								<label class="field">
 									<span>Преимущества, по одному на строку</span>
 									<textarea id="job-benefits" rows="6" placeholder="Высокий доход&#10;Гибкий график" required></textarea>
+								</label>
+							</div>
+
+							<label class="field">
+								<span>Требуемые документы, по одному на строку</span>
+								<textarea id="job-required-documents" rows="5" placeholder="Паспорт&#10;СНИЛС&#10;ИНН&#10;Медицинская книжка, если требуется" required></textarea>
+							</label>
+
+							<div class="three-col">
+								<label class="field">
+									<span>Доп. требования оффера</span>
+									<textarea id="job-requirements-override" rows="4" placeholder="Права категории B для авто&#10;Свой велосипед для вело"></textarea>
+								</label>
+								<label class="field">
+									<span>Доп. бенефиты оффера</span>
+									<textarea id="job-benefits-override" rows="4" placeholder="Повышенный коэффициент в часы спроса"></textarea>
+								</label>
+								<label class="field">
+									<span>Доп. документы оффера</span>
+									<textarea id="job-required-documents-override" rows="4" placeholder="Водительское удостоверение категории B&#10;СТС автомобиля"></textarea>
 								</label>
 							</div>
 
@@ -167,12 +219,8 @@ const companyExamples = jobsData.slice(0, 8).map((job) => ({
 									<input id="detail-medical-book" type="text" placeholder="Требуется" required />
 								</label>
 								<label class="field">
-									<span>Самозанятость</span>
-									<input id="detail-self-employed" type="text" placeholder="Обязательно" required />
-								</label>
-								<label class="field">
 									<span>Тип оформления</span>
-									<input id="detail-employment-type" type="text" placeholder="Самозанятость / ГПХ" required />
+									<input id="detail-employment-type" type="text" placeholder="self_employed, gph, ip, official" required />
 								</label>
 								<label class="field">
 									<span>Форма</span>
@@ -190,8 +238,8 @@ const companyExamples = jobsData.slice(0, 8).map((job) => ({
 							</label>
 
 							<div class="toolbar-actions">
-								<button id="owner-generate" type="submit" class="btn-primary">Сгенерировать JSON</button>
-								<button id="owner-copy" type="button" class="btn-secondary">Копировать JSON</button>
+								<button id="owner-generate" type="submit" class="btn-primary">Сгенерировать объект</button>
+								<button id="owner-copy" type="button" class="btn-secondary">Копировать объект</button>
 								<button id="owner-download" type="button" class="btn-secondary">Скачать файл</button>
 							</div>
 						</form>
@@ -199,8 +247,8 @@ const companyExamples = jobsData.slice(0, 8).map((job) => ({
 
 					<aside class="owner-card">
 						<h3>Готовый результат</h3>
-						<p class="muted">Скопируй JSON ниже и добавь объект в [`src/data/jobs.json`](/Users/ivan/Documents/scratch/kurieros-astro/src/data/jobs.json).</p>
-						<textarea id="job-output" class="job-output" rows="28" readonly placeholder="После заполнения формы здесь появится JSON вакансии"></textarea>
+						<p class="muted">Скопируй объект ниже и добавь его в массив `vacancySources` в [`src/data/vacancies.ts`](/Users/ivan/Documents/scratch/kurieros/kurieros-astro/src/data/vacancies.ts). Блок `content` создается для всех языков сайта; перед публикацией замени автозаполненные тексты на реальные переводы.</p>
+						<textarea id="job-output" class="job-output" rows="28" readonly placeholder="После заполнения формы здесь появится объект базовой вакансии"></textarea>
 						<p id="owner-copy-status" class="muted"></p>
 						<div class="owner-note">
 							<strong>Код доступа:</strong> хранится на этой странице в виде хэша. Для настоящей серверной защиты позже лучше вынести админку в backend или закрыть её через reverse proxy/auth.
@@ -212,7 +260,7 @@ const companyExamples = jobsData.slice(0, 8).map((job) => ({
 	</main>
 </BaseLayout>
 
-<script is:inline define:vars={{ adminHash, nextId, companyExamples }}>
+<script is:inline define:vars={{ adminHash, nextId, companyExamples, supportedLanguages }}>
 	const AUTH_KEY = 'kurieros-owner-auth';
 	const DRAFT_KEY = 'kurieros-owner-vacancy-draft';
 
@@ -270,6 +318,90 @@ const companyExamples = jobsData.slice(0, 8).map((job) => ({
 			.filter(Boolean);
 	}
 
+	function readLocalizedList(value) {
+		if (Array.isArray(value)) {
+			return value;
+		}
+
+		if (value && typeof value === 'object') {
+			return value.ru || Object.values(value).find((item) => Array.isArray(item)) || [];
+		}
+
+		return [];
+	}
+
+	function normalizeTransport(value) {
+		const normalized = value.trim().toLowerCase();
+		const map = {
+			auto: 'auto',
+			авто: 'auto',
+			автомобиль: 'auto',
+			foot: 'foot',
+			пеший: 'foot',
+			пешком: 'foot',
+			bicycle: 'bicycle',
+			вело: 'bicycle',
+			велосипед: 'bicycle',
+			самокат: 'bicycle'
+		};
+
+		return map[normalized] || normalized;
+	}
+
+	function normalizeMedicalBook(value) {
+		const normalized = value.trim().toLowerCase();
+		if (!normalized || normalized.includes('уточ')) return 'unknown';
+		if (normalized.includes('компен')) return 'compensated';
+		if (normalized.includes('не') || normalized === 'no' || normalized === 'false') return 'not_required';
+		return 'required';
+	}
+
+	function normalizeEmploymentFormat(value) {
+		const normalized = value.trim().toLowerCase();
+		const map = {
+			gph: 'gph',
+			гпх: 'gph',
+			self_employed: 'self_employed',
+			самозанятость: 'self_employed',
+			самозанятый: 'self_employed',
+			ip: 'individual_entrepreneur',
+			ип: 'individual_entrepreneur',
+			individual_entrepreneur: 'individual_entrepreneur',
+			official: 'official',
+			официальное: 'official',
+			'официальное трудоустройство': 'official',
+			тк: 'official'
+		};
+
+		return map[normalized] || normalized;
+	}
+
+	function readAgeFrom(value) {
+		const match = value.match(/\d+/);
+		return match ? Number(match[0]) : 18;
+	}
+
+	function readMoneyRange(value) {
+		const numbers = String(value)
+			.match(/\d[\d\s]*/g)
+			?.map((item) => Number(item.replace(/\s/g, '')))
+			.filter((item) => Number.isFinite(item) && item > 0) || [];
+		const range = { text: value.trim() || 'Доход уточняется' };
+
+		if (numbers.length >= 2) {
+			range.min = Math.min(numbers[0], numbers[1]);
+			range.max = Math.max(numbers[0], numbers[1]);
+		} else if (numbers.length === 1) {
+			range.max = numbers[0];
+		}
+
+		return range;
+	}
+
+	function todayDate() {
+		return new Date().toISOString().slice(0, 10);
+	}
+
 	function setFieldValue(id, value) {
 		const field = document.getElementById(id);
 		if (!field) return;
@@ -281,35 +413,86 @@ const companyExamples = jobsData.slice(0, 8).map((job) => ({
 	}
 
 	function readFormData() {
-		const formData = {
-			id: Number(document.getElementById('job-id').value || nextId),
-			slug: document.getElementById('job-slug').value.trim(),
+		const employmentFormats = splitComma(document.getElementById('detail-employment-type').value)
+			.map(normalizeEmploymentFormat)
+			.filter(Boolean);
+		const cities = splitComma(document.getElementById('job-location').value);
+		const transports = splitComma(document.getElementById('job-tags').value).map(normalizeTransport).filter(Boolean);
+		const monthlyPay = readMoneyRange(document.getElementById('job-salary').value);
+		const cityDistricts = splitComma(document.getElementById('job-city-districts').value);
+		const priorityRaw = Number(document.getElementById('job-priority').value);
+		const requirementsOverride = splitLines(document.getElementById('job-requirements-override').value);
+		const benefitsOverride = splitLines(document.getElementById('job-benefits-override').value);
+		const requiredDocumentsOverride = splitLines(document.getElementById('job-required-documents-override').value);
+		const sourceUrl = document.getElementById('job-source-url').value.trim();
+		const updatedAt = document.getElementById('job-updated-at').value || todayDate();
+		const applyLink = document.getElementById('job-apply-link').value.trim() || '#';
+		const content = {
 			title: document.getElementById('job-title').value.trim(),
-			company: document.getElementById('job-company').value.trim(),
-			companyLogo: document.getElementById('job-company-logo').value.trim(),
-			salary: document.getElementById('job-salary').value.trim(),
-			location: document.getElementById('job-location').value.trim(),
-			tags: splitComma(document.getElementById('job-tags').value),
-			labels: splitComma(document.getElementById('job-labels').value),
-			applyLink: document.getElementById('job-apply-link').value.trim() || '#',
 			shortDescription: document.getElementById('job-short-description').value.trim(),
 			description: document.getElementById('job-description').value.trim(),
 			requirements: splitLines(document.getElementById('job-requirements').value),
 			benefits: splitLines(document.getElementById('job-benefits').value),
-			details: {
-				rate: document.getElementById('detail-rate').value.trim(),
+			requiredDocuments: splitLines(document.getElementById('job-required-documents').value),
+			labels: splitComma(document.getElementById('job-labels').value),
+			searchTags: splitComma(document.getElementById('job-search-tags').value)
+		};
+		const formData = {
+			id: Number(document.getElementById('job-id').value || nextId),
+			slug: document.getElementById('job-slug').value.trim(),
+			company: {
+				name: document.getElementById('job-company').value.trim(),
+				logo: document.getElementById('job-company-logo').value.trim()
+			},
+			content: Object.fromEntries(
+				supportedLanguages.map((lang) => [
+					lang,
+					{
+						...content,
+						requirements: [...content.requirements],
+						benefits: [...content.benefits],
+						requiredDocuments: [...content.requiredDocuments],
+						labels: [...content.labels],
+						searchTags: [...content.searchTags]
+					}
+				])
+			),
+			defaults: {
+				ageFrom: readAgeFrom(document.getElementById('detail-age').value),
+				medicalBook: normalizeMedicalBook(document.getElementById('detail-medical-book').value),
+				employmentFormats: employmentFormats.length ? employmentFormats : ['self_employed'],
 				schedule: document.getElementById('detail-schedule').value.trim(),
 				education: document.getElementById('detail-education').value.trim(),
-				age: document.getElementById('detail-age').value.trim(),
-				payment_freq: document.getElementById('detail-payment-freq').value.trim(),
 				citizenship: document.getElementById('detail-citizenship').value.trim(),
-				medical_book: document.getElementById('detail-medical-book').value.trim(),
-				self_employed: document.getElementById('detail-self-employed').value.trim(),
-				employment_type: document.getElementById('detail-employment-type').value.trim(),
 				uniform: document.getElementById('detail-uniform').value.trim(),
 				os: document.getElementById('detail-os').value.trim()
 			},
-			search_tags: splitComma(document.getElementById('job-search-tags').value)
+			offers: cities.flatMap((city) =>
+				transports.map((transport) => ({
+					city,
+					transport,
+					pay: {
+						currency: 'RUB',
+						monthly: monthlyPay,
+						rate: document.getElementById('detail-rate').value.trim(),
+						paymentFrequency: document.getElementById('detail-payment-freq').value.trim()
+					},
+					isActive: true,
+					updatedAt,
+					...(sourceUrl ? { sourceUrl } : {}),
+					salaryConfidence: document.getElementById('job-salary-confidence').value,
+					ageFrom: readAgeFrom(document.getElementById('detail-age').value),
+					medicalBook: normalizeMedicalBook(document.getElementById('detail-medical-book').value),
+					employmentFormats: employmentFormats.length ? employmentFormats : ['self_employed'],
+					schedule: document.getElementById('detail-schedule').value.trim(),
+					applyLink,
+					...(cityDistricts.length ? { cityDistricts } : {}),
+					...(Number.isFinite(priorityRaw) && priorityRaw > 0 ? { priority: priorityRaw } : {}),
+					...(requirementsOverride.length ? { requirementsOverride } : {}),
+					...(benefitsOverride.length ? { benefitsOverride } : {}),
+					...(requiredDocumentsOverride.length ? { requiredDocumentsOverride } : {})
+				}))
+			)
 		};
 
 		if (document.getElementById('job-is-hot').checked) {
@@ -332,32 +515,42 @@ const companyExamples = jobsData.slice(0, 8).map((job) => ({
 
 		try {
 			const draft = JSON.parse(raw);
+			const draftContent = draft.content?.ru || {};
+			const firstOffer = draft.offers?.[0] || {};
 			setFieldValue('job-id', draft.id ?? nextId);
 			setFieldValue('job-slug', draft.slug);
-			setFieldValue('job-title', draft.title);
-			setFieldValue('job-company', draft.company);
-			setFieldValue('job-company-logo', draft.companyLogo);
-			setFieldValue('job-salary', draft.salary);
-			setFieldValue('job-location', draft.location);
-			setFieldValue('job-tags', (draft.tags || []).join(', '));
-			setFieldValue('job-labels', (draft.labels || []).join(', '));
-			setFieldValue('job-apply-link', draft.applyLink === '#' ? '' : draft.applyLink);
-			setFieldValue('job-short-description', draft.shortDescription);
-			setFieldValue('job-description', draft.description);
-			setFieldValue('job-requirements', (draft.requirements || []).join('\n'));
-			setFieldValue('job-benefits', (draft.benefits || []).join('\n'));
-			setFieldValue('detail-rate', draft.details?.rate);
-			setFieldValue('detail-schedule', draft.details?.schedule);
-			setFieldValue('detail-education', draft.details?.education);
-			setFieldValue('detail-age', draft.details?.age);
-			setFieldValue('detail-payment-freq', draft.details?.payment_freq);
-			setFieldValue('detail-citizenship', draft.details?.citizenship);
-			setFieldValue('detail-medical-book', draft.details?.medical_book);
-			setFieldValue('detail-self-employed', draft.details?.self_employed);
-			setFieldValue('detail-employment-type', draft.details?.employment_type);
-			setFieldValue('detail-uniform', draft.details?.uniform);
-			setFieldValue('detail-os', draft.details?.os);
-			setFieldValue('job-search-tags', (draft.search_tags || []).join(', '));
+			setFieldValue('job-title', draftContent.title ?? draft.title);
+			setFieldValue('job-company', draft.company?.name ?? draft.company);
+			setFieldValue('job-company-logo', draft.company?.logo ?? draft.companyLogo);
+			setFieldValue('job-salary', firstOffer.pay?.monthly?.text ?? draft.pay?.salary ?? draft.salary);
+			setFieldValue('job-location', Array.from(new Set((draft.offers || []).map((offer) => offer.city))).join(', ') || (draft.hiring?.cities || []).map((city) => city.name).join(', ') || draft.location);
+			setFieldValue('job-tags', Array.from(new Set((draft.offers || []).map((offer) => offer.transport))).join(', ') || (draft.transport || draft.tags || []).join(', '));
+			setFieldValue('job-labels', (draftContent.labels || draft.labels || []).join(', '));
+			setFieldValue('job-apply-link', firstOffer.applyLink === '#' ? '' : firstOffer.applyLink ?? (draft.applyLink === '#' ? '' : draft.applyLink));
+			setFieldValue('job-source-url', firstOffer.sourceUrl);
+			setFieldValue('job-updated-at', firstOffer.updatedAt);
+			setFieldValue('job-salary-confidence', firstOffer.salaryConfidence || 'partner');
+			setFieldValue('job-city-districts', (firstOffer.cityDistricts || []).join(', '));
+			setFieldValue('job-priority', firstOffer.priority);
+			setFieldValue('job-short-description', draftContent.shortDescription ?? draft.description?.short ?? draft.shortDescription);
+			setFieldValue('job-description', draftContent.description ?? draft.description?.full ?? draft.description);
+			setFieldValue('job-requirements', (draftContent.requirements || draft.description?.requirements || draft.requirements || []).join('\n'));
+			setFieldValue('job-benefits', (draftContent.benefits || draft.description?.benefits || draft.benefits || []).join('\n'));
+			setFieldValue('job-required-documents', readLocalizedList(draftContent.requiredDocuments || draft.requiredDocuments || draft.documents).join('\n'));
+			setFieldValue('job-requirements-override', readLocalizedList(firstOffer.requirementsOverride).join('\n'));
+			setFieldValue('job-benefits-override', readLocalizedList(firstOffer.benefitsOverride).join('\n'));
+			setFieldValue('job-required-documents-override', readLocalizedList(firstOffer.requiredDocumentsOverride).join('\n'));
+			setFieldValue('detail-rate', firstOffer.pay?.rate ?? draft.pay?.rate ?? draft.details?.rate);
+			setFieldValue('detail-schedule', firstOffer.schedule ?? draft.defaults?.schedule ?? draft.work?.schedule ?? draft.details?.schedule);
+			setFieldValue('detail-education', draft.defaults?.education ?? draft.work?.education ?? draft.details?.education);
+			setFieldValue('detail-age', firstOffer.ageFrom ? `от ${firstOffer.ageFrom} лет` : draft.defaults?.ageFrom ? `от ${draft.defaults.ageFrom} лет` : draft.hiring?.defaultAgeFrom ? `от ${draft.hiring.defaultAgeFrom} лет` : draft.details?.age);
+			setFieldValue('detail-payment-freq', firstOffer.pay?.paymentFrequency ?? draft.pay?.paymentFrequency ?? draft.details?.payment_freq);
+			setFieldValue('detail-citizenship', draft.defaults?.citizenship ?? draft.work?.citizenship ?? draft.details?.citizenship);
+			setFieldValue('detail-medical-book', firstOffer.medicalBook ?? draft.defaults?.medicalBook ?? draft.hiring?.medicalBook ?? draft.details?.medical_book);
+			setFieldValue('detail-employment-type', (firstOffer.employmentFormats || draft.defaults?.employmentFormats || draft.hiring?.employmentFormats || []).join(', ') || draft.details?.employment_type);
+			setFieldValue('detail-uniform', draft.defaults?.uniform ?? draft.work?.uniform ?? draft.details?.uniform);
+			setFieldValue('detail-os', draft.defaults?.os ?? draft.work?.os ?? draft.details?.os);
+			setFieldValue('job-search-tags', (draftContent.searchTags || draft.searchTags || draft.search_tags || []).join(', '));
 			setFieldValue('job-is-hot', Boolean(draft.isHot));
 		} catch (error) {
 			console.error('Не удалось загрузить черновик', error);
@@ -412,7 +605,7 @@ const companyExamples = jobsData.slice(0, 8).map((job) => ({
 	vacancyForm?.addEventListener('submit', (event) => {
 		event.preventDefault();
 		generateJson();
-		copyStatus.textContent = 'JSON сгенерирован.';
+		copyStatus.textContent = 'Объект базовой вакансии сгенерирован.';
 	});
 
 	document.getElementById('owner-save-draft')?.addEventListener('click', () => {
@@ -435,7 +628,7 @@ const companyExamples = jobsData.slice(0, 8).map((job) => ({
 
 		try {
 			await navigator.clipboard.writeText(output.value);
-			copyStatus.textContent = 'JSON скопирован в буфер обмена.';
+			copyStatus.textContent = 'Объект скопирован в буфер обмена.';
 		} catch (error) {
 			copyStatus.textContent = 'Не удалось скопировать автоматически. Можно скопировать вручную из окна справа.';
 		}
@@ -453,7 +646,7 @@ const companyExamples = jobsData.slice(0, 8).map((job) => ({
 		link.download = `${document.getElementById('job-slug').value || 'vacancy'}.json`;
 		link.click();
 		URL.revokeObjectURL(url);
-		copyStatus.textContent = 'JSON-файл скачан.';
+		copyStatus.textContent = 'Файл с объектом скачан.';
 	});
 
 	document.getElementById('owner-logout')?.addEventListener('click', () => {

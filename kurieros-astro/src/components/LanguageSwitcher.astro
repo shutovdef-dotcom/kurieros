@@ -1,77 +1,140 @@
 ---
-const languages = [
-    { code: 'ru', name: 'Русский', flag: '🇷🇺' },
-    { code: 'kk', name: 'Қазақ', flag: '🇰🇿' },
-    { code: 'uz', name: 'O\'zbek', flag: '🇺🇿' },
-    { code: 'uk', name: 'Українська', flag: '🇺🇦' },
-    { code: 'be', name: 'Беларуская', flag: '🇧🇾' },
-    { code: 'hy', name: 'Հայերեն', flag: '🇦🇲' },
-    { code: 'ky', name: 'Кыргызча', flag: '🇰🇬' },
-    { code: 'tg', name: 'Тоҷикӣ', flag: '🇹🇯' },
-    { code: 'az', name: 'Azərbaycan', flag: '🇦🇿' },
-    { code: 'hi', name: 'हिन्दी', flag: '🇮🇳' },
-    { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' },
-    { code: 'zh', name: '中文', flag: '🇨🇳' },
-];
+import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../data/translations';
+
+const languageNames: Record<SupportedLanguage, { name: string; flag: string }> = {
+    ru: { name: 'Русский', flag: '🇷🇺' },
+    uz: { name: "O'zbek", flag: '🇺🇿' },
+    tg: { name: 'Тоҷикӣ', flag: '🇹🇯' },
+    ky: { name: 'Кыргызча', flag: '🇰🇬' },
+    hy: { name: 'Հայերեն', flag: '🇦🇲' },
+    kk: { name: 'Қазақ', flag: '🇰🇿' },
+    az: { name: 'Azərbaycan', flag: '🇦🇿' },
+    uk: { name: 'Українська', flag: '🇺🇦' },
+    be: { name: 'Беларуская', flag: '🇧🇾' },
+    hi: { name: 'हिन्दी', flag: '🇮🇳' },
+    vi: { name: 'Tiếng Việt', flag: '🇻🇳' },
+    zh: { name: '中文', flag: '🇨🇳' },
+};
+
+const languages = SUPPORTED_LANGUAGES.map((code) => ({
+    code,
+    ...languageNames[code],
+}));
+
+const languageMeta = Object.fromEntries(
+    languages.map((language) => [language.code, { name: language.name, flag: language.flag }]),
+);
 ---
 
-<div class="lang-switcher">
-    <button class="lang-toggle" id="lang-toggle-btn" type="button">
-        <span id="current-lang-flag">🇷🇺</span>
-        <span id="current-lang-code">RU</span>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+<div class="lang-switcher" data-lang-switcher>
+    <button
+        class="lang-toggle"
+        data-lang-toggle
+        type="button"
+        aria-haspopup="true"
+        aria-expanded="false"
+        aria-label="Сменить язык"
+    >
+        <span class="lang-flag" data-current-lang-flag aria-hidden="true">🇷🇺</span>
+        <span class="lang-code" data-current-lang-code>RU</span>
+        <svg class="lang-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
     </button>
-    
-    <div class="lang-dropdown hidden" id="lang-dropdown">
-        {languages.map(lang => (
-            <button class="lang-option" data-lang={lang.code} type="button">
-                <span class="flag">{lang.flag}</span>
-                <span class="name">{lang.name}</span>
+
+    <div class="lang-dropdown" data-lang-dropdown hidden>
+        {languages.map((language) => (
+            <button class="lang-option" data-lang-option data-lang={language.code} type="button">
+                <span class="flag" aria-hidden="true">{language.flag}</span>
+                <span class="name">{language.name}</span>
             </button>
         ))}
     </div>
 </div>
 
-<script is:inline>
+<script is:inline define:vars={{ languageMeta }}>
     (function() {
-        const btn = document.getElementById('lang-toggle-btn');
-        const dropdown = document.getElementById('lang-dropdown');
-        const flagEl = document.getElementById('current-lang-flag');
-        const codeEl = document.getElementById('current-lang-code');
-        
-        const languages = {
-            ru: '🇷🇺', kk: '🇰🇿', uz: '🇺🇿', uk: '🇺🇦', be: '🇧🇾', 
-            hy: '🇦🇲', ky: '🇰🇬', tg: '🇹🇯', az: '🇦🇿', hi: '🇮🇳', 
-            vi: '🇻🇳', zh: '🇨🇳'
-        };
+        const roots = Array.from(document.querySelectorAll('[data-lang-switcher]'));
+        if (!roots.length) return;
 
-        function updateUI(lang) {
-            if (flagEl) flagEl.textContent = languages[lang] || '🇷🇺';
-            if (codeEl) codeEl.textContent = lang.toUpperCase();
+        const defaultLang = 'ru';
+
+        function getSafeLang(lang) {
+            return languageMeta[lang] ? lang : defaultLang;
         }
 
-        // Initialize UI from current lang
-        document.addEventListener('DOMContentLoaded', () => {
-            const currentLang = window.kurieros_i18n?.currentLang || 'ru';
-            updateUI(currentLang);
-        });
+        function getCurrentLang() {
+            return getSafeLang(window.kurieros_i18n?.currentLang || localStorage.getItem('site-lang') || defaultLang);
+        }
 
-        btn?.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdown?.classList.toggle('hidden');
-        });
+        roots.forEach((root) => {
+            if (root.dataset.ready === 'true') return;
+            root.dataset.ready = 'true';
 
-        document.querySelectorAll('.lang-option').forEach(opt => {
-            opt.addEventListener('click', () => {
-                const lang = opt.getAttribute('data-lang');
-                window.kurieros_i18n?.setLanguage(lang);
-                updateUI(lang);
-                dropdown?.classList.add('hidden');
+            const toggle = root.querySelector('[data-lang-toggle]');
+            const dropdown = root.querySelector('[data-lang-dropdown]');
+            const flagEl = root.querySelector('[data-current-lang-flag]');
+            const codeEl = root.querySelector('[data-current-lang-code]');
+            const options = Array.from(root.querySelectorAll('[data-lang-option]'));
+            if (!toggle || !dropdown || !flagEl || !codeEl) return;
+
+            function closeDropdown() {
+                dropdown.hidden = true;
+                toggle.setAttribute('aria-expanded', 'false');
+            }
+
+            function toggleDropdown() {
+                const willOpen = dropdown.hidden;
+                dropdown.hidden = !willOpen;
+                toggle.setAttribute('aria-expanded', String(willOpen));
+            }
+
+            function updateUI(lang) {
+                const safeLang = getSafeLang(lang);
+                const meta = languageMeta[safeLang] || languageMeta[defaultLang];
+
+                flagEl.textContent = meta.flag;
+                codeEl.textContent = safeLang.toUpperCase();
+                toggle.setAttribute('aria-label', `Сменить язык, выбран ${meta.name}`);
+
+                options.forEach((option) => {
+                    const isActive = option.getAttribute('data-lang') === safeLang;
+                    option.classList.toggle('active', isActive);
+                    option.setAttribute('aria-current', isActive ? 'true' : 'false');
+                });
+            }
+
+            toggle.addEventListener('click', (event) => {
+                event.stopPropagation();
+                toggleDropdown();
             });
-        });
 
-        document.addEventListener('click', () => {
-            dropdown?.classList.add('hidden');
+            options.forEach((option) => {
+                option.addEventListener('click', () => {
+                    const lang = getSafeLang(option.getAttribute('data-lang'));
+
+                    if (window.kurieros_i18n) {
+                        window.kurieros_i18n.setLanguage(lang);
+                    } else {
+                        localStorage.setItem('site-lang', lang);
+                        updateUI(lang);
+                    }
+
+                    closeDropdown();
+                });
+            });
+
+            document.addEventListener('click', (event) => {
+                if (!root.contains(event.target)) closeDropdown();
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') closeDropdown();
+            });
+
+            window.addEventListener('kurieros:lang-change', (event) => {
+                updateUI(event.detail?.lang);
+            });
+
+            updateUI(getCurrentLang());
         });
     })();
 </script>
@@ -80,78 +143,90 @@ const languages = [
     .lang-switcher {
         position: relative;
         font-family: var(--font-main);
-        height: 100%;
+        line-height: 1;
     }
+
     .lang-toggle {
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
-        background: var(--surface-color);
+        justify-content: center;
+        gap: 0.4rem;
+        min-width: 4.2rem;
+        min-height: 2.35rem;
+        padding: 0 0.7rem;
         border: 1px solid var(--border-color);
-        padding: 0 0.75rem; /* No vertical padding, align-items: center will do it */
-        height: 100%;
-        border-radius: 99px;
-        cursor: pointer;
-        font-size: 0.85rem;
-        font-weight: 600;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.88);
         color: var(--text-main);
-        transition: var(--transition);
         box-shadow: var(--shadow-sm);
-        box-sizing: border-box;
+        cursor: pointer;
+        font-size: 0.86rem;
+        font-weight: 800;
+        transition: var(--transition);
     }
-    .lang-toggle:hover {
+
+    .lang-toggle:hover,
+    .lang-toggle:focus-visible {
         border-color: var(--primary-color);
+        outline: none;
         transform: translateY(-1px);
     }
+
+    .lang-code {
+        letter-spacing: 0;
+    }
+
+    .lang-chevron {
+        flex: 0 0 auto;
+    }
+
     .lang-dropdown {
         position: absolute;
-        top: calc(100% + 8px);
-        left: 50%;
-        transform: translateX(-50%);
-        background: var(--surface-color);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        box-shadow: var(--shadow-md);
-        z-index: 1000;
-        width: 180px;
-        max-height: 400px;
-        overflow-y: auto;
-        padding: 0.5rem;
+        top: calc(100% + 0.5rem);
+        right: 0;
+        z-index: 1100;
         display: flex;
+        width: min(13rem, calc(100vw - 2rem));
+        max-height: min(24rem, calc(100vh - 7rem));
         flex-direction: column;
-        gap: 2px;
+        gap: 0.15rem;
+        overflow-y: auto;
+        padding: 0.45rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: var(--surface-color);
+        box-shadow: var(--shadow-md);
     }
-    .lang-dropdown.hidden {
+
+    .lang-dropdown[hidden] {
         display: none;
     }
+
     .lang-option {
         display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.6rem 0.75rem;
-        border: none;
-        background: none;
         width: 100%;
-        text-align: left;
-        cursor: pointer;
+        align-items: center;
+        gap: 0.7rem;
+        padding: 0.65rem 0.7rem;
+        border: 0;
         border-radius: 8px;
-        font-size: 0.9rem;
+        background: transparent;
         color: var(--text-main);
+        cursor: pointer;
+        font: inherit;
+        text-align: left;
         transition: var(--transition);
     }
-    .lang-option:hover {
-        background: var(--bg-color);
+
+    .lang-option:hover,
+    .lang-option:focus-visible,
+    .lang-option.active {
+        background: #eef7f2;
         color: var(--primary-color);
+        outline: none;
     }
+
     .flag {
-        font-size: 1.1rem;
-    }
-    /* Simple scrollbar */
-    .lang-dropdown::-webkit-scrollbar {
-        width: 4px;
-    }
-    .lang-dropdown::-webkit-scrollbar-thumb {
-        background: var(--border-color);
-        border-radius: 10px;
+        font-size: 1.05rem;
     }
 </style>

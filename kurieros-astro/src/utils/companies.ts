@@ -1,3 +1,5 @@
+import { getVacancyPluralText, humanJoin, parseSalary } from './format';
+
 export type JobLike = {
   slug: string;
   title: string;
@@ -69,15 +71,6 @@ export const slugifyCompany = (name: string) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .replace(/--+/g, '-');
-
-const parseSalary = (salary: string) => Number(salary.replace(/[^\d]/g, '')) || 0;
-
-const humanJoin = (items: string[]) => {
-  if (items.length === 0) return '';
-  if (items.length === 1) return items[0];
-  if (items.length === 2) return `${items[0]} и ${items[1]}`;
-  return `${items.slice(0, -1).join(', ')} и ${items.at(-1)}`;
-};
 
 const companyTypeLabel = (name: string) => {
   if (/банк/i.test(name)) return 'финтех и банковская доставка';
@@ -185,7 +178,7 @@ export const getCompaniesFromJobs = (jobs: JobLike[], reviews: ReviewLike[] = []
       const paymentPreview = Array.from(company.payments).slice(0, 2);
       const employmentPreview = Array.from(company.employmentTypes).slice(0, 2);
       const agePreview = Array.from(company.ages).slice(0, 2);
-      const shortIntro = `${company.name} на Курьерок — это ${companyTypeLabel(company.name)} с ${company.jobs.length} ваканс${company.jobs.length === 1 ? 'ией' : 'иями'}, где можно быстро сравнить формат работы, выплаты и ограничения до отклика.`;
+      const shortIntro = `${company.name} на Курьерок — это ${companyTypeLabel(company.name)}, где сейчас есть ${company.jobs.length} ${getVacancyPluralText(company.jobs.length)}. Здесь удобно сравнить формат работы, выплаты и ограничения до отклика.`;
 
       return {
         name: company.name,
@@ -220,7 +213,7 @@ export const getCompaniesFromJobs = (jobs: JobLike[], reviews: ReviewLike[] = []
         faqItems: [
           {
             question: `Какие вакансии есть у ${company.name}?`,
-            answer: `Сейчас на сайте есть ${company.jobs.length} ваканс${company.jobs.length === 1 ? 'ия' : 'ии'} ${company.name}. Основные форматы: ${humanJoin(transportModes) || 'смешанные форматы'}${paymentPreview.length ? `, выплаты: ${humanJoin(paymentPreview)}` : ''}.`,
+            answer: `Сейчас на сайте есть ${company.jobs.length} ${getVacancyPluralText(company.jobs.length)} ${company.name}. Основные форматы: ${humanJoin(transportModes) || 'смешанные форматы'}${paymentPreview.length ? `, выплаты: ${humanJoin(paymentPreview)}` : ''}.`,
           },
           {
             question: `Кому подходит работа в ${company.name}?`,

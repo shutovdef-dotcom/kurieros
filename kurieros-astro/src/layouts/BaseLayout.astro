@@ -2,10 +2,22 @@
 import '../styles/index.css';
 import '../styles/themes.css';
 import VPNModal from '../components/VPNModal.astro';
-import { translations } from '../data/translations';
-import jobTranslations from '../data/job_translations.json';
+import { SUPPORTED_LANGUAGES, translations, type SupportedLanguage } from '../data/translations';
 
-Object.keys(translations).forEach(lang => {
+const supportedLanguages = SUPPORTED_LANGUAGES;
+const vacancyTranslationModules = import.meta.glob('../data/vacancy-translations/*.json', {
+	eager: true,
+}) as Record<string, { default: Record<string, Record<string, string>> }>;
+const jobTranslations = Object.fromEntries(
+	Object.entries(vacancyTranslationModules)
+		.map(([path, module]) => [
+			path.match(/\/([^/]+)\.json$/)?.[1],
+			module.default,
+		])
+		.filter(([language]) => supportedLanguages.includes(language as SupportedLanguage)),
+) as Partial<Record<SupportedLanguage, Record<string, Record<string, string>>>>;
+
+supportedLanguages.forEach(lang => {
     if (jobTranslations[lang]) {
         translations[lang].vacancies = jobTranslations[lang];
     }
@@ -13,7 +25,9 @@ Object.keys(translations).forEach(lang => {
 
 interface Props {
 	title?: string;
+	titleKey?: string;
 	description?: string;
+	descriptionKey?: string;
 	image?: string;
 	canonicalURL?: URL | string;
 	schemaGraph?: Record<string, any> | Array<Record<string, any>>;
@@ -22,7 +36,9 @@ interface Props {
 
 const {
 	title = "Курьерок — Вся работа здесь",
+	titleKey,
 	description = "Лучшие вакансии для курьеров в России. Работа на авто, мото, вело и пешком. Сравнивайте условия в Яндекс Еда, СДЭК, Ozon и других компаниях.",
+	descriptionKey,
 	image = "/favicon.svg",
 	canonicalURL = new URL(Astro.url.pathname, Astro.site),
 	schemaGraph = [],
@@ -51,6 +67,12 @@ const structuredData = JSON.stringify(
 	null,
 	2,
 );
+
+const isProduction = import.meta.env.PROD;
+const ga4MeasurementId = String(import.meta.env.PUBLIC_GA4_MEASUREMENT_ID ?? '').trim();
+const yandexMetrikaId = String(import.meta.env.PUBLIC_YANDEX_METRIKA_ID ?? '').trim();
+const yandexVerification = String(import.meta.env.PUBLIC_YANDEX_VERIFICATION ?? 'ac1cd99571b69d37').trim();
+const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION ?? 'QIGlMj-JAXkxvnkeFNNu6hWJ5bslKtguuUxY4ty17bI').trim();
 ---
 
 <!doctype html>
@@ -59,13 +81,13 @@ const structuredData = JSON.stringify(
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
 		<meta name="generator" content={Astro.generator} />
-		<title>{title}</title>
-		<meta name="description" content={description} />
+		<title data-t-title={titleKey}>{title}</title>
+		<meta name="description" content={description} data-t-content={descriptionKey} />
 		<meta name="robots" content={robots} />
 		<link rel="canonical" href={resolvedCanonicalUrl} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="yandex-verification" content="30c6a3b60b31cae1" />
-		<meta name="google-site-verification" content="VzCdNteici0zCzN4iBE8dXeeWTC_6k4UAxT4EwNwlPY" />
+			<meta name="yandex-verification" content={yandexVerification} />
+			<meta name="google-site-verification" content={googleSiteVerification} />
 		<meta name="format-detection" content="telephone=no" />
 
 		<!-- Google Fonts for Logo Experiments -->
@@ -73,16 +95,50 @@ const structuredData = JSON.stringify(
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800;900&family=Playfair+Display:wght@700;900&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
 
-		<!-- Theme Persistence -->
-		<script is:inline>
-			(function() {
-				const savedTheme = localStorage.getItem('site-theme');
+			<!-- Theme Persistence -->
+			<script is:inline>
+				(function() {
+					const savedTheme = localStorage.getItem('site-theme');
 				const bodyClass = savedTheme && savedTheme !== 'default'
 					? `theme-${savedTheme}`
 					: 'theme-minimal';
 				document.documentElement.dataset.initialTheme = bodyClass;
-			})();
-		</script>
+				})();
+			</script>
+
+			{isProduction && ga4MeasurementId && (
+				<>
+					<script async src={`https://www.googletagmanager.com/gtag/js?id=${ga4MeasurementId}`}></script>
+					<script is:inline define:vars={{ ga4MeasurementId }}>
+						window.dataLayer = window.dataLayer || [];
+						function gtag(){window.dataLayer.push(arguments);}
+						gtag('js', new Date());
+						gtag('config', ga4MeasurementId, {
+							anonymize_ip: true,
+						});
+					</script>
+				</>
+			)}
+
+			{isProduction && yandexMetrikaId && (
+				<script is:inline define:vars={{ yandexMetrikaId }}>
+					(function(m,e,t,r,i,k,a){
+						m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+						m[i].l=1*new Date();
+						for (var j = 0; j < document.scripts.length; j++) {
+							if (document.scripts[j].src === r) return;
+						}
+						k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a);
+					})(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js', 'ym');
+
+					ym(Number(yandexMetrikaId), 'init', {
+						clickmap:true,
+						trackLinks:true,
+						accurateTrackBounce:true,
+						webvisor:true
+					});
+				</script>
+			)}
 
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content="website" />
@@ -100,17 +156,24 @@ const structuredData = JSON.stringify(
 		<meta property="twitter:description" content={description} />
 		<meta property="twitter:image" content={resolvedImageUrl} />
 
-		<meta name="theme-color" content="#4F46E5" />
+		<meta name="theme-color" content="#16734c" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-		<!-- SEO Schema.org Markup -->
+		<!-- Schema.org Markup -->
 		<script type="application/ld+json" set:html={structuredData}></script>
 	</head>
-	<body class="theme-minimal">
-		<script is:inline>
-			(function() {
-				const initialTheme = document.documentElement.dataset.initialTheme;
+		<body class="theme-minimal">
+			{isProduction && yandexMetrikaId && (
+				<noscript>
+					<div>
+						<img src={`https://mc.yandex.ru/watch/${yandexMetrikaId}`} style="position:absolute; left:-9999px;" alt="" />
+					</div>
+				</noscript>
+			)}
+			<script is:inline>
+				(function() {
+					const initialTheme = document.documentElement.dataset.initialTheme;
 				document.body.className = initialTheme || 'theme-minimal';
 			})();
 		</script>
@@ -122,16 +185,11 @@ const structuredData = JSON.stringify(
 		<VPNModal />
 
 		<script is:inline>
-			// Global Location & VPN Detection
 			(async function() {
 				if (window.kurieros_user) return;
 
-				const isGeoDebugHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-
-				function logGeoDebug(level, ...args) {
-					if (isGeoDebugHost) {
-						console[level](...args);
-					}
+				if (['localhost', '127.0.0.1'].includes(window.location.hostname)) {
+					return;
 				}
 				
 				async function fetchWithTimeout(resource, options = {}) {
@@ -171,16 +229,13 @@ const structuredData = JSON.stringify(
 					if (res.ok) {
 						data = normalizeGeoData(await res.json());
 					}
-				} catch (e) {
-					logGeoDebug('warn', 'Primary geo API failed, trying fallback...', e);
+				} catch {
 					try {
 						const res = await fetchWithTimeout('https://ipwho.is/');
 						if (res.ok) {
 							data = normalizeGeoData(await res.json());
 						}
-					} catch (e2) {
-						logGeoDebug('warn', 'All geo APIs failed.', e2);
-					}
+					} catch {}
 				}
 
 				if (data) {
@@ -189,22 +244,33 @@ const structuredData = JSON.stringify(
 				}
 			})();
 		</script>
-		<script is:inline define:vars={{ translations }}>
+		<script is:inline define:vars={{ translations, supportedLanguages }}>
 			// Global i18n Manager
 			(function() {
 				const STORAGE_KEY = 'site-lang';
 				const DEFAULT_LANG = 'ru';
+				const SUPPORTED_LANGS = supportedLanguages;
 				window.translations = translations;
 				
+				function getSafeLang(lang) {
+					return SUPPORTED_LANGS.includes(lang) ? lang : DEFAULT_LANG;
+				}
+
 				function getNestedValue(obj, path) {
 					return path.split('.').reduce((prev, curr) => prev && prev[curr], obj);
 				}
 
+				const savedLang = localStorage.getItem(STORAGE_KEY);
+				const initialLang = getSafeLang(savedLang || DEFAULT_LANG);
+				if (savedLang !== initialLang) {
+					localStorage.setItem(STORAGE_KEY, initialLang);
+				}
+
 				window.kurieros_i18n = {
-					currentLang: localStorage.getItem(STORAGE_KEY) || DEFAULT_LANG,
+					currentLang: initialLang,
 					
 					setLanguage(lang) {
-						if (!translations[lang]) lang = DEFAULT_LANG;
+						lang = getSafeLang(lang);
 						this.currentLang = lang;
 						localStorage.setItem(STORAGE_KEY, lang);
 						this.applyTranslations();
@@ -213,7 +279,10 @@ const structuredData = JSON.stringify(
 
 					applyTranslations() {
 						const elements = document.querySelectorAll('[data-t]');
-						const langData = translations[this.currentLang] || translations[DEFAULT_LANG];
+						const contentElements = document.querySelectorAll('[data-t-content]');
+						const titleElement = document.querySelector('[data-t-title]');
+						const lang = getSafeLang(this.currentLang);
+						const langData = translations[lang] || translations[DEFAULT_LANG];
 						
 						elements.forEach(el => {
 							const key = el.getAttribute('data-t');
@@ -227,13 +296,30 @@ const structuredData = JSON.stringify(
 								}
 							}
 						});
+
+						contentElements.forEach(el => {
+							const key = el.getAttribute('data-t-content');
+							const translation = getNestedValue(langData, key) || getNestedValue(translations[DEFAULT_LANG], key);
+
+							if (translation) {
+								el.setAttribute('content', translation);
+							}
+						});
+
+						if (titleElement) {
+							const key = titleElement.getAttribute('data-t-title');
+							const translation = getNestedValue(langData, key) || getNestedValue(translations[DEFAULT_LANG], key);
+
+							if (translation) {
+								titleElement.textContent = translation;
+								document.title = translation;
+							}
+						}
 						
-						// Update HTML lang attribute
-						document.documentElement.setAttribute('lang', this.currentLang);
+						document.documentElement.setAttribute('lang', lang);
 					}
 				};
 
-				// Initial apply
 				document.addEventListener('DOMContentLoaded', () => {
 					window.kurieros_i18n.applyTranslations();
 				});

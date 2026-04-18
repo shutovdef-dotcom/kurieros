@@ -95,7 +95,7 @@ const pageSchemaGraph = [
 
 			<section class="article-answer-panel">
 				<div>
-					<div class="article-kicker">SEO / GEO TL;DR</div>
+					<div class="article-kicker">После статьи</div>
 					<h2>Что делать после прочтения?</h2>
 				</div>
 				<p>
@@ -119,13 +119,13 @@ const pageSchemaGraph = [
 				<div class="editor-note">
 					<div class="editor-note-label">Материал подготовлен редакцией</div>
 					<h2>Курьерок Журнал</h2>
-					<p>Мы собираем практические материалы о работе курьером: сравниваем вакансии, условия и реальные сценарии заработка без рекламных обещаний.</p>
+					<p>Мы собираем практические материалы о работе курьером: сравниваем вакансии, условия и доход без рекламных обещаний.</p>
 				</div>
 
 				<div class="article-next">
 					<div class="related-header">
 						<h2>Куда перейти дальше</h2>
-						<p>Следующий логичный шаг после статьи — перейти в одну из рабочих поверхностей сайта.</p>
+						<p>Следующий шаг после статьи — открыть раздел с вакансиями, компаниями или городскими подборками.</p>
 					</div>
 					<div class="next-grid">
 						{routeLinks.map((link) => (
@@ -191,12 +191,12 @@ const pageSchemaGraph = [
 		margin-bottom: 1rem;
 		font-size: 0.78rem;
 		text-transform: uppercase;
-		letter-spacing: 0.18em;
+		letter-spacing: 0;
 		color: var(--text-muted);
 	}
 	.article-cover-frame {
 		overflow: clip;
-		border-radius: 32px;
+		border-radius: 8px;
 		background: #e2e8f0;
 		border: 1px solid rgba(148, 163, 184, 0.25);
 		box-shadow: 0 28px 70px rgba(15, 23, 42, 0.12);
@@ -212,9 +212,9 @@ const pageSchemaGraph = [
 		object-fit: cover;
 	}
 	.article-header h1 {
-		font-size: clamp(2.4rem, 5vw, 4.8rem);
+		font-size: 4.2rem;
 		line-height: 0.96;
-		letter-spacing: -0.055em;
+		letter-spacing: 0;
 		max-width: 11ch;
 	}
 	.article-meta {
@@ -249,9 +249,9 @@ const pageSchemaGraph = [
 		align-items: center;
 		min-height: 2.2rem;
 		padding: 0.45rem 0.8rem;
-		border-radius: 999px;
-		border: 1px solid rgba(99, 102, 241, 0.14);
-		background: rgba(99, 102, 241, 0.08);
+		border-radius: 8px;
+		border: 1px solid rgba(22, 115, 76, 0.14);
+		background: rgba(22, 115, 76, 0.08);
 		color: var(--text-main);
 		text-decoration: none;
 		font-weight: 800;
@@ -265,7 +265,7 @@ const pageSchemaGraph = [
 		gap: 1.5rem;
 		align-items: start;
 		padding: 1.5rem;
-		border-radius: 1.5rem;
+		border-radius: 8px;
 		border: 1px solid rgba(148, 163, 184, 0.16);
 		background: rgba(255, 255, 255, 0.82);
 		box-shadow: var(--shadow-sm);
@@ -289,9 +289,9 @@ const pageSchemaGraph = [
 		align-items: center;
 		min-height: 2.5rem;
 		padding: 0.65rem 1rem;
-		border-radius: 999px;
-		border: 1px solid rgba(99, 102, 241, 0.16);
-		background: rgba(99, 102, 241, 0.08);
+		border-radius: 8px;
+		border: 1px solid rgba(22, 115, 76, 0.16);
+		background: rgba(22, 115, 76, 0.08);
 		color: var(--text-main);
 		text-decoration: none;
 		font-weight: 800;
@@ -309,9 +309,9 @@ const pageSchemaGraph = [
 	:global(.article-body h2) {
 		margin-top: 2.75rem;
 		margin-bottom: 1rem;
-		font-size: clamp(1.6rem, 2.4vw, 2.2rem);
+		font-size: 2rem;
 		line-height: 1.2;
-		letter-spacing: -0.03em;
+		letter-spacing: 0;
 	}
 	:global(.article-body p) {
 		margin-bottom: 1.35rem;
@@ -348,7 +348,7 @@ const pageSchemaGraph = [
 	.editor-note,
 	.next-card {
 		padding: 2rem;
-		border-radius: 28px;
+		border-radius: 8px;
 		background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(248,250,252,0.96));
 		border: 1px solid rgba(148, 163, 184, 0.18);
 		box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
@@ -356,14 +356,14 @@ const pageSchemaGraph = [
 	.editor-note-label {
 		font-size: 0.78rem;
 		text-transform: uppercase;
-		letter-spacing: 0.18em;
+		letter-spacing: 0;
 		color: var(--text-muted);
 		margin-bottom: 0.8rem;
 	}
 	.editor-note h2,
 	.related-header h2 {
-		font-size: clamp(1.7rem, 2.6vw, 2.4rem);
-		letter-spacing: -0.04em;
+		font-size: 2.1rem;
+		letter-spacing: 0;
 	}
 	.editor-note p,
 	.related-header p {
@@ -400,7 +400,7 @@ const pageSchemaGraph = [
 	.related-copy h3 {
 		font-size: 1.05rem;
 		line-height: 1.3;
-		letter-spacing: -0.02em;
+		letter-spacing: 0;
 	}
 	.related-card {
 		display: grid;
@@ -408,7 +408,7 @@ const pageSchemaGraph = [
 		color: inherit;
 		background: rgba(255,255,255,0.88);
 		border: 1px solid rgba(148, 163, 184, 0.16);
-		border-radius: 24px;
+		border-radius: 8px;
 		overflow: hidden;
 		box-shadow: 0 18px 48px rgba(15, 23, 42, 0.07);
 	}
@@ -450,7 +450,16 @@ const pageSchemaGraph = [
 			padding: 0;
 		}
 		.article-cover-frame {
-			border-radius: 24px;
+			border-radius: 8px;
+		}
+		.article-header h1 {
+			font-size: 2.55rem;
+			max-width: 13ch;
+		}
+		:global(.article-body h2),
+		.editor-note h2,
+		.related-header h2 {
+			font-size: 1.6rem;
 		}
 		.article-cover {
 			height: 260px;
@@ -462,7 +471,7 @@ const pageSchemaGraph = [
 		}
 		.editor-note {
 			padding: 1.5rem;
-			border-radius: 22px;
+			border-radius: 8px;
 		}
 		.related-header {
 			display: grid;

@@ -98,47 +98,36 @@ const ratesJson = JSON.stringify(cityRates);
     const totalAmount = document.getElementById('total-amount');
 
     function calculate() {
-        const days = parseInt(daysRange.value);
-        const hours = parseInt(hoursRange.value);
+        const days = Number.parseInt(daysRange.value, 10);
+        const hours = Number.parseInt(hoursRange.value, 10);
         const citySlug = citySelect.value;
         const rate = rates[citySlug] || rates['default'];
-        
-        let total = days * hours * rate;
-        total = total * 1.2; // +20% for bonuses/tips
+        const total = days * hours * rate * 1.2;
         
         daysVal.textContent = days;
         hoursVal.textContent = hours;
-        
-        // Simple counter animation
-        const currentAmount = parseInt(totalAmount.textContent.replace(/\s/g, '')) || 0;
-        const targetAmount = total;
-        
-        totalAmount.textContent = targetAmount.toLocaleString('ru-RU');
+        totalAmount.textContent = total.toLocaleString('ru-RU');
     }
 
     daysRange?.addEventListener('input', calculate);
     hoursRange?.addEventListener('input', calculate);
     citySelect?.addEventListener('change', calculate);
     
-    // Init
     document.addEventListener('DOMContentLoaded', calculate);
 </script>
 
 <style>
-    /* Section uses .home-section from index.astro (creamy bg) */
-
     .calc-card {
         background: #ffffff;
-        border: 1px solid #ebe5dc;
-        border-radius: 1.5rem;
+        border: 1px solid #d9e2d6;
+        border-radius: 8px;
         padding: 2.5rem;
         display: flex;
         gap: 3rem;
-        box-shadow: 0 4px 20px rgba(60, 41, 20, 0.04);
+        box-shadow: 0 4px 20px rgba(24, 45, 34, 0.04);
         margin-top: 1.5rem;
     }
 
-    /* Left Side: Inputs */
     .calc-inputs {
         flex: 1.4;
         display: flex;
@@ -161,17 +150,17 @@ const ratesJson = JSON.stringify(cityRates);
     .field-header label {
         font-size: 1.1rem;
         font-weight: 700;
-        color: #2b2622;
+        color: #1d2b24;
     }
 
     .value-badge {
-        background: #f7f2ea;
-        color: #2b2622;
+        background: #f6faf8;
+        color: #1d2b24;
         padding: 0.4rem 1rem;
-        border-radius: 99px;
+        border-radius: 8px;
         font-weight: 800;
         font-size: 1rem;
-        border: 1px solid #ebe5dc;
+        border: 1px solid #d9e2d6;
     }
 
     .range-wrapper {
@@ -184,7 +173,7 @@ const ratesJson = JSON.stringify(cityRates);
         -webkit-appearance: none;
         width: 100%;
         height: 8px;
-        background: #f0ede8;
+        background: #e6efe8;
         border-radius: 5px;
         outline: none;
         margin: 10px 0;
@@ -195,7 +184,7 @@ const ratesJson = JSON.stringify(cityRates);
         appearance: none;
         width: 24px;
         height: 24px;
-        background: #2b2622;
+        background: #163d2b;
         border-radius: 50%;
         cursor: pointer;
         border: 2px solid #ffffff;
@@ -211,35 +200,33 @@ const ratesJson = JSON.stringify(cityRates);
         display: flex;
         justify-content: space-between;
         font-size: 0.85rem;
-        color: #a39587;
+        color: #61746b;
         font-weight: 500;
     }
 
     .calc-select {
         width: 100%;
         padding: 1rem 1.25rem;
-        border-radius: 12px;
-        border: 1px solid #ebe5dc;
-        background: #fdfcfb;
-        color: #2b2622;
+        border-radius: 8px;
+        border: 1px solid #d9e2d6;
+        background: #ffffff;
+        color: #1d2b24;
         font-size: 1.05rem;
         font-weight: 700;
         cursor: pointer;
         outline: none;
         appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%232b2622' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 5 3 3 3-3'/%3E%3C/svg%3E");
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23163d2b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 5 3 3 3-3'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
         background-position: right 1.25rem center;
     }
 
-    /* Vertical Divider */
     .calc-divider {
         width: 1px;
-        background: #ebe5dc;
+        background: #d9e2d6;
         align-self: stretch;
     }
 
-    /* Right Side: Result */
     .calc-result {
         flex: 1;
         display: flex;
@@ -257,7 +244,7 @@ const ratesJson = JSON.stringify(cityRates);
     .result-label {
         font-size: 1.2rem;
         font-weight: 600;
-        color: #8b7d70;
+        color: #51635c;
     }
 
     .amount-container {
@@ -265,29 +252,29 @@ const ratesJson = JSON.stringify(cityRates);
         display: flex;
         align-items: baseline;
         gap: 0.5rem;
-        color: #2b2622;
+        color: #1d2b24;
     }
 
     .amount {
         font-size: 4rem;
         font-weight: 900;
-        letter-spacing: -2px;
+        letter-spacing: 0;
         line-height: 1;
     }
 
     .currency {
         font-size: 2rem;
         font-weight: 800;
-        color: #8b7d70;
+        color: #51635c;
     }
 
     .calc-cta-btn {
         display: block;
-        background: #2b2622;
+        background: #163d2b;
         color: #ffffff;
         text-align: center;
         padding: 1.25rem;
-        border-radius: 12px;
+        border-radius: 8px;
         text-decoration: none;
         font-weight: 800;
         font-size: 1.1rem;
@@ -296,7 +283,7 @@ const ratesJson = JSON.stringify(cityRates);
     }
 
     .calc-cta-btn:hover {
-        background: #000000;
+        background: #0f2b1d;
         transform: translateY(-2px);
         box-shadow: 0 8px 24px rgba(0,0,0,0.15);
     }
@@ -304,11 +291,10 @@ const ratesJson = JSON.stringify(cityRates);
     .disclaimer {
         margin-top: 1rem;
         font-size: 0.8rem;
-        color: #a39587;
+        color: #61746b;
         line-height: 1.4;
     }
 
-    /* Responsive */
     @media (max-width: 992px) {
         .calc-card {
             flex-direction: column;

@@ -22,15 +22,15 @@ import IncomeCalculator from '../components/IncomeCalculator.astro';
             <div class="info-grid">
                 <div class="info-card">
                     <h3>Как мы считаем?</h3>
-                    <p>Наши алгоритмы используют актуальные данные о средних ставках курьеров в разных городах России, включая бонусы и доплаты за высокий спрос.</p>
+                    <p>Берём средние ставки по городам, умножаем их на часы и дни работы, а затем добавляем примерную надбавку за чаевые и пиковые периоды.</p>
                 </div>
                 <div class="info-card">
                     <h3>Можно ли заработать больше?</h3>
-                    <p>Да! Использование электровелосипеда или автомобиля, работа в часы пик и выполнение целей по количеству заказов могут увеличить доход на 30-50%.</p>
+                    <p>Да. Электровелосипед или авто, часы повышенного спроса и стабильные смены обычно дают больше заказов и выше итоговую сумму.</p>
                 </div>
                 <div class="info-card">
                     <h3>Когда придут деньги?</h3>
-                    <p>Большинство компаний-партнеров (Яндекс, Самокат, Додо) выплачивают вознаграждение ежедневно или еженедельно на карту любого банка.</p>
+                    <p>В вакансиях встречаются ежедневные и еженедельные выплаты. Точный график лучше проверять в карточке работодателя перед откликом.</p>
                 </div>
             </div>
         </section>
@@ -52,16 +52,16 @@ import IncomeCalculator from '../components/IncomeCalculator.astro';
     }
     
     .calculator-hero h1 {
-        font-size: clamp(2.5rem, 5vw, 4rem);
+        font-size: 3.8rem;
         font-weight: 900;
-        letter-spacing: -0.05em;
+        letter-spacing: 0;
         margin-bottom: 1rem;
-        color: #2b2622;
+        color: #1d2b24;
     }
     
     .calculator-hero p {
         font-size: 1.25rem;
-        color: #8b7d70;
+        color: #51635c;
         max-width: 600px;
         margin: 0 auto;
     }
@@ -70,7 +70,6 @@ import IncomeCalculator from '../components/IncomeCalculator.astro';
         margin-bottom: 4rem;
     }
 
-    /* Additional info section */
     .calc-info-section {
         margin-bottom: 6rem;
     }
@@ -82,10 +81,10 @@ import IncomeCalculator from '../components/IncomeCalculator.astro';
     }
     
     .info-card {
-        background: #fdfcfb;
-        border: 1px solid #ebe5dc;
+        background: #ffffff;
+        border: 1px solid #d9e2d6;
         padding: 2.5rem;
-        border-radius: 2rem;
+        border-radius: 8px;
         transition: transform 0.3s ease;
     }
     
@@ -97,11 +96,11 @@ import IncomeCalculator from '../components/IncomeCalculator.astro';
         font-size: 1.5rem;
         font-weight: 800;
         margin-bottom: 1rem;
-        color: #2b2622;
+        color: #1d2b24;
     }
     
     .info-card p {
-        color: #8b7d70;
+        color: #51635c;
         line-height: 1.6;
         font-size: 1.05rem;
     }
@@ -112,6 +111,9 @@ import IncomeCalculator from '../components/IncomeCalculator.astro';
         }
         .calculator-hero {
             padding: 3rem 1rem 2rem 1rem;
+        }
+        .calculator-hero h1 {
+            font-size: 2.6rem;
         }
         .info-card {
             padding: 1.5rem;

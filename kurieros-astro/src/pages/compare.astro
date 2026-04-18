@@ -3,10 +3,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { CATEGORIES } from '../data/constants';
-import jobsData from '../data/jobs.json';
+import jobsData from '../data/jobs';
 import articlesData from '../data/articles.json';
 import { getCitiesFromJobs } from '../utils/cities';
 import { slugifyCompany } from '../utils/companies';
+import { parseSalary } from '../utils/format';
 import { buildBreadcrumbSchema } from '../utils/schema';
 
 const transportLabelMap: Record<string, string> = {
@@ -15,13 +16,12 @@ const transportLabelMap: Record<string, string> = {
   foot: 'Пешком',
 };
 
-const parseSalary = (salary: string) => Number(salary.replace(/[^\d]/g, '')) || 0;
 const getTransportLabel = (tags: string[]) =>
   tags.find((tag) => tag in transportLabelMap)
     ? transportLabelMap[tags.find((tag) => tag in transportLabelMap) as string]
     : 'Смешанный формат';
 
-const compareJobs = jobsData.slice(0, 4).map((job) => ({
+const mapCompareJob = (job: typeof jobsData[number]) => ({
   id: job.id,
   slug: job.slug,
   title: job.title,
@@ -36,7 +36,10 @@ const compareJobs = jobsData.slice(0, 4).map((job) => ({
   bonus: job.benefits[0] || 'Условия уточняются при отклике',
   age: job.details.age,
   link: `/v/${job.slug}/`,
-}));
+});
+
+const allCompareJobs = jobsData.map(mapCompareJob);
+const compareJobs = allCompareJobs.slice(0, 4);
 
 const compareCompanies = Array.from(
   new Map(compareJobs.map((job) => [job.company, { name: job.company, href: job.companyHref }])).values(),
@@ -72,35 +75,52 @@ const features = [
   { key: 'bonus', name: 'Особенности' },
 ];
 
-const topIncomeJob = [...compareJobs].sort((a, b) => parseSalary(b.salary) - parseSalary(a.salary))[0];
-const studentFriendlyJob = compareJobs.find((job) => job.age.includes('16')) || compareJobs[0];
-const stableContractJob = compareJobs.find((job) => /тк|официаль/i.test(job.contract)) || compareJobs[0];
 const compareTitle = 'Сравнение вакансий курьеров: что лучше выбрать | Курьерок';
 const compareDescription = 'Сравнение вакансий курьеров по зарплате, выплатам, транспорту и оформлению. Смотрите, что лучше для дохода, старта и стабильности.';
 
-const decisionCards = [
-  {
-    label: 'Лучше для дохода',
-    title: topIncomeJob.title,
-    hint: 'Сильнее по верхней вилке дохода.',
-    text: `Если сейчас важнее потенциал заработка, начните с карточки ${topIncomeJob.company} и проверьте формулу выплат уже в вакансии.`,
-    href: topIncomeJob.link,
-  },
-  {
-    label: 'Лучше для старта',
-    title: studentFriendlyJob.title,
-    hint: 'Мягче для входа в профессию.',
-    text: 'Этот маршрут полезен тем, кто хочет войти в доставку быстрее и с более мягкими входными требованиями.',
-    href: studentFriendlyJob.link,
-  },
-  {
-    label: 'Лучше для стабильности',
-    title: stableContractJob.title,
-    hint: 'Понятнее по оформлению и занятости.',
-    text: 'Если вы выбираете по оформлению и предсказуемости занятости, стоит начать именно с этого варианта.',
-    href: stableContractJob.link,
-  },
-];
+const buildDecisionCards = (jobs: typeof allCompareJobs) => {
+  if (jobs.length === 0) {
+    return [
+      {
+        label: 'Список пуст',
+        title: 'Вакансии пока не опубликованы',
+        hint: 'Сравнение появится после добавления новых карточек.',
+        text: 'Сейчас на сайте нет активных вакансий. Когда появятся новые карточки, здесь можно будет сравнить выплаты, транспорт и оформление.',
+        href: '/',
+      },
+    ];
+  }
+
+  const topIncomeJob = [...jobs].sort((a, b) => parseSalary(b.salary) - parseSalary(a.salary))[0] ?? jobs[0];
+  const studentFriendlyJob = jobs.find((job) => job.age.includes('16')) || jobs[0];
+  const stableContractJob = jobs.find((job) => /тк|официаль/i.test(job.contract)) || jobs[0];
+
+  return [
+    {
+      label: 'Лучше для дохода',
+      title: topIncomeJob.title,
+      hint: 'Сильнее по верхней вилке дохода.',
+      text: `Если сейчас важнее потенциал заработка, начните с карточки ${topIncomeJob.company} и проверьте формулу выплат уже в вакансии.`,
+      href: topIncomeJob.link,
+    },
+    {
+      label: 'Лучше для старта',
+      title: studentFriendlyJob.title,
+      hint: 'Мягче для входа в профессию.',
+      text: 'Этот вариант подходит для первого шага в доставке: меньше входных требований и проще понять, подойдёт ли работа.',
+      href: studentFriendlyJob.link,
+    },
+    {
+      label: 'Лучше для стабильности',
+      title: stableContractJob.title,
+      hint: 'Понятнее по оформлению и занятости.',
+      text: 'Если вы выбираете по оформлению и предсказуемости занятости, стоит начать именно с этого варианта.',
+      href: stableContractJob.link,
+    },
+  ];
+};
+
+const decisionCards = buildDecisionCards(compareJobs);
 const answerFocusPoints = ['Выплаты', 'Транспорт', 'Оформление', 'Возрастной порог'];
 
 const fitPoints = [
@@ -208,60 +228,70 @@ const pageSchemaGraph = [
       </section>
 
       <div class="compare-table-wrapper" id="compare-table">
-        <div class="compare-grid">
-          <div class="compare-row compare-head">
-            <div class="compare-cell feature-col empty-cell">
-              Параметры
-            </div>
-            {compareJobs.map((job, index) => (
-              <div class="compare-cell job-col" data-col={index}>
-                <div class="job-card-mini">
-                  <button class="remove-col-btn" aria-label="Удалить" title="Удалить из сравнения" data-col-target={index} type="button">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                  </button>
-                  <div class={`company-logo company-logo-${job.companySlug}`}>
-                    <span class="company-logo-letter">
-                      {job.company.charAt(0)}
-                    </span>
-                  </div>
-                  <h3>{job.title}</h3>
-                  <span class="company-name">{job.company}</span>
+        <div class="compare-grid" style={`--cols: ${compareJobs.length};`}>
+          {compareJobs.length > 0 ? (
+            <>
+              <div class="compare-row compare-head">
+                <div class="compare-cell feature-col empty-cell">
+                  Параметры
                 </div>
+                {compareJobs.map((job, index) => (
+                  <div class="compare-cell job-col" data-col={index}>
+                    <div class="job-card-mini">
+                      <button class="remove-col-btn" aria-label="Удалить" title="Удалить из сравнения" data-col-target={index} type="button">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                      <div class={`company-logo company-logo-${job.companySlug}`}>
+                        <span class="company-logo-letter">
+                          {job.company.charAt(0)}
+                        </span>
+                      </div>
+                      <h3>{job.title}</h3>
+                      <span class="company-name">{job.company}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          {features.map((feature) => (
-            <div class="compare-row">
-              <div class="compare-cell feature-col">
-                {feature.name}
-              </div>
-              {compareJobs.map((job, index) => (
-                <div class="compare-cell job-col" data-col={index}>
-                  {job[feature.key as keyof typeof job]}
+              {features.map((feature) => (
+                <div class="compare-row">
+                  <div class="compare-cell feature-col">
+                    {feature.name}
+                  </div>
+                  {compareJobs.map((job, index) => (
+                    <div class="compare-cell job-col" data-col={index}>
+                      {job[feature.key as keyof typeof job]}
+                    </div>
+                  ))}
                 </div>
               ))}
-            </div>
-          ))}
 
-          <div class="compare-row compare-actions">
-            <div class="compare-cell feature-col"></div>
-            {compareJobs.map((job, index) => (
-              <div class="compare-cell job-col" data-col={index}>
-                <a href={job.link} class="btn-primary">Открыть карточку</a>
+              <div class="compare-row compare-actions">
+                <div class="compare-cell feature-col"></div>
+                {compareJobs.map((job, index) => (
+                  <div class="compare-cell job-col" data-col={index}>
+                    <a href={job.link} class="btn-primary">Открыть карточку</a>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          ) : (
+            <div class="compare-empty-state">
+              <h3>Нет вакансий для сравнения</h3>
+              <p>Список активных вакансий очищен. Новые варианты появятся здесь после публикации карточек.</p>
+              <a href="/" class="btn-primary compare-empty-state-link">Вернуться на главную</a>
+            </div>
+          )}
         </div>
       </div>
 
-      <section class="compare-route-grid" aria-label="Маршруты выбора после сравнения">
+      <section class="compare-route-grid" aria-label="Что открыть после сравнения">
         {decisionCards.map((card) => (
           <article class="compare-route-card">
             <span>{card.label}</span>
             <h2>{card.title}</h2>
             <p>{card.text}</p>
-            <a href={card.href} class="compare-route-link">Открыть маршрут</a>
+            <a href={card.href} class="compare-route-link">Открыть вариант</a>
           </article>
         ))}
       </section>
@@ -288,11 +318,11 @@ const pageSchemaGraph = [
         </article>
       </section>
 
-      <section class="compare-link-grid" aria-label="Связанные хабы">
+      <section class="compare-link-grid" aria-label="Куда перейти после сравнения">
         <article class="compare-link-card">
           <p class="section-eyebrow">По компаниям</p>
           <h2>Куда идти после короткого сравнения?</h2>
-          <div class="compare-chip-row">
+          <div class="compare-chip-row" data-compare-companies>
             {compareCompanies.map((company) => (
               <a href={company.href} class="compare-chip-link">{company.name}</a>
             ))}
@@ -310,8 +340,8 @@ const pageSchemaGraph = [
         </article>
 
         <article class="compare-link-card">
-          <p class="section-eyebrow">По интенту</p>
-          <h2>Куда идти, если сценарий уже понятен?</h2>
+          <p class="section-eyebrow">По условиям</p>
+          <h2>Куда идти, если формат уже понятен?</h2>
           <div class="compare-chip-row">
             {compareFormats.map((format) => (
               <a href={format.href} class="compare-chip-link">{format.name}</a>
@@ -353,41 +383,255 @@ const pageSchemaGraph = [
   <Footer />
 </BaseLayout>
 
-<script>
+<script is:inline define:vars={{ allCompareJobs, features }}>
   document.addEventListener('DOMContentLoaded', () => {
     const grid = document.querySelector('.compare-grid');
     if (!grid) return;
 
-    const allJobCols = document.querySelectorAll('.compare-head .job-col');
-    let totalCols = allJobCols.length;
+    const decisionGrid = document.querySelector('.compare-route-grid');
+    const companyLinks = document.querySelector('[data-compare-companies]');
+    const jobsById = new Map(allCompareJobs.map((job) => [job.id, job]));
+    const hasAvailableJobs = allCompareJobs.length > 0;
+    const scopeAttribute = Array.from(grid.getAttributeNames()).find((name) => name.startsWith('data-astro-cid'));
 
-    const updateGridState = () => {
-      grid.style.setProperty('--cols', totalCols.toString());
+    function applyScopedStyles(root) {
+      if (!scopeAttribute) return;
+      root.querySelectorAll('*').forEach((element) => {
+        element.setAttribute(scopeAttribute, '');
+      });
+    }
 
-      if (totalCols === 0) {
-        grid.innerHTML = `
-          <div class="compare-empty-state">
-            <h3>Нет вакансий для сравнения</h3>
-            <a href="/" class="btn-primary compare-empty-state-link">Вернуться к списку</a>
-          </div>
-        `;
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function parseSalaryValue(salary) {
+      return Number(String(salary).replace(/[^\d]/g, '')) || 0;
+    }
+
+    function readCompareIds() {
+      try {
+        const rawList = JSON.parse(localStorage.getItem('compareList') || '[]');
+        if (!Array.isArray(rawList)) return [];
+
+        return rawList
+          .map((id) => Number.parseInt(String(id), 10))
+          .filter((id, index, ids) => Number.isFinite(id) && jobsById.has(id) && ids.indexOf(id) === index)
+          .slice(0, 4);
+      } catch {
+        return [];
       }
-    };
+    }
 
-    grid.style.setProperty('--cols', totalCols.toString());
+    function writeCompareIds(ids) {
+      localStorage.setItem('compareList', JSON.stringify(ids));
+      window.dispatchEvent(new CustomEvent('compareUpdate'));
+    }
+
+    function getSelectedJobs() {
+      return readCompareIds().map((id) => jobsById.get(id)).filter(Boolean);
+    }
+
+    function renderEmptyState() {
+      const emptyCopy = hasAvailableJobs
+        ? {
+          heading: 'Нет вакансий для сравнения',
+          text: 'Добавьте 2-4 вакансии из списка, чтобы увидеть разницу по выплатам, транспорту и оформлению.',
+          href: '/#vacancies',
+          link: 'Вернуться к вакансиям',
+        }
+        : {
+          heading: 'Нет вакансий для сравнения',
+          text: 'Список активных вакансий очищен. Новые варианты появятся здесь после публикации карточек.',
+          href: '/',
+          link: 'Вернуться на главную',
+        };
+
+      grid.style.setProperty('--cols', '0');
+      grid.innerHTML = `
+        <div class="compare-empty-state">
+          <h3>${emptyCopy.heading}</h3>
+          <p>${emptyCopy.text}</p>
+          <a href="${emptyCopy.href}" class="btn-primary compare-empty-state-link">${emptyCopy.link}</a>
+        </div>
+      `;
+      applyScopedStyles(grid);
+
+      if (decisionGrid) {
+        const routeCopy = hasAvailableJobs
+          ? {
+            label: 'Дальше',
+            title: 'Сначала добавьте вакансии',
+            text: 'Нажмите «Сравнить» в карточках вакансий. Здесь появятся только выбранные варианты.',
+            href: '/#vacancies',
+            link: 'Открыть список',
+          }
+          : {
+            label: 'Список пуст',
+            title: 'Вакансии пока не опубликованы',
+            text: 'Сейчас на сайте нет активных вакансий. Когда появятся новые карточки, здесь можно будет сравнить выплаты, транспорт и оформление.',
+            href: '/',
+            link: 'На главную',
+          };
+
+        decisionGrid.innerHTML = `
+          <article class="compare-route-card compare-route-card-wide">
+            <span>${routeCopy.label}</span>
+            <h2>${routeCopy.title}</h2>
+            <p>${routeCopy.text}</p>
+            <a href="${routeCopy.href}" class="compare-route-link">${routeCopy.link}</a>
+          </article>
+        `;
+        applyScopedStyles(decisionGrid);
+      }
+
+      if (companyLinks) {
+        companyLinks.innerHTML = '<a href="/companies/" class="compare-chip-link">Все компании</a>';
+        applyScopedStyles(companyLinks);
+      }
+    }
+
+    function renderComparisonTable(jobs) {
+      if (jobs.length === 0) {
+        renderEmptyState();
+        return;
+      }
+
+      grid.style.setProperty('--cols', jobs.length.toString());
+
+      const headerCells = jobs.map((job, index) => `
+        <div class="compare-cell job-col" data-col="${index}">
+          <div class="job-card-mini">
+            <button class="remove-col-btn" aria-label="Удалить" title="Удалить из сравнения" data-job-id="${job.id}" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <div class="company-logo company-logo-${escapeHtml(job.companySlug)}">
+              <span class="company-logo-letter">${escapeHtml(job.company.charAt(0))}</span>
+            </div>
+            <h3>${escapeHtml(job.title)}</h3>
+            <span class="company-name">${escapeHtml(job.company)}</span>
+          </div>
+        </div>
+      `).join('');
+
+      const featureRows = features.map((feature) => `
+        <div class="compare-row">
+          <div class="compare-cell feature-col">${escapeHtml(feature.name)}</div>
+          ${jobs.map((job, index) => `
+            <div class="compare-cell job-col" data-col="${index}">
+              ${escapeHtml(job[feature.key])}
+            </div>
+          `).join('')}
+        </div>
+      `).join('');
+
+      const actionCells = jobs.map((job, index) => `
+        <div class="compare-cell job-col" data-col="${index}">
+          <a href="${escapeHtml(job.link)}" class="btn-primary">Открыть карточку</a>
+        </div>
+      `).join('');
+
+      grid.innerHTML = `
+        <div class="compare-row compare-head">
+          <div class="compare-cell feature-col empty-cell">Параметры</div>
+          ${headerCells}
+        </div>
+        ${featureRows}
+        <div class="compare-row compare-actions">
+          <div class="compare-cell feature-col"></div>
+          ${actionCells}
+        </div>
+      `;
+      applyScopedStyles(grid);
+    }
+
+    function renderDecisionCards(jobs) {
+      if (!decisionGrid || jobs.length === 0) return;
+
+      const topIncomeJob = [...jobs].sort((a, b) => parseSalaryValue(b.salary) - parseSalaryValue(a.salary))[0];
+      const studentFriendlyJob = jobs.find((job) => String(job.age).includes('16')) || jobs[0];
+      const stableContractJob = jobs.find((job) => /тк|официаль/i.test(job.contract)) || jobs[0];
+      const cards = [
+        {
+          label: 'Лучше для дохода',
+          title: topIncomeJob.title,
+          text: `Если сейчас важнее потенциал заработка, начните с карточки ${topIncomeJob.company} и проверьте формулу выплат уже в вакансии.`,
+          href: topIncomeJob.link,
+        },
+        {
+          label: 'Лучше для старта',
+          title: studentFriendlyJob.title,
+          text: 'Этот вариант подходит для первого шага в доставке: меньше входных требований и проще понять, подойдёт ли работа.',
+          href: studentFriendlyJob.link,
+        },
+        {
+          label: 'Лучше для стабильности',
+          title: stableContractJob.title,
+          text: 'Если вы выбираете по оформлению и предсказуемости занятости, стоит начать именно с этого варианта.',
+          href: stableContractJob.link,
+        },
+      ];
+
+      decisionGrid.innerHTML = cards.map((card) => `
+        <article class="compare-route-card">
+          <span>${escapeHtml(card.label)}</span>
+          <h2>${escapeHtml(card.title)}</h2>
+          <p>${escapeHtml(card.text)}</p>
+          <a href="${escapeHtml(card.href)}" class="compare-route-link">Открыть вариант</a>
+        </article>
+      `).join('');
+      applyScopedStyles(decisionGrid);
+    }
+
+    function renderCompanyLinks(jobs) {
+      if (!companyLinks) return;
+
+      const companies = Array.from(new Map(jobs.map((job) => [job.company, {
+        name: job.company,
+        href: job.companyHref,
+      }])).values());
+
+      companyLinks.innerHTML = companies.length
+        ? companies.map((company) => `<a href="${escapeHtml(company.href)}" class="compare-chip-link">${escapeHtml(company.name)}</a>`).join('')
+        : '<a href="/companies/" class="compare-chip-link">Все компании</a>';
+      applyScopedStyles(companyLinks);
+    }
+
+    function renderSelectedComparison() {
+      const jobs = getSelectedJobs();
+      const safeIds = jobs.map((job) => job.id);
+
+      if (JSON.stringify(safeIds) !== JSON.stringify(readCompareIds())) {
+        writeCompareIds(safeIds);
+      }
+
+      renderComparisonTable(jobs);
+      renderDecisionCards(jobs);
+      renderCompanyLinks(jobs);
+    }
+
+    renderSelectedComparison();
 
     grid.addEventListener('click', (e) => {
-      const btn = e.target.closest('.remove-col-btn');
+      const btn = e.target instanceof Element ? e.target.closest('.remove-col-btn') : null;
       if (!btn) return;
 
-      const targetCol = btn.getAttribute('data-col-target');
-      if (targetCol === null) return;
+      const jobId = Number.parseInt(btn.getAttribute('data-job-id') || '', 10);
+      if (!Number.isFinite(jobId)) return;
 
-      const cells = document.querySelectorAll(`.compare-cell[data-col="${targetCol}"]`);
-      cells.forEach(cell => cell.remove());
+      writeCompareIds(readCompareIds().filter((id) => id !== jobId));
+      renderSelectedComparison();
+    });
 
-      totalCols--;
-      updateGridState();
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'compareList') {
+        renderSelectedComparison();
+      }
     });
   });
 </script>
@@ -404,7 +648,7 @@ const pageSchemaGraph = [
   .compare-container {
     background: var(--surface-color);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-xl);
+    border-radius: 8px;
     padding: 2rem;
     box-shadow: var(--shadow-sm);
   }
@@ -457,7 +701,7 @@ const pageSchemaGraph = [
     margin: 0 0 0.55rem;
     font-size: 0.74rem;
     font-weight: 900;
-    letter-spacing: 0.16em;
+    letter-spacing: 0;
     text-transform: uppercase;
     color: var(--accent-color);
   }
@@ -488,9 +732,9 @@ const pageSchemaGraph = [
     justify-content: center;
     min-height: 2.8rem;
     padding: 0.7rem 1rem;
-    border-radius: 999px;
-    background: #1f2937;
-    border: 1px solid #1f2937;
+    border-radius: 8px;
+    background: #16734c;
+    border: 1px solid #16734c;
     color: #fff;
     text-decoration: none;
     font-weight: 800;
@@ -511,7 +755,7 @@ const pageSchemaGraph = [
     margin-bottom: 1rem;
     padding: 1.5rem;
     border: 1px solid rgba(148, 163, 184, 0.16);
-    border-radius: 1.5rem;
+    border-radius: 8px;
     background: rgba(255, 255, 255, 0.74);
     box-shadow: var(--shadow-sm);
   }
@@ -547,7 +791,7 @@ const pageSchemaGraph = [
   .compare-link-card,
   .compare-faq-item {
     padding: 1.25rem;
-    border-radius: 1.25rem;
+    border-radius: 8px;
     background: rgba(255, 255, 255, 0.82);
     border: 1px solid rgba(148, 163, 184, 0.16);
     box-shadow: var(--shadow-sm);
@@ -578,10 +822,8 @@ const pageSchemaGraph = [
   }
 
   .compare-geo-card {
-    border: 1px solid rgba(99, 102, 241, 0.12);
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.96)),
-      var(--bg-card);
+    border: 1px solid rgba(22, 115, 76, 0.12);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(246, 250, 248, 0.96));
   }
 
   .compare-geo-card-caution {
@@ -589,20 +831,20 @@ const pageSchemaGraph = [
   }
 
   .compare-link-card {
-    border-color: rgba(99, 102, 241, 0.12);
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 247, 255, 0.96)),
-      var(--bg-card);
+    border-color: rgba(22, 115, 76, 0.12);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(246, 250, 248, 0.96));
   }
 
   .compare-route-card {
     padding: 1.25rem;
-    border-radius: 1.25rem;
-    border: 1px solid rgba(99, 102, 241, 0.14);
-    background:
-      radial-gradient(circle at top right, rgba(99, 102, 241, 0.12), transparent 10rem),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 247, 255, 0.96));
+    border-radius: 8px;
+    border: 1px solid rgba(22, 115, 76, 0.14);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(246, 250, 248, 0.96));
     box-shadow: var(--shadow-sm);
+  }
+
+  .compare-route-card-wide {
+    grid-column: 1 / -1;
   }
 
   .compare-route-card span {
@@ -610,7 +852,7 @@ const pageSchemaGraph = [
     margin-bottom: 0.6rem;
     font-size: 0.72rem;
     font-weight: 900;
-    letter-spacing: 0.11em;
+    letter-spacing: 0;
     text-transform: uppercase;
     color: var(--text-muted);
   }
@@ -631,12 +873,12 @@ const pageSchemaGraph = [
     align-items: center;
     min-height: 2.5rem;
     padding: 0.6rem 0.95rem;
-    border-radius: 999px;
+    border-radius: 8px;
     text-decoration: none;
     font-weight: 800;
     color: var(--text-main);
-    border: 1px solid rgba(99, 102, 241, 0.16);
-    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(22, 115, 76, 0.16);
+    background: rgba(22, 115, 76, 0.08);
     transition: var(--transition);
   }
 
@@ -661,9 +903,9 @@ const pageSchemaGraph = [
     align-items: center;
     min-height: 2.25rem;
     padding: 0.45rem 0.85rem;
-    border-radius: 999px;
-    background: rgba(99, 102, 241, 0.08);
-    border: 1px solid rgba(99, 102, 241, 0.14);
+    border-radius: 8px;
+    background: rgba(22, 115, 76, 0.08);
+    border: 1px solid rgba(22, 115, 76, 0.14);
     color: var(--text-main);
     text-decoration: none;
     font-weight: 700;
@@ -695,7 +937,7 @@ const pageSchemaGraph = [
   .compare-article-link {
     display: block;
     padding: 0.85rem 1rem;
-    border-radius: 1rem;
+    border-radius: 8px;
     text-decoration: none;
     color: var(--text-main);
     background: rgba(255, 255, 255, 0.78);
@@ -794,7 +1036,7 @@ const pageSchemaGraph = [
     align-items: center;
     text-transform: uppercase;
     font-size: 0.8rem;
-    letter-spacing: 0.05em;
+    letter-spacing: 0;
   }
 
   .job-card-mini {
@@ -811,7 +1053,7 @@ const pageSchemaGraph = [
     right: -0.75rem;
     width: 26px;
     height: 26px;
-    border-radius: 50%;
+    border-radius: 8px;
     background: var(--bg-color);
     border: 1px solid var(--border-color);
     color: var(--text-muted);
@@ -832,10 +1074,10 @@ const pageSchemaGraph = [
   }
 
   .company-logo {
-    background: rgba(99, 102, 241, 0.12);
+    background: rgba(22, 115, 76, 0.12);
     width: 56px;
     height: 56px;
-    border-radius: 14px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -867,7 +1109,7 @@ const pageSchemaGraph = [
   }
 
   .company-logo-letter {
-    color: #6366f1;
+    color: #16734c;
     font-weight: 800;
     font-size: 1.25rem;
   }
@@ -938,6 +1180,13 @@ const pageSchemaGraph = [
 
   .compare-empty-state h3 {
     margin-bottom: 1rem;
+  }
+
+  .compare-empty-state p {
+    max-width: 38rem;
+    margin: 0 auto 1.25rem;
+    color: var(--text-muted);
+    line-height: 1.7;
   }
 
   .compare-empty-state-link {
@@ -1052,7 +1301,7 @@ const pageSchemaGraph = [
 
     .compare-container {
       padding: 0.5rem;
-      border-radius: 24px;
+      border-radius: 8px;
     }
 
     .compare-header {
@@ -1062,7 +1311,7 @@ const pageSchemaGraph = [
     .compare-answer-panel,
     .compare-trust-panel {
       padding: 1rem;
-      border-radius: 1.25rem;
+      border-radius: 8px;
     }
 
     .compare-grid {

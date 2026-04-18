@@ -3,7 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import { CATEGORIES } from '../../data/constants';
-import jobsData from '../../data/jobs.json';
+import jobsData from '../../data/jobs';
 import reviewsData from '../../data/reviews.json';
 import { getCompaniesFromJobs } from '../../utils/companies';
 import { getCitiesFromJobs } from '../../utils/cities';
@@ -39,7 +39,7 @@ const topRatedCompany = companies
 const routeCards = [
   {
     title: 'Хочу сначала выбрать бренд',
-    text: 'Смотреть крупные компании, отзывы и контекст работодателя до открытия отдельных вакансий.',
+    text: 'Сначала посмотреть крупные компании, отзывы и контекст, а потом открывать вакансии.',
     href: '/companies/',
   },
   {
@@ -49,7 +49,7 @@ const routeCards = [
   },
   {
     title: 'Нужна подработка',
-    text: 'Открыть гибкие сценарии и смотреть, какие бренды чаще встречаются в подработке.',
+    text: 'Открыть гибкие варианты и посмотреть, какие бренды чаще встречаются в подработке.',
     href: '/rabota-kurerom-podrabotka/',
   },
   {
@@ -123,10 +123,10 @@ const pageSchemaGraph = [
         <span>Компании</span>
       </nav>
       <h1 data-t="companies.title">Компании-работодатели</h1>
-      <p data-t="companies.subtitle">Мы сотрудничаем только с проверенными брендами, гарантирующими стабильные выплаты и честные условия.</p>
+      <p data-t="companies.subtitle">Смотрите бренды, сравнивайте условия и переходите к тем вакансиям, где формат работы действительно подходит.</p>
     </section>
 
-    <section class="companies-route-grid" aria-label="Маршруты выбора">
+    <section class="companies-route-grid" aria-label="Переходы для выбора компании">
       {routeCards.map((route) => (
         <a href={route.href} class="companies-route-card">
           <h2>{route.title}</h2>
@@ -137,7 +137,7 @@ const pageSchemaGraph = [
 
     <section class="companies-answer-panel">
       <div>
-        <p class="section-eyebrow">AI GEO TL;DR</p>
+        <p class="section-eyebrow">Короткий вывод</p>
         <h2>Что важно знать о компаниях на Курьерок?</h2>
       </div>
       <p>
@@ -153,7 +153,7 @@ const pageSchemaGraph = [
       <a href="/blog/" class="companies-link-pill">Блог</a>
     </section>
 
-    <section class="companies-surface-grid" aria-label="Маршруты по компаниям">
+    <section class="companies-surface-grid" aria-label="Разделы по компаниям">
       <article class="companies-surface-card">
         <h2>Сильные бренды</h2>
         <div class="companies-chip-row">
@@ -173,7 +173,7 @@ const pageSchemaGraph = [
       </article>
 
       <article class="companies-surface-card">
-        <h2>Форматы и сценарии</h2>
+        <h2>Форматы работы</h2>
         <div class="companies-chip-row">
           {brandFormats.map((format) => (
             <a href={format.href} class="companies-chip-link">{format.name}</a>
@@ -204,7 +204,7 @@ const pageSchemaGraph = [
     <section class="companies-geo-grid">
       <article class="companies-geo-card">
         <p class="section-eyebrow">Кому подходит</p>
-        <h2>Когда этот хаб особенно полезен?</h2>
+        <h2>Когда эта страница особенно полезна?</h2>
         <ul class="companies-list">
           <li>Когда вы хотите сначала выбрать бренд, а уже потом разбираться в конкретных карточках вакансий.</li>
           <li>Когда важно сравнить компании по типу доставки, выплатам, географии и общему стилю занятости.</li>
@@ -214,7 +214,7 @@ const pageSchemaGraph = [
 
       <article class="companies-geo-card companies-geo-card-caution">
         <p class="section-eyebrow">Что уточнить</p>
-        <h2>Что не стоит решать только по хабу?</h2>
+        <h2>Что не стоит решать только по странице?</h2>
         <ol class="companies-list numbered-list">
           <li>Финальные выплаты и график зависят от конкретной вакансии, города и формата работы.</li>
           <li>Тип оформления, гражданство, медкнижка и возрастной порог нужно проверять уже внутри карточки вакансии.</li>
@@ -261,7 +261,7 @@ const pageSchemaGraph = [
         <h2>Как использовать страницы брендов</h2>
       </div>
       <p>
-        Хаб обновлен {updatedDate}. Он помогает выбрать бренд для дальнейшего изучения, но не заменяет карточку вакансии.
+        Страница обновлена {updatedDate}. Она помогает выбрать бренд для дальнейшего изучения, но не заменяет карточку вакансии.
         После выбора компании откройте её страницу, а затем 1-2 релевантные вакансии и проверьте выплаты, ограничения,
         оформление и ссылку на отклик уже по фактическим условиям.
       </p>
@@ -311,7 +311,7 @@ const pageSchemaGraph = [
     margin: 0 0 0.55rem;
     font-size: 0.74rem;
     font-weight: 900;
-    letter-spacing: 0.16em;
+    letter-spacing: 0;
     text-transform: uppercase;
     color: var(--accent-color);
   }
@@ -326,7 +326,7 @@ const pageSchemaGraph = [
     align-items: start;
     padding: 1.5rem;
     border: 1px solid rgba(148, 163, 184, 0.16);
-    border-radius: 1.5rem;
+    border-radius: 8px;
     background: rgba(255, 255, 255, 0.74);
     box-shadow: var(--shadow-sm);
   }
@@ -360,7 +360,7 @@ const pageSchemaGraph = [
   .companies-route-card,
   .companies-surface-card {
     padding: 1.25rem;
-    border-radius: 1.5rem;
+    border-radius: 8px;
     border: 1px solid rgba(148, 163, 184, 0.16);
     background: rgba(255, 255, 255, 0.82);
     box-shadow: var(--shadow-sm);
@@ -369,9 +369,8 @@ const pageSchemaGraph = [
   }
 
   .companies-route-card {
-    background:
-      radial-gradient(circle at top right, rgba(99, 102, 241, 0.12), transparent 10rem),
-      linear-gradient(180deg, rgba(255,255,255,0.94), rgba(244,247,255,0.96));
+    border-color: rgba(22, 115, 76, 0.14);
+    background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(246,250,248,0.96));
   }
 
   .companies-route-card h2,
@@ -397,9 +396,9 @@ const pageSchemaGraph = [
     align-items: center;
     min-height: 2.35rem;
     padding: 0.55rem 0.85rem;
-    border-radius: 999px;
-    border: 1px solid rgba(99, 102, 241, 0.14);
-    background: rgba(99, 102, 241, 0.08);
+    border-radius: 8px;
+    border: 1px solid rgba(22, 115, 76, 0.14);
+    background: rgba(22, 115, 76, 0.08);
     color: var(--text-main);
     text-decoration: none;
     font-weight: 700;
@@ -431,9 +430,9 @@ const pageSchemaGraph = [
     align-items: center;
     min-height: 2.5rem;
     padding: 0.55rem 1rem;
-    border-radius: 999px;
-    background: rgba(99, 102, 241, 0.08);
-    border: 1px solid rgba(99, 102, 241, 0.14);
+    border-radius: 8px;
+    background: rgba(22, 115, 76, 0.08);
+    border: 1px solid rgba(22, 115, 76, 0.14);
     color: var(--text-main);
     font-weight: 700;
     text-decoration: none;
@@ -455,7 +454,7 @@ const pageSchemaGraph = [
   .companies-faq-item,
   .company-listing-card {
     border: 1px solid rgba(148, 163, 184, 0.16);
-    border-radius: 1.5rem;
+    border-radius: 8px;
     background: rgba(255, 255, 255, 0.82);
     box-shadow: var(--shadow-sm);
   }
@@ -470,7 +469,7 @@ const pageSchemaGraph = [
   .companies-fact-card span {
     font-size: 0.72rem;
     font-weight: 900;
-    letter-spacing: 0.11em;
+    letter-spacing: 0;
     text-transform: uppercase;
     color: var(--text-muted);
   }
@@ -487,10 +486,8 @@ const pageSchemaGraph = [
 
   .companies-geo-card {
     padding: 1.5rem;
-    border: 1px solid rgba(99, 102, 241, 0.12);
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.96)),
-      var(--bg-card);
+    border: 1px solid rgba(22, 115, 76, 0.12);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(246, 250, 248, 0.96));
   }
 
   .companies-geo-card-caution {
@@ -547,7 +544,7 @@ const pageSchemaGraph = [
     margin: 0 auto 1.25rem;
     background: white;
     padding: 1rem;
-    border-radius: 1.25rem;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -599,9 +596,9 @@ const pageSchemaGraph = [
     align-items: center;
     min-height: 2rem;
     padding: 0.4rem 0.75rem;
-    border-radius: 999px;
-    background: rgba(99, 102, 241, 0.08);
-    border: 1px solid rgba(99, 102, 241, 0.12);
+    border-radius: 8px;
+    background: rgba(22, 115, 76, 0.08);
+    border: 1px solid rgba(22, 115, 76, 0.12);
     font-size: 0.8rem;
     font-weight: 700;
     color: var(--text-main);
@@ -638,7 +635,7 @@ const pageSchemaGraph = [
     background: var(--surface-color);
     border: 1px solid var(--border-color);
     padding: 3rem;
-    border-radius: 2rem;
+    border-radius: 8px;
     text-align: center;
   }
 
@@ -677,14 +674,14 @@ const pageSchemaGraph = [
 
     .company-listing-card {
       padding: 1rem 0.75rem;
-      border-radius: 1.25rem;
+      border-radius: 8px;
     }
 
     .company-logo-large {
       width: 50px;
       height: 50px;
       margin-bottom: 0.75rem;
-      border-radius: 0.75rem;
+      border-radius: 8px;
     }
 
     .company-listing-card h2 {
@@ -700,7 +697,7 @@ const pageSchemaGraph = [
     .company-listing-card .btn-primary {
       padding: 0.5rem 0.5rem;
       font-size: 0.8rem;
-      border-radius: 0.75rem;
+      border-radius: 8px;
     }
   }
 

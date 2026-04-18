@@ -14,6 +14,7 @@
 
 ```sh
 npm install
+npm run generate:data
 npm run build
 npm run dev
 npm run preview
@@ -34,6 +35,19 @@ npm run preview
 - `preview`: поднимает локальный preview production-сборки
 
 Если нужен локальный Node из репозитория, он добавляется через скрипты в `scripts/`.
+
+## SEO аналитика (production)
+
+В `BaseLayout` уже добавлено подключение аналитики для production-сборок:
+
+- `PUBLIC_GA4_MEASUREMENT_ID` — ID счётчика Google Analytics 4 (например, `G-XXXXXXX`)
+- `PUBLIC_YANDEX_METRIKA_ID` — ID счётчика Яндекс.Метрики
+
+Также добавлена закрытая owner-страница `/owner/seo` (доступ по коду):
+
+- `PUBLIC_OWNER_SEO_HASH` — SHA-256 хэш кода доступа для `/owner/seo`
+- `PUBLIC_GSC_PROPERTY_URL` — URL свойства Search Console (например, `sc-domain:kurerok.ru` или `https://kurerok.ru/`)
+- `PUBLIC_YANDEX_WEBMASTER_HOST` — хост для Яндекс.Вебмастера (например, `https:kurerok.ru:443`)
 
 ## Структура проекта
 
@@ -62,8 +76,9 @@ docs/           вспомогательные заметки
 
 ## Данные
 
-- `src/data/jobs.json` — вакансии
-- `src/data/translations.ts` и `src/data/job_translations.json` — переводы
+- `src/data/vacancies.ts` — исходники базовых вакансий
+- `src/data/jobs.ts` — сгенерированный список вакансий
+- `src/data/translations.ts` и `src/data/vacancy-translations/*.json` — переводы
 - `src/data/articles.json` — блог
 - `src/data/reviews.json` — отзывы
 

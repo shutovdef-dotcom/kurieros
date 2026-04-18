@@ -34,9 +34,9 @@ const TOPIC_DEFINITIONS: TopicDefinition[] = [
 	{
 		id: 'formats',
 		label: 'Форматы работы',
-		description: 'Пеший, вело- и автоформат, а также разбор рабочих сценариев.',
+		description: 'Пеший, вело- и автоформат, а также выбор транспорта под график.',
 		href: '/rabota-kurerom-na-avto/',
-		pattern: /пеш|вело|авто|электровел|формат|маршрут/i,
+		pattern: /пеш|вело|авто|электровел|формат|транспорт/i,
 	},
 	{
 		id: 'part-time',
@@ -48,7 +48,7 @@ const TOPIC_DEFINITIONS: TopicDefinition[] = [
 	{
 		id: 'start',
 		label: 'Старт и адаптация',
-		description: 'Вход в профессию, первые недели, студенческие и стартовые сценарии.',
+		description: 'Вход в профессию, первые недели и варианты для студентов.',
 		href: '/rabota-kurerom-dlya-studentov/',
 		pattern: /студент|16|без опыта|первую недел|нача|старт/i,
 	},
@@ -62,7 +62,7 @@ const TOPIC_DEFINITIONS: TopicDefinition[] = [
 	{
 		id: 'geo',
 		label: 'Города и районы',
-		description: 'Локальные сценарии поиска и работа по городам и районам.',
+		description: 'Поиск работы по городам, районам и локальным условиям.',
 		href: '/cities/',
 		pattern: /город|район|москв|спб|екатеринбург|казан|самар|маленьком городе/i,
 	},

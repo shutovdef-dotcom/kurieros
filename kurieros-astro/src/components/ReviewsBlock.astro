@@ -145,8 +145,8 @@ const renderStars = (rating: number) => {
     width: 100%;
     background: var(--surface-color);
     border: 1px solid var(--border-color);
-    border-radius: 1.6rem;
-    box-shadow: 0 8px 24px rgba(60, 41, 20, 0.03);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(24, 45, 34, 0.04);
   }
 
   .reviews-header-wrap {
@@ -162,7 +162,7 @@ const renderStars = (rating: number) => {
     font-size: 1.8rem;
     font-weight: 800;
     margin-bottom: 0.5rem;
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
   }
 
   .section-heading p {
@@ -174,10 +174,10 @@ const renderStars = (rating: number) => {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: #fff8f0;
+    background: #f6faf8;
     padding: 0.5rem 1rem;
-    border-radius: 999px;
-    border: 1px solid #ffe8cc;
+    border-radius: 8px;
+    border: 1px solid #d9e2d6;
   }
 
   .rating-number {
@@ -189,7 +189,7 @@ const renderStars = (rating: number) => {
   .rating-stars {
     color: #facc15;
     font-size: 1.1rem;
-    letter-spacing: 0.1em;
+    letter-spacing: 0;
   }
 
   .rating-count {
@@ -204,9 +204,9 @@ const renderStars = (rating: number) => {
   }
 
   .review-card {
-    background: #fffdf8;
-    border: 1px solid #ebe5dc;
-    border-radius: 1.25rem;
+    background: #ffffff;
+    border: 1px solid #d9e2d6;
+    border-radius: 8px;
     padding: 1.5rem;
     box-shadow: 0 4px 12px rgba(60, 41, 20, 0.03);
     transition: var(--transition);
@@ -265,7 +265,7 @@ const renderStars = (rating: number) => {
     color: var(--text-muted);
     background: var(--bg-color);
     padding: 0.1rem 0.6rem;
-    border-radius: 999px;
+    border-radius: 8px;
     border: 1px solid var(--border-color);
   }
 
@@ -284,7 +284,7 @@ const renderStars = (rating: number) => {
   .r-rating {
     color: #facc15;
     font-size: 0.9rem;
-    letter-spacing: 0.1em;
+    letter-spacing: 0;
   }
 
   .review-content {
@@ -349,7 +349,7 @@ const renderStars = (rating: number) => {
     font-size: 0.7rem;
     font-weight: 800;
     padding: 0.2rem 0.6rem;
-    border-radius: 999px;
+    border-radius: 8px;
     text-transform: uppercase;
   }
 
@@ -365,7 +365,7 @@ const renderStars = (rating: number) => {
   @media (max-width: 768px) {
     .dyn-reviews-section {
       padding: 1.5rem;
-      border-radius: 1.25rem;
+      border-radius: 8px;
     }
     
     .reviews-header-wrap {

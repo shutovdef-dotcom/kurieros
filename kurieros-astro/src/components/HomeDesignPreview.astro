@@ -1,5 +1,5 @@
 ---
-import jobsData from '../data/jobs.json';
+import jobsData from '../data/jobs';
 
 interface Props {
 	variant: 'linear' | 'raycast' | 'notion';
@@ -20,19 +20,19 @@ const featuredJobs = jobsData.slice(0, 3);
 
 const copy = {
 	linear: {
-		label: 'Linear Concept',
+		label: 'Строгая версия',
 		title: 'Подберите вакансию за пару минут',
 		text: 'Строгая структура, быстрый сканинг, фокус на зарплате, городе и условиях.',
 		cta: 'Смотреть вакансии'
 	},
 	raycast: {
-		label: 'Raycast Concept',
+		label: 'Быстрая версия',
 		title: 'Найдите работу в современном ритме',
 		text: 'Технологичный интерфейс с более сильным характером и акцентом на ощущение продукта.',
 		cta: 'Открыть каталог'
 	},
 	notion: {
-		label: 'Notion Concept',
+		label: 'Спокойная версия',
 		title: 'Спокойный способ выбрать работу',
 		text: 'Мягкий интерфейс, доверительная подача и понятные блоки без перегрузки.',
 		cta: 'Выбрать вакансию'
@@ -110,11 +110,11 @@ const copy = {
 	.concept-copy,
 	.concept-aside,
 	.concept-card {
-		border-radius: 1.5rem;
+		border-radius: 8px;
 		padding: 1.5rem;
 	}
 	.concept-copy h1 {
-		font-size: clamp(2rem, 4vw, 3.3rem);
+		font-size: 3rem;
 		line-height: 1.02;
 		margin: 0.4rem 0 0.9rem;
 	}
@@ -124,7 +124,7 @@ const copy = {
 	.concept-label {
 		font-size: 0.78rem;
 		font-weight: 800;
-		letter-spacing: 0.1em;
+		letter-spacing: 0;
 		text-transform: uppercase;
 	}
 	.concept-actions {
@@ -136,7 +136,7 @@ const copy = {
 	}
 	.concept-primary {
 		border: none;
-		border-radius: 999px;
+		border-radius: 8px;
 		padding: 0.85rem 1.2rem;
 		font: inherit;
 		font-weight: 700;
@@ -149,7 +149,7 @@ const copy = {
 	}
 	.concept-stat {
 		padding: 1rem 1.1rem;
-		border-radius: 1.1rem;
+		border-radius: 8px;
 	}
 	.concept-stat strong {
 		display: block;
@@ -187,7 +187,7 @@ const copy = {
 	}
 	.concept-tags span {
 		padding: 0.38rem 0.62rem;
-		border-radius: 999px;
+		border-radius: 8px;
 		font-size: 0.8rem;
 	}
 	.concept-link {
@@ -235,7 +235,7 @@ const copy = {
 		color: #cbd5e1;
 	}
 	.concept-raycast .concept-primary {
-		background: linear-gradient(135deg, #8b5cf6, #22c55e);
+		background: linear-gradient(135deg, #16734c, #22c55e);
 		color: #fff;
 	}
 	.concept-raycast .concept-stat,
@@ -244,7 +244,7 @@ const copy = {
 		border: 1px solid rgba(255, 255, 255, 0.08);
 	}
 	.concept-raycast .concept-link {
-		color: #d8b4fe;
+		color: #bbf7d0;
 	}
 
 	.concept-notion .concept-copy,
@@ -279,6 +279,9 @@ const copy = {
 		.concept-hero,
 		.concept-grid {
 			grid-template-columns: 1fr;
+		}
+		.concept-copy h1 {
+			font-size: 2.35rem;
 		}
 	}
 </style>

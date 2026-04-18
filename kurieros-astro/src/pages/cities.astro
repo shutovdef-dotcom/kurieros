@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import jobsData from '../data/jobs.json';
+import jobsData from '../data/jobs';
 import { CATEGORIES } from '../data/constants';
 import { getCitiesFromJobs } from '../utils/cities';
 import { getCompaniesFromJobs } from '../utils/companies';
@@ -78,8 +78,8 @@ const faqItems = [
 		answer: 'Откройте страницу нужного города, посмотрите активные вакансии, сравните компании и только потом переходите к карточкам конкретных работодателей.',
 	},
 	{
-		question: 'Чем полезен городской хаб для SEO и AI?',
-		answer: 'Он помогает собрать локальный интент в одной точке: пользователь, поиск и AI-системы быстрее понимают, в каких городах сайт уже закрывает запросы о работе курьером.',
+		question: 'Зачем выбирать город перед откликом?',
+		answer: 'Условия курьерской работы зависят от города: отличаются компании, районы, транспорт и график. Поэтому лучше сначала открыть локальную подборку, а уже потом выбирать вакансию.',
 	},
 ];
 const pageSchemaGraph = [
@@ -122,14 +122,14 @@ const pageSchemaGraph = [
 
 <BaseLayout
 	title="Работа курьером по городам России: вакансии и компании | Курьерок"
-	description="Выберите город и откройте локальную подборку вакансий курьеров: компании, форматы работы, выплаты и быстрые маршруты по городам России."
+	description="Выберите город и откройте локальную подборку вакансий курьеров: компании, форматы работы, выплаты и быстрые переходы по городам России."
 	schemaGraph={pageSchemaGraph}
 >
 	<Header />
 
 	<main class="cities-page">
 		<section class="cities-hero">
-			<p class="section-eyebrow">City Hub</p>
+			<p class="section-eyebrow">Города</p>
 			<h1 data-t="cities.title">Работа курьером по городам России</h1>
 			<p data-t="cities.subtitle">
 				Выберите город, посмотрите активные бренды, затем откройте локальную подборку вакансий и подходящий формат работы.
@@ -138,13 +138,12 @@ const pageSchemaGraph = [
 
 		<section class="cities-answer-panel">
 			<div>
-				<p class="section-eyebrow">SEO / GEO TL;DR</p>
-				<h2>Зачем нужен отдельный хаб по городам?</h2>
+				<p class="section-eyebrow">Короткий вывод</p>
+				<h2>Зачем выбирать город отдельно?</h2>
 			</div>
 			<p>
-				Эта страница собирает региональный интент в одном месте: сначала вы выбираете город, затем видите локальные компании,
-				форматы и маршруты выбора. Для поиска и AI это понятный вход в слой "работа курьером по городам", а для пользователя
-				это короткий путь от города к нужной вакансии.
+				В разных городах отличаются компании, районы, транспорт и частота выплат. Сначала выберите город, затем
+				сравните локальные вакансии и открывайте только те карточки, где условия похожи на ваши.
 			</p>
 		</section>
 
@@ -173,7 +172,7 @@ const pageSchemaGraph = [
 			<a href="/blog/" class="quick-link">Блог о работе курьером</a>
 		</section>
 
-		<section class="cities-route-grid" aria-label="Маршруты по сайту">
+		<section class="cities-route-grid" aria-label="Переходы по сайту">
 			<article class="route-card">
 				<p class="section-eyebrow">Шаг 1</p>
 				<h2>Выбрать сильный город</h2>
@@ -186,7 +185,7 @@ const pageSchemaGraph = [
 			</article>
 			<article class="route-card">
 				<p class="section-eyebrow">Шаг 3</p>
-				<h2>Сузить сценарий</h2>
+				<h2>Сузить формат</h2>
 				<p>Если важны авто, подработка или старт с 16 лет, дальше открывайте тематические страницы и сравнивайте уже внутри формата.</p>
 			</article>
 		</section>
@@ -221,7 +220,7 @@ const pageSchemaGraph = [
 			})}
 		</section>
 
-		<section class="cities-surfaces" aria-label="Поверхности выбора">
+		<section class="cities-surfaces" aria-label="Разделы выбора">
 			<article class="surface-card">
 				<p class="section-eyebrow">Бренды</p>
 				<h2>Какие компании чаще встречаются на сайте</h2>
@@ -234,7 +233,7 @@ const pageSchemaGraph = [
 
 			<article class="surface-card">
 				<p class="section-eyebrow">Форматы</p>
-				<h2>Какие сценарии стоит открыть после города</h2>
+				<h2>Какие форматы стоит открыть после города</h2>
 				<div class="surface-chip-row">
 					{featuredCategories.map((category) => (
 						<a href={category.href} class="quick-link">{category.name}</a>
@@ -273,14 +272,14 @@ const pageSchemaGraph = [
 		margin: 0 0 0.55rem;
 		font-size: 0.74rem;
 		font-weight: 900;
-		letter-spacing: 0.16em;
+		letter-spacing: 0;
 		text-transform: uppercase;
 		color: var(--accent-color);
 	}
 	.cities-hero h1 {
-		font-size: clamp(2rem, 5vw, 3rem);
+		font-size: 3rem;
 		line-height: 1.05;
-		letter-spacing: -0.03em;
+		letter-spacing: 0;
 		margin-bottom: 0.45rem;
 	}
 	.cities-hero p,
@@ -294,7 +293,7 @@ const pageSchemaGraph = [
 	.city-tile,
 	.faq-card {
 		border: 1px solid rgba(148, 163, 184, 0.16);
-		border-radius: 1.5rem;
+		border-radius: 8px;
 		background: rgba(255, 255, 255, 0.82);
 		box-shadow: var(--shadow-sm);
 	}
@@ -339,7 +338,7 @@ const pageSchemaGraph = [
 	.fact-card span {
 		font-size: 0.72rem;
 		font-weight: 900;
-		letter-spacing: 0.11em;
+		letter-spacing: 0;
 		text-transform: uppercase;
 		color: var(--text-muted);
 	}
@@ -360,9 +359,9 @@ const pageSchemaGraph = [
 		justify-content: center;
 		min-height: 2.5rem;
 		padding: 0.65rem 1rem;
-		border-radius: 999px;
-		border: 1px solid rgba(99, 102, 241, 0.16);
-		background: rgba(99, 102, 241, 0.08);
+		border-radius: 8px;
+		border: 1px solid rgba(22, 115, 76, 0.16);
+		background: rgba(22, 115, 76, 0.08);
 		color: var(--text-main);
 		text-decoration: none;
 		font-weight: 800;
@@ -380,7 +379,7 @@ const pageSchemaGraph = [
 		gap: 0.55rem;
 		padding: 1.25rem;
 		border: 1px solid rgba(148, 163, 184, 0.16);
-		border-radius: 1.5rem;
+		border-radius: 8px;
 		background: rgba(255, 255, 255, 0.82);
 		box-shadow: var(--shadow-sm);
 	}
@@ -388,7 +387,7 @@ const pageSchemaGraph = [
 	.surface-card h2,
 	.cities-section-head h2 {
 		margin: 0;
-		font-size: clamp(1.25rem, 2vw, 1.6rem);
+		font-size: 1.45rem;
 	}
 	.route-card p:last-child,
 	.surface-card p:last-child,
@@ -471,6 +470,14 @@ const pageSchemaGraph = [
 		}
 	}
 	@media (max-width: 560px) {
+		.cities-hero h1 {
+			font-size: 2.2rem;
+		}
+		.route-card h2,
+		.surface-card h2,
+		.cities-section-head h2 {
+			font-size: 1.25rem;
+		}
 		.cities-facts,
 		.cities-faq-grid,
 		.cities-grid,

@@ -25,11 +25,11 @@ const topicGroups = getArticleTopicGroups(posts).slice(0, 4);
 const faqItems = [
 	{
 		question: 'Что публикуется в блоге Курьерок?',
-		answer: 'В блоге выходят практические материалы о работе курьером: доход, форматы занятости, сравнение брендов, городские сценарии и реальные ограничения перед откликом.',
+		answer: 'В блоге выходят практические материалы о работе курьером: доход, занятость, сравнение компаний, работа в разных городах и ограничения, которые лучше знать до отклика.',
 	},
 	{
 		question: 'Как использовать блог вместе с вакансиями?',
-		answer: 'Сначала можно прочитать обзор или разбор формата, затем перейти в сравнение вакансий, каталог компаний или нужный город и выбрать уже подходящий сценарий отклика.',
+		answer: 'Сначала можно прочитать обзор, затем перейти в сравнение вакансий, каталог компаний или нужный город и выбрать подходящий формат работы.',
 	},
 ];
 const blogTitle = 'Блог о работе курьером: доход, компании, форматы | Курьерок';
@@ -95,13 +95,12 @@ const pageSchemaGraph = [
 
 		<section class="blog-answer-panel">
 			<div>
-				<span class="eyebrow">SEO / GEO TL;DR</span>
-				<h2>Зачем блогу отдельная роль в структуре сайта?</h2>
+				<span class="eyebrow">Перед выбором</span>
+				<h2>Сначала разберитесь в условиях</h2>
 			</div>
 			<p>
-				Блог закрывает информационный интент до отклика: сначала пользователь получает объяснение формата, дохода или
-				условий, затем переходит в сравнение вакансий, каталог компаний или нужный город. Это усиливает и поисковый,
-				и AI-слой сайта.
+				Статьи помогают не идти в отклик наугад. Сначала можно понять, как устроены выплаты, график и требования,
+				а затем открыть сравнение вакансий, компанию или городскую подборку уже с нормальными вопросами в голове.
 			</p>
 		</section>
 
@@ -114,14 +113,14 @@ const pageSchemaGraph = [
 		<section class="blog-topic-section">
 			<div class="section-heading">
 				<h2>Читать по теме</h2>
-				<p>Самые сильные кластеры блога, чтобы не листать статьи подряд, а идти по нужному сценарию.</p>
+				<p>Разделы для тех, кто хочет быстро найти материалы по доходу, компаниям, графику или старту в доставке.</p>
 			</div>
 			<div class="blog-topic-grid">
 				{topicGroups.map((topic) => (
 					<article class="blog-topic-card">
 						<div class="blog-topic-head">
 							<span class="blog-topic-count">{topic.articles.length} материалов</span>
-							<a href={topic.href} class="blog-topic-link">Открыть хаб</a>
+							<a href={topic.href} class="blog-topic-link">Открыть раздел</a>
 						</div>
 						<h3>{topic.label}</h3>
 						<p>{topic.description}</p>
@@ -179,7 +178,7 @@ const pageSchemaGraph = [
 		<section class="blog-faq">
 			<div class="section-heading">
 				<h2>Короткие ответы о журнале</h2>
-				<p>Зачем читать блог перед выбором вакансии и как использовать его вместе с хабами сайта.</p>
+				<p>Зачем читать блог перед выбором вакансии и как переходить от статьи к живым условиям.</p>
 			</div>
 			<div class="blog-grid faq-grid">
 				{faqItems.map((item) => (
@@ -196,7 +195,7 @@ const pageSchemaGraph = [
 		<section class="newsletter">
 			<div class="newsletter-content">
 				<h2>Подпишитесь на новые статьи</h2>
-				<p>Получайте лучшие советы по заработку раз в неделю прямо в Telegram.</p>
+				<p>Получайте новые материалы о вакансиях, выплатах и выборе формата работы прямо в Telegram.</p>
 				<a href="/contacts/" class="btn-primary newsletter-link">Подписаться в Telegram</a>
 			</div>
 		</section>
@@ -216,9 +215,9 @@ const pageSchemaGraph = [
 		align-items: end;
 	}
 	.blog-hero-copy h1 {
-		font-size: clamp(2.6rem, 5vw, 4.8rem);
+		font-size: 4.4rem;
 		line-height: 0.95;
-		letter-spacing: -0.05em;
+		letter-spacing: 0;
 		max-width: 10ch;
 		margin-bottom: 1rem;
 	}
@@ -238,7 +237,7 @@ const pageSchemaGraph = [
 		margin-bottom: 1rem;
 		font-size: 0.78rem;
 		text-transform: uppercase;
-		letter-spacing: 0.18em;
+		letter-spacing: 0;
 		color: var(--text-muted);
 	}
 	.blog-hero-note {
@@ -277,9 +276,9 @@ const pageSchemaGraph = [
 		align-items: center;
 		min-height: 2.5rem;
 		padding: 0.65rem 1rem;
-		border-radius: 999px;
-		border: 1px solid rgba(99, 102, 241, 0.16);
-		background: rgba(99, 102, 241, 0.08);
+		border-radius: 8px;
+		border: 1px solid rgba(22, 115, 76, 0.16);
+		background: rgba(22, 115, 76, 0.08);
 		color: var(--text-main);
 		text-decoration: none;
 		font-weight: 800;
@@ -298,7 +297,7 @@ const pageSchemaGraph = [
 		display: grid;
 		gap: 0.85rem;
 		padding: 1.25rem;
-		border-radius: 1.4rem;
+		border-radius: 8px;
 		border: 1px solid rgba(148, 163, 184, 0.16);
 		background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(248,250,252,0.96));
 		box-shadow: 0 18px 48px rgba(15, 23, 42, 0.07);
@@ -312,7 +311,7 @@ const pageSchemaGraph = [
 	.blog-topic-count {
 		font-size: 0.74rem;
 		font-weight: 900;
-		letter-spacing: 0.11em;
+		letter-spacing: 0;
 		text-transform: uppercase;
 		color: var(--text-muted);
 	}
@@ -336,7 +335,7 @@ const pageSchemaGraph = [
 	}
 	.blog-topic-article {
 		padding: 0.75rem 0.9rem;
-		border-radius: 1rem;
+		border-radius: 8px;
 		background: rgba(255,255,255,0.78);
 		border: 1px solid rgba(148, 163, 184, 0.16);
 		text-decoration: none;
@@ -358,7 +357,7 @@ const pageSchemaGraph = [
 	.featured-story-copy {
 		background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(248,250,252,0.96));
 		border: 1px solid rgba(148, 163, 184, 0.18);
-		border-radius: 32px;
+		border-radius: 8px;
 		box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
 		padding: 2rem;
 		display: grid;
@@ -366,9 +365,9 @@ const pageSchemaGraph = [
 		gap: 1rem;
 	}
 	.featured-story-copy h2 {
-		font-size: clamp(2rem, 4vw, 3.4rem);
+		font-size: 3rem;
 		line-height: 1.02;
-		letter-spacing: -0.05em;
+		letter-spacing: 0;
 		max-width: 11ch;
 	}
 	.featured-story-copy p {
@@ -389,7 +388,7 @@ const pageSchemaGraph = [
 		height: 100%;
 		min-height: 440px;
 		object-fit: cover;
-		border-radius: 32px;
+		border-radius: 8px;
 		box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
 	}
 	.blog-section,
@@ -406,8 +405,8 @@ const pageSchemaGraph = [
 		margin-bottom: 1.75rem;
 	}
 	.section-heading h2 {
-		font-size: clamp(1.6rem, 2.4vw, 2.3rem);
-		letter-spacing: -0.04em;
+		font-size: 2rem;
+		letter-spacing: 0;
 	}
 	.section-heading p {
 		max-width: 44ch;
@@ -428,7 +427,7 @@ const pageSchemaGraph = [
 	}
 	.blog-card {
 		background: rgba(255, 255, 255, 0.86);
-		border-radius: 28px;
+		border-radius: 8px;
 		overflow: hidden;
 		box-shadow: 0 18px 50px rgba(15, 23, 42, 0.07);
 		transition: transform 0.25s ease, box-shadow 0.25s ease;
@@ -470,7 +469,7 @@ const pageSchemaGraph = [
 		font-size: 1.55rem;
 		margin-bottom: 0.9rem;
 		line-height: 1.12;
-		letter-spacing: -0.03em;
+		letter-spacing: 0;
 	}
 	.blog-excerpt {
 		font-size: 0.98rem;
@@ -486,10 +485,10 @@ const pageSchemaGraph = [
 	.newsletter {
 		max-width: 1360px;
 		margin: 0 auto 4rem;
-		background: linear-gradient(135deg, #111827, #1f2937);
+		background: linear-gradient(135deg, #123b2a, #16734c);
 		color: white;
 		padding: 4rem 2rem;
-		border-radius: 2rem;
+		border-radius: 8px;
 		text-align: center;
 	}
 	.newsletter h2 { color: white; margin-bottom: 1rem; }
@@ -513,17 +512,28 @@ const pageSchemaGraph = [
 		}
 	}
 	@media (max-width: 720px) {
+		.blog-hero-copy h1 {
+			font-size: 2.8rem;
+			max-width: 12ch;
+		}
 		.featured-story {
 			padding: 0 1rem;
+		}
+		.featured-story-copy h2 {
+			font-size: 2.15rem;
+			max-width: 14ch;
+		}
+		.section-heading h2 {
+			font-size: 1.65rem;
 		}
 		.featured-story-copy {
 			order: 2;
 			padding: 1.5rem;
-			border-radius: 24px;
+			border-radius: 8px;
 		}
 		.featured-story-image {
 			min-height: 280px;
-			border-radius: 24px;
+			border-radius: 8px;
 		}
 		.blog-card-link {
 			grid-template-columns: 1fr;
@@ -541,6 +551,7 @@ const pageSchemaGraph = [
 			margin-left: 1rem;
 			margin-right: 1rem;
 			padding: 3rem 1.25rem;
+			border-radius: 8px;
 		}
 	}
 </style>
