@@ -22,7 +22,7 @@ const TRANSPORT_PRIORITY: Record<TransportMode, number> = {
 
 // Temporary fast-mode for local iteration:
 // keep ~2% of offers active to speed up builds while UI/content is in flux.
-const LIGHT_MODE_ENABLED = true;
+const LIGHT_MODE_ENABLED = false;
 const LIGHT_MODE_KEEP_PERCENT = 2;
 const LIGHT_MODE_STRIDE = Math.max(1, Math.round(100 / LIGHT_MODE_KEEP_PERCENT));
 
