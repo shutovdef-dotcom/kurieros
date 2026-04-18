@@ -5,23 +5,9 @@ import VPNModal from '../components/VPNModal.astro';
 import { SUPPORTED_LANGUAGES, translations, type SupportedLanguage } from '../data/translations';
 
 const supportedLanguages = SUPPORTED_LANGUAGES;
-const vacancyTranslationModules = import.meta.glob('../data/vacancy-translations/*.json', {
-	eager: true,
-}) as Record<string, { default: Record<string, Record<string, string>> }>;
-const jobTranslations = Object.fromEntries(
-	Object.entries(vacancyTranslationModules)
-		.map(([path, module]) => [
-			path.match(/\/([^/]+)\.json$/)?.[1],
-			module.default,
-		])
-		.filter(([language]) => supportedLanguages.includes(language as SupportedLanguage)),
-) as Partial<Record<SupportedLanguage, Record<string, Record<string, string>>>>;
-
-supportedLanguages.forEach(lang => {
-    if (jobTranslations[lang]) {
-        translations[lang].vacancies = jobTranslations[lang];
-    }
-});
+const vacancyTranslationPaths = Object.fromEntries(
+	supportedLanguages.map((language) => [language, `/vacancy-translations/${language}.json`]),
+) as Record<SupportedLanguage, string>;
 
 interface Props {
 	title?: string;
@@ -244,16 +230,54 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 				}
 			})();
 		</script>
-		<script is:inline define:vars={{ translations, supportedLanguages }}>
+		<script is:inline define:vars={{ translations, supportedLanguages, vacancyTranslationPaths }}>
 			// Global i18n Manager
 			(function() {
 				const STORAGE_KEY = 'site-lang';
 				const DEFAULT_LANG = 'ru';
 				const SUPPORTED_LANGS = supportedLanguages;
+				const VACANCY_TRANSLATION_PATHS = vacancyTranslationPaths;
+				const loadedVacancyTranslations = new Set();
 				window.translations = translations;
 				
 				function getSafeLang(lang) {
 					return SUPPORTED_LANGS.includes(lang) ? lang : DEFAULT_LANG;
+				}
+
+				function pageHasVacancyTranslationKeys() {
+					return Boolean(document.querySelector('[data-t^="vacancies."]'));
+				}
+
+				async function ensureVacancyTranslations(lang) {
+					if (lang === DEFAULT_LANG || loadedVacancyTranslations.has(lang) || !pageHasVacancyTranslationKeys()) {
+						return;
+					}
+
+					const sourcePath = VACANCY_TRANSLATION_PATHS[lang];
+					if (!sourcePath) {
+						return;
+					}
+
+					try {
+						const response = await fetch(sourcePath, { cache: 'force-cache' });
+						if (!response.ok) {
+							return;
+						}
+
+						const payload = await response.json();
+						const langDictionary = translations[lang] || {};
+						const currentVacancies = langDictionary.vacancies || {};
+						translations[lang] = {
+							...langDictionary,
+							vacancies: {
+								...currentVacancies,
+								...payload,
+							},
+						};
+						loadedVacancyTranslations.add(lang);
+					} catch (error) {
+						console.warn('Failed to load vacancy translations', lang, error);
+					}
 				}
 
 				function getNestedValue(obj, path) {
@@ -268,11 +292,13 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 
 				window.kurieros_i18n = {
 					currentLang: initialLang,
+					ensureVacancyTranslations,
 					
-					setLanguage(lang) {
+					async setLanguage(lang) {
 						lang = getSafeLang(lang);
 						this.currentLang = lang;
 						localStorage.setItem(STORAGE_KEY, lang);
+						await this.ensureVacancyTranslations(lang);
 						this.applyTranslations();
 						window.dispatchEvent(new CustomEvent('kurieros:lang-change', { detail: { lang } }));
 					},
@@ -320,7 +346,8 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 					}
 				};
 
-				document.addEventListener('DOMContentLoaded', () => {
+				document.addEventListener('DOMContentLoaded', async () => {
+					await window.kurieros_i18n.ensureVacancyTranslations(window.kurieros_i18n.currentLang);
 					window.kurieros_i18n.applyTranslations();
 				});
 				
