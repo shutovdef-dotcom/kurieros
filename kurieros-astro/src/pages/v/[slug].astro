@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import ReviewsBlock from '../../components/ReviewsBlock.astro';
+import PartnerBanner from '../../components/PartnerBanner.astro';
 import jobsData from '../../data/jobs';
 import { slugifyCompany } from '../../utils/companies';
 import { getCityHref } from '../../utils/cities';
@@ -24,6 +25,7 @@ const jobCities = job.location
 	.split(',')
 	.map((city: string) => city.trim())
 	.filter((city: string) => city && city !== 'Вся Россия');
+const isMoscowVacancy = jobCities.includes('Москва');
 const cityLinks = jobCities.map((city) => ({
 	name: city,
 	href: getCityHref(city),
@@ -48,7 +50,7 @@ const scoredRelatedJobs = jobsData
 	.sort((a, b) => b.score - a.score || parseSalaryValue(b.salary) - parseSalaryValue(a.salary));
 const prioritizedRelatedJobs = scoredRelatedJobs.filter((item) => item.score > 0);
 const relatedJobs = prioritizedRelatedJobs.length ? prioritizedRelatedJobs.slice(0, 4) : scoredRelatedJobs.slice(0, 4);
-const vacancyTitle = `${job.title} — зарплата, условия и отклик | Курьерок`;
+const vacancyTitle = `${job.title} — зарплата, условия и отклик | КурьерОк`;
 const vacancyDescription = `Вакансия "${job.title}" в ${job.company}: ${job.salary}, ${job.details.schedule.toLowerCase()}, ${job.details.payment_freq.toLowerCase()}. Сравните условия и переходите к отклику.`.slice(0, 170);
 const jobLocationSchema = (jobCities.length ? jobCities : ['Россия']).map((city) => ({
 	'@type': 'Place',
@@ -128,7 +130,7 @@ const pageSchemaGraph = [
 		description: job.description,
 		identifier: {
 			'@type': 'PropertyValue',
-			name: 'Курьерок',
+			name: 'КурьерОк',
 			value: job.slug,
 		},
 		datePosted: new Date().toISOString(),
@@ -420,6 +422,8 @@ const pageSchemaGraph = [
 					решение об отклике было быстрее и спокойнее.
 				</p>
 			</section>
+
+			{isMoscowVacancy && <PartnerBanner />}
 		</div>
 	</main>
 

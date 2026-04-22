@@ -58,7 +58,7 @@ const routeCards = [
     href: '/rabota-kurerom-na-avto/',
   },
 ];
-const companiesTitle = 'Работа курьером по компаниям: бренды и вакансии | Курьерок';
+const companiesTitle = 'Работа курьером по компаниям: бренды и вакансии | КурьерОк';
 const companiesDescription = `Компании с вакансиями курьеров: ${companies.length} брендов и ${totalVacancies} вакансий. Выберите работодателя, сравните бренды и переходите в подходящие карточки.`.slice(0, 170);
 const faqItems = [
   {
@@ -126,6 +126,29 @@ const pageSchemaGraph = [
       <p data-t="companies.subtitle">Смотрите бренды, сравнивайте условия и переходите к тем вакансиям, где формат работы действительно подходит.</p>
     </section>
 
+    <section class="companies-grid">
+      {companies.map((company) => {
+        const isExternalApplyLink = /^https?:\/\//i.test(company.applyLink);
+        return (
+          <article class="company-listing-card">
+            <a
+              class="company-card-link"
+              href={company.applyLink}
+              target={isExternalApplyLink ? '_blank' : undefined}
+              rel={isExternalApplyLink ? 'noopener noreferrer nofollow sponsored' : undefined}
+              aria-label={`Открыть заявку ${company.name}`}
+            ></a>
+            <div class="company-logo-large">
+              <img src={company.logo} alt={company.name} />
+            </div>
+            <h2>{company.name}</h2>
+            <p class="company-meta"><strong>{company.vacancyCount}</strong> <span data-t="companies.active_vacancies">активных вакансий</span></p>
+            <p class="company-snippet">{company.shortIntro}</p>
+          </article>
+        );
+      })}
+    </section>
+
     <section class="companies-route-grid" aria-label="Переходы для выбора компании">
       {routeCards.map((route) => (
         <a href={route.href} class="companies-route-card">
@@ -138,7 +161,7 @@ const pageSchemaGraph = [
     <section class="companies-answer-panel">
       <div>
         <p class="section-eyebrow">Короткий вывод</p>
-        <h2>Что важно знать о компаниях на Курьерок?</h2>
+        <h2>Что важно знать о компаниях на КурьерОк?</h2>
       </div>
       <p>
         На этой странице собраны бренды, у которых уже есть вакансии на сайте. Сначала стоит выбрать работодателя по типу
@@ -221,25 +244,6 @@ const pageSchemaGraph = [
           <li>Даже если бренд выглядит подходящим, перед откликом всё равно лучше открыть 1-2 карточки и сравнить детали.</li>
         </ol>
       </article>
-    </section>
-
-    <section class="companies-grid">
-      {companies.map((company) => (
-        <article class="company-listing-card">
-          <a class="company-card-link" href={company.href} aria-label={`Открыть страницу компании ${company.name}`}></a>
-          <div class="company-logo-large">
-            <img src={company.logo} alt={company.name} />
-          </div>
-          <h2>{company.name}</h2>
-          <p class="company-meta"><strong>{company.vacancyCount}</strong> <span data-t="companies.active_vacancies">активных вакансий</span></p>
-          <p class="company-snippet">{company.shortIntro}</p>
-          <div class="company-chip-row">
-            <span class="company-chip">{company.primaryTransport}</span>
-            {company.paymentPreview[0] && <span class="company-chip">{company.paymentPreview[0]}</span>}
-          </div>
-          <a href={company.href} class="btn-primary" data-t="companies.view_jobs">Смотреть компанию</a>
-        </article>
-      ))}
     </section>
 
     <section class="companies-faq-section">
@@ -525,6 +529,7 @@ const pageSchemaGraph = [
     text-align: center;
     transition: transform 0.3s;
     overflow: hidden;
+    cursor: pointer;
   }
 
   .company-listing-card:hover {
@@ -535,7 +540,13 @@ const pageSchemaGraph = [
   .company-card-link {
     position: absolute;
     inset: 0;
-    z-index: 1;
+    z-index: 3;
+  }
+
+  .company-card-link:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: -2px;
+    border-radius: 8px;
   }
 
   .company-logo-large {
@@ -559,8 +570,6 @@ const pageSchemaGraph = [
 
   .company-listing-card h2,
   .company-listing-card p,
-  .company-chip-row,
-  .company-listing-card .btn-primary,
   .company-logo-large {
     position: relative;
     z-index: 2;
@@ -578,7 +587,7 @@ const pageSchemaGraph = [
   }
 
   .company-snippet {
-    margin: 0 0 1rem;
+    margin: 0;
     color: var(--text-muted);
     line-height: 1.7;
   }

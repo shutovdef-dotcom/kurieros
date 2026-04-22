@@ -156,7 +156,7 @@ const languageMeta = Object.fromEntries(
         padding: 0 0.7rem;
         border: 1px solid var(--border-color);
         border-radius: 8px;
-        background: rgba(255, 255, 255, 0.88);
+        background: var(--glass-bg);
         color: var(--text-main);
         box-shadow: var(--shadow-sm);
         cursor: pointer;
@@ -221,12 +221,42 @@ const languageMeta = Object.fromEntries(
     .lang-option:hover,
     .lang-option:focus-visible,
     .lang-option.active {
-        background: #eef7f2;
+        background: rgba(22, 115, 76, 0.12);
         color: var(--primary-color);
         outline: none;
     }
 
     .flag {
         font-size: 1.05rem;
+    }
+
+    :global(body.dark-mode) .lang-toggle {
+        background: var(--dm-green-surface);
+        border-color: var(--dm-green-border);
+        color: var(--dm-green-text);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.28);
+    }
+
+    :global(body.dark-mode) .lang-toggle:hover,
+    :global(body.dark-mode) .lang-toggle:focus-visible {
+        background: var(--dm-green-surface-hover);
+        border-color: var(--dm-green-surface-hover);
+    }
+
+    :global(body.dark-mode) .lang-dropdown {
+        background: rgba(31, 74, 60, 0.96);
+        border-color: rgba(114, 184, 157, 0.44);
+        box-shadow: 0 14px 32px rgba(15, 23, 42, 0.34);
+    }
+
+    :global(body.dark-mode) .lang-option {
+        color: var(--dm-green-text);
+    }
+
+    :global(body.dark-mode) .lang-option:hover,
+    :global(body.dark-mode) .lang-option:focus-visible,
+    :global(body.dark-mode) .lang-option.active {
+        background: rgba(91, 170, 141, 0.24);
+        color: #f0fbf6;
     }
 </style>

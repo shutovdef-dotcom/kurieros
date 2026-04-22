@@ -1,0 +1,54 @@
+---
+interface Props {
+	href?: string;
+	imageSrc?: string;
+	imageAlt?: string;
+}
+
+const {
+	href = 'https://trk.ppdu.ru/click/gtLv8Qo4?erid=2SDnjceSYW1',
+	imageSrc = '/banners/masters-728x90.jpg',
+	imageAlt = 'Ищем мастеров по ремонту: доход 200 000 ₽ в месяц',
+} = Astro.props as Props;
+---
+
+<section class="partner-banner" aria-label="Партнерский баннер">
+	<a class="partner-banner-link" href={href} target="_blank" rel="noopener noreferrer nofollow sponsored">
+		<img
+			src={imageSrc}
+			alt={imageAlt}
+			width="728"
+			height="90"
+			loading="lazy"
+			decoding="async"
+		/>
+	</a>
+</section>
+
+<style>
+	.partner-banner {
+		max-width: 1180px;
+		margin: 1.5rem auto 0;
+		padding: 0 1rem;
+	}
+	.partner-banner-link {
+		display: block;
+		max-width: 728px;
+		margin: 0 auto;
+		line-height: 0;
+		border-radius: 8px;
+		overflow: hidden;
+		box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
+	}
+	.partner-banner-link img {
+		display: block;
+		width: 100%;
+		height: auto;
+	}
+	@media (max-width: 768px) {
+		.partner-banner {
+			margin-top: 1rem;
+			padding: 0 0.75rem;
+		}
+	}
+</style>

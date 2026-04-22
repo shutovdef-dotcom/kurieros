@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import JobGrid from '../components/JobGrid.astro';
+import PartnerBanner from '../components/PartnerBanner.astro';
 import articlesData from '../data/articles.json';
 import jobsData from '../data/jobs';
 import { CATEGORIES } from '../data/constants';
@@ -42,6 +43,7 @@ export async function getStaticPaths() {
 }
 
 const { type, data, title, description } = Astro.props;
+const isMoscowCityPage = type === 'city' && data.slug === 'moskva';
 const searchTerm = type === 'category' ? (data.query || '').toLowerCase() : '';
 const tagFilter = type === 'category' ? data.tag || 'all' : 'all';
 
@@ -176,8 +178,8 @@ const updatedDate = new Intl.DateTimeFormat('ru-RU', {
 }).format(new Date());
 const seoTitle =
 	type === 'city'
-		? `Работа курьером ${data.prep}: вакансии и зарплата | Курьерок`
-		: `Работа курьером ${data.name.toLowerCase()}: вакансии и условия | Курьерок`;
+		? `Работа курьером ${data.prep}: вакансии и зарплата | КурьерОк`
+		: `Работа курьером ${data.name.toLowerCase()}: вакансии и условия | КурьерОк`;
 const seoDescription = (
 	type === 'city'
 		? `Работа курьером ${data.prep}: ${filteredJobs.length} вакансий от ${companyNames.length} компаний, выплаты ${paymentTypes.slice(0, 2).join(' / ') || 'уточняются в карточках'}. Сравните условия и откройте подходящие отклики.`
@@ -544,6 +546,8 @@ const pageSchemaGraph = [
 				</div>
 			</article>
 		</section>
+
+		{isMoscowCityPage && <PartnerBanner />}
 	</main>
 
 	<Footer />

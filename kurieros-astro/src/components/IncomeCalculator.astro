@@ -136,13 +136,13 @@ const fallbackRateJson = JSON.stringify(fallbackRate);
 
 <style>
     .calc-card {
-        background: #ffffff;
-        border: 1px solid #d9e2d6;
+        background: var(--surface-color);
+        border: 1px solid var(--border-color);
         border-radius: 8px;
         padding: 2.5rem;
         display: flex;
         gap: 3rem;
-        box-shadow: 0 4px 20px rgba(24, 45, 34, 0.04);
+        box-shadow: var(--shadow-sm);
         margin-top: 1.5rem;
     }
 
@@ -168,17 +168,17 @@ const fallbackRateJson = JSON.stringify(fallbackRate);
     .field-header label {
         font-size: 1.1rem;
         font-weight: 700;
-        color: #1d2b24;
+        color: var(--text-main);
     }
 
     .value-badge {
-        background: #f6faf8;
-        color: #1d2b24;
+        background: rgba(246, 250, 248, 0.95);
+        color: var(--text-main);
         padding: 0.4rem 1rem;
         border-radius: 8px;
         font-weight: 800;
         font-size: 1rem;
-        border: 1px solid #d9e2d6;
+        border: 1px solid var(--border-color);
     }
 
     .range-wrapper {
@@ -218,7 +218,7 @@ const fallbackRateJson = JSON.stringify(fallbackRate);
         display: flex;
         justify-content: space-between;
         font-size: 0.85rem;
-        color: #61746b;
+        color: var(--text-muted);
         font-weight: 500;
     }
 
@@ -226,9 +226,9 @@ const fallbackRateJson = JSON.stringify(fallbackRate);
         width: 100%;
         padding: 1rem 1.25rem;
         border-radius: 8px;
-        border: 1px solid #d9e2d6;
-        background: #ffffff;
-        color: #1d2b24;
+        border: 1px solid var(--border-color);
+        background: var(--surface-color);
+        color: var(--text-main);
         font-size: 1.05rem;
         font-weight: 700;
         cursor: pointer;
@@ -241,7 +241,7 @@ const fallbackRateJson = JSON.stringify(fallbackRate);
 
     .calc-divider {
         width: 1px;
-        background: #d9e2d6;
+        background: var(--border-color);
         align-self: stretch;
     }
 
@@ -262,7 +262,7 @@ const fallbackRateJson = JSON.stringify(fallbackRate);
     .result-label {
         font-size: 1.2rem;
         font-weight: 600;
-        color: #51635c;
+        color: var(--text-muted);
     }
 
     .amount-container {
@@ -270,7 +270,7 @@ const fallbackRateJson = JSON.stringify(fallbackRate);
         display: flex;
         align-items: baseline;
         gap: 0.5rem;
-        color: #1d2b24;
+        color: var(--text-main);
     }
 
     .amount {
@@ -283,7 +283,7 @@ const fallbackRateJson = JSON.stringify(fallbackRate);
     .currency {
         font-size: 2rem;
         font-weight: 800;
-        color: #51635c;
+        color: var(--text-muted);
     }
 
     .calc-cta-btn {
@@ -309,8 +309,52 @@ const fallbackRateJson = JSON.stringify(fallbackRate);
     .disclaimer {
         margin-top: 1rem;
         font-size: 0.8rem;
-        color: #61746b;
+        color: var(--text-muted);
         line-height: 1.4;
+    }
+
+    :global(body.dark-mode) .calc-card {
+        background: rgba(67, 77, 90, 0.76);
+        border-color: rgba(195, 204, 216, 0.28);
+        box-shadow: 0 14px 30px rgba(15, 23, 42, 0.28);
+    }
+
+    :global(body.dark-mode) .value-badge {
+        background: var(--dm-green-surface);
+        border-color: var(--dm-green-border);
+        color: var(--dm-green-text);
+    }
+
+    :global(body.dark-mode) input[type="range"] {
+        background: rgba(195, 204, 216, 0.22);
+    }
+
+    :global(body.dark-mode) input[type="range"]::-webkit-slider-thumb {
+        background: var(--dm-green-border);
+        border-color: rgba(67, 77, 90, 0.96);
+    }
+
+    :global(body.dark-mode) .calc-select {
+        background-color: var(--dm-green-surface);
+        border-color: var(--dm-green-border);
+        color: var(--dm-green-text);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23e2e8f0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 5 3 3 3-3'/%3E%3C/svg%3E");
+    }
+
+    :global(body.dark-mode) .calc-divider {
+        background: rgba(195, 204, 216, 0.28);
+    }
+
+    :global(body.dark-mode) .calc-cta-btn {
+        background: var(--dm-green-surface-strong);
+        border: 1px solid var(--dm-green-border);
+        color: var(--dm-green-text);
+    }
+
+    :global(body.dark-mode) .calc-cta-btn:hover {
+        background: var(--dm-green-surface-hover);
+        border-color: var(--dm-green-focus);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.34);
     }
 
     @media (max-width: 992px) {

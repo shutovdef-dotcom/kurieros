@@ -188,10 +188,10 @@ const hasVacancies = jobsData.length > 0;
 		const index = compareList.indexOf(id);
 		if (index === -1) {
 			if (compareList.length >= 4) {
-				showCompareNotice(getTranslation('compare.limit_reached', 'Можно сравнивать не более 4 вакансий одновременно.'));
-				return;
+				compareList = [...compareList.slice(1), id];
+			} else {
+				compareList = [...compareList, id];
 			}
-			compareList = [...compareList, id];
 		} else {
 			compareList = compareList.filter((item) => item !== id);
 		}
@@ -199,10 +199,10 @@ const hasVacancies = jobsData.length > 0;
 		localStorage.setItem('compareList', JSON.stringify(compareList));
 		window.dispatchEvent(new CustomEvent('compareUpdate'));
 
-		setCompareButtonState(
-			document.querySelector(`.btn-compare[data-id="${id}"]`),
-			compareList.includes(id)
-		);
+		document.querySelectorAll('.btn-compare').forEach((btn) => {
+			const buttonId = Number.parseInt(btn.dataset.id || '', 10);
+			setCompareButtonState(btn, compareList.includes(buttonId));
+		});
 	}
 
 	document.addEventListener('DOMContentLoaded', () => {

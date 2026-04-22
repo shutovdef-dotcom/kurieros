@@ -6,6 +6,7 @@ import JobGrid from '../components/JobGrid.astro';
 import IncomeCalculator from '../components/IncomeCalculator.astro';
 import LanguageSwitcher from '../components/LanguageSwitcher.astro';
 import ReviewsBlock from '../components/ReviewsBlock.astro';
+import PartnerBanner from '../components/PartnerBanner.astro';
 import jobsData from '../data/jobs';
 import { getCompaniesFromJobs } from '../utils/companies';
 import { getCitiesFromJobs, getCityNames, sortCityNamesByPopulation } from '../utils/cities';
@@ -115,7 +116,7 @@ const discoveryCards = [
 		variant: 'hub',
 	})),
 ];
-const homepageTitle = 'Работа курьером: вакансии, компании и сравнение | Курьерок';
+const homepageTitle = 'Работа курьером: вакансии, компании и сравнение | КурьерОк';
 const homepageDescription = `Работа курьером в России: ${totalVacancies} вакансий, ${companies.length} компаний, города, сравнение условий и понятные разборы перед откликом.`.slice(0, 170);
 const pageSchemaGraph = [
 	{
@@ -136,7 +137,7 @@ const pageSchemaGraph = [
 	},
 	{
 		'@type': 'Organization',
-		name: 'Курьерок',
+		name: 'КурьерОк',
 		url: Astro.site,
 		description: 'Каталог вакансий курьеров, компаний, городов и практических разборов для спокойного выбора работы.',
 	},
@@ -207,6 +208,7 @@ const pageSchemaGraph = [
 						<option value="foot">Транспорт: пешком</option>
 						<option value="bicycle">Транспорт: велосипед / самокат</option>
 						<option value="auto">Транспорт: авто</option>
+						<option value="remote">Транспорт: работа из дома</option>
 					</select>
 				</div>
 			</section>
@@ -285,6 +287,8 @@ const pageSchemaGraph = [
 					<div class="faq-answer" data-t="faq.a3">{faqItems[2].answer}</div>
 				</div>
 			</section>
+
+			<PartnerBanner />
 		</div>
 	</main>
 
@@ -380,7 +384,12 @@ const pageSchemaGraph = [
 			}
 		}
 
-		detectCityByGeo();
+			const savedCity = localStorage.getItem(STORAGE_KEY);
+			if (savedCity && availableCities.includes(savedCity)) {
+				applyCity(savedCity, 'saved');
+			} else {
+				detectCityByGeo();
+			}
 
 		citySelect?.addEventListener('change', (event) => {
 			applyCity(event.target.value, 'manual');
@@ -674,8 +683,8 @@ const pageSchemaGraph = [
 	}
 	:global(.review-card),
 	:global(.faq-item) {
-		background: #ffffff !important;
-		border: 1px solid #dfe7dd !important;
+		background: var(--surface-color) !important;
+		border: 1px solid var(--border-color) !important;
 		border-radius: 8px !important;
 		box-shadow: 0 4px 12px rgba(24, 45, 34, 0.03) !important;
 	}
@@ -759,6 +768,117 @@ const pageSchemaGraph = [
 	.home-chip-link:hover {
 		transform: translateY(-1px);
 		box-shadow: 0 8px 18px rgba(24, 45, 34, 0.07);
+	}
+
+	/* --- Dark Mode --- */
+	:global(body.dark-mode) .home-hero-panel {
+		border-color: rgba(195, 204, 216, 0.28);
+		background: linear-gradient(
+			135deg,
+			rgba(76, 88, 103, 0.68) 0%,
+			rgba(64, 75, 88, 0.62) 52%,
+			rgba(54, 64, 76, 0.7) 100%
+		);
+		box-shadow: 0 24px 42px rgba(15, 23, 42, 0.34);
+	}
+	:global(body.dark-mode) .home-hero-fact {
+		background: rgba(66, 76, 89, 0.66);
+		border-color: rgba(195, 204, 216, 0.24);
+		box-shadow: 0 10px 24px rgba(15, 23, 42, 0.26);
+	}
+	:global(body.dark-mode) .home-hero-fact span {
+		color: #94a3b8;
+	}
+	:global(body.dark-mode) .home-hero-fact strong {
+		color: #e2e8f0;
+	}
+	:global(body.dark-mode) .home-section {
+		background: rgba(58, 68, 81, 0.66);
+		border-color: rgba(195, 204, 216, 0.24);
+		box-shadow: 0 18px 38px rgba(15, 23, 42, 0.28);
+	}
+	:global(body.dark-mode) .home-filter-select {
+		background: var(--dm-green-surface);
+		border-color: var(--dm-green-border);
+		color: var(--dm-green-text);
+	}
+	:global(body.dark-mode) .home-filter-select:focus-visible {
+		outline-color: var(--dm-green-focus);
+		border-color: var(--dm-green-focus);
+		background: var(--dm-green-surface-hover);
+	}
+	:global(body.dark-mode) .city-selector-container {
+		background: var(--dm-green-surface);
+		border-color: var(--dm-green-border);
+		box-shadow: 0 10px 24px rgba(15, 23, 42, 0.28);
+	}
+	:global(body.dark-mode) .city-selector-container:hover {
+		background: var(--dm-green-surface-hover);
+		border-color: var(--dm-green-focus);
+		box-shadow: 0 14px 30px rgba(15, 23, 42, 0.3);
+	}
+	:global(body.dark-mode) .city-selector-container::after,
+	:global(body.dark-mode) .city-icon {
+		color: #a7d8c5;
+	}
+	:global(body.dark-mode) .city-select {
+		color: var(--dm-green-text);
+	}
+	:global(body.dark-mode) .hero-lang-switcher :global(.lang-toggle) {
+		background: var(--dm-green-surface);
+		border-color: var(--dm-green-border);
+		box-shadow: 0 10px 24px rgba(15, 23, 42, 0.28);
+		color: var(--dm-green-text);
+	}
+	:global(body.dark-mode) .hero-lang-switcher :global(.lang-toggle:hover),
+	:global(body.dark-mode) .hero-lang-switcher :global(.lang-toggle:focus-visible) {
+		background: var(--dm-green-surface-hover);
+		border-color: var(--dm-green-surface-hover);
+	}
+	:global(body.dark-mode) .hero-city-link {
+		background: var(--dm-green-surface);
+		border-color: var(--dm-green-border);
+		color: var(--dm-green-text);
+	}
+	:global(body.dark-mode) .hero-city-link:hover {
+		background: var(--dm-green-surface-hover);
+		border-color: var(--dm-green-focus);
+		box-shadow: 0 12px 26px rgba(15, 23, 42, 0.34);
+	}
+	:global(body.dark-mode) .home-navigation-card,
+	:global(body.dark-mode) .home-navigation-card-route,
+	:global(body.dark-mode) .home-surface-card {
+		background: linear-gradient(180deg, rgba(68, 79, 94, 0.74) 0%, rgba(57, 67, 79, 0.72) 100%);
+		border-color: rgba(195, 204, 216, 0.24);
+		box-shadow: 0 12px 28px rgba(15, 23, 42, 0.24);
+		color: var(--text-main);
+	}
+	:global(body.dark-mode) .home-navigation-card span {
+		color: #94a3b8;
+	}
+	:global(body.dark-mode) .home-navigation-card p,
+	:global(body.dark-mode) .section-heading p {
+		color: var(--text-muted);
+	}
+	:global(body.dark-mode) .home-chip-link {
+		background: rgba(67, 77, 90, 0.78);
+		border-color: rgba(195, 204, 216, 0.28);
+		color: var(--text-main);
+	}
+	:global(body.dark-mode) .home-chip-link:hover {
+		background: rgba(79, 91, 105, 0.94);
+		border-color: rgba(52, 211, 153, 0.5);
+		box-shadow: 0 10px 24px rgba(15, 23, 42, 0.3);
+	}
+	:global(body.dark-mode .review-card),
+	:global(body.dark-mode .faq-item) {
+		background: rgba(67, 77, 90, 0.86) !important;
+		border-color: rgba(195, 204, 216, 0.28) !important;
+		box-shadow: 0 12px 28px rgba(15, 23, 42, 0.3) !important;
+	}
+	:global(body.dark-mode .faq-question),
+	:global(body.dark-mode .faq-answer) {
+		color: var(--text-main);
 	}
 
 	/* --- Utilities --- */

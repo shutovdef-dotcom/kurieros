@@ -1,5 +1,6 @@
 import descriptionTranslationsSource from './vacancy-description-translations.json';
 import kuperPayRatesSource from './kuper-pay-rates.json';
+import tBankVacanciesSource from './tbank-vacancies.json';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from './translations';
 import { slugifyCity } from '../utils/cities';
 import type {
@@ -26,6 +27,12 @@ const KUPER_PACKER_APPLY_LINK =
 const KUPER_AUTO_APPLY_LINK =
   'https://trk.ppdu.ru/click/qHQDwLuc?erid=2SDnjeL6Zwp&landingId=2741';
 const KUPER_DEFAULT_CITIZENSHIP = 'РФ / ЕАЭС / страны вне ЕАЭС при наличии ВНЖ и патента';
+const T_BANK_COMPANY_NAME = 'Т-Банк';
+const T_BANK_COMPANY_LOGO =
+  'https://agents.pampadu.ru/api/file/ViewFile?type=1&name=23a3b3dd-48a4-4edf-a2a6-c5d681389c1a.png';
+const T_BANK_APPLY_LINK = 'https://trk.ppdu.ru/click/X76Tf6si?erid=2SDnjcbs16H';
+const T_BANK_CITIZENSHIP = 'РФ / ЕАЭС / страны вне ЕАЭС при наличии ВНЖ и патента';
+const T_BANK_EMPLOYMENT_FORMATS = ['gph', 'self_employed'] satisfies EmploymentFormat[];
 
 type KuperPayRates = {
   sourceUrl: string;
@@ -33,6 +40,33 @@ type KuperPayRates = {
   footAndBikeShiftByCity: Record<string, number>;
   autoShiftByCity: Record<string, number>;
   packerShiftByCity: Record<string, number>;
+};
+
+type TBankOfferSource = {
+  city: string;
+  workMode?: string | null;
+  avgIncomeRub?: number | null;
+  incomeMinRub?: number | null;
+  incomeMaxRub?: number | null;
+  hiringActive?: boolean;
+};
+
+type TBankVacancyData = {
+  title: string;
+  titleTemplate: string;
+  shortDescription: string;
+  description: string;
+  requirements: string[];
+  benefits: string[];
+  requiredDocuments: string[];
+  offers: TBankOfferSource[];
+};
+
+type TBankVacanciesData = {
+  sourceUrl: string;
+  updatedAt: string;
+  operatorB2B: TBankVacancyData;
+  representative: TBankVacancyData;
 };
 
 const TRANSPORT_MODES = ['foot', 'bicycle', 'auto'] satisfies TransportMode[];
@@ -76,6 +110,7 @@ type YandexEdaCityRate = {
 
 const descriptionTranslations = descriptionTranslationsSource as Record<SupportedLanguage, DescriptionTranslation>;
 const kuperPayRates = kuperPayRatesSource as KuperPayRates;
+const tBankVacancies = tBankVacanciesSource as TBankVacanciesData;
 
 const yandexEdaCityRates: YandexEdaCityRate[] = [
   { city: 'Адлер', citizenship: 'РФ', rates: { foot: 445, bicycle: 440, auto: 672 } },
@@ -581,6 +616,141 @@ const kuperPackerOffers = kuperPackerShiftByCity.map(([city, shift], cityIndex) 
   }),
 );
 
+const formatRub = (value: number) => new Intl.NumberFormat('ru-RU').format(value);
+
+const buildTBankPay = (minMonthly: number, maxMonthly: number): VacancyOffer['pay'] => {
+  const min = Math.min(minMonthly, maxMonthly);
+  const max = Math.max(minMonthly, maxMonthly);
+  const monthlyText = min === max
+    ? `${formatRub(max)} ₽/мес`
+    : `${formatRub(min)}–${formatRub(max)} ₽/мес`;
+
+  return {
+    currency: 'RUB',
+    monthly: {
+      min,
+      max,
+      text: monthlyText,
+    },
+    rate: monthlyText,
+    paymentFrequency: 'Уточняется',
+  };
+};
+
+const resolveTBankIncomeRange = (offer: TBankOfferSource) => {
+  const numericCandidates = [offer.incomeMinRub, offer.avgIncomeRub, offer.incomeMaxRub]
+    .filter((value): value is number => typeof value === 'number' && Number.isFinite(value) && value > 0);
+
+  if (!numericCandidates.length) {
+    return { min: 70_000, max: 70_000 };
+  }
+
+  return {
+    min: Math.min(...numericCandidates),
+    max: Math.max(...numericCandidates),
+  };
+};
+
+const buildTBankApplyLink = (city: string, role: 'operator-b2b' | 'representative') => {
+  const url = new URL(T_BANK_APPLY_LINK);
+  const citySlug = slugifyCity(city);
+
+  url.searchParams.set('utm_source', 'kurerok');
+  url.searchParams.set('utm_medium', 'vacancy');
+  url.searchParams.set('utm_campaign', `tbank-${role}`);
+  url.searchParams.set('utm_content', `${citySlug}-${role}`);
+
+  return url.toString();
+};
+
+const getRepresentativeTransport = (workMode?: string | null): TransportMode => {
+  const normalized = (workMode ?? '').toLowerCase();
+
+  if (normalized.includes('авто') && !normalized.includes('пеш')) {
+    return 'auto';
+  }
+
+  return 'foot';
+};
+
+const tBankOperatorContent = createKuperLocalizedContent({
+  title: tBankVacancies.operatorB2B.title,
+  shortDescription: tBankVacancies.operatorB2B.shortDescription,
+  description: tBankVacancies.operatorB2B.description,
+  requirements: [...tBankVacancies.operatorB2B.requirements],
+  benefits: [...tBankVacancies.operatorB2B.benefits],
+  requiredDocuments: [...tBankVacancies.operatorB2B.requiredDocuments],
+  labels: ['Удалённо', 'B2B-продажи'],
+  searchTags: ['Т-Банк', 'оператор', 'B2B-продажи', 'удалённая работа'],
+});
+
+const representativeTitleTemplate = tBankVacancies.representative.titleTemplate.includes('в %city-name%')
+  ? tBankVacancies.representative.titleTemplate.replace('в %city-name%', '{cityPrep}')
+  : tBankVacancies.representative.titleTemplate.includes('%city-name%')
+    ? tBankVacancies.representative.titleTemplate.replace('%city-name%', '{cityPrep}')
+    : tBankVacancies.representative.title;
+
+const tBankRepresentativeContent = createKuperLocalizedContent({
+  title: representativeTitleTemplate,
+  shortDescription: tBankVacancies.representative.shortDescription,
+  description: tBankVacancies.representative.description,
+  requirements: [...tBankVacancies.representative.requirements],
+  benefits: [...tBankVacancies.representative.benefits],
+  requiredDocuments: [...tBankVacancies.representative.requiredDocuments],
+  labels: ['Разъездная работа', 'Гибкий график'],
+  searchTags: ['Т-Банк', 'представитель', 'разъездная работа', 'работа с клиентами'],
+});
+
+const tBankOperatorOffers = tBankVacancies.operatorB2B.offers.map((offer, cityIndex) => {
+  const incomeRange = resolveTBankIncomeRange(offer);
+
+  return {
+    city: offer.city,
+    transport: 'foot',
+    pay: buildTBankPay(incomeRange.min, incomeRange.max),
+    isActive: offer.hiringActive ?? true,
+    updatedAt: tBankVacancies.updatedAt,
+    sourceUrl: tBankVacancies.sourceUrl,
+    salaryConfidence: 'partner',
+    ageFrom: 18,
+    citizenship: T_BANK_CITIZENSHIP,
+    medicalBook: 'unknown',
+    employmentFormats: [...T_BANK_EMPLOYMENT_FORMATS],
+    schedule: 'Гибкий график, полностью удалённый формат',
+    applyLink: buildTBankApplyLink(offer.city, 'operator-b2b'),
+    priority: 1750 - cityIndex * 2 + TRANSPORT_PRIORITY.foot,
+  } satisfies VacancyOffer;
+});
+
+const tBankRepresentativeOffers = tBankVacancies.representative.offers.map((offer, cityIndex) => {
+  const incomeRange = resolveTBankIncomeRange(offer);
+  const transport = getRepresentativeTransport(offer.workMode);
+  const normalizedMode = (offer.workMode ?? '').toLowerCase();
+  const hasMixedMode = normalizedMode.includes('авто') && normalizedMode.includes('пеш');
+
+  return {
+    city: offer.city,
+    transport,
+    pay: buildTBankPay(incomeRange.min, incomeRange.max),
+    isActive: offer.hiringActive ?? true,
+    updatedAt: tBankVacancies.updatedAt,
+    sourceUrl: tBankVacancies.sourceUrl,
+    salaryConfidence: 'partner',
+    ageFrom: 18,
+    citizenship: T_BANK_CITIZENSHIP,
+    medicalBook: 'unknown',
+    employmentFormats: [...T_BANK_EMPLOYMENT_FORMATS],
+    schedule: 'От 2 дней в неделю, время выбирается из доступных интервалов',
+    applyLink: buildTBankApplyLink(offer.city, 'representative'),
+    priority: 1700 - cityIndex * 2 + TRANSPORT_PRIORITY[transport],
+    ...(hasMixedMode
+      ? {
+          benefitsOverride: ['В этом городе можно работать как на авто, так и пешком (по условиям вакансии).'],
+        }
+      : {}),
+  } satisfies VacancyOffer;
+});
+
 export const vacancySources = [
   {
     id: 1,
@@ -692,6 +862,50 @@ export const vacancySources = [
     },
     offers: kuperPackerOffers,
     extraTags: ['kuper', 'picker', 'store', 'source:google-sheet'],
+    isHot: true,
+  },
+  {
+    id: 6,
+    slug: 'tbank-outbound-b2b-operator',
+    company: {
+      name: T_BANK_COMPANY_NAME,
+      logo: T_BANK_COMPANY_LOGO,
+    },
+    content: tBankOperatorContent,
+    defaults: {
+      ageFrom: 18,
+      medicalBook: 'unknown',
+      employmentFormats: [...T_BANK_EMPLOYMENT_FORMATS],
+      schedule: 'Гибкий график, полностью удалённый формат',
+      education: 'От 9 классов',
+      citizenship: T_BANK_CITIZENSHIP,
+      uniform: 'Не требуется',
+      os: 'iOS / Android',
+    },
+    offers: tBankOperatorOffers,
+    extraTags: ['tbank', 'operator', 'b2b', 'remote', 'source:google-sheet'],
+    isHot: true,
+  },
+  {
+    id: 7,
+    slug: 'tbank-representative',
+    company: {
+      name: T_BANK_COMPANY_NAME,
+      logo: T_BANK_COMPANY_LOGO,
+    },
+    content: tBankRepresentativeContent,
+    defaults: {
+      ageFrom: 18,
+      medicalBook: 'unknown',
+      employmentFormats: [...T_BANK_EMPLOYMENT_FORMATS],
+      schedule: 'От 2 дней в неделю, время выбирается из доступных интервалов',
+      education: 'От 9 классов',
+      citizenship: T_BANK_CITIZENSHIP,
+      uniform: 'Не требуется',
+      os: 'iOS / Android',
+    },
+    offers: tBankRepresentativeOffers,
+    extraTags: ['tbank', 'representative', 'field-sales', 'source:google-sheet'],
     isHot: true,
   },
 ] satisfies VacancySource[];

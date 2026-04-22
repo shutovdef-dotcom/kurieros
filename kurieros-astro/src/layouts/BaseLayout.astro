@@ -21,7 +21,7 @@ interface Props {
 }
 
 const {
-	title = "Курьерок — Вся работа здесь",
+	title = "КурьерОк — Вся работа здесь",
 	titleKey,
 	description = "Лучшие вакансии для курьеров в России. Работа на авто, мото, вело и пешком. Сравнивайте условия в Яндекс Еда, СДЭК, Ozon и других компаниях.",
 	descriptionKey,
@@ -37,7 +37,7 @@ const resolvedImageUrl = new URL(image, socialBaseUrl).toString();
 
 const websiteSchema = {
 	"@type": "WebSite",
-	name: "Курьерок",
+	name: "КурьерОк",
 	url: "https://kurerok.ru/",
 };
 
@@ -85,10 +85,17 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 			<script is:inline>
 				(function() {
 					const savedTheme = localStorage.getItem('site-theme');
-				const bodyClass = savedTheme && savedTheme !== 'default'
-					? `theme-${savedTheme}`
-					: 'theme-minimal';
-				document.documentElement.dataset.initialTheme = bodyClass;
+					const bodyClass = savedTheme && savedTheme !== 'default'
+						? `theme-${savedTheme}`
+						: 'theme-minimal';
+					document.documentElement.dataset.initialTheme = bodyClass;
+
+					const savedColorMode = localStorage.getItem('site-color-mode');
+					const hasSavedMode = savedColorMode === 'dark' || savedColorMode === 'light';
+					const systemPrefersDark = window.matchMedia?.('(prefers-color-scheme: dark)')?.matches;
+					const colorMode = hasSavedMode ? savedColorMode : (systemPrefersDark ? 'dark' : 'light');
+					document.documentElement.dataset.initialColorMode = colorMode;
+					document.documentElement.style.colorScheme = colorMode;
 				})();
 			</script>
 
@@ -128,7 +135,7 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content="website" />
-		<meta property="og:site_name" content="Курьерок" />
+		<meta property="og:site_name" content="КурьерОк" />
 		<meta property="og:locale" content="ru_RU" />
 		<meta property="og:url" content={resolvedCanonicalUrl} />
 		<meta property="og:title" content={title} />
@@ -160,9 +167,14 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 			<script is:inline>
 				(function() {
 					const initialTheme = document.documentElement.dataset.initialTheme;
-				document.body.className = initialTheme || 'theme-minimal';
-			})();
-		</script>
+					const initialColorMode = document.documentElement.dataset.initialColorMode || 'light';
+
+					document.body.className = initialTheme || 'theme-minimal';
+					document.body.classList.toggle('dark-mode', initialColorMode === 'dark');
+					document.body.dataset.colorMode = initialColorMode;
+					document.documentElement.style.colorScheme = initialColorMode;
+				})();
+			</script>
 		<div class="bg-blob blob-1"></div>
 		<div class="bg-blob blob-2"></div>
 		
@@ -342,8 +354,11 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 					}
 				}
 
-					const initialLang = detectSystemLanguage();
-					localStorage.setItem(STORAGE_KEY, initialLang);
+					const savedLang = localStorage.getItem(STORAGE_KEY);
+					const initialLang = getSafeLang(savedLang || detectSystemLanguage());
+					if (savedLang !== initialLang) {
+						localStorage.setItem(STORAGE_KEY, initialLang);
+					}
 
 				window.kurieros_i18n = {
 					currentLang: initialLang,

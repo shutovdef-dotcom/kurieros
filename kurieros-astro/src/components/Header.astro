@@ -5,7 +5,7 @@ import LanguageSwitcher from './LanguageSwitcher.astro';
     <div class="header-left">
         <a href="/" class="logo">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            Курьерок
+            КурьерОк
         </a>
     </div>
     
@@ -21,8 +21,20 @@ import LanguageSwitcher from './LanguageSwitcher.astro';
         </ul>
     </nav>
 
-    <div class="header-lang">
-        <LanguageSwitcher />
+    <div class="header-controls">
+        <button
+            id="theme-toggle"
+            class="theme-toggle"
+            type="button"
+            aria-label="Переключить на тёмную тему"
+            aria-pressed="false"
+            title="Переключить на тёмную тему"
+        >
+            <span id="theme-toggle-icon" class="theme-toggle-icon" aria-hidden="true">🌙</span>
+        </button>
+        <div class="header-lang">
+            <LanguageSwitcher />
+        </div>
     </div>
 </header>
 
@@ -57,6 +69,83 @@ import LanguageSwitcher from './LanguageSwitcher.astro';
 </nav>
 
 <script is:inline>
+    const COLOR_MODE_KEY = 'site-color-mode';
+
+    function readStoredColorMode() {
+        try {
+            const stored = localStorage.getItem(COLOR_MODE_KEY);
+            return stored === 'dark' || stored === 'light' ? stored : null;
+        } catch {
+            return null;
+        }
+    }
+
+    function getSystemColorMode() {
+        return window.matchMedia?.('(prefers-color-scheme: dark)')?.matches ? 'dark' : 'light';
+    }
+
+    function getCurrentColorMode() {
+        return document.body?.dataset.colorMode === 'dark' ? 'dark' : 'light';
+    }
+
+    function updateThemeToggleButton(mode) {
+        const button = document.getElementById('theme-toggle');
+        const icon = document.getElementById('theme-toggle-icon');
+        if (!button || !icon) return;
+
+        const isDark = mode === 'dark';
+        const nextModeLabel = isDark ? 'светлую' : 'тёмную';
+        button.setAttribute('aria-pressed', String(isDark));
+        button.setAttribute('aria-label', `Переключить на ${nextModeLabel} тему`);
+        button.setAttribute('title', `Переключить на ${nextModeLabel} тему`);
+        icon.textContent = isDark ? '☀️' : '🌙';
+    }
+
+    function applyColorMode(mode, persist = true) {
+        const resolvedMode = mode === 'dark' ? 'dark' : 'light';
+        if (document.body) {
+            document.body.classList.toggle('dark-mode', resolvedMode === 'dark');
+            document.body.dataset.colorMode = resolvedMode;
+        }
+        document.documentElement.style.colorScheme = resolvedMode;
+        updateThemeToggleButton(resolvedMode);
+
+        if (persist) {
+            try {
+                localStorage.setItem(COLOR_MODE_KEY, resolvedMode);
+            } catch {}
+        }
+
+        window.dispatchEvent(new CustomEvent('kurieros:color-mode-change', {
+            detail: { mode: resolvedMode },
+        }));
+    }
+
+    function initThemeToggle() {
+        const button = document.getElementById('theme-toggle');
+        if (!button) return;
+
+        const bodyMode = document.body?.dataset.colorMode;
+        const initialMode = bodyMode === 'dark' || bodyMode === 'light'
+            ? bodyMode
+            : (readStoredColorMode() || getSystemColorMode());
+
+        applyColorMode(initialMode, false);
+
+        button.addEventListener('click', () => {
+            const nextMode = getCurrentColorMode() === 'dark' ? 'light' : 'dark';
+            applyColorMode(nextMode, true);
+        });
+
+        const mediaQuery = window.matchMedia?.('(prefers-color-scheme: dark)');
+        if (mediaQuery && typeof mediaQuery.addEventListener === 'function') {
+            mediaQuery.addEventListener('change', (event) => {
+                if (readStoredColorMode()) return;
+                applyColorMode(event.matches ? 'dark' : 'light', false);
+            });
+        }
+    }
+
     function readCompareList() {
         try {
             const rawList = JSON.parse(localStorage.getItem('compareList') || '[]');
@@ -97,9 +186,22 @@ import LanguageSwitcher from './LanguageSwitcher.astro';
     }
     
     document.addEventListener('DOMContentLoaded', () => {
+        initThemeToggle();
         updateHeaderCompareBadge();
     });
 
-    window.addEventListener('storage', updateHeaderCompareBadge);
+    window.addEventListener('storage', (event) => {
+        if (!event.key || event.key === 'compareList') {
+            updateHeaderCompareBadge();
+        }
+
+        if (event.key === COLOR_MODE_KEY) {
+            const stored = readStoredColorMode();
+            if (stored) {
+                applyColorMode(stored, false);
+            }
+        }
+    });
+
     window.addEventListener('compareUpdate', updateHeaderCompareBadge);
 </script>

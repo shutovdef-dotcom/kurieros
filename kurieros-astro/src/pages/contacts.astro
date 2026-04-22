@@ -4,7 +4,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 ---
 
-<BaseLayout title="Контакты и поддержка — Курьерок" description="Свяжитесь с нами по вопросам размещения вакансий, сотрудничества или технической поддержки. Мы всегда рады помочь курьерам и работодателям.">
+<BaseLayout title="Контакты и поддержка — КурьерОк" description="Свяжитесь с нами по вопросам размещения вакансий, сотрудничества или технической поддержки. Мы всегда рады помочь курьерам и работодателям.">
     <Header />
 
     <main>
@@ -20,19 +20,13 @@ import Footer from '../components/Footer.astro';
                     <div class="contact-card">
                         <h3 data-t="contacts.collab">Сотрудничество</h3>
                         <p data-t="contacts.collab_text">Для компаний и рекламных агентств</p>
-                        <a href="mailto:partners@kurerok.ru" class="contact-link">partners@kurerok.ru</a>
+                        <a href="mailto:vasiljevsckiy@yandex.ru" class="contact-link">vasiljevsckiy@yandex.ru</a>
                     </div>
                     
                     <div class="contact-card">
                         <h3 data-t="contacts.support">Поддержка</h3>
                         <p data-t="contacts.support_text">Для курьеров и соискателей</p>
-                        <a href="https://t.me/kurieros_support" target="_blank" class="contact-link">Написать в Telegram</a>
-                    </div>
-
-                    <div class="contact-card">
-                        <h3 data-t="contacts.editor">Редакция блога</h3>
-                        <p data-t="contacts.editor_text">Предложить статью или прислать историю</p>
-                        <a href="mailto:editor@kurerok.ru" class="contact-link">editor@kurerok.ru</a>
+                        <a href="https://t.me/vishuwd" target="_blank" class="contact-link">Написать в Telegram</a>
                     </div>
                 </div>
 
@@ -59,8 +53,8 @@ import Footer from '../components/Footer.astro';
                         <p>Для вопросов по вакансиям быстрее Telegram. Для сотрудничества и редакционных тем удобнее email.</p>
                         <pre class="contact-preview" id="contact-preview"></pre>
                         <div class="contact-success-actions">
-                            <a href="https://t.me/kurieros_support" target="_blank" rel="noopener noreferrer" class="btn-primary">Написать в Telegram</a>
-                            <a href="mailto:partners@kurerok.ru" class="btn-secondary" id="contact-email-link">Открыть email</a>
+                            <a href="https://t.me/vishuwd" target="_blank" rel="noopener noreferrer" class="btn-primary">Написать в Telegram</a>
+                            <a href="mailto:vasiljevsckiy@yandex.ru" class="btn-secondary" id="contact-email-link">Открыть email</a>
                         </div>
                     </div>
                 </div>
@@ -100,7 +94,7 @@ import Footer from '../components/Footer.astro';
             if (emailLink) {
                 const subject = encodeURIComponent(`Сообщение с сайта от ${name}`);
                 const body = encodeURIComponent(preparedMessage);
-                emailLink.href = `mailto:partners@kurerok.ru?subject=${subject}&body=${body}`;
+                emailLink.href = `mailto:vasiljevsckiy@yandex.ru?subject=${subject}&body=${body}`;
             }
 
             successBox?.classList.remove('hidden');

@@ -1,0 +1,5689 @@
+{
+  "sourceUrl": "https://docs.google.com/spreadsheets/d/1FmvN2Zy3Hwu3Yf9IGrlYFvBO42nrJMLia7jwzoxM1cA/edit?gid=1748545111#gid=1748545111",
+  "updatedAt": "2026-04-22",
+  "operatorB2B": {
+    "title": "Оператор исходящих B2B-продаж в Т-банк",
+    "titleTemplate": "Оператор исходящих B2B-продаж в Т-банк",
+    "shortDescription": "Удалённая вакансия в Т-Банке: исходящие B2B-звонки по предоставляемой базе и продажи продуктов для бизнеса. Сдельный доход без потолка, гибкий график и обучение на старте.",
+    "description": "Оператор исходящих B2B-продаж работает с базой потенциальных клиентов: совершает исходящие звонки, презентует продукты банка для бизнеса, выявляет потребность, отвечает на вопросы и помогает довести клиента до оформления заявки. Формат работы полностью удалённый: нужен компьютер или ноутбук, стабильный интернет и гарнитура. График гибкий, с возможностью работать ежедневно в доступных интервалах по Москве. Условия транспорта и ГСМ: Удалённый формат, компенсация ГСМ не применяется.",
+    "requirements": [
+      "Образование от 9 классов (или выше).",
+      "Уверенное владение ПК и базовыми рабочими инструментами.",
+      "Грамотная устная речь, вежливая коммуникация и навыки аргументации.",
+      "Готовность к исходящим звонкам и работе с возражениями клиентов.",
+      "Наличие компьютера/ноутбука, стабильного интернета и гарнитуры для удалённой работы."
+    ],
+    "benefits": [
+      "Сдельная система оплаты без потолка по вознаграждению.",
+      "Дополнительные выплаты/бонусы при выполнении условий.",
+      "Полностью удалённый формат работы.",
+      "Гибкий график: можно работать ежедневно в доступных интервалах.",
+      "Оплачиваемое дистанционное обучение на старте.",
+      "Страхование жизни, специальные тарифы по картам и скидки от партнёров компании."
+    ],
+    "requiredDocuments": [
+      "Паспорт РФ",
+      "СНИЛС"
+    ],
+    "offers": [
+      {
+        "city": "Барнаул",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Бийск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Рубцовск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Белогорск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Благовещенск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Свободный",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Архангельск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Котлас",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Северодвинск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Астрахань",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ахтубинск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Знаменск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Белгород",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Губкин",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Старый Оскол",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Брянск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Клинцы",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Новозыбков",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Владимир",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ковров",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Муром",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Волгоград",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Волжский",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Камышин",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Вологда",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сокол",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Череповец",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Борисоглебск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Воронеж",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Россошь",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Борзя",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Краснокаменск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Чита",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Иваново",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кинешма",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Шуя",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ангарск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Братск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Иркутск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Калининград",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Советск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Черняховск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Калуга",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Людиново",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Обнинск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Вилючинск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Елизово",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Петропавловск-Камчатский",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Вятские Поляны",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Киров",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кирово-Чепецк",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Буй",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кострома",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Шарья",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Краснодар",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Новороссийск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сочи",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ачинск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Красноярск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Норильск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Курган",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Шадринск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Шумиха",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Железногорск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Курск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Курчатов",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Всеволожск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Выборг",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Гатчина",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Грязи",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Елец",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Липецк",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Балашиха",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Подольск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Химки",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Арзамас",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Дзержинск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Нижний Новгород",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Бердск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Искитим",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Новосибирск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Калачинск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Омск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Тара",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Бузулук",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Оренбург",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Орск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ливны",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Мценск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Орел",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Березники",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Пермь",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Соликамск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Владивосток",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Находка",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Уссурийск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Великие Луки",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Остров",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Псков",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Салават",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Стерлитамак",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Уфа",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Гусиноозерск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Северобайкальск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Улан-Удэ",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Дербент",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Махачкала",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Хасавюрт",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Городовиковск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Лагань",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Элиста",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кондопога",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Костомукша",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Петрозаводск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Воркута",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сыктывкар",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ухта",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Евпатория",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Керчь",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Симферополь",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Волжск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Йошкар-Ола",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Козьмодемьянск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ковылкино",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Рузаевка",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Саранск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Казань",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Набережные Челны",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Нижнекамск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ак-Довурак",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кызыл",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Шагонар",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ростов-на-Дону",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Таганрог",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Шахты",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Касимов",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Рязань",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Скопин",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Самара",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сызрань",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Тольятти",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Санкт-Петербург",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Балаково",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Саратов",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Энгельс",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Екатеринбург",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Каменск-Уральский",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Нижний Тагил",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Севастополь",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Вязьма",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Рославль",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Смоленск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Мичуринск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Рассказово",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Тамбов",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Вышний Волочек",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ржев",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Тверь",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Северск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Стрежевой",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Томск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Донской",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Новомосковск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Тула",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Нижневартовск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сургут",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Тюмень",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Воткинск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ижевск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сарапул",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Димитровград",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Инза",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ульяновск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Златоуст",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Магнитогорск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Челябинск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Грозный",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Гудермес",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Урус-Мартан",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Канаш",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Новочебоксарск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Чебоксары",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Новый Уренгой",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ноябрьск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Салехард",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Рыбинск",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Тутаев",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ярославль",
+        "workMode": "из дома",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      }
+    ]
+  },
+  "representative": {
+    "title": "Представитель Т-Банк в %city-name%",
+    "titleTemplate": "Представитель Т-Банк в %city-name%",
+    "shortDescription": "Разъездная работа с готовыми встречами: доставка банковских продуктов клиентам и консультация по условиям. Сдельный доход, гибкий график от 2 дней в неделю.",
+    "description": "Представитель Т-Банка выезжает на заранее согласованные встречи и передаёт клиентам продукты компании: карты, SIM-карты, страховые полисы и документы. Поиск клиентов не требуется: заявки уже оформлены. Ваша задача — качественно провести встречу, рассказать о преимуществах продукта и при необходимости предложить дополнительные услуги. Условия транспорта и ГСМ: Есть доплата/компенсация за ГСМ и пробег (по условиям зоны/города).",
+    "requirements": [
+      "Образование от 9 классов (в ряде городов) или от 11 классов — по условиям региона.",
+      "Опыт в продажах, банковской сфере, страховании или рознице будет преимуществом.",
+      "Грамотная речь, вежливая коммуникация и умение находить подход к клиенту.",
+      "Готовность к разъездному формату и встречам с клиентами по назначенному маршруту."
+    ],
+    "benefits": [
+      "Сдельная система оплаты: размер дохода зависит от количества и качества встреч.",
+      "Гибкий график: от 2 дней в неделю, дни и время можно выбирать в доступных слотах региона.",
+      "Компенсация расходов на бензин в регионах, где используются поездки на авто.",
+      "Проездной в зоне доставки для ряда городов (включая Москву и Санкт-Петербург).",
+      "Можно совмещать с учёбой или другой занятостью.",
+      "Спецтарифы по картам, скидки от партнёров и страхование жизни."
+    ],
+    "requiredDocuments": [
+      "Паспорт РФ",
+      "СНИЛС"
+    ],
+    "offers": [
+      {
+        "city": "Барнаул",
+        "workMode": "на авто",
+        "avgIncomeRub": 73333,
+        "incomeMinRub": 65000,
+        "incomeMaxRub": 85000,
+        "hiringActive": true
+      },
+      {
+        "city": "Бийск",
+        "workMode": "на авто",
+        "avgIncomeRub": 77500,
+        "incomeMinRub": 65000,
+        "incomeMaxRub": 90000,
+        "hiringActive": true
+      },
+      {
+        "city": "Рубцовск",
+        "workMode": "на авто",
+        "avgIncomeRub": 73333,
+        "incomeMinRub": 65000,
+        "incomeMaxRub": 85000,
+        "hiringActive": true
+      },
+      {
+        "city": "Белогорск",
+        "workMode": "на авто",
+        "avgIncomeRub": 39800,
+        "incomeMinRub": 30000,
+        "incomeMaxRub": 64000,
+        "hiringActive": true
+      },
+      {
+        "city": "Благовещенск",
+        "workMode": "на авто",
+        "avgIncomeRub": 39600,
+        "incomeMinRub": 30000,
+        "incomeMaxRub": 63000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сковородино",
+        "workMode": "на авто",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Тында",
+        "workMode": "на авто",
+        "avgIncomeRub": 100000,
+        "incomeMinRub": 100000,
+        "incomeMaxRub": 100000,
+        "hiringActive": true
+      },
+      {
+        "city": "Шимановск",
+        "workMode": "на авто",
+        "avgIncomeRub": 66000,
+        "incomeMinRub": 66000,
+        "incomeMaxRub": 66000,
+        "hiringActive": true
+      },
+      {
+        "city": "Архангельск",
+        "workMode": "на авто",
+        "avgIncomeRub": 46200,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 57000,
+        "hiringActive": true
+      },
+      {
+        "city": "Котлас",
+        "workMode": "на авто",
+        "avgIncomeRub": 43500,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Онега",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Северодвинск",
+        "workMode": "на авто",
+        "avgIncomeRub": 43500,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Астрахань",
+        "workMode": "на авто",
+        "avgIncomeRub": 63500,
+        "incomeMinRub": 30000,
+        "incomeMaxRub": 110000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ахтубинск",
+        "workMode": "на авто",
+        "avgIncomeRub": 54200,
+        "incomeMinRub": 30000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Знаменск",
+        "workMode": "на авто",
+        "avgIncomeRub": 54000,
+        "incomeMinRub": 30000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Алексеевка",
+        "workMode": "на авто",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Брянск",
+        "workMode": "на авто",
+        "avgIncomeRub": 46286,
+        "incomeMinRub": 42000,
+        "incomeMaxRub": 61000,
+        "hiringActive": true
+      },
+      {
+        "city": "Дятьково",
+        "workMode": "на авто",
+        "avgIncomeRub": 52000,
+        "incomeMinRub": 52000,
+        "incomeMaxRub": 52000,
+        "hiringActive": true
+      },
+      {
+        "city": "Клинцы",
+        "workMode": "на авто",
+        "avgIncomeRub": 43833,
+        "incomeMinRub": 42000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Новозыбков",
+        "workMode": "на авто",
+        "avgIncomeRub": 43833,
+        "incomeMinRub": 42000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Почеп",
+        "workMode": "на авто",
+        "avgIncomeRub": 77000,
+        "incomeMinRub": 77000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Севск",
+        "workMode": "на авто",
+        "avgIncomeRub": 42000,
+        "incomeMinRub": 42000,
+        "incomeMaxRub": 42000,
+        "hiringActive": true
+      },
+      {
+        "city": "Стародуб",
+        "workMode": "на авто",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сураж",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Трубчевск",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Фокино",
+        "workMode": "на авто",
+        "avgIncomeRub": 42000,
+        "incomeMinRub": 42000,
+        "incomeMaxRub": 42000,
+        "hiringActive": true
+      },
+      {
+        "city": "Владимир",
+        "workMode": "на авто",
+        "avgIncomeRub": 66500,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 80000,
+        "hiringActive": true
+      },
+      {
+        "city": "Вязники",
+        "workMode": "на авто",
+        "avgIncomeRub": 52000,
+        "incomeMinRub": 52000,
+        "incomeMaxRub": 52000,
+        "hiringActive": true
+      },
+      {
+        "city": "Киржач",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ковров",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Меленки",
+        "workMode": "на авто",
+        "avgIncomeRub": 15000,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 15000,
+        "hiringActive": true
+      },
+      {
+        "city": "Муром",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Волгоград",
+        "workMode": "на авто",
+        "avgIncomeRub": 36500,
+        "incomeMinRub": 20000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Волжский",
+        "workMode": "на авто",
+        "avgIncomeRub": 36500,
+        "incomeMinRub": 20000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Дубовка",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Жирновск",
+        "workMode": "на авто",
+        "avgIncomeRub": 75000,
+        "incomeMinRub": 75000,
+        "incomeMaxRub": 75000,
+        "hiringActive": true
+      },
+      {
+        "city": "Камышин",
+        "workMode": "на авто",
+        "avgIncomeRub": 36500,
+        "incomeMinRub": 20000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Котово",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ленинск",
+        "workMode": "на авто",
+        "avgIncomeRub": 30000,
+        "incomeMinRub": 30000,
+        "incomeMaxRub": 30000,
+        "hiringActive": true
+      },
+      {
+        "city": "Бабаево",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Белозерск",
+        "workMode": "на авто",
+        "avgIncomeRub": 54000,
+        "incomeMinRub": 54000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Вологда",
+        "workMode": "на авто",
+        "avgIncomeRub": 36273,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кадников",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кириллов",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сокол",
+        "workMode": "на авто",
+        "avgIncomeRub": 36273,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Тотьма",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Харовск",
+        "workMode": "на авто",
+        "avgIncomeRub": 15000,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 15000,
+        "hiringActive": true
+      },
+      {
+        "city": "Череповец",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 65000,
+        "incomeMinRub": 65000,
+        "incomeMaxRub": 65000,
+        "hiringActive": true
+      },
+      {
+        "city": "Борисоглебск",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 42000,
+        "incomeMinRub": 42000,
+        "incomeMaxRub": 42000,
+        "hiringActive": true
+      },
+      {
+        "city": "Воронеж",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 42000,
+        "incomeMinRub": 42000,
+        "incomeMaxRub": 42000,
+        "hiringActive": true
+      },
+      {
+        "city": "Каменка",
+        "workMode": "на авто",
+        "avgIncomeRub": 47000,
+        "incomeMinRub": 47000,
+        "incomeMaxRub": 47000,
+        "hiringActive": true
+      },
+      {
+        "city": "Лиски",
+        "workMode": "на авто",
+        "avgIncomeRub": 80000,
+        "incomeMinRub": 80000,
+        "incomeMaxRub": 80000,
+        "hiringActive": true
+      },
+      {
+        "city": "Нововоронеж",
+        "workMode": "на авто",
+        "avgIncomeRub": 65000,
+        "incomeMinRub": 65000,
+        "incomeMaxRub": 65000,
+        "hiringActive": true
+      },
+      {
+        "city": "Острогожск",
+        "workMode": "на авто",
+        "avgIncomeRub": 85000,
+        "incomeMinRub": 85000,
+        "incomeMaxRub": 85000,
+        "hiringActive": true
+      },
+      {
+        "city": "Петропавловка",
+        "workMode": "на авто",
+        "avgIncomeRub": 47000,
+        "incomeMinRub": 47000,
+        "incomeMaxRub": 47000,
+        "hiringActive": true
+      },
+      {
+        "city": "Поворино",
+        "workMode": "на авто",
+        "avgIncomeRub": 47000,
+        "incomeMinRub": 47000,
+        "incomeMaxRub": 47000,
+        "hiringActive": true
+      },
+      {
+        "city": "Россошь",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 42000,
+        "incomeMinRub": 42000,
+        "incomeMaxRub": 42000,
+        "hiringActive": true
+      },
+      {
+        "city": "Советский",
+        "workMode": "на авто",
+        "avgIncomeRub": 85000,
+        "incomeMinRub": 85000,
+        "incomeMaxRub": 85000,
+        "hiringActive": true
+      },
+      {
+        "city": "Эртиль",
+        "workMode": "на авто",
+        "avgIncomeRub": 47000,
+        "incomeMinRub": 47000,
+        "incomeMaxRub": 47000,
+        "hiringActive": true
+      },
+      {
+        "city": "Биробиджан",
+        "workMode": "на авто",
+        "avgIncomeRub": 50333,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Облучье",
+        "workMode": "на авто",
+        "avgIncomeRub": 50333,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Балей",
+        "workMode": "на авто",
+        "avgIncomeRub": 25000,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 25000,
+        "hiringActive": true
+      },
+      {
+        "city": "Борзя",
+        "workMode": "на авто",
+        "avgIncomeRub": 43923,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 80000,
+        "hiringActive": true
+      },
+      {
+        "city": "Краснокаменск",
+        "workMode": "на авто",
+        "avgIncomeRub": 43308,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 80000,
+        "hiringActive": true
+      },
+      {
+        "city": "Хилок",
+        "workMode": "на авто",
+        "avgIncomeRub": 40000,
+        "incomeMinRub": 40000,
+        "incomeMaxRub": 40000,
+        "hiringActive": true
+      },
+      {
+        "city": "Чита",
+        "workMode": "на авто",
+        "avgIncomeRub": 42750,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 80000,
+        "hiringActive": true
+      },
+      {
+        "city": "Катав-Ивановск",
+        "workMode": "на авто",
+        "avgIncomeRub": 71000,
+        "incomeMinRub": 71000,
+        "incomeMaxRub": 71000,
+        "hiringActive": true
+      },
+      {
+        "city": "Пучеж",
+        "workMode": "на авто",
+        "avgIncomeRub": 44000,
+        "incomeMinRub": 44000,
+        "incomeMaxRub": 44000,
+        "hiringActive": true
+      },
+      {
+        "city": "Тейково",
+        "workMode": "на авто",
+        "avgIncomeRub": 100000,
+        "incomeMinRub": 100000,
+        "incomeMaxRub": 100000,
+        "hiringActive": true
+      },
+      {
+        "city": "Усть-Катав",
+        "workMode": "на авто",
+        "avgIncomeRub": 71000,
+        "incomeMinRub": 71000,
+        "incomeMaxRub": 71000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ангарск",
+        "workMode": "на авто",
+        "avgIncomeRub": 50000,
+        "incomeMinRub": 46000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Байкальск",
+        "workMode": "на авто",
+        "avgIncomeRub": 41000,
+        "incomeMinRub": 41000,
+        "incomeMaxRub": 41000,
+        "hiringActive": true
+      },
+      {
+        "city": "Братск",
+        "workMode": "на авто",
+        "avgIncomeRub": 56000,
+        "incomeMinRub": 51000,
+        "incomeMaxRub": 60000,
+        "hiringActive": true
+      },
+      {
+        "city": "Вихоревка",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Зима",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Иркутск",
+        "workMode": "на авто",
+        "avgIncomeRub": 52000,
+        "incomeMinRub": 51000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Нижнеудинск",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 95000,
+        "incomeMinRub": 95000,
+        "incomeMaxRub": 95000,
+        "hiringActive": true
+      },
+      {
+        "city": "Саянск",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Слюдянка",
+        "workMode": "на авто",
+        "avgIncomeRub": 41000,
+        "incomeMinRub": 41000,
+        "incomeMaxRub": 41000,
+        "hiringActive": true
+      },
+      {
+        "city": "Тайшет",
+        "workMode": "на авто",
+        "avgIncomeRub": 73000,
+        "incomeMinRub": 73000,
+        "incomeMaxRub": 73000,
+        "hiringActive": true
+      },
+      {
+        "city": "Тулун",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Усть-Илимск",
+        "workMode": "на авто",
+        "avgIncomeRub": 75000,
+        "incomeMinRub": 75000,
+        "incomeMaxRub": 75000,
+        "hiringActive": true
+      },
+      {
+        "city": "Усть-Кут",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 65000,
+        "incomeMinRub": 65000,
+        "incomeMaxRub": 65000,
+        "hiringActive": true
+      },
+      {
+        "city": "Баксан",
+        "workMode": "на авто",
+        "avgIncomeRub": 77000,
+        "incomeMinRub": 77000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Майский",
+        "workMode": "на авто",
+        "avgIncomeRub": 83000,
+        "incomeMinRub": 83000,
+        "incomeMaxRub": 83000,
+        "hiringActive": true
+      },
+      {
+        "city": "Нальчик",
+        "workMode": "на авто",
+        "avgIncomeRub": 77000,
+        "incomeMinRub": 77000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Прохладный",
+        "workMode": "на авто",
+        "avgIncomeRub": 77000,
+        "incomeMinRub": 77000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Тырныауз",
+        "workMode": "на авто",
+        "avgIncomeRub": 77000,
+        "incomeMinRub": 77000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Чегем",
+        "workMode": "на авто",
+        "avgIncomeRub": 77000,
+        "incomeMinRub": 77000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Гусев",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Калининград",
+        "workMode": "на авто",
+        "avgIncomeRub": 67500,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 90000,
+        "hiringActive": true
+      },
+      {
+        "city": "Неман",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Нестеров",
+        "workMode": "на авто",
+        "avgIncomeRub": 30000,
+        "incomeMinRub": 30000,
+        "incomeMaxRub": 30000,
+        "hiringActive": true
+      },
+      {
+        "city": "Славск",
+        "workMode": "на авто",
+        "avgIncomeRub": 65000,
+        "incomeMinRub": 65000,
+        "incomeMaxRub": 65000,
+        "hiringActive": true
+      },
+      {
+        "city": "Советск",
+        "workMode": "на авто",
+        "avgIncomeRub": 55000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 65000,
+        "hiringActive": true
+      },
+      {
+        "city": "Черняховск",
+        "workMode": "на авто",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Жуков",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Калуга",
+        "workMode": "на авто",
+        "avgIncomeRub": 68571,
+        "incomeMinRub": 54000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Киров",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кондрово",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Куровское",
+        "workMode": "на авто",
+        "avgIncomeRub": 54000,
+        "incomeMinRub": 54000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Людиново",
+        "workMode": "на авто",
+        "avgIncomeRub": 65000,
+        "incomeMinRub": 54000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Медынь",
+        "workMode": "на авто",
+        "avgIncomeRub": 54000,
+        "incomeMinRub": 54000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Мещовск",
+        "workMode": "на авто",
+        "avgIncomeRub": 54000,
+        "incomeMinRub": 54000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Мосальск",
+        "workMode": "на авто",
+        "avgIncomeRub": 54000,
+        "incomeMinRub": 54000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Обнинск",
+        "workMode": "на авто",
+        "avgIncomeRub": 65000,
+        "incomeMinRub": 54000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Спас-Деменск",
+        "workMode": "на авто",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Таруса",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Юхнов",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Вилючинск",
+        "workMode": "на авто",
+        "avgIncomeRub": 46500,
+        "incomeMinRub": 40000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Елизово",
+        "workMode": "на авто",
+        "avgIncomeRub": 40000,
+        "incomeMinRub": 40000,
+        "incomeMaxRub": 40000,
+        "hiringActive": true
+      },
+      {
+        "city": "Петропавловск-Камчатский",
+        "workMode": "на авто",
+        "avgIncomeRub": 85000,
+        "incomeMinRub": 40000,
+        "incomeMaxRub": 130000,
+        "hiringActive": true
+      },
+      {
+        "city": "Карачаевск",
+        "workMode": "на авто",
+        "avgIncomeRub": 77000,
+        "incomeMinRub": 77000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Усть-Джегута",
+        "workMode": "на авто",
+        "avgIncomeRub": 77000,
+        "incomeMinRub": 77000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Черкесск",
+        "workMode": "на авто",
+        "avgIncomeRub": 78500,
+        "incomeMinRub": 77000,
+        "incomeMaxRub": 83000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кемерово",
+        "workMode": "на авто",
+        "avgIncomeRub": 34250,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Новокузнецк",
+        "workMode": "на авто",
+        "avgIncomeRub": 34250,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Прокопьевск",
+        "workMode": "на авто",
+        "avgIncomeRub": 34250,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Вятские Поляны",
+        "workMode": "на авто",
+        "avgIncomeRub": 46286,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Зуевка",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кирово-Чепецк",
+        "workMode": "на авто",
+        "avgIncomeRub": 46286,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кирс",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Нолинск",
+        "workMode": "на авто",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Буй",
+        "workMode": "на авто",
+        "avgIncomeRub": 46667,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 72000,
+        "hiringActive": true
+      },
+      {
+        "city": "Волгореченск",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кострома",
+        "workMode": "на авто",
+        "avgIncomeRub": 46667,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 72000,
+        "hiringActive": true
+      },
+      {
+        "city": "Мантурово",
+        "workMode": "на авто",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Нерехта",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Нея",
+        "workMode": "на авто",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Приволжск",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Шарья",
+        "workMode": "на авто",
+        "avgIncomeRub": 46667,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 72000,
+        "hiringActive": true
+      },
+      {
+        "city": "Горячий Ключ",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Краснодар",
+        "workMode": "на авто",
+        "avgIncomeRub": 38133,
+        "incomeMinRub": 10000,
+        "incomeMaxRub": 125000,
+        "hiringActive": true
+      },
+      {
+        "city": "Лабинск",
+        "workMode": "на авто",
+        "avgIncomeRub": 42000,
+        "incomeMinRub": 30000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Новороссийск",
+        "workMode": "на авто",
+        "avgIncomeRub": 38133,
+        "incomeMinRub": 10000,
+        "incomeMaxRub": 125000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сочи",
+        "workMode": "на авто",
+        "avgIncomeRub": 38133,
+        "incomeMinRub": 10000,
+        "incomeMaxRub": 125000,
+        "hiringActive": true
+      },
+      {
+        "city": "Усть-Лабинск",
+        "workMode": "на авто",
+        "avgIncomeRub": 54000,
+        "incomeMinRub": 54000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Хадыженск",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ачинск",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 140000,
+        "incomeMinRub": 140000,
+        "incomeMaxRub": 140000,
+        "hiringActive": true
+      },
+      {
+        "city": "Боготол",
+        "workMode": "на авто",
+        "avgIncomeRub": 54000,
+        "incomeMinRub": 54000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Дудинка",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Зеленогорск",
+        "workMode": "на авто",
+        "avgIncomeRub": 48000,
+        "incomeMinRub": 48000,
+        "incomeMaxRub": 48000,
+        "hiringActive": true
+      },
+      {
+        "city": "Красноярск",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 140000,
+        "incomeMinRub": 140000,
+        "incomeMaxRub": 140000,
+        "hiringActive": true
+      },
+      {
+        "city": "Лесосибирск",
+        "workMode": "на авто",
+        "avgIncomeRub": 60000,
+        "incomeMinRub": 60000,
+        "incomeMaxRub": 60000,
+        "hiringActive": true
+      },
+      {
+        "city": "Норильск",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 140000,
+        "incomeMinRub": 140000,
+        "incomeMaxRub": 140000,
+        "hiringActive": true
+      },
+      {
+        "city": "Курган",
+        "workMode": "на авто",
+        "avgIncomeRub": 40375,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Макушино",
+        "workMode": "на авто",
+        "avgIncomeRub": 54000,
+        "incomeMinRub": 54000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Петухово",
+        "workMode": "на авто",
+        "avgIncomeRub": 54000,
+        "incomeMinRub": 54000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Шадринск",
+        "workMode": "на авто",
+        "avgIncomeRub": 40375,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Шумиха",
+        "workMode": "на авто",
+        "avgIncomeRub": 40375,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Щучье",
+        "workMode": "на авто",
+        "avgIncomeRub": 15000,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 15000,
+        "hiringActive": true
+      },
+      {
+        "city": "Железногорск",
+        "workMode": "на авто",
+        "avgIncomeRub": 32667,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 63000,
+        "hiringActive": true
+      },
+      {
+        "city": "Курск",
+        "workMode": "на авто",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 100000,
+        "hiringActive": true
+      },
+      {
+        "city": "Курчатов",
+        "workMode": "на авто",
+        "avgIncomeRub": 41667,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 90000,
+        "hiringActive": true
+      },
+      {
+        "city": "Фатеж",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Бор",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Волосово",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Всеволожск",
+        "workMode": "на авто",
+        "avgIncomeRub": 122812,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 137500,
+        "hiringActive": true
+      },
+      {
+        "city": "Выборг",
+        "workMode": "на авто",
+        "avgIncomeRub": 122812,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 137500,
+        "hiringActive": true
+      },
+      {
+        "city": "Гатчина",
+        "workMode": "на авто",
+        "avgIncomeRub": 122812,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 137500,
+        "hiringActive": true
+      },
+      {
+        "city": "Ивангород",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кингисепп",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кировск",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Коммунар",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кудрово",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Лодейное Поле",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Луга",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Любань",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Павловск",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Приморск",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Светогорск",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сертолово",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сосновый Бор",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Тосно",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Шлиссельбург",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Грязи",
+        "workMode": "на авто",
+        "avgIncomeRub": 40500,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Данков",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Елец",
+        "workMode": "на авто",
+        "avgIncomeRub": 40500,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Лебедянь",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Липецк",
+        "workMode": "на авто",
+        "avgIncomeRub": 40500,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Усмань",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Магадан",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сусуман",
+        "workMode": "на авто",
+        "avgIncomeRub": 55000,
+        "incomeMinRub": 55000,
+        "incomeMaxRub": 55000,
+        "hiringActive": true
+      },
+      {
+        "city": "Москва",
+        "workMode": "на авто",
+        "avgIncomeRub": 150000,
+        "incomeMinRub": 150000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Химки",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 140000,
+        "incomeMinRub": 140000,
+        "incomeMaxRub": 140000,
+        "hiringActive": true
+      },
+      {
+        "city": "Апрелевка",
+        "workMode": "на авто",
+        "avgIncomeRub": 150000,
+        "incomeMinRub": 150000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Балашиха",
+        "workMode": "на авто",
+        "avgIncomeRub": 134815,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Белоозерский",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Бронницы",
+        "workMode": "на авто",
+        "avgIncomeRub": 130000,
+        "incomeMinRub": 130000,
+        "incomeMaxRub": 130000,
+        "hiringActive": true
+      },
+      {
+        "city": "Верея",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Видное",
+        "workMode": "на авто",
+        "avgIncomeRub": 150000,
+        "incomeMinRub": 150000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Дедовск",
+        "workMode": "на авто",
+        "avgIncomeRub": 130000,
+        "incomeMinRub": 130000,
+        "incomeMaxRub": 130000,
+        "hiringActive": true
+      },
+      {
+        "city": "Дзержинский",
+        "workMode": "на авто",
+        "avgIncomeRub": 130000,
+        "incomeMinRub": 130000,
+        "incomeMaxRub": 130000,
+        "hiringActive": true
+      },
+      {
+        "city": "Дмитров",
+        "workMode": "на авто",
+        "avgIncomeRub": 150000,
+        "incomeMinRub": 150000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Домодедово",
+        "workMode": "на авто",
+        "avgIncomeRub": 150000,
+        "incomeMinRub": 150000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Дубна",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Жуковский",
+        "workMode": "на авто",
+        "avgIncomeRub": 150000,
+        "incomeMinRub": 150000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Заречный",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Звенигород",
+        "workMode": "на авто",
+        "avgIncomeRub": 150000,
+        "incomeMinRub": 150000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Истра",
+        "workMode": "на авто",
+        "avgIncomeRub": 150000,
+        "incomeMinRub": 150000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Клин",
+        "workMode": "на авто",
+        "avgIncomeRub": 150000,
+        "incomeMinRub": 150000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Коломна",
+        "workMode": "на авто",
+        "avgIncomeRub": 150000,
+        "incomeMinRub": 150000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Котельники",
+        "workMode": "на авто",
+        "avgIncomeRub": 130000,
+        "incomeMinRub": 130000,
+        "incomeMaxRub": 130000,
+        "hiringActive": true
+      },
+      {
+        "city": "Красноармейск",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Красногорск",
+        "workMode": "на авто",
+        "avgIncomeRub": 150000,
+        "incomeMinRub": 150000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Краснозаводск",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Краснознаменск",
+        "workMode": "на авто",
+        "avgIncomeRub": 150000,
+        "incomeMinRub": 150000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Лесной",
+        "workMode": "на авто",
+        "avgIncomeRub": 150000,
+        "incomeMinRub": 150000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Лобня",
+        "workMode": "на авто",
+        "avgIncomeRub": 150000,
+        "incomeMinRub": 150000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Можайск",
+        "workMode": "на авто",
+        "avgIncomeRub": 130000,
+        "incomeMinRub": 130000,
+        "incomeMaxRub": 130000,
+        "hiringActive": true
+      },
+      {
+        "city": "Наро-Фоминск",
+        "workMode": "на авто",
+        "avgIncomeRub": 150000,
+        "incomeMinRub": 150000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Пересвет",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Подольск",
+        "workMode": "на авто",
+        "avgIncomeRub": 134815,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Пущино",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Реутов",
+        "workMode": "на авто",
+        "avgIncomeRub": 150000,
+        "incomeMinRub": 150000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сергиев Посад",
+        "workMode": "на авто",
+        "avgIncomeRub": 150000,
+        "incomeMinRub": 150000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Серпухов",
+        "workMode": "на авто",
+        "avgIncomeRub": 130000,
+        "incomeMinRub": 130000,
+        "incomeMaxRub": 130000,
+        "hiringActive": true
+      },
+      {
+        "city": "Солнечногорск",
+        "workMode": "на авто",
+        "avgIncomeRub": 150000,
+        "incomeMinRub": 150000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Старая Купавна",
+        "workMode": "на авто",
+        "avgIncomeRub": 150000,
+        "incomeMinRub": 150000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Троицк",
+        "workMode": "на авто",
+        "avgIncomeRub": 150000,
+        "incomeMinRub": 150000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Хотьково",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Чехов",
+        "workMode": "на авто",
+        "avgIncomeRub": 130000,
+        "incomeMinRub": 130000,
+        "incomeMaxRub": 130000,
+        "hiringActive": true
+      },
+      {
+        "city": "Электроугли",
+        "workMode": "на авто",
+        "avgIncomeRub": 150000,
+        "incomeMinRub": 150000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Апатиты",
+        "workMode": "на авто",
+        "avgIncomeRub": 69333,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 85000,
+        "hiringActive": true
+      },
+      {
+        "city": "Гаджиево",
+        "workMode": "на авто",
+        "avgIncomeRub": 54000,
+        "incomeMinRub": 54000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Заполярный",
+        "workMode": "на авто",
+        "avgIncomeRub": 85000,
+        "incomeMinRub": 85000,
+        "incomeMaxRub": 85000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кандалакша",
+        "workMode": "на авто",
+        "avgIncomeRub": 74000,
+        "incomeMinRub": 74000,
+        "incomeMaxRub": 74000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кола",
+        "workMode": "на авто",
+        "avgIncomeRub": 58000,
+        "incomeMinRub": 58000,
+        "incomeMaxRub": 58000,
+        "hiringActive": true
+      },
+      {
+        "city": "Мончегорск",
+        "workMode": "на авто",
+        "avgIncomeRub": 79000,
+        "incomeMinRub": 79000,
+        "incomeMaxRub": 79000,
+        "hiringActive": true
+      },
+      {
+        "city": "Мурманск",
+        "workMode": "на авто",
+        "avgIncomeRub": 68500,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 85000,
+        "hiringActive": true
+      },
+      {
+        "city": "Оленегорск",
+        "workMode": "на авто",
+        "avgIncomeRub": 58000,
+        "incomeMinRub": 58000,
+        "incomeMaxRub": 58000,
+        "hiringActive": true
+      },
+      {
+        "city": "Полярные Зори",
+        "workMode": "на авто",
+        "avgIncomeRub": 74000,
+        "incomeMinRub": 74000,
+        "incomeMaxRub": 74000,
+        "hiringActive": true
+      },
+      {
+        "city": "Североморск",
+        "workMode": "на авто",
+        "avgIncomeRub": 64833,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 85000,
+        "hiringActive": true
+      },
+      {
+        "city": "Снежногорск",
+        "workMode": "на авто",
+        "avgIncomeRub": 44000,
+        "incomeMinRub": 44000,
+        "incomeMaxRub": 44000,
+        "hiringActive": true
+      },
+      {
+        "city": "Арзамас",
+        "workMode": "на авто",
+        "avgIncomeRub": 55636,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 74000,
+        "hiringActive": true
+      },
+      {
+        "city": "Володарск",
+        "workMode": "на авто",
+        "avgIncomeRub": 65000,
+        "incomeMinRub": 65000,
+        "incomeMaxRub": 65000,
+        "hiringActive": true
+      },
+      {
+        "city": "Дзержинск",
+        "workMode": "на авто",
+        "avgIncomeRub": 55727,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 75000,
+        "hiringActive": true
+      },
+      {
+        "city": "Княгинино",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Лысково",
+        "workMode": "на авто",
+        "avgIncomeRub": 65000,
+        "incomeMinRub": 65000,
+        "incomeMaxRub": 65000,
+        "hiringActive": true
+      },
+      {
+        "city": "Нижний Новгород",
+        "workMode": "на авто",
+        "avgIncomeRub": 60273,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 125000,
+        "hiringActive": true
+      },
+      {
+        "city": "Павлово",
+        "workMode": "на авто",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Первомайск",
+        "workMode": "на авто",
+        "avgIncomeRub": 30000,
+        "incomeMinRub": 30000,
+        "incomeMaxRub": 30000,
+        "hiringActive": true
+      },
+      {
+        "city": "Саров",
+        "workMode": "на авто",
+        "avgIncomeRub": 75000,
+        "incomeMinRub": 75000,
+        "incomeMaxRub": 75000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сергач",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Боровичи",
+        "workMode": "на авто",
+        "avgIncomeRub": 38500,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 52000,
+        "hiringActive": true
+      },
+      {
+        "city": "Великий Новгород",
+        "workMode": "на авто",
+        "avgIncomeRub": 41333,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 52000,
+        "hiringActive": true
+      },
+      {
+        "city": "Малая Вишера",
+        "workMode": "на авто",
+        "avgIncomeRub": 52000,
+        "incomeMinRub": 52000,
+        "incomeMaxRub": 52000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сольцы",
+        "workMode": "на авто",
+        "avgIncomeRub": 15000,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 15000,
+        "hiringActive": true
+      },
+      {
+        "city": "Старая Русса",
+        "workMode": "на авто",
+        "avgIncomeRub": 38500,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 52000,
+        "hiringActive": true
+      },
+      {
+        "city": "Чудово",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Бердск",
+        "workMode": "на авто",
+        "avgIncomeRub": 56200,
+        "incomeMinRub": 47000,
+        "incomeMaxRub": 75000,
+        "hiringActive": true
+      },
+      {
+        "city": "Искитим",
+        "workMode": "на авто",
+        "avgIncomeRub": 51500,
+        "incomeMinRub": 47000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Карасук",
+        "workMode": "на авто",
+        "avgIncomeRub": 65000,
+        "incomeMinRub": 65000,
+        "incomeMaxRub": 65000,
+        "hiringActive": true
+      },
+      {
+        "city": "Каргат",
+        "workMode": "на авто",
+        "avgIncomeRub": 15000,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 15000,
+        "hiringActive": true
+      },
+      {
+        "city": "Купино",
+        "workMode": "на авто",
+        "avgIncomeRub": 56000,
+        "incomeMinRub": 56000,
+        "incomeMaxRub": 56000,
+        "hiringActive": true
+      },
+      {
+        "city": "Новосибирск",
+        "workMode": "на авто",
+        "avgIncomeRub": 59200,
+        "incomeMinRub": 47000,
+        "incomeMaxRub": 90000,
+        "hiringActive": true
+      },
+      {
+        "city": "Тогучин",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Черепаново",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Чулым",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Калачинск",
+        "workMode": "на авто",
+        "avgIncomeRub": 32667,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Омск",
+        "workMode": "на авто",
+        "avgIncomeRub": 32667,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Тара",
+        "workMode": "на авто",
+        "avgIncomeRub": 32667,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Бузулук",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Оренбург",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Орск",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Светлый",
+        "workMode": "на авто",
+        "avgIncomeRub": 54000,
+        "incomeMinRub": 54000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ливны",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Мценск",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Орел",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кузнецк",
+        "workMode": "на авто",
+        "avgIncomeRub": 33667,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 71000,
+        "hiringActive": true
+      },
+      {
+        "city": "Пенза",
+        "workMode": "на авто",
+        "avgIncomeRub": 33667,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 71000,
+        "hiringActive": true
+      },
+      {
+        "city": "Березники",
+        "workMode": "на авто",
+        "avgIncomeRub": 56333,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 71000,
+        "hiringActive": true
+      },
+      {
+        "city": "Гремячинск",
+        "workMode": "на авто",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Пермь",
+        "workMode": "на авто",
+        "avgIncomeRub": 56333,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 71000,
+        "hiringActive": true
+      },
+      {
+        "city": "Соликамск",
+        "workMode": "на авто",
+        "avgIncomeRub": 56333,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 71000,
+        "hiringActive": true
+      },
+      {
+        "city": "Чусовой",
+        "workMode": "на авто",
+        "avgIncomeRub": 50000,
+        "incomeMinRub": 50000,
+        "incomeMaxRub": 50000,
+        "hiringActive": true
+      },
+      {
+        "city": "Арсеньев",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Артем",
+        "workMode": "на авто",
+        "avgIncomeRub": 85000,
+        "incomeMinRub": 85000,
+        "incomeMaxRub": 85000,
+        "hiringActive": true
+      },
+      {
+        "city": "Владивосток",
+        "workMode": "на авто",
+        "avgIncomeRub": 46923,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Лесозаводск",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Находка",
+        "workMode": "на авто",
+        "avgIncomeRub": 47357,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Партизанск",
+        "workMode": "на авто",
+        "avgIncomeRub": 80000,
+        "incomeMinRub": 80000,
+        "incomeMaxRub": 80000,
+        "hiringActive": true
+      },
+      {
+        "city": "Советская Гавань",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Уссурийск",
+        "workMode": "на авто",
+        "avgIncomeRub": 46923,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Великие Луки",
+        "workMode": "на авто",
+        "avgIncomeRub": 35571,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Гдов",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Дно",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Новосокольники",
+        "workMode": "на авто",
+        "avgIncomeRub": 25000,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 25000,
+        "hiringActive": true
+      },
+      {
+        "city": "Опочка",
+        "workMode": "на авто",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Остров",
+        "workMode": "на авто",
+        "avgIncomeRub": 35571,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Псков",
+        "workMode": "на авто",
+        "avgIncomeRub": 35571,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Пыталово",
+        "workMode": "на авто",
+        "avgIncomeRub": 25000,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 25000,
+        "hiringActive": true
+      },
+      {
+        "city": "Себеж",
+        "workMode": "на авто",
+        "avgIncomeRub": 15000,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 15000,
+        "hiringActive": true
+      },
+      {
+        "city": "Адыгейск",
+        "workMode": "на авто",
+        "avgIncomeRub": 77000,
+        "incomeMinRub": 77000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Майкоп",
+        "workMode": "на авто",
+        "avgIncomeRub": 77000,
+        "incomeMinRub": 77000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Горно-Алтайск",
+        "workMode": "на авто",
+        "avgIncomeRub": 150000,
+        "incomeMinRub": 150000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Белебей",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Межгорье",
+        "workMode": "на авто",
+        "avgIncomeRub": 74000,
+        "incomeMinRub": 74000,
+        "incomeMaxRub": 74000,
+        "hiringActive": true
+      },
+      {
+        "city": "Салават",
+        "workMode": "на авто",
+        "avgIncomeRub": 42032,
+        "incomeMinRub": 8600,
+        "incomeMaxRub": 65000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сибай",
+        "workMode": "на авто",
+        "avgIncomeRub": 54000,
+        "incomeMinRub": 54000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Стерлитамак",
+        "workMode": "на авто",
+        "avgIncomeRub": 42032,
+        "incomeMinRub": 8600,
+        "incomeMaxRub": 65000,
+        "hiringActive": true
+      },
+      {
+        "city": "Уфа",
+        "workMode": "на авто",
+        "avgIncomeRub": 42032,
+        "incomeMinRub": 8600,
+        "incomeMaxRub": 65000,
+        "hiringActive": true
+      },
+      {
+        "city": "Гусиноозерск",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Северобайкальск",
+        "workMode": "на авто",
+        "avgIncomeRub": 75333,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Улан-Удэ",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Дербент",
+        "workMode": "на авто",
+        "avgIncomeRub": 64000,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кизляр",
+        "workMode": "на авто",
+        "avgIncomeRub": 77000,
+        "incomeMinRub": 77000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Махачкала",
+        "workMode": "на авто",
+        "avgIncomeRub": 64000,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Хасавюрт",
+        "workMode": "на авто",
+        "avgIncomeRub": 64000,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Городовиковск",
+        "workMode": "на авто",
+        "avgIncomeRub": 45400,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 69000,
+        "hiringActive": true
+      },
+      {
+        "city": "Лагань",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 44000,
+        "incomeMaxRub": 69000,
+        "hiringActive": true
+      },
+      {
+        "city": "Суровикино",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Элиста",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 44000,
+        "incomeMaxRub": 69000,
+        "hiringActive": true
+      },
+      {
+        "city": "Беломорск",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кемь",
+        "workMode": "на авто",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кондопога",
+        "workMode": "на авто",
+        "avgIncomeRub": 51000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Костомукша",
+        "workMode": "на авто",
+        "avgIncomeRub": 54000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 65000,
+        "hiringActive": true
+      },
+      {
+        "city": "Лахденпохья",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Петрозаводск",
+        "workMode": "на авто",
+        "avgIncomeRub": 59000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 85000,
+        "hiringActive": true
+      },
+      {
+        "city": "Питкяранта",
+        "workMode": "на авто",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Пудож",
+        "workMode": "на авто",
+        "avgIncomeRub": 25000,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 25000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сортавала",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Воркута",
+        "workMode": "на авто",
+        "avgIncomeRub": 49667,
+        "incomeMinRub": 39000,
+        "incomeMaxRub": 51000,
+        "hiringActive": true
+      },
+      {
+        "city": "Емва",
+        "workMode": "на авто",
+        "avgIncomeRub": 51000,
+        "incomeMinRub": 51000,
+        "incomeMaxRub": 51000,
+        "hiringActive": true
+      },
+      {
+        "city": "Микунь",
+        "workMode": "на авто",
+        "avgIncomeRub": 51000,
+        "incomeMinRub": 51000,
+        "incomeMaxRub": 51000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сыктывкар",
+        "workMode": "на авто",
+        "avgIncomeRub": 49667,
+        "incomeMinRub": 39000,
+        "incomeMaxRub": 51000,
+        "hiringActive": true
+      },
+      {
+        "city": "Усинск",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ухта",
+        "workMode": "на авто",
+        "avgIncomeRub": 49667,
+        "incomeMinRub": 39000,
+        "incomeMaxRub": 51000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ардатов",
+        "workMode": "на авто",
+        "avgIncomeRub": 59000,
+        "incomeMinRub": 59000,
+        "incomeMaxRub": 59000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ковылкино",
+        "workMode": "на авто",
+        "avgIncomeRub": 44000,
+        "incomeMinRub": 20000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Рузаевка",
+        "workMode": "на авто",
+        "avgIncomeRub": 44000,
+        "incomeMinRub": 20000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Саранск",
+        "workMode": "на авто",
+        "avgIncomeRub": 44000,
+        "incomeMinRub": 20000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Нерюнгри",
+        "workMode": "на авто",
+        "avgIncomeRub": 58400,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 80000,
+        "hiringActive": true
+      },
+      {
+        "city": "Нюрба",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Якутск",
+        "workMode": "на авто",
+        "avgIncomeRub": 58400,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 80000,
+        "hiringActive": true
+      },
+      {
+        "city": "Беслан",
+        "workMode": "на авто",
+        "avgIncomeRub": 77000,
+        "incomeMinRub": 77000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сунжа",
+        "workMode": "на авто",
+        "avgIncomeRub": 15000,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 15000,
+        "hiringActive": true
+      },
+      {
+        "city": "Арск",
+        "workMode": "на авто",
+        "avgIncomeRub": 39000,
+        "incomeMinRub": 39000,
+        "incomeMaxRub": 39000,
+        "hiringActive": true
+      },
+      {
+        "city": "Елабуга",
+        "workMode": "на авто",
+        "avgIncomeRub": 44000,
+        "incomeMinRub": 44000,
+        "incomeMaxRub": 44000,
+        "hiringActive": true
+      },
+      {
+        "city": "Казань",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 75000,
+        "incomeMinRub": 75000,
+        "incomeMaxRub": 75000,
+        "hiringActive": true
+      },
+      {
+        "city": "Лаишево",
+        "workMode": "на авто",
+        "avgIncomeRub": 40000,
+        "incomeMinRub": 40000,
+        "incomeMaxRub": 40000,
+        "hiringActive": true
+      },
+      {
+        "city": "Набережные Челны",
+        "workMode": "на авто",
+        "avgIncomeRub": 50000,
+        "incomeMinRub": 47000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Нижнекамск",
+        "workMode": "на авто",
+        "avgIncomeRub": 50000,
+        "incomeMinRub": 47000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Нурлат",
+        "workMode": "на авто",
+        "avgIncomeRub": 49000,
+        "incomeMinRub": 49000,
+        "incomeMaxRub": 49000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ак-Довурак",
+        "workMode": "на авто",
+        "avgIncomeRub": 43750,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 110000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кызыл",
+        "workMode": "на авто",
+        "avgIncomeRub": 62500,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 110000,
+        "hiringActive": true
+      },
+      {
+        "city": "Чадан",
+        "workMode": "на авто",
+        "avgIncomeRub": 39000,
+        "incomeMinRub": 39000,
+        "incomeMaxRub": 39000,
+        "hiringActive": true
+      },
+      {
+        "city": "Шагонар",
+        "workMode": "на авто",
+        "avgIncomeRub": 43750,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 110000,
+        "hiringActive": true
+      },
+      {
+        "city": "Абаза",
+        "workMode": "на авто",
+        "avgIncomeRub": 43000,
+        "incomeMinRub": 43000,
+        "incomeMaxRub": 43000,
+        "hiringActive": true
+      },
+      {
+        "city": "Абакан",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Саяногорск",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сорск",
+        "workMode": "на авто",
+        "avgIncomeRub": 15000,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 15000,
+        "hiringActive": true
+      },
+      {
+        "city": "Черногорск",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Белая Калитва",
+        "workMode": "на авто",
+        "avgIncomeRub": 75000,
+        "incomeMinRub": 75000,
+        "incomeMaxRub": 75000,
+        "hiringActive": true
+      },
+      {
+        "city": "Гуково",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Донецк",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Зверево",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Каменск-Шахтинский",
+        "workMode": "на авто",
+        "avgIncomeRub": 85000,
+        "incomeMinRub": 85000,
+        "incomeMaxRub": 85000,
+        "hiringActive": true
+      },
+      {
+        "city": "Константиновск",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Красный Сулин",
+        "workMode": "на авто",
+        "avgIncomeRub": 62000,
+        "incomeMinRub": 62000,
+        "incomeMaxRub": 62000,
+        "hiringActive": true
+      },
+      {
+        "city": "Миллерово",
+        "workMode": "на авто",
+        "avgIncomeRub": 100000,
+        "incomeMinRub": 100000,
+        "incomeMaxRub": 100000,
+        "hiringActive": true
+      },
+      {
+        "city": "Новочеркасск",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Новошахтинск",
+        "workMode": "на авто",
+        "avgIncomeRub": 55000,
+        "incomeMinRub": 55000,
+        "incomeMaxRub": 55000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ростов",
+        "workMode": "на авто",
+        "avgIncomeRub": 120000,
+        "incomeMinRub": 120000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ростов-на-Дону",
+        "workMode": "на авто",
+        "avgIncomeRub": 55789,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Семикаракорск",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Таганрог",
+        "workMode": "на авто",
+        "avgIncomeRub": 52222,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 55000,
+        "hiringActive": true
+      },
+      {
+        "city": "Цимлянск",
+        "workMode": "на авто",
+        "avgIncomeRub": 55000,
+        "incomeMinRub": 55000,
+        "incomeMaxRub": 55000,
+        "hiringActive": true
+      },
+      {
+        "city": "Шахты",
+        "workMode": "на авто",
+        "avgIncomeRub": 55263,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 110000,
+        "hiringActive": true
+      },
+      {
+        "city": "Касимов",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Михайлов",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Рязань",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Скопин",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Жигулевск",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 54000,
+        "incomeMinRub": 54000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Отрадный",
+        "workMode": "на авто",
+        "avgIncomeRub": 49000,
+        "incomeMinRub": 49000,
+        "incomeMaxRub": 49000,
+        "hiringActive": true
+      },
+      {
+        "city": "Самара",
+        "workMode": "на авто",
+        "avgIncomeRub": 49000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сызрань",
+        "workMode": "на авто",
+        "avgIncomeRub": 50333,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Тольятти",
+        "workMode": "на авто",
+        "avgIncomeRub": 49000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Усолье",
+        "workMode": "на авто",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Санкт-Петербург",
+        "workMode": "на авто",
+        "avgIncomeRub": 130000,
+        "incomeMinRub": 130000,
+        "incomeMaxRub": 130000,
+        "hiringActive": true
+      },
+      {
+        "city": "Аркадак",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Балаково",
+        "workMode": "на авто",
+        "avgIncomeRub": 50750,
+        "incomeMinRub": 20000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Балашов",
+        "workMode": "на авто",
+        "avgIncomeRub": 65000,
+        "incomeMinRub": 65000,
+        "incomeMaxRub": 65000,
+        "hiringActive": true
+      },
+      {
+        "city": "Вольск",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Карабулак",
+        "workMode": "на авто",
+        "avgIncomeRub": 40000,
+        "incomeMinRub": 40000,
+        "incomeMaxRub": 40000,
+        "hiringActive": true
+      },
+      {
+        "city": "Маркс",
+        "workMode": "на авто",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Пугачев",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Пушкино",
+        "workMode": "на авто",
+        "avgIncomeRub": 64000,
+        "incomeMinRub": 64000,
+        "incomeMaxRub": 64000,
+        "hiringActive": true
+      },
+      {
+        "city": "Саратов",
+        "workMode": "на авто",
+        "avgIncomeRub": 50750,
+        "incomeMinRub": 20000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Энгельс",
+        "workMode": "на авто",
+        "avgIncomeRub": 50750,
+        "incomeMinRub": 20000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Анива",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Корсаков",
+        "workMode": "на авто",
+        "avgIncomeRub": 25000,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 25000,
+        "hiringActive": true
+      },
+      {
+        "city": "Оха",
+        "workMode": "на авто",
+        "avgIncomeRub": 82000,
+        "incomeMinRub": 82000,
+        "incomeMaxRub": 82000,
+        "hiringActive": true
+      },
+      {
+        "city": "Поронайск",
+        "workMode": "на авто",
+        "avgIncomeRub": 80000,
+        "incomeMinRub": 80000,
+        "incomeMaxRub": 80000,
+        "hiringActive": true
+      },
+      {
+        "city": "Холмск",
+        "workMode": "на авто",
+        "avgIncomeRub": 52500,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 80000,
+        "hiringActive": true
+      },
+      {
+        "city": "Южно-Сахалинск",
+        "workMode": "на авто",
+        "avgIncomeRub": 52500,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 80000,
+        "hiringActive": true
+      },
+      {
+        "city": "Арамиль",
+        "workMode": "на авто",
+        "avgIncomeRub": 60000,
+        "incomeMinRub": 60000,
+        "incomeMaxRub": 60000,
+        "hiringActive": true
+      },
+      {
+        "city": "Асбест",
+        "workMode": "на авто",
+        "avgIncomeRub": 61000,
+        "incomeMinRub": 61000,
+        "incomeMaxRub": 61000,
+        "hiringActive": true
+      },
+      {
+        "city": "Березовский",
+        "workMode": "на авто",
+        "avgIncomeRub": 95000,
+        "incomeMinRub": 95000,
+        "incomeMaxRub": 95000,
+        "hiringActive": true
+      },
+      {
+        "city": "Верхняя Пышма",
+        "workMode": "на авто",
+        "avgIncomeRub": 100000,
+        "incomeMinRub": 100000,
+        "incomeMaxRub": 100000,
+        "hiringActive": true
+      },
+      {
+        "city": "Верхняя Тура",
+        "workMode": "на авто",
+        "avgIncomeRub": 54000,
+        "incomeMinRub": 54000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Верхотурье",
+        "workMode": "на авто",
+        "avgIncomeRub": 81000,
+        "incomeMinRub": 81000,
+        "incomeMaxRub": 81000,
+        "hiringActive": true
+      },
+      {
+        "city": "Волчанск",
+        "workMode": "на авто",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Екатеринбург",
+        "workMode": "на авто",
+        "avgIncomeRub": 47833,
+        "incomeMinRub": 42000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ивдель",
+        "workMode": "на авто",
+        "avgIncomeRub": 54000,
+        "incomeMinRub": 54000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Каменск-Уральский",
+        "workMode": "на авто",
+        "avgIncomeRub": 47833,
+        "incomeMinRub": 42000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Качканар",
+        "workMode": "на авто",
+        "avgIncomeRub": 91000,
+        "incomeMinRub": 91000,
+        "incomeMaxRub": 91000,
+        "hiringActive": true
+      },
+      {
+        "city": "Красноуральск",
+        "workMode": "на авто",
+        "avgIncomeRub": 54000,
+        "incomeMinRub": 54000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кушва",
+        "workMode": "на авто",
+        "avgIncomeRub": 54000,
+        "incomeMinRub": 54000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Михайловск",
+        "workMode": "на авто",
+        "avgIncomeRub": 58000,
+        "incomeMinRub": 58000,
+        "incomeMaxRub": 58000,
+        "hiringActive": true
+      },
+      {
+        "city": "Нижние Серги",
+        "workMode": "на авто",
+        "avgIncomeRub": 54000,
+        "incomeMinRub": 54000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Нижний Тагил",
+        "workMode": "на авто",
+        "avgIncomeRub": 47833,
+        "incomeMinRub": 42000,
+        "incomeMaxRub": 54000,
+        "hiringActive": true
+      },
+      {
+        "city": "Нижняя Тура",
+        "workMode": "на авто",
+        "avgIncomeRub": 65000,
+        "incomeMinRub": 65000,
+        "incomeMaxRub": 65000,
+        "hiringActive": true
+      },
+      {
+        "city": "Реж",
+        "workMode": "на авто",
+        "avgIncomeRub": 58000,
+        "incomeMinRub": 58000,
+        "incomeMaxRub": 58000,
+        "hiringActive": true
+      },
+      {
+        "city": "Свободный",
+        "workMode": "на авто",
+        "avgIncomeRub": 72000,
+        "incomeMinRub": 72000,
+        "incomeMaxRub": 72000,
+        "hiringActive": true
+      },
+      {
+        "city": "Тавда",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 58000,
+        "incomeMinRub": 58000,
+        "incomeMaxRub": 58000,
+        "hiringActive": true
+      },
+      {
+        "city": "Талица",
+        "workMode": "на авто",
+        "avgIncomeRub": 48000,
+        "incomeMinRub": 48000,
+        "incomeMaxRub": 48000,
+        "hiringActive": true
+      },
+      {
+        "city": "Велиж",
+        "workMode": "на авто",
+        "avgIncomeRub": 73000,
+        "incomeMinRub": 73000,
+        "incomeMaxRub": 73000,
+        "hiringActive": true
+      },
+      {
+        "city": "Вязьма",
+        "workMode": "на авто",
+        "avgIncomeRub": 69167,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 74000,
+        "hiringActive": true
+      },
+      {
+        "city": "Гагарин",
+        "workMode": "на авто",
+        "avgIncomeRub": 49000,
+        "incomeMinRub": 49000,
+        "incomeMaxRub": 49000,
+        "hiringActive": true
+      },
+      {
+        "city": "Десногорск",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Дорогобуж",
+        "workMode": "на авто",
+        "avgIncomeRub": 73000,
+        "incomeMinRub": 73000,
+        "incomeMaxRub": 73000,
+        "hiringActive": true
+      },
+      {
+        "city": "Духовщина",
+        "workMode": "на авто",
+        "avgIncomeRub": 73000,
+        "incomeMinRub": 73000,
+        "incomeMaxRub": 73000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ельня",
+        "workMode": "на авто",
+        "avgIncomeRub": 73000,
+        "incomeMinRub": 73000,
+        "incomeMaxRub": 73000,
+        "hiringActive": true
+      },
+      {
+        "city": "Рославль",
+        "workMode": "на авто",
+        "avgIncomeRub": 68200,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 73000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сафоново",
+        "workMode": "на авто",
+        "avgIncomeRub": 69000,
+        "incomeMinRub": 69000,
+        "incomeMaxRub": 69000,
+        "hiringActive": true
+      },
+      {
+        "city": "Смоленск",
+        "workMode": "на авто",
+        "avgIncomeRub": 68200,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 73000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сычевка",
+        "workMode": "на авто",
+        "avgIncomeRub": 73000,
+        "incomeMinRub": 73000,
+        "incomeMaxRub": 73000,
+        "hiringActive": true
+      },
+      {
+        "city": "Холм",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ярцево",
+        "workMode": "на авто",
+        "avgIncomeRub": 41000,
+        "incomeMinRub": 41000,
+        "incomeMaxRub": 41000,
+        "hiringActive": true
+      },
+      {
+        "city": "Благодарный",
+        "workMode": "на авто",
+        "avgIncomeRub": 77000,
+        "incomeMinRub": 77000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Георгиевск",
+        "workMode": "на авто",
+        "avgIncomeRub": 77000,
+        "incomeMinRub": 77000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ипатово",
+        "workMode": "на авто",
+        "avgIncomeRub": 65000,
+        "incomeMinRub": 65000,
+        "incomeMaxRub": 65000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кисловодск",
+        "workMode": "на авто",
+        "avgIncomeRub": 73842,
+        "incomeMinRub": 65000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Мирный",
+        "workMode": "на авто",
+        "avgIncomeRub": 77000,
+        "incomeMinRub": 77000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Пятигорск",
+        "workMode": "на авто",
+        "avgIncomeRub": 73842,
+        "incomeMinRub": 65000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Светлоград",
+        "workMode": "на авто",
+        "avgIncomeRub": 65000,
+        "incomeMinRub": 65000,
+        "incomeMaxRub": 65000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ставрополь",
+        "workMode": "на авто",
+        "avgIncomeRub": 73842,
+        "incomeMinRub": 65000,
+        "incomeMaxRub": 77000,
+        "hiringActive": true
+      },
+      {
+        "city": "Мичуринск",
+        "workMode": "на авто",
+        "avgIncomeRub": 37000,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 59000,
+        "hiringActive": true
+      },
+      {
+        "city": "Рассказово",
+        "workMode": "на авто",
+        "avgIncomeRub": 15000,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 15000,
+        "hiringActive": true
+      },
+      {
+        "city": "Тамбов",
+        "workMode": "на авто",
+        "avgIncomeRub": 15000,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 15000,
+        "hiringActive": true
+      },
+      {
+        "city": "Андреаполь",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Весьегонск",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Вышний Волочек",
+        "workMode": "на авто",
+        "avgIncomeRub": 50714,
+        "incomeMinRub": 41000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Западная Двина",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кувшиново",
+        "workMode": "на авто",
+        "avgIncomeRub": 43000,
+        "incomeMinRub": 43000,
+        "incomeMaxRub": 43000,
+        "hiringActive": true
+      },
+      {
+        "city": "Лихославль",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Осташков",
+        "workMode": "на авто",
+        "avgIncomeRub": 59000,
+        "incomeMinRub": 59000,
+        "incomeMaxRub": 59000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ржев",
+        "workMode": "на авто",
+        "avgIncomeRub": 50714,
+        "incomeMinRub": 41000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Старица",
+        "workMode": "на авто",
+        "avgIncomeRub": 80000,
+        "incomeMinRub": 80000,
+        "incomeMaxRub": 80000,
+        "hiringActive": true
+      },
+      {
+        "city": "Тверь",
+        "workMode": "на авто",
+        "avgIncomeRub": 55500,
+        "incomeMinRub": 41000,
+        "incomeMaxRub": 89000,
+        "hiringActive": true
+      },
+      {
+        "city": "Торжок",
+        "workMode": "на авто",
+        "avgIncomeRub": 43000,
+        "incomeMinRub": 43000,
+        "incomeMaxRub": 43000,
+        "hiringActive": true
+      },
+      {
+        "city": "Северск",
+        "workMode": "на авто",
+        "avgIncomeRub": 40000,
+        "incomeMinRub": 40000,
+        "incomeMaxRub": 40000,
+        "hiringActive": true
+      },
+      {
+        "city": "Стрежевой",
+        "workMode": "на авто",
+        "avgIncomeRub": 40000,
+        "incomeMinRub": 40000,
+        "incomeMaxRub": 40000,
+        "hiringActive": true
+      },
+      {
+        "city": "Томск",
+        "workMode": "на авто",
+        "avgIncomeRub": 46000,
+        "incomeMinRub": 40000,
+        "incomeMaxRub": 52000,
+        "hiringActive": true
+      },
+      {
+        "city": "Алексин",
+        "workMode": "на авто",
+        "avgIncomeRub": 90000,
+        "incomeMinRub": 90000,
+        "incomeMaxRub": 90000,
+        "hiringActive": true
+      },
+      {
+        "city": "Богородицк",
+        "workMode": "на авто",
+        "avgIncomeRub": 48000,
+        "incomeMinRub": 48000,
+        "incomeMaxRub": 48000,
+        "hiringActive": true
+      },
+      {
+        "city": "Болохово",
+        "workMode": "на авто",
+        "avgIncomeRub": 90000,
+        "incomeMinRub": 90000,
+        "incomeMaxRub": 90000,
+        "hiringActive": true
+      },
+      {
+        "city": "Венев",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Донской",
+        "workMode": "на авто",
+        "avgIncomeRub": 78600,
+        "incomeMinRub": 40000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ефремов",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Киреевск",
+        "workMode": "на авто",
+        "avgIncomeRub": 90000,
+        "incomeMinRub": 90000,
+        "incomeMaxRub": 90000,
+        "hiringActive": true
+      },
+      {
+        "city": "Новомосковск",
+        "workMode": "на авто",
+        "avgIncomeRub": 80500,
+        "incomeMinRub": 40000,
+        "incomeMaxRub": 120000,
+        "hiringActive": true
+      },
+      {
+        "city": "Суворов",
+        "workMode": "на авто",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Тула",
+        "workMode": "на авто",
+        "avgIncomeRub": 90500,
+        "incomeMinRub": 40000,
+        "incomeMaxRub": 150000,
+        "hiringActive": true
+      },
+      {
+        "city": "Чекалин",
+        "workMode": "на авто",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ясногорск",
+        "workMode": "на авто",
+        "avgIncomeRub": 90000,
+        "incomeMinRub": 90000,
+        "incomeMaxRub": 90000,
+        "hiringActive": true
+      },
+      {
+        "city": "Нижневартовск",
+        "workMode": "на авто",
+        "avgIncomeRub": 51429,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 78000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сургут",
+        "workMode": "на авто",
+        "avgIncomeRub": 51429,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 78000,
+        "hiringActive": true
+      },
+      {
+        "city": "Тюмень",
+        "workMode": "на авто",
+        "avgIncomeRub": 51429,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 78000,
+        "hiringActive": true
+      },
+      {
+        "city": "Воткинск",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 44000,
+        "incomeMinRub": 44000,
+        "incomeMaxRub": 44000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ижевск",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 44000,
+        "incomeMinRub": 44000,
+        "incomeMaxRub": 44000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сарапул",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 44000,
+        "incomeMinRub": 44000,
+        "incomeMaxRub": 44000,
+        "hiringActive": true
+      },
+      {
+        "city": "Димитровград",
+        "workMode": "на авто",
+        "avgIncomeRub": 57400,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 80000,
+        "hiringActive": true
+      },
+      {
+        "city": "Инза",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 41000,
+        "incomeMinRub": 41000,
+        "incomeMaxRub": 41000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сенгилей",
+        "workMode": "на авто",
+        "avgIncomeRub": 8600,
+        "incomeMinRub": 8600,
+        "incomeMaxRub": 8600,
+        "hiringActive": true
+      },
+      {
+        "city": "Ульяновск",
+        "workMode": "на авто",
+        "avgIncomeRub": 51800,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 56000,
+        "hiringActive": true
+      },
+      {
+        "city": "Амурск",
+        "workMode": "на авто",
+        "avgIncomeRub": 47625,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 64000,
+        "hiringActive": true
+      },
+      {
+        "city": "Бикин",
+        "workMode": "на авто",
+        "avgIncomeRub": 80000,
+        "incomeMinRub": 80000,
+        "incomeMaxRub": 80000,
+        "hiringActive": true
+      },
+      {
+        "city": "Вяземский",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Комсомольск",
+        "workMode": "на авто",
+        "avgIncomeRub": 45000,
+        "incomeMinRub": 45000,
+        "incomeMaxRub": 45000,
+        "hiringActive": true
+      },
+      {
+        "city": "Комсомольск-на-Амуре",
+        "workMode": "на авто",
+        "avgIncomeRub": 45375,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 64000,
+        "hiringActive": true
+      },
+      {
+        "city": "Хабаровск",
+        "workMode": "на авто",
+        "avgIncomeRub": 45429,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 64000,
+        "hiringActive": true
+      },
+      {
+        "city": "Когалым",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Лангепас",
+        "workMode": "на авто",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Нефтеюганск",
+        "workMode": "на авто",
+        "avgIncomeRub": 44000,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Покачи",
+        "workMode": "на авто",
+        "avgIncomeRub": 65000,
+        "incomeMinRub": 65000,
+        "incomeMaxRub": 65000,
+        "hiringActive": true
+      },
+      {
+        "city": "Пыть-Ях",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ханты-Мансийск",
+        "workMode": "на авто",
+        "avgIncomeRub": 125000,
+        "incomeMinRub": 125000,
+        "incomeMaxRub": 125000,
+        "hiringActive": true
+      },
+      {
+        "city": "Бакал",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Верхний Уфалей",
+        "workMode": "на авто",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Еманжелинск",
+        "workMode": "на авто",
+        "avgIncomeRub": 70000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 70000,
+        "hiringActive": true
+      },
+      {
+        "city": "Златоуст",
+        "workMode": "на авто",
+        "avgIncomeRub": 53731,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 90000,
+        "hiringActive": true
+      },
+      {
+        "city": "Карталы",
+        "workMode": "на авто",
+        "avgIncomeRub": 74000,
+        "incomeMinRub": 74000,
+        "incomeMaxRub": 74000,
+        "hiringActive": true
+      },
+      {
+        "city": "Кыштым",
+        "workMode": "на авто",
+        "avgIncomeRub": 80000,
+        "incomeMinRub": 80000,
+        "incomeMaxRub": 80000,
+        "hiringActive": true
+      },
+      {
+        "city": "Магнитогорск",
+        "workMode": "на авто",
+        "avgIncomeRub": 53731,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 90000,
+        "hiringActive": true
+      },
+      {
+        "city": "Миньяр",
+        "workMode": "на авто",
+        "avgIncomeRub": 73000,
+        "incomeMinRub": 73000,
+        "incomeMaxRub": 73000,
+        "hiringActive": true
+      },
+      {
+        "city": "Нязепетровск",
+        "workMode": "на авто",
+        "avgIncomeRub": 25000,
+        "incomeMinRub": 25000,
+        "incomeMaxRub": 25000,
+        "hiringActive": true
+      },
+      {
+        "city": "Пласт",
+        "workMode": "на авто",
+        "avgIncomeRub": 90000,
+        "incomeMinRub": 90000,
+        "incomeMaxRub": 90000,
+        "hiringActive": true
+      },
+      {
+        "city": "Сатка",
+        "workMode": "на авто",
+        "avgIncomeRub": 59000,
+        "incomeMinRub": 59000,
+        "incomeMaxRub": 59000,
+        "hiringActive": true
+      },
+      {
+        "city": "Снежинск",
+        "workMode": "на авто",
+        "avgIncomeRub": 75000,
+        "incomeMinRub": 75000,
+        "incomeMaxRub": 75000,
+        "hiringActive": true
+      },
+      {
+        "city": "Трехгорный",
+        "workMode": "на авто",
+        "avgIncomeRub": 95000,
+        "incomeMinRub": 95000,
+        "incomeMaxRub": 95000,
+        "hiringActive": true
+      },
+      {
+        "city": "Челябинск",
+        "workMode": "на авто",
+        "avgIncomeRub": 53731,
+        "incomeMinRub": 15000,
+        "incomeMaxRub": 90000,
+        "hiringActive": true
+      },
+      {
+        "city": "Юрюзань",
+        "workMode": "на авто",
+        "avgIncomeRub": 95000,
+        "incomeMinRub": 95000,
+        "incomeMaxRub": 95000,
+        "hiringActive": true
+      },
+      {
+        "city": "Грозный",
+        "workMode": "на авто",
+        "avgIncomeRub": 74000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 75000,
+        "hiringActive": true
+      },
+      {
+        "city": "Гудермес",
+        "workMode": "на авто",
+        "avgIncomeRub": 74000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 75000,
+        "hiringActive": true
+      },
+      {
+        "city": "Урус-Мартан",
+        "workMode": "на авто",
+        "avgIncomeRub": 74000,
+        "incomeMinRub": 70000,
+        "incomeMaxRub": 75000,
+        "hiringActive": true
+      },
+      {
+        "city": "Козловка",
+        "workMode": "на авто",
+        "avgIncomeRub": 47000,
+        "incomeMinRub": 47000,
+        "incomeMaxRub": 47000,
+        "hiringActive": true
+      },
+      {
+        "city": "Губкинский",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 85000,
+        "incomeMinRub": 85000,
+        "incomeMaxRub": 85000,
+        "hiringActive": true
+      },
+      {
+        "city": "Муравленко",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Надым",
+        "workMode": "на авто",
+        "avgIncomeRub": 40000,
+        "incomeMinRub": 40000,
+        "incomeMaxRub": 40000,
+        "hiringActive": true
+      },
+      {
+        "city": "Новый Уренгой",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Ноябрьск",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Салехард",
+        "workMode": "на авто",
+        "avgIncomeRub": 53000,
+        "incomeMinRub": 53000,
+        "incomeMaxRub": 53000,
+        "hiringActive": true
+      },
+      {
+        "city": "Тарко-Сале",
+        "workMode": "авто/ пеший",
+        "avgIncomeRub": 90000,
+        "incomeMinRub": 90000,
+        "incomeMaxRub": 90000,
+        "hiringActive": true
+      },
+      {
+        "city": "Углич",
+        "workMode": "на авто",
+        "avgIncomeRub": 80000,
+        "incomeMinRub": 80000,
+        "incomeMaxRub": 80000,
+        "hiringActive": true
+      }
+    ]
+  }
+}

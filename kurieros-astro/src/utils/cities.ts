@@ -5,10 +5,27 @@ type JobLike = {
 	location?: string;
 };
 
-const KNOWN_CITIES = new Map(CITIES.map((city) => [city.name, city]));
-const CITY_POPULATION_RANK = new Map(
-	CITY_POPULATION_ORDER.map((city, index) => [city.toLowerCase().replace(/ё/g, 'е'), CITY_POPULATION_ORDER.length - index]),
+const normalizeCityDisplayName = (name: string) =>
+	name
+		.replace(/[\u00A0\u202F\u2007]/g, ' ')
+		.replace(/[\u2010-\u2015]/g, '-')
+		.replace(/\s+/g, ' ')
+		.replace(/\s*-\s*/g, '-')
+		.trim();
+
+const normalizeCityKey = (name: string) =>
+	normalizeCityDisplayName(name)
+		.toLowerCase()
+		.replace(/ё/g, 'е');
+
+const CANONICAL_CITY_BY_KEY = new Map(
+	CITY_POPULATION_ORDER.map((city) => [normalizeCityKey(city), city]),
 );
+const KNOWN_CITIES = new Map(CITIES.map((city) => [normalizeCityKey(city.name), city]));
+const CITY_POPULATION_RANK = new Map(
+	CITY_POPULATION_ORDER.map((city, index) => [normalizeCityKey(city), CITY_POPULATION_ORDER.length - index]),
+);
+const ALL_RUSSIA_KEY = normalizeCityKey('Вся Россия');
 
 const SLUG_MAP: Record<string, string> = {
 	а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'e', ж: 'zh', з: 'z',
@@ -26,13 +43,17 @@ export const slugifyCity = (name: string) =>
 		.replace(/[^a-z0-9]+/g, '-')
 		.replace(/^-+|-+$/g, '');
 
-export const getCityCounts = (jobs: JobLike[]) => {
+const getCityCounts = (jobs: JobLike[]) => {
 	const counts = new Map<string, number>();
 
 	jobs
 		.flatMap((job) => (job.location || '').split(','))
-		.map((city) => city.trim())
-		.filter((city) => city && city !== 'Вся Россия')
+		.map((city) => {
+			const normalizedName = normalizeCityDisplayName(city);
+			const cityKey = normalizeCityKey(normalizedName);
+			return CANONICAL_CITY_BY_KEY.get(cityKey) ?? normalizedName;
+		})
+		.filter((city) => city && normalizeCityKey(city) !== ALL_RUSSIA_KEY)
 		.forEach((city) => counts.set(city, (counts.get(city) ?? 0) + 1));
 
 	return counts;
@@ -43,7 +64,7 @@ export const getCitiesFromJobs = (jobs: JobLike[]) => {
 
 	return Array.from(counts.entries())
 		.map(([name, vacancyCount]) => {
-			const known = KNOWN_CITIES.get(name);
+			const known = KNOWN_CITIES.get(normalizeCityKey(name));
 			const slug = known?.slug ?? slugifyCity(name);
 			const prep = known?.prep ?? `в ${name}`;
 			return { name, slug, prep, vacancyCount };
@@ -55,14 +76,14 @@ export const getCityNames = (jobs: JobLike[]) =>
 	getCitiesFromJobs(jobs).map((city) => city.name);
 
 export const getCityHref = (name: string) => {
-	const known = KNOWN_CITIES.get(name);
+	const known = KNOWN_CITIES.get(normalizeCityKey(name));
 	const slug = known?.slug ?? slugifyCity(name);
 	return `/rabota-kurerom-${slug}/`;
 };
 
-const getPopulationRank = (name: string) => CITY_POPULATION_RANK.get(name.toLowerCase().replace(/ё/g, 'е')) ?? 0;
+const getPopulationRank = (name: string) => CITY_POPULATION_RANK.get(normalizeCityKey(name)) ?? 0;
 
-export const compareCityNamesByPopulation = (a: string, b: string) =>
+const compareCityNamesByPopulation = (a: string, b: string) =>
 	getPopulationRank(b) - getPopulationRank(a) || a.localeCompare(b, 'ru');
 
 export const sortCityNamesByPopulation = (names: string[]) =>

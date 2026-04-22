@@ -5,6 +5,7 @@ export type JobLike = {
   title: string;
   company: string;
   companyLogo: string;
+  applyLink?: string;
   location: string;
   salary: string;
   shortDescription?: string;
@@ -80,11 +81,22 @@ const companyTypeLabel = (name: string) => {
   return 'курьерская занятость';
 };
 
+const normalizeCompanyApplyLink = (rawUrl: string) => {
+  try {
+    const parsedUrl = new URL(rawUrl);
+    parsedUrl.searchParams.delete('utm_content');
+    return parsedUrl.toString();
+  } catch {
+    return rawUrl;
+  }
+};
+
 export type CompanyEntity = {
   name: string;
   slug: string;
   logo: string;
   href: string;
+  applyLink: string;
   jobs: JobLike[];
   reviews: ReviewLike[];
   vacancyCount: number;
@@ -113,6 +125,7 @@ export const getCompaniesFromJobs = (jobs: JobLike[], reviews: ReviewLike[] = []
     name: string;
     slug: string;
     logo: string;
+    applyLink: string | null;
     jobs: JobLike[];
     cities: Set<string>;
     payments: Set<string>;
@@ -128,6 +141,7 @@ export const getCompaniesFromJobs = (jobs: JobLike[], reviews: ReviewLike[] = []
       name: job.company,
       slug: slugifyCompany(job.company),
       logo: job.companyLogo,
+      applyLink: null,
       jobs: [],
       cities: new Set<string>(),
       payments: new Set<string>(),
@@ -139,6 +153,9 @@ export const getCompaniesFromJobs = (jobs: JobLike[], reviews: ReviewLike[] = []
     };
 
     existing.jobs.push(job);
+    if (!existing.applyLink && job.applyLink && job.applyLink !== '#') {
+      existing.applyLink = normalizeCompanyApplyLink(job.applyLink);
+    }
     existing.payments.add(job.details.payment_freq);
     existing.ages.add(job.details.age);
     existing.employmentTypes.add(job.details.employment_type);
@@ -178,13 +195,14 @@ export const getCompaniesFromJobs = (jobs: JobLike[], reviews: ReviewLike[] = []
       const paymentPreview = Array.from(company.payments).slice(0, 2);
       const employmentPreview = Array.from(company.employmentTypes).slice(0, 2);
       const agePreview = Array.from(company.ages).slice(0, 2);
-      const shortIntro = `${company.name} на Курьерок — это ${companyTypeLabel(company.name)}, где сейчас есть ${company.jobs.length} ${getVacancyPluralText(company.jobs.length)}. Здесь удобно сравнить формат работы, выплаты и ограничения до отклика.`;
+      const shortIntro = `${company.name} на КурьерОк — это ${companyTypeLabel(company.name)}, где сейчас есть ${company.jobs.length} ${getVacancyPluralText(company.jobs.length)}. Здесь удобно сравнить формат работы, выплаты и ограничения до отклика.`;
 
       return {
         name: company.name,
         slug: company.slug,
         logo: company.logo,
         href: `/companies/${company.slug}/`,
+        applyLink: company.applyLink || `/companies/${company.slug}/`,
         jobs: company.jobs,
         reviews: company.reviews,
         vacancyCount: company.jobs.length,

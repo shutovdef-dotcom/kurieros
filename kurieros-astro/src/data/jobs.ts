@@ -178,18 +178,18 @@ const RATE_TEXT: Record<SupportedLanguage, (hourly: string, daily: string, month
 };
 
 const PAGE_TITLE_TEXT: Record<SupportedLanguage, (title: string) => string> = {
-  ru: (title) => `${title} — зарплата, условия и отклик | Курьерок`,
-  uz: (title) => `${title} — daromad, shartlar va ariza | Курьерок`,
-  tg: (title) => `${title} — даромад, шартҳо ва отклик | Курьерок`,
-  ky: (title) => `${title} — киреше, шарттар жана отклик | Курьерок`,
-  hy: (title) => `${title} — եկամուտ, պայմաններ և դիմում | Курьерок`,
-  kk: (title) => `${title} — табыс, шарттар және өтінім | Курьерок`,
-  az: (title) => `${title} — gəlir, şərtlər və müraciət | Курьерок`,
-  uk: (title) => `${title} — зарплата, умови та відгук | Курьерок`,
-  be: (title) => `${title} — заробак, умовы і водгук | Курьерок`,
-  hi: (title) => `${title} — आय, शर्तें और आवेदन | Курьерок`,
-  vi: (title) => `${title} — thu nhập, điều kiện và ứng tuyển | Курьерок`,
-  zh: (title) => `${title} — 收入、条件和申请 | Курьерок`,
+  ru: (title) => `${title} — зарплата, условия и отклик | КурьерОк`,
+  uz: (title) => `${title} — daromad, shartlar va ariza | КурьерОк`,
+  tg: (title) => `${title} — даромад, шартҳо ва отклик | КурьерОк`,
+  ky: (title) => `${title} — киреше, шарттар жана отклик | КурьерОк`,
+  hy: (title) => `${title} — եկամուտ, պայմաններ և դիմում | КурьерОк`,
+  kk: (title) => `${title} — табыс, шарттар және өтінім | КурьерОк`,
+  az: (title) => `${title} — gəlir, şərtlər və müraciət | КурьерОк`,
+  uk: (title) => `${title} — зарплата, умови та відгук | КурьерОк`,
+  be: (title) => `${title} — заробак, умовы і водгук | КурьерОк`,
+  hi: (title) => `${title} — आय, शर्तें और आवेदन | КурьерОк`,
+  vi: (title) => `${title} — thu nhập, điều kiện và ứng tuyển | КурьерОк`,
+  zh: (title) => `${title} — 收入、条件和申请 | КурьерОк`,
 };
 
 const PAGE_DESCRIPTION_TEXT: Record<SupportedLanguage, (job: GeneratedJob) => string> = {
@@ -384,7 +384,7 @@ const buildLabels = (
       medicalBook === 'required' ? COMMON_LABELS[language].medicalBook : '',
     ]);
 
-export const buildJobsFromVacancies = (
+const buildJobsFromVacancies = (
   sources: VacancySource[],
   language: SupportedLanguage = 'ru',
 ): GeneratedJob[] =>
@@ -491,8 +491,6 @@ export const buildJobTranslations = (sources: VacancySource[]) =>
   ) as Record<SupportedLanguage, Record<string, Record<string, string>>>;
 
 const jobsData = buildJobsFromVacancies(vacancySources);
-const jobTranslations = buildJobTranslations(vacancySources);
 
 export { vacancySources };
-export { jobTranslations };
 export default jobsData;
