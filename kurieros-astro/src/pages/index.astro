@@ -193,23 +193,20 @@ const pageSchemaGraph = [
 						</div>
 					</div>
 					<a id="city-page-link" class="hero-city-link hidden" href="/" data-t="location.view_jobs">Все вакансии в этом городе</a>
-				</div>
-			</section>
-
-			<section class="home-section home-vacancy-launch">
-				<div class="home-filter-row">
-					<select id="vacancy-age-filter" class="home-filter-select" aria-label="Фильтр по возрасту">
-						<option value="all">Возраст: любой</option>
-						<option value="16plus">Возраст: с 16 лет</option>
-						<option value="18plus">Возраст: с 18 лет</option>
-					</select>
-					<select id="vacancy-transport-filter" class="home-filter-select" aria-label="Фильтр по транспорту">
-						<option value="all">Транспорт: любой</option>
-						<option value="foot">Транспорт: пешком</option>
-						<option value="bicycle">Транспорт: велосипед / самокат</option>
-						<option value="auto">Транспорт: авто</option>
-						<option value="remote">Транспорт: работа из дома</option>
-					</select>
+					<div class="home-filter-row">
+						<select id="vacancy-age-filter" class="home-filter-select" aria-label="Фильтр по возрасту">
+							<option value="all">Возраст: любой</option>
+							<option value="16plus">Возраст: с 16 лет</option>
+							<option value="18plus">Возраст: с 18 лет</option>
+						</select>
+						<select id="vacancy-transport-filter" class="home-filter-select" aria-label="Фильтр по транспорту">
+							<option value="all">Транспорт: любой</option>
+							<option value="foot">Транспорт: пешком</option>
+							<option value="bicycle">Транспорт: велосипед / самокат</option>
+							<option value="auto">Транспорт: авто</option>
+							<option value="remote">Транспорт: работа из дома</option>
+						</select>
+					</div>
 				</div>
 			</section>
 
@@ -1105,19 +1102,17 @@ const pageSchemaGraph = [
 		display: flex;
 		align-items: center;
 	}
-	.city-selector-container::before {
-		content: '';
+	.city-selector-container .city-icon {
 		flex: 0 0 auto;
-		width: 18px;
-		height: 18px;
+		color: var(--brand-700);
 		margin-right: 10px;
-		background: var(--brand-700);
-		-webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z'/><circle cx='12' cy='10' r='3'/></svg>") center/contain no-repeat;
-		mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z'/><circle cx='12' cy='10' r='3'/></svg>") center/contain no-repeat;
 	}
 	.city-selector-container::after {
 		color: var(--ink-500);
 		margin-left: auto;
+	}
+	:where(html, body).dark-mode .city-selector-container .city-icon {
+		color: var(--brand-500);
 	}
 	.city-selector-container:hover,
 	.city-selector-container:focus-within {
@@ -1204,9 +1199,6 @@ const pageSchemaGraph = [
 	:where(html, body).dark-mode .home-filter-select {
 		background: var(--ink-100) !important;
 		border-color: var(--ink-200) !important;
-	}
-	:where(html, body).dark-mode .city-selector-container::before {
-		background: var(--brand-500);
 	}
 	:where(html, body).dark-mode .city-select,
 	:where(html, body).dark-mode .hero-city-link {
