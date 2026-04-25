@@ -1,0 +1,183 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import PartnerBanner from '../../components/PartnerBanner.astro';
+import { TOPIC_META, getItemsByTopic, knowledgeBaseData } from '../../utils/knowledge';
+import { buildBreadcrumbSchema } from '../../utils/schema';
+
+const topics = Object.entries(TOPIC_META).map(([key, meta]) => ({
+	key,
+	...meta,
+	itemCount: getItemsByTopic(key).length,
+}));
+
+const totalItems = knowledgeBaseData.items.length;
+const totalSources = knowledgeBaseData.sources.length;
+const pageTitle = 'Гид для курьера: всё об оформлении, доходе и работе | КурьерОк';
+const pageDescription = `Структурированный гид по работе курьером в России 2026: ${totalItems} вопросов на ${topics.length} тем — возраст, медкнижка, доход, выплаты, штрафы и оформление.`;
+
+const itemListSchema = {
+	'@type': 'ItemList',
+	itemListElement: topics.map((topic, index) => ({
+		'@type': 'ListItem',
+		position: index + 1,
+		name: topic.title,
+		url: new URL(`/guide/${topic.slug}/`, Astro.site).toString(),
+	})),
+};
+
+const collectionSchema = {
+	'@type': 'CollectionPage',
+	name: pageTitle,
+	description: pageDescription,
+	url: Astro.url.href,
+	dateModified: knowledgeBaseData.generated,
+	mainEntity: itemListSchema,
+};
+
+const pageSchemaGraph = [
+	collectionSchema,
+	buildBreadcrumbSchema(
+		[
+			{ name: 'Главная', url: '/' },
+			{ name: 'Гид', url: '/guide/' },
+		],
+		Astro.site,
+	),
+];
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} schemaGraph={pageSchemaGraph}>
+	<Header />
+
+	<main class="guide-index-page">
+		<div class="container container-narrow">
+			<nav class="breadcrumb" aria-label="Breadcrumb">
+				<a href="/">Главная</a> &gt; <span>Гид</span>
+			</nav>
+
+			<header class="guide-hero">
+				<div class="guide-kicker">База знаний</div>
+				<h1>Гид для курьера 2026</h1>
+				<p class="guide-lead">
+					Собрали в одно место всё, что нужно знать перед откликом: возраст, медкнижка, документы, доход,
+					выплаты, штрафы и сравнение работодателей. Все ответы основаны на официальных страницах
+					сервисов.
+				</p>
+				<div class="guide-meta">
+					<span>Тем: {topics.length}</span>
+					<span>·</span>
+					<span>Вопросов: {totalItems}</span>
+					<span>·</span>
+					<span>Источников: {totalSources}</span>
+					<span>·</span>
+					<span>Обновлено: {knowledgeBaseData.generated}</span>
+				</div>
+			</header>
+
+			<section class="guide-grid">
+				{topics.map((topic) => (
+					<a class="guide-card-link" href={`/guide/${topic.slug}/`}>
+						<strong>{topic.title}</strong>
+						<p>{topic.description}</p>
+						<span class="guide-card-meta">{topic.itemCount} {topic.itemCount === 1 ? 'вопрос' : 'вопросов'}</span>
+					</a>
+				))}
+			</section>
+
+			<PartnerBanner />
+		</div>
+	</main>
+
+	<Footer />
+</BaseLayout>
+
+<style>
+	.guide-index-page {
+		padding: clamp(20px, 4vw, 40px) 0 60px;
+	}
+	.breadcrumb {
+		font-size: 14px;
+		color: var(--ink-500, #6c7785);
+		margin-bottom: 16px;
+	}
+	.breadcrumb a {
+		color: inherit;
+		text-decoration: none;
+		border-bottom: 1px dashed currentColor;
+	}
+	.breadcrumb a:hover {
+		color: var(--brand-700, #16734c);
+	}
+	.guide-hero {
+		margin-bottom: 32px;
+	}
+	.guide-kicker {
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		font-size: 12px;
+		font-weight: 700;
+		color: var(--brand-700, #16734c);
+		margin-bottom: 8px;
+	}
+	.guide-hero h1 {
+		font-size: clamp(28px, 4vw, 40px);
+		line-height: 1.15;
+		margin: 0 0 12px;
+	}
+	.guide-lead {
+		font-size: clamp(16px, 1.4vw, 18px);
+		color: var(--ink-700, #2c3440);
+		margin: 0 0 16px;
+		max-width: 720px;
+	}
+	.guide-meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		font-size: 14px;
+		color: var(--ink-500, #6c7785);
+	}
+	.guide-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+		gap: 16px;
+		margin-bottom: 40px;
+	}
+	.guide-card-link {
+		display: grid;
+		gap: 8px;
+		padding: 24px;
+		border: 1px solid var(--ink-100, #e5e8ed);
+		border-radius: 16px;
+		background: var(--surface-100, #fff);
+		color: inherit;
+		text-decoration: none;
+		transition: border-color 0.15s ease, transform 0.15s ease;
+	}
+	.guide-card-link:hover {
+		border-color: var(--brand-700, #16734c);
+		transform: translateY(-2px);
+	}
+	.guide-card-link strong {
+		font-size: 18px;
+		color: var(--ink-900, #0f172a);
+	}
+	.guide-card-link p {
+		font-size: 14px;
+		color: var(--ink-500, #6c7785);
+		margin: 0;
+	}
+	.guide-card-meta {
+		font-size: 12px;
+		color: var(--brand-700, #16734c);
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+	:global(.dark-mode) .guide-card-link {
+		background: var(--surface-200, #1a2230);
+		border-color: var(--ink-200, #2a3441);
+	}
+</style>
