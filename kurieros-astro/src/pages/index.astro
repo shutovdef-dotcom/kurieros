@@ -1078,20 +1078,12 @@ const pageSchemaGraph = [
 		display: none;
 	}
 
-	/* Toolbar section — sits below the Hero, contains city/lang/cta/filters */
+	/* Toolbar section — sits below the Hero, full-width inside home-shell */
 	.home-toolbar-section {
-		max-width: 880px;
-		margin: var(--space-8) auto;
-		padding: 0 var(--space-6);
-	}
-	@media (max-width: 768px) {
-		.home-toolbar-section {
-			padding: 0 var(--space-4);
-			margin: var(--space-5) auto;
-		}
+		margin: var(--space-6) 0 var(--space-8);
 	}
 
-	/* Hero toolbar — k-cityrow / k-cityselect / k-langselect / k-citycta / k-fselect (handoff exact values) */
+	/* Hero toolbar — k-cityrow layout (handoff): city+lang | cta | fselects */
 	.hero-toolbar {
 		display: flex;
 		flex-direction: column;
@@ -1103,6 +1095,34 @@ const pageSchemaGraph = [
 		display: flex;
 		gap: var(--space-3);
 		align-items: stretch;
+	}
+	/* Equal height for ALL toolbar controls */
+	.city-selector-container,
+	.hero-lang-switcher :global(.lang-toggle),
+	.hero-city-link,
+	.home-filter-select {
+		min-height: 52px !important;
+		height: 52px !important;
+	}
+	.hero-city-link {
+		height: auto !important;
+		min-height: 52px !important;
+	}
+	.home-filter-row {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+	@media (min-width: 768px) {
+		.home-filter-row {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+	@media (max-width: 480px) {
+		.toolbar-top {
+			flex-direction: column;
+		}
+		.home-filter-row {
+			grid-template-columns: 1fr;
+		}
 	}
 	.city-selector-container,
 	.hero-lang-switcher :global(.lang-toggle),
