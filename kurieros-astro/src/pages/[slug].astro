@@ -178,12 +178,12 @@ const updatedDate = new Intl.DateTimeFormat('ru-RU', {
 }).format(new Date());
 const seoTitle =
 	type === 'city'
-		? `Работа курьером ${data.prep}: вакансии и зарплата | КурьерОк`
-		: `Работа курьером ${data.name.toLowerCase()}: вакансии и условия | КурьерОк`;
+		? `Работа курьером ${data.prep} 2026: ${filteredJobs.length} вакансий | КурьерОк`.slice(0, 70)
+		: `Работа курьером ${data.name.toLowerCase()} 2026: ${filteredJobs.length} вакансий | КурьерОк`.slice(0, 70);
 const seoDescription = (
 	type === 'city'
-		? `Работа курьером ${data.prep}: ${filteredJobs.length} вакансий от ${companyNames.length} компаний, выплаты ${paymentTypes.slice(0, 2).join(' / ') || 'уточняются в карточках'}. Сравните условия и откройте подходящие отклики.`
-		: `Подборка "${data.name}": ${filteredJobs.length} вакансий от ${companyNames.length} компаний, форматы ${transportTypes.join(', ') || 'разные'}. Сравните условия и выберите подходящую карточку вакансии.`
+		? `Работа курьером ${data.prep} 2026: ${filteredJobs.length} актуальных вакансий от ${companyNames.length} компаний. Доход, выплаты ${paymentTypes.slice(0, 2).join(' / ').toLowerCase() || 'уточняются'}, форматы ${transportTypes.join(', ').toLowerCase() || 'разные'}.`
+		: `Курьер ${data.name.toLowerCase()} 2026: ${filteredJobs.length} вакансий от ${companyNames.length} компаний. Сравните выплаты, требования и оформление до отклика.`
 ).slice(0, 170);
 const relatedArticles = articlesData
 	.filter((article) => {
