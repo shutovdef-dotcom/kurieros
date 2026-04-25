@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="180" height="180" role="img" aria-label="КурьерОк">
+  <title>КурьерОк</title>
+  <rect width="64" height="64" rx="14" fill="#2f8851"></rect>
+  <path d="M32 12 C22 12 16 19 16 28 C16 38 28 50 32 54 C36 50 48 38 48 28 C48 19 42 12 32 12 Z" fill="#fbf7ed"></path>
+  <circle cx="32" cy="27" r="6" fill="#2f8851"></circle>
+  <circle cx="32" cy="27" r="2.4" fill="#d95a35"></circle>
+</svg>
