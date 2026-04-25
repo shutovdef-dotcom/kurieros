@@ -1,0 +1,115 @@
+---
+// Astro Logo component for КурьерОк
+// Drop-in replacement for the existing logo in src/components/Header.astro
+//
+// Usage:
+//   <Logo size="md" />              { default — primary on light bg }
+//   <Logo size="lg" tone="onBrand"/>{ for green hero/footer }
+//   <Logo size="sm" tone="mono" />  { mono black on light }
+//   <Logo glyphOnly size="md" />    { just the pin in rounded square — for mobile menu, avatars }
+
+interface Props {
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  tone?: 'default' | 'onBrand' | 'onInk' | 'onCream' | 'onAccent' | 'monoBlack' | 'monoWhite';
+  glyphOnly?: boolean;
+  href?: string | null;
+  ariaLabel?: string;
+}
+
+const {
+  size = 'md',
+  tone = 'default',
+  glyphOnly = false,
+  href = '/',
+  ariaLabel = 'КурьерОк — на главную',
+} = Astro.props;
+
+// Wordmark sizes (font-size in px)
+const wordmarkPx = { xs: 14, sm: 18, md: 20, lg: 32, xl: 48 }[size];
+// Glyph sizes (px)
+const glyphPx = { xs: 16, sm: 20, md: 24, lg: 40, xl: 64 }[size];
+
+const tones = {
+  default:    { text: 'var(--ink-900,#211c17)', pin: 'var(--brand-500,#2f8851)', k: 'var(--brand-500,#2f8851)', dot: 'var(--ink-0,#fbf7ed)' },
+  onBrand:    { text: 'var(--ink-0,#fbf7ed)',   pin: 'var(--ink-0,#fbf7ed)',     k: 'var(--ink-0,#fbf7ed)',     dot: 'var(--brand-500,#2f8851)' },
+  onInk:      { text: 'var(--ink-0,#fbf7ed)',   pin: 'var(--brand-500,#2f8851)', k: 'var(--brand-500,#2f8851)', dot: 'var(--ink-900,#211c17)' },
+  onCream:    { text: 'var(--ink-900,#211c17)', pin: 'var(--brand-500,#2f8851)', k: 'var(--brand-500,#2f8851)', dot: 'var(--ink-50,#f3eee4)' },
+  onAccent:   { text: 'var(--ink-0,#fbf7ed)',   pin: 'var(--ink-0,#fbf7ed)',     k: 'var(--ink-0,#fbf7ed)',     dot: 'var(--accent-500,#d95a35)' },
+  monoBlack:  { text: 'currentColor',           pin: 'currentColor',             k: 'currentColor',             dot: 'transparent' },
+  monoWhite:  { text: 'currentColor',           pin: 'currentColor',             k: 'currentColor',             dot: 'transparent' },
+};
+const c = tones[tone];
+
+const Tag = href ? 'a' : 'span';
+---
+
+<Tag
+  class:list={['kurerok-logo', `kurerok-logo--${size}`, `kurerok-logo--${tone}`, { 'is-glyph': glyphOnly }]}
+  href={href || undefined}
+  aria-label={ariaLabel}
+  style={`--logo-fs:${wordmarkPx}px;--logo-glyph:${glyphPx}px;`}
+>
+  {glyphOnly ? (
+    <svg viewBox="0 0 64 64" width={glyphPx} height={glyphPx} aria-hidden="true">
+      <rect width="64" height="64" rx="14" fill={c.pin === 'currentColor' ? 'currentColor' : 'var(--brand-500,#2f8851)'} />
+      <path d="M32 12 C22 12 16 19 16 28 C16 38 28 50 32 54 C36 50 48 38 48 28 C48 19 42 12 32 12 Z"
+            fill={c.dot === 'transparent' ? 'var(--ink-0,#fbf7ed)' : 'var(--ink-0,#fbf7ed)'} />
+      <circle cx="32" cy="27" r="6" fill="var(--brand-500,#2f8851)" />
+      <circle cx="32" cy="27" r="2.4" fill="var(--accent-500,#d95a35)" />
+    </svg>
+  ) : (
+    <span class="kurerok-logo__inner">
+      <span class="kurerok-logo__word" style={`color:${c.text}`}>Курьер</span>
+      <svg
+        class="kurerok-logo__pin"
+        viewBox="0 0 58 76"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path d="M29 4 C13 4 4 14 4 28 C4 44 22 64 29 72 C36 64 54 44 54 28 C54 14 45 4 29 4 Z" fill={c.pin}/>
+        <circle cx="29" cy="28" r="10" fill={c.dot}/>
+      </svg>
+      <span class="kurerok-logo__k" style={`color:${c.k}`}>к</span>
+    </span>
+  )}
+</Tag>
+
+<style>
+  .kurerok-logo {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    line-height: 1;
+    font-family: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    font-size: var(--logo-fs);
+    transition: opacity 160ms cubic-bezier(.2,.7,.3,1);
+  }
+  .kurerok-logo:hover {
+    opacity: 0.85;
+  }
+  .kurerok-logo:focus-visible {
+    outline: 2px solid var(--brand-500, #2f8851);
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+  .kurerok-logo__inner {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+  }
+  .kurerok-logo__pin {
+    width:  calc(var(--logo-fs) * 0.92);
+    height: calc(var(--logo-fs) * 1.20);
+    margin: 0 calc(var(--logo-fs) * -0.03) 0 calc(var(--logo-fs) * 0.06);
+    transform: translateY(calc(var(--logo-fs) * 0.04));
+    flex-shrink: 0;
+  }
+  .kurerok-logo--monoBlack { color: var(--ink-900, #211c17); }
+  .kurerok-logo--monoWhite { color: var(--ink-0,   #fbf7ed); }
+  .kurerok-logo--monoBlack .kurerok-logo__pin circle:last-child,
+  .kurerok-logo--monoWhite .kurerok-logo__pin circle:last-child {
+    fill: var(--bg, transparent);
+  }
+</style>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 90" role="img" aria-label="КурьерОк">
+  <title>КурьерОк — master</title>
+  
+  <text x="0" y="70" font-family="Manrope, system-ui, -apple-system, &#39;Segoe UI&#39;, sans-serif" font-weight="800" font-size="64" letter-spacing="-2.24" fill="#211c17">Курьер</text>
+  <g transform="translate(222 10.096000000000004)">
+    <svg viewBox="0 0 58 76" width="58.88" height="76.8" overflow="visible">
+      <path d="M29 4 C13 4 4 14 4 28 C4 44 22 64 29 72 C36 64 54 44 54 28 C54 14 45 4 29 4 Z" fill="#2f8851"></path>
+      <circle cx="29" cy="28" r="10" fill="#fbf7ed"></circle>
+    </svg>
+  </g>
+  <text x="282.88" y="70" font-family="Manrope, system-ui, -apple-system, &#39;Segoe UI&#39;, sans-serif" font-weight="800" font-size="64" letter-spacing="-2.24" fill="#2f8851">к</text>
+</svg>
