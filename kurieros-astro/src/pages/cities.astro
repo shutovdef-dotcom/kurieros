@@ -136,78 +136,6 @@ const pageSchemaGraph = [
 			</p>
 		</section>
 
-		<section class="cities-answer-panel">
-			<div>
-				<p class="section-eyebrow">Короткий вывод</p>
-				<h2>Зачем выбирать город отдельно?</h2>
-			</div>
-			<p>
-				В разных городах отличаются компании, районы, транспорт и частота выплат. Сначала выберите город, затем
-				сравните локальные вакансии и открывайте только те карточки, где условия похожи на ваши.
-			</p>
-		</section>
-
-		<section class="cities-facts" aria-label="Ключевые факты по городам">
-			<article class="fact-card">
-				<span>Города</span>
-				<strong>{cities.length}</strong>
-			</article>
-			<article class="fact-card">
-				<span>Вакансии</span>
-				<strong>{totalVacancies}</strong>
-			</article>
-			<article class="fact-card">
-				<span>Топ города</span>
-				<strong>{topCities.map((city) => city.name).join(', ')}</strong>
-			</article>
-			<article class="fact-card">
-				<span>Следующий шаг</span>
-				<strong>Открыть город и сравнить вакансии</strong>
-			</article>
-		</section>
-
-		<section class="cities-link-strip" aria-label="Быстрые переходы">
-			<a href="/compare/" class="quick-link">Сравнение вакансий</a>
-			<a href="/companies/" class="quick-link">Каталог компаний</a>
-			<a href="/blog/" class="quick-link">Блог о работе курьером</a>
-		</section>
-
-		<section class="cities-route-grid" aria-label="Переходы по сайту">
-			<article class="route-card">
-				<p class="section-eyebrow">Шаг 1</p>
-				<h2>Выбрать сильный город</h2>
-				<p>Если нужен быстрый старт, начинайте с городов, где уже видны несколько брендов и больше карточек вакансий.</p>
-			</article>
-			<article class="route-card">
-				<p class="section-eyebrow">Шаг 2</p>
-				<h2>Понять, кто активен</h2>
-				<p>После выбора города переходите в локальную страницу и смотрите, какие компании, выплаты и форматы уже есть в подборке.</p>
-			</article>
-			<article class="route-card">
-				<p class="section-eyebrow">Шаг 3</p>
-				<h2>Сузить формат</h2>
-				<p>Если важны авто, подработка или старт с 16 лет, дальше открывайте тематические страницы и сравнивайте уже внутри формата.</p>
-			</article>
-		</section>
-
-		<section class="cities-spotlight" aria-label="Приоритетные города">
-			<div class="cities-section-head">
-				<p class="section-eyebrow">Локальный спрос</p>
-				<h2>С каких городов логично начинать</h2>
-			</div>
-			<div class="cities-spotlight-grid">
-				{citySnapshots.map((city) => (
-					<a href={city.href} class="spotlight-card">
-						<strong>{city.name}</strong>
-						<span>
-							{city.vacancyCount} {getVacancyPlural(city.vacancyCount).text} и {city.companyCount} {getCompanyPlural(city.companyCount)}
-						</span>
-						<small>Чаще видны: {city.formats.join(', ') || 'смешанные форматы'}</small>
-					</a>
-				))}
-			</div>
-		</section>
-
 		<section class="cities-grid">
 			{cities.map((city) => {
 				const plural = getVacancyPlural(city.vacancyCount);
@@ -220,40 +148,6 @@ const pageSchemaGraph = [
 			})}
 		</section>
 
-		<section class="cities-surfaces" aria-label="Разделы выбора">
-			<article class="surface-card">
-				<p class="section-eyebrow">Бренды</p>
-				<h2>Какие компании чаще встречаются на сайте</h2>
-				<div class="surface-chip-row">
-					{topCompanies.map((company) => (
-						<a href={company.href} class="quick-link">{company.name}</a>
-					))}
-				</div>
-			</article>
-
-			<article class="surface-card">
-				<p class="section-eyebrow">Форматы</p>
-				<h2>Какие форматы стоит открыть после города</h2>
-				<div class="surface-chip-row">
-					{featuredCategories.map((category) => (
-						<a href={category.href} class="quick-link">{category.name}</a>
-					))}
-				</div>
-			</article>
-		</section>
-
-		<section class="cities-faq-section">
-			<p class="section-eyebrow">FAQ</p>
-			<h2>Короткие ответы по городским страницам</h2>
-			<div class="cities-faq-grid">
-				{faqItems.map((item) => (
-					<article class="faq-card">
-						<h3>{item.question}</h3>
-						<p>{item.answer}</p>
-					</article>
-				))}
-			</div>
-		</section>
 	</main>
 
 	<Footer />

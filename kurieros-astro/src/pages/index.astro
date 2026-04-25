@@ -214,50 +214,6 @@ const pageSchemaGraph = [
 
 			<JobGrid />
 
-			<section class="home-section home-discovery-section">
-				<div class="section-heading">
-					<h2>Когда список слишком широкий</h2>
-					<p>Отфильтруйте поиск по ситуации: подработка, возраст, свой автомобиль, конкретная компания или город.</p>
-				</div>
-				<div class="home-navigation-grid">
-					{discoveryCards.map((card) => (
-						<a href={card.href} class={`home-navigation-card ${card.variant === 'route' ? 'home-navigation-card-route' : ''}`}>
-							<span>{card.kicker}</span>
-							<h3>{card.title}</h3>
-							<p>{card.text}</p>
-						</a>
-					))}
-				</div>
-				<div class="home-surface-grid">
-					<article class="home-surface-card">
-						<h3>Популярные города</h3>
-						<div class="home-chip-row">
-							{topCities.map((city) => (
-								<a href={city.href} class="home-chip-link">{city.name} · {city.vacancyCount}</a>
-							))}
-						</div>
-					</article>
-
-					<article class="home-surface-card">
-						<h3>Популярные форматы</h3>
-						<div class="home-chip-row">
-							{featuredFormats.map((format) => (
-								<a href={format.href} class="home-chip-link">{format.name}</a>
-							))}
-						</div>
-					</article>
-
-					<article class="home-surface-card">
-						<h3>Компании в подборке</h3>
-						<div class="home-chip-row">
-							{featuredCompanies.map((company) => (
-								<a href={company.href} class="home-chip-link">{company.name}</a>
-							))}
-						</div>
-					</article>
-				</div>
-			</section>
-
 			<IncomeCalculator />
 
 			<ReviewsBlock />
