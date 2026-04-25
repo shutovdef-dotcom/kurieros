@@ -175,7 +175,9 @@ const pageSchemaGraph = [
 						</div>
 					</div>
 				</div>
+			</section>
 
+			<section class="home-toolbar-section">
 				<div class="hero-toolbar hero-toolbar-only">
 					<div class="toolbar-top">
 						<div class="city-selector-container" data-region-autoprompt="manual-only">
@@ -1076,12 +1078,31 @@ const pageSchemaGraph = [
 		display: none;
 	}
 
+	/* Toolbar section — sits below the Hero, contains city/lang/cta/filters */
+	.home-toolbar-section {
+		max-width: 880px;
+		margin: var(--space-8) auto;
+		padding: 0 var(--space-6);
+	}
+	@media (max-width: 768px) {
+		.home-toolbar-section {
+			padding: 0 var(--space-4);
+			margin: var(--space-5) auto;
+		}
+	}
+
 	/* Hero toolbar — k-cityrow / k-cityselect / k-langselect / k-citycta / k-fselect (handoff exact values) */
 	.hero-toolbar {
 		display: flex;
+		flex-direction: column;
 		gap: var(--space-3);
 		align-items: stretch;
-		margin-top: var(--space-6);
+		margin-top: 0;
+	}
+	.toolbar-top {
+		display: flex;
+		gap: var(--space-3);
+		align-items: stretch;
 	}
 	.city-selector-container,
 	.hero-lang-switcher :global(.lang-toggle),
