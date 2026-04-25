@@ -84,7 +84,7 @@
   --shadow-sm: 0 1px 2px rgba(38,29,18,0.06), 0 1px 3px rgba(38,29,18,0.04);
   --shadow-md: 0 4px 12px rgba(38,29,18,0.06), 0 2px 4px rgba(38,29,18,0.04);
   --shadow-lg: 0 12px 32px rgba(38,29,18,0.08), 0 4px 8px rgba(38,29,18,0.04);
-  --shadow-focus: 0 0 0 3px rgba(47,136,81,0.25);
+  --shadow-focus: 0 0 0 2px var(--ink-0), 0 0 0 4px var(--brand-600);
 
   /* ── Motion ──────────────────────────────────────────────── */
   --transition: 160ms cubic-bezier(.2,.7,.3,1);
@@ -102,8 +102,6 @@
   --glass-bg:       var(--ink-0);
   --glass-border:   var(--ink-200);
   --shadow-glass:   var(--shadow-sm);
-  --blob-1:         transparent;
-  --blob-2:         transparent;
 }
 
 /* ── Dark mode (warm coal — more contrast, layered) ─────────────
@@ -145,7 +143,7 @@
   --shadow-sm: 0 1px 2px rgba(0,0,0,.5), 0 1px 3px rgba(0,0,0,.35);
   --shadow-md: 0 6px 16px rgba(0,0,0,.55), 0 2px 4px rgba(0,0,0,.3);
   --shadow-lg: 0 16px 36px rgba(0,0,0,.6);
-  --shadow-focus: 0 0 0 3px rgba(111,208,147,.4);
+  --shadow-focus: 0 0 0 2px var(--ink-0), 0 0 0 4px var(--brand-500);
 
   /* Legacy aliases re-declared so var(--ink-*) resolves to dark values.
      CSS custom properties don't auto-recompute through var() across scopes. */
