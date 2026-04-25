@@ -35,6 +35,9 @@ export default defineConfig({
         if (url.includes('/companies/')) {
           return { ...item, priority: 0.6, changefreq: 'weekly' };
         }
+        if (url.includes('/guide/')) {
+          return { ...item, priority: 0.6, changefreq: 'weekly' };
+        }
         if (url.includes('/blog/')) {
           return { ...item, priority: 0.5, changefreq: 'weekly' };
         }
