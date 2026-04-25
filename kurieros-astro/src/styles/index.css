@@ -1170,6 +1170,10 @@ body.dark-mode .footer-cloud span {
 :where(html, body).dark-mode .compare-link-card,
 :where(html, body).dark-mode .compare-route-card,
 :where(html, body).dark-mode .compare-route-grid,
+:where(html, body).dark-mode .compare-answer-panel,
+:where(html, body).dark-mode .compare-summary-card,
+:where(html, body).dark-mode .compare-summary-panel,
+:where(html, body).dark-mode .compare-trust-panel,
 :where(html, body).dark-mode .home-hero-fact,
 :where(html, body).dark-mode .contact-success,
 :where(html, body).dark-mode .faq-item,
@@ -1207,6 +1211,11 @@ body.dark-mode .footer-cloud span {
 :where(html, body).dark-mode .cities-faq-section h3,
 :where(html, body).dark-mode .compare-th,
 :where(html, body).dark-mode .compare-cell-label,
+:where(html, body).dark-mode .compare-answer-panel h2,
+:where(html, body).dark-mode .compare-answer-panel h3,
+:where(html, body).dark-mode .compare-summary-card h2,
+:where(html, body).dark-mode .compare-summary-panel h2,
+:where(html, body).dark-mode .compare-trust-panel h2,
 :where(html, body).dark-mode .faq-item h2,
 :where(html, body).dark-mode .faq-item h3 {
   color: var(--ink-900);

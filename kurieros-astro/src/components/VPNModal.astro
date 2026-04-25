@@ -2,7 +2,7 @@
 ---
 <div id="vpn-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="vpn-modal-title">
     <div class="modal-content">
-        <div class="modal-icon">🌐</div>
+        <div class="modal-icon" aria-hidden="true">🌐</div>
         <h3 id="vpn-modal-title" data-t="vpn.title">Регион не определён автоматически</h3>
         <p data-t="vpn.text">Мы не смогли уверенно определить ваш город по IP. Выберите его вручную, а если списка на этой странице нет, мы откроем раздел с городами.</p>
         
@@ -24,16 +24,53 @@
         return sessionStorage.getItem(VPN_MODAL_SESSION_KEY);
     }
 
+    let lastFocusedBeforeOpen = null;
+
+    function isVPNModalOpen() {
+        return Boolean(getVPNModal()) && !getVPNModal().classList.contains('hidden');
+    }
+
     function showVPNModal() {
         const modal = getVPNModal();
-        if (modal && !isVPNModalDismissed()) {
-            modal.classList.remove('hidden');
-        }
+        if (!modal || isVPNModalDismissed()) return;
+        lastFocusedBeforeOpen = document.activeElement;
+        modal.classList.remove('hidden');
+        // Move focus to first button after paint
+        requestAnimationFrame(() => {
+            document.getElementById('btn-vpn-ok')?.focus();
+        });
     }
 
     function hideVPNModal() {
         getVPNModal()?.classList.add('hidden');
         sessionStorage.setItem(VPN_MODAL_SESSION_KEY, 'true');
+        // Restore focus to the element that opened the modal
+        if (lastFocusedBeforeOpen && typeof lastFocusedBeforeOpen.focus === 'function') {
+            lastFocusedBeforeOpen.focus();
+            lastFocusedBeforeOpen = null;
+        }
+    }
+
+    function trapFocus(event) {
+        if (!isVPNModalOpen()) return;
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            hideVPNModal();
+            return;
+        }
+        if (event.key !== 'Tab') return;
+        const modal = getVPNModal();
+        const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        }
     }
 
     function focusCitySelector() {
@@ -85,6 +122,8 @@
                 hideVPNModal();
             }
         });
+
+        document.addEventListener('keydown', trapFocus);
     });
 </script>
 
