@@ -93,47 +93,6 @@ const pageSchemaGraph = [
 			</div>
 		</section>
 
-		<section class="blog-answer-panel">
-			<div>
-				<span class="eyebrow">Перед выбором</span>
-				<h2>Сначала разберитесь в условиях</h2>
-			</div>
-			<p>
-				Статьи помогают не идти в отклик наугад. Сначала можно понять, как устроены выплаты, график и требования,
-				а затем открыть сравнение вакансий, компанию или городскую подборку уже с нормальными вопросами в голове.
-			</p>
-		</section>
-
-		<section class="blog-link-strip">
-			<a href="/compare/" class="hub-link">Сравнение вакансий</a>
-			<a href="/companies/" class="hub-link">Компании</a>
-			<a href="/cities/" class="hub-link">Города</a>
-		</section>
-
-		<section class="blog-topic-section">
-			<div class="section-heading">
-				<h2>Читать по теме</h2>
-				<p>Разделы для тех, кто хочет быстро найти материалы по доходу, компаниям, графику или старту в доставке.</p>
-			</div>
-			<div class="blog-topic-grid">
-				{topicGroups.map((topic) => (
-					<article class="blog-topic-card">
-						<div class="blog-topic-head">
-							<span class="blog-topic-count">{topic.articles.length} материалов</span>
-							<a href={topic.href} class="blog-topic-link">Открыть раздел</a>
-						</div>
-						<h3>{topic.label}</h3>
-						<p>{topic.description}</p>
-						<div class="blog-topic-stack">
-							{topic.articles.slice(0, 2).map((post) => (
-								<a href={`/blog/${post.slug}/`} class="blog-topic-article">{post.title}</a>
-							))}
-						</div>
-					</article>
-				))}
-			</div>
-		</section>
-
 		<a href={`/blog/${featuredPost.slug}/`} class="featured-story">
 			<div class="featured-story-copy">
 				<div class="blog-meta">
@@ -170,23 +129,6 @@ const pageSchemaGraph = [
 								<span class="btn-text">Читать статью</span>
 							</div>
 						</a>
-					</article>
-				))}
-			</div>
-		</section>
-
-		<section class="blog-faq">
-			<div class="section-heading">
-				<h2>Короткие ответы о журнале</h2>
-				<p>Зачем читать блог перед выбором вакансии и как переходить от статьи к живым условиям.</p>
-			</div>
-			<div class="blog-grid faq-grid">
-				{faqItems.map((item) => (
-					<article class="blog-card faq-card">
-						<div class="blog-content">
-							<h3 class="blog-title">{item.question}</h3>
-							<p class="blog-excerpt">{item.answer}</p>
-						</div>
 					</article>
 				))}
 			</div>
