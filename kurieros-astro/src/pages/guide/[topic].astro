@@ -1,0 +1,291 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import PartnerBanner from '../../components/PartnerBanner.astro';
+import {
+	TOPIC_META,
+	getItemsByTopic,
+	getSourceById,
+	knowledgeBaseData,
+} from '../../utils/knowledge';
+import { buildBreadcrumbSchema } from '../../utils/schema';
+
+export function getStaticPaths() {
+	return Object.entries(TOPIC_META).map(([topic, meta]) => ({
+		params: { topic: meta.slug },
+		props: { topic, meta },
+	}));
+}
+
+const { topic, meta } = Astro.props;
+const items = getItemsByTopic(topic);
+const allTopics = Object.entries(TOPIC_META)
+	.filter(([key]) => key !== topic)
+	.map(([key, value]) => ({ key, ...value }));
+
+const usedSourceIds = Array.from(
+	new Set(items.flatMap((item) => item.facts.map((fact) => fact.source_id))),
+);
+const usedSources = usedSourceIds
+	.map((id) => getSourceById(id))
+	.filter((source): source is NonNullable<typeof source> => Boolean(source));
+
+const pageTitle = `${meta.title} — гид для курьера 2026 | КурьерОк`;
+const pageDescription = meta.description;
+
+const faqEntities = items.map((item) => ({
+	'@type': 'Question',
+	name: item.question,
+	acceptedAnswer: {
+		'@type': 'Answer',
+		text: item.answer_long,
+	},
+}));
+
+const articleSchema = {
+	'@type': 'Article',
+	headline: meta.title,
+	description: meta.description,
+	url: Astro.url.href,
+	datePublished: knowledgeBaseData.generated,
+	dateModified: knowledgeBaseData.generated,
+	inLanguage: 'ru',
+	about: {
+		'@type': 'Thing',
+		name: meta.title,
+	},
+	author: {
+		'@type': 'Organization',
+		name: 'КурьерОк',
+		url: 'https://kurerok.ru/',
+	},
+	publisher: {
+		'@type': 'Organization',
+		name: 'КурьерОк',
+		url: 'https://kurerok.ru/',
+	},
+	citation: usedSources.map((source) => ({
+		'@type': 'CreativeWork',
+		name: source.name,
+		url: source.url,
+	})),
+};
+
+const pageSchemaGraph = [
+	articleSchema,
+	{
+		'@type': 'FAQPage',
+		mainEntity: faqEntities,
+	},
+	buildBreadcrumbSchema(
+		[
+			{ name: 'Главная', url: '/' },
+			{ name: 'Гид', url: '/guide/' },
+			{ name: meta.title, url: Astro.url.pathname },
+		],
+		Astro.site,
+	),
+];
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} schemaGraph={pageSchemaGraph}>
+	<Header />
+
+	<main class="guide-page">
+		<div class="container container-narrow">
+			<nav class="breadcrumb" aria-label="Breadcrumb">
+				<a href="/">Главная</a> &gt; <a href="/guide/">Гид</a> &gt; <span>{meta.title}</span>
+			</nav>
+
+			<header class="guide-hero">
+				<div class="guide-kicker">Гид для курьера</div>
+				<h1>{meta.title}</h1>
+				<p class="guide-lead">{meta.description}</p>
+				<div class="guide-meta">
+					<span>Обновлено: {knowledgeBaseData.generated}</span>
+					<span>·</span>
+					<span>{items.length} {items.length === 1 ? 'вопрос' : 'вопросов'}</span>
+					<span>·</span>
+					<span>Источников: {usedSources.length}</span>
+				</div>
+			</header>
+
+			<section class="guide-faq">
+				{items.map((item) => (
+					<article class="guide-card">
+						<h2>{item.question}</h2>
+						<p class="guide-card-short"><strong>Кратко:</strong> {item.answer_short}</p>
+						<p class="guide-card-long">{item.answer_long}</p>
+						{item.facts.length > 0 && (
+							<details class="guide-facts">
+								<summary>Факты и источники</summary>
+								<ul>
+									{item.facts.map((fact) => {
+										const source = getSourceById(fact.source_id);
+										return (
+											<li>
+												{fact.value}
+												{source && (
+													<>
+														{' — '}
+														<a href={source.url} target="_blank" rel="noopener noreferrer nofollow">
+															{source.name}
+														</a>
+													</>
+												)}
+											</li>
+										);
+									})}
+								</ul>
+							</details>
+						)}
+					</article>
+				))}
+			</section>
+
+			<section class="guide-related">
+				<h2>Другие разделы гида</h2>
+				<div class="guide-related-grid">
+					{allTopics.map((topicEntry) => (
+						<a class="guide-related-card" href={`/guide/${topicEntry.slug}/`}>
+							<strong>{topicEntry.title}</strong>
+							<span>{topicEntry.description}</span>
+						</a>
+					))}
+				</div>
+			</section>
+
+			<PartnerBanner />
+		</div>
+	</main>
+
+	<Footer />
+</BaseLayout>
+
+<style>
+	.guide-page {
+		padding: clamp(20px, 4vw, 40px) 0 60px;
+	}
+	.breadcrumb {
+		font-size: 14px;
+		color: var(--ink-500, #6c7785);
+		margin-bottom: 16px;
+	}
+	.breadcrumb a {
+		color: inherit;
+		text-decoration: none;
+		border-bottom: 1px dashed currentColor;
+	}
+	.breadcrumb a:hover {
+		color: var(--brand-700, #16734c);
+	}
+	.guide-hero {
+		margin-bottom: 32px;
+	}
+	.guide-kicker {
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		font-size: 12px;
+		font-weight: 700;
+		color: var(--brand-700, #16734c);
+		margin-bottom: 8px;
+	}
+	.guide-hero h1 {
+		font-size: clamp(28px, 4vw, 40px);
+		line-height: 1.15;
+		margin: 0 0 12px;
+	}
+	.guide-lead {
+		font-size: clamp(16px, 1.4vw, 18px);
+		color: var(--ink-700, #2c3440);
+		margin: 0 0 16px;
+		max-width: 720px;
+	}
+	.guide-meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		font-size: 14px;
+		color: var(--ink-500, #6c7785);
+	}
+	.guide-faq {
+		display: grid;
+		gap: 20px;
+		margin-bottom: 40px;
+	}
+	.guide-card {
+		background: var(--surface-100, #fff);
+		border: 1px solid var(--ink-100, #e5e8ed);
+		border-radius: 16px;
+		padding: 24px;
+	}
+	.guide-card h2 {
+		font-size: clamp(20px, 2vw, 24px);
+		margin: 0 0 12px;
+	}
+	.guide-card-short {
+		margin: 0 0 12px;
+	}
+	.guide-card-long {
+		margin: 0 0 12px;
+		color: var(--ink-700, #2c3440);
+	}
+	.guide-facts {
+		margin-top: 8px;
+		font-size: 14px;
+	}
+	.guide-facts summary {
+		cursor: pointer;
+		color: var(--brand-700, #16734c);
+		font-weight: 600;
+	}
+	.guide-facts ul {
+		margin: 12px 0 0;
+		padding-left: 20px;
+	}
+	.guide-facts li {
+		margin-bottom: 6px;
+	}
+	.guide-facts a {
+		color: var(--brand-700, #16734c);
+	}
+	.guide-related {
+		margin: 40px 0 24px;
+	}
+	.guide-related h2 {
+		font-size: 22px;
+		margin: 0 0 16px;
+	}
+	.guide-related-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+		gap: 12px;
+	}
+	.guide-related-card {
+		display: grid;
+		gap: 4px;
+		padding: 16px 20px;
+		border: 1px solid var(--ink-100, #e5e8ed);
+		border-radius: 12px;
+		background: var(--surface-100, #fff);
+		text-decoration: none;
+		color: inherit;
+	}
+	.guide-related-card:hover {
+		border-color: var(--brand-700, #16734c);
+	}
+	.guide-related-card strong {
+		font-size: 16px;
+		color: var(--ink-900, #0f172a);
+	}
+	.guide-related-card span {
+		font-size: 14px;
+		color: var(--ink-500, #6c7785);
+	}
+	:global(.dark-mode) .guide-card,
+	:global(.dark-mode) .guide-related-card {
+		background: var(--surface-200, #1a2230);
+		border-color: var(--ink-200, #2a3441);
+	}
+</style>
