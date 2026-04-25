@@ -9,7 +9,7 @@ import { vacancySources } from '../../data/vacancies';
 import type { VacancyOffer } from '../../data/vacancyTypes';
 import { slugifyCompany } from '../../utils/companies';
 import { getCityHref } from '../../utils/cities';
-import { buildBreadcrumbSchema } from '../../utils/schema';
+import { buildBreadcrumbSchema, buildJobPostingSchema } from '../../utils/schema';
 
 export async function getStaticPaths() {
 	return jobsData.map((job) => ({
@@ -99,14 +99,16 @@ const prioritizedRelatedJobs = scoredRelatedJobs.filter((item) => item.score > 0
 const relatedJobs = prioritizedRelatedJobs.length ? prioritizedRelatedJobs.slice(0, 4) : scoredRelatedJobs.slice(0, 4);
 const vacancyTitle = `${job.title} — зарплата, условия и отклик | КурьерОк`;
 const vacancyDescription = `Вакансия "${job.title}" в ${job.company}: ${job.salary}, ${job.details.schedule.toLowerCase()}, ${job.details.payment_freq.toLowerCase()}. Сравните условия и переходите к отклику.`.slice(0, 170);
-const jobLocationSchema = (jobCities.length ? jobCities : ['Россия']).map((city) => ({
-	'@type': 'Place',
-	address: {
-		'@type': 'PostalAddress',
-		...(city !== 'Россия' ? { addressLocality: city } : {}),
-		addressCountry: 'RU',
-	},
-}));
+const datePosted = (() => {
+	const updatedAt = (job as { updatedAt?: string }).updatedAt;
+	const parsed = updatedAt ? new Date(updatedAt) : null;
+	return parsed && !Number.isNaN(parsed.getTime()) ? parsed.toISOString() : new Date().toISOString();
+})();
+const validThrough = (() => {
+	const base = new Date(datePosted);
+	base.setDate(base.getDate() + 60);
+	return base.toISOString();
+})();
 const factCards = [
 	{ label: 'Доход', labelKey: 'vacancy.fact_income', value: job.salary, valueKey: `vacancies.${job.id}.salary` },
 	{ label: 'График', labelKey: 'vacancy.fact_schedule', value: job.details.schedule, valueKey: `vacancies.${job.id}.details_schedule` },
@@ -171,39 +173,25 @@ const pageSchemaGraph = [
 			url: new URL(companyUrl, Astro.site).toString(),
 		},
 	},
-	{
-		'@type': 'JobPosting',
+	buildJobPostingSchema({
 		title: job.title,
 		description: job.description,
-		identifier: {
-			'@type': 'PropertyValue',
-			name: 'КурьерОк',
-			value: job.slug,
-		},
-		datePosted: new Date().toISOString(),
-		employmentType: job.details.employment_type,
-		hiringOrganization: {
-			'@type': 'Organization',
-			name: job.company,
-			sameAs: new URL(companyUrl, Astro.site).toString(),
-			logo: job.companyLogo,
-		},
-		jobLocation: jobLocationSchema,
-		directApply: hasApplyLink,
-		jobBenefits: job.benefits.join('; '),
+		slug: job.slug,
+		company: job.company,
+		companyUrl: new URL(companyUrl, Astro.site).toString(),
+		companyLogo: job.companyLogo,
+		cities: jobCities,
+		employmentTypeLabel: job.details.employment_type,
 		qualifications: [...job.requirements, ...job.requiredDocuments].join('; '),
-		baseSalary: salaryValue
-			? {
-				'@type': 'MonetaryAmount',
-				currency: 'RUB',
-				value: {
-					'@type': 'QuantitativeValue',
-					maxValue: salaryValue,
-					unitText: 'MONTH',
-				},
-			}
-			: undefined,
-	},
+		benefits: job.benefits.join('; '),
+		hasApplyLink,
+		applyLink: job.applyLink,
+		baseSalaryMonthly: salaryValue,
+		hourlyRate,
+		currency: job.currency || 'RUB',
+		datePosted,
+		validThrough,
+	}),
 	{
 		'@type': 'FAQPage',
 		mainEntity: faqItems.map((item) => ({

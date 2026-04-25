@@ -10,7 +10,7 @@ import { CATEGORIES } from '../data/constants';
 import { getCitiesFromJobs } from '../utils/cities';
 import { slugifyCompany } from '../utils/companies';
 import { formatMoney, getVacancyPluralText, humanJoin, parseSalary } from '../utils/format';
-import { buildBreadcrumbSchema } from '../utils/schema';
+import { buildBreadcrumbSchema, buildPlaceSchema } from '../utils/schema';
 
 export async function getStaticPaths() {
 	const paths = [];
@@ -311,6 +311,15 @@ const pageSchemaGraph = [
 			})),
 		},
 	},
+	...(type === 'city'
+		? [
+			buildPlaceSchema({
+				city: data.name,
+				pageUrl: Astro.url.href,
+				description: seoDescription,
+			}),
+		]
+		: []),
 	{
 		'@type': 'FAQPage',
 		mainEntity: faqItems.map((item) => ({
