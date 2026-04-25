@@ -1,5 +1,4 @@
-import { CITIES } from '../data/constants';
-import { CITY_POPULATION_ORDER } from '../data/cityPopulationOrder';
+import { CITY_BLOCKLIST, CITY_DATASET } from '../data/cities-dataset';
 
 type JobLike = {
 	location?: string;
@@ -18,14 +17,17 @@ const normalizeCityKey = (name: string) =>
 		.toLowerCase()
 		.replace(/ё/g, 'е');
 
-const CANONICAL_CITY_BY_KEY = new Map(
-	CITY_POPULATION_ORDER.map((city) => [normalizeCityKey(city), city]),
+const CITY_BY_KEY = new Map(
+	CITY_DATASET.map((city) => [normalizeCityKey(city.name), city]),
 );
-const KNOWN_CITIES = new Map(CITIES.map((city) => [normalizeCityKey(city.name), city]));
 const CITY_POPULATION_RANK = new Map(
-	CITY_POPULATION_ORDER.map((city, index) => [normalizeCityKey(city), CITY_POPULATION_ORDER.length - index]),
+	CITY_DATASET.map((city, index) => [normalizeCityKey(city.name), CITY_DATASET.length - index]),
 );
+const BLOCKLIST_KEYS = new Set(CITY_BLOCKLIST.map((name) => normalizeCityKey(name)));
 const ALL_RUSSIA_KEY = normalizeCityKey('Вся Россия');
+
+export const isCityBlocked = (name: string) =>
+	BLOCKLIST_KEYS.has(normalizeCityKey(name));
 
 const SLUG_MAP: Record<string, string> = {
 	а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'e', ж: 'zh', з: 'z',
@@ -51,7 +53,7 @@ const getCityCounts = (jobs: JobLike[]) => {
 		.map((city) => {
 			const normalizedName = normalizeCityDisplayName(city);
 			const cityKey = normalizeCityKey(normalizedName);
-			return CANONICAL_CITY_BY_KEY.get(cityKey) ?? normalizedName;
+			return CITY_BY_KEY.get(cityKey)?.name ?? normalizedName;
 		})
 		.filter((city) => city && normalizeCityKey(city) !== ALL_RUSSIA_KEY)
 		.forEach((city) => counts.set(city, (counts.get(city) ?? 0) + 1));
@@ -64,10 +66,11 @@ export const getCitiesFromJobs = (jobs: JobLike[]) => {
 
 	return Array.from(counts.entries())
 		.map(([name, vacancyCount]) => {
-			const known = KNOWN_CITIES.get(normalizeCityKey(name));
+			const known = CITY_BY_KEY.get(normalizeCityKey(name));
 			const slug = known?.slug ?? slugifyCity(name);
 			const prep = known?.prep ?? `в ${name}`;
-			return { name, slug, prep, vacancyCount };
+			const population = known?.population ?? 0;
+			return { name, slug, prep, vacancyCount, population };
 		})
 		.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
 };
@@ -76,7 +79,7 @@ export const getCityNames = (jobs: JobLike[]) =>
 	getCitiesFromJobs(jobs).map((city) => city.name);
 
 export const getCityHref = (name: string) => {
-	const known = KNOWN_CITIES.get(normalizeCityKey(name));
+	const known = CITY_BY_KEY.get(normalizeCityKey(name));
 	const slug = known?.slug ?? slugifyCity(name);
 	return `/rabota-kurerom-${slug}/`;
 };

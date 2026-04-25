@@ -89,14 +89,26 @@
 </script>
 
 <style>
-    .modal-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .modal-icon {
+        font-size: 3rem;
+        margin-bottom: var(--space-4);
+        line-height: 1;
+    }
     #vpn-modal {
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(15, 23, 42, 0.4);
+        background: rgba(19, 16, 13, 0.55);
         backdrop-filter: blur(4px);
         -webkit-backdrop-filter: blur(4px);
+    }
+    .modal-content {
+        background: var(--ink-0);
+        border: 1px solid var(--ink-200);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-lg);
+        padding: var(--space-8);
+        color: var(--ink-700);
     }
     .modal-content h3 {
         font-family: var(--font-heading);

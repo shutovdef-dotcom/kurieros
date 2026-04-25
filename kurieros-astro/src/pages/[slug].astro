@@ -1005,4 +1005,94 @@ const pageSchemaGraph = [
 			padding-right: 1rem;
 		}
 	}
+
+	/* === Visual refresh overrides (City/Category listing pages) === */
+	.listing-hero {
+		background: var(--ink-50);
+		border: 1px solid var(--ink-200);
+		border-radius: var(--radius-xl);
+		box-shadow: var(--shadow-xs);
+	}
+	.listing-hero h1 {
+		font-family: var(--font-heading);
+		color: var(--ink-900);
+		letter-spacing: -0.02em;
+		font-weight: 800;
+		line-height: 1.15;
+	}
+	.listing-hero p,
+	.listing-hero .listing-lede {
+		color: var(--ink-600);
+	}
+	.listing-trust-panel {
+		background: var(--ink-0);
+		border: 1px solid var(--ink-200);
+		border-radius: var(--radius-lg);
+	}
+	.listing-link-grid > a,
+	.listing-link-grid > * {
+		background: var(--ink-0);
+		border: 1px solid var(--ink-200);
+		border-radius: var(--radius-md);
+		transition: border-color var(--transition), box-shadow var(--transition);
+	}
+	.listing-link-grid > a:hover,
+	.listing-link-grid > a:focus-visible {
+		border-color: var(--brand-500);
+		box-shadow: var(--shadow-sm);
+		outline: none;
+	}
+	.listing-faq-section h2,
+	.listing-faq-section h3 {
+		font-family: var(--font-heading);
+		color: var(--ink-900);
+		letter-spacing: -0.01em;
+	}
+
+	/* Color contrast fixes — make headings/text readable in light theme */
+	.listing-hero-panel h1,
+	.listing-vacancy-launch h2,
+	.listing-trust-panel h2,
+	.listing-trust-panel h3,
+	.listing-spotlight h2,
+	.listing-spotlight-card h3,
+	.listing-company-card h2,
+	.listing-company-card h3,
+	.listing-link-grid h2,
+	.listing-link-grid h3 {
+		color: var(--ink-900);
+	}
+	.listing-fact-card strong,
+	.listing-trust-panel p,
+	.listing-vacancy-launch p:not(.section-eyebrow),
+	.listing-link-grid p,
+	.listing-spotlight-card p,
+	.listing-company-card p {
+		color: var(--ink-700);
+	}
+	.listing-fact-card span {
+		color: var(--ink-500);
+	}
+
+	.link-chip {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--ink-0);
+		border: 1px solid var(--ink-200);
+		color: var(--ink-700);
+		border-radius: var(--radius-pill);
+		font-weight: 600;
+		font-size: var(--fs-13);
+		padding: 8px 14px;
+		text-decoration: none;
+		transition: border-color var(--transition), color var(--transition), background var(--transition);
+	}
+	.link-chip:hover,
+	.link-chip:focus-visible {
+		border-color: var(--brand-500);
+		color: var(--brand-700);
+		background: var(--brand-50);
+		outline: none;
+	}
 </style>

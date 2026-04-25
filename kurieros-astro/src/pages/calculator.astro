@@ -119,4 +119,26 @@ import IncomeCalculator from '../components/IncomeCalculator.astro';
             padding: 1.5rem;
         }
     }
+
+    /* === Visual refresh overrides (Calculator page) === */
+    .calculator-hero h1 {
+        font-family: var(--font-heading);
+        color: var(--ink-900);
+        letter-spacing: -0.02em;
+        font-weight: 800;
+    }
+    .calculator-hero p {
+        color: var(--ink-600);
+    }
+    .info-card {
+        background: var(--ink-0);
+        border: 1px solid var(--ink-200);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-xs);
+    }
+    .info-card h3 {
+        font-family: var(--font-heading);
+        color: var(--ink-900);
+        font-weight: 700;
+    }
 </style>

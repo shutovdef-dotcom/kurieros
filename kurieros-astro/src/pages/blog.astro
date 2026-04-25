@@ -554,4 +554,38 @@ const pageSchemaGraph = [
 			border-radius: 8px;
 		}
 	}
+
+	/* === Visual refresh overrides (Blog listing) === */
+	.blog-card,
+	.article-card {
+		background: var(--ink-0);
+		border: 1px solid var(--ink-200);
+		border-radius: var(--radius-lg);
+		box-shadow: var(--shadow-xs);
+		transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+	}
+	.blog-card:hover,
+	.article-card:hover {
+		transform: translateY(-1px);
+		border-color: var(--brand-400);
+		box-shadow: var(--shadow-md);
+	}
+	.blog-card-title,
+	.article-card-title,
+	.article-title {
+		font-family: var(--font-heading);
+		color: var(--ink-900);
+		letter-spacing: -0.01em;
+		font-weight: 700;
+	}
+	.blog-meta,
+	.article-meta {
+		color: var(--ink-500);
+		font-size: var(--fs-13);
+	}
+	.newsletter {
+		background: var(--brand-50);
+		border: 1px solid var(--brand-200);
+		border-radius: var(--radius-xl);
+	}
 </style>

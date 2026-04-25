@@ -5,6 +5,8 @@ import Footer from '../../components/Footer.astro';
 import ReviewsBlock from '../../components/ReviewsBlock.astro';
 import PartnerBanner from '../../components/PartnerBanner.astro';
 import jobsData from '../../data/jobs';
+import { vacancySources } from '../../data/vacancies';
+import type { VacancyOffer } from '../../data/vacancyTypes';
 import { slugifyCompany } from '../../utils/companies';
 import { getCityHref } from '../../utils/cities';
 import { buildBreadcrumbSchema } from '../../utils/schema';
@@ -20,7 +22,52 @@ const { job } = Astro.props;
 const hasApplyLink = Boolean(job.applyLink && job.applyLink !== '#');
 const companyUrl = `/companies/${slugifyCompany(job.company)}/`;
 const parseSalaryValue = (salary: string) => Number(salary.replace(/[^\d]/g, '')) || 0;
+const parseAmountFromText = (value?: string) => {
+	if (!value) return null;
+	const normalized = value.replace(/[\u00a0\u202f]/g, ' ');
+	const match = normalized.match(/(\d[\d\s]*)/);
+	if (!match) return null;
+	const parsed = Number(match[1].replace(/\s+/g, ''));
+	return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+};
+const parseHourlyRateFromRateText = (value: string) => {
+	const normalized = value.replace(/[\u00a0\u202f]/g, ' ');
+	if (!/(час|hour|soat|соат|саат|ժам|сағ|год|гадз|घंट|giờ|小时)/i.test(normalized)) {
+		return null;
+	}
+	const match = normalized.match(/(\d[\d\s]*)\s*₽/);
+	if (!match) return null;
+	const parsed = Number(match[1].replace(/\s+/g, ''));
+	return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+};
+const resolveHourlyRate = (offer?: VacancyOffer) => {
+	if (!offer) return null;
+	const numericRate =
+		(typeof offer.pay.hourly?.max === 'number' && Number.isFinite(offer.pay.hourly.max) ? offer.pay.hourly.max : null) ??
+		(typeof offer.pay.hourly?.min === 'number' && Number.isFinite(offer.pay.hourly.min) ? offer.pay.hourly.min : null);
+	if (numericRate && numericRate > 0) {
+		return numericRate;
+	}
+	return parseAmountFromText(offer.pay.hourly?.text);
+};
 const salaryValue = parseSalaryValue(job.salary);
+const matchingSource = vacancySources.find((source) => source.id === job.sourceId);
+const matchingOffer =
+	matchingSource?.offers.find(
+		(offer) =>
+			offer.isActive &&
+			offer.city === job.location &&
+			offer.transport === job.transport &&
+			(offer.applyLink ?? '#') === job.applyLink,
+	) ??
+	matchingSource?.offers.find(
+		(offer) =>
+			offer.isActive &&
+			offer.city === job.location &&
+			offer.transport === job.transport,
+	);
+const hourlyRate = resolveHourlyRate(matchingOffer) ?? parseHourlyRateFromRateText(job.details.rate);
+const formattedHourlyRate = hourlyRate ? `${new Intl.NumberFormat('ru-RU').format(hourlyRate)} ₽/час` : null;
 const jobCities = job.location
 	.split(',')
 	.map((city: string) => city.trim())
@@ -405,6 +452,49 @@ const pageSchemaGraph = [
 								<p class="apply-note" data-t="vacancy.apply_disabled_note">Для этой вакансии прямая ссылка пока не добавлена</p>
 							</>
 						)}
+						<div class="vacancy-income-calculator" id="vacancy-income-calculator" data-hourly-rate={hourlyRate ?? ''}>
+							<p class="vacancy-income-eyebrow">Калькулятор дохода</p>
+							{hourlyRate ? (
+								<p class="vacancy-income-rate">Ставка в этой вакансии: <strong>{formattedHourlyRate}</strong></p>
+							) : (
+								<p class="vacancy-income-rate vacancy-income-rate-muted">Почасовая ставка в источнике не указана. Расчет станет доступен после обновления данных.</p>
+							)}
+							<div class="vacancy-income-controls">
+								<label class="vacancy-income-label" for="vacancy-days-range">
+									<span>Дней в месяц</span>
+									<strong id="vacancy-days-value">22</strong>
+								</label>
+								<input
+									class="vacancy-income-range"
+									type="range"
+									id="vacancy-days-range"
+									min="1"
+									max="31"
+									step="1"
+									value="22"
+									disabled={hourlyRate === null}
+								/>
+								<label class="vacancy-income-label" for="vacancy-hours-range">
+									<span>Часов в день</span>
+									<strong id="vacancy-hours-value">8</strong>
+								</label>
+								<input
+									class="vacancy-income-range"
+									type="range"
+									id="vacancy-hours-range"
+									min="1"
+									max="16"
+									step="1"
+									value="8"
+									disabled={hourlyRate === null}
+								/>
+							</div>
+							<div class="vacancy-income-output" aria-live="polite">
+								<span data-t="calculator.result">Примерный доход</span>
+								<strong id="vacancy-income-total">{hourlyRate ? `${new Intl.NumberFormat('ru-RU').format(hourlyRate * 22 * 8)} ₽` : 'Нет данных по ставке'}</strong>
+								<small id="vacancy-income-formula">{hourlyRate ? `22 дн × 8 ч × ${formattedHourlyRate}` : 'Калькулятор ожидает почасовую ставку этой вакансии.'}</small>
+							</div>
+						</div>
 					</div>
 				</aside>
 			</div>
@@ -430,10 +520,60 @@ const pageSchemaGraph = [
 	<Footer />
 </BaseLayout>
 
+<script is:inline>
+	const vacancyIncomeCalculator = document.getElementById('vacancy-income-calculator');
+
+	if (vacancyIncomeCalculator) {
+		const hourlyRate = Number.parseInt(vacancyIncomeCalculator.dataset.hourlyRate ?? '', 10);
+		if (Number.isFinite(hourlyRate) && hourlyRate > 0) {
+			const daysRange = vacancyIncomeCalculator.querySelector('#vacancy-days-range');
+			const hoursRange = vacancyIncomeCalculator.querySelector('#vacancy-hours-range');
+			const daysValue = vacancyIncomeCalculator.querySelector('#vacancy-days-value');
+			const hoursValue = vacancyIncomeCalculator.querySelector('#vacancy-hours-value');
+			const totalValue = vacancyIncomeCalculator.querySelector('#vacancy-income-total');
+			const formulaValue = vacancyIncomeCalculator.querySelector('#vacancy-income-formula');
+
+			const updateIncome = () => {
+				const days = Number.parseInt(daysRange?.value ?? '22', 10);
+				const hours = Number.parseInt(hoursRange?.value ?? '8', 10);
+				const total = Math.round(days * hours * hourlyRate);
+				const formattedRate = `${hourlyRate.toLocaleString('ru-RU')} ₽/час`;
+
+				if (daysValue) daysValue.textContent = String(days);
+				if (hoursValue) hoursValue.textContent = String(hours);
+				if (totalValue) totalValue.textContent = `${total.toLocaleString('ru-RU')} ₽`;
+				if (formulaValue) formulaValue.textContent = `${days} дн × ${hours} ч × ${formattedRate}`;
+			};
+
+			daysRange?.addEventListener('input', updateIncome);
+			hoursRange?.addEventListener('input', updateIncome);
+			updateIncome();
+		}
+	}
+</script>
+
 <style>
 	.vacancy-page {
+		--vacancy-ink: #1d2b24;
+		--vacancy-muted: #51635c;
+		--vacancy-eyebrow: #61746b;
+		--vacancy-border: #dfe7dd;
+		--vacancy-border-strong: #d9e2d6;
+		--vacancy-chip-border: #c9dccf;
+		--vacancy-card: #ffffff;
+		--vacancy-soft: #f6faf8;
+		--vacancy-soft-strong: #eff8f4;
+		--vacancy-action: #163d2b;
+		--vacancy-action-hover: #1f574c;
+		--vacancy-focus: #4b8269;
+		--vacancy-panel-gradient: linear-gradient(135deg, rgba(245, 249, 242, 0.96) 0%, rgba(255, 255, 255, 0.98) 54%, rgba(242, 250, 253, 0.96) 100%);
+		--vacancy-card-gradient: linear-gradient(180deg, #ffffff 0%, #f7fbf8 100%);
+		--vacancy-route-gradient: linear-gradient(180deg, #ffffff 0%, #eff8f4 100%);
+		--vacancy-shadow: 0 8px 24px rgba(24, 45, 34, 0.04);
+		--vacancy-shadow-strong: 0 18px 44px rgba(24, 45, 34, 0.08);
 		padding: 2rem 0 4rem;
 		background: linear-gradient(180deg, #ffffff 0%, #f6faf8 100%);
+		color: var(--vacancy-ink);
 	}
 	.container-narrow {
 		max-width: 1240px;
@@ -443,25 +583,24 @@ const pageSchemaGraph = [
 	.breadcrumb {
 		margin-bottom: 2rem;
 		font-size: 0.875rem;
-		color: var(--text-muted);
+		color: var(--vacancy-muted);
 	}
 	.breadcrumb a {
-		color: var(--accent-color);
+		color: var(--vacancy-action);
 		text-decoration: none;
+		font-weight: 700;
 	}
 	.vacancy-header {
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) minmax(250px, 0.32fr);
 		gap: 2rem;
 		align-items: stretch;
-		background:
-			linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(248, 250, 252, 0.86)),
-			var(--bg-card);
+		background: var(--vacancy-panel-gradient);
 		padding: 2.25rem;
-		border: 1px solid rgba(148, 163, 184, 0.18);
+		border: 1px solid var(--vacancy-border-strong);
 		border-radius: 8px;
 		margin-bottom: 2rem;
-		box-shadow: 0 26px 80px rgba(15, 23, 42, 0.08);
+		box-shadow: var(--vacancy-shadow-strong);
 		position: relative;
 		overflow: hidden;
 	}
@@ -471,7 +610,7 @@ const pageSchemaGraph = [
 		inset: auto -6rem -8rem auto;
 		width: 18rem;
 		height: 18rem;
-		background: rgba(22, 115, 76, 0.08);
+		background: rgba(22, 61, 43, 0.06);
 		pointer-events: none;
 	}
 	.vacancy-hero-main {
@@ -492,7 +631,8 @@ const pageSchemaGraph = [
 		border-radius: 8px;
 		background: white;
 		padding: 0.5rem;
-		box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
+		border: 1px solid var(--vacancy-border);
+		box-shadow: 0 6px 18px rgba(24, 45, 34, 0.05);
 	}
 	.vacancy-kicker,
 	.section-eyebrow {
@@ -501,7 +641,7 @@ const pageSchemaGraph = [
 		font-weight: 900;
 		letter-spacing: 0;
 		text-transform: uppercase;
-		color: var(--accent-color);
+		color: var(--vacancy-eyebrow);
 	}
 	.vacancy-header h1 {
 		max-width: 13ch;
@@ -510,12 +650,13 @@ const pageSchemaGraph = [
 		line-height: 0.98;
 		letter-spacing: 0;
 		text-wrap: balance;
+		color: var(--vacancy-ink);
 	}
 	.vacancy-company-name {
 		display: inline-flex;
 		align-items: center;
 		gap: 0.35rem;
-		color: var(--accent-color);
+		color: var(--vacancy-action);
 		text-decoration: none;
 		font-weight: 800;
 	}
@@ -525,7 +666,7 @@ const pageSchemaGraph = [
 	.vacancy-ai-summary {
 		max-width: 70ch;
 		margin: 0;
-		color: var(--text-muted);
+		color: var(--vacancy-muted);
 		font-size: 1.12rem;
 		line-height: 1.75;
 	}
@@ -540,15 +681,15 @@ const pageSchemaGraph = [
 		min-height: 2.25rem;
 		padding: 0.45rem 0.8rem;
 		border-radius: 8px;
-		border: 1px solid rgba(148, 163, 184, 0.16);
-		background: rgba(255, 255, 255, 0.72);
-		color: var(--text-muted);
+		border: 1px solid var(--vacancy-border);
+		background: rgba(255, 255, 255, 0.9);
+		color: var(--vacancy-muted);
 		font-size: 0.82rem;
 		font-weight: 700;
 	}
 	.meta-pill-link {
 		text-decoration: none;
-		color: var(--text-main);
+		color: var(--vacancy-ink);
 	}
 	.vacancy-hero-actions {
 		display: flex;
@@ -560,12 +701,17 @@ const pageSchemaGraph = [
 		align-items: center;
 		min-height: 2.6rem;
 		padding: 0.65rem 1rem;
-		border: 1px solid rgba(22, 115, 76, 0.16);
+		border: 1px solid var(--vacancy-chip-border);
 		border-radius: 8px;
-		background: rgba(22, 115, 76, 0.08);
-		color: var(--text-main);
+		background: var(--vacancy-card);
+		color: var(--vacancy-ink);
 		text-decoration: none;
 		font-weight: 800;
+		transition: var(--transition);
+	}
+	.hero-link:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 8px 18px rgba(24, 45, 34, 0.07);
 	}
 	.vacancy-salary-card {
 		position: relative;
@@ -576,18 +722,20 @@ const pageSchemaGraph = [
 		min-height: 100%;
 		padding: 1.5rem;
 		border-radius: 8px;
-		background: linear-gradient(160deg, #123b2a, #16734c);
-		color: white;
-		box-shadow: 0 20px 55px rgba(15, 23, 42, 0.18);
+		background: var(--vacancy-card-gradient);
+		border: 1px solid var(--vacancy-border);
+		color: var(--vacancy-ink);
+		box-shadow: 0 6px 18px rgba(24, 45, 34, 0.05);
 	}
 	.vacancy-salary-card span,
 	.vacancy-salary-card small {
-		color: rgba(255, 255, 255, 0.72);
+		color: var(--vacancy-muted);
 	}
 	.vacancy-salary-card strong {
 		font-size: 2.1rem;
 		line-height: 1;
 		letter-spacing: 0;
+		color: var(--vacancy-ink);
 	}
 	.salary-rate {
 		line-height: 1.35;
@@ -600,17 +748,17 @@ const pageSchemaGraph = [
 		align-items: start;
 		margin-bottom: 1rem;
 		padding: 1.5rem;
-		border: 1px solid rgba(148, 163, 184, 0.16);
+		border: 1px solid var(--vacancy-border);
 		border-radius: 8px;
-		background: rgba(255, 255, 255, 0.74);
-		box-shadow: var(--shadow-sm);
+		background: var(--vacancy-card);
+		box-shadow: var(--vacancy-shadow);
 	}
 	.vacancy-answer-panel h2,
 	.vacancy-answer-panel p {
 		margin: 0;
 	}
 	.vacancy-answer-panel p {
-		color: var(--text-muted);
+		color: var(--vacancy-muted);
 		line-height: 1.8;
 	}
 	.vacancy-answer-panel-bottom {
@@ -628,10 +776,10 @@ const pageSchemaGraph = [
 			gap: 0.22rem;
 			min-height: 5.35rem;
 			padding: 0.72rem 0.82rem;
-			border: 1px solid rgba(148, 163, 184, 0.16);
+			border: 1px solid var(--vacancy-border-strong);
 			border-radius: 8px;
-			background: rgba(255, 255, 255, 0.82);
-			box-shadow: var(--shadow-sm);
+			background: rgba(255, 255, 255, 0.9);
+			box-shadow: 0 6px 18px rgba(24, 45, 34, 0.04);
 		}
 		.fact-card span {
 			font-size: 0.68rem;
@@ -639,12 +787,13 @@ const pageSchemaGraph = [
 			letter-spacing: 0;
 			text-transform: uppercase;
 			line-height: 1.2;
-			color: var(--text-muted);
+			color: var(--vacancy-eyebrow);
 		}
 		.fact-card strong {
 			align-self: start;
 			font-size: 0.9rem;
 			line-height: 1.28;
+			color: var(--vacancy-ink);
 		}
 	.vacancy-description {
 		white-space: pre-wrap;
@@ -658,13 +807,13 @@ const pageSchemaGraph = [
 	}
 	.vacancy-subsection {
 		padding-top: 1.35rem;
-		border-top: 1px solid rgba(148, 163, 184, 0.16);
+		border-top: 1px solid var(--vacancy-border);
 	}
 	.vacancy-subsection h3 {
 		margin: 0 0 0.9rem;
 		font-size: 1.08rem;
 		line-height: 1.3;
-		color: var(--text-main);
+		color: var(--vacancy-ink);
 	}
 	.vacancy-content-grid {
 		display: grid;
@@ -681,11 +830,12 @@ const pageSchemaGraph = [
 		}
 	}
 	.vacancy-section {
-		background: var(--bg-card);
+		background: var(--vacancy-card);
 		padding: 2rem;
 		border-radius: 8px;
+		border: 1px solid var(--vacancy-border);
 		margin-bottom: 1.5rem;
-		box-shadow: var(--shadow-sm);
+		box-shadow: var(--vacancy-shadow);
 	}
 	.vacancy-section h2 {
 		margin-top: 0;
@@ -699,8 +849,8 @@ const pageSchemaGraph = [
 		margin-bottom: 0.5rem;
 	}
 	.vacancy-guidance-section {
-		border: 1px solid rgba(22, 115, 76, 0.12);
-		background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(246, 250, 248, 0.96));
+		border: 1px solid var(--vacancy-border);
+		background: var(--vacancy-card-gradient);
 	}
 	.answer-grid {
 		display: grid;
@@ -710,18 +860,20 @@ const pageSchemaGraph = [
 	.answer-card {
 		padding: 1rem;
 		border-radius: 8px;
-		background: rgba(22, 115, 76, 0.07);
-		color: var(--text-main);
+		border: 1px solid var(--vacancy-border);
+		background: var(--vacancy-soft);
+		color: var(--vacancy-ink);
 		line-height: 1.6;
 	}
 	.answer-grid-two {
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
 	.answer-card-warning {
-		background: rgba(249, 115, 22, 0.08);
+		border-color: #efd7bd;
+		background: #fff8ef;
 	}
 	.numbered-list li::marker {
-		color: var(--accent-color);
+		color: var(--vacancy-action);
 		font-weight: 900;
 	}
 	.faq-stack {
@@ -730,9 +882,9 @@ const pageSchemaGraph = [
 	}
 	.faq-item {
 		padding: 1.1rem;
-		border: 1px solid rgba(148, 163, 184, 0.16);
+		border: 1px solid var(--vacancy-border);
 		border-radius: 8px;
-		background: rgba(255, 255, 255, 0.72);
+		background: var(--vacancy-card);
 	}
 	.faq-item h3 {
 		margin: 0 0 0.45rem;
@@ -740,7 +892,7 @@ const pageSchemaGraph = [
 	}
 	.faq-item p {
 		margin: 0;
-		color: var(--text-muted);
+		color: var(--vacancy-muted);
 		line-height: 1.7;
 	}
 	.trust-stack {
@@ -750,11 +902,11 @@ const pageSchemaGraph = [
 	}
 	.trust-item {
 		padding: 1rem;
-		border: 1px solid rgba(148, 163, 184, 0.16);
+		border: 1px solid var(--vacancy-border);
 		border-radius: 8px;
-		background: rgba(255, 255, 255, 0.72);
+		background: var(--vacancy-card);
 		line-height: 1.7;
-		color: var(--text-main);
+		color: var(--vacancy-ink);
 	}
 	.trust-links {
 		display: flex;
@@ -768,9 +920,9 @@ const pageSchemaGraph = [
 	}
 	.route-card {
 		padding: 1rem;
-		border: 1px solid rgba(148, 163, 184, 0.16);
+		border: 1px solid var(--vacancy-border);
 		border-radius: 8px;
-		background: rgba(255, 255, 255, 0.72);
+		background: var(--vacancy-card);
 	}
 	.route-card h3 {
 		margin: 0 0 0.9rem;
@@ -790,13 +942,13 @@ const pageSchemaGraph = [
 		gap: 0.4rem;
 		padding: 0.95rem 1rem;
 		border-radius: 8px;
-		border: 1px solid rgba(22, 115, 76, 0.14);
-		background: rgba(22, 115, 76, 0.06);
+		border: 1px solid var(--vacancy-border);
+		background: var(--vacancy-route-gradient);
 		text-decoration: none;
-		color: var(--text-main);
+		color: var(--vacancy-ink);
 	}
 	.related-job-card span {
-		color: var(--text-muted);
+		color: var(--vacancy-muted);
 	}
 	.related-job-meta {
 		display: flex;
@@ -805,10 +957,11 @@ const pageSchemaGraph = [
 		font-size: 0.85rem;
 	}
 	.vacancy-card-sidebar {
-		background: var(--bg-card);
+		background: var(--vacancy-card);
 		padding: 2rem;
 		border-radius: 8px;
-		box-shadow: var(--shadow-sm);
+		border: 1px solid var(--vacancy-border);
+		box-shadow: var(--vacancy-shadow);
 		position: sticky;
 		top: 2rem;
 	}
@@ -816,57 +969,213 @@ const pageSchemaGraph = [
 		display: flex;
 		justify-content: space-between;
 		padding: 0.75rem 0;
-		border-bottom: 1px solid var(--border-color);
+		border-bottom: 1px solid var(--vacancy-border);
+		color: var(--vacancy-muted);
+		gap: 1rem;
+	}
+	.detail-item strong,
+	.detail-item span {
+		color: var(--vacancy-ink);
 	}
 	.apply-btn-large {
 		display: block;
 		width: 100%;
-		background: #ffe033;
-		color: #111827;
+		background: var(--vacancy-action);
+		color: #ffffff;
 		text-align: center;
 		padding: 1.15rem 1.1rem;
 		border-radius: 8px;
-		border: 2px solid rgba(17, 24, 39, 0.08);
+		border: 1px solid var(--vacancy-action);
 		font-weight: 900;
 		margin-top: 2rem;
 		text-decoration: none;
-		box-shadow:
-			0 18px 42px rgba(255, 224, 51, 0.36),
-			0 10px 26px rgba(15, 23, 42, 0.18);
-		transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+		box-shadow: 0 10px 24px rgba(22, 61, 43, 0.12);
+		transition: transform 0.2s, box-shadow 0.2s, background 0.2s, border-color 0.2s;
 	}
 	.apply-btn-large:hover {
-		transform: translateY(-2px);
-		filter: saturate(1.05);
-		box-shadow:
-			0 24px 54px rgba(255, 224, 51, 0.44),
-			0 14px 30px rgba(15, 23, 42, 0.22);
+		transform: translateY(-1px);
+		background: var(--vacancy-action-hover);
+		border-color: var(--vacancy-action-hover);
+		box-shadow: 0 12px 28px rgba(22, 61, 43, 0.16);
 	}
 	.apply-btn-large:focus-visible {
-		outline: 3px solid rgba(255, 224, 51, 0.45);
+		outline: 3px solid rgba(75, 130, 105, 0.35);
 		outline-offset: 3px;
 	}
 	.apply-btn-hero {
 		margin-top: 1rem;
 	}
 	.apply-btn-disabled {
-		background: var(--surface-color);
-		color: var(--text-main);
-		border: 1px solid var(--border-color);
+		background: var(--vacancy-soft);
+		color: var(--vacancy-ink);
+		border: 1px solid var(--vacancy-border);
+		box-shadow: none;
 	}
 	.apply-btn-disabled:hover {
 		transform: none;
+		background: var(--vacancy-soft);
+		border-color: var(--vacancy-border);
+		color: var(--vacancy-ink);
 	}
 	.apply-note {
 		text-align: center;
 		font-size: 0.75rem;
-		color: var(--text-muted);
+		color: var(--vacancy-muted);
 		margin-top: 0.5rem;
+	}
+	.vacancy-income-calculator {
+		display: grid;
+		gap: 0.8rem;
+		margin-top: 1rem;
+		padding: 0.95rem;
+		border-radius: 8px;
+		border: 1px solid var(--vacancy-border-strong);
+		background: var(--vacancy-soft);
+	}
+	.vacancy-income-eyebrow {
+		margin: 0;
+		font-size: 0.72rem;
+		font-weight: 900;
+		text-transform: uppercase;
+		letter-spacing: 0;
+		color: var(--vacancy-eyebrow);
+	}
+	.vacancy-income-rate {
+		margin: 0;
+		font-size: 0.82rem;
+		line-height: 1.45;
+		color: var(--vacancy-ink);
+	}
+	.vacancy-income-rate strong {
+		font-size: 0.94rem;
+	}
+	.vacancy-income-rate-muted {
+		color: var(--vacancy-muted);
+	}
+	.vacancy-income-controls {
+		display: grid;
+		gap: 0.45rem;
+	}
+	.vacancy-income-label {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.6rem;
+		font-size: 0.79rem;
+		color: var(--vacancy-muted);
+	}
+	.vacancy-income-label strong {
+		min-width: 2.4rem;
+		text-align: center;
+		padding: 0.2rem 0.45rem;
+		border-radius: 999px;
+		background: var(--vacancy-soft-strong);
+		color: var(--vacancy-ink);
+		font-size: 0.78rem;
+	}
+	.vacancy-income-range {
+		-webkit-appearance: none;
+		appearance: none;
+		width: 100%;
+		height: 0.42rem;
+		border-radius: 999px;
+		background: #d7e4dc;
+		outline: none;
+	}
+	.vacancy-income-range::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		appearance: none;
+		width: 0.95rem;
+		height: 0.95rem;
+		border-radius: 50%;
+		background: var(--vacancy-action);
+		border: 2px solid #ffffff;
+		box-shadow: 0 3px 10px rgba(22, 61, 43, 0.24);
+		cursor: pointer;
+	}
+	.vacancy-income-range::-moz-range-thumb {
+		width: 0.95rem;
+		height: 0.95rem;
+		border-radius: 50%;
+		background: var(--vacancy-action);
+		border: 2px solid #ffffff;
+		box-shadow: 0 3px 10px rgba(22, 61, 43, 0.24);
+		cursor: pointer;
+	}
+	.vacancy-income-range:disabled {
+		opacity: 0.55;
+		cursor: not-allowed;
+	}
+	.vacancy-income-output {
+		display: grid;
+		gap: 0.18rem;
+		padding: 0.68rem;
+		border-radius: 8px;
+		background: var(--vacancy-card);
+		border: 1px solid var(--vacancy-border);
+	}
+	.vacancy-income-output span {
+		font-size: 0.72rem;
+		text-transform: uppercase;
+		font-weight: 800;
+		color: var(--vacancy-muted);
+	}
+	.vacancy-income-output strong {
+		font-size: 1.2rem;
+		line-height: 1.2;
+		color: var(--vacancy-ink);
+	}
+	.vacancy-income-output small {
+		font-size: 0.72rem;
+		line-height: 1.35;
+		color: var(--vacancy-muted);
 	}
 	.apply-note-hero {
 		margin: 0;
-		color: rgba(255, 255, 255, 0.78);
+		color: var(--vacancy-muted);
 		line-height: 1.45;
+	}
+	:global(body.dark-mode) .vacancy-page {
+		--vacancy-ink: #edf2f7;
+		--vacancy-muted: #c3ccd8;
+		--vacancy-eyebrow: #a7d8c5;
+		--vacancy-border: rgba(195, 204, 216, 0.24);
+		--vacancy-border-strong: rgba(195, 204, 216, 0.28);
+		--vacancy-chip-border: rgba(195, 204, 216, 0.28);
+		--vacancy-card: rgba(58, 68, 81, 0.66);
+		--vacancy-soft: rgba(67, 77, 90, 0.78);
+		--vacancy-soft-strong: rgba(79, 91, 105, 0.94);
+		--vacancy-action: var(--dm-green-surface);
+		--vacancy-action-hover: var(--dm-green-surface-hover);
+		--vacancy-focus: var(--dm-green-focus);
+		--vacancy-panel-gradient: linear-gradient(
+			135deg,
+			rgba(76, 88, 103, 0.68) 0%,
+			rgba(64, 75, 88, 0.62) 52%,
+			rgba(54, 64, 76, 0.7) 100%
+		);
+		--vacancy-card-gradient: linear-gradient(180deg, rgba(68, 79, 94, 0.74) 0%, rgba(57, 67, 79, 0.72) 100%);
+		--vacancy-route-gradient: linear-gradient(180deg, rgba(68, 79, 94, 0.74) 0%, rgba(57, 67, 79, 0.72) 100%);
+		--vacancy-shadow: 0 12px 28px rgba(15, 23, 42, 0.24);
+		--vacancy-shadow-strong: 0 24px 42px rgba(15, 23, 42, 0.34);
+		background: #2f3742;
+	}
+	:global(body.dark-mode) .vacancy-logo,
+	:global(body.dark-mode) .fact-card,
+	:global(body.dark-mode) .meta-pill,
+	:global(body.dark-mode) .hero-link,
+	:global(body.dark-mode) .faq-item,
+	:global(body.dark-mode) .trust-item,
+	:global(body.dark-mode) .route-card,
+	:global(body.dark-mode) .vacancy-income-output {
+		background: rgba(67, 77, 90, 0.86);
+	}
+	:global(body.dark-mode) .answer-card-warning {
+		background: rgba(96, 74, 53, 0.72);
+		border-color: rgba(239, 215, 189, 0.34);
+	}
+	:global(body.dark-mode) .vacancy-income-range {
+		background: rgba(148, 163, 184, 0.34);
 	}
 	@media (max-width: 1100px) {
 		.vacancy-facts {
@@ -905,6 +1214,76 @@ const pageSchemaGraph = [
 		}
 		.vacancy-facts {
 			grid-template-columns: 1fr;
+		}
+	}
+
+	/* === Visual refresh overrides (Apply CTAs, sidebar, mobile sticky) === */
+	.apply-btn-large {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--accent-500);
+		color: var(--ink-0);
+		border: none;
+		border-radius: var(--radius-md);
+		padding: 14px 28px;
+		font-family: var(--font-main);
+		font-weight: 700;
+		font-size: var(--fs-16);
+		text-decoration: none;
+		transition: background var(--transition);
+	}
+	.apply-btn-large:hover {
+		background: var(--accent-400);
+	}
+	.apply-btn-large:focus-visible {
+		outline: none;
+		box-shadow: var(--shadow-focus);
+	}
+	.apply-btn-hero {
+		min-height: 52px;
+		padding: 16px 32px;
+		font-size: var(--fs-18);
+	}
+	.apply-btn-disabled {
+		background: var(--ink-200);
+		color: var(--ink-500);
+		pointer-events: none;
+		cursor: not-allowed;
+	}
+
+	.vacancy-sidebar {
+		align-self: start;
+	}
+	@media (min-width: 1024px) {
+		.vacancy-sidebar {
+			position: sticky;
+			top: 80px;
+		}
+	}
+	.side-card,
+	.vacancy-sidebar > * {
+		background: var(--ink-0);
+		border: 1px solid var(--ink-200);
+		border-radius: var(--radius-lg);
+		box-shadow: var(--shadow-xs);
+	}
+
+	/* Mobile sticky CTA — appears only on small screens, fixed to bottom */
+	@media (max-width: 768px) {
+		main {
+			padding-bottom: 80px;
+		}
+		.apply-btn-hero {
+			position: fixed;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			z-index: 90;
+			border-radius: 0;
+			width: 100%;
+			padding: 16px;
+			box-shadow: 0 -4px 12px rgba(38, 29, 18, 0.08);
 		}
 	}
 </style>
