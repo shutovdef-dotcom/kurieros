@@ -268,24 +268,18 @@ const pageSchemaGraph = [
 					<h2 data-t="faq.title">Частые вопросы</h2>
 					<p data-t="faq.subtitle">Коротко о том, что обычно важно перед первым откликом.</p>
 				</div>
-				<div class="faq-item">
-					<div class="faq-question">
-						<span data-t="faq.q1">{faqItems[0].question}</span> <span>+</span>
-					</div>
+				<details class="faq-item">
+					<summary class="faq-question" data-t="faq.q1">{faqItems[0].question}</summary>
 					<div class="faq-answer" data-t="faq.a1">{faqItems[0].answer}</div>
-				</div>
-				<div class="faq-item">
-					<div class="faq-question">
-						<span data-t="faq.q2">{faqItems[1].question}</span> <span>+</span>
-					</div>
+				</details>
+				<details class="faq-item">
+					<summary class="faq-question" data-t="faq.q2">{faqItems[1].question}</summary>
 					<div class="faq-answer" data-t="faq.a2">{faqItems[1].answer}</div>
-				</div>
-				<div class="faq-item">
-					<div class="faq-question">
-						<span data-t="faq.q3">{faqItems[2].question}</span> <span>+</span>
-					</div>
+				</details>
+				<details class="faq-item">
+					<summary class="faq-question" data-t="faq.q3">{faqItems[2].question}</summary>
 					<div class="faq-answer" data-t="faq.a3">{faqItems[2].answer}</div>
-				</div>
+				</details>
 			</section>
 
 			<PartnerBanner />
@@ -395,11 +389,7 @@ const pageSchemaGraph = [
 			applyCity(event.target.value, 'manual');
 		});
 
-		document.querySelectorAll('.faq-item').forEach((item) => {
-			item.querySelector('.faq-question')?.addEventListener('click', () => {
-				item.classList.toggle('active');
-			});
-		});
+		// FAQ uses native <details>/<summary> — no JS needed.
 	});
 </script>
 
@@ -1194,5 +1184,50 @@ const pageSchemaGraph = [
 	}
 	:where(html, body).dark-mode .hero-city-link {
 		color: var(--ink-900);
+	}
+
+	/* FAQ — native <details>/<summary> styled to look like the old toggle */
+	:global(.faq-question) {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-3);
+		padding: 16px 20px;
+		font-family: var(--font-heading);
+		font-weight: 700;
+		font-size: var(--fs-16);
+		color: var(--ink-900);
+		cursor: pointer;
+		list-style: none;
+		user-select: none;
+	}
+	:global(.faq-question::-webkit-details-marker) {
+		display: none;
+	}
+	:global(.faq-question::after) {
+		content: '+';
+		flex: 0 0 auto;
+		width: 24px;
+		height: 24px;
+		display: grid;
+		place-items: center;
+		font-size: 20px;
+		font-weight: 700;
+		color: var(--ink-500);
+		transition: transform var(--transition), color var(--transition);
+	}
+	:global(details[open] .faq-question::after) {
+		content: '−';
+		color: var(--brand-600);
+	}
+	:global(.faq-question:focus-visible) {
+		outline: none;
+		box-shadow: var(--shadow-focus);
+		border-radius: var(--radius-md);
+	}
+	:global(.faq-answer) {
+		padding: 0 20px 16px;
+		color: var(--ink-600);
+		line-height: var(--lh-16);
 	}
 </style>
