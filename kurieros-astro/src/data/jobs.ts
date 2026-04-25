@@ -1,4 +1,5 @@
 import { CITIES } from './constants';
+import { CITY_DATASET } from './cities-dataset';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from './translations';
 import { vacancySources } from './vacancies';
 import type {
@@ -11,7 +12,7 @@ import type {
   VacancyOffer,
   VacancySource,
 } from './vacancyTypes';
-import { slugifyCity } from '../utils/cities';
+import { isCityBlocked, slugifyCity } from '../utils/cities';
 
 const TRANSPORT_TAGS: Record<TransportMode, string> = {
   foot: 'foot',
@@ -49,6 +50,36 @@ const TRANSPORT_TITLES: LocalizedLabels<TransportMode> = {
   hi: { foot: 'पैदल कूरियर', auto: 'कार कूरियर', bicycle: 'साइकिल कूरियर' },
   vi: { foot: 'Shipper đi bộ', auto: 'Shipper ô tô', bicycle: 'Shipper xe đạp' },
   zh: { foot: '步行配送员', auto: '汽车配送员', bicycle: '自行车配送员' },
+};
+
+const TRANSPORT_TITLE_SUFFIXES: LocalizedLabels<TransportMode> = {
+  ru: { foot: 'пеший', auto: 'на авто', bicycle: 'на велосипеде' },
+  uz: { foot: 'piyoda', auto: 'avtomobilda', bicycle: 'velosipedda' },
+  tg: { foot: 'пиёда', auto: 'бо мошин', bicycle: 'бо велосипед' },
+  ky: { foot: 'жөө', auto: 'унаа менен', bicycle: 'велосипед менен' },
+  hy: { foot: 'հետիոտն', auto: 'ավտոյով', bicycle: 'հեծանիվով' },
+  kk: { foot: 'жаяу', auto: 'көлікпен', bicycle: 'велосипедпен' },
+  az: { foot: 'piyada', auto: 'avtomobillə', bicycle: 'velosipedlə' },
+  uk: { foot: 'пішки', auto: 'на авто', bicycle: 'на велосипеді' },
+  be: { foot: 'пешшу', auto: 'на аўто', bicycle: 'на ровары' },
+  hi: { foot: 'पैदल', auto: 'कार से', bicycle: 'साइकिल से' },
+  vi: { foot: 'đi bộ', auto: 'bằng ô tô', bicycle: 'bằng xe đạp' },
+  zh: { foot: '步行', auto: '开车', bicycle: '骑自行车' },
+};
+
+const TRANSPORT_BANK_ROLE_TITLES: LocalizedLabels<TransportMode> = {
+  ru: { foot: 'Пеший представитель', auto: 'Авто-представитель', bicycle: 'Велопредставитель' },
+  uz: { foot: 'Piyoda vakil', auto: 'Avtomobilli vakil', bicycle: 'Velosipedli vakil' },
+  tg: { foot: 'Намояндаи пиёда', auto: 'Намояндаи мошинӣ', bicycle: 'Намояндаи велосипедӣ' },
+  ky: { foot: 'Жөө өкүл', auto: 'Авто-өкүл', bicycle: 'Велоөкүл' },
+  hy: { foot: 'Հետիոտն ներկայացուցիչ', auto: 'Ավտո ներկայացուցիչ', bicycle: 'Հեծանվային ներկայացուցիչ' },
+  kk: { foot: 'Жаяу өкіл', auto: 'Авто-өкіл', bicycle: 'Велоөкіл' },
+  az: { foot: 'Piyada nümayəndə', auto: 'Avtomobilli nümayəndə', bicycle: 'Velosipedli nümayəndə' },
+  uk: { foot: 'Піший представник', auto: 'Авто-представник', bicycle: 'Велопредставник' },
+  be: { foot: 'Пешы прадстаўнік', auto: 'Аўта-прадстаўнік', bicycle: 'Велапрадстаўнік' },
+  hi: { foot: 'पैदल प्रतिनिधि', auto: 'कार प्रतिनिधि', bicycle: 'साइकिल प्रतिनिधि' },
+  vi: { foot: 'Đại diện đi bộ', auto: 'Đại diện ô tô', bicycle: 'Đại diện xe đạp' },
+  zh: { foot: '步行代表', auto: '汽车代表', bicycle: '自行车代表' },
 };
 
 const TRANSPORT_PROVISION_LABELS: LocalizedLabels<TransportProvision> = {
@@ -230,7 +261,7 @@ const formatUpdatedDate = (date: string, language: SupportedLanguage) =>
   }).format(new Date(date));
 
 const cityCodes = new Map(CITIES.map((city, index) => [city.name, index + 1]));
-const cityPrepositions = new Map(CITIES.map((city) => [city.name, city.prep]));
+const cityPrepositions = new Map(CITY_DATASET.map((city) => [city.name, city.prep]));
 
 const unique = <T>(items: T[]) => Array.from(new Set(items.filter(Boolean)));
 
@@ -256,7 +287,9 @@ const interpolate = (value: string, offer: VacancyOffer, language: SupportedLang
   value
     .replaceAll('{city}', offer.city)
     .replaceAll('{cityPrep}', getCityPrep(offer.city, language))
-    .replaceAll('{transportTitle}', getLocalizedLabel(TRANSPORT_TITLES, language, offer.transport));
+    .replaceAll('{transportTitle}', getLocalizedLabel(TRANSPORT_TITLES, language, offer.transport))
+    .replaceAll('{transportSuffix}', getLocalizedLabel(TRANSPORT_TITLE_SUFFIXES, language, offer.transport))
+    .replaceAll('{transportBankRoleTitle}', getLocalizedLabel(TRANSPORT_BANK_ROLE_TITLES, language, offer.transport));
 
 const resolveList = (
   value: VacancyOffer['requirementsOverride'],
@@ -390,7 +423,7 @@ const buildJobsFromVacancies = (
 ): GeneratedJob[] =>
   sources.flatMap((source) =>
     source.offers
-      .filter((offer) => offer.isActive)
+      .filter((offer) => offer.isActive && !isCityBlocked(offer.city))
       .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
       .map((offer, index) => {
       const content = getContent(source, language);

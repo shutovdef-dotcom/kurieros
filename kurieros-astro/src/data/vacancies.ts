@@ -1,6 +1,8 @@
 import descriptionTranslationsSource from './vacancy-description-translations.json';
 import kuperPayRatesSource from './kuper-pay-rates.json';
 import tBankVacanciesSource from './tbank-vacancies.json';
+import efinVacanciesSource from './efin-vacancies.json';
+import alfaBankVacanciesSource from './alfa-bank-vacancies.json';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from './translations';
 import { slugifyCity } from '../utils/cities';
 import type {
@@ -33,6 +35,18 @@ const T_BANK_COMPANY_LOGO =
 const T_BANK_APPLY_LINK = 'https://trk.ppdu.ru/click/X76Tf6si?erid=2SDnjcbs16H';
 const T_BANK_CITIZENSHIP = 'РФ / ЕАЭС / страны вне ЕАЭС при наличии ВНЖ и патента';
 const T_BANK_EMPLOYMENT_FORMATS = ['gph', 'self_employed'] satisfies EmploymentFormat[];
+const EFIN_COMPANY_NAME = 'Efin';
+const EFIN_COMPANY_LOGO =
+  'https://agents.pampadu.ru/api/file/ViewFile?type=1&name=314d3acb-aba3-488c-9ddb-9c41dece71ca.png';
+const EFIN_APPLY_LINK = 'https://trk.ppdu.ru/click/VuqTAiCx?erid=2SDnjdmxiVK';
+const EFIN_CITIZENSHIP = 'РФ';
+const EFIN_EMPLOYMENT_FORMATS = ['self_employed'] satisfies EmploymentFormat[];
+const ALFA_BANK_COMPANY_NAME = 'Альфа-Банк';
+const ALFA_BANK_COMPANY_LOGO = '/logos/alfa-bank.svg';
+const ALFA_BANK_APPLY_LINK =
+  'https://pxl.leads.su/click/00012fe3aecb294c077b1c68b4594cb0?erid=2W5zFJdQNW4';
+const ALFA_BANK_CITIZENSHIP = 'РФ / Беларусь / Казахстан';
+const ALFA_BANK_EMPLOYMENT_FORMATS = ['official'] satisfies EmploymentFormat[];
 
 type KuperPayRates = {
   sourceUrl: string;
@@ -67,6 +81,48 @@ type TBankVacanciesData = {
   updatedAt: string;
   operatorB2B: TBankVacancyData;
   representative: TBankVacancyData;
+};
+
+type EfinOfferSource = {
+  city: string;
+  transport: 'foot' | 'auto';
+  monthlyFromRub: number;
+  meetingFeeRub: number;
+  schedule?: string;
+  workTime?: string;
+  statusUpdatedAt?: string;
+  region?: string;
+  area?: string;
+};
+
+type EfinVacanciesData = {
+  sourceUrl: string;
+  updatedAt: string;
+  offers: EfinOfferSource[];
+};
+
+type AlfaBankOfferSource = {
+  city: string;
+  transport: TransportMode;
+  monthlyFromRub: number;
+  sourceSheets?: string[];
+  hasZeroDemandRows?: boolean;
+  maxDemand?: number;
+  schedule?: string;
+  requirement?: string;
+  extraInfo?: string;
+  updatedAt?: string;
+};
+
+type AlfaBankVacanciesData = {
+  sourceUrl: string;
+  descriptionSourceUrl: string;
+  updatedAt: string;
+  salaryMonthlyFromRub: number;
+  cityCount: number;
+  offerCount: number;
+  transportRule: string;
+  offers: AlfaBankOfferSource[];
 };
 
 const TRANSPORT_MODES = ['foot', 'bicycle', 'auto'] satisfies TransportMode[];
@@ -111,6 +167,8 @@ type YandexEdaCityRate = {
 const descriptionTranslations = descriptionTranslationsSource as Record<SupportedLanguage, DescriptionTranslation>;
 const kuperPayRates = kuperPayRatesSource as KuperPayRates;
 const tBankVacancies = tBankVacanciesSource as TBankVacanciesData;
+const efinVacancies = efinVacanciesSource as EfinVacanciesData;
+const alfaBankVacancies = alfaBankVacanciesSource as AlfaBankVacanciesData;
 
 const yandexEdaCityRates: YandexEdaCityRate[] = [
   { city: 'Адлер', citizenship: 'РФ', rates: { foot: 445, bicycle: 440, auto: 672 } },
@@ -751,6 +809,256 @@ const tBankRepresentativeOffers = tBankVacancies.representative.offers.map((offe
   } satisfies VacancyOffer;
 });
 
+const buildEfinApplyLink = (city: string, transport: EfinOfferSource['transport']) => {
+  const url = new URL(EFIN_APPLY_LINK);
+  const citySlug = slugifyCity(city);
+
+  url.searchParams.set('utm_source', 'kurerok');
+  url.searchParams.set('utm_medium', 'vacancy');
+  url.searchParams.set('utm_campaign', 'efin-bank-representative');
+  url.searchParams.set('utm_content', `${citySlug}-${transport}`);
+
+  return url.toString();
+};
+
+const buildAlfaBankApplyLink = (city: string, transport: AlfaBankOfferSource['transport']) => {
+  const url = new URL(ALFA_BANK_APPLY_LINK);
+  const citySlug = slugifyCity(city);
+
+  url.searchParams.set('utm_source', 'kurerok');
+  url.searchParams.set('utm_medium', 'vacancy');
+  url.searchParams.set('utm_campaign', 'alfa-bank-representative');
+  url.searchParams.set('utm_content', `${citySlug}-${transport}`);
+
+  return url.toString();
+};
+
+const buildEfinPay = (monthlyFromRub: number, meetingFeeRub: number): VacancyOffer['pay'] => {
+  const normalizedMonthly = Number.isFinite(monthlyFromRub) && monthlyFromRub > 0
+    ? Math.round(monthlyFromRub)
+    : 50_000;
+  const normalizedMeeting = Number.isFinite(meetingFeeRub) && meetingFeeRub > 0
+    ? Math.round(meetingFeeRub)
+    : 400;
+  const monthlyText = `от ${formatRub(normalizedMonthly)} ₽/мес`;
+  const perOrderText = `в среднем ${formatRub(normalizedMeeting)} ₽ за встречу`;
+
+  return {
+    currency: 'RUB',
+    monthly: {
+      min: normalizedMonthly,
+      text: monthlyText,
+    },
+    perOrder: {
+      min: normalizedMeeting,
+      max: normalizedMeeting,
+      text: perOrderText,
+    },
+    rate: `${perOrderText}; ${monthlyText}`,
+    paymentFrequency: 'Еженедельно',
+  };
+};
+
+const buildEfinSchedule = (offer: EfinOfferSource) => {
+  const schedule = offer.schedule?.trim();
+  const workTime = offer.workTime?.trim();
+
+  if (schedule && workTime) {
+    return `${schedule}; ${workTime}`;
+  }
+
+  if (schedule) {
+    return schedule;
+  }
+
+  if (workTime) {
+    return workTime;
+  }
+
+  return 'Гибкий график, время встреч выбираете самостоятельно';
+};
+
+const efinRepresentativeContent = createKuperLocalizedContent({
+  title: 'Представитель банка в Efin {cityPrep} {transportSuffix}',
+  shortDescription:
+    'Разъездная работа с еженедельными выплатами: оплачивается каждая встреча с клиентом банка.',
+  description:
+    'Работая в Efin, вы получаете еженедельные выплаты и доход, на который влияете напрямую: каждая встреча оплачивается отдельно. Формат гибкий и комфортный — вы сами выбираете график. Оформление и выдача продуктов проходят без бумажек через мобильное приложение, где можно брать заявки с карты. Старт быстрый, без долгого ожидания трудоустройства, а плотность заявок высокая благодаря широкой партнерской сети банков. Дополнительно доступны чаевые, реферальные выплаты и регулярные конкурсы с призами.',
+  requirements: [
+    'Доставлять клиентам банковские продукты.',
+    'Консультировать клиентов по продуктам и сервисам банков.',
+  ],
+  benefits: [
+    'Еженедельные выплаты вознаграждения.',
+    'Оплата за каждую встречу с клиентом: уровень дохода зависит от вашей активности.',
+    'Средняя стоимость встречи — около 400 ₽.',
+    'Гибкий и комфортный график, который вы определяете самостоятельно.',
+    'Безбумажное оформление и выдача продуктов: нужен только смартфон.',
+    'Быстрый старт без длительного ожидания оформления в штат банка.',
+    'Высокая плотность заявок в районе и постоянный поток встреч.',
+    'Удобное мобильное приложение с необходимой информацией по заявкам.',
+    'Поддержка на старте и в процессе работы.',
+    'Регулярные конкурсы с ценными призами.',
+    'Дополнительное вознаграждение по программе «Собери свою команду» — от 10 000 до 15 000 ₽ за рекомендацию.',
+    'Дополнительный доход от чаевых и рекомендаций клиентов сервиса reki.efin.ru.',
+  ],
+  requiredDocuments: [
+    'Паспорт гражданина РФ с указанием прописки.',
+    'СНИЛС.',
+    'ИНН.',
+    'Оформленный статус самозанятого.',
+  ],
+  labels: ['Разъездная работа', 'Еженедельные выплаты', 'Оплата за встречи'],
+  searchTags: ['Efin', 'выездной представитель банка', 'банковские продукты', 'самозанятость'],
+});
+
+const efinRepresentativeOffers = efinVacancies.offers.map((offer, cityIndex) => ({
+  city: offer.city,
+  transport: offer.transport,
+  pay: buildEfinPay(offer.monthlyFromRub, offer.meetingFeeRub),
+  isActive: true,
+  updatedAt: efinVacancies.updatedAt,
+  sourceUrl: efinVacancies.sourceUrl,
+  salaryConfidence: 'partner',
+  ageFrom: 18,
+  citizenship: EFIN_CITIZENSHIP,
+  medicalBook: 'not_required',
+  employmentFormats: [...EFIN_EMPLOYMENT_FORMATS],
+  schedule: buildEfinSchedule(offer),
+  applyLink: buildEfinApplyLink(offer.city, offer.transport),
+  priority: 1650 - cityIndex * 2 + TRANSPORT_PRIORITY[offer.transport],
+  ...(offer.transport === 'auto' ? { transportProvision: 'own' as const } : {}),
+}) satisfies VacancyOffer);
+
+const buildAlfaBankPay = (monthlyFromRub: number): VacancyOffer['pay'] => {
+  const normalizedMonthly = Number.isFinite(monthlyFromRub) && monthlyFromRub > 0
+    ? Math.round(monthlyFromRub)
+    : alfaBankVacancies.salaryMonthlyFromRub;
+  const monthlyText = `от ${formatRub(normalizedMonthly)} ₽/мес`;
+
+  return {
+    currency: 'RUB',
+    monthly: {
+      min: normalizedMonthly,
+      text: monthlyText,
+    },
+    rate: 'Оплата за каждую доставку и за каждое подключение дополнительных банковских услуг',
+    paymentFrequency: 'Уточняется',
+  };
+};
+
+const buildAlfaBankSchedule = (offer: AlfaBankOfferSource) => {
+  const schedule = offer.schedule?.trim();
+
+  return schedule || 'Гибкий график: 5/2, 2/2, 4/2 или 3/2';
+};
+
+const buildAlfaBankRequirementsOverride = (offer: AlfaBankOfferSource) => {
+  const requirement = offer.requirement?.trim();
+
+  if (!requirement) {
+    return {};
+  }
+
+  const lowerRequirement = requirement.toLowerCase();
+
+  if (/^(с\s+авто|авто|личн(?:ый|ое)\s+авто|наличие\s+авто|на\s+авто)$/.test(lowerRequirement)) {
+    return {};
+  }
+
+  if (/без\s+авто|можно\s+без\s+авто/.test(lowerRequirement)) {
+    return {};
+  }
+
+  if (offer.transport !== 'auto' && /авто|автомоб/.test(lowerRequirement)) {
+    return {};
+  }
+
+  if (offer.transport !== 'foot' && /пеш/.test(lowerRequirement)) {
+    return {};
+  }
+
+  return {
+    requirementsOverride: [`Условия по таблице для города: ${requirement}.`],
+  };
+};
+
+const buildAlfaBankBenefitsOverride = (offer: AlfaBankOfferSource) => {
+  const extraInfo = offer.extraInfo?.trim();
+
+  if (!extraInfo) {
+    return {};
+  }
+
+  const lowerExtraInfo = extraInfo.toLowerCase();
+
+  if (/^(с\s+авто|авто|без\s+авто|можно\s+без\s+авто)$/.test(lowerExtraInfo)) {
+    return {};
+  }
+
+  if (/офис|удаленка|удалёнка/.test(lowerExtraInfo)) {
+    return {};
+  }
+
+  return {
+    benefitsOverride: [extraInfo],
+  };
+};
+
+const alfaBankRepresentativeContent = createKuperLocalizedContent({
+  title: '{transportBankRoleTitle} Альфа-Банка {cityPrep}',
+  shortDescription:
+    'Разъездная работа в Альфа-Банке: доставка банковских продуктов клиентам, подписание документов и помощь с подключением сервисов банка.',
+  description:
+    'Альфа-Банк ищет представителей для работы с клиентами на выезде. Нужно доставлять банковские продукты, встречаться с клиентами в удобных точках города, подписывать документы, консультировать по услугам и предложениям банка, а также помогать подключать дополнительные сервисы. Формат подойдёт кандидатам без опыта: перед стартом есть обучение, поддержка и понятный ввод в работу. Банк предлагает официальное оформление, гибкий график, возможности для роста и доступ к корпоративным льготам, скидкам и обучающим программам.',
+  requirements: [
+    'Возраст от 18 лет; после 40 лет банк дополнительно смотрит на опыт и навыки кандидата.',
+    'Гражданство РФ, Беларуси или Казахстана.',
+    'Образование от среднего специального и выше; кандидатов со средним образованием могут рассмотреть отдельно.',
+    'Готовность к разъездному характеру работы и продажам.',
+    'Опрятный внешний вид, без тату на видных частях тела.',
+    'Грамотная речь без сильного акцента.',
+    'Отсутствие судимости и отсутствие активного статуса в CRM рекрутмента за последние 90 календарных дней.',
+    'Наличие авто может быть преимуществом в регионах; для строк с требованием авто генерируется только автоформат.',
+  ],
+  benefits: [
+    'Оформление по ТК РФ.',
+    'Зарплата от 120 000 ₽; доход зависит от доставок и подключений дополнительных банковских услуг.',
+    'Гибкий график: 5/2, 2/2, 4/2 или 3/2.',
+    'Комфортный дресс-код.',
+    'Льготные условия на услуги банка и скидки от партнёров.',
+    'Оплата больничного до 10 дней.',
+    'Карьерный рост с наставником.',
+    'Бесплатное обучение в Альфа-Академии, вебинары и доступ к корпоративным библиотекам.',
+    'Корпоративные сообщества и мероприятия: книжные клубы, киноклубы, спорт и кибертурниры.',
+  ],
+  requiredDocuments: [
+    'Паспорт.',
+    'Документы для оформления по ТК РФ.',
+    'Документ об образовании, если потребуется на этапе проверки.',
+  ],
+  searchTags: ['Альфа-Банк', 'представитель банка', 'банковские продукты', 'официальное трудоустройство'],
+});
+
+const alfaBankRepresentativeOffers = alfaBankVacancies.offers.map((offer, offerIndex) => ({
+  city: offer.city,
+  transport: offer.transport,
+  pay: buildAlfaBankPay(offer.monthlyFromRub),
+  isActive: true,
+  updatedAt: offer.updatedAt || alfaBankVacancies.updatedAt,
+  sourceUrl: alfaBankVacancies.sourceUrl,
+  salaryConfidence: 'partner',
+  ageFrom: 18,
+  citizenship: ALFA_BANK_CITIZENSHIP,
+  medicalBook: 'not_required',
+  employmentFormats: [...ALFA_BANK_EMPLOYMENT_FORMATS],
+  schedule: buildAlfaBankSchedule(offer),
+  applyLink: buildAlfaBankApplyLink(offer.city, offer.transport),
+  priority: 1500 - offerIndex,
+  ...buildAlfaBankRequirementsOverride(offer),
+  ...buildAlfaBankBenefitsOverride(offer),
+})) satisfies VacancyOffer[];
+
 export const vacancySources = [
   {
     id: 1,
@@ -906,6 +1214,50 @@ export const vacancySources = [
     },
     offers: tBankRepresentativeOffers,
     extraTags: ['tbank', 'representative', 'field-sales', 'source:google-sheet'],
+    isHot: true,
+  },
+  {
+    id: 8,
+    slug: 'efin-bank-representative',
+    company: {
+      name: EFIN_COMPANY_NAME,
+      logo: EFIN_COMPANY_LOGO,
+    },
+    content: efinRepresentativeContent,
+    defaults: {
+      ageFrom: 18,
+      medicalBook: 'not_required',
+      employmentFormats: [...EFIN_EMPLOYMENT_FORMATS],
+      schedule: 'Гибкий график, время встреч выбираете самостоятельно',
+      education: 'Не требуется',
+      citizenship: EFIN_CITIZENSHIP,
+      uniform: 'Дресс-код по стандартам банка-партнёра',
+      os: 'Android или iOS',
+    },
+    offers: efinRepresentativeOffers,
+    extraTags: ['efin', 'bank-representative', 'field-work', 'source:google-sheet'],
+    isHot: true,
+  },
+  {
+    id: 9,
+    slug: 'alfa-bank-representative',
+    company: {
+      name: ALFA_BANK_COMPANY_NAME,
+      logo: ALFA_BANK_COMPANY_LOGO,
+    },
+    content: alfaBankRepresentativeContent,
+    defaults: {
+      ageFrom: 18,
+      medicalBook: 'not_required',
+      employmentFormats: [...ALFA_BANK_EMPLOYMENT_FORMATS],
+      schedule: 'Гибкий график: 5/2, 2/2, 4/2 или 3/2',
+      education: 'От среднего специального; возможно среднее образование по согласованию',
+      citizenship: ALFA_BANK_CITIZENSHIP,
+      uniform: 'Комфортный дресс-код',
+      os: 'Android или iOS',
+    },
+    offers: alfaBankRepresentativeOffers,
+    extraTags: ['alfa-bank', 'bank-representative', 'field-sales', 'official-employment', 'source:google-sheet'],
     isHot: true,
   },
 ] satisfies VacancySource[];

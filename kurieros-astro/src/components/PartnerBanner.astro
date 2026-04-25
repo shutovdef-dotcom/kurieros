@@ -36,9 +36,19 @@ const {
 		max-width: 728px;
 		margin: 0 auto;
 		line-height: 0;
-		border-radius: 8px;
+		border-radius: var(--radius-lg);
 		overflow: hidden;
-		box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
+		box-shadow: var(--shadow-md);
+		transition: transform var(--transition), box-shadow var(--transition);
+	}
+	.partner-banner-link:hover,
+	.partner-banner-link:focus-visible {
+		transform: translateY(-1px);
+		box-shadow: var(--shadow-lg);
+		outline: none;
+	}
+	.partner-banner-link:focus-visible {
+		box-shadow: var(--shadow-lg), var(--shadow-focus);
 	}
 	.partner-banner-link img {
 		display: block;

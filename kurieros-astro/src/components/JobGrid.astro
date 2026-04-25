@@ -55,29 +55,86 @@ const hasVacancies = jobsData.length > 0;
 </div>
 
 <style>
-	.compare-inline-alert {
-		margin-bottom: 1rem;
-		padding: 0.85rem 1rem;
-		border-radius: 8px;
-		border: 1px solid rgba(244, 63, 94, 0.22);
-		background: rgba(255, 241, 242, 0.9);
-		color: #9f1239;
-		font-size: 0.92rem;
-		font-weight: 600;
-		line-height: 1.5;
+	.job-grid-container {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
 	}
 
+	.compare-inline-alert {
+		margin-bottom: 0;
+		padding: 12px 16px;
+		border-radius: var(--radius-md);
+		border: 1px solid var(--danger-fg);
+		background: var(--danger-bg);
+		color: var(--danger-fg);
+		font-size: var(--fs-14);
+		font-weight: 600;
+		line-height: var(--lh-14);
+	}
 	.compare-inline-alert.hidden {
 		display: none;
+	}
+
+	.jobs-grid {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: var(--space-4);
+	}
+	@media (min-width: 768px) {
+		.jobs-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+	@media (min-width: 1280px) {
+		.jobs-grid {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
 	}
 
 	.no-results {
 		grid-column: 1 / -1;
 		text-align: center;
-		padding: 4rem;
-		background: var(--bg-card);
-		border-radius: 8px;
-		border: 1px dashed var(--border-color);
+		padding: var(--space-12) var(--space-6);
+		background: var(--ink-50);
+		border-radius: var(--radius-lg);
+		border: 1px dashed var(--ink-200);
+		color: var(--ink-600);
+	}
+	.no-results h3 {
+		font-family: var(--font-heading);
+		font-size: var(--fs-20);
+		font-weight: 700;
+		color: var(--ink-800);
+		margin: 0 0 8px 0;
+	}
+	.no-results p {
+		font-size: var(--fs-14);
+		margin: 0 0 var(--space-4) 0;
+	}
+	.no-results .btn-secondary {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		height: 44px;
+		padding: 0 18px;
+		border-radius: var(--radius-md);
+		background: var(--ink-0);
+		color: var(--ink-700);
+		border: 1px solid var(--ink-200);
+		font-weight: 700;
+		font-size: var(--fs-14);
+		text-decoration: none;
+		transition: background var(--transition), border-color var(--transition);
+	}
+	.no-results .btn-secondary:hover,
+	.no-results .btn-secondary:focus-visible {
+		background: var(--ink-50);
+		border-color: var(--brand-400);
+		outline: none;
+	}
+	.no-results .btn-secondary:focus-visible {
+		box-shadow: var(--shadow-focus);
 	}
 </style>
 

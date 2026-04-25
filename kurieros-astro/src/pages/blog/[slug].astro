@@ -477,4 +477,61 @@ const pageSchemaGraph = [
 			display: grid;
 		}
 	}
+
+	/* === Visual refresh overrides (Article typography) === */
+	.article-content {
+		max-width: 65ch;
+		color: var(--ink-700);
+		font-size: var(--fs-16);
+		line-height: 1.65;
+	}
+	.article-content h1,
+	.article-content h2,
+	.article-content h3 {
+		font-family: var(--font-heading);
+		color: var(--ink-900);
+		letter-spacing: -0.01em;
+	}
+	.article-content h2 {
+		font-size: var(--fs-30);
+		margin-top: var(--space-12);
+		margin-bottom: var(--space-4);
+	}
+	.article-content h3 {
+		font-size: var(--fs-24);
+		margin-top: var(--space-8);
+		margin-bottom: var(--space-3);
+	}
+	.article-content p {
+		margin-bottom: var(--space-5);
+	}
+	.article-content blockquote {
+		border-left: 3px solid var(--accent-500);
+		padding-left: var(--space-5);
+		margin: var(--space-6) 0;
+		color: var(--ink-600);
+		font-style: italic;
+	}
+	.article-content a {
+		color: var(--brand-600);
+		text-decoration-color: var(--brand-200);
+	}
+	.article-content a:hover,
+	.article-content a:focus-visible {
+		color: var(--brand-700);
+		text-decoration-color: currentColor;
+		outline: none;
+	}
+	.editor-note {
+		background: var(--brand-50);
+		border: 1px solid var(--brand-200);
+		border-radius: var(--radius-lg);
+		color: var(--ink-700);
+	}
+	.related-card,
+	.related-header > * {
+		background: var(--ink-0);
+		border: 1px solid var(--ink-200);
+		border-radius: var(--radius-md);
+	}
 </style>

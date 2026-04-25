@@ -1,157 +1,176 @@
-/* THEME-SYSTEM: 8 UNIQUE STYLES FOR KURIEROS */
+/* ============================================================
+   КурьерОк — design tokens
+   Source: docs/design-bundle/tokens.css (Claude Design handoff)
+   Aesthetic: warm trust-green primary, coral accent, stone neutrals.
+   All text/bg pairs verified at WCAG AA (≥4.5:1).
+   ============================================================ */
 
-/* 1. Cyber-Courier (Neon Dark) */
-.theme-cyber {
-  --primary-color: #00f2ff;
-  --accent-color: #bc13fe;
-  --bg-color: #05010a;
-  --surface-color: #100b1d;
-  --text-main: #e0e0e0;
-  --text-muted: #8b8ea1;
-  --border-color: #2b1f4d;
-  --glass-bg: rgba(16, 11, 29, 0.8);
-  --glass-border: rgba(188, 19, 254, 0.3);
-  --shadow-sm: 0 0 10px rgba(0, 242, 255, 0.2);
-  --shadow-md: 0 0 20px rgba(188, 19, 254, 0.3);
-  --shadow-glass: 0 0 40px rgba(0, 242, 255, 0.1);
-  --radius-lg: 4px;
-  --radius-xl: 8px;
-  --font-main: 'Inter', sans-serif;
-  --glow-intensity: 0.8;
+:root {
+  color-scheme: light dark;
+
+  /* ── Brand ─────────────────────────────────────────────── */
+  --brand-50:  #ecf5ef;
+  --brand-100: #d4ebda;
+  --brand-200: #a8d6b6;
+  --brand-300: #74bb8b;
+  --brand-400: #4ba26a;
+  --brand-500: #2f8851;
+  --brand-600: #256d41;
+  --brand-700: #1d5634;
+  --brand-800: #163f27;
+  --brand-900: #0e2818;
+
+  /* ── Accent (CTA, sun-warm tags) ─────────────────────── */
+  --accent-50:  #fdf1ec;
+  --accent-100: #fbdfd2;
+  --accent-200: #f6bca5;
+  --accent-300: #ee9476;
+  --accent-400: #e57352;
+  --accent-500: #d95a35;
+  --accent-600: #b8471f;
+  --accent-700: #903517;
+
+  /* ── Neutrals (warm stone, not cold slate) ───────────────── */
+  --ink-0:  #ffffff;
+  --ink-50: #f3eee4;
+  --ink-100:#e9e1d2;
+  --ink-150:#ddd2bd;
+  --ink-200:#cabea3;
+  --ink-300:#b0a386;
+  --ink-400:#8a7e62;
+  --ink-500:#65594a;
+  --ink-600:#4a4036;
+  --ink-700:#332b24;
+  --ink-800:#211c17;
+  --ink-900:#13100d;
+
+  /* ── Semantic ────────────────────────────────────────────── */
+  --success-bg: #e3f2e8;  --success-fg: #1d5634;
+  --warning-bg: #fcefd5;  --warning-fg: #7a4a0a;
+  --danger-bg:  #fbe2dc;  --danger-fg:  #903517;
+  --info-bg:    #e2ecf6;  --info-fg:    #1f4a78;
+
+  /* ── Type ────────────────────────────────────────────────── */
+  --font-main:    'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: var(--font-main);
+  --font-mono:    ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --fs-12: 0.75rem;     --lh-12: 1.4;
+  --fs-13: 0.8125rem;   --lh-13: 1.45;
+  --fs-14: 0.875rem;    --lh-14: 1.5;
+  --fs-16: 1rem;        --lh-16: 1.55;
+  --fs-18: 1.125rem;    --lh-18: 1.5;
+  --fs-20: 1.25rem;     --lh-20: 1.4;
+  --fs-24: 1.5rem;      --lh-24: 1.3;
+  --fs-30: 1.875rem;    --lh-30: 1.25;
+  --fs-36: 2.25rem;     --lh-36: 1.2;
+  --fs-48: 3rem;        --lh-48: 1.1;
+
+  /* ── Spacing (4px base) ──────────────────────────────────── */
+  --space-1: 4px;   --space-2: 8px;    --space-3: 12px;
+  --space-4: 16px;  --space-5: 20px;   --space-6: 24px;
+  --space-8: 32px;  --space-10:40px;   --space-12:56px;
+  --space-16:80px;
+
+  /* ── Radii ───────────────────────────────────────────────── */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+
+  /* ── Shadows (warm tint, not pure black) ─────────────────── */
+  --shadow-xs: 0 1px 2px rgba(38,29,18,0.05);
+  --shadow-sm: 0 1px 2px rgba(38,29,18,0.06), 0 1px 3px rgba(38,29,18,0.04);
+  --shadow-md: 0 4px 12px rgba(38,29,18,0.06), 0 2px 4px rgba(38,29,18,0.04);
+  --shadow-lg: 0 12px 32px rgba(38,29,18,0.08), 0 4px 8px rgba(38,29,18,0.04);
+  --shadow-focus: 0 0 0 3px rgba(47,136,81,0.25);
+
+  /* ── Motion ──────────────────────────────────────────────── */
+  --transition: 160ms cubic-bezier(.2,.7,.3,1);
+  --transition-slow: 240ms cubic-bezier(.2,.7,.3,1);
+
+  /* ── Legacy aliases (back-compat for existing CSS) ─────── */
+  --primary-color:  var(--brand-500);
+  --primary-hover:  var(--brand-600);
+  --bg-color:       var(--ink-50);
+  --surface-color:  var(--ink-0);
+  --text-main:      var(--ink-700);
+  --text-muted:     var(--ink-500);
+  --border-color:   var(--ink-200);
+  --accent-color:   var(--accent-500);
+  --glass-bg:       var(--ink-0);
+  --glass-border:   var(--ink-200);
+  --shadow-glass:   var(--shadow-sm);
+  --blob-1:         transparent;
+  --blob-2:         transparent;
 }
 
-/* 2. Clean Tech (Fresh & Trusted) */
-.theme-minimal {
-  --primary-color: #3b82f6;
-  --accent-color: #10b981;
-  --bg-color: #ffffff;
-  --surface-color: #f1f5f9;
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --border-color: #e2e8f0;
-  --glass-bg: rgba(255, 255, 255, 0.9);
-  --glass-border: rgba(59, 130, 246, 0.1);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  --shadow-glass: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  --radius-lg: 24px;
-  --radius-xl: 32px;
-  --font-main: 'Inter', system-ui;
+/* ── Dark mode (warm coal — more contrast, layered) ─────────────
+   Class applied to <html> in <head>-script (before first paint) AND
+   to <body> in <body>-script (for legacy body.dark-mode .xxx rules).
+   :where() keeps specificity at (0,1,0) — same as plain body.dark-mode. */
+:where(html, body).dark-mode {
+  --ink-0:  #131110;
+  --ink-50: #1a1714;
+  --ink-100:#221e1a;
+  --ink-150:#2c2722;
+  --ink-200:#3a342d;
+  --ink-300:#544c42;
+  --ink-400:#7d7264;
+  --ink-500:#a89c8a;
+  --ink-600:#c8bca8;
+  --ink-700:#e2d8c6;
+  --ink-800:#f1ead9;
+  --ink-900:#fbf6e8;
+
+  --brand-50:  #1d3a26;
+  --brand-100: #234a31;
+  --brand-200: #2d6041;
+  --brand-500: #6fd093;
+  --brand-600: #8adfa9;
+  --brand-700: #b1ebc4;
+
+  --accent-50: #3a1f15;
+  --accent-100:#4a2618;
+  --accent-500:#ff8862;
+  --accent-400:#ff9c7c;
+  --accent-600:#ffb59c;
+
+  --success-bg:#1f3a28; --success-fg:#a8d6b6;
+  --warning-bg:#3a2f15; --warning-fg:#f0c97a;
+  --danger-bg: #3a221c; --danger-fg: #f0a48a;
+  --info-bg:   #1f2d3a; --info-fg:   #a8c4e0;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.5), 0 1px 3px rgba(0,0,0,.35);
+  --shadow-md: 0 6px 16px rgba(0,0,0,.55), 0 2px 4px rgba(0,0,0,.3);
+  --shadow-lg: 0 16px 36px rgba(0,0,0,.6);
+  --shadow-focus: 0 0 0 3px rgba(111,208,147,.4);
+
+  /* Legacy aliases re-declared so var(--ink-*) resolves to dark values.
+     CSS custom properties don't auto-recompute through var() across scopes. */
+  --primary-color:  var(--brand-500);
+  --primary-hover:  var(--brand-600);
+  --bg-color:       var(--ink-50);
+  --surface-color:  var(--ink-100);
+  --text-main:      var(--ink-700);
+  --text-muted:     var(--ink-500);
+  --border-color:   var(--ink-200);
+  --accent-color:   var(--accent-500);
+  --glass-bg:       var(--ink-100);
+  --glass-border:   var(--ink-200);
+  --shadow-glass:   var(--shadow-sm);
+
+  /* Dark-mode green-tinted surfaces used by LanguageSwitcher & ReviewsBlock */
+  --dm-green-surface:        var(--brand-50);
+  --dm-green-surface-strong: var(--brand-100);
+  --dm-green-surface-hover:  var(--brand-200);
+  --dm-green-border:         var(--brand-200);
+  --dm-green-focus:          var(--brand-500);
+  --dm-green-text:           var(--ink-800);
 }
 
-/* 3. Startup Style (Vibrant Energy) */
-.theme-vibrant {
-  --primary-color: #f97316;
-  --accent-color: #facc15;
-  --bg-color: #fffaf5;
-  --surface-color: #ffffff;
-  --text-main: #431407;
-  --text-muted: #9a3412;
-  --border-color: #fed7aa;
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(249, 115, 22, 0.2);
-  --shadow-sm: 4px 4px 0 rgba(249, 115, 22, 0.1);
-  --shadow-md: 8px 8px 0 rgba(249, 115, 22, 0.1);
-  --shadow-glass: 0 12px 24px rgba(249, 115, 22, 0.15);
-  --radius-lg: 32px;
-  --radius-xl: 40px;
-  --font-main: 'Outfit', sans-serif;
-}
-
-/* 4. Eco-Friendly Urban (Green) */
-.theme-eco {
-  --primary-color: #059669;
-  --accent-color: #10b981;
-  --bg-color: #f0fdf4;
-  --surface-color: #ffffff;
-  --text-main: #064e3b;
-  --text-muted: #065f46;
-  --border-color: #d1fae5;
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(5, 150, 105, 0.2);
-  --shadow-sm: 0 2px 4px rgba(5, 150, 105, 0.05);
-  --shadow-md: 0 10px 20px rgba(5, 150, 105, 0.08);
-  --shadow-glass: 0 8px 16px rgba(5, 150, 105, 0.05);
-  --radius-lg: 20px;
-  --radius-xl: 28px;
-  --font-main: 'Inter', sans-serif;
-}
-
-/* 5. Midnight Executive (Black/Gold) */
-.theme-midnight {
-  --primary-color: #c5a059;
-  --accent-color: #ffffff;
-  --bg-color: #0b0b0b;
-  --surface-color: #1a1a1a;
-  --text-main: #f3f3f3;
-  --text-muted: #999999;
-  --border-color: #2a2a2a;
-  --glass-bg: rgba(26, 26, 26, 0.9);
-  --glass-border: rgba(197, 160, 89, 0.2);
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 20px 40px rgba(0, 0, 0, 0.6);
-  --shadow-glass: 0 0 30px rgba(197, 160, 89, 0.05);
-  --radius-lg: 0px;
-  --radius-xl: 0px;
-  --font-main: 'Playfair Display', serif;
-}
-
-/* 6. 8-Bit Retro Game (Pixel) */
-.theme-retro {
-  --primary-color: #ffde00;
-  --accent-color: #3b4cca;
-  --bg-color: #000000;
-  --surface-color: #222222;
-  --text-main: #ffffff;
-  --text-muted: #aaaaaa;
-  --border-color: #ffffff;
-  --glass-bg: #222222;
-  --glass-border: #ffffff;
-  --shadow-sm: 4px 4px 0 #ffffff;
-  --shadow-md: 8px 8px 0 #ffffff;
-  --shadow-glass: 0 0 0 4px #ffffff;
-  --radius-lg: 0px;
-  --radius-xl: 0px;
-  --font-main: 'Press Start 2P', cursive;
-  --pixel-border: 4px solid #fff;
-}
-
-/* 7. Aurora Glass 2.0 (Glow) */
-.theme-aurora {
-  --primary-color: #ff00cc;
-  --accent-color: #3333ff;
-  --bg-color: #0a0e21;
-  --surface-color: rgba(255, 255, 255, 0.05);
-  --text-main: #ffffff;
-  --text-muted: rgba(255, 255, 255, 0.6);
-  --border-color: rgba(255, 255, 255, 0.1);
-  --glass-bg: rgba(255, 255, 255, 0.1);
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --shadow-sm: 0 4px 10px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 20px 40px rgba(0, 0, 0, 0.4);
-  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-  --radius-lg: 24px;
-  --radius-xl: 32px;
-  --font-main: 'Outfit', sans-serif;
-  --aurora-gradient: linear-gradient(45deg, #ff00cc, #3333ff, #00d2ff, #3a7bd5);
-}
-
-/* 8. Minimalist Editorial (Magazine) */
-.theme-editorial {
-  --primary-color: #000000;
-  --accent-color: #666666;
-  --bg-color: #f9f7f2;
-  --surface-color: #ffffff;
-  --text-main: #000000;
-  --text-muted: #555555;
-  --border-color: #000000;
-  --glass-bg: #ffffff;
-  --glass-border: #000000;
-  --shadow-sm: none;
-  --shadow-md: none;
-  --shadow-glass: none;
-  --radius-lg: 0px;
-  --radius-xl: 0px;
-  --font-main: 'Libre Baskerville', serif;
-  --font-heading: 'Syncopate', sans-serif;
+@media (prefers-reduced-motion: reduce) {
+  :root { --transition: 0ms; --transition-slow: 0ms; }
+  *, *::before, *::after { animation-duration:.01ms!important; transition-duration:.01ms!important; }
 }

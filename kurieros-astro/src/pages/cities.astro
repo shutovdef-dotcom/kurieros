@@ -487,4 +487,35 @@ const pageSchemaGraph = [
 			grid-template-columns: 1fr;
 		}
 	}
+
+	/* === Visual refresh overrides (Cities page) === */
+	.cities-grid > a,
+	.city-card,
+	.cities-route-grid > *,
+	.cities-spotlight-grid > * {
+		background: var(--ink-0);
+		border: 1px solid var(--ink-200);
+		border-radius: var(--radius-md);
+		transition: border-color var(--transition), box-shadow var(--transition);
+	}
+	.cities-grid > a:hover,
+	.cities-grid > a:focus-visible,
+	.city-card:hover {
+		border-color: var(--brand-500);
+		box-shadow: var(--shadow-sm);
+		outline: none;
+	}
+	.cities-spotlight,
+	.cities-faq-section {
+		background: var(--ink-0);
+		border: 1px solid var(--ink-200);
+		border-radius: var(--radius-lg);
+	}
+	.cities-spotlight h2,
+	.cities-faq-section h2,
+	.cities-faq-section h3 {
+		font-family: var(--font-heading);
+		color: var(--ink-900);
+		letter-spacing: -0.01em;
+	}
 </style>

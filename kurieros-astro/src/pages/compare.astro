@@ -1399,4 +1399,41 @@ const pageSchemaGraph = [
       height: 22px;
     }
   }
+
+  /* === Visual refresh overrides (Compare page) === */
+  .compare-table,
+  .compare-page,
+  .compare-grid {
+    background: var(--ink-0);
+    border: 1px solid var(--ink-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xs);
+  }
+  .compare-th,
+  .compare-cell-label {
+    background: var(--ink-50);
+    color: var(--ink-700);
+    font-family: var(--font-heading);
+    font-weight: 700;
+  }
+  .compare-row:nth-child(even) {
+    background: var(--ink-50);
+  }
+  .compare-empty {
+    background: var(--ink-50);
+    border: 1px dashed var(--ink-200);
+    border-radius: var(--radius-lg);
+    color: var(--ink-600);
+  }
+  .remove-col-btn {
+    background: var(--ink-100);
+    color: var(--ink-700);
+    border: 1px solid var(--ink-200);
+    border-radius: var(--radius-pill);
+    transition: background var(--transition), color var(--transition);
+  }
+  .remove-col-btn:hover {
+    background: var(--danger-bg);
+    color: var(--danger-fg);
+  }
 </style>

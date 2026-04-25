@@ -1,194 +1,8 @@
-:root {
-  --primary-color: #1e293b;
-  --primary-hover: #0f172a;
-  --bg-color: #ffffff;
-  --surface-color: #ffffff;
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --border-color: #e2e8f0;
-  --accent-color: #475569;
-  --glass-bg: #ffffff;
-  --glass-border: #e2e8f0;
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-glass: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  --font-heading: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  
-  /* Blob colors - hidden by default in simple white */
-  --blob-1: transparent;
-  --blob-2: transparent;
-}
+/* Design tokens live in src/styles/themes.css (CSS variables :root + body.dark-mode).
+   Decorative theme presets (theme-cyber/navy/green/etc.) were removed. */
 
-/* Original Colorful Theme */
-body.theme-original {
-  --primary-color: #16734c;
-  --primary-hover: #0f5d3a;
-  --bg-color: #f8fafc;
-  --surface-color: #ffffff;
-  --text-main: #0f172a;
-  --accent-color: #06b6d4;
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.5);
-  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --blob-1: transparent;
-  --blob-2: transparent;
-}
-
-/* Theme 1: Digital Trustee (Navy) */
-body.theme-navy {
-  --primary-color: #1e40af;
-  --primary-hover: #1e3a8a;
-  --bg-color: #f1f5f9;
-  --text-main: #0f172a;
-  --accent-color: #3b82f6;
-  --glass-bg: rgba(255, 255, 255, 0.8);
-  --blob-1: #1e3a8a;
-  --blob-2: #3b82f6;
-}
-
-/* Theme 2: Fresh Start (Green) */
-body.theme-green {
-  --primary-color: #059669;
-  --primary-hover: #047857;
-  --bg-color: #f0fdf4;
-  --text-main: #064e3b;
-  --accent-color: #10b981;
-  --glass-bg: rgba(255, 255, 255, 0.8);
-  --blob-1: #064e3b;
-  --blob-2: #10b981;
-}
-
-/* Theme 3: Pure Transparency (Minimal) */
-body.theme-minimal {
-  --primary-color: #16734c;
-  --primary-hover: #0f5d3a;
-  --bg-color: #ffffff;
-  --surface-color: #f8fafc;
-  --text-main: #1e293b;
-  --accent-color: #16734c;
-  --glass-bg: rgba(248, 250, 252, 0.8);
-  --blob-1: transparent;
-  --blob-2: transparent;
-}
-
-/* Theme 4: Cyber-Action (Neobrutalism) */
-body.theme-cyber {
-  --primary-color: #FF4F00; /* Electric Orange */
-  --primary-hover: #e64600;
-  --bg-color: #F5F5F5;
-  --surface-color: #ffffff;
-  --text-main: #1F1F1F;
-  --text-muted: #4b5563;
-  --border-color: #1F1F1F;
-  --accent-color: #00BFFF;
-  --glass-bg: #ffffff;
-  --glass-border: #1F1F1F;
-  --radius-lg: 0px;
-  --radius-xl: 0px;
-  --shadow-glass: 4px 4px 0px #1F1F1F;
-  --blob-1: #FF4F00;
-  --blob-2: #00BFFF;
-}
-
-/* Theme 5: Aurora Night (Advanced Glass) */
-body.theme-aurora {
-  --primary-color: #48CFCB; /* Turquoise */
-  --primary-hover: #22d3ee;
-  --bg-color: #020617;
-  --surface-color: #0f172a;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --border-color: rgba(255,255,255,0.1);
-  --accent-color: #FF6B6B;
-  --glass-bg: rgba(15, 23, 42, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --shadow-glass: 0 20px 50px rgba(0, 0, 0, 0.5);
-  --radius-xl: 3rem;
-  --blob-1: #48CFCB;
-  --blob-2: #FF6B6B;
-}
-
-/* Theme 6: Luxury Earth (Warm Minimal) */
-body.theme-luxury {
-  --primary-color: #A0522D; /* Burnt Sienna */
-  --primary-hover: #8b4513;
-  --bg-color: #F5F5DC;
-  --surface-color: #fffaf0;
-  --text-main: #334155;
-  --text-muted: #64748b;
-  --border-color: #d2b48c;
-  --accent-color: #8b4513;
-  --glass-bg: rgba(255, 250, 240, 0.9);
-  --radius-lg: 8px;
-  --radius-xl: 12px;
-  --font-heading: "Playfair Display", serif;
-  --blob-1: rgba(160, 82, 45, 0.1);
-  --blob-2: rgba(51, 65, 85, 0.1);
-}
-
-/* Theme 7 was Simple White, now integrated into :root */
-
-/* Theme 8: Yandex Style (Yellow & Service-focused) */
-body.theme-yandex {
-  --primary-color: #FFCC00; /* Yandex Yellow */
-  --primary-hover: #FFDB4D;
-  --bg-color: #f6f6f6;
-  --surface-color: #ffffff;
-  --text-main: #000000;
-  --text-muted: #8b8989;
-  --border-color: #e2e2e2;
-  --accent-color: #ff0000;
-  --glass-bg: #ffffff;
-  --glass-border: #e2e2e2;
-  --shadow-glass: 0 4px 12px rgba(0,0,0,0.05);
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --blob-1: transparent;
-  --blob-2: transparent;
-}
-
-body.dark-mode {
-  --primary-color: #3f7a6c;
-  --primary-hover: #1f574c;
-  --bg-color: #2f3742;
-  --surface-color: #3a4451;
-  --text-main: #edf2f7;
-  --text-muted: #c3ccd8;
-  --border-color: #5d6a7c;
-  --accent-color: #3f7a6c;
-  --dm-green-surface: #173f38;
-  --dm-green-surface-strong: #173f38;
-  --dm-green-surface-hover: #1f574c;
-  --dm-green-border: #3f7a6c;
-  --dm-green-focus: #4c9a86;
-  --dm-green-text: #f4fbf8;
-  --glass-bg: rgba(58, 68, 81, 0.88);
-  --glass-border: rgba(195, 204, 216, 0.28);
-  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.32);
-  --shadow-md: 0 12px 24px rgba(15, 23, 42, 0.34);
-  --shadow-glass: 0 12px 32px rgba(15, 23, 42, 0.34);
-  --blob-1: rgba(16, 185, 129, 0.12);
-  --blob-2: rgba(52, 211, 153, 0.08);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-color: #2f3742;
-    --surface-color: #3a4451;
-    --text-main: #edf2f7;
-    --text-muted: #c3ccd8;
-    --border-color: #5d6a7c;
-    --glass-bg: rgba(58, 68, 81, 0.84);
-    --glass-border: rgba(195, 204, 216, 0.24);
-    --shadow-glass: 0 8px 32px 0 rgba(15, 23, 42, 0.28);
-  }
-}
+/* Dark-mode variable values are now defined in src/styles/themes.css under body.dark-mode.
+   Selector-specific dark-mode overrides (e.g. body.dark-mode .logo {...}) remain below. */
 
 * {
   margin: 0;
@@ -985,15 +799,13 @@ body.dark-mode .btn-compare:hover {
   border-color: var(--dm-green-focus);
 }
 
-body.dark-mode .btn-primary,
-body.dark-mode .apply-btn {
+body.dark-mode .btn-primary {
   background: var(--dm-green-surface-strong);
   border-color: var(--dm-green-border);
   color: var(--dm-green-text);
 }
 
-body.dark-mode .btn-primary:hover,
-body.dark-mode .apply-btn:hover {
+body.dark-mode .btn-primary:hover {
   background: var(--dm-green-surface-hover);
   border-color: var(--dm-green-focus);
   color: var(--dm-green-text);
