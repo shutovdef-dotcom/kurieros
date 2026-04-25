@@ -1095,4 +1095,44 @@ const pageSchemaGraph = [
 		background: var(--brand-50);
 		outline: none;
 	}
+
+	/* Dark-mode overrides for hardcoded light backgrounds in legacy rules */
+	:where(html, body).dark-mode .listing-hero-panel,
+	:where(html, body).dark-mode .listing-vacancy-launch,
+	:where(html, body).dark-mode .listing-trust-panel,
+	:where(html, body).dark-mode .listing-fact-card,
+	:where(html, body).dark-mode .listing-faq-section,
+	:where(html, body).dark-mode .listing-faq-item,
+	:where(html, body).dark-mode .listing-spotlight-card,
+	:where(html, body).dark-mode .listing-company-card,
+	:where(html, body).dark-mode .listing-route-card,
+	:where(html, body).dark-mode .listing-secondary-link {
+		background-color: var(--ink-100);
+		background-image: none;
+		border-color: var(--ink-200);
+		color: var(--ink-700);
+		box-shadow: var(--shadow-xs);
+	}
+	:where(html, body).dark-mode .listing-hero-panel h1,
+	:where(html, body).dark-mode .listing-vacancy-launch h2,
+	:where(html, body).dark-mode .listing-trust-panel h2,
+	:where(html, body).dark-mode .listing-trust-panel h3,
+	:where(html, body).dark-mode .listing-spotlight-card h3,
+	:where(html, body).dark-mode .listing-company-card h2,
+	:where(html, body).dark-mode .listing-company-card h3,
+	:where(html, body).dark-mode .listing-faq-section h2,
+	:where(html, body).dark-mode .listing-faq-section h3,
+	:where(html, body).dark-mode .listing-faq-item h3,
+	:where(html, body).dark-mode .listing-fact-card strong {
+		color: var(--ink-900);
+	}
+	:where(html, body).dark-mode .listing-hero-panel > p:not(.section-eyebrow),
+	:where(html, body).dark-mode .listing-vacancy-launch p:not(.section-eyebrow),
+	:where(html, body).dark-mode .listing-trust-panel p,
+	:where(html, body).dark-mode .listing-spotlight-card p,
+	:where(html, body).dark-mode .listing-company-card p,
+	:where(html, body).dark-mode .listing-faq-item p,
+	:where(html, body).dark-mode .listing-fact-card span {
+		color: var(--ink-600);
+	}
 </style>
