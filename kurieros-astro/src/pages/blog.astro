@@ -3,37 +3,23 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import articlesData from '../data/articles.json';
-import { getArticleTopicGroups } from '../utils/articles';
 import { buildBreadcrumbSchema } from '../utils/schema';
 
-const formatDate = (value) =>
+const formatDate = (value: string) =>
 	new Intl.DateTimeFormat('ru-RU', {
 		day: 'numeric',
 		month: 'long',
 		year: 'numeric',
 	}).format(new Date(value));
 
-const posts = articlesData.map((article) => ({
+const posts = articlesData.map((article: any) => ({
 	...article,
 	excerpt: article.description,
-	image: article.image,
-	author: 'Редакция КурьерОк',
 	formattedDate: formatDate(article.date),
 }));
-const [featuredPost, ...secondaryPosts] = posts;
-const topicGroups = getArticleTopicGroups(posts).slice(0, 4);
-const faqItems = [
-	{
-		question: 'Что публикуется в блоге КурьерОк?',
-		answer: 'В блоге выходят практические материалы о работе курьером: доход, занятость, сравнение компаний, работа в разных городах и ограничения, которые лучше знать до отклика.',
-	},
-	{
-		question: 'Как использовать блог вместе с вакансиями?',
-		answer: 'Сначала можно прочитать обзор, затем перейти в сравнение вакансий, каталог компаний или нужный город и выбрать подходящий формат работы.',
-	},
-];
-const blogTitle = 'Блог о работе курьером: доход, компании, форматы | КурьерОк';
-const blogDescription = `Блог о работе курьером: ${posts.length} практических материалов про доход, подработку, компании, города и реальные условия отклика.`.slice(0, 170);
+
+const blogTitle = 'Блог о работе курьером | КурьерОк';
+const blogDescription = 'Блог КурьерОк готовится к запуску. Скоро здесь появятся материалы про работу курьером.';
 
 const pageSchemaGraph = [
 	{
@@ -41,27 +27,15 @@ const pageSchemaGraph = [
 		name: 'Блог КурьерОк',
 		description: blogDescription,
 		url: Astro.url.href,
-		dateModified: new Date(featuredPost.date).toISOString(),
 		mainEntity: {
 			'@type': 'ItemList',
-			itemListElement: posts.map((post, index) => ({
+			itemListElement: posts.map((post: any, index: number) => ({
 				'@type': 'ListItem',
 				position: index + 1,
 				name: post.title,
 				url: new URL(`/blog/${post.slug}/`, Astro.site).toString(),
 			})),
 		},
-	},
-	{
-		'@type': 'FAQPage',
-		mainEntity: faqItems.map((item) => ({
-			'@type': 'Question',
-			name: item.question,
-			acceptedAnswer: {
-				'@type': 'Answer',
-				text: item.answer,
-			},
-		})),
 	},
 	buildBreadcrumbSchema(
 		[
@@ -88,51 +62,41 @@ const pageSchemaGraph = [
 				<p>Практические разборы дохода, компаний и форматов доставки без рекламного шума и пустых обещаний.</p>
 			</div>
 			<div class="blog-hero-note">
-				<span>{posts.length} материалов</span>
-				<span>Обновлено {featuredPost.formattedDate}</span>
+				<span>{posts.length === 0 ? 'Готовим материалы' : `${posts.length} материалов`}</span>
 			</div>
 		</section>
 
-		<a href={`/blog/${featuredPost.slug}/`} class="featured-story">
-			<div class="featured-story-copy">
-				<div class="blog-meta">
-					<time datetime={featuredPost.date}>{featuredPost.formattedDate}</time>
-					<span aria-hidden="true">•</span>
-					<span>{featuredPost.readTime}</span>
+		{posts.length > 0 ? (
+			<section class="blog-section">
+				<div class="section-heading">
+					<h2>Материалы</h2>
 				</div>
-				<h2>{featuredPost.title}</h2>
-				<p>{featuredPost.excerpt}</p>
-				<span class="featured-link">Открыть материал</span>
-			</div>
-			<img src={featuredPost.image} alt={featuredPost.title} class="featured-story-image" />
-		</a>
-
-		<section class="blog-section">
-			<div class="section-heading">
-				<h2>Последние материалы</h2>
-				<p>Выборка по доходу, условиям работы и реальному опыту курьеров.</p>
-			</div>
-
-			<div class="blog-grid">
-				{secondaryPosts.map((post) => (
-					<article class="blog-card">
-						<a href={`/blog/${post.slug}/`} class="blog-card-link">
-							<img src={post.image} alt={post.title} class="blog-image" />
-							<div class="blog-content">
-								<div class="blog-meta">
-									<time datetime={post.date}>{post.formattedDate}</time>
-									<span aria-hidden="true">•</span>
-									<span>{post.readTime}</span>
+				<div class="blog-grid">
+					{posts.map((post: any) => (
+						<article class="blog-card">
+							<a href={`/blog/${post.slug}/`} class="blog-card-link">
+								<img src={post.image} alt={post.title} class="blog-image" />
+								<div class="blog-content">
+									<div class="blog-meta">
+										<time datetime={post.date}>{post.formattedDate}</time>
+										<span aria-hidden="true">•</span>
+										<span>{post.readTime}</span>
+									</div>
+									<h3 class="blog-title">{post.title}</h3>
+									<p class="blog-excerpt">{post.excerpt}</p>
+									<span class="btn-text">Читать статью</span>
 								</div>
-								<h3 class="blog-title">{post.title}</h3>
-								<p class="blog-excerpt">{post.excerpt}</p>
-								<span class="btn-text">Читать статью</span>
-							</div>
-						</a>
-					</article>
-				))}
-			</div>
-		</section>
+							</a>
+						</article>
+					))}
+				</div>
+			</section>
+		) : (
+			<section class="blog-empty">
+				<h2>Скоро здесь будут материалы</h2>
+				<p>Команда готовит новые статьи о работе курьером — про доход, форматы доставки и реальные условия. Загляните позже.</p>
+			</section>
+		)}
 
 		<section class="newsletter">
 			<div class="newsletter-content">
