@@ -8,6 +8,8 @@ import {
 	getItemsByTopic,
 	getSourceById,
 	knowledgeBaseData,
+	resolveCompanyLinks,
+	resolveGeoLinks,
 } from '../../utils/knowledge';
 import { buildBreadcrumbSchema } from '../../utils/schema';
 
@@ -112,36 +114,68 @@ const pageSchemaGraph = [
 			</header>
 
 			<section class="guide-faq">
-				{items.map((item) => (
-					<article class="guide-card">
-						<h2>{item.question}</h2>
-						<p class="guide-card-short"><strong>Кратко:</strong> {item.answer_short}</p>
-						<p class="guide-card-long">{item.answer_long}</p>
-						{item.facts.length > 0 && (
-							<details class="guide-facts">
-								<summary>Факты и источники</summary>
-								<ul>
-									{item.facts.map((fact) => {
-										const source = getSourceById(fact.source_id);
-										return (
-											<li>
-												{fact.value}
-												{source && (
-													<>
-														{' — '}
-														<a href={source.url} target="_blank" rel="noopener noreferrer nofollow">
-															{source.name}
-														</a>
-													</>
+				{items.map((item) => {
+					const companyLinks = resolveCompanyLinks(item.company_scope);
+					const geoLinks = resolveGeoLinks(item.geo_scope);
+					return (
+						<article class="guide-card">
+							<h2>{item.question}</h2>
+							<p class="guide-card-short"><strong>Кратко:</strong> {item.answer_short}</p>
+							<p class="guide-card-long">{item.answer_long}</p>
+							{item.facts.length > 0 && (
+								<details class="guide-facts">
+									<summary>Факты и источники</summary>
+									<ul>
+										{item.facts.map((fact) => {
+											const source = getSourceById(fact.source_id);
+											return (
+												<li>
+													{fact.value}
+													{source && (
+														<>
+															{' — '}
+															<a href={source.url} target="_blank" rel="noopener noreferrer nofollow">
+																{source.name}
+															</a>
+														</>
+													)}
+												</li>
+											);
+										})}
+									</ul>
+								</details>
+							)}
+							{(companyLinks.length > 0 || geoLinks.length > 0) && (
+								<div class="guide-card-links">
+									{companyLinks.length > 0 && (
+										<div class="guide-card-links-row">
+											<span class="guide-card-links-label">Работодатели:</span>
+											<ul>
+												{companyLinks.map((link) =>
+													link.href ? (
+														<li><a href={link.href}>{link.name}</a></li>
+													) : (
+														<li><span>{link.name}</span></li>
+													),
 												)}
-											</li>
-										);
-									})}
-								</ul>
-							</details>
-						)}
-					</article>
-				))}
+											</ul>
+										</div>
+									)}
+									{geoLinks.length > 0 && (
+										<div class="guide-card-links-row">
+											<span class="guide-card-links-label">Города:</span>
+											<ul>
+												{geoLinks.map((link) => (
+													<li><a href={link.href}>{link.name}</a></li>
+												))}
+											</ul>
+										</div>
+									)}
+								</div>
+							)}
+						</article>
+					);
+				})}
 			</section>
 
 			<section class="guide-related">
@@ -249,6 +283,43 @@ const pageSchemaGraph = [
 	}
 	.guide-facts a {
 		color: var(--brand-700, #16734c);
+	}
+	.guide-card-links {
+		display: grid;
+		gap: 8px;
+		margin-top: 12px;
+		padding-top: 12px;
+		border-top: 1px dashed var(--ink-100, #e5e8ed);
+		font-size: 14px;
+	}
+	.guide-card-links-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		align-items: baseline;
+	}
+	.guide-card-links-label {
+		color: var(--ink-500, #6c7785);
+		font-weight: 600;
+	}
+	.guide-card-links ul {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px 8px;
+	}
+	.guide-card-links a {
+		color: var(--brand-700, #16734c);
+		text-decoration: none;
+		border-bottom: 1px dashed currentColor;
+	}
+	.guide-card-links a:hover {
+		color: var(--ink-900, #0f172a);
+	}
+	.guide-card-links span {
+		color: var(--ink-700, #2c3440);
 	}
 	.guide-related {
 		margin: 40px 0 24px;

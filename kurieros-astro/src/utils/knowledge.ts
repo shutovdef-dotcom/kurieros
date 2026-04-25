@@ -115,3 +115,75 @@ export const getTopicBySlug = (
 
 export const getSourceById = (id: string): KnowledgeSource | undefined =>
 	knowledgeBaseData.sources.find((source) => source.id === id);
+
+const COMPANY_ROUTE_SLUGS: Readonly<Record<string, string | undefined>> = {
+	'yandex-eda': 'yandex-eda',
+	kuper: 'kuper-ex-sbermarket',
+	samokat: undefined,
+	ozon: undefined,
+	'alfa-bank': 'alfa-bank',
+	't-bank': 't-bank',
+	dostavista: undefined,
+	'fns-npd': undefined,
+};
+
+const COMPANY_DISPLAY_NAMES: Readonly<Record<string, string>> = {
+	'yandex-eda': 'Яндекс Еда',
+	kuper: 'Купер',
+	samokat: 'Самокат',
+	ozon: 'Ozon',
+	'alfa-bank': 'Альфа-Банк',
+	't-bank': 'Т-Банк',
+	dostavista: 'Достависта',
+	'fns-npd': 'ФНС',
+};
+
+export type CompanyLink = {
+	id: string;
+	name: string;
+	href?: string;
+};
+
+export const resolveCompanyLinks = (sourceIds: readonly string[]): CompanyLink[] =>
+	Array.from(new Set(sourceIds))
+		.filter((id) => id !== 'fns-npd')
+		.map((id) => {
+			const slug = COMPANY_ROUTE_SLUGS[id];
+			return {
+				id,
+				name: COMPANY_DISPLAY_NAMES[id] ?? id,
+				...(slug ? { href: `/companies/${slug}/` } : {}),
+			};
+		});
+
+const GEO_LINKS: Readonly<Record<string, { name: string; href: string }[]>> = {
+	all: [
+		{ name: 'Москва', href: '/rabota-kurerom-moskva/' },
+		{ name: 'Санкт-Петербург', href: '/rabota-kurerom-sankt-peterburg/' },
+		{ name: 'Все города', href: '/cities/' },
+	],
+	msk: [{ name: 'Москва', href: '/rabota-kurerom-moskva/' }],
+	spb: [{ name: 'Санкт-Петербург', href: '/rabota-kurerom-sankt-peterburg/' }],
+	regions: [
+		{ name: 'Екатеринбург', href: '/rabota-kurerom-ekaterinburg/' },
+		{ name: 'Казань', href: '/rabota-kurerom-kazan/' },
+		{ name: 'Новосибирск', href: '/rabota-kurerom-novosibirsk/' },
+	],
+};
+
+export const resolveGeoLinks = (
+	scope: readonly string[],
+): { name: string; href: string }[] => {
+	const seen = new Set<string>();
+	const out: { name: string; href: string }[] = [];
+	for (const entry of scope) {
+		const links = GEO_LINKS[entry] ?? [];
+		for (const link of links) {
+			if (!seen.has(link.href)) {
+				seen.add(link.href);
+				out.push(link);
+			}
+		}
+	}
+	return out;
+};
