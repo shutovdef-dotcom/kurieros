@@ -50,6 +50,10 @@ const articleSchema = {
 	headline: meta.title,
 	description: meta.description,
 	url: Astro.url.href,
+	mainEntityOfPage: {
+		'@type': 'WebPage',
+		'@id': Astro.url.href,
+	},
 	datePublished: knowledgeBaseData.generated,
 	dateModified: knowledgeBaseData.generated,
 	inLanguage: 'ru',
@@ -118,8 +122,8 @@ const pageSchemaGraph = [
 					const companyLinks = resolveCompanyLinks(item.company_scope);
 					const geoLinks = resolveGeoLinks(item.geo_scope);
 					return (
-						<article class="guide-card">
-							<h2>{item.question}</h2>
+						<article class="guide-card" id={item.id}>
+							<h2><a href={`#${item.id}`} class="guide-anchor">{item.question}</a></h2>
 							<p class="guide-card-short"><strong>Кратко:</strong> {item.answer_short}</p>
 							<p class="guide-card-long">{item.answer_long}</p>
 							{item.facts.length > 0 && (
@@ -257,6 +261,17 @@ const pageSchemaGraph = [
 	.guide-card h2 {
 		font-size: clamp(20px, 2vw, 24px);
 		margin: 0 0 12px;
+	}
+	.guide-anchor {
+		color: inherit;
+		text-decoration: none;
+	}
+	.guide-anchor:hover {
+		color: var(--brand-700, #16734c);
+	}
+	.guide-card[id]:target {
+		outline: 2px solid var(--brand-700, #16734c);
+		outline-offset: 4px;
 	}
 	.guide-card-short {
 		margin: 0 0 12px;
