@@ -5,7 +5,6 @@ import Footer from '../components/Footer.astro';
 import jobsData from '../data/jobs';
 import { getCityNames, sortCityNamesByPopulation } from '../utils/cities';
 import { slugifyCompany } from '../utils/companies';
-import { parseSalary } from '../utils/format';
 import { buildBreadcrumbSchema } from '../utils/schema';
 
 const transportLabelMap: Record<string, string> = {
@@ -80,50 +79,6 @@ const features = [
 
 const compareTitle = 'Сравнение вакансий курьеров: что лучше выбрать | КурьерОк';
 const compareDescription = 'Сравнение вакансий курьеров по зарплате, выплатам, транспорту и оформлению. Смотрите, что лучше для дохода, старта и стабильности.';
-
-const buildDecisionCards = (jobs: typeof compareJobs) => {
-  if (jobs.length === 0) {
-    return [
-      {
-        label: 'Список пуст',
-        title: 'Вакансии пока не опубликованы',
-        hint: 'Сравнение появится после добавления новых карточек.',
-        text: 'Сейчас на сайте нет активных вакансий. Когда появятся новые карточки, здесь можно будет сравнить выплаты, транспорт и оформление.',
-        href: '/',
-      },
-    ];
-  }
-
-  const topIncomeJob = [...jobs].sort((a, b) => parseSalary(b.salary) - parseSalary(a.salary))[0] ?? jobs[0];
-  const studentFriendlyJob = jobs.find((job) => job.age.includes('16')) || jobs[0];
-  const stableContractJob = jobs.find((job) => /тк|официаль/i.test(job.contract)) || jobs[0];
-
-  return [
-    {
-      label: 'Лучше для дохода',
-      title: topIncomeJob.title,
-      hint: 'Сильнее по верхней вилке дохода.',
-      text: `Если сейчас важнее потенциал заработка, начните с карточки ${topIncomeJob.company} и проверьте формулу выплат уже в вакансии.`,
-      href: topIncomeJob.link,
-    },
-    {
-      label: 'Лучше для старта',
-      title: studentFriendlyJob.title,
-      hint: 'Мягче для входа в профессию.',
-      text: 'Этот вариант подходит для первого шага в доставке: меньше входных требований и проще понять, подойдёт ли работа.',
-      href: studentFriendlyJob.link,
-    },
-    {
-      label: 'Лучше для стабильности',
-      title: stableContractJob.title,
-      hint: 'Понятнее по оформлению и занятости.',
-      text: 'Если вы выбираете по оформлению и предсказуемости занятости, стоит начать именно с этого варианта.',
-      href: stableContractJob.link,
-    },
-  ];
-};
-
-const decisionCards = buildDecisionCards(compareJobs);
 
 const pageSchemaGraph = [
   {
@@ -271,15 +226,50 @@ const pageSchemaGraph = [
         </div>
       </div>
 
-      <section class="compare-route-grid" aria-label="Что открыть после сравнения">
-        {decisionCards.map((card) => (
-          <article class="compare-route-card">
-            <span>{card.label}</span>
-            <h2>{card.title}</h2>
-            <p>{card.text}</p>
-            <a href={card.href} class="compare-route-link">Открыть вариант</a>
-          </article>
-        ))}
+      <section class="compare-help-grid" aria-label="Частые вопросы перед откликом">
+        <div class="compare-help-heading">
+          <p class="section-eyebrow">Помощь в выборе</p>
+          <h2>Что обычно спрашивают перед откликом</h2>
+        </div>
+        <div class="compare-help-cards">
+          <a class="compare-help-card" href="/guide/dohod/">
+            <span class="compare-help-kicker">Доход</span>
+            <h3>Сколько реально зарабатывает курьер?</h3>
+            <p>Вилки по форматам в Москве, СПб и регионах — пеший, вело, авто, банк-представитель.</p>
+            <span class="compare-help-link">Открыть гид →</span>
+          </a>
+          <a class="compare-help-card" href="/guide/vyplaty/">
+            <span class="compare-help-kicker">Выплаты</span>
+            <h3>Где платят чаще — еженедельно или раз в месяц?</h3>
+            <p>Yandex Еда, Купер, Самокат — еженедельно. Альфа-Банк по ТК РФ — 2 раза в месяц.</p>
+            <span class="compare-help-link">Открыть гид →</span>
+          </a>
+          <a class="compare-help-card" href="/guide/oformlenie/">
+            <span class="compare-help-kicker">Оформление</span>
+            <h3>Где проще трудоустроиться?</h3>
+            <p>Самозанятость, ГПХ, ИП или ТК РФ — какой режим подходит и как зарегистрироваться.</p>
+            <span class="compare-help-link">Открыть гид →</span>
+          </a>
+          <a class="compare-help-card" href="/guide/dokumenty/">
+            <span class="compare-help-kicker">Документы</span>
+            <h3>Какие документы нужны для отклика?</h3>
+            <p>Паспорт, ИНН, СНИЛС — базовый набор. Для авто — права и СТС, для иностранцев — патент.</p>
+            <span class="compare-help-link">Открыть гид →</span>
+          </a>
+          <a class="compare-help-card" href="/guide/vozrast/">
+            <span class="compare-help-kicker">Возраст</span>
+            <h3>Со скольки лет берут курьером?</h3>
+            <p>С 16 лет — пешком и на велосипеде в Yandex Еде и Купере. С 18 — автокурьеры и банк.</p>
+            <span class="compare-help-link">Открыть гид →</span>
+          </a>
+          <a class="compare-help-card" href="/guide/shtrafy/">
+            <span class="compare-help-kicker">Штрафы</span>
+            <h3>За что штрафуют курьеров?</h3>
+            <p>Опоздания, отмены слотов, отсутствие формы — суммы и условия по сервисам.</p>
+            <span class="compare-help-link">Открыть гид →</span>
+          </a>
+        </div>
+        <a class="compare-help-all" href="/guide/">Все гиды для курьера →</a>
       </section>
 
     </div>
@@ -293,7 +283,6 @@ const pageSchemaGraph = [
     const grid = document.querySelector('.compare-grid');
     if (!grid) return;
 
-    const decisionGrid = document.querySelector('.compare-route-grid');
     const companyLinks = document.querySelector('[data-compare-companies]');
     // Bootstrap with the 4 preselected jobs already in HTML.
     // Full catalog is fetched lazily from /api/compare-jobs.json on demand.
@@ -415,34 +404,6 @@ const pageSchemaGraph = [
       `;
       applyScopedStyles(grid);
 
-      if (decisionGrid) {
-        const routeCopy = hasAvailableJobs
-          ? {
-            label: 'Дальше',
-            title: 'Сначала добавьте вакансии',
-            text: 'Нажмите «Сравнить» в карточках вакансий. Здесь появятся только выбранные варианты.',
-            href: '/#vacancies',
-            link: 'Открыть список',
-          }
-          : {
-            label: 'Список пуст',
-            title: 'Вакансии пока не опубликованы',
-            text: 'Сейчас на сайте нет активных вакансий. Когда появятся новые карточки, здесь можно будет сравнить выплаты, транспорт и оформление.',
-            href: '/',
-            link: 'На главную',
-          };
-
-        decisionGrid.innerHTML = `
-          <article class="compare-route-card compare-route-card-wide">
-            <span>${routeCopy.label}</span>
-            <h2>${routeCopy.title}</h2>
-            <p>${routeCopy.text}</p>
-            <a href="${routeCopy.href}" class="compare-route-link">${routeCopy.link}</a>
-          </article>
-        `;
-        applyScopedStyles(decisionGrid);
-      }
-
       if (companyLinks) {
         companyLinks.innerHTML = '<a href="/companies/" class="compare-chip-link">Все компании</a>';
         applyScopedStyles(companyLinks);
@@ -503,44 +464,6 @@ const pageSchemaGraph = [
       applyScopedStyles(grid);
     }
 
-    function renderDecisionCards(jobs) {
-      if (!decisionGrid || jobs.length === 0) return;
-
-      const topIncomeJob = [...jobs].sort((a, b) => parseSalaryValue(b.salary) - parseSalaryValue(a.salary))[0];
-      const studentFriendlyJob = jobs.find((job) => String(job.age).includes('16')) || jobs[0];
-      const stableContractJob = jobs.find((job) => /тк|официаль/i.test(job.contract)) || jobs[0];
-      const cards = [
-        {
-          label: 'Лучше для дохода',
-          title: topIncomeJob.title,
-          text: `Если сейчас важнее потенциал заработка, начните с карточки ${topIncomeJob.company} и проверьте формулу выплат уже в вакансии.`,
-          href: topIncomeJob.link,
-        },
-        {
-          label: 'Лучше для старта',
-          title: studentFriendlyJob.title,
-          text: 'Этот вариант подходит для первого шага в доставке: меньше входных требований и проще понять, подойдёт ли работа.',
-          href: studentFriendlyJob.link,
-        },
-        {
-          label: 'Лучше для стабильности',
-          title: stableContractJob.title,
-          text: 'Если вы выбираете по оформлению и предсказуемости занятости, стоит начать именно с этого варианта.',
-          href: stableContractJob.link,
-        },
-      ];
-
-      decisionGrid.innerHTML = cards.map((card) => `
-        <article class="compare-route-card">
-          <span>${escapeHtml(card.label)}</span>
-          <h2>${escapeHtml(card.title)}</h2>
-          <p>${escapeHtml(card.text)}</p>
-          <a href="${escapeHtml(card.href)}" class="compare-route-link">Открыть вариант</a>
-        </article>
-      `).join('');
-      applyScopedStyles(decisionGrid);
-    }
-
     function renderCompanyLinks(jobs) {
       if (!companyLinks) return;
 
@@ -563,14 +486,12 @@ const pageSchemaGraph = [
         ensureFullCatalog().then(() => {
           const jobs = getSelectedJobs();
           renderComparisonTable(jobs);
-          renderDecisionCards(jobs);
           renderCompanyLinks(jobs);
         });
         return;
       }
       const jobs = getSelectedJobs();
       renderComparisonTable(jobs);
-      renderDecisionCards(jobs);
       renderCompanyLinks(jobs);
     }
 
@@ -643,12 +564,10 @@ const pageSchemaGraph = [
       if (display.length === 0) {
         setStatus(`Нет вакансий по фильтру «${city || 'любой город'} / ${transport ? Object.keys(TRANSPORT_LABEL_TO_TAG).find(k => TRANSPORT_LABEL_TO_TAG[k] === transport) : 'любой транспорт'}»`);
         renderComparisonTable([]);
-        renderDecisionCards([]);
         renderCompanyLinks([]);
         return;
       }
       renderComparisonTable(display);
-      renderDecisionCards(display);
       renderCompanyLinks(display);
       setStatus(matched.length > display.length
         ? `Показано ${display.length} из ${matched.length} вакансий по фильтру`
@@ -1488,5 +1407,98 @@ const pageSchemaGraph = [
     background: var(--surface-100, #0e1622);
     color: #e7eaf0;
     border-color: var(--ink-200, #2a3441);
+  }
+
+  /* ============ Help grid (links to /guide/) ============ */
+  .compare-help-grid {
+    margin: 32px 0 16px;
+    padding: 0;
+  }
+  .compare-help-heading {
+    margin-bottom: 18px;
+  }
+  .compare-help-heading h2 {
+    margin: 0;
+    font-size: clamp(22px, 2.2vw, 28px);
+  }
+  .compare-help-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+  }
+  .compare-help-card {
+    display: grid;
+    gap: 8px;
+    padding: 20px 22px;
+    border: 1px solid var(--ink-100, #e5e8ed);
+    border-radius: 16px;
+    background: var(--surface-100, #fff);
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  }
+  .compare-help-card:hover {
+    border-color: var(--brand-700, #16734c);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+  }
+  .compare-help-kicker {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--brand-700, #16734c);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .compare-help-card h3 {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.3;
+    color: var(--ink-900, #0f172a);
+  }
+  .compare-help-card p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink-700, #2c3440);
+  }
+  .compare-help-link {
+    margin-top: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--brand-700, #16734c);
+  }
+  .compare-help-all {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 18px;
+    padding: 12px 20px;
+    border-radius: 999px;
+    background: var(--brand-700, #16734c);
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .compare-help-all:hover {
+    background: var(--brand-800, #105838);
+    transform: translateY(-1px);
+  }
+  :global(body.dark-mode) .compare-help-card {
+    background: var(--surface-200, #1a2230);
+    border-color: var(--ink-200, #2a3441);
+  }
+  :global(body.dark-mode) .compare-help-card h3 {
+    color: #e7eaf0;
+  }
+  :global(body.dark-mode) .compare-help-card p {
+    color: #c0c8d3;
+  }
+  :global(body.dark-mode) .compare-help-all {
+    background: var(--brand-500, #2eb37a);
+    color: #0e1622;
+  }
+  :global(body.dark-mode) .compare-help-all:hover {
+    background: var(--brand-400, #57c897);
   }
 </style>
