@@ -10,6 +10,7 @@ import PartnerBanner from '../components/PartnerBanner.astro';
 import jobsData from '../data/jobs';
 import { getCompaniesFromJobs } from '../utils/companies';
 import { getCitiesFromJobs, getCityNames, sortCityNamesByPopulation } from '../utils/cities';
+import { TOPIC_META, knowledgeBaseData } from '../utils/knowledge';
 
 const cities = getCitiesFromJobs(jobsData);
 const availableCities = sortCityNamesByPopulation(getCityNames(jobsData));
@@ -65,23 +66,33 @@ const heroFacts = [
 	{ label: 'Города', value: `${cities.length}` },
 	{ label: 'Форматы', value: 'Авто, вело, пешком, подработка' },
 ];
-const faqItems = [
-	{
-		question: 'Со скольки лет можно работать курьером?',
-		answer:
-			'В большинстве компаний можно устроиться пешим курьером или велокурьером уже с 16 лет. Для работы на автомобиле обычно нужен возраст 18+ и права категории B.',
-	},
-	{
-		question: 'Сколько реально зарабатывает курьер в 2026 году?',
-		answer:
-			'Доход зависит от города, транспорта, графика и компании. Пешие курьеры обычно зарабатывают меньше, а вело- и автоформаты дают более высокий потенциал дохода.',
-	},
-	{
-		question: 'Нужна ли собственная термосумка?',
-		answer:
-			'Чаще всего нет: агрегаторы и сервисы доставки выдают экипировку и термосумку после подключения или короткого обучения.',
-	},
+const FEATURED_KB_IDS = [
+	'age-min-courier',
+	'income-foot-courier-msk',
+	'income-bike-courier-msk',
+	'medical-book',
+	'self-employed-registration',
+	'find-courier-job',
+	'training-period',
+	'winter-equipment',
 ];
+const featuredKbItems = FEATURED_KB_IDS
+	.map((id) => knowledgeBaseData.items.find((entry) => entry.id === id))
+	.filter((entry): entry is NonNullable<typeof entry> => Boolean(entry))
+	.map((entry) => {
+		const topicMeta = TOPIC_META[entry.topic];
+		return {
+			id: entry.id,
+			question: entry.question,
+			answer_short: entry.answer_short,
+			topicSlug: topicMeta?.slug ?? '',
+			topicTitle: topicMeta?.title ?? entry.topic,
+		};
+	});
+const faqItems = featuredKbItems.map((item) => ({
+	question: item.question,
+	answer: item.answer_short,
+}));
 const hubLinks = [
 	{
 		href: '/compare/',
@@ -225,21 +236,29 @@ const pageSchemaGraph = [
 
 			<section class="faq-section home-section">
 				<div class="section-heading">
-					<h2 data-t="faq.title">Частые вопросы</h2>
-					<p data-t="faq.subtitle">Коротко о том, что обычно важно перед первым откликом.</p>
+					<h2>База знаний для курьера</h2>
+					<p>Главные ответы из 23 проверенных источников. Можно открыть любую тему и получить структурированный разбор.</p>
 				</div>
-				<details class="faq-item">
-					<summary class="faq-question" data-t="faq.q1">{faqItems[0].question}</summary>
-					<div class="faq-answer" data-t="faq.a1">{faqItems[0].answer}</div>
-				</details>
-				<details class="faq-item">
-					<summary class="faq-question" data-t="faq.q2">{faqItems[1].question}</summary>
-					<div class="faq-answer" data-t="faq.a2">{faqItems[1].answer}</div>
-				</details>
-				<details class="faq-item">
-					<summary class="faq-question" data-t="faq.q3">{faqItems[2].question}</summary>
-					<div class="faq-answer" data-t="faq.a3">{faqItems[2].answer}</div>
-				</details>
+				<div class="kb-grid">
+					{featuredKbItems.map((item) => (
+						<details class="faq-item kb-item">
+							<summary class="faq-question">{item.question}</summary>
+							<div class="faq-answer">
+								<p>{item.answer_short}</p>
+								{item.topicSlug && (
+									<p class="kb-item-link">
+										<a href={`/guide/${item.topicSlug}/#${item.id}`}>
+											Подробнее в разделе «{item.topicTitle}» →
+										</a>
+									</p>
+								)}
+							</div>
+						</details>
+					))}
+				</div>
+				<div class="kb-section-cta">
+					<a href="/guide/" class="kb-cta-link">Все вопросы и ответы — Гид для курьера →</a>
+				</div>
 			</section>
 
 			<PartnerBanner />
@@ -1256,5 +1275,57 @@ const pageSchemaGraph = [
 		padding: 0 20px 16px;
 		color: var(--ink-600);
 		line-height: var(--lh-16);
+	}
+	.kb-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 12px;
+	}
+	@media (max-width: 720px) {
+		.kb-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+	.kb-item-link {
+		margin: 8px 0 0;
+		font-size: 14px;
+	}
+	.kb-item-link a {
+		color: var(--brand-700, #16734c);
+		text-decoration: none;
+		border-bottom: 1px dashed currentColor;
+		font-weight: 600;
+	}
+	.kb-item-link a:hover {
+		color: var(--ink-900, #0f172a);
+	}
+	.kb-section-cta {
+		display: flex;
+		justify-content: center;
+		margin-top: 20px;
+	}
+	.kb-cta-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: 12px 20px;
+		border-radius: 999px;
+		background: var(--brand-700, #16734c);
+		color: #fff;
+		text-decoration: none;
+		font-weight: 700;
+		font-size: 14px;
+		transition: background-color 0.15s ease, transform 0.15s ease;
+	}
+	.kb-cta-link:hover {
+		background: var(--brand-800, #105838);
+		transform: translateY(-1px);
+	}
+	:global(body.dark-mode) .kb-cta-link {
+		background: var(--brand-500, #2eb37a);
+		color: #0e1622;
+	}
+	:global(body.dark-mode) .kb-cta-link:hover {
+		background: var(--brand-400, #57c897);
 	}
 </style>
