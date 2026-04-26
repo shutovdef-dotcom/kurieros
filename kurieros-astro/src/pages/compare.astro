@@ -58,8 +58,11 @@ const mapCompareJob = (job: typeof jobsData[number]) => ({
   link: `/v/${job.slug}/`,
 });
 
-const allCompareJobs = jobsData.map(mapCompareJob);
-const compareJobs = allCompareJobs.slice(0, 4);
+// Only render preselected 4 jobs in HTML (was: all 4399 → 3.9 MB page).
+// Full job catalog is served from /api/compare-jobs.json and fetched
+// lazily by the client only if user has saved compareList in localStorage.
+const compareJobs = jobsData.slice(0, 4).map(mapCompareJob);
+const totalCompareJobs = jobsData.length;
 
 const compareCompanies = Array.from(
   new Map(compareJobs.map((job) => [job.company, { name: job.company, href: job.companyHref }])).values(),
@@ -102,7 +105,7 @@ const features = [
 const compareTitle = 'Сравнение вакансий курьеров: что лучше выбрать | КурьерОк';
 const compareDescription = 'Сравнение вакансий курьеров по зарплате, выплатам, транспорту и оформлению. Смотрите, что лучше для дохода, старта и стабильности.';
 
-const buildDecisionCards = (jobs: typeof allCompareJobs) => {
+const buildDecisionCards = (jobs: typeof compareJobs) => {
   if (jobs.length === 0) {
     return [
       {
@@ -418,15 +421,34 @@ const pageSchemaGraph = [
   <Footer />
 </BaseLayout>
 
-<script is:inline define:vars={{ allCompareJobs, features }}>
+<script is:inline define:vars={{ compareJobs, features, totalCompareJobs }}>
   document.addEventListener('DOMContentLoaded', () => {
     const grid = document.querySelector('.compare-grid');
     if (!grid) return;
 
     const decisionGrid = document.querySelector('.compare-route-grid');
     const companyLinks = document.querySelector('[data-compare-companies]');
-    const jobsById = new Map(allCompareJobs.map((job) => [job.id, job]));
-    const hasAvailableJobs = allCompareJobs.length > 0;
+    // Bootstrap with the 4 preselected jobs already in HTML.
+    // Full catalog is fetched lazily from /api/compare-jobs.json on demand.
+    const jobsById = new Map(compareJobs.map((job) => [job.id, job]));
+    const hasAvailableJobs = totalCompareJobs > 0;
+    let fullCatalogPromise = null;
+
+    function ensureFullCatalog() {
+      if (fullCatalogPromise) return fullCatalogPromise;
+      fullCatalogPromise = fetch('/api/compare-jobs.json', { cache: 'force-cache' })
+        .then((response) => (response.ok ? response.json() : []))
+        .then((jobs) => {
+          if (Array.isArray(jobs)) {
+            for (const job of jobs) {
+              jobsById.set(job.id, job);
+            }
+          }
+          return jobs;
+        })
+        .catch(() => []);
+      return fullCatalogPromise;
+    }
     const scopeAttribute = Array.from(grid.getAttributeNames()).find((name) => name.startsWith('data-astro-cid'));
 
     function applyScopedStyles(root) {
@@ -667,8 +689,19 @@ const pageSchemaGraph = [
     }
 
     function renderSelectedComparison() {
+      const storedIds = readStoredCompareIds();
+      const needsCatalog = storedIds.some((id) => !jobsById.has(id));
+      if (needsCatalog) {
+        // User saved IDs we don't have in preselected — load full catalog.
+        ensureFullCatalog().then(() => {
+          const jobs = getSelectedJobs();
+          renderComparisonTable(jobs);
+          renderDecisionCards(jobs);
+          renderCompanyLinks(jobs);
+        });
+        return;
+      }
       const jobs = getSelectedJobs();
-
       renderComparisonTable(jobs);
       renderDecisionCards(jobs);
       renderCompanyLinks(jobs);
