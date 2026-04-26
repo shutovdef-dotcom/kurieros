@@ -14,6 +14,7 @@ const transportLabelMap: Record<string, string> = {
   auto: 'Авто',
   bicycle: 'Велосипед / самокат',
   foot: 'Пешком',
+  remote: 'Удалённо / офис',
 };
 
 const getTransportLabel = (tags: string[]) =>
@@ -21,10 +22,11 @@ const getTransportLabel = (tags: string[]) =>
     ? transportLabelMap[tags.find((tag) => tag in transportLabelMap) as string]
     : 'Смешанный формат';
 
-const getTransportProvisionLabel = (provision: 'own' | 'company') =>
-  provision === 'company'
-    ? 'Компания выдает транспортное средство'
-    : 'Нужно своё транспортное средство';
+const getTransportProvisionLabel = (provision: 'own' | 'company' | 'not_required') => {
+  if (provision === 'company') return 'Компания выдает транспортное средство';
+  if (provision === 'not_required') return 'Транспорт не требуется';
+  return 'Нужно своё транспортное средство';
+};
 
 const normalizeOsRequirement = (value?: string) => {
   const normalized = String(value ?? '').trim().toLowerCase();
