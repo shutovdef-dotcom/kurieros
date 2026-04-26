@@ -32,12 +32,43 @@ const collectionSchema = {
 	name: pageTitle,
 	description: pageDescription,
 	url: Astro.url.href,
+	inLanguage: 'ru-RU',
 	dateModified: knowledgeBaseData.generated,
 	mainEntity: itemListSchema,
 };
 
+const articleIndexSchema = {
+	'@type': 'Article',
+	headline: 'Гид для курьера 2026 — все темы',
+	description: pageDescription,
+	url: Astro.url.href,
+	mainEntityOfPage: {
+		'@type': 'WebPage',
+		'@id': Astro.url.href,
+	},
+	datePublished: knowledgeBaseData.generated,
+	dateModified: knowledgeBaseData.generated,
+	inLanguage: 'ru-RU',
+	author: {
+		'@type': 'Organization',
+		name: 'КурьерОк',
+		url: 'https://kurerok.ru/',
+	},
+	publisher: {
+		'@type': 'Organization',
+		name: 'КурьерОк',
+		url: 'https://kurerok.ru/',
+	},
+	about: topics.map((topic) => ({
+		'@type': 'Thing',
+		name: topic.title,
+		url: new URL(`/guide/${topic.slug}/`, Astro.site).toString(),
+	})),
+};
+
 const pageSchemaGraph = [
 	collectionSchema,
+	articleIndexSchema,
 	buildBreadcrumbSchema(
 		[
 			{ name: 'Главная', url: '/' },
@@ -48,7 +79,15 @@ const pageSchemaGraph = [
 ];
 ---
 
-<BaseLayout title={pageTitle} description={pageDescription} schemaGraph={pageSchemaGraph}>
+<BaseLayout
+	title={pageTitle}
+	description={pageDescription}
+	schemaGraph={pageSchemaGraph}
+	ogType="article"
+	articleSection="Гид для курьера"
+	articlePublishedTime={`${knowledgeBaseData.generated}T00:00:00Z`}
+	articleModifiedTime={`${knowledgeBaseData.generated}T00:00:00Z`}
+>
 	<Header />
 
 	<main class="guide-index-page">

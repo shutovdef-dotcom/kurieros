@@ -74,6 +74,29 @@ const relatedCompanies = getCompaniesFromJobs(jobsData, reviewsData)
   .sort((a, b) => b.score - a.score || b.vacancyCount - a.vacancyCount)
   .slice(0, 4);
 const faqItems = company.faqItems;
+const reviewSchemas = featuredReviews.map((review) => ({
+  '@type': 'Review',
+  author: {
+    '@type': 'Person',
+    name: review.name,
+  },
+  datePublished: new Date(review.date).toISOString(),
+  reviewBody: [review.comment, review.pros ? `Плюсы: ${review.pros}` : '', review.cons ? `Минусы: ${review.cons}` : '']
+    .filter(Boolean)
+    .join(' '),
+  reviewRating: {
+    '@type': 'Rating',
+    ratingValue: review.rating,
+    bestRating: 5,
+    worstRating: 1,
+  },
+  itemReviewed: {
+    '@type': 'Organization',
+    name: company.name,
+    url: Astro.url.href,
+  },
+  inLanguage: 'ru-RU',
+}));
 const pageSchemaGraph = [
   {
     '@type': 'Organization',
@@ -93,6 +116,7 @@ const pageSchemaGraph = [
           },
         }
       : {}),
+    ...(reviewSchemas.length ? { review: reviewSchemas } : {}),
   },
   {
     '@type': 'CollectionPage',
