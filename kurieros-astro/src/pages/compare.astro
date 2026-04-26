@@ -124,22 +124,6 @@ const buildDecisionCards = (jobs: typeof compareJobs) => {
 };
 
 const decisionCards = buildDecisionCards(compareJobs);
-const answerFocusPoints = ['Выплаты', 'Транспорт', 'Оформление', 'Возрастной порог'];
-
-const faqItems = [
-  {
-    question: 'Как читать это сравнение вакансий?',
-    answer: 'Сначала посмотрите на формат транспорта, выплаты и оформление, а затем откройте подходящие карточки вакансий, чтобы проверить ограничения и детали отклика.',
-  },
-  {
-    question: 'Что сравнивать в первую очередь?',
-    answer: 'Обычно первыми стоит сравнить выплаты, формат занятости, требования к транспорту и возрастной порог. Именно эти параметры быстрее всего отсеивают неподходящие варианты.',
-  },
-  {
-    question: 'Можно ли выбирать только по зарплате?',
-    answer: 'Нет. Верхняя планка дохода без графика, условий оформления и частоты выплат почти всегда даёт неполную картину, поэтому лучше смотреть на набор факторов сразу.',
-  },
-];
 
 const pageSchemaGraph = [
   {
@@ -157,17 +141,6 @@ const pageSchemaGraph = [
         url: new URL(job.link, Astro.site).toString(),
       })),
     },
-  },
-  {
-    '@type': 'FAQPage',
-    mainEntity: faqItems.map((item) => ({
-      '@type': 'Question',
-      name: item.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: item.answer,
-      },
-    })),
   },
   buildBreadcrumbSchema(
     [
@@ -199,24 +172,6 @@ const pageSchemaGraph = [
           <a href="/" class="back-link">← К вакансиям</a>
         </div>
       </div>
-
-      <section class="compare-answer-panel">
-        <div>
-          <p class="section-eyebrow">Короткий вывод</p>
-          <h2>Сначала сравните ключевые условия</h2>
-        </div>
-        <div class="compare-answer-copy">
-          <p>
-            Сначала смотрите выплаты, транспорт и оформление. Если по этим трем пунктам вакансия подходит, уже потом
-            открывайте полную карточку.
-          </p>
-          <div class="compare-chip-row compare-answer-chip-row">
-            {answerFocusPoints.map((point) => (
-              <span class="compare-chip-link compare-chip-static">{point}</span>
-            ))}
-          </div>
-        </div>
-      </section>
 
       <section class="compare-filters" aria-label="Фильтры сравнения">
         <p class="compare-filters-hint">
@@ -327,30 +282,6 @@ const pageSchemaGraph = [
         ))}
       </section>
 
-      <section class="compare-faq-section">
-        <p class="section-eyebrow">FAQ</p>
-        <h2>Короткие ответы перед выбором вакансии</h2>
-        <div class="compare-faq-grid">
-          {faqItems.map((item) => (
-            <article class="compare-faq-item">
-              <h3>{item.question}</h3>
-              <p>{item.answer}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section class="compare-trust-panel">
-        <div>
-          <p class="section-eyebrow">Прозрачность</p>
-          <h2>Как использовать это сравнение</h2>
-        </div>
-        <p>
-          Эта страница помогает быстро понять различия между форматами работы, но не заменяет карточку вакансии. После выбора
-          подходящего варианта откройте его страницу и подтвердите выплаты, оформление, возрастной порог и ограничения уже по
-          актуальным условиям работодателя.
-        </p>
-      </section>
     </div>
   </main>
 
