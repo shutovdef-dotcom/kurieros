@@ -33,7 +33,7 @@ const collectionSchema = {
 	description: pageDescription,
 	url: Astro.url.href,
 	inLanguage: 'ru-RU',
-	dateModified: knowledgeBaseData.generated,
+	dateModified: `${knowledgeBaseData.generated}T00:00:00+03:00`,
 	mainEntity: itemListSchema,
 };
 
@@ -47,8 +47,8 @@ const articleIndexSchema = {
 		'@type': 'WebPage',
 		'@id': Astro.url.href,
 	},
-	datePublished: knowledgeBaseData.generated,
-	dateModified: knowledgeBaseData.generated,
+	datePublished: `${knowledgeBaseData.generated}T00:00:00+03:00`,
+	dateModified: `${knowledgeBaseData.generated}T00:00:00+03:00`,
 	inLanguage: 'ru-RU',
 	author: {
 		'@type': 'Organization',
