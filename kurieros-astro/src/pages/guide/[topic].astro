@@ -151,7 +151,15 @@ const pageSchemaGraph = [
 ];
 ---
 
-<BaseLayout title={pageTitle} description={pageDescription} schemaGraph={pageSchemaGraph}>
+<BaseLayout
+	title={pageTitle}
+	description={pageDescription}
+	schemaGraph={pageSchemaGraph}
+	ogType="article"
+	articleSection={meta.title}
+	articlePublishedTime={`${knowledgeBaseData.generated}T00:00:00Z`}
+	articleModifiedTime={`${knowledgeBaseData.generated}T00:00:00Z`}
+>
 	<Header />
 
 	<main class="guide-page">
@@ -172,6 +180,40 @@ const pageSchemaGraph = [
 					<span>Источников: {usedSources.length}</span>
 				</div>
 			</header>
+
+			{howToSchema && (
+				<section class="guide-howto" aria-labelledby="howto-heading">
+					<h2 id="howto-heading">{howToSchema.name}</h2>
+					<p class="guide-howto-lead">{howToSchema.description}</p>
+					<dl class="guide-howto-meta">
+						<div>
+							<dt>Время</dt>
+							<dd>~15 минут</dd>
+						</div>
+						<div>
+							<dt>Стоимость</dt>
+							<dd>0 ₽</dd>
+						</div>
+						<div>
+							<dt>Что нужно</dt>
+							<dd>{howToSchema.supply.map((s: { name: string }) => s.name).join(', ')}</dd>
+						</div>
+					</dl>
+					<ol class="guide-howto-steps">
+						{howToSchema.step.map((step: { position: number; name: string; text: string; url?: string }) => (
+							<li>
+								<strong>{step.name}</strong>
+								<p>{step.text}</p>
+								{step.url && (
+									<a href={step.url} target="_blank" rel="noopener noreferrer nofollow" class="guide-howto-link">
+										{step.url} →
+									</a>
+								)}
+							</li>
+						))}
+					</ol>
+				</section>
+			)}
 
 			<section class="guide-faq">
 				{items.map((item) => {
@@ -302,6 +344,84 @@ const pageSchemaGraph = [
 		gap: 8px;
 		font-size: 14px;
 		color: var(--ink-500, #6c7785);
+	}
+	.guide-howto {
+		margin: 0 0 40px;
+		padding: 28px;
+		border: 1px solid var(--brand-700, #16734c);
+		border-radius: 16px;
+		background: linear-gradient(180deg, rgba(22, 115, 76, 0.06), rgba(22, 115, 76, 0.02));
+	}
+	.guide-howto h2 {
+		margin: 0 0 8px;
+		font-size: clamp(22px, 2.4vw, 28px);
+	}
+	.guide-howto-lead {
+		margin: 0 0 16px;
+		color: var(--ink-700, #2c3440);
+	}
+	.guide-howto-meta {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+		gap: 12px;
+		margin: 0 0 20px;
+		padding: 12px 16px;
+		background: var(--surface-100, #fff);
+		border-radius: 12px;
+	}
+	.guide-howto-meta div {
+		display: grid;
+		gap: 2px;
+	}
+	.guide-howto-meta dt {
+		font-size: 12px;
+		font-weight: 700;
+		color: var(--ink-500, #6c7785);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+	}
+	.guide-howto-meta dd {
+		margin: 0;
+		font-size: 14px;
+		color: var(--ink-900, #0f172a);
+	}
+	.guide-howto-steps {
+		display: grid;
+		gap: 12px;
+		margin: 0;
+		padding-left: 24px;
+		counter-reset: howto;
+	}
+	.guide-howto-steps li {
+		padding: 12px 16px;
+		background: var(--surface-100, #fff);
+		border-radius: 10px;
+	}
+	.guide-howto-steps li strong {
+		display: block;
+		font-size: 16px;
+		margin-bottom: 4px;
+	}
+	.guide-howto-steps li p {
+		margin: 0 0 6px;
+		font-size: 14px;
+		color: var(--ink-700, #2c3440);
+	}
+	.guide-howto-link {
+		font-size: 13px;
+		color: var(--brand-700, #16734c);
+		text-decoration: none;
+	}
+	.guide-howto-link:hover {
+		text-decoration: underline;
+	}
+	:global(.dark-mode) .guide-howto {
+		border-color: var(--brand-500, #2eb37a);
+		background: linear-gradient(180deg, rgba(46, 179, 122, 0.12), rgba(46, 179, 122, 0.04));
+	}
+	:global(.dark-mode) .guide-howto-meta,
+	:global(.dark-mode) .guide-howto-steps li {
+		background: var(--surface-200, #1a2230);
 	}
 	.guide-faq {
 		display: grid;
