@@ -689,16 +689,18 @@ const formatRub = (value: number) => new Intl.NumberFormat('ru-RU').format(value
 
 const buildTBankPay = (minMonthly: number, maxMonthly: number): VacancyOffer['pay'] => {
   const min = Math.min(minMonthly, maxMonthly);
-  const max = Math.max(minMonthly, maxMonthly);
-  const monthlyText = min === max
-    ? `${formatRub(max)} ₽/мес`
-    : `${formatRub(min)}–${formatRub(max)} ₽/мес`;
+  // T-Bank publishes income as "from X" (no upper cap) — operators &
+  // representatives are paid per result so real income usually exceeds
+  // the displayed minimum. Display "от X ₽/мес" instead of misleading
+  // "до Y ₽/мес".
+  const monthlyText = `от ${formatRub(min)} ₽/мес`;
 
   return {
     currency: 'RUB',
     monthly: {
       min,
-      max,
+      // Intentionally no `max` — getSalaryText falls back to monthly.text
+      // ("от X ₽/мес") instead of the "до X ₽/мес" branch.
       text: monthlyText,
     },
     rate: monthlyText,
