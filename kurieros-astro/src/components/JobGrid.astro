@@ -365,9 +365,9 @@ const hasVacancies = jobsData.length > 0;
 	}
 
 	document.addEventListener('DOMContentLoaded', () => {
-		const jobCards = document.querySelectorAll('.job-card');
 		const ageFilterSelect = document.getElementById('vacancy-age-filter');
 		const transportFilterSelect = document.getElementById('vacancy-transport-filter');
+		const employmentFilterSelect = document.getElementById('vacancy-employment-filter');
 		syncCompareList();
 
 		document.querySelectorAll('.btn-compare').forEach((btn) => {
@@ -457,19 +457,29 @@ const hasVacancies = jobsData.length > 0;
 			filterJobs();
 		});
 
+		employmentFilterSelect?.addEventListener('change', () => {
+			filterJobs();
+		});
+
 		function filterJobs() {
 			const term = normalizedInitialSearch;
 			const selectedAgeTag = mapAgeFilterToTag(ageFilterSelect?.value || 'all');
 			const selectedTransportTag = transportFilterSelect?.value || 'all';
+			const employmentValue = employmentFilterSelect?.value || 'all';
+			const selectedEmploymentTag = employmentValue === 'all' ? 'all' : 'emp:' + employmentValue;
 
-			jobCards.forEach((card) => {
+			// Live query so the filter runs against the *current* DOM —
+			// after a city switch the grid innerHTML is replaced, so a
+			// snapshot from DOMContentLoaded would be stale.
+			document.querySelectorAll('.job-card').forEach((card) => {
 				const location = (card.dataset.location || '').toLowerCase();
 				const matchesCity = !selectedCity || location.includes(selectedCity.toLowerCase()) || location === 'вся россия';
 				const matchesSearchTerm = matchesSearch(card, term);
 				const matchesAge = hasTag(card, selectedAgeTag);
 				const matchesTransport = hasTag(card, selectedTransportTag);
+				const matchesEmployment = hasTag(card, selectedEmploymentTag);
 
-				if (matchesSearchTerm && matchesCity && matchesAge && matchesTransport) {
+				if (matchesSearchTerm && matchesCity && matchesAge && matchesTransport && matchesEmployment) {
 					card.style.display = 'flex';
 				} else {
 					card.style.display = 'none';

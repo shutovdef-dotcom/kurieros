@@ -21,6 +21,16 @@ const TRANSPORT_TAGS: Record<TransportMode, string> = {
   remote: 'remote',
 };
 
+// Internal data-tags tokens used by the home filter dropdowns.
+// `emp:` prefix avoids collisions with transport/age tokens like
+// `foot` or `16plus` that share the same flat tag list.
+const EMPLOYMENT_TAGS: Record<EmploymentFormat, string> = {
+  gph: 'emp:gph',
+  self_employed: 'emp:self_employed',
+  individual_entrepreneur: 'emp:individual_entrepreneur',
+  official: 'emp:official',
+};
+
 type LocalizedLabels<T extends string> = Record<SupportedLanguage, Record<T, string>>;
 
 const TRANSPORT_LABELS: LocalizedLabels<TransportMode> = {
@@ -458,6 +468,7 @@ const buildJobsFromVacancies = (
         tags: unique([
           TRANSPORT_TAGS[transport],
           getAgeTag(ageFrom),
+          ...formats.map((format) => EMPLOYMENT_TAGS[format]),
           ...(source.extraTags ?? []),
         ]),
         labels: buildLabels(content.labels, [transport], ageFrom, formats, medicalBook, language),
