@@ -213,6 +213,152 @@ const pickKbItemsForVacancy = (limit: number): KnowledgeItem[] => {
 
 const selectedKbItems = pickKbItemsForVacancy(6);
 const kbAnchorTopic = (item: KnowledgeItem) => TOPIC_META[item.topic];
+
+// === SEO+AI block helpers (replace removed «Дальше» block) ===
+
+const formatRubAmount = (value: number) =>
+	`${new Intl.NumberFormat('ru-RU').format(Math.round(value))} ₽`;
+
+// Block: 3 concrete income scenarios. Computed only when an hourly
+// rate is available — otherwise the block is skipped.
+type IncomeScenario = { key: string; label: string; hours: number; shifts: number; income: string };
+const incomeScenarios: IncomeScenario[] | null = hourlyRate
+	? [
+			{ key: 'lite', label: 'Подработка', hours: 4, shifts: 12 },
+			{ key: 'std', label: 'Стандарт', hours: 8, shifts: 22 },
+			{ key: 'full', label: 'Полная загрузка', hours: 10, shifts: 26 },
+		].map((scenario) => ({
+			...scenario,
+			income: formatRubAmount(scenario.hours * scenario.shifts * hourlyRate),
+		}))
+	: null;
+
+// Block: HowTo steps tailored to company + transport + employment.
+const employmentTypeText = job.details.employment_type ?? '';
+const requiresSelfEmployedRegistration = /Самозанят/i.test(employmentTypeText);
+const requiresMedicalBookFormat = job.transport === 'foot' || job.transport === 'bicycle';
+const isBankRepresentativeRole =
+	matchingSource?.slug?.startsWith('alfa-bank') ||
+	matchingSource?.slug?.startsWith('tbank') ||
+	matchingSource?.slug?.startsWith('efin');
+
+type HowToStep = { name: string; text: string };
+const buildHowToSteps = (): HowToStep[] => {
+	const steps: HowToStep[] = [];
+
+	steps.push(
+		hasApplyLink
+			? {
+					name: `Заполните анкету на сайте ${job.company}`,
+					text: `Перейдите по кнопке отклика в карточке. Укажите контакты, город${jobCities[0] ? ` (${jobCities[0]})` : ''}, удобный формат смен и подтвердите согласие на обработку данных.`,
+				}
+			: {
+					name: 'Уточните условия через страницу контактов',
+					text: 'Прямой ссылки на отклик пока нет — оставьте заявку через контакты, мы подскажем актуальные условия и подключим к работодателю.',
+				},
+	);
+
+	if (isBankRepresentativeRole) {
+		steps.push({
+			name: 'Пройдите телефонное собеседование',
+			text: `Сотрудник ${job.company} перезвонит в течение 1–2 рабочих дней, обсудит график, район работы и проверит документы.`,
+		});
+		steps.push({
+			name: 'Получите оборудование и обучение',
+			text: 'В офисе банка выдадут планшет и форму. Обучение оплачиваемое, длится 3–7 дней — изучаются продукты, скрипты и правила безопасности.',
+		});
+		steps.push({
+			name: 'Выходите на встречи с клиентами',
+			text: `Маршруты приходят в приложение представителя. Выплаты — ${job.details.payment_freq.toLowerCase()}, формат оформления — ${employmentTypeText.toLowerCase()}.`,
+		});
+	} else {
+		if (requiresSelfEmployedRegistration) {
+			steps.push({
+				name: 'Оформите самозанятость в «Мой налог»',
+				text: 'Регистрация бесплатная, занимает 5 минут — нужны паспорт и ИНН. Налог: 4% с дохода от физлиц, 6% с юрлиц. Без отчётности и страховых взносов.',
+			});
+		}
+		if (requiresMedicalBookFormat) {
+			steps.push({
+				name: 'Оформите медицинскую книжку',
+				text: `Обязательна для ${job.transport === 'foot' ? 'пешей' : 'велосипедной'} доставки еды. Стоит 2500–4000 ₽, оформляется за 1 рабочий день в платных клиниках с лицензией Роспотребнадзора.`,
+			});
+		}
+		steps.push({
+			name: 'Скачайте приложение и пройдите вводное обучение',
+			text: `Получите доступ к приложению курьера ${job.company}. Внутри: 15-минутный инструктаж, тарифы, правила работы со штрафами и поддержкой.`,
+		});
+		steps.push({
+			name: 'Выходите на первую смену',
+			text: `Открывайте слоты в приложении и принимайте заказы. Выплаты — ${job.details.payment_freq.toLowerCase()}, ставка по этой вакансии — ${job.salary.toLowerCase()}.`,
+		});
+	}
+
+	return steps.slice(0, 5);
+};
+
+const howToSteps = buildHowToSteps();
+const stepCountWord =
+	howToSteps.length === 1 ? 'шаг' : howToSteps.length < 5 ? 'шага' : 'шагов';
+const howToTitle = `Старт за ${howToSteps.length} ${stepCountWord}: ${job.title}`;
+const howToDescription = `Пошаговый план: с чего начать работу в ${job.company}${jobCities[0] ? ` (${jobCities[0]})` : ''}, что подготовить и в какой срок реально выйти на первую смену.`;
+
+// Block: dense one-paragraph fact summary. Designed for Speakable
+// schema and direct quoting by AI assistants — every clause answers a
+// distinct intent (доход / график / возраст / оформление / отклик).
+// `job.title` already includes the company + city, so we don't repeat
+// them in the opening sentence.
+const quickFactSummary = (() => {
+	const parts: string[] = [];
+	parts.push(`${job.title}.`);
+	parts.push(`Доход — ${job.salary}, выплаты ${job.details.payment_freq.toLowerCase()}.`);
+	parts.push(`График — ${job.details.schedule.toLowerCase()}.`);
+	parts.push(`Возраст: ${job.details.age.toLowerCase()}, гражданство — ${job.details.citizenship}.`);
+	parts.push(`Формат оформления: ${employmentTypeText}.`);
+	if (
+		job.details.transport_provision &&
+		job.details.transport_provision !== 'Транспорт не требуется'
+	) {
+		parts.push(`Транспорт: ${job.details.transport_provision.toLowerCase()}.`);
+	}
+	parts.push(
+		hasApplyLink
+			? 'Откликнуться можно сразу — кнопка ведёт на сайт работодателя.'
+			: 'Условия уточняются через страницу контактов.',
+	);
+	return parts.join(' ');
+})();
+
+// Block: alternatives. Auto-generated differentiator string explains
+// WHY each related vacancy is worth a click ("другая компания / другой
+// транспорт / другие выплаты"), so users (and crawlers) get value
+// from the cross-link, not just generic "похожие вакансии".
+type AlternativeJob = (typeof relatedJobs)[number];
+const TRANSPORT_LABEL_MAP: Record<string, string> = {
+	foot: 'пеший формат',
+	bicycle: 'велоформат',
+	auto: 'авто',
+	remote: 'удалённо',
+};
+const buildAlternativeDifferentiator = (other: AlternativeJob): string => {
+	if (other.company !== job.company) return `Другая компания — ${other.company}`;
+	if (other.location !== job.location) return `Другой город — ${other.location}`;
+	if (other.transport !== job.transport) {
+		return `Другой транспорт — ${TRANSPORT_LABEL_MAP[other.transport] ?? other.transport}`;
+	}
+	if (other.details.payment_freq !== job.details.payment_freq) {
+		return `Другая частота выплат — ${other.details.payment_freq.toLowerCase()}`;
+	}
+	if (other.details.employment_type !== job.details.employment_type) {
+		return `Другое оформление — ${other.details.employment_type}`;
+	}
+	return 'Похожие условия — для прямого сравнения';
+};
+const alternativesWithDiff = relatedJobs.map((other) => ({
+	job: other,
+	diff: buildAlternativeDifferentiator(other),
+}));
+
 const pageSchemaGraph = [
 	{
 		'@type': 'WebPage',
@@ -225,6 +371,23 @@ const pageSchemaGraph = [
 			name: job.company,
 			url: new URL(companyUrl, Astro.site).toString(),
 		},
+		// Voice-assistant hint: read the dense fact summary on request.
+		speakable: {
+			'@type': 'SpeakableSpecification',
+			cssSelector: ['#vacancy-quick-summary-text'],
+		},
+	},
+	{
+		'@type': 'HowTo',
+		name: howToTitle,
+		description: howToDescription,
+		totalTime: 'P1D',
+		step: howToSteps.map((step, index) => ({
+			'@type': 'HowToStep',
+			position: index + 1,
+			name: step.name,
+			text: step.text,
+		})),
 	},
 	buildJobPostingSchema({
 		title: job.title,
@@ -402,49 +565,110 @@ const pageSchemaGraph = [
 						</p>
 					</section>
 
-					<section class="vacancy-section vacancy-guidance-section">
-						<p class="section-eyebrow" data-t="vacancy.next_eyebrow">Дальше</p>
-						<h2 data-t="vacancy.next_title">Что ещё открыть после этой вакансии?</h2>
-						<div class="vacancy-route-grid">
-							<article class="route-card">
-								<h3 data-t="vacancy.useful_sections">Полезные разделы</h3>
-								<div class="route-chip-row">
-									<a href="/compare/" class="hero-link" data-t="nav.compare">Сравнение вакансий</a>
-									<a href={companyUrl} class="hero-link" data-t="vacancy.open_company">Страница компании</a>
-									<a href="/companies/" class="hero-link" data-t="vacancy.all_companies">Все компании</a>
-									{cityLinks.map((city) => (
-										<a href={city.href} class="hero-link"><span data-t="vacancy.city_jobs_prefix">Работа курьером в</span> {city.name}</a>
-									))}
-								</div>
-							</article>
+					<section class="vacancy-section vacancy-quick-summary" id="vacancy-quick-summary" aria-labelledby="vacancy-quick-summary-title">
+						<p class="section-eyebrow">Кратко о вакансии</p>
+						<h2 id="vacancy-quick-summary-title">Главное о вакансии в одном абзаце</h2>
+						<p id="vacancy-quick-summary-text" class="vacancy-quick-summary-text">{quickFactSummary}</p>
+					</section>
 
-							<article class="route-card">
-								<h3>Что важно знать перед откликом</h3>
-								<div class="route-chip-row">
-									<a href="/guide/dohod/" class="hero-link">Сколько зарабатывает курьер</a>
-									<a href="/guide/oformlenie/" class="hero-link">Оформление и налоги</a>
-									<a href="/guide/medknizhka/" class="hero-link">Медкнижка</a>
-									<a href="/guide/dokumenty/" class="hero-link">Какие документы нужны</a>
-									<a href="/guide/shtrafy/" class="hero-link">Штрафы курьерам</a>
-									<a href="/guide/" class="hero-link">Все темы — Гид</a>
-								</div>
-							</article>
+					<section class="vacancy-section vacancy-howto" id="vacancy-howto" aria-labelledby="vacancy-howto-title" itemscope itemtype="https://schema.org/HowTo">
+						<p class="section-eyebrow">Быстрый старт</p>
+						<h2 id="vacancy-howto-title" itemprop="name">{howToTitle}</h2>
+						<meta itemprop="totalTime" content="P1D" />
+						<p class="vacancy-howto-lead" itemprop="description">{howToDescription}</p>
+						<ol class="vacancy-howto-steps">
+							{howToSteps.map((step, index) => (
+								<li class="vacancy-howto-step" itemprop="step" itemscope itemtype="https://schema.org/HowToStep">
+									<meta itemprop="position" content={String(index + 1)} />
+									<span class="vacancy-howto-num" aria-hidden="true">{index + 1}</span>
+									<div class="vacancy-howto-body">
+										<h3 itemprop="name">{step.name}</h3>
+										<p itemprop="text">{step.text}</p>
+									</div>
+								</li>
+							))}
+						</ol>
+					</section>
 
-							<article class="route-card">
-								<h3 data-t="vacancy.related_jobs">Похожие вакансии для сравнения</h3>
-								<div class="related-jobs-grid">
-									{relatedJobs.map((relatedJob) => (
-										<a href={`/v/${relatedJob.slug}/`} class="related-job-card">
-											<strong data-t={`vacancies.${relatedJob.id}.title`}>{relatedJob.title}</strong>
-											<span data-t={`vacancies.${relatedJob.id}.company`}>{relatedJob.company}</span>
-											<div class="related-job-meta">
-												<span data-t={`vacancies.${relatedJob.id}.salary`}>{relatedJob.salary}</span>
-												<span data-t={`vacancies.${relatedJob.id}.location`}>{relatedJob.location}</span>
-											</div>
-										</a>
-									))}
-								</div>
-							</article>
+					{incomeScenarios && (
+						<section class="vacancy-section vacancy-income-scenarios" id="vacancy-income-scenarios" aria-labelledby="vacancy-income-scenarios-title">
+							<p class="section-eyebrow">Расчёт дохода</p>
+							<h2 id="vacancy-income-scenarios-title">Сколько можно заработать на этой вакансии</h2>
+							<p class="vacancy-income-scenarios-lead">
+								Базовая ставка — <strong>{formattedHourlyRate}</strong>. Цифры ниже — оценка дохода до&nbsp;налогов
+								при разных режимах смен. Реальная сумма зависит от спроса, бонусов и&nbsp;района.
+							</p>
+							<div class="vacancy-income-table-wrap">
+								<table class="vacancy-income-table">
+									<thead>
+										<tr>
+											<th scope="col">Режим</th>
+											<th scope="col">Часы за смену</th>
+											<th scope="col">Смен в&nbsp;месяц</th>
+											<th scope="col">Месячный доход</th>
+										</tr>
+									</thead>
+									<tbody>
+										{incomeScenarios.map((scenario) => (
+											<tr class={`vacancy-income-row vacancy-income-row-${scenario.key}`}>
+												<th scope="row">{scenario.label}</th>
+												<td>{scenario.hours} ч</td>
+												<td>{scenario.shifts}</td>
+												<td><strong>{scenario.income}</strong></td>
+											</tr>
+										))}
+									</tbody>
+								</table>
+							</div>
+							<p class="vacancy-income-scenarios-note">
+								{requiresSelfEmployedRegistration
+									? 'Налог самозанятого: 4% с дохода от физлиц, 6% — с юрлиц. Чистый доход = сумма выше минус налог.'
+									: 'Указанные суммы — до удержания налогов; их размер зависит от формата оформления.'}
+							</p>
+						</section>
+					)}
+
+					<section class="vacancy-section vacancy-alternatives" id="vacancy-alternatives" aria-labelledby="vacancy-alternatives-title">
+						<p class="section-eyebrow">Альтернативы и разделы</p>
+						<h2 id="vacancy-alternatives-title">Что ещё посмотреть и&nbsp;с&nbsp;чем&nbsp;сравнить</h2>
+						<p class="vacancy-alternatives-lead">
+							Если хочется выбрать осознанно — рядом подобраны самые близкие вакансии с&nbsp;коротким объяснением,
+							чем они отличаются от&nbsp;этой, и&nbsp;ключевые разделы сайта по&nbsp;теме.
+						</p>
+
+						<div class="vacancy-alternatives-grid">
+							{alternativesWithDiff.map(({ job: other, diff }) => (
+								<a class="vacancy-alternative-card" href={`/v/${other.slug}/`}>
+									<span class="vacancy-alternative-diff">{diff}</span>
+									<strong class="vacancy-alternative-title" data-t={`vacancies.${other.id}.title`}>{other.title}</strong>
+									<span class="vacancy-alternative-company" data-t={`vacancies.${other.id}.company`}>{other.company}</span>
+									<dl class="vacancy-alternative-meta">
+										<div>
+											<dt>Доход</dt>
+											<dd data-t={`vacancies.${other.id}.salary`}>{other.salary}</dd>
+										</div>
+										<div>
+											<dt>Город</dt>
+											<dd data-t={`vacancies.${other.id}.location`}>{other.location}</dd>
+										</div>
+										<div>
+											<dt>Выплаты</dt>
+											<dd data-t={`vacancies.${other.id}.details_payment_freq`}>{other.details.payment_freq}</dd>
+										</div>
+									</dl>
+								</a>
+							))}
+						</div>
+
+						<div class="vacancy-alternatives-deeplinks">
+							<a class="vacancy-alternatives-deeplink" href="/compare/">Сравнить рядом до 4 вакансий →</a>
+							<a class="vacancy-alternatives-deeplink" href={companyUrl}>Все вакансии {job.company} →</a>
+							{cityLinks.length > 0 && (
+								<a class="vacancy-alternatives-deeplink" href={cityLinks[0].href}>
+									Курьерские вакансии в {cityLinks[0].name} →
+								</a>
+							)}
+							<a class="vacancy-alternatives-deeplink" href="/guide/">Гид для курьера: возраст, медкнижка, доход, налоги →</a>
 						</div>
 					</section>
 				</div>
@@ -1480,6 +1704,423 @@ const pageSchemaGraph = [
 	@media (max-width: 600px) {
 		.vacancy-kb-section {
 			padding: 1.2rem 1rem;
+		}
+	}
+
+	/* === SEO+AI replacement blocks === */
+
+	/* Block A: Quick fact summary (Speakable) */
+	.vacancy-quick-summary {
+		padding: 1.6rem 1.85rem;
+		background: var(--vacancy-soft-strong);
+		border: 1px solid var(--vacancy-chip-border);
+		border-radius: 16px;
+		box-shadow: var(--vacancy-shadow);
+		display: grid;
+		gap: 0.55rem;
+	}
+	.vacancy-quick-summary .section-eyebrow {
+		margin: 0;
+		font-size: 0.78rem;
+		font-weight: 800;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--vacancy-eyebrow);
+	}
+	.vacancy-quick-summary h2 {
+		margin: 0;
+		font-family: var(--font-heading, 'Manrope', sans-serif);
+		font-size: clamp(1.25rem, 2vw, 1.55rem);
+		line-height: 1.18;
+		color: var(--vacancy-ink);
+		letter-spacing: -0.01em;
+	}
+	.vacancy-quick-summary-text {
+		margin: 0;
+		font-size: 1.02rem;
+		line-height: 1.6;
+		color: var(--vacancy-ink);
+		max-width: 78ch;
+	}
+
+	/* Block B: HowTo steps */
+	.vacancy-howto {
+		padding: 1.75rem 1.85rem;
+		background: var(--vacancy-card);
+		border: 1px solid var(--vacancy-border);
+		border-radius: 16px;
+		box-shadow: var(--vacancy-shadow);
+		display: grid;
+		gap: 0.85rem;
+	}
+	.vacancy-howto h2 {
+		margin: 0;
+		font-family: var(--font-heading, 'Manrope', sans-serif);
+		font-size: clamp(1.4rem, 2.2vw, 1.75rem);
+		line-height: 1.18;
+		letter-spacing: -0.01em;
+		color: var(--vacancy-ink);
+	}
+	.vacancy-howto-lead {
+		margin: 0;
+		max-width: 70ch;
+		color: var(--vacancy-muted);
+		font-size: 0.95rem;
+		line-height: 1.55;
+	}
+	.vacancy-howto-steps {
+		list-style: none;
+		margin: 0.25rem 0 0;
+		padding: 0;
+		display: grid;
+		gap: 0.7rem;
+	}
+	.vacancy-howto-step {
+		position: relative;
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: 0.95rem;
+		padding: 1rem 1.15rem;
+		background: var(--vacancy-soft);
+		border: 1px solid var(--vacancy-border);
+		border-radius: 12px;
+		transition: border-color 0.18s ease, transform 0.18s ease;
+	}
+	.vacancy-howto-step:hover {
+		border-color: var(--vacancy-chip-border);
+		transform: translateY(-1px);
+	}
+	.vacancy-howto-num {
+		flex: 0 0 auto;
+		display: grid;
+		place-items: center;
+		width: 2.1rem;
+		height: 2.1rem;
+		border-radius: 999px;
+		background: var(--vacancy-action);
+		color: #ffffff;
+		font-family: var(--font-heading, 'Manrope', sans-serif);
+		font-weight: 800;
+		font-size: 0.95rem;
+		line-height: 1;
+	}
+	.vacancy-howto-body {
+		display: grid;
+		gap: 0.3rem;
+	}
+	.vacancy-howto-body h3 {
+		margin: 0;
+		font-family: var(--font-heading, 'Manrope', sans-serif);
+		font-size: 1rem;
+		font-weight: 700;
+		color: var(--vacancy-ink);
+		line-height: 1.3;
+	}
+	.vacancy-howto-body p {
+		margin: 0;
+		font-size: 0.92rem;
+		line-height: 1.55;
+		color: var(--vacancy-muted);
+	}
+
+	/* Block C: Income scenarios table */
+	.vacancy-income-scenarios {
+		padding: 1.75rem 1.85rem;
+		background: var(--vacancy-card);
+		border: 1px solid var(--vacancy-border);
+		border-radius: 16px;
+		box-shadow: var(--vacancy-shadow);
+		display: grid;
+		gap: 0.85rem;
+	}
+	.vacancy-income-scenarios h2 {
+		margin: 0;
+		font-family: var(--font-heading, 'Manrope', sans-serif);
+		font-size: clamp(1.4rem, 2.2vw, 1.75rem);
+		line-height: 1.18;
+		letter-spacing: -0.01em;
+		color: var(--vacancy-ink);
+	}
+	.vacancy-income-scenarios-lead {
+		margin: 0;
+		max-width: 70ch;
+		color: var(--vacancy-muted);
+		font-size: 0.95rem;
+		line-height: 1.55;
+	}
+	.vacancy-income-scenarios-lead strong {
+		color: var(--vacancy-ink);
+		font-weight: 800;
+	}
+	.vacancy-income-table-wrap {
+		overflow-x: auto;
+	}
+	.vacancy-income-table {
+		width: 100%;
+		border-collapse: separate;
+		border-spacing: 0;
+		font-size: 0.95rem;
+		min-width: 360px;
+	}
+	.vacancy-income-table thead th {
+		text-align: left;
+		padding: 0.7rem 0.9rem;
+		font-size: 0.78rem;
+		font-weight: 800;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: var(--vacancy-eyebrow);
+		border-bottom: 1px solid var(--vacancy-border);
+		background: var(--vacancy-soft);
+	}
+	.vacancy-income-table thead th:first-child {
+		border-top-left-radius: 12px;
+	}
+	.vacancy-income-table thead th:last-child {
+		border-top-right-radius: 12px;
+		text-align: right;
+	}
+	.vacancy-income-table tbody th {
+		text-align: left;
+		font-weight: 700;
+		color: var(--vacancy-ink);
+	}
+	.vacancy-income-table tbody td,
+	.vacancy-income-table tbody th {
+		padding: 0.85rem 0.9rem;
+		border-bottom: 1px solid var(--vacancy-border);
+		color: var(--vacancy-ink);
+	}
+	.vacancy-income-table tbody tr:last-child td,
+	.vacancy-income-table tbody tr:last-child th {
+		border-bottom: none;
+	}
+	.vacancy-income-table tbody td:last-child {
+		text-align: right;
+	}
+	.vacancy-income-row-std {
+		background: var(--vacancy-soft-strong);
+	}
+	.vacancy-income-row-std th,
+	.vacancy-income-row-std td strong {
+		color: var(--vacancy-action);
+	}
+	.vacancy-income-scenarios-note {
+		margin: 0;
+		font-size: 0.85rem;
+		color: var(--vacancy-eyebrow);
+		line-height: 1.5;
+	}
+
+	/* Block D: Alternatives + cross-links */
+	.vacancy-alternatives {
+		padding: 1.75rem 1.85rem;
+		background: var(--vacancy-card);
+		border: 1px solid var(--vacancy-border);
+		border-radius: 16px;
+		box-shadow: var(--vacancy-shadow);
+		display: grid;
+		gap: 0.95rem;
+	}
+	.vacancy-alternatives h2 {
+		margin: 0;
+		font-family: var(--font-heading, 'Manrope', sans-serif);
+		font-size: clamp(1.4rem, 2.2vw, 1.75rem);
+		line-height: 1.18;
+		letter-spacing: -0.01em;
+		color: var(--vacancy-ink);
+	}
+	.vacancy-alternatives-lead {
+		margin: 0;
+		max-width: 70ch;
+		color: var(--vacancy-muted);
+		font-size: 0.95rem;
+		line-height: 1.55;
+	}
+	.vacancy-alternatives-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+		gap: 0.7rem;
+	}
+	.vacancy-alternative-card {
+		display: grid;
+		gap: 0.35rem;
+		padding: 1rem 1.1rem;
+		text-decoration: none;
+		color: var(--vacancy-ink);
+		background: var(--vacancy-soft);
+		border: 1px solid var(--vacancy-border);
+		border-radius: 12px;
+		transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+	}
+	.vacancy-alternative-card:hover,
+	.vacancy-alternative-card:focus-visible {
+		border-color: var(--vacancy-action);
+		transform: translateY(-2px);
+		box-shadow: var(--vacancy-shadow);
+		outline: none;
+	}
+	.vacancy-alternative-diff {
+		display: inline-block;
+		padding: 0.18rem 0.55rem;
+		border-radius: 999px;
+		background: rgba(22, 61, 43, 0.07);
+		color: var(--vacancy-action);
+		font-size: 0.7rem;
+		font-weight: 800;
+		letter-spacing: 0.02em;
+		text-transform: uppercase;
+		width: fit-content;
+	}
+	.vacancy-alternative-title {
+		font-family: var(--font-heading, 'Manrope', sans-serif);
+		font-weight: 700;
+		font-size: 1rem;
+		line-height: 1.3;
+		color: var(--vacancy-ink);
+	}
+	.vacancy-alternative-company {
+		font-size: 0.85rem;
+		color: var(--vacancy-muted);
+	}
+	.vacancy-alternative-meta {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 0.4rem;
+		margin: 0.35rem 0 0;
+	}
+	.vacancy-alternative-meta > div {
+		display: grid;
+		gap: 0.1rem;
+	}
+	.vacancy-alternative-meta dt {
+		margin: 0;
+		font-size: 0.68rem;
+		font-weight: 800;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: var(--vacancy-eyebrow);
+	}
+	.vacancy-alternative-meta dd {
+		margin: 0;
+		font-size: 0.84rem;
+		color: var(--vacancy-ink);
+		line-height: 1.3;
+	}
+	.vacancy-alternatives-deeplinks {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.55rem;
+		margin-top: 0.25rem;
+	}
+	.vacancy-alternatives-deeplink {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.55rem 0.95rem;
+		border-radius: 999px;
+		background: rgba(22, 61, 43, 0.07);
+		color: var(--vacancy-action);
+		font-weight: 700;
+		font-size: 0.88rem;
+		text-decoration: none;
+		transition: background 0.18s ease, transform 0.18s ease;
+	}
+	.vacancy-alternatives-deeplink:hover,
+	.vacancy-alternatives-deeplink:focus-visible {
+		background: rgba(22, 61, 43, 0.14);
+		transform: translateX(2px);
+		outline: none;
+	}
+
+	/* === SEO+AI replacement blocks: Dark mode === */
+	:global(:where(html, body).dark-mode) .vacancy-quick-summary {
+		background: rgba(22, 30, 44, 0.78);
+		border-color: rgba(195, 204, 216, 0.2);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-quick-summary h2,
+	:global(:where(html, body).dark-mode) .vacancy-quick-summary-text {
+		color: #e7eaf0;
+	}
+	:global(:where(html, body).dark-mode) .vacancy-quick-summary .section-eyebrow {
+		color: rgba(231, 234, 240, 0.55);
+	}
+
+	:global(:where(html, body).dark-mode) .vacancy-howto,
+	:global(:where(html, body).dark-mode) .vacancy-income-scenarios,
+	:global(:where(html, body).dark-mode) .vacancy-alternatives {
+		background: rgba(20, 32, 48, 0.7);
+		border-color: rgba(195, 204, 216, 0.18);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-howto h2,
+	:global(:where(html, body).dark-mode) .vacancy-income-scenarios h2,
+	:global(:where(html, body).dark-mode) .vacancy-alternatives h2,
+	:global(:where(html, body).dark-mode) .vacancy-howto-body h3,
+	:global(:where(html, body).dark-mode) .vacancy-alternative-title,
+	:global(:where(html, body).dark-mode) .vacancy-alternative-meta dd,
+	:global(:where(html, body).dark-mode) .vacancy-income-table tbody td,
+	:global(:where(html, body).dark-mode) .vacancy-income-table tbody th {
+		color: #e7eaf0;
+	}
+	:global(:where(html, body).dark-mode) .vacancy-howto-lead,
+	:global(:where(html, body).dark-mode) .vacancy-income-scenarios-lead,
+	:global(:where(html, body).dark-mode) .vacancy-alternatives-lead,
+	:global(:where(html, body).dark-mode) .vacancy-howto-body p,
+	:global(:where(html, body).dark-mode) .vacancy-alternative-company {
+		color: rgba(231, 234, 240, 0.7);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-howto .section-eyebrow,
+	:global(:where(html, body).dark-mode) .vacancy-income-scenarios .section-eyebrow,
+	:global(:where(html, body).dark-mode) .vacancy-alternatives .section-eyebrow,
+	:global(:where(html, body).dark-mode) .vacancy-income-table thead th,
+	:global(:where(html, body).dark-mode) .vacancy-alternative-meta dt,
+	:global(:where(html, body).dark-mode) .vacancy-income-scenarios-note {
+		color: rgba(231, 234, 240, 0.55);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-howto-step,
+	:global(:where(html, body).dark-mode) .vacancy-alternative-card,
+	:global(:where(html, body).dark-mode) .vacancy-income-table thead th {
+		background: rgba(15, 23, 36, 0.65);
+		border-color: rgba(195, 204, 216, 0.16);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-howto-step:hover,
+	:global(:where(html, body).dark-mode) .vacancy-alternative-card:hover,
+	:global(:where(html, body).dark-mode) .vacancy-alternative-card:focus-visible {
+		border-color: rgba(76, 175, 128, 0.55);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-howto-num {
+		background: #4caf80;
+		color: #0e1622;
+	}
+	:global(:where(html, body).dark-mode) .vacancy-income-table tbody td,
+	:global(:where(html, body).dark-mode) .vacancy-income-table tbody th {
+		border-bottom-color: rgba(195, 204, 216, 0.14);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-income-row-std {
+		background: rgba(76, 175, 128, 0.12);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-income-row-std th,
+	:global(:where(html, body).dark-mode) .vacancy-income-row-std td strong {
+		color: #4caf80;
+	}
+	:global(:where(html, body).dark-mode) .vacancy-alternative-diff,
+	:global(:where(html, body).dark-mode) .vacancy-alternatives-deeplink {
+		background: rgba(76, 175, 128, 0.15);
+		color: #4caf80;
+	}
+	:global(:where(html, body).dark-mode) .vacancy-alternatives-deeplink:hover,
+	:global(:where(html, body).dark-mode) .vacancy-alternatives-deeplink:focus-visible {
+		background: rgba(76, 175, 128, 0.25);
+	}
+
+	@media (max-width: 600px) {
+		.vacancy-quick-summary,
+		.vacancy-howto,
+		.vacancy-income-scenarios,
+		.vacancy-alternatives {
+			padding: 1.2rem 1rem;
+		}
+		.vacancy-alternative-meta {
+			grid-template-columns: 1fr;
 		}
 	}
 </style>
