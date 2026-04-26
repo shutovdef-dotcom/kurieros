@@ -2,10 +2,8 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { CATEGORIES } from '../data/constants';
 import jobsData from '../data/jobs';
-import articlesData from '../data/articles.json';
-import { getCitiesFromJobs, getCityNames, sortCityNamesByPopulation } from '../utils/cities';
+import { getCityNames, sortCityNamesByPopulation } from '../utils/cities';
 import { slugifyCompany } from '../utils/companies';
 import { parseSalary } from '../utils/format';
 import { buildBreadcrumbSchema } from '../utils/schema';
@@ -67,31 +65,6 @@ const compareJobs = jobsData.slice(0, 4).map(mapCompareJob);
 const totalCompareJobs = jobsData.length;
 const availableCities = sortCityNamesByPopulation(getCityNames(jobsData));
 
-const compareCompanies = Array.from(
-  new Map(compareJobs.map((job) => [job.company, { name: job.company, href: job.companyHref }])).values(),
-);
-const compareCities = getCitiesFromJobs(compareJobs)
-  .sort((a, b) => b.vacancyCount - a.vacancyCount)
-  .slice(0, 4)
-  .map((city) => ({
-    name: city.name,
-    href: `/rabota-kurerom-${city.slug}/`,
-  }));
-const compareFormats = ['na-avto', 'peshkom', 'dlya-studentov', 'ezhednevnaya-oplata']
-  .map((slug) => CATEGORIES.find((category) => category.slug === slug))
-  .filter(Boolean)
-  .map((category) => ({
-    name: category!.name,
-    href: `/rabota-kurerom-${category!.slug}/`,
-  }));
-const relatedArticles = articlesData
-  .filter((article) => /срав|выбрать|курьер|доход|компан/i.test(`${article.title} ${article.description}`))
-  .slice(0, 3)
-  .map((article) => ({
-    title: article.title,
-    href: `/blog/${article.slug}/`,
-  }));
-
 const features = [
   { key: 'salary', name: 'Зарплата' },
   { key: 'location', name: 'Район работы' },
@@ -152,18 +125,6 @@ const buildDecisionCards = (jobs: typeof compareJobs) => {
 
 const decisionCards = buildDecisionCards(compareJobs);
 const answerFocusPoints = ['Выплаты', 'Транспорт', 'Оформление', 'Возрастной порог'];
-
-const fitPoints = [
-  'Сравнение полезно тем, кто уже выбрал 2-4 похожих вакансии и хочет быстро увидеть разницу по выплатам, транспорту и оформлению.',
-  'Такой экран особенно помогает перед откликом, когда нужно отсечь неподходящие условия без лишних переходов между страницами.',
-  'Если выбор уже сузился до одной компании, после сравнения лучше открыть её карточку и проверить ограничения детально.',
-];
-
-const cautionPoints = [
-  'Верхняя зарплатная планка не равна гарантированному доходу: проверяйте формулу выплат и частоту начислений.',
-  'Если для вас критичны ТК РФ, гражданство, медкнижка или точный район, эти пункты лучше сверять в карточке вакансии.',
-  'Сравнение помогает принять решение быстрее, но финальные условия подтверждаются уже у работодателя или в анкете партнера.',
-];
 
 const faqItems = [
   {
@@ -364,63 +325,6 @@ const pageSchemaGraph = [
             <a href={card.href} class="compare-route-link">Открыть вариант</a>
           </article>
         ))}
-      </section>
-
-      <section class="compare-geo-grid">
-        <article class="compare-geo-card">
-          <p class="section-eyebrow">Кому подходит</p>
-          <h2>Когда это сравнение реально полезно?</h2>
-          <ul class="compare-list">
-            {fitPoints.map((point) => (
-              <li>{point}</li>
-            ))}
-          </ul>
-        </article>
-
-        <article class="compare-geo-card compare-geo-card-caution">
-          <p class="section-eyebrow">Что уточнить</p>
-          <h2>Что проверить перед откликом?</h2>
-          <ol class="compare-list numbered-list">
-            {cautionPoints.map((point) => (
-              <li>{point}</li>
-            ))}
-          </ol>
-        </article>
-      </section>
-
-      <section class="compare-link-grid" aria-label="Куда перейти после сравнения">
-        <article class="compare-link-card">
-          <p class="section-eyebrow">По компаниям</p>
-          <h2>Куда идти после короткого сравнения?</h2>
-          <div class="compare-chip-row" data-compare-companies>
-            {compareCompanies.map((company) => (
-              <a href={company.href} class="compare-chip-link">{company.name}</a>
-            ))}
-          </div>
-        </article>
-
-        <article class="compare-link-card">
-          <p class="section-eyebrow">По материалам</p>
-          <h2>Что прочитать перед откликом?</h2>
-          <div class="compare-article-stack">
-            {relatedArticles.map((article) => (
-              <a href={article.href} class="compare-article-link">{article.title}</a>
-            ))}
-          </div>
-        </article>
-
-        <article class="compare-link-card">
-          <p class="section-eyebrow">По условиям</p>
-          <h2>Куда идти, если формат уже понятен?</h2>
-          <div class="compare-chip-row">
-            {compareFormats.map((format) => (
-              <a href={format.href} class="compare-chip-link">{format.name}</a>
-            ))}
-            {compareCities.map((city) => (
-              <a href={city.href} class="compare-chip-link">{city.name}</a>
-            ))}
-          </div>
-        </article>
       </section>
 
       <section class="compare-faq-section">
@@ -1194,6 +1098,16 @@ const pageSchemaGraph = [
     word-break: break-word;
     hyphens: auto;
     scroll-snap-align: start;
+  }
+
+  /* Column dividers between job columns. Light theme = darker line,
+     dark theme = lighter line (per user request). First job column
+     has a divider to its left to separate from sticky feature column. */
+  .compare-cell.job-col {
+    border-left: 1px solid var(--ink-200, #d4dae3);
+  }
+  :global(body.dark-mode) .compare-cell.job-col {
+    border-left-color: rgba(231, 234, 240, 0.18);
   }
 
   .feature-col {
