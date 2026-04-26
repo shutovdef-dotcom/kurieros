@@ -5,7 +5,7 @@ import Footer from '../components/Footer.astro';
 import { CATEGORIES } from '../data/constants';
 import jobsData from '../data/jobs';
 import articlesData from '../data/articles.json';
-import { getCitiesFromJobs } from '../utils/cities';
+import { getCitiesFromJobs, getCityNames, sortCityNamesByPopulation } from '../utils/cities';
 import { slugifyCompany } from '../utils/companies';
 import { parseSalary } from '../utils/format';
 import { buildBreadcrumbSchema } from '../utils/schema';
@@ -65,6 +65,7 @@ const mapCompareJob = (job: typeof jobsData[number]) => ({
 // lazily by the client only if user has saved compareList in localStorage.
 const compareJobs = jobsData.slice(0, 4).map(mapCompareJob);
 const totalCompareJobs = jobsData.length;
+const availableCities = sortCityNamesByPopulation(getCityNames(jobsData));
 
 const compareCompanies = Array.from(
   new Map(compareJobs.map((job) => [job.company, { name: job.company, href: job.companyHref }])).values(),
@@ -254,6 +255,35 @@ const pageSchemaGraph = [
             ))}
           </div>
         </div>
+      </section>
+
+      <section class="compare-filters" aria-label="Фильтры сравнения">
+        <p class="compare-filters-hint">
+          Можно сравнить добавленные вакансии вручную, либо выбрать город и транспорт — и страница покажет все подходящие варианты.
+        </p>
+        <div class="compare-filters-row">
+          <label class="compare-filter">
+            <span>Город</span>
+            <select id="compare-city-filter">
+              <option value="">Все города</option>
+              {availableCities.map((city) => (
+                <option value={city}>{city}</option>
+              ))}
+            </select>
+          </label>
+          <label class="compare-filter">
+            <span>Транспорт</span>
+            <select id="compare-transport-filter">
+              <option value="">Любой формат</option>
+              <option value="foot">Пешком</option>
+              <option value="bicycle">Велосипед / самокат</option>
+              <option value="auto">Авто</option>
+              <option value="remote">Удалённо / из дома</option>
+            </select>
+          </label>
+          <button type="button" id="compare-filter-reset" class="compare-filter-reset">Сбросить</button>
+        </div>
+        <p class="compare-filters-status" id="compare-filters-status" aria-live="polite"></p>
       </section>
 
       <div class="compare-table-wrapper" id="compare-table">
@@ -726,6 +756,76 @@ const pageSchemaGraph = [
       if (event.key === 'compareList') {
         renderSelectedComparison();
       }
+    });
+
+    // ====== City + transport filter mode ======
+    // When user picks city/transport, fetch full catalog and render
+    // matching jobs (overrides the localStorage-driven manual mode).
+    const cityFilter = document.getElementById('compare-city-filter');
+    const transportFilter = document.getElementById('compare-transport-filter');
+    const filterReset = document.getElementById('compare-filter-reset');
+    const filterStatus = document.getElementById('compare-filters-status');
+
+    const TRANSPORT_LABEL_TO_TAG = {
+      'Авто': 'auto',
+      'Велосипед / самокат': 'bicycle',
+      'Пешком': 'foot',
+      'Удалённо / офис': 'remote',
+    };
+
+    function jobMatchesTransport(job, tagValue) {
+      if (!tagValue) return true;
+      const label = String(job.transport || '');
+      if (TRANSPORT_LABEL_TO_TAG[label] === tagValue) return true;
+      return false;
+    }
+
+    function jobMatchesCity(job, cityName) {
+      if (!cityName) return true;
+      const loc = String(job.location || '').toLowerCase();
+      return loc.includes(cityName.toLowerCase()) || loc === 'вся россия';
+    }
+
+    function setStatus(text) {
+      if (filterStatus) filterStatus.textContent = text || '';
+    }
+
+    async function applyServerFilters() {
+      const city = cityFilter?.value || '';
+      const transport = transportFilter?.value || '';
+      if (!city && !transport) {
+        // No filter — fall back to manual selection from localStorage.
+        renderSelectedComparison();
+        setStatus('');
+        return;
+      }
+      setStatus('Загружаем подходящие вакансии…');
+      const all = await ensureFullCatalog();
+      const list = Array.isArray(all) ? all : [];
+      const matched = list.filter((job) => jobMatchesCity(job, city) && jobMatchesTransport(job, transport));
+      // Cap to 12 columns (UI limit) but show count of total matches.
+      const display = matched.slice(0, 12);
+      if (display.length === 0) {
+        setStatus(`Нет вакансий по фильтру «${city || 'любой город'} / ${transport ? Object.keys(TRANSPORT_LABEL_TO_TAG).find(k => TRANSPORT_LABEL_TO_TAG[k] === transport) : 'любой транспорт'}»`);
+        renderComparisonTable([]);
+        renderDecisionCards([]);
+        renderCompanyLinks([]);
+        return;
+      }
+      renderComparisonTable(display);
+      renderDecisionCards(display);
+      renderCompanyLinks(display);
+      setStatus(matched.length > display.length
+        ? `Показано ${display.length} из ${matched.length} вакансий по фильтру`
+        : `Показано ${display.length} вакансий по фильтру`);
+    }
+
+    cityFilter?.addEventListener('change', applyServerFilters);
+    transportFilter?.addEventListener('change', applyServerFilters);
+    filterReset?.addEventListener('click', () => {
+      if (cityFilter) cityFilter.value = '';
+      if (transportFilter) transportFilter.value = '';
+      applyServerFilters();
     });
   });
 </script>
@@ -1470,5 +1570,78 @@ const pageSchemaGraph = [
   .remove-col-btn:hover {
     background: var(--danger-bg);
     color: var(--danger-fg);
+  }
+  .compare-filters {
+    margin: 24px 0 16px;
+    padding: 20px 24px;
+    background: var(--ink-50, #f7f5ee);
+    border: 1px solid var(--ink-100, #e5e8ed);
+    border-radius: 16px;
+  }
+  .compare-filters-hint {
+    margin: 0 0 14px;
+    font-size: 14px;
+    color: var(--ink-700, #2c3440);
+  }
+  .compare-filters-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+  }
+  .compare-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1 1 220px;
+    min-width: 200px;
+  }
+  .compare-filter span {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-500, #6c7785);
+  }
+  .compare-filter select {
+    height: 44px;
+    padding: 0 14px;
+    border-radius: 12px;
+    border: 1px solid var(--ink-100, #e5e8ed);
+    background: var(--surface-100, #fff);
+    font-size: 15px;
+    color: var(--ink-900, #0f172a);
+    cursor: pointer;
+  }
+  .compare-filter-reset {
+    height: 44px;
+    padding: 0 18px;
+    border-radius: 12px;
+    border: 1px solid var(--ink-100, #e5e8ed);
+    background: var(--surface-100, #fff);
+    color: var(--ink-700, #2c3440);
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .compare-filter-reset:hover {
+    border-color: var(--brand-700, #16734c);
+    color: var(--brand-700, #16734c);
+  }
+  .compare-filters-status {
+    margin: 12px 0 0;
+    font-size: 13px;
+    color: var(--brand-700, #16734c);
+    min-height: 18px;
+  }
+  :global(body.dark-mode) .compare-filters {
+    background: var(--surface-200, #1a2230);
+    border-color: var(--ink-200, #2a3441);
+  }
+  :global(body.dark-mode) .compare-filter select,
+  :global(body.dark-mode) .compare-filter-reset {
+    background: var(--surface-100, #0e1622);
+    color: #e7eaf0;
+    border-color: var(--ink-200, #2a3441);
   }
 </style>

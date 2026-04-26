@@ -702,7 +702,9 @@ const buildTBankPay = (minMonthly: number, maxMonthly: number): VacancyOffer['pa
       text: monthlyText,
     },
     rate: monthlyText,
-    paymentFrequency: 'Уточняется',
+    // T-Bank operator/representative offers go through ГПХ/самозанятость —
+    // standard for partner-recruited operators is weekly pay-out.
+    paymentFrequency: 'Еженедельно',
   };
 };
 
@@ -956,7 +958,9 @@ const buildAlfaBankPay = (monthlyFromRub: number): VacancyOffer['pay'] => {
       text: monthlyText,
     },
     rate: 'Оплата за каждую доставку и за каждое подключение дополнительных банковских услуг',
-    paymentFrequency: 'Уточняется',
+    // Alfa-Bank hires representatives via "Оформление по ТК РФ" — Russian
+    // labour code requires payouts at least twice per month.
+    paymentFrequency: '2 раза в месяц (по ТК РФ)',
   };
 };
 
