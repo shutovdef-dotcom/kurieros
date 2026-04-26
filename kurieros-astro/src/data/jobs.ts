@@ -18,89 +18,91 @@ const TRANSPORT_TAGS: Record<TransportMode, string> = {
   foot: 'foot',
   auto: 'auto',
   bicycle: 'bicycle',
+  remote: 'remote',
 };
 
 type LocalizedLabels<T extends string> = Record<SupportedLanguage, Record<T, string>>;
 
 const TRANSPORT_LABELS: LocalizedLabels<TransportMode> = {
-  ru: { foot: 'Пеший', auto: 'На авто', bicycle: 'На велосипеде' },
-  uz: { foot: 'Piyoda', auto: 'Avtomobilda', bicycle: 'Velosipedda' },
-  tg: { foot: 'Пиёда', auto: 'Бо мошин', bicycle: 'Бо велосипед' },
-  ky: { foot: 'Жөө', auto: 'Унаа менен', bicycle: 'Велосипед менен' },
-  hy: { foot: 'Հետիոտն', auto: 'Ավտոյով', bicycle: 'Հեծանիվով' },
-  kk: { foot: 'Жаяу', auto: 'Көлікпен', bicycle: 'Велосипедпен' },
-  az: { foot: 'Piyada', auto: 'Avtomobillə', bicycle: 'Velosipedlə' },
-  uk: { foot: 'Пішки', auto: 'На авто', bicycle: 'На велосипеді' },
-  be: { foot: 'Пешшу', auto: 'На аўто', bicycle: 'На ровары' },
-  hi: { foot: 'पैदल', auto: 'कार से', bicycle: 'साइकिल से' },
-  vi: { foot: 'Đi bộ', auto: 'Bằng ô tô', bicycle: 'Bằng xe đạp' },
-  zh: { foot: '步行', auto: '开车', bicycle: '骑自行车' },
+  ru: { foot: 'Пеший', auto: 'На авто', bicycle: 'На велосипеде', remote: 'Удалённо / офис' },
+  uz: { foot: 'Piyoda', auto: 'Avtomobilda', bicycle: 'Velosipedda', remote: 'Masofadan / ofis' },
+  tg: { foot: 'Пиёда', auto: 'Бо мошин', bicycle: 'Бо велосипед', remote: 'Аз масофа / офис' },
+  ky: { foot: 'Жөө', auto: 'Унаа менен', bicycle: 'Велосипед менен', remote: 'Алыстан / офис' },
+  hy: { foot: 'Հետիոտն', auto: 'Ավտոյով', bicycle: 'Հեծանիվով', remote: 'Հեռավար / գրասենյակ' },
+  kk: { foot: 'Жаяу', auto: 'Көлікпен', bicycle: 'Велосипедпен', remote: 'Қашықтан / офис' },
+  az: { foot: 'Piyada', auto: 'Avtomobillə', bicycle: 'Velosipedlə', remote: 'Uzaqdan / ofis' },
+  uk: { foot: 'Пішки', auto: 'На авто', bicycle: 'На велосипеді', remote: 'Віддалено / офіс' },
+  be: { foot: 'Пешшу', auto: 'На аўто', bicycle: 'На ровары', remote: 'Аддалена / офіс' },
+  hi: { foot: 'पैदल', auto: 'कार से', bicycle: 'साइकिल से', remote: 'दूरस्थ / कार्यालय' },
+  vi: { foot: 'Đi bộ', auto: 'Bằng ô tô', bicycle: 'Bằng xe đạp', remote: 'Từ xa / văn phòng' },
+  zh: { foot: '步行', auto: '开车', bicycle: '骑自行车', remote: '远程 / 办公室' },
 };
 
 const TRANSPORT_TITLES: LocalizedLabels<TransportMode> = {
-  ru: { foot: 'Пеший курьер', auto: 'Автокурьер', bicycle: 'Велокурьер' },
-  uz: { foot: 'Piyoda kuryer', auto: 'Avtokuryer', bicycle: 'Velokuryer' },
-  tg: { foot: 'Курери пиёда', auto: 'Автокурер', bicycle: 'Велокурер' },
-  ky: { foot: 'Жөө курьер', auto: 'Автокурьер', bicycle: 'Велокурьер' },
-  hy: { foot: 'Հետիոտն սուրհանդակ', auto: 'Ավտոսուրհանդակ', bicycle: 'Հեծանվային սուրհանդակ' },
-  kk: { foot: 'Жаяу курьер', auto: 'Автокурьер', bicycle: 'Велокурьер' },
-  az: { foot: 'Piyada kuryer', auto: 'Avtokuryer', bicycle: 'Velokuryer' },
-  uk: { foot: "Піший кур'єр", auto: "Автокур'єр", bicycle: "Велокур'єр" },
-  be: { foot: "Пешы кур'ер", auto: "Аўтакур'ер", bicycle: "Велакур'ер" },
-  hi: { foot: 'पैदल कूरियर', auto: 'कार कूरियर', bicycle: 'साइकिल कूरियर' },
-  vi: { foot: 'Shipper đi bộ', auto: 'Shipper ô tô', bicycle: 'Shipper xe đạp' },
-  zh: { foot: '步行配送员', auto: '汽车配送员', bicycle: '自行车配送员' },
+  ru: { foot: 'Пеший курьер', auto: 'Автокурьер', bicycle: 'Велокурьер', remote: 'Сотрудник удалённого формата' },
+  uz: { foot: 'Piyoda kuryer', auto: 'Avtokuryer', bicycle: 'Velokuryer', remote: 'Masofaviy xodim' },
+  tg: { foot: 'Курери пиёда', auto: 'Автокурер', bicycle: 'Велокурер', remote: 'Кормандиди масофа' },
+  ky: { foot: 'Жөө курьер', auto: 'Автокурьер', bicycle: 'Велокурьер', remote: 'Алыскы кызматкер' },
+  hy: { foot: 'Հետիոտն սուրհանդակ', auto: 'Ավտոսուրհանդակ', bicycle: 'Հեծանվային սուրհանդակ', remote: 'Հեռակա աշխատող' },
+  kk: { foot: 'Жаяу курьер', auto: 'Автокурьер', bicycle: 'Велокурьер', remote: 'Қашықтан жұмыс істейтін қызметкер' },
+  az: { foot: 'Piyada kuryer', auto: 'Avtokuryer', bicycle: 'Velokuryer', remote: 'Məsafədən işləyən işçi' },
+  uk: { foot: "Піший кур'єр", auto: "Автокур'єр", bicycle: "Велокур'єр", remote: 'Віддалений співробітник' },
+  be: { foot: "Пешы кур'ер", auto: "Аўтакур'ер", bicycle: "Велакур'ер", remote: 'Аддалены супрацоўнік' },
+  hi: { foot: 'पैदल कूरियर', auto: 'कार कूरियर', bicycle: 'साइकिल कूरियर', remote: 'दूरस्थ कर्मचारी' },
+  vi: { foot: 'Shipper đi bộ', auto: 'Shipper ô tô', bicycle: 'Shipper xe đạp', remote: 'Nhân viên từ xa' },
+  zh: { foot: '步行配送员', auto: '汽车配送员', bicycle: '自行车配送员', remote: '远程员工' },
 };
 
 const TRANSPORT_TITLE_SUFFIXES: LocalizedLabels<TransportMode> = {
-  ru: { foot: 'пеший', auto: 'на авто', bicycle: 'на велосипеде' },
-  uz: { foot: 'piyoda', auto: 'avtomobilda', bicycle: 'velosipedda' },
-  tg: { foot: 'пиёда', auto: 'бо мошин', bicycle: 'бо велосипед' },
-  ky: { foot: 'жөө', auto: 'унаа менен', bicycle: 'велосипед менен' },
-  hy: { foot: 'հետիոտն', auto: 'ավտոյով', bicycle: 'հեծանիվով' },
-  kk: { foot: 'жаяу', auto: 'көлікпен', bicycle: 'велосипедпен' },
-  az: { foot: 'piyada', auto: 'avtomobillə', bicycle: 'velosipedlə' },
-  uk: { foot: 'пішки', auto: 'на авто', bicycle: 'на велосипеді' },
-  be: { foot: 'пешшу', auto: 'на аўто', bicycle: 'на ровары' },
-  hi: { foot: 'पैदल', auto: 'कार से', bicycle: 'साइकिल से' },
-  vi: { foot: 'đi bộ', auto: 'bằng ô tô', bicycle: 'bằng xe đạp' },
-  zh: { foot: '步行', auto: '开车', bicycle: '骑自行车' },
+  ru: { foot: 'пеший', auto: 'на авто', bicycle: 'на велосипеде', remote: 'удалённо' },
+  uz: { foot: 'piyoda', auto: 'avtomobilda', bicycle: 'velosipedda', remote: 'masofadan' },
+  tg: { foot: 'пиёда', auto: 'бо мошин', bicycle: 'бо велосипед', remote: 'аз масофа' },
+  ky: { foot: 'жөө', auto: 'унаа менен', bicycle: 'велосипед менен', remote: 'алыстан' },
+  hy: { foot: 'հետիոտն', auto: 'ավտոյով', bicycle: 'հեծանիվով', remote: 'հեռակա' },
+  kk: { foot: 'жаяу', auto: 'көлікпен', bicycle: 'велосипедпен', remote: 'қашықтан' },
+  az: { foot: 'piyada', auto: 'avtomobillə', bicycle: 'velosipedlə', remote: 'uzaqdan' },
+  uk: { foot: 'пішки', auto: 'на авто', bicycle: 'на велосипеді', remote: 'віддалено' },
+  be: { foot: 'пешшу', auto: 'на аўто', bicycle: 'на ровары', remote: 'аддалена' },
+  hi: { foot: 'पैदल', auto: 'कार से', bicycle: 'साइकिल से', remote: 'दूरस्थ' },
+  vi: { foot: 'đi bộ', auto: 'bằng ô tô', bicycle: 'bằng xe đạp', remote: 'từ xa' },
+  zh: { foot: '步行', auto: '开车', bicycle: '骑自行车', remote: '远程' },
 };
 
 const TRANSPORT_BANK_ROLE_TITLES: LocalizedLabels<TransportMode> = {
-  ru: { foot: 'Пеший представитель', auto: 'Авто-представитель', bicycle: 'Велопредставитель' },
-  uz: { foot: 'Piyoda vakil', auto: 'Avtomobilli vakil', bicycle: 'Velosipedli vakil' },
-  tg: { foot: 'Намояндаи пиёда', auto: 'Намояндаи мошинӣ', bicycle: 'Намояндаи велосипедӣ' },
-  ky: { foot: 'Жөө өкүл', auto: 'Авто-өкүл', bicycle: 'Велоөкүл' },
-  hy: { foot: 'Հետիոտն ներկայացուցիչ', auto: 'Ավտո ներկայացուցիչ', bicycle: 'Հեծանվային ներկայացուցիչ' },
-  kk: { foot: 'Жаяу өкіл', auto: 'Авто-өкіл', bicycle: 'Велоөкіл' },
-  az: { foot: 'Piyada nümayəndə', auto: 'Avtomobilli nümayəndə', bicycle: 'Velosipedli nümayəndə' },
-  uk: { foot: 'Піший представник', auto: 'Авто-представник', bicycle: 'Велопредставник' },
-  be: { foot: 'Пешы прадстаўнік', auto: 'Аўта-прадстаўнік', bicycle: 'Велапрадстаўнік' },
-  hi: { foot: 'पैदल प्रतिनिधि', auto: 'कार प्रतिनिधि', bicycle: 'साइकिल प्रतिनिधि' },
-  vi: { foot: 'Đại diện đi bộ', auto: 'Đại diện ô tô', bicycle: 'Đại diện xe đạp' },
-  zh: { foot: '步行代表', auto: '汽车代表', bicycle: '自行车代表' },
+  ru: { foot: 'Пеший представитель', auto: 'Авто-представитель', bicycle: 'Велопредставитель', remote: 'Удалённый сотрудник' },
+  uz: { foot: 'Piyoda vakil', auto: 'Avtomobilli vakil', bicycle: 'Velosipedli vakil', remote: 'Masofaviy xodim' },
+  tg: { foot: 'Намояндаи пиёда', auto: 'Намояндаи мошинӣ', bicycle: 'Намояндаи велосипедӣ', remote: 'Кормандиди масофа' },
+  ky: { foot: 'Жөө өкүл', auto: 'Авто-өкүл', bicycle: 'Велоөкүл', remote: 'Алыскы кызматкер' },
+  hy: { foot: 'Հետիոտն ներկայացուցիչ', auto: 'Ավտո ներկայացուցիչ', bicycle: 'Հեծանվային ներկայացուցիչ', remote: 'Հեռակա աշխատող' },
+  kk: { foot: 'Жаяу өкіл', auto: 'Авто-өкіл', bicycle: 'Велоөкіл', remote: 'Қашықтан жұмыс істейтін қызметкер' },
+  az: { foot: 'Piyada nümayəndə', auto: 'Avtomobilli nümayəndə', bicycle: 'Velosipedli nümayəndə', remote: 'Məsafədən işləyən işçi' },
+  uk: { foot: 'Піший представник', auto: 'Авто-представник', bicycle: 'Велопредставник', remote: 'Віддалений співробітник' },
+  be: { foot: 'Пешы прадстаўнік', auto: 'Аўта-прадстаўнік', bicycle: 'Велапрадстаўнік', remote: 'Аддалены супрацоўнік' },
+  hi: { foot: 'पैदल प्रतिनिधि', auto: 'कार प्रतिनिधि', bicycle: 'साइकिल प्रतिनिधि', remote: 'दूरस्थ कर्मचारी' },
+  vi: { foot: 'Đại diện đi bộ', auto: 'Đại diện ô tô', bicycle: 'Đại diện xe đạp', remote: 'Nhân viên từ xa' },
+  zh: { foot: '步行代表', auto: '汽车代表', bicycle: '自行车代表', remote: '远程员工' },
 };
 
 const TRANSPORT_PROVISION_LABELS: LocalizedLabels<TransportProvision> = {
-  ru: { own: 'Нужно своё транспортное средство', company: 'Компания выдает транспортное средство' },
-  uz: { own: "Shaxsiy transport kerak", company: 'Transportni kompaniya beradi' },
-  tg: { own: 'Нақлиёти шахсӣ лозим', company: 'Нақлиётро ширкат медиҳад' },
-  ky: { own: 'Өз транспорту керек', company: 'Транспортту компания берет' },
-  hy: { own: 'Պետք է սեփական տրանսպորտ', company: 'Տրանսպորտը տրամադրում է ընկերությունը' },
-  kk: { own: 'Өз көлігі қажет', company: 'Көлікті компания береді' },
-  az: { own: 'Şəxsi nəqliyyat tələb olunur', company: 'Nəqliyyatı şirkət verir' },
-  uk: { own: 'Потрібен власний транспорт', company: 'Транспорт надає компанія' },
-  be: { own: 'Патрэбны ўласны транспарт', company: 'Транспарт прадастаўляе кампанія' },
-  hi: { own: 'अपना वाहन आवश्यक', company: 'कंपनी वाहन उपलब्ध कराती है' },
-  vi: { own: 'Cần phương tiện cá nhân', company: 'Công ty cấp phương tiện' },
-  zh: { own: '需要自有交通工具', company: '公司提供交通工具' },
+  ru: { own: 'Нужно своё транспортное средство', company: 'Компания выдает транспортное средство', not_required: 'Транспорт не требуется' },
+  uz: { own: "Shaxsiy transport kerak", company: 'Transportni kompaniya beradi', not_required: 'Transport talab qilinmaydi' },
+  tg: { own: 'Нақлиёти шахсӣ лозим', company: 'Нақлиётро ширкат медиҳад', not_required: 'Нақлиёт лозим нест' },
+  ky: { own: 'Өз транспорту керек', company: 'Транспортту компания берет', not_required: 'Транспорт талап кылынбайт' },
+  hy: { own: 'Պետք է սեփական տրանսպորտ', company: 'Տրանսպորտը տրամադրում է ընկերությունը', not_required: 'Տրանսպորտ չի պահանջվում' },
+  kk: { own: 'Өз көлігі қажет', company: 'Көлікті компания береді', not_required: 'Көлік қажет емес' },
+  az: { own: 'Şəxsi nəqliyyat tələb olunur', company: 'Nəqliyyatı şirkət verir', not_required: 'Nəqliyyat tələb olunmur' },
+  uk: { own: 'Потрібен власний транспорт', company: 'Транспорт надає компанія', not_required: 'Транспорт не потрібен' },
+  be: { own: 'Патрэбны ўласны транспарт', company: 'Транспарт прадастаўляе кампанія', not_required: 'Транспарт не патрабуецца' },
+  hi: { own: 'अपना वाहन आवश्यक', company: 'कंपनी वाहन उपलब्ध कराती है', not_required: 'वाहन आवश्यक नहीं' },
+  vi: { own: 'Cần phương tiện cá nhân', company: 'Công ty cấp phương tiện', not_required: 'Không cần phương tiện' },
+  zh: { own: '需要自有交通工具', company: '公司提供交通工具', not_required: '无需交通工具' },
 };
 
 const TRANSPORT_ID_PARTS: Record<TransportMode, number> = {
   foot: 1,
   bicycle: 2,
   auto: 3,
+  remote: 4,
 };
 
 const EMPLOYMENT_LABELS: LocalizedLabels<EmploymentFormat> = {
@@ -317,8 +319,13 @@ const getCitizenship = (source: VacancySource, offer: VacancyOffer) =>
 const getEmploymentFormats = (source: VacancySource, offer: VacancyOffer) =>
   offer.employmentFormats?.length ? offer.employmentFormats : source.defaults.employmentFormats;
 
-const getTransportProvision = (offer: VacancyOffer): TransportProvision =>
-  offer.transportProvision ?? 'own';
+const getTransportProvision = (offer: VacancyOffer): TransportProvision => {
+  if (offer.transportProvision) return offer.transportProvision;
+  // Foot couriers and remote workers don't need a vehicle by default;
+  // bicycle/auto vacancies default to "own".
+  if (offer.transport === 'foot' || offer.transport === 'remote') return 'not_required';
+  return 'own';
+};
 
 const getSchedule = (source: VacancySource, offer: VacancyOffer, language: SupportedLanguage) => {
   const schedule = offer.schedule ?? source.defaults.schedule;
