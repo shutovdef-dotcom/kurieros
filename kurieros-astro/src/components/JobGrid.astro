@@ -35,7 +35,23 @@ const matchedJobs = jobsData.filter((job) => {
 
 	return matchesCity && matchesTag && matchesSearch;
 });
-const filteredJobs = typeof limit === 'number' && limit > 0 ? matchedJobs.slice(0, limit) : matchedJobs;
+
+// When `limit` is used (home page), bias selection toward the default
+// client-side city ("Москва") so the JS city filter on first paint
+// doesn't hide every card. Order: Москва → СПб → other million-cities → rest.
+const CITY_PRIORITY = ['Москва', 'Санкт-Петербург', 'Екатеринбург', 'Новосибирск', 'Казань', 'Нижний Новгород'];
+const cityRank = (loc: string): number => {
+	const lower = loc.toLowerCase();
+	for (let i = 0; i < CITY_PRIORITY.length; i++) {
+		if (lower.includes(CITY_PRIORITY[i].toLowerCase())) return i;
+	}
+	return CITY_PRIORITY.length;
+};
+const sortedMatchedJobs = typeof limit === 'number' && limit > 0
+	? [...matchedJobs].sort((a, b) => cityRank(a.location) - cityRank(b.location))
+	: matchedJobs;
+
+const filteredJobs = typeof limit === 'number' && limit > 0 ? sortedMatchedJobs.slice(0, limit) : matchedJobs;
 const hasMore = typeof limit === 'number' && limit > 0 && matchedJobs.length > limit;
 const totalMatched = matchedJobs.length;
 const hasVacancies = jobsData.length > 0;
