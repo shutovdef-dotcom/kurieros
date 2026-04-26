@@ -306,7 +306,7 @@ const pageSchemaGraph = [
 			}
 
 			window.dispatchEvent(new CustomEvent('kurieros:city-selected', {
-				detail: { city: normalizedCity, source }
+				detail: { city: normalizedCity, source, slug: cityRouteMap[normalizedCity]?.replace(/^\/rabota-kurerom-/, '').replace(/\/$/, '') || '' }
 			}));
 		}
 

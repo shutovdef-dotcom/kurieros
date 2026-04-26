@@ -36,10 +36,15 @@ const matchedJobs = jobsData.filter((job) => {
 	return matchesCity && matchesTag && matchesSearch;
 });
 
-// When `limit` is used (home page), bias selection toward the default
-// client-side city ("Москва") so the JS city filter on first paint
-// doesn't hide every card. Order: Москва → СПб → other million-cities → rest.
-const CITY_PRIORITY = ['Москва', 'Санкт-Петербург', 'Екатеринбург', 'Новосибирск', 'Казань', 'Нижний Новгород'];
+// When `limit` is used (home page), distribute selection across multiple
+// top cities via round-robin so the JS city filter has matches for ANY
+// of the priority cities (was: top-24 all from Москва → switching city
+// → empty grid). Top-12 priority cities × 2 jobs each ≈ 24 jobs.
+const CITY_PRIORITY = [
+	'Москва', 'Санкт-Петербург', 'Екатеринбург', 'Новосибирск', 'Казань',
+	'Нижний Новгород', 'Краснодар', 'Самара', 'Уфа', 'Челябинск',
+	'Ростов-на-Дону', 'Воронеж',
+];
 const cityRank = (loc: string): number => {
 	const lower = loc.toLowerCase();
 	for (let i = 0; i < CITY_PRIORITY.length; i++) {
@@ -47,11 +52,33 @@ const cityRank = (loc: string): number => {
 	}
 	return CITY_PRIORITY.length;
 };
-const sortedMatchedJobs = typeof limit === 'number' && limit > 0
-	? [...matchedJobs].sort((a, b) => cityRank(a.location) - cityRank(b.location))
-	: matchedJobs;
 
-const filteredJobs = typeof limit === 'number' && limit > 0 ? sortedMatchedJobs.slice(0, limit) : matchedJobs;
+type JobItem = (typeof matchedJobs)[number];
+const distributeAcrossCities = (jobs: JobItem[], max: number): JobItem[] => {
+	// Group jobs by primary priority-city, then round-robin pick to maximize
+	// city diversity. Jobs from non-priority cities go into a single bucket
+	// and are appended after priority cities.
+	const buckets: JobItem[][] = Array.from({ length: CITY_PRIORITY.length + 1 }, () => []);
+	for (const job of jobs) {
+		buckets[cityRank(job.location)].push(job);
+	}
+	const out: JobItem[] = [];
+	let cursor = 0;
+	const nonEmpty = () => buckets.some((b) => b.length > 0);
+	while (out.length < max && nonEmpty()) {
+		const bucket = buckets[cursor % buckets.length];
+		if (bucket.length > 0) {
+			out.push(bucket.shift()!);
+		}
+		cursor++;
+		if (cursor > buckets.length * (max + 1)) break;
+	}
+	return out;
+};
+
+const filteredJobs = typeof limit === 'number' && limit > 0
+	? distributeAcrossCities(matchedJobs, limit)
+	: matchedJobs;
 const hasMore = typeof limit === 'number' && limit > 0 && matchedJobs.length > limit;
 const totalMatched = matchedJobs.length;
 const hasVacancies = jobsData.length > 0;
@@ -352,9 +379,99 @@ const hasVacancies = jobsData.length > 0;
 			});
 		});
 
+		const grid = document.getElementById('jobs-grid');
+		const cityCache = new Map();
+		let activeFetch = 0;
+
+		function escapeAttr(s) {
+			return String(s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+		}
+		function escapeText(s) {
+			return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+		}
+
+		function renderJobCard(job) {
+			const tagsAttr = (job.tags || []).join(',');
+			const labels = (job.tags || []).slice(0, 3).map((t) => `<span class="job-label">${escapeText(t)}</span>`).join('');
+			return `
+				<article class="job-card" data-location="${escapeAttr(job.location)}" data-tags="${escapeAttr(tagsAttr)}">
+					<div class="job-card-head">
+						<img src="${escapeAttr(job.companyLogo)}" alt="${escapeAttr(job.company)} logo" width="48" height="48" loading="lazy" decoding="async" />
+						<div class="job-card-title">
+							<a href="/v/${escapeAttr(job.slug)}/"><h3>${escapeText(job.title)}</h3></a>
+							<span class="company-name">${escapeText(job.company)}</span>
+						</div>
+					</div>
+					<div class="job-card-meta">
+						<span class="salary">${escapeText(job.salary)}</span>
+						<span class="location">${escapeText(job.location)}</span>
+					</div>
+					<div class="job-card-labels">${labels}</div>
+					<div class="job-card-actions">
+						<a class="btn-primary" href="/v/${escapeAttr(job.slug)}/">Подробнее</a>
+						<button type="button" class="btn-compare" data-id="${escapeAttr(job.id)}">Сравнить</button>
+					</div>
+				</article>
+			`;
+		}
+
+		function renderEmptyForCity(cityName, citySlug) {
+			const safeCity = escapeText(cityName || '');
+			const safeSlug = escapeAttr(citySlug || '');
+			const cityHref = safeSlug ? `/rabota-kurerom-${safeSlug}/` : '/cities/';
+			grid.innerHTML = `
+				<div class="no-results">
+					<h3>В городе ${safeCity} нет вакансий в коротком списке</h3>
+					<p>Полный список доступен на отдельной странице города.</p>
+					<a class="btn-primary" href="${cityHref}">Открыть вакансии ${safeCity}</a>
+				</div>
+			`;
+		}
+
+		async function renderJobsForCity(citySlug, cityName) {
+			if (!grid) return;
+			if (!citySlug) {
+				// Fallback to server-rendered cards visibility filter.
+				filterJobs();
+				return;
+			}
+			const ticket = ++activeFetch;
+			let payload = cityCache.get(citySlug);
+			if (!payload) {
+				try {
+					const res = await fetch(`/api/jobs-by-city/${citySlug}.json`, { cache: 'force-cache' });
+					if (!res.ok) throw new Error(`HTTP ${res.status}`);
+					payload = await res.json();
+					cityCache.set(citySlug, payload);
+				} catch (err) {
+					console.warn('jobs-by-city fetch failed', err);
+					return;
+				}
+			}
+			if (ticket !== activeFetch) return; // stale response
+			const items = (payload && payload.items) || [];
+			if (items.length === 0) {
+				renderEmptyForCity(cityName || payload?.city || '', citySlug);
+				return;
+			}
+			grid.innerHTML = items.map(renderJobCard).join('');
+			// Re-bind compare buttons for new cards.
+			grid.querySelectorAll('.btn-compare').forEach((btn) => {
+				const id = Number.parseInt(btn.dataset.id || '', 10);
+				setCompareButtonState(btn, compareList.includes(id));
+				btn.addEventListener('click', (e) => {
+					e.preventDefault();
+					toggleCompare(id);
+				});
+			});
+			// Apply age/transport filters on top of fetched cards.
+			filterJobs();
+		}
+
 		window.addEventListener('kurieros:city-selected', (event) => {
 			selectedCity = event.detail?.city || '';
-			filterJobs();
+			const slug = event.detail?.slug || '';
+			renderJobsForCity(slug, selectedCity);
 		});
 
 		window.addEventListener('storage', (event) => {
