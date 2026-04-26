@@ -1,7 +1,7 @@
 import type { SupportedLanguage } from './translations';
 
-export type TransportMode = 'foot' | 'auto' | 'bicycle';
-export type TransportProvision = 'own' | 'company';
+export type TransportMode = 'foot' | 'auto' | 'bicycle' | 'remote';
+export type TransportProvision = 'own' | 'company' | 'not_required';
 
 export type EmploymentFormat =
   | 'gph'

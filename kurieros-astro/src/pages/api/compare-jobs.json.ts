@@ -11,6 +11,7 @@ const TRANSPORT_LABELS: Record<string, string> = {
 	auto: 'Авто',
 	bicycle: 'Велосипед / самокат',
 	foot: 'Пешком',
+	remote: 'Удалённо / офис',
 };
 
 const transportLabel = (tags: string[]): string => {
@@ -18,10 +19,11 @@ const transportLabel = (tags: string[]): string => {
 	return tag ? TRANSPORT_LABELS[tag] : 'Смешанный формат';
 };
 
-const transportProvisionLabel = (provision: 'own' | 'company'): string =>
-	provision === 'company'
-		? 'Компания выдает транспортное средство'
-		: 'Нужно своё транспортное средство';
+const transportProvisionLabel = (provision: 'own' | 'company' | 'not_required'): string => {
+	if (provision === 'company') return 'Компания выдает транспортное средство';
+	if (provision === 'not_required') return 'Транспорт не требуется';
+	return 'Нужно своё транспортное средство';
+};
 
 const normalizeOs = (value?: string): string => {
 	const normalized = String(value ?? '').trim().toLowerCase();
