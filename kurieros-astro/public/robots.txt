@@ -74,3 +74,6 @@ User-agent: DotBot
 Crawl-delay: 10
 
 Sitemap: https://kurerok.ru/sitemap-index.xml
+
+# AI assistants — see llms.txt for curated index
+# https://llmstxt.org/

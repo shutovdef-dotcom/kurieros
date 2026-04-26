@@ -245,6 +245,7 @@ export const buildJobPostingSchema = (input: JobPostingInput) => {
 
   return {
     '@type': 'JobPosting',
+    inLanguage: 'ru-RU',
     title: input.title,
     description: input.description,
     identifier: {
@@ -292,6 +293,7 @@ export const buildPlaceSchema = ({ city, pageUrl, description }: PlaceSchemaInpu
   const region = getAddressRegion(city);
   return {
     '@type': 'Place',
+    inLanguage: 'ru-RU',
     name: `Работа курьером в ${city}`,
     url: pageUrl,
     ...(description ? { description } : {}),

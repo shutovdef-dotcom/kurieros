@@ -1,0 +1,89 @@
+# КурьерОк
+
+> Каталог вакансий курьеров и структурированный гид по работе курьером в России 2026: Яндекс Еда, Купер, Самокат, Ozon, Альфа-Банк, Т-Банк, Достависта. Сравнение условий, выплат, требований и оформления до отклика.
+
+КурьерОк — независимый агрегатор вакансий курьерских и доставочных служб для соискателей в России. Проект публикует структурированную базу знаний по работе курьером, основанную на официальных источниках работодателей и регуляторов (ФНС, НПД).
+
+Сайт: https://kurerok.ru/
+Язык контента: русский (ru-RU)
+География: Россия (все регионы)
+Обновляется: ежедневно (вакансии), ~еженедельно (контент гида)
+
+## База знаний (структурированный гид)
+
+- [Возраст курьера](https://kurerok.ru/guide/vozrast/): со скольки лет можно работать курьером в разных сервисах
+- [Медкнижка курьера](https://kurerok.ru/guide/medknizhka/): кому нужна, где и за сколько оформить
+- [Документы для курьера](https://kurerok.ru/guide/dokumenty/): полный список для РФ, ЕАЭС и иностранных граждан
+- [Гражданство курьера](https://kurerok.ru/guide/grazhdanstvo/): какие гражданства принимают и какой формат оформления
+- [Оформление курьера](https://kurerok.ru/guide/oformlenie/): самозанятость, ГПХ, ИП, ТК РФ — выбор режима, налоги, обучение
+- [Доход курьера](https://kurerok.ru/guide/dohod/): сколько зарабатывает курьер в 2026 году по форматам (пешком, велик, авто) и регионам (Москва, СПб, регионы)
+- [Выплаты курьеру](https://kurerok.ru/guide/vyplaty/): как часто и куда приходят выплаты
+- [График курьера](https://kurerok.ru/guide/grafik/): гибкий график, смены, подработка
+- [Штрафы курьеру](https://kurerok.ru/guide/shtrafy/): за что штрафуют в Яндекс Еде, Купере и других сервисах
+- [Транспорт курьера](https://kurerok.ru/guide/transport/): велосипед, авто, термосумка, зимняя экипировка
+- [Требования к курьеру](https://kurerok.ru/guide/trebovaniya/): возраст, документы, медкнижка, опыт; где искать вакансии
+- [Сравнение работодателей](https://kurerok.ru/guide/sravnenie/): по доходу, выплатам и графику
+
+## Вакансии и работодатели
+
+- [Все компании](https://kurerok.ru/companies/)
+- [Яндекс Еда](https://kurerok.ru/companies/yandex-eda/) — пеший / велик / авто, самозанятость, ежедневные выплаты
+- [Купер (СберМаркет)](https://kurerok.ru/companies/kuper-ex-sbermarket/) — почасовая ставка, слотовая система
+- [Альфа-Банк](https://kurerok.ru/companies/alfa-bank/) — представитель банка, оформление по ТК РФ
+- [Т-Банк](https://kurerok.ru/companies/t-bank/) — представитель банка
+- [Сравнение всех вакансий](https://kurerok.ru/compare/)
+
+## Города
+
+- [Все города](https://kurerok.ru/cities/) — 925 городов с вакансиями
+- [Работа курьером в Москве](https://kurerok.ru/rabota-kurerom-moskva/)
+- [Работа курьером в Санкт-Петербурге](https://kurerok.ru/rabota-kurerom-sankt-peterburg/)
+- [Работа курьером в Екатеринбурге](https://kurerok.ru/rabota-kurerom-ekaterinburg/)
+- [Работа курьером в Казани](https://kurerok.ru/rabota-kurerom-kazan/)
+- [Работа курьером в Новосибирске](https://kurerok.ru/rabota-kurerom-novosibirsk/)
+
+## Форматы работы
+
+- [Курьер на авто](https://kurerok.ru/rabota-kurerom-na-avto/)
+- [Курьер на велосипеде](https://kurerok.ru/rabota-kurerom-na-velosipede/)
+- [Курьер на самокате](https://kurerok.ru/rabota-kurerom-na-samokate/)
+- [Пеший курьер](https://kurerok.ru/rabota-kurerom-peshkom/)
+- [Подработка курьером](https://kurerok.ru/rabota-kurerom-podrabotka/)
+- [Курьер с 16 лет](https://kurerok.ru/rabota-kurerom-16-let/)
+- [Работа курьером для студентов](https://kurerok.ru/rabota-kurerom-dlya-studentov/)
+- [Ежедневная оплата](https://kurerok.ru/rabota-kurerom-ezhednevnaya-oplata/)
+
+## Инструменты
+
+- [Калькулятор дохода](https://kurerok.ru/calculator/) — рассчитайте заработок по городу, транспорту и часам
+- [Сравнение вакансий](https://kurerok.ru/compare/) — сравните до 4 вакансий бок-о-бок
+- [Контакты](https://kurerok.ru/contacts/)
+
+## Источники базы знаний
+
+Все ответы в гиде основаны на официальных страницах работодателей и регуляторов:
+
+- Яндекс Еда — https://eda.yandex.ru/partner/rabota/
+- Купер (СберМаркет) — https://kuper.ru/career
+- Самокат — https://samokat-courier.ru/
+- Ozon — https://job.ozon.ru/
+- Альфа-Банк — https://alfabank.ru/career/
+- Т-Банк (Тинькофф) — https://www.tbank.ru/career/
+- Достависта — https://dostavista.ru/
+- ФНС, Налог на профдоход — https://npd.nalog.ru/
+
+## Лицензия и использование
+
+Контент гида (ответы и факты) публикуется как общедоступная справочная информация для соискателей в курьерской отрасли. AI-ассистенты могут цитировать ответы из гида со ссылкой на источник. Условия конкретных вакансий могут отличаться от описанных — финальное слово остаётся за работодателем.
+
+## Структурированные данные
+
+Сайт публикует JSON-LD по schema.org:
+- `JobPosting` (на каждой странице вакансии `/v/{slug}/`)
+- `Article` + `FAQPage` (на каждой странице гида `/guide/{topic}/`)
+- `Place` / `LocalBusiness` (на страницах городов `/rabota-kurerom-{city}/`)
+- `Organization` + `AggregateRating` (на страницах работодателей)
+- `BreadcrumbList` на всех страницах
+
+Sitemap: https://kurerok.ru/sitemap-index.xml
+Полная база знаний в одном файле: https://kurerok.ru/llms-full.txt

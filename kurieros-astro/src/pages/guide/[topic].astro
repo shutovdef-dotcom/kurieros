@@ -56,7 +56,11 @@ const articleSchema = {
 	},
 	datePublished: knowledgeBaseData.generated,
 	dateModified: knowledgeBaseData.generated,
-	inLanguage: 'ru',
+	inLanguage: 'ru-RU',
+	speakable: {
+		'@type': 'SpeakableSpecification',
+		cssSelector: ['.guide-card h2', '.guide-card-short'],
+	},
 	about: {
 		'@type': 'Thing',
 		name: meta.title,
@@ -78,8 +82,60 @@ const articleSchema = {
 	})),
 };
 
+const howToSchema =
+	topic === 'оформление'
+		? {
+				'@type': 'HowTo',
+				name: 'Как стать самозанятым курьером',
+				description:
+					'Пошаговая инструкция по регистрации самозанятым курьером в России через приложение «Мой налог».',
+				inLanguage: 'ru-RU',
+				totalTime: 'PT15M',
+				estimatedCost: { '@type': 'MonetaryAmount', currency: 'RUB', value: 0 },
+				supply: [
+					{ '@type': 'HowToSupply', name: 'Паспорт РФ' },
+					{ '@type': 'HowToSupply', name: 'ИНН' },
+					{ '@type': 'HowToSupply', name: 'Смартфон с приложением «Мой налог» или мобильным банком' },
+				],
+				step: [
+					{
+						'@type': 'HowToStep',
+						position: 1,
+						name: 'Скачайте приложение «Мой налог»',
+						text: 'Установите официальное приложение ФНС «Мой налог» из App Store или Google Play. Альтернатива — раздел «Самозанятые» в мобильном банке (Сбер, Альфа, Т-Банк, Озон Банк).',
+						url: 'https://npd.nalog.ru/',
+					},
+					{
+						'@type': 'HowToStep',
+						position: 2,
+						name: 'Подтвердите личность',
+						text: 'Войдите по номеру телефона + СМС или через ЕСИА (Госуслуги). Приложение само загрузит данные паспорта и ИНН.',
+					},
+					{
+						'@type': 'HowToStep',
+						position: 3,
+						name: 'Выберите регион работы',
+						text: 'Укажите регион, где будете работать курьером (можно несколько).',
+					},
+					{
+						'@type': 'HowToStep',
+						position: 4,
+						name: 'Подтвердите регистрацию',
+						text: 'Нажмите «Стать самозанятым». Через 1–6 дней ФНС подтверждает статус, обычно в день подачи.',
+					},
+					{
+						'@type': 'HowToStep',
+						position: 5,
+						name: 'Подключитесь к сервису доставки',
+						text: 'Откройте приложение Яндекс Про, Купер, Самокат или Достависта и пройдите регистрацию курьера. Самозанятость уже настроена — все чеки и налоги формируются автоматически.',
+					},
+				],
+		  }
+		: null;
+
 const pageSchemaGraph = [
 	articleSchema,
+	...(howToSchema ? [howToSchema] : []),
 	{
 		'@type': 'FAQPage',
 		mainEntity: faqEntities,
