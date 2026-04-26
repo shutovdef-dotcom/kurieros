@@ -6,12 +6,22 @@ interface Props {
 	initialCity?: string;
 	initialTag?: string;
 	initialSearch?: string;
+	limit?: number;
+	moreHref?: string;
+	moreLabel?: string;
 }
 
-const { initialCity = '', initialTag = 'all', initialSearch = '' } = Astro.props;
+const {
+	initialCity = '',
+	initialTag = 'all',
+	initialSearch = '',
+	limit,
+	moreHref = '/cities/',
+	moreLabel = 'Все вакансии — выбрать город',
+} = Astro.props;
 const availableJobIds = jobsData.map((job) => job.id);
 
-const filteredJobs = jobsData.filter((job) => {
+const matchedJobs = jobsData.filter((job) => {
 	const searchTerm = initialSearch.toLowerCase();
 	const cityTerm = initialCity.toLowerCase();
 	const matchesCity = !initialCity || job.location.toLowerCase().includes(cityTerm) || job.location === 'Вся Россия';
@@ -25,6 +35,9 @@ const filteredJobs = jobsData.filter((job) => {
 
 	return matchesCity && matchesTag && matchesSearch;
 });
+const filteredJobs = typeof limit === 'number' && limit > 0 ? matchedJobs.slice(0, limit) : matchedJobs;
+const hasMore = typeof limit === 'number' && limit > 0 && matchedJobs.length > limit;
+const totalMatched = matchedJobs.length;
 const hasVacancies = jobsData.length > 0;
 ---
 
@@ -51,6 +64,14 @@ const hasVacancies = jobsData.length > 0;
 				</div>
 			)}
 		</div>
+		{hasMore && (
+			<div class="jobs-grid-more">
+				<p class="jobs-grid-more-text">
+					Показано {filteredJobs.length} из {totalMatched} вакансий
+				</p>
+				<a class="jobs-grid-more-btn" href={moreHref}>{moreLabel}</a>
+			</div>
+		)}
 	</section>
 </div>
 
@@ -135,6 +156,44 @@ const hasVacancies = jobsData.length > 0;
 	}
 	.no-results .btn-secondary:focus-visible {
 		box-shadow: var(--shadow-focus);
+	}
+	.jobs-grid-more {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 12px;
+		margin-top: 24px;
+		padding: 20px;
+		text-align: center;
+	}
+	.jobs-grid-more-text {
+		margin: 0;
+		font-size: 14px;
+		color: var(--ink-500, #6c7785);
+	}
+	.jobs-grid-more-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		padding: 12px 24px;
+		border-radius: 999px;
+		background: var(--brand-700, #16734c);
+		color: #fff;
+		text-decoration: none;
+		font-weight: 700;
+		font-size: 15px;
+		transition: background-color 0.15s ease, transform 0.15s ease;
+	}
+	.jobs-grid-more-btn:hover {
+		background: var(--brand-800, #105838);
+		transform: translateY(-1px);
+	}
+	:global(body.dark-mode) .jobs-grid-more-btn {
+		background: var(--brand-500, #2eb37a);
+		color: #0e1622;
+	}
+	:global(body.dark-mode) .jobs-grid-more-btn:hover {
+		background: var(--brand-400, #57c897);
 	}
 </style>
 
