@@ -10,6 +10,7 @@ import type { VacancyOffer } from '../../data/vacancyTypes';
 import { slugifyCompany } from '../../utils/companies';
 import { getCityHref } from '../../utils/cities';
 import { buildBreadcrumbSchema, buildJobPostingSchema } from '../../utils/schema';
+import { knowledgeBaseData, TOPIC_META, type KnowledgeItem } from '../../utils/knowledge';
 
 export async function getStaticPaths() {
 	return jobsData.map((job) => ({
@@ -117,49 +118,101 @@ const factCards = [
 	{ label: 'Гражданство', labelKey: 'vacancy.fact_citizenship', value: job.details.citizenship, valueKey: `vacancies.${job.id}.details_citizenship` },
 	{ label: 'Оформление', labelKey: 'vacancy.fact_employment', value: job.details.employment_type, valueKey: `vacancies.${job.id}.details_employment_type` },
 ];
-const fitPoints = [
-	`Тем, кто хочет рассмотреть работу в ${job.company} без долгого отбора условий.`,
-	`Кандидатам, которым важны ${job.details.schedule.toLowerCase()} и понятный формат оформления.`,
-	`Соискателям, которые сравнивают вакансии курьера по выплатам, требованиям и графику.`,
-];
-const importantPoints = [
-	`Перед откликом проверьте актуальные условия по выплатам: для этой вакансии указано "${job.details.payment_freq}".`,
-	`Уточните требования к оформлению: сейчас в карточке указано "${job.details.employment_type}".`,
-	`Если условия на сайте работодателя отличаются от карточки, ориентируйтесь на финальные условия при подключении.`,
-];
-const antiFitPoints = [
-	`Если вам не подходит формат оформления "${job.details.employment_type}", лучше сразу сравнить эту вакансию с альтернативами.`,
-	`Если критичны точные ограничения по возрасту, гражданству или медкнижке, подтверждайте эти условия до перехода к анкете.`,
-	`Если нужен строго официальный формат по ТК РФ или другой тип выплат, карточку стоит сравнить с более подходящими вариантами.`,
-];
-const faqItems = [
-	{
-		question: `Кому подходит вакансия "${job.title}"?`,
-		answer: `Эта вакансия подходит кандидатам, которые рассматривают работу в ${job.company}, готовы к формату "${job.details.schedule}" и хотят заранее сравнить доход, требования и оформление.`,
-	},
-	{
-		question: 'Что нужно проверить перед откликом?',
-		answer: `Перед откликом стоит проверить график, выплаты, требования к возрасту, гражданству и оформлению. Для этой вакансии указаны выплаты: ${job.details.payment_freq}.`,
-	},
-	{
-		question: 'Куда ведёт кнопка отклика?',
-		answer: hasApplyLink
-			? 'Кнопка отклика ведёт на внешний сайт работодателя или партнёра, где нужно заполнить анкету и подтвердить актуальные условия.'
-			: 'Для этой вакансии прямая ссылка пока не добавлена, поэтому кнопка ведёт на страницу контактов для уточнения условий.',
-	},
-];
 const updatedDate = new Intl.DateTimeFormat('ru-RU', {
 	day: 'numeric',
 	month: 'long',
 	year: 'numeric',
 }).format(new Date());
-const methodologyPoints = [
-	`Карточка обновлена ${updatedDate} и помогает быстро сравнить доход, график, оформление и ограничения до отклика.`,
-	hasApplyLink
-		? 'Кнопка отклика ведёт на внешний сайт работодателя или партнёра, где нужно ещё раз проверить актуальные условия.'
-		: 'Прямая ссылка на внешний отклик пока не добавлена, поэтому условия стоит уточнять через страницу контактов.',
-	'Если данные в анкете работодателя отличаются от карточки, ориентируйтесь на финальные условия при подключении.',
+
+// Map vacancy-source slugs (e.g. 'yandex-eda-courier') to the
+// knowledge-base company_scope IDs (e.g. 'yandex-eda').
+const KB_COMPANY_BY_PREFIX: ReadonlyArray<readonly [string, string]> = [
+	['yandex-eda', 'yandex-eda'],
+	['kuper', 'kuper'],
+	['tbank', 't-bank'],
+	['efin', 't-bank'],
+	['alfa-bank', 'alfa-bank'],
+	['samokat', 'samokat'],
+	['ozon', 'ozon'],
+	['dostavista', 'dostavista'],
 ];
+const inferKbCompanyId = (sourceSlug: string | undefined): string | null => {
+	if (!sourceSlug) return null;
+	for (const [prefix, kbId] of KB_COMPANY_BY_PREFIX) {
+		if (sourceSlug.startsWith(prefix)) return kbId;
+	}
+	return null;
+};
+
+// Score knowledge-base items against this specific vacancy and return
+// the most relevant N. Designed so the page shows answers that
+// actually match the company, transport, geo and employment format —
+// not generic SEO boilerplate.
+const pickKbItemsForVacancy = (limit: number): KnowledgeItem[] => {
+	const kbCompanyId = inferKbCompanyId(matchingSource?.slug);
+	const transport = job.transport;
+	const isMoscow = isMoscowVacancy;
+	const isSpb = jobCities.includes('Санкт-Петербург');
+	const employmentTypes = job.details.employment_type ?? '';
+	const requiresSelfEmployed = /Самозанят/i.test(employmentTypes);
+	const requiresGph = /ГПХ/i.test(employmentTypes);
+	const isBankRep = kbCompanyId === 'alfa-bank' || kbCompanyId === 't-bank';
+
+	const candidates = kbCompanyId
+		? knowledgeBaseData.items.filter((item) => item.company_scope.includes(kbCompanyId))
+		: knowledgeBaseData.items;
+
+	const scored = candidates.map((item) => {
+		let score = 0;
+
+		// Geo relevance.
+		if (isMoscow && item.geo_scope.includes('msk')) score += 5;
+		else if (isSpb && item.geo_scope.includes('spb')) score += 5;
+		else if (!isMoscow && !isSpb && item.geo_scope.includes('regions')) score += 4;
+		if (item.geo_scope.includes('all')) score += 1;
+
+		// Transport-specific income items: boost the matching one,
+		// penalize the mismatching ones (so a foot vacancy doesn't
+		// surface auto-courier income).
+		if (item.id === 'income-foot-courier-msk') score += transport === 'foot' ? 5 : -4;
+		if (item.id === 'income-bike-courier-msk') score += transport === 'bicycle' ? 5 : -4;
+		if (item.id === 'income-auto-courier-msk') score += transport === 'auto' ? 5 : -4;
+		if (item.id === 'income-bank-rep-msk') score += isBankRep ? 5 : -4;
+
+		// Employment-format relevance.
+		if (item.id === 'self-employed-registration' && requiresSelfEmployed) score += 4;
+		if (item.id === 'tax-self-employed' && requiresSelfEmployed) score += 3;
+		if (item.id === 'training-period' && requiresGph) score += 2;
+
+		// Always-useful baseline boosts.
+		if (item.id === 'payment-frequency') score += 2;
+		if (item.id === 'schedule-flexibility') score += 1;
+		if (item.id === 'find-courier-job') score += 1;
+		if (item.id === 'documents-required') score += 1;
+
+		// Medical book — only really matters for food delivery formats.
+		if (item.id === 'medical-book') {
+			if (transport === 'foot' || transport === 'bicycle') score += 3;
+			else score -= 2;
+		}
+
+		// Company-specific fines guide.
+		if (kbCompanyId && item.id === `fines-${kbCompanyId}`) score += 3;
+
+		// Confidence tie-breaker (small).
+		score += (item.confidence ?? 0.5) * 0.5;
+
+		return { item, score };
+	});
+
+	return scored
+		.sort((a, b) => b.score - a.score)
+		.slice(0, limit)
+		.map((entry) => entry.item);
+};
+
+const selectedKbItems = pickKbItemsForVacancy(6);
+const kbAnchorTopic = (item: KnowledgeItem) => TOPIC_META[item.topic];
 const pageSchemaGraph = [
 	{
 		'@type': 'WebPage',
@@ -194,12 +247,15 @@ const pageSchemaGraph = [
 	}),
 	{
 		'@type': 'FAQPage',
-		mainEntity: faqItems.map((item) => ({
+		// Source the FAQ schema from the curated knowledge base instead
+		// of the previous boilerplate template, so the structured data
+		// reflects the same answers shown on the page.
+		mainEntity: selectedKbItems.map((item) => ({
 			'@type': 'Question',
 			name: item.question,
 			acceptedAnswer: {
 				'@type': 'Answer',
-				text: item.answer,
+				text: item.answer_long || item.answer_short,
 			},
 		})),
 	},
@@ -314,61 +370,36 @@ const pageSchemaGraph = [
 						</div>
 					</section>
 
-					<section class="vacancy-section vacancy-guidance-section">
-						<p class="section-eyebrow" data-t="vacancy.fit_eyebrow">Кому подходит</p>
-						<h2 data-t="vacancy.fit_title">Кому лучше всего подходит эта вакансия?</h2>
-						<div class="answer-grid">
-							{['fit_point_0', 'fit_point_1', 'fit_point_2'].map((key, index) => (
-								<div class="answer-card" data-t={`vacancy.${key}`}>{fitPoints[index]}</div>
+					<section class="vacancy-section vacancy-kb-section" id="vacancy-faq" aria-labelledby="vacancy-kb-title">
+						<p class="section-eyebrow">База знаний</p>
+						<h2 id="vacancy-kb-title">Что ещё стоит знать о работе в&nbsp;{job.company}</h2>
+						<p class="vacancy-kb-lead">
+							Короткие ответы на главные вопросы кандидатов — собраны из&nbsp;официальных
+							источников и&nbsp;адаптированы под формат этой вакансии. Если хочется
+							разобраться подробнее — открой полный гид по&nbsp;нужной теме.
+						</p>
+						<div class="vacancy-kb-grid">
+							{selectedKbItems.map((item, index) => (
+								<details class="vacancy-kb-item" open={index === 0}>
+									<summary class="vacancy-kb-question">
+										<span>{item.question}</span>
+										<span class="vacancy-kb-toggle" aria-hidden="true"></span>
+									</summary>
+									<div class="vacancy-kb-answer">
+										<p>{item.answer_short}</p>
+										{kbAnchorTopic(item)?.slug && (
+											<a class="vacancy-kb-deeplink" href={`/guide/${kbAnchorTopic(item)!.slug}/`}>
+												<span>Полный гид: {kbAnchorTopic(item)!.title}</span>
+												<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+											</a>
+										)}
+									</div>
+								</details>
 							))}
 						</div>
-					</section>
-
-					<section class="vacancy-section vacancy-guidance-section">
-						<p class="section-eyebrow" data-t="vacancy.anti_eyebrow">Когда сравнить ещё варианты</p>
-						<h2 data-t="vacancy.anti_title">Кому эта вакансия может не подойти?</h2>
-						<div class="answer-grid answer-grid-two">
-							{['anti_point_0', 'anti_point_1', 'anti_point_2'].map((key, index) => (
-								<div class="answer-card answer-card-warning" data-t={`vacancy.${key}`}>{antiFitPoints[index]}</div>
-							))}
-						</div>
-					</section>
-
-					<section class="vacancy-section vacancy-guidance-section">
-						<p class="section-eyebrow" data-t="vacancy.check_eyebrow">Перед откликом</p>
-						<h2 data-t="vacancy.check_title">Что проверить до заполнения анкеты?</h2>
-						<ol class="vacancy-list numbered-list">
-							{['check_point_0', 'check_point_1', 'check_point_2'].map((key, index) => (
-								<li data-t={`vacancy.${key}`}>{importantPoints[index]}</li>
-							))}
-						</ol>
-					</section>
-
-					<section class="vacancy-section vacancy-guidance-section" id="vacancy-faq">
-						<p class="section-eyebrow" data-t="vacancy.faq_eyebrow">FAQ</p>
-						<h2 data-t="vacancy.faq_title">Короткие ответы перед откликом</h2>
-						<div class="faq-stack">
-							{faqItems.map((item, index) => (
-								<article class="faq-item">
-									<h3 data-t={`vacancy.faq_q_${index}`}>{item.question}</h3>
-									<p data-t={index === 2 ? (hasApplyLink ? 'vacancy.faq_a_2_apply' : 'vacancy.faq_a_2_no') : `vacancy.faq_a_${index}`}>{item.answer}</p>
-								</article>
-							))}
-						</div>
-					</section>
-
-					<section class="vacancy-section vacancy-guidance-section">
-						<p class="section-eyebrow" data-t="vacancy.transparency_eyebrow">Прозрачность</p>
-						<h2 data-t="vacancy.transparency_title">Как собрана эта карточка?</h2>
-						<div class="trust-stack">
-							{methodologyPoints.map((point, index) => (
-								<div class="trust-item" data-t={index === 1 ? (hasApplyLink ? 'vacancy.methodology_1_apply' : 'vacancy.methodology_1_no') : `vacancy.methodology_${index}`}>{point}</div>
-							))}
-						</div>
-						<div class="trust-links">
-							<a href="/compare/" class="hero-link" data-t="vacancy.compare_jobs">Сравнить с другими вакансиями</a>
-							<a href={companyUrl} class="hero-link" data-t="vacancy.open_company">Открыть страницу компании</a>
-						</div>
+						<p class="vacancy-kb-meta">
+							Карточка обновлена {updatedDate}. Перед откликом сверяйте условия на&nbsp;сайте работодателя.
+						</p>
 					</section>
 
 					<section class="vacancy-section vacancy-guidance-section">
@@ -500,18 +531,6 @@ const pageSchemaGraph = [
 			</div>
 
 			<ReviewsBlock jobId={job.id} />
-
-			<section class="vacancy-answer-panel vacancy-answer-panel-bottom" aria-label="Краткий вывод по вакансии">
-				<div>
-					<p class="section-eyebrow" data-t="vacancy.short_output">Короткий вывод</p>
-					<h2 data-t="vacancy.important_title">Что важно знать об этой вакансии?</h2>
-				</div>
-				<p data-t="vacancy.answer_summary">
-					{job.title} подходит тем, кто ищет работу курьером с условиями "{job.details.schedule}" и хочет заранее сравнить
-					доход, оформление, возрастные требования и частоту выплат. На этой странице собраны основные факты, чтобы
-					решение об отклике было быстрее и спокойнее.
-				</p>
-			</section>
 
 			{isMoscowVacancy && <PartnerBanner />}
 		</div>
@@ -1284,6 +1303,183 @@ const pageSchemaGraph = [
 			width: 100%;
 			padding: 16px;
 			box-shadow: 0 -4px 12px rgba(38, 29, 18, 0.08);
+		}
+	}
+
+	/* === KB-driven section (replaces old fit/anti/check/FAQ/transparency blocks) === */
+	.vacancy-kb-section {
+		display: grid;
+		gap: 1rem;
+		padding: 1.75rem 1.85rem;
+		background: var(--vacancy-card);
+		border: 1px solid var(--vacancy-border);
+		border-radius: 16px;
+		box-shadow: var(--vacancy-shadow);
+	}
+	.vacancy-kb-section .section-eyebrow {
+		margin: 0;
+		font-size: 0.78rem;
+		font-weight: 800;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--vacancy-eyebrow);
+	}
+	.vacancy-kb-section h2 {
+		margin: 0;
+		font-family: var(--font-heading, 'Manrope', sans-serif);
+		font-size: clamp(1.4rem, 2.2vw, 1.75rem);
+		line-height: 1.18;
+		color: var(--vacancy-ink);
+		letter-spacing: -0.01em;
+	}
+	.vacancy-kb-lead {
+		margin: 0;
+		max-width: 70ch;
+		color: var(--vacancy-muted);
+		font-size: 0.95rem;
+		line-height: 1.5;
+	}
+	.vacancy-kb-grid {
+		display: grid;
+		gap: 0.5rem;
+		margin-top: 0.25rem;
+	}
+	.vacancy-kb-item {
+		border: 1px solid var(--vacancy-border);
+		border-radius: 12px;
+		background: var(--vacancy-soft);
+		transition: border-color 0.18s ease, background 0.18s ease;
+		overflow: hidden;
+	}
+	.vacancy-kb-item[open] {
+		border-color: var(--vacancy-chip-border);
+		background: var(--vacancy-soft-strong);
+	}
+	.vacancy-kb-question {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 0.95rem 1.1rem;
+		font-family: var(--font-heading, 'Manrope', sans-serif);
+		font-weight: 700;
+		font-size: 1rem;
+		color: var(--vacancy-ink);
+		cursor: pointer;
+		list-style: none;
+		user-select: none;
+		line-height: 1.35;
+	}
+	.vacancy-kb-question::-webkit-details-marker {
+		display: none;
+	}
+	.vacancy-kb-toggle {
+		flex: 0 0 auto;
+		position: relative;
+		width: 22px;
+		height: 22px;
+		display: inline-block;
+	}
+	.vacancy-kb-toggle::before,
+	.vacancy-kb-toggle::after {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 12px;
+		height: 2px;
+		background: var(--vacancy-action);
+		border-radius: 2px;
+		transform: translate(-50%, -50%);
+		transition: transform 0.18s ease, opacity 0.18s ease;
+	}
+	.vacancy-kb-toggle::after {
+		transform: translate(-50%, -50%) rotate(90deg);
+	}
+	.vacancy-kb-item[open] .vacancy-kb-toggle::after {
+		transform: translate(-50%, -50%) rotate(0deg);
+		opacity: 0;
+	}
+	.vacancy-kb-answer {
+		display: grid;
+		gap: 0.75rem;
+		padding: 0 1.1rem 1.05rem;
+		color: var(--vacancy-muted);
+		font-size: 0.95rem;
+		line-height: 1.55;
+	}
+	.vacancy-kb-answer p {
+		margin: 0;
+	}
+	.vacancy-kb-deeplink {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0.45rem 0.8rem;
+		border-radius: 999px;
+		background: rgba(22, 61, 43, 0.07);
+		color: var(--vacancy-action);
+		font-weight: 700;
+		font-size: 0.85rem;
+		text-decoration: none;
+		width: fit-content;
+		transition: background 0.18s ease, transform 0.18s ease;
+	}
+	.vacancy-kb-deeplink:hover,
+	.vacancy-kb-deeplink:focus-visible {
+		background: rgba(22, 61, 43, 0.13);
+		transform: translateX(2px);
+		outline: none;
+	}
+	.vacancy-kb-meta {
+		margin: 0.5rem 0 0;
+		font-size: 0.82rem;
+		color: var(--vacancy-eyebrow);
+	}
+
+	/* Dark mode */
+	:global(:where(html, body).dark-mode) .vacancy-kb-section {
+		background: rgba(20, 32, 48, 0.7);
+		border-color: rgba(195, 204, 216, 0.18);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-kb-section .section-eyebrow,
+	:global(:where(html, body).dark-mode) .vacancy-kb-meta {
+		color: rgba(231, 234, 240, 0.55);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-kb-section h2 {
+		color: #e7eaf0;
+	}
+	:global(:where(html, body).dark-mode) .vacancy-kb-lead,
+	:global(:where(html, body).dark-mode) .vacancy-kb-answer {
+		color: rgba(231, 234, 240, 0.75);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-kb-item {
+		background: rgba(15, 23, 36, 0.65);
+		border-color: rgba(195, 204, 216, 0.16);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-kb-item[open] {
+		background: rgba(20, 32, 48, 0.85);
+		border-color: rgba(76, 175, 128, 0.4);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-kb-question {
+		color: #e7eaf0;
+	}
+	:global(:where(html, body).dark-mode) .vacancy-kb-toggle::before,
+	:global(:where(html, body).dark-mode) .vacancy-kb-toggle::after {
+		background: #4caf80;
+	}
+	:global(:where(html, body).dark-mode) .vacancy-kb-deeplink {
+		background: rgba(76, 175, 128, 0.15);
+		color: #4caf80;
+	}
+	:global(:where(html, body).dark-mode) .vacancy-kb-deeplink:hover,
+	:global(:where(html, body).dark-mode) .vacancy-kb-deeplink:focus-visible {
+		background: rgba(76, 175, 128, 0.25);
+	}
+
+	@media (max-width: 600px) {
+		.vacancy-kb-section {
+			padding: 1.2rem 1rem;
 		}
 	}
 </style>
