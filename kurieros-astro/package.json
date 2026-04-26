@@ -8,9 +8,10 @@
   "scripts": {
     "generate": "astro sync",
     "pregenerate": "npm run generate:data",
-    "generate:data": "npm run generate:vacancy-translations && npm run generate:reviews",
+    "generate:data": "npm run generate:vacancy-translations && npm run generate:reviews && npm run generate:llms",
     "generate:vacancy-translations": "tsx scripts/generate-vacancy-translations.ts",
     "generate:reviews": "tsx scripts/generate-reviews.ts",
+    "generate:llms": "node scripts/generate-llms.mjs",
     "predev": "npm run generate:data",
     "dev": "astro dev",
     "prebuild": "npm run generate:data",

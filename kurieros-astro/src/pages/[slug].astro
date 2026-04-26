@@ -199,7 +199,9 @@ const routeLinks =
 		? [
 			{ name: 'Сравнение вакансий', href: '/compare/' },
 			{ name: 'Компании', href: '/companies/' },
-			...CATEGORIES.filter((cat) => cat.slug !== data.slug).slice(0, 4).map((cat) => ({
+			{ name: 'Гид: доход курьера', href: '/guide/dohod/' },
+			{ name: 'Гид: оформление', href: '/guide/oformlenie/' },
+			...CATEGORIES.filter((cat) => cat.slug !== data.slug).slice(0, 3).map((cat) => ({
 				name: cat.name,
 				href: `/rabota-kurerom-${cat.slug}/`,
 			})),
@@ -207,10 +209,11 @@ const routeLinks =
 		: [
 			{ name: 'Сравнение вакансий', href: '/compare/' },
 			{ name: 'Города', href: '/cities/' },
+			{ name: 'Гид для курьера', href: '/guide/' },
 			...getCitiesFromJobs(jobsData)
 				.filter((city) => city.name !== data.name)
 				.sort((a, b) => b.vacancyCount - a.vacancyCount)
-				.slice(0, 4)
+				.slice(0, 3)
 				.map((city) => ({
 					name: city.name,
 					href: `/rabota-kurerom-${city.slug}/`,
