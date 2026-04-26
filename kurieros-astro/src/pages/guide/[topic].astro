@@ -50,6 +50,7 @@ const articleSchema = {
 	headline: meta.title,
 	description: meta.description,
 	url: Astro.url.href,
+	image: new URL('/og-default.png', Astro.site).toString(),
 	mainEntityOfPage: {
 		'@type': 'WebPage',
 		'@id': Astro.url.href,
