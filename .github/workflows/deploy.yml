@@ -30,7 +30,7 @@ jobs:
           PUBLIC_OWNER_SEO_HASH: f08d870722fc49f961b4bddb87fe6b15c226f7880c5cc1da17697ce9be527073
           PUBLIC_GSC_PROPERTY_URL: sc-domain:kurerok.ru
           PUBLIC_YANDEX_WEBMASTER_HOST: https:kurerok.ru:443
-          PUBLIC_YANDEX_VERIFICATION: ac1cd99571b69d37
+          PUBLIC_YANDEX_VERIFICATION: 9a662580de5ebac5
           PUBLIC_GOOGLE_SITE_VERIFICATION: QIGlMj-JAXkxvnkeFNNu6hWJ5bslKtguuUxY4ty17bI
         with:
           path: ./kurieros-astro
