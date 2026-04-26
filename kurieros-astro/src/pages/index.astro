@@ -489,20 +489,25 @@ const pageSchemaGraph = [
 	}
 	.home-filter-select {
 		width: 100%;
-		min-height: 2.7rem;
-		padding: 0.5rem 0.8rem;
-		border-radius: 8px;
-		border: 1px solid #cad8ca;
-		background: #f9fcf8;
-		color: #1d2b24;
-		font: inherit;
-		font-weight: 600;
+		height: 44px;
+		padding: 0 14px;
+		border-radius: 12px;
+		border: 1px solid var(--ink-100, #e5e8ed);
+		background: var(--surface-100, #fff);
+		color: var(--ink-900, #0f172a);
+		font-size: 15px;
+		font-family: inherit;
+		font-weight: 500;
+		cursor: pointer;
+		transition: border-color 0.15s, background 0.15s;
+	}
+	.home-filter-select:hover {
+		border-color: var(--brand-700, #16734c);
 	}
 	.home-filter-select:focus-visible {
-		outline: 2px solid #4b8269;
-		outline-offset: 1px;
-		border-color: #4b8269;
-		background: #fff;
+		outline: none;
+		border-color: var(--brand-700, #16734c);
+		box-shadow: 0 0 0 3px rgba(22, 115, 76, 0.18);
 	}
 	.home-discovery-section {
 		display: grid;
@@ -526,69 +531,72 @@ const pageSchemaGraph = [
 	}
 	.toolbar-top {
 		display: flex;
-		gap: 0.75rem;
+		gap: 12px;
 		width: 100%;
 		max-width: 640px;
 		margin: 0 auto;
 		justify-content: center;
+		align-items: flex-end;
 	}
 	.city-selector-container {
 		display: flex;
 		align-items: center;
-		padding: 0 1.25rem;
-		/* Removing padding-right: 2.75rem; as we'll use absolute pos for arrow */
-		background: #f5faf6;
-		border: 1px solid #d9e2d6;
-		font-size: 1.4rem;
-		box-shadow: 0 6px 16px rgba(24, 45, 34, 0.08);
+		padding: 0 14px;
+		background: var(--surface-100, #fff);
+		border: 1px solid var(--ink-100, #e5e8ed);
+		font-size: 15px;
 		flex: 1;
-		height: 4.2rem;
+		height: 44px;
 		box-sizing: border-box;
-		border-radius: 8px;
+		border-radius: 12px;
 		cursor: pointer;
 		position: relative;
-		transition: var(--transition);
+		transition: border-color 0.15s, background 0.15s;
 	}
 	.city-selector-container:hover {
-		border-color: #a8c8b5;
-		background: #ffffff;
-		transform: translateY(-2px);
-		box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+		border-color: var(--brand-700, #16734c);
+	}
+	.city-selector-container:focus-within {
+		border-color: var(--brand-700, #16734c);
+		box-shadow: 0 0 0 3px rgba(22, 115, 76, 0.18);
 	}
 	.city-selector-container::after {
 		content: '▼';
 		position: absolute;
-		right: 1.5rem;
-		font-size: 0.75rem;
-		color: #61746b;
+		right: 14px;
+		font-size: 0.7rem;
+		color: var(--ink-500, #6c7785);
 		pointer-events: none;
 	}
 	.hero-lang-switcher {
-		flex: 0 0 7.5rem;
+		flex: 0 0 7rem;
 		min-width: 0;
 	}
 	.hero-lang-switcher :global(.lang-toggle) {
 		width: 100%;
-		min-height: 4.2rem;
-		background: #f5faf6;
-		border-color: #d9e2d6;
-		box-shadow: 0 6px 16px rgba(24, 45, 34, 0.08);
-		font-size: 1.05rem;
-		font-weight: 900;
+		min-height: 44px;
+		height: 44px;
+		background: var(--surface-100, #fff);
+		border: 1px solid var(--ink-100, #e5e8ed);
+		border-radius: 12px;
+		box-shadow: none;
+		font-size: 15px;
+		font-weight: 600;
+		transition: border-color 0.15s;
 	}
 	.hero-lang-switcher :global(.lang-toggle:hover),
 	.hero-lang-switcher :global(.lang-toggle:focus-visible) {
-		border-color: #a8c8b5;
-		background: #ffffff;
+		border-color: var(--brand-700, #16734c);
+		background: var(--surface-100, #fff);
 	}
 	/* --- City Select & Icon --- */
 	.city-icon {
 		position: absolute;
-		left: 1.25rem;
-		color: #61746b;
+		left: 14px;
+		color: var(--ink-500, #6c7785);
 		flex-shrink: 0;
-		width: 20px;
-		height: 20px;
+		width: 18px;
+		height: 18px;
 		pointer-events: none;
 		z-index: 2;
 	}
@@ -598,13 +606,13 @@ const pageSchemaGraph = [
 		background: transparent;
 		appearance: none;
 		font: inherit;
-		font-size: inherit !important;
-		font-weight: 800 !important;
-		color: #1d2b24;
-		padding: 0 2.5rem;
+		font-size: 15px !important;
+		font-weight: 500 !important;
+		color: var(--ink-900, #0f172a);
+		padding: 0 36px;
 		outline: none;
-		text-align: center;
-		text-align-last: center;
+		text-align: left;
+		text-align-last: left;
 		cursor: pointer;
 	}
 
