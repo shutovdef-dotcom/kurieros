@@ -224,7 +224,9 @@ export const buildJobPostingSchema = (input: JobPostingInput) => {
         currency: input.currency || 'RUB',
         value: {
           '@type': 'QuantitativeValue',
+          value: input.baseSalaryMonthly,
           maxValue: input.baseSalaryMonthly,
+          minValue: Math.round(input.baseSalaryMonthly * 0.6),
           unitText: 'MONTH',
         },
       };
@@ -275,10 +277,7 @@ export const buildJobPostingSchema = (input: JobPostingInput) => {
     ...(input.qualifications ? { qualifications: input.qualifications } : {}),
     industry: input.industry || 'Курьерская доставка',
     occupationalCategory: '53-3031 Driver/Sales Workers',
-    experienceRequirements: {
-      '@type': 'OccupationalExperienceRequirements',
-      monthsOfExperience: 0,
-    },
+    experienceRequirements: 'без опыта',
     ...(baseSalary ? { baseSalary } : {}),
   };
 };

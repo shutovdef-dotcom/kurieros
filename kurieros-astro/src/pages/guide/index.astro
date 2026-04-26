@@ -42,6 +42,7 @@ const articleIndexSchema = {
 	headline: 'Гид для курьера 2026 — все темы',
 	description: pageDescription,
 	url: Astro.url.href,
+	image: new URL('/og-default.png', Astro.site).toString(),
 	mainEntityOfPage: {
 		'@type': 'WebPage',
 		'@id': Astro.url.href,

@@ -29,7 +29,7 @@ const {
 	titleKey,
 	description = "Лучшие вакансии для курьеров в России. Работа на авто, мото, вело и пешком. Сравнивайте условия в Яндекс Еда, СДЭК, Ozon и других компаниях.",
 	descriptionKey,
-	image = "/favicon.svg",
+	image = "/og-default.png",
 	canonicalURL = new URL(Astro.url.pathname, Astro.site),
 	schemaGraph = [],
 	robots = "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
@@ -70,7 +70,7 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 ---
 
 <!doctype html>
-<html lang="ru">
+<html lang="ru" prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article#">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
