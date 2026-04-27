@@ -1,0 +1,17 @@
+name = "kurerok-ozon-lead"
+main = "src/index.js"
+compatibility_date = "2025-04-01"
+workers_dev = true
+
+[vars]
+ALLOWED_ORIGINS = "https://kurerok.ru,https://www.kurerok.ru"
+OZON_VACANCY = "rocket:courier"
+OZON_CITIZENSHIP_ID = "7"
+OZON_CITY_ID = "73d71199-1e3c-11e9-90e9-9418826ee072"
+OZON_HIRE_OBJECT_UUID = "8bc59f96-1fb5-11ed-861d-0242ac120002"
+
+# Secrets are NOT defined here — set via wrangler CLI:
+#   wrangler secret put OZON_REFERRER_NAME
+#   wrangler secret put OZON_REFERRER_PHONE
+#   wrangler secret put TELEGRAM_BOT_TOKEN
+#   wrangler secret put TELEGRAM_CHAT_ID

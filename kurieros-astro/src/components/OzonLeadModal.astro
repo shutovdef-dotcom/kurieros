@@ -10,25 +10,24 @@
  * `src/data/vacancies.ts`).
  *
  * Flow:
- *  1. User submits the form (name, phone, city, transport).
- *  2. JS POSTs to Telegram Bot API directly from the browser.
- *  3. On success → success state with the referrer code + a
- *     one-click copy button so the user can paste it into the Ozon
- *     Job app's «Приведи друга» field.
+ *  1. User submits the form (name, phone, transport).
+ *  2. Browser POSTs `{ name, phone, transport }` to the Cloudflare
+ *     Worker (PUBLIC_OZON_LEAD_API).
+ *  3. Worker fills the Ozon recruitment form on the user's behalf
+ *     using the site owner's referrer credentials (Worker secrets)
+ *     and pings Telegram for alerts. The user never sees the
+ *     referrer phone or the bot token — both stay server-side.
+ *  4. On success Ozon sends an SMS directly to the candidate's phone.
  *
- * Env vars (build-time, prefixed `PUBLIC_*` so Astro inlines them
- * into client bundles):
- *  - PUBLIC_OZON_REF_CODE        — referrer phone shown to user
- *  - PUBLIC_TELEGRAM_BOT_TOKEN   — Telegram bot token
- *  - PUBLIC_TELEGRAM_CHAT_ID     — chat that receives the lead alert
+ * Env var (build-time, prefixed PUBLIC_ so Astro inlines it):
+ *  - PUBLIC_OZON_LEAD_API — Worker URL like
+ *    https://kurerok-ozon-lead.<account>.workers.dev/lead
  *
- * If any of those are blank (e.g. dev), the modal still opens and the
- * form validates client-side; the Telegram POST is skipped and the
- * success state shows a placeholder phone.
+ * If the env var is blank (dev / not deployed yet), submit shows the
+ * success state without dispatching — useful for previews and
+ * keeps the build green before Worker deployment.
  */
-const ozonRefCode = String(import.meta.env.PUBLIC_OZON_REF_CODE ?? '').trim();
-const telegramBotToken = String(import.meta.env.PUBLIC_TELEGRAM_BOT_TOKEN ?? '').trim();
-const telegramChatId = String(import.meta.env.PUBLIC_TELEGRAM_CHAT_ID ?? '').trim();
+const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 ---
 
 <div
@@ -75,11 +74,6 @@ const telegramChatId = String(import.meta.env.PUBLIC_TELEGRAM_CHAT_ID ?? '').tri
 						pattern="[+\d\s\(\)\-]{10,}"
 					/>
 				</label>
-				<label class="ozon-lead-field">
-					<span>Город</span>
-					<input type="text" name="city" value="Москва" autocomplete="address-level2" />
-				</label>
-
 				<fieldset class="ozon-lead-fieldset">
 					<legend>Транспорт</legend>
 					<label class="ozon-lead-radio">
@@ -111,10 +105,14 @@ const telegramChatId = String(import.meta.env.PUBLIC_TELEGRAM_CHAT_ID ?? '').tri
 
 		<div class="ozon-lead-stage hidden" data-stage="success">
 			<div class="ozon-lead-success-icon" aria-hidden="true">✓</div>
-			<h2>Заявка принята</h2>
-			<p>Мы свяжемся с&nbsp;вами в&nbsp;ближайшее время и&nbsp;поможем пройти все шаги.</p>
+			<h2>Заявка отправлена в&nbsp;Ozon</h2>
+			<p>Сейчас Ozon пришлёт SMS на&nbsp;ваш номер с&nbsp;инструкцией. Мы&nbsp;уже передали ваши контакты и&nbsp;закрепили вас за&nbsp;нашим аккаунтом.</p>
 
 			<ol class="ozon-lead-steps">
+				<li>
+					<strong>Дождитесь SMS от&nbsp;Ozon</strong>
+					<span>В&nbsp;течение нескольких минут на&nbsp;ваш телефон придёт сообщение с&nbsp;ссылкой и&nbsp;дальнейшими шагами.</span>
+				</li>
 				<li>
 					<strong>Установите Ozon Job</strong>
 					<span>
@@ -124,25 +122,8 @@ const telegramChatId = String(import.meta.env.PUBLIC_TELEGRAM_CHAT_ID ?? '').tri
 					</span>
 				</li>
 				<li>
-					<strong>Зарегистрируйтесь</strong>
-					<span>через Госуслуги или Ozon&nbsp;Bank — пара минут.</span>
-				</li>
-				<li>
-					<strong>Введите реферальный код</strong>
-					<span>В&nbsp;разделе «Приведи друга» вставьте этот номер:</span>
-					<div class="ozon-lead-refbox">
-						<code id="ozon-lead-refcode-text">{ozonRefCode || '+7 ___ ___-__-__'}</code>
-						<button
-							type="button"
-							class="ozon-lead-refcopy"
-							id="ozon-lead-refcopy"
-							data-ref-code={ozonRefCode}
-							disabled={!ozonRefCode}
-						>
-							<span class="ozon-lead-refcopy-default">Скопировать</span>
-							<span class="ozon-lead-refcopy-done">Скопировано ✓</span>
-						</button>
-					</div>
+					<strong>Зарегистрируйтесь и&nbsp;выходите на&nbsp;смену</strong>
+					<span>Регистрация через Госуслуги — занимает 5&nbsp;минут. Дальше выберите смену в&nbsp;приложении.</span>
 				</li>
 			</ol>
 
@@ -153,7 +134,7 @@ const telegramChatId = String(import.meta.env.PUBLIC_TELEGRAM_CHAT_ID ?? '').tri
 
 <script
 	is:inline
-	define:vars={{ telegramBotToken, telegramChatId, ozonRefCode }}
+	define:vars={{ ozonLeadApi }}
 >
 	(function () {
 		const modal = document.getElementById('ozon-lead-modal');
@@ -163,10 +144,6 @@ const telegramChatId = String(import.meta.env.PUBLIC_TELEGRAM_CHAT_ID ?? '').tri
 		const errorEl = document.getElementById('ozon-lead-error');
 		const stageForm = modal.querySelector('[data-stage="form"]');
 		const stageSuccess = modal.querySelector('[data-stage="success"]');
-		const refCopyBtn = document.getElementById('ozon-lead-refcopy');
-
-		const escapeHtml = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
-
 		const showError = (msg) => {
 			if (!errorEl) return;
 			errorEl.textContent = msg;
@@ -232,32 +209,22 @@ const telegramChatId = String(import.meta.env.PUBLIC_TELEGRAM_CHAT_ID ?? '').tri
 			});
 		});
 
-		const sendToTelegram = async (data) => {
-			if (!telegramBotToken || !telegramChatId) return { skipped: true };
-			const lines = [
-				'🆕 <b>Новая заявка с kurerok.ru — Ozon</b>',
-				'',
-				'👤 ' + escapeHtml(data.name),
-				'📞 ' + escapeHtml(data.phone),
-				'🏙 ' + escapeHtml(data.city),
-				'🚗 ' + escapeHtml(data.transport),
-				'',
-				'🌐 ' + escapeHtml(data.pageUrl),
-				'🕒 ' + escapeHtml(data.timestamp)
-			];
-			const res = await fetch('https://api.telegram.org/bot' + telegramBotToken + '/sendMessage', {
+		const submitToWorker = async (data) => {
+			if (!ozonLeadApi) return { skipped: true };
+			const res = await fetch(ozonLeadApi, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					chat_id: telegramChatId,
-					text: lines.join('\n'),
-					parse_mode: 'HTML',
-					disable_web_page_preview: true
+					name: data.name,
+					phone: data.phone,
+					transport: data.transport
 				})
 			});
-			if (!res.ok) {
-				const body = await res.text().catch(() => '');
-				throw new Error('Telegram API ' + res.status + ': ' + body.slice(0, 200));
+			let payload = null;
+			try { payload = await res.json(); } catch (_) { payload = null; }
+			if (!res.ok || (payload && payload.ok === false)) {
+				const errCode = (payload && payload.error) || ('http_' + res.status);
+				throw new Error(errCode);
 			}
 			return { sent: true };
 		};
@@ -270,7 +237,6 @@ const telegramChatId = String(import.meta.env.PUBLIC_TELEGRAM_CHAT_ID ?? '').tri
 			const fd = new FormData(form);
 			const name = String(fd.get('name') ?? '').trim();
 			const phoneRaw = String(fd.get('phone') ?? '').trim();
-			const city = String(fd.get('city') ?? '').trim() || 'Москва';
 			const transportKey = String(fd.get('transport') ?? 'auto');
 			const transport = transportLabels[transportKey] || transportKey;
 
@@ -289,17 +255,9 @@ const telegramChatId = String(import.meta.env.PUBLIC_TELEGRAM_CHAT_ID ?? '').tri
 
 			setBusy(true);
 			try {
-				await sendToTelegram({
-					name,
-					phone: phoneRaw,
-					city,
-					transport: transport + (ctx.transport && ctx.transport !== transportKey ? ' (карточка: ' + ctx.transport + ')' : ''),
-					pageUrl: location.href,
-					timestamp: new Date().toLocaleString('ru-RU')
-				});
+				await submitToWorker({ name, phone: phoneRaw, transport });
 				if (typeof window.gtag === 'function') {
 					window.gtag('event', 'ozon_lead_submit', {
-						city,
 						transport: transportKey,
 						context_position: ctx.position || ''
 					});
@@ -308,29 +266,14 @@ const telegramChatId = String(import.meta.env.PUBLIC_TELEGRAM_CHAT_ID ?? '').tri
 				stageSuccess?.classList.remove('hidden');
 			} catch (err) {
 				console.warn('[ozon-lead] submit failed', err);
-				showError('Не удалось отправить заявку. Попробуйте ещё раз через минуту или напишите нам в Telegram.');
+				const code = String(err?.message || '');
+				let msg = 'Не удалось отправить заявку. Попробуйте ещё раз через минуту.';
+				if (code === 'invalid_phone') msg = 'Похоже, в номере не хватает цифр. Проверьте телефон.';
+				else if (code === 'name_too_short') msg = 'Укажите имя — минимум 2 символа.';
+				else if (code === 'ozon_submit_failed') msg = 'Ozon временно не отвечает. Попробуйте через минуту.';
+				showError(msg);
 			} finally {
 				setBusy(false);
-			}
-		});
-
-		refCopyBtn?.addEventListener('click', async () => {
-			const code = refCopyBtn.dataset.refCode || ozonRefCode || '';
-			if (!code) return;
-			try {
-				await navigator.clipboard.writeText(code);
-				refCopyBtn.classList.add('copied');
-				setTimeout(() => refCopyBtn.classList.remove('copied'), 1800);
-			} catch (_) {
-				// Fallback: select the text in the <code> element.
-				const codeEl = document.getElementById('ozon-lead-refcode-text');
-				if (codeEl && window.getSelection) {
-					const range = document.createRange();
-					range.selectNodeContents(codeEl);
-					const sel = window.getSelection();
-					sel?.removeAllRanges();
-					sel?.addRange(range);
-				}
 			}
 		});
 	})();
