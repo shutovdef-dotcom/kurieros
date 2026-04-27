@@ -297,11 +297,14 @@ export const buildJobPostingSchema = (input: JobPostingInput) => {
     industry: input.industry || 'Курьерская доставка',
     occupationalCategory: '53-3031 Driver/Sales Workers',
     // Google for Jobs requires `experienceRequirements` to be an
-    // `OccupationalExperienceRequirements` object with a numeric
-    // `monthsOfExperience` — a free-text string fails validation.
-    // Most courier roles in our catalogue are «без опыта»; for the few
-    // that mention a minimum, parse it from the qualifications text.
-    experienceRequirements: buildExperienceRequirements(input.qualifications),
+    // `OccupationalExperienceRequirements` object with a *positive*
+    // numeric `monthsOfExperience`. For «без опыта» roles we omit the
+    // field entirely — emitting `monthsOfExperience: 0` is treated as
+    // a non-critical warning by the Rich Results validator.
+    ...(() => {
+      const req = buildExperienceRequirements(input.qualifications);
+      return req ? { experienceRequirements: req } : {};
+    })(),
     ...(baseSalary ? { baseSalary } : {}),
   };
 };
@@ -309,21 +312,31 @@ export const buildJobPostingSchema = (input: JobPostingInput) => {
 /**
  * Map the free-text `qualifications` blob to a structured
  * `OccupationalExperienceRequirements` (Google rich result requirement).
- * Patterns supported: «Без опыта» (default), «от N месяцев», «от N лет / года».
+ *
+ * Returns `undefined` when no positive months-of-experience are
+ * required so the caller can omit the field entirely. Google rejects
+ * `monthsOfExperience: 0` with a non-critical «must be positive»
+ * warning, so a missing field is preferable for «без опыта» roles.
+ *
+ * Match requires an explicit experience-context keyword («опыт» /
+ * «стаж» / `experience`) within ~40 chars *before* a duration phrase
+ * — this prevents false positives such as «Возраст от 18 лет» where
+ * «лет» refers to age, not experience. Anything else returns
+ * `undefined`.
  */
 const buildExperienceRequirements = (qualifications: string | undefined) => {
-  const fallback = {
-    '@type': 'OccupationalExperienceRequirements' as const,
-    monthsOfExperience: 0,
-  };
-  if (!qualifications) return fallback;
+  if (!qualifications) return undefined;
   const text = qualifications.toLowerCase();
-  if (/без опыта|no experience/.test(text)) return fallback;
-  const match = text.match(/от\s+(\d+)\s+(год|лет|месяц)/);
-  if (!match) return fallback;
+  if (/без\s+опыта|no\s+experience/.test(text)) return undefined;
+  // Experience-context keyword + duration «от N год/лет/месяц(ев)».
+  const match = text.match(
+    /(?:опыт|стаж|experience)[^.;]{0,40}?от\s+(\d+)\s+(год|лет|месяц)/,
+  );
+  if (!match) return undefined;
   const num = Number.parseInt(match[1], 10);
-  if (!Number.isFinite(num) || num < 0) return fallback;
+  if (!Number.isFinite(num) || num <= 0) return undefined;
   const months = /месяц/.test(match[2]) ? num : num * 12;
+  if (months <= 0) return undefined;
   return {
     '@type': 'OccupationalExperienceRequirements' as const,
     monthsOfExperience: months,
