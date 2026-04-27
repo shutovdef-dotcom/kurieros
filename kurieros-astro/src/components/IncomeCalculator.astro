@@ -115,22 +115,46 @@ const fallbackRateJson = JSON.stringify(fallbackRate);
     const hoursVal = document.getElementById('hours-val');
     const totalAmount = document.getElementById('total-amount');
 
+    let lastResult = 0;
+
     function calculate() {
         const days = Number.parseInt(daysRange.value, 10);
         const hours = Number.parseInt(hoursRange.value, 10);
         const cityName = citySelect.value;
         const rate = Number(rates[cityName]) || fallbackRate;
         const total = days * hours * rate * 1.2;
-        
+
         daysVal.textContent = days;
         hoursVal.textContent = hours;
         totalAmount.textContent = total.toLocaleString('ru-RU');
+        lastResult = total;
+    }
+
+    function dispatchCalculatorSubmit() {
+        // Slider `change` fires on release (not on every pixel of drag),
+        // so this is a much cleaner signal of an actual user interaction
+        // than wiring it to `input`.
+        const days = Number.parseInt(daysRange.value, 10);
+        const hours = Number.parseInt(hoursRange.value, 10);
+        window.dispatchEvent(new CustomEvent('kurieros:calculator-submit', {
+            detail: {
+                source: 'income_calculator',
+                city: citySelect.value,
+                hours_per_day: hours,
+                days_per_month: days,
+                result_monthly: Math.round(lastResult)
+            }
+        }));
     }
 
     daysRange?.addEventListener('input', calculate);
     hoursRange?.addEventListener('input', calculate);
     citySelect?.addEventListener('change', calculate);
-    
+
+    daysRange?.addEventListener('change', dispatchCalculatorSubmit);
+    hoursRange?.addEventListener('change', dispatchCalculatorSubmit);
+    citySelect?.addEventListener('change', dispatchCalculatorSubmit);
+
     document.addEventListener('DOMContentLoaded', calculate);
 </script>
 

@@ -2,6 +2,21 @@
 const { job, isInCompare = false } = Astro.props;
 const applyHref = job.applyLink && job.applyLink !== '#' ? job.applyLink : `/v/${job.slug}/`;
 const applyExternal = job.applyLink && job.applyLink !== '#';
+
+// Extract a numeric ceiling from the human salary string (e.g.
+// «до 298 800 ₽/мес» → 298800). Used for the GA4 `apply_click` event
+// payload so we can analyse click-through value distribution.
+// Best-effort: returns 0 on parse miss.
+const salaryMaxNumeric = (() => {
+	const raw = (job.salary ?? '').replace(/[  ]/g, ' ');
+	const matches = raw.match(/(\d[\d\s]*)/g);
+	if (!matches) return 0;
+	const numbers = matches
+		.map((m: string) => Number.parseInt(m.replace(/\s+/g, ''), 10))
+		.filter((n: number) => Number.isFinite(n) && n > 0);
+	return numbers.length ? Math.max(...numbers) : 0;
+})();
+const applyEmploymentText = job.details?.employment_type ?? '';
 ---
 
 <div class="job-card" data-tags={job.tags.join(',')} data-location={job.location}>
@@ -58,7 +73,20 @@ const applyExternal = job.applyLink && job.applyLink !== '#';
 			<button class={`btn-compare ${isInCompare ? 'active' : ''}`} data-id={job.id} type="button">
 				{isInCompare ? <><span data-t="job.in_compare">В сравнении</span> ✓</> : <span data-t="job.compare">+ Сравнить</span>}
 			</button>
-			<a href={applyHref} class="apply-btn" target={applyExternal ? '_blank' : undefined} rel={applyExternal ? 'noopener noreferrer' : undefined} data-t="job.apply">Заполнить заявку</a>
+			<a
+				href={applyHref}
+				class="apply-btn"
+				target={applyExternal ? '_blank' : undefined}
+				rel={applyExternal ? 'noopener noreferrer nofollow sponsored' : undefined}
+				data-t="job.apply"
+				data-apply-cta
+				data-apply-position="grid_card"
+				data-apply-company={job.company}
+				data-apply-city={job.location}
+				data-apply-transport={job.transport}
+				data-apply-employment={applyEmploymentText}
+				data-apply-salary-max={salaryMaxNumeric || ''}
+			>Заполнить заявку</a>
 		</div>
 	</div>
 </div>
