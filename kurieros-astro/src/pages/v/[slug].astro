@@ -214,6 +214,18 @@ const pickKbItemsForVacancy = (limit: number): KnowledgeItem[] => {
 const selectedKbItems = pickKbItemsForVacancy(6);
 const kbAnchorTopic = (item: KnowledgeItem) => TOPIC_META[item.topic];
 
+// Numeric salary ceiling for the GA4 `apply_click` event payload.
+// Parses the human salary string (e.g. «до 298 800 ₽/мес») best-effort.
+const salaryMaxNumeric = (() => {
+	const raw = (job.salary ?? '').replace(/[  ]/g, ' ');
+	const matches = raw.match(/(\d[\d\s]*)/g);
+	if (!matches) return 0;
+	const numbers = matches
+		.map((m: string) => Number.parseInt(m.replace(/\s+/g, ''), 10))
+		.filter((n: number) => Number.isFinite(n) && n > 0);
+	return numbers.length ? Math.max(...numbers) : 0;
+})();
+
 // === SEO+AI block helpers (replace removed «Дальше» block) ===
 
 const formatRubAmount = (value: number) =>
@@ -476,7 +488,20 @@ const pageSchemaGraph = [
 						<small class="salary-rate" data-t={`vacancies.${job.id}.details_rate`}>{job.details.rate}</small>
 						<small data-t="vacancy.final_terms_short">Финальные условия уточняются при отклике</small>
 						{hasApplyLink ? (
-							<a href={job.applyLink} target="_blank" rel="noopener noreferrer" class="apply-btn-large apply-btn-hero" data-t="vacancy.apply">
+							<a
+								href={job.applyLink}
+								target="_blank"
+								rel="noopener noreferrer nofollow sponsored"
+								class="apply-btn-large apply-btn-hero"
+								data-t="vacancy.apply"
+								data-apply-cta
+								data-apply-position="vacancy_hero"
+								data-apply-company={job.company}
+								data-apply-city={job.location}
+								data-apply-transport={job.transport}
+								data-apply-employment={employmentTypeText}
+								data-apply-salary-max={salaryMaxNumeric || ''}
+							>
 								Откликнуться сейчас
 						</a>
 					) : (
@@ -694,7 +719,20 @@ const pageSchemaGraph = [
 						
 						{hasApplyLink ? (
 							<>
-								<a href={job.applyLink} target="_blank" rel="noopener noreferrer" class="apply-btn-large" data-t="vacancy.apply">
+								<a
+									href={job.applyLink}
+									target="_blank"
+									rel="noopener noreferrer nofollow sponsored"
+									class="apply-btn-large"
+									data-t="vacancy.apply"
+									data-apply-cta
+									data-apply-position="vacancy_sidebar"
+									data-apply-company={job.company}
+									data-apply-city={job.location}
+									data-apply-transport={job.transport}
+									data-apply-employment={employmentTypeText}
+									data-apply-salary-max={salaryMaxNumeric || ''}
+								>
 									Откликнуться сейчас
 								</a>
 								<p class="apply-note" data-t="vacancy.apply_note">Вы перейдете на сайт прямого работодателя</p>
@@ -707,7 +745,7 @@ const pageSchemaGraph = [
 								<p class="apply-note" data-t="vacancy.apply_disabled_note">Для этой вакансии прямая ссылка пока не добавлена</p>
 							</>
 						)}
-						<div class="vacancy-income-calculator" id="vacancy-income-calculator" data-hourly-rate={hourlyRate ?? ''}>
+						<div class="vacancy-income-calculator" id="vacancy-income-calculator" data-hourly-rate={hourlyRate ?? ''} data-city={job.location} data-transport={job.transport}>
 							<p class="vacancy-income-eyebrow">Калькулятор дохода</p>
 							{hourlyRate ? (
 								<p class="vacancy-income-rate">Ставка в этой вакансии: <strong>{formattedHourlyRate}</strong></p>
@@ -776,6 +814,8 @@ const pageSchemaGraph = [
 			const totalValue = vacancyIncomeCalculator.querySelector('#vacancy-income-total');
 			const formulaValue = vacancyIncomeCalculator.querySelector('#vacancy-income-formula');
 
+			let lastTotal = 0;
+
 			const updateIncome = () => {
 				const days = Number.parseInt(daysRange?.value ?? '22', 10);
 				const hours = Number.parseInt(hoursRange?.value ?? '8', 10);
@@ -786,10 +826,28 @@ const pageSchemaGraph = [
 				if (hoursValue) hoursValue.textContent = String(hours);
 				if (totalValue) totalValue.textContent = `${total.toLocaleString('ru-RU')} ₽`;
 				if (formulaValue) formulaValue.textContent = `${days} дн × ${hours} ч × ${formattedRate}`;
+				lastTotal = total;
+			};
+
+			const dispatchVacancyCalcSubmit = () => {
+				const days = Number.parseInt(daysRange?.value ?? '22', 10);
+				const hours = Number.parseInt(hoursRange?.value ?? '8', 10);
+				window.dispatchEvent(new CustomEvent('kurieros:calculator-submit', {
+					detail: {
+						source: 'vacancy_income_calculator',
+						city: vacancyIncomeCalculator.dataset.city || '',
+						transport: vacancyIncomeCalculator.dataset.transport || '',
+						hours_per_day: hours,
+						days_per_month: days,
+						result_monthly: lastTotal
+					}
+				}));
 			};
 
 			daysRange?.addEventListener('input', updateIncome);
 			hoursRange?.addEventListener('input', updateIncome);
+			daysRange?.addEventListener('change', dispatchVacancyCalcSubmit);
+			hoursRange?.addEventListener('change', dispatchVacancyCalcSubmit);
 			updateIncome();
 		}
 	}

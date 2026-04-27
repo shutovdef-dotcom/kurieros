@@ -21,6 +21,11 @@ export default defineConfig({
       filter: (page) => !page.includes('/designs/') && !page.includes('/owner/'),
       changefreq: 'daily',
       lastmod: new Date(),
+      // Split the ~5 370-URL catalogue into ~3 chunks so each chunked
+      // sitemap stays small and quick for GSC / Yandex to fetch and
+      // re-process — mitigates the «no referring sitemaps detected»
+      // GSC URL-inspection symptom on individual vacancy URLs.
+      entryLimit: 2500,
       serialize(item) {
         const url = item.url;
         if (url === 'https://kurerok.ru/' || url.endsWith('://kurerok.ru/')) {

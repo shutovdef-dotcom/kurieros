@@ -1,3 +1,5 @@
+import { getCityPostalAddress } from '../data/cityAddresses';
+
 type BreadcrumbItem = {
   name: string;
   url: string;
@@ -203,13 +205,30 @@ export type JobPostingInput = {
 export const buildJobPostingSchema = (input: JobPostingInput) => {
   const cities = input.cities.length ? input.cities : ['Россия'];
   const jobLocation = cities.map((city) => {
-    const region = getAddressRegion(city);
+    // For per-city aggregator pages we don't have a real street
+    // address; we fall back to a synthetic city-centre landmark from
+    // the curated `CITY_ADDRESSES` map (or a generic «Центр города»
+    // for cities not in the map). This satisfies Google for Jobs'
+    // requirement of a complete `PostalAddress` with streetAddress +
+    // postalCode + addressRegion alongside addressLocality.
+    if (city === 'Россия') {
+      return {
+        '@type': 'Place',
+        address: {
+          '@type': 'PostalAddress',
+          addressCountry: 'RU',
+        },
+      };
+    }
+    const postal = getCityPostalAddress(city);
     return {
       '@type': 'Place',
       address: {
         '@type': 'PostalAddress',
-        ...(city !== 'Россия' ? { addressLocality: city } : {}),
-        ...(region ? { addressRegion: region } : {}),
+        streetAddress: postal.streetAddress,
+        addressLocality: city,
+        addressRegion: postal.addressRegion,
+        ...(postal.postalCode ? { postalCode: postal.postalCode } : {}),
         addressCountry: 'RU',
       },
     };
@@ -277,8 +296,37 @@ export const buildJobPostingSchema = (input: JobPostingInput) => {
     ...(input.qualifications ? { qualifications: input.qualifications } : {}),
     industry: input.industry || 'Курьерская доставка',
     occupationalCategory: '53-3031 Driver/Sales Workers',
-    experienceRequirements: 'без опыта',
+    // Google for Jobs requires `experienceRequirements` to be an
+    // `OccupationalExperienceRequirements` object with a numeric
+    // `monthsOfExperience` — a free-text string fails validation.
+    // Most courier roles in our catalogue are «без опыта»; for the few
+    // that mention a minimum, parse it from the qualifications text.
+    experienceRequirements: buildExperienceRequirements(input.qualifications),
     ...(baseSalary ? { baseSalary } : {}),
+  };
+};
+
+/**
+ * Map the free-text `qualifications` blob to a structured
+ * `OccupationalExperienceRequirements` (Google rich result requirement).
+ * Patterns supported: «Без опыта» (default), «от N месяцев», «от N лет / года».
+ */
+const buildExperienceRequirements = (qualifications: string | undefined) => {
+  const fallback = {
+    '@type': 'OccupationalExperienceRequirements' as const,
+    monthsOfExperience: 0,
+  };
+  if (!qualifications) return fallback;
+  const text = qualifications.toLowerCase();
+  if (/без опыта|no experience/.test(text)) return fallback;
+  const match = text.match(/от\s+(\d+)\s+(год|лет|месяц)/);
+  if (!match) return fallback;
+  const num = Number.parseInt(match[1], 10);
+  if (!Number.isFinite(num) || num < 0) return fallback;
+  const months = /месяц/.test(match[2]) ? num : num * 12;
+  return {
+    '@type': 'OccupationalExperienceRequirements' as const,
+    monthsOfExperience: months,
   };
 };
 
