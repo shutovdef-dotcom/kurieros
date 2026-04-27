@@ -32,6 +32,14 @@ jobs:
           PUBLIC_YANDEX_WEBMASTER_HOST: https:kurerok.ru:443
           PUBLIC_YANDEX_VERIFICATION: 9a662580de5ebac5
           PUBLIC_GOOGLE_SITE_VERIFICATION: QIGlMj-JAXkxvnkeFNNu6hWJ5bslKtguuUxY4ty17bI
+          # Ozon lead-form integration. Sourced from repository
+          # Variables (Settings → Secrets and variables → Actions →
+          # Variables) so they can be rotated without a code change.
+          # All three are PUBLIC_-prefixed because Astro inlines them
+          # into client bundles at build time.
+          PUBLIC_OZON_REF_CODE: ${{ vars.PUBLIC_OZON_REF_CODE }}
+          PUBLIC_TELEGRAM_BOT_TOKEN: ${{ vars.PUBLIC_TELEGRAM_BOT_TOKEN }}
+          PUBLIC_TELEGRAM_CHAT_ID: ${{ vars.PUBLIC_TELEGRAM_CHAT_ID }}
         with:
           path: ./kurieros-astro
           node-version: 22
