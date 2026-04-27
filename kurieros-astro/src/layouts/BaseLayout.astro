@@ -2,6 +2,7 @@
 import '../styles/index.css';
 import '../styles/themes.css';
 import VPNModal from '../components/VPNModal.astro';
+import OzonLeadModal from '../components/OzonLeadModal.astro';
 import { SUPPORTED_LANGUAGES, translations, type SupportedLanguage } from '../data/translations';
 
 const supportedLanguages = SUPPORTED_LANGUAGES;
@@ -259,6 +260,7 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 		<slot />
 
 		<VPNModal />
+		<OzonLeadModal />
 
 		<script is:inline>
 			(async function() {

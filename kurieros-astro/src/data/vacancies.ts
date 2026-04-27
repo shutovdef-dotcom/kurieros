@@ -41,6 +41,21 @@ const EFIN_COMPANY_LOGO =
 const EFIN_APPLY_LINK = 'https://trk.ppdu.ru/click/VuqTAiCx?erid=2SDnjdmxiVK';
 const EFIN_CITIZENSHIP = 'РФ';
 const EFIN_EMPLOYMENT_FORMATS = ['self_employed'] satisfies EmploymentFormat[];
+// === Ozon ============================================================
+// Ozon doesn't expose a public referral URL for courier sign-ups —
+// the actual application flow happens inside the Ozon Job mobile app
+// after registration through Госуслуги. The site captures the lead
+// via an in-page form (`OzonLeadModal.astro`) and shows the user our
+// referrer phone to paste into the «Приведи друга» field.
+//
+// The magic `applyLink: 'lead-form:ozon'` prefix is detected by
+// `JobCard.astro` and `pages/v/[slug].astro` — those switch the CTA
+// from an external `<a>` to a modal-opening `<button>`.
+const OZON_COMPANY_NAME = 'Ozon';
+const OZON_COMPANY_LOGO = '/logos/ozon.svg';
+const OZON_EMPLOYMENT_FORMATS = ['self_employed', 'individual_entrepreneur'] satisfies EmploymentFormat[];
+const OZON_CITIZENSHIP = 'РФ / ЕАЭС';
+
 const ALFA_BANK_COMPANY_NAME = 'Альфа-Банк';
 const ALFA_BANK_COMPANY_LOGO = '/logos/alfa-bank.svg';
 const ALFA_BANK_APPLY_LINK =
@@ -1078,6 +1093,67 @@ const alfaBankRepresentativeOffers = alfaBankVacancies.offers.map((offer, offerI
   ...buildAlfaBankBenefitsOverride(offer),
 })) satisfies VacancyOffer[];
 
+// === Ozon — single Moscow auto-courier vacancy (test) ================
+const ozonCourierContent = createKuperLocalizedContent({
+  title: 'Автокурьер Ozon {cityPrep}',
+  shortDescription:
+    'Доставка заказов на личном или арендованном авто из складов Ozon. Гибкий график, еженедельные выплаты, регистрация через Госуслуги.',
+  description:
+    'Ozon ищет автокурьеров для доставки заказов клиентам. Работа на собственном или арендованном автомобиле, формат — самозанятость или ИП. Регистрация и обучение проходят в приложении Ozon Job через Госуслуги. Свободный график, можно совмещать с другими подработками. Выплаты раз в неделю напрямую на карту. Доход от 100 000 ₽ в Москве при полной загрузке. Подключение через нашу заявку: оставьте контакты — мы перезвоним и поможем зарегистрироваться с реферальным кодом, чтобы вы получили бонус после первой смены.',
+  requirements: [
+    'Возраст от 18 лет.',
+    'Гражданство РФ или ЕАЭС.',
+    'Личный или арендованный автомобиль.',
+    'Действующее водительское удостоверение категории B.',
+    'Самозанятость или ИП (поможем оформить за 5 минут через «Мой налог»).',
+    'Готовность пройти онбординг в приложении Ozon Job через Госуслуги.',
+  ],
+  benefits: [
+    'Доход от 100 000 ₽ в месяц при полной загрузке.',
+    'Еженедельные выплаты напрямую на карту.',
+    'Свободный график — берёте слоты в приложении сами.',
+    'Бонус +1 000 ₽ после первой смены за регистрацию по реферальному коду.',
+    'Дополнительные бонусы за брендирование автомобиля.',
+    'Прямая поддержка от нас на всех этапах онбординга.',
+  ],
+  requiredDocuments: [
+    'Паспорт РФ или ЕАЭС.',
+    'Водительское удостоверение категории B.',
+    'Свидетельство о регистрации ТС или договор аренды.',
+    'Регистрация в «Мой налог» (самозанятость) или ИП.',
+  ],
+  searchTags: ['Ozon', 'Озон', 'автокурьер', 'самозанятость', 'личный автомобиль'],
+});
+
+const ozonCourierOffers = [
+  {
+    city: 'Москва',
+    transport: 'auto',
+    pay: {
+      currency: 'RUB',
+      monthly: {
+        min: 100_000,
+        text: 'от 100 000 ₽/мес',
+      },
+      rate: 'Тариф за заказ + бонусы за брендирование автомобиля',
+      paymentFrequency: 'Еженедельно',
+    },
+    isActive: true,
+    updatedAt: new Date().toISOString().slice(0, 10),
+    sourceUrl: 'https://job.ozon.ru/courier',
+    salaryConfidence: 'partner',
+    ageFrom: 18,
+    citizenship: OZON_CITIZENSHIP,
+    medicalBook: 'not_required',
+    employmentFormats: [...OZON_EMPLOYMENT_FORMATS],
+    schedule: 'Свободный график, слоты от 4 часов',
+    // Magic prefix consumed by JobCard / vacancy page — they swap the
+    // CTA from an external `<a>` to a modal-opening `<button>`.
+    applyLink: 'lead-form:ozon',
+    priority: 1700,
+  },
+] satisfies VacancyOffer[];
+
 export const vacancySources = [
   {
     id: 1,
@@ -1277,6 +1353,28 @@ export const vacancySources = [
     },
     offers: alfaBankRepresentativeOffers,
     extraTags: ['alfa-bank', 'bank-representative', 'field-sales', 'official-employment', 'source:google-sheet'],
+    isHot: true,
+  },
+  {
+    id: 10,
+    slug: 'ozon-courier',
+    company: {
+      name: OZON_COMPANY_NAME,
+      logo: OZON_COMPANY_LOGO,
+    },
+    content: ozonCourierContent,
+    defaults: {
+      ageFrom: 18,
+      medicalBook: 'not_required',
+      employmentFormats: [...OZON_EMPLOYMENT_FORMATS],
+      schedule: 'Свободный график, слоты от 4 часов',
+      education: 'Не требуется',
+      citizenship: OZON_CITIZENSHIP,
+      uniform: 'Брендированный автомобиль (за бонус)',
+      os: 'Android или iOS',
+    },
+    offers: ozonCourierOffers,
+    extraTags: ['ozon', 'auto', 'self-employed', 'lead-form'],
     isHot: true,
   },
 ] satisfies VacancySource[];

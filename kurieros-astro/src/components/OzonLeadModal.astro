@@ -1,0 +1,787 @@
+---
+/**
+ * Ozon lead-capture modal.
+ *
+ * Mounted once in BaseLayout. Hidden by default — opened by a global
+ * click delegate inside this component's inline script when JobCard
+ * or the vacancy page renders an apply CTA tagged
+ * `data-lead-form-type="ozon"` (used for vacancies whose data has
+ * `applyLink: 'lead-form:ozon'`, the magic prefix from
+ * `src/data/vacancies.ts`).
+ *
+ * Flow:
+ *  1. User submits the form (name, phone, city, transport).
+ *  2. JS POSTs to Telegram Bot API directly from the browser.
+ *  3. On success → success state with the referrer code + a
+ *     one-click copy button so the user can paste it into the Ozon
+ *     Job app's «Приведи друга» field.
+ *
+ * Env vars (build-time, prefixed `PUBLIC_*` so Astro inlines them
+ * into client bundles):
+ *  - PUBLIC_OZON_REF_CODE        — referrer phone shown to user
+ *  - PUBLIC_TELEGRAM_BOT_TOKEN   — Telegram bot token
+ *  - PUBLIC_TELEGRAM_CHAT_ID     — chat that receives the lead alert
+ *
+ * If any of those are blank (e.g. dev), the modal still opens and the
+ * form validates client-side; the Telegram POST is skipped and the
+ * success state shows a placeholder phone.
+ */
+const ozonRefCode = String(import.meta.env.PUBLIC_OZON_REF_CODE ?? '').trim();
+const telegramBotToken = String(import.meta.env.PUBLIC_TELEGRAM_BOT_TOKEN ?? '').trim();
+const telegramChatId = String(import.meta.env.PUBLIC_TELEGRAM_CHAT_ID ?? '').trim();
+---
+
+<div
+	id="ozon-lead-modal"
+	class="ozon-lead-modal hidden"
+	role="dialog"
+	aria-modal="true"
+	aria-labelledby="ozon-lead-title"
+	aria-hidden="true"
+>
+	<div class="ozon-lead-backdrop" data-ozon-lead-close></div>
+	<div class="ozon-lead-card" role="document">
+		<button
+			class="ozon-lead-close"
+			type="button"
+			aria-label="Закрыть форму"
+			data-ozon-lead-close
+		>×</button>
+
+		<div class="ozon-lead-stage" data-stage="form">
+			<header class="ozon-lead-head">
+				<span class="ozon-lead-eyebrow">Заявка через kurerok.ru</span>
+				<h2 id="ozon-lead-title">Откликнуться на вакансию Ozon</h2>
+				<p class="ozon-lead-lead">
+					Оставьте контакты — мы перезвоним и поможем зарегистрироваться
+					в&nbsp;Ozon Job. После первой смены вы получите бонус +1&nbsp;000&nbsp;₽
+					за&nbsp;регистрацию по&nbsp;нашему реферальному коду.
+				</p>
+			</header>
+
+			<form id="ozon-lead-form" class="ozon-lead-form" novalidate>
+				<label class="ozon-lead-field">
+					<span>Имя <em>*</em></span>
+					<input type="text" name="name" required autocomplete="name" minlength="2" />
+				</label>
+				<label class="ozon-lead-field">
+					<span>Телефон <em>*</em></span>
+					<input
+						type="tel"
+						name="phone"
+						required
+						autocomplete="tel"
+						placeholder="+7 (___) ___-__-__"
+						pattern="[+\d\s\(\)\-]{10,}"
+					/>
+				</label>
+				<label class="ozon-lead-field">
+					<span>Город</span>
+					<input type="text" name="city" value="Москва" autocomplete="address-level2" />
+				</label>
+
+				<fieldset class="ozon-lead-fieldset">
+					<legend>Транспорт</legend>
+					<label class="ozon-lead-radio">
+						<input type="radio" name="transport" value="auto" checked />
+						<span>Авто</span>
+					</label>
+					<label class="ozon-lead-radio">
+						<input type="radio" name="transport" value="foot" />
+						<span>Пешком</span>
+					</label>
+					<label class="ozon-lead-radio">
+						<input type="radio" name="transport" value="bicycle" />
+						<span>Велосипед / самокат</span>
+					</label>
+				</fieldset>
+
+				<button type="submit" class="ozon-lead-submit" id="ozon-lead-submit">
+					<span class="ozon-lead-submit-label">Отправить заявку</span>
+					<span class="ozon-lead-spinner" aria-hidden="true"></span>
+				</button>
+
+				<p class="ozon-lead-error hidden" id="ozon-lead-error" role="alert"></p>
+
+				<p class="ozon-lead-fineprint">
+					Нажимая «Отправить», вы соглашаетесь, что мы&nbsp;свяжемся с&nbsp;вами по&nbsp;указанному телефону.
+				</p>
+			</form>
+		</div>
+
+		<div class="ozon-lead-stage hidden" data-stage="success">
+			<div class="ozon-lead-success-icon" aria-hidden="true">✓</div>
+			<h2>Заявка принята</h2>
+			<p>Мы свяжемся с&nbsp;вами в&nbsp;ближайшее время и&nbsp;поможем пройти все шаги.</p>
+
+			<ol class="ozon-lead-steps">
+				<li>
+					<strong>Установите Ozon Job</strong>
+					<span>
+						<a href="https://apps.apple.com/ru/app/ozon-job/id6498711171" target="_blank" rel="noopener noreferrer">App Store</a>
+						·
+						<a href="https://play.google.com/store/apps/details?id=ru.ozon.hire" target="_blank" rel="noopener noreferrer">Google Play</a>
+					</span>
+				</li>
+				<li>
+					<strong>Зарегистрируйтесь</strong>
+					<span>через Госуслуги или Ozon&nbsp;Bank — пара минут.</span>
+				</li>
+				<li>
+					<strong>Введите реферальный код</strong>
+					<span>В&nbsp;разделе «Приведи друга» вставьте этот номер:</span>
+					<div class="ozon-lead-refbox">
+						<code id="ozon-lead-refcode-text">{ozonRefCode || '+7 ___ ___-__-__'}</code>
+						<button
+							type="button"
+							class="ozon-lead-refcopy"
+							id="ozon-lead-refcopy"
+							data-ref-code={ozonRefCode}
+							disabled={!ozonRefCode}
+						>
+							<span class="ozon-lead-refcopy-default">Скопировать</span>
+							<span class="ozon-lead-refcopy-done">Скопировано ✓</span>
+						</button>
+					</div>
+				</li>
+			</ol>
+
+			<button type="button" class="ozon-lead-finish" data-ozon-lead-close>Готово</button>
+		</div>
+	</div>
+</div>
+
+<script
+	is:inline
+	define:vars={{ telegramBotToken, telegramChatId, ozonRefCode }}
+>
+	(function () {
+		const modal = document.getElementById('ozon-lead-modal');
+		if (!modal) return;
+		const form = document.getElementById('ozon-lead-form');
+		const submitBtn = document.getElementById('ozon-lead-submit');
+		const errorEl = document.getElementById('ozon-lead-error');
+		const stageForm = modal.querySelector('[data-stage="form"]');
+		const stageSuccess = modal.querySelector('[data-stage="success"]');
+		const refCopyBtn = document.getElementById('ozon-lead-refcopy');
+
+		const escapeHtml = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+
+		const showError = (msg) => {
+			if (!errorEl) return;
+			errorEl.textContent = msg;
+			errorEl.classList.remove('hidden');
+		};
+		const clearError = () => errorEl?.classList.add('hidden');
+
+		const setBusy = (busy) => {
+			if (!submitBtn) return;
+			submitBtn.disabled = busy;
+			submitBtn.classList.toggle('busy', busy);
+		};
+
+		const open = (context) => {
+			modal.classList.remove('hidden');
+			modal.setAttribute('aria-hidden', 'false');
+			document.body.classList.add('ozon-lead-modal-open');
+			modal.dataset.context = JSON.stringify(context || {});
+			stageForm?.classList.remove('hidden');
+			stageSuccess?.classList.add('hidden');
+			clearError();
+			setTimeout(() => form?.querySelector('input[name="name"]')?.focus(), 50);
+			if (typeof window.gtag === 'function') {
+				window.gtag('event', 'ozon_lead_open', {
+					context_company: context?.company || '',
+					context_city: context?.city || '',
+					context_position: context?.position || ''
+				});
+			}
+		};
+		const close = () => {
+			modal.classList.add('hidden');
+			modal.setAttribute('aria-hidden', 'true');
+			document.body.classList.remove('ozon-lead-modal-open');
+			form?.reset();
+			setBusy(false);
+			clearError();
+		};
+
+		// Public-on-window so anything on the page can call it.
+		window.openOzonLeadModal = open;
+
+		modal.querySelectorAll('[data-ozon-lead-close]').forEach((el) => {
+			el.addEventListener('click', close);
+		});
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && !modal.classList.contains('hidden')) close();
+		});
+
+		// Click delegation: any element with `data-lead-form-type="ozon"`
+		// opens the modal. Apply CTAs in JobCard / vacancy page set this.
+		document.addEventListener('click', (e) => {
+			const trigger = e.target instanceof Element
+				? e.target.closest('[data-lead-form-type="ozon"]')
+				: null;
+			if (!trigger) return;
+			e.preventDefault();
+			open({
+				company: trigger.dataset.applyCompany || 'Ozon',
+				city: trigger.dataset.applyCity || '',
+				transport: trigger.dataset.applyTransport || '',
+				position: trigger.dataset.applyPosition || ''
+			});
+		});
+
+		const sendToTelegram = async (data) => {
+			if (!telegramBotToken || !telegramChatId) return { skipped: true };
+			const lines = [
+				'🆕 <b>Новая заявка с kurerok.ru — Ozon</b>',
+				'',
+				'👤 ' + escapeHtml(data.name),
+				'📞 ' + escapeHtml(data.phone),
+				'🏙 ' + escapeHtml(data.city),
+				'🚗 ' + escapeHtml(data.transport),
+				'',
+				'🌐 ' + escapeHtml(data.pageUrl),
+				'🕒 ' + escapeHtml(data.timestamp)
+			];
+			const res = await fetch('https://api.telegram.org/bot' + telegramBotToken + '/sendMessage', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					chat_id: telegramChatId,
+					text: lines.join('\n'),
+					parse_mode: 'HTML',
+					disable_web_page_preview: true
+				})
+			});
+			if (!res.ok) {
+				const body = await res.text().catch(() => '');
+				throw new Error('Telegram API ' + res.status + ': ' + body.slice(0, 200));
+			}
+			return { sent: true };
+		};
+
+		const transportLabels = { auto: 'Авто', foot: 'Пешком', bicycle: 'Велосипед / самокат' };
+
+		form?.addEventListener('submit', async (e) => {
+			e.preventDefault();
+			clearError();
+			const fd = new FormData(form);
+			const name = String(fd.get('name') ?? '').trim();
+			const phoneRaw = String(fd.get('phone') ?? '').trim();
+			const city = String(fd.get('city') ?? '').trim() || 'Москва';
+			const transportKey = String(fd.get('transport') ?? 'auto');
+			const transport = transportLabels[transportKey] || transportKey;
+
+			if (name.length < 2) {
+				showError('Укажите имя — минимум 2 символа.');
+				return;
+			}
+			const phoneDigits = phoneRaw.replace(/\D+/g, '');
+			if (phoneDigits.length < 10) {
+				showError('Похоже, в номере не хватает цифр. Проверьте телефон.');
+				return;
+			}
+
+			let ctx = {};
+			try { ctx = JSON.parse(modal.dataset.context || '{}'); } catch (_) { ctx = {}; }
+
+			setBusy(true);
+			try {
+				await sendToTelegram({
+					name,
+					phone: phoneRaw,
+					city,
+					transport: transport + (ctx.transport && ctx.transport !== transportKey ? ' (карточка: ' + ctx.transport + ')' : ''),
+					pageUrl: location.href,
+					timestamp: new Date().toLocaleString('ru-RU')
+				});
+				if (typeof window.gtag === 'function') {
+					window.gtag('event', 'ozon_lead_submit', {
+						city,
+						transport: transportKey,
+						context_position: ctx.position || ''
+					});
+				}
+				stageForm?.classList.add('hidden');
+				stageSuccess?.classList.remove('hidden');
+			} catch (err) {
+				console.warn('[ozon-lead] submit failed', err);
+				showError('Не удалось отправить заявку. Попробуйте ещё раз через минуту или напишите нам в Telegram.');
+			} finally {
+				setBusy(false);
+			}
+		});
+
+		refCopyBtn?.addEventListener('click', async () => {
+			const code = refCopyBtn.dataset.refCode || ozonRefCode || '';
+			if (!code) return;
+			try {
+				await navigator.clipboard.writeText(code);
+				refCopyBtn.classList.add('copied');
+				setTimeout(() => refCopyBtn.classList.remove('copied'), 1800);
+			} catch (_) {
+				// Fallback: select the text in the <code> element.
+				const codeEl = document.getElementById('ozon-lead-refcode-text');
+				if (codeEl && window.getSelection) {
+					const range = document.createRange();
+					range.selectNodeContents(codeEl);
+					const sel = window.getSelection();
+					sel?.removeAllRanges();
+					sel?.addRange(range);
+				}
+			}
+		});
+	})();
+</script>
+
+<style>
+	.ozon-lead-modal {
+		position: fixed;
+		inset: 0;
+		z-index: 9000;
+		display: grid;
+		place-items: center;
+		padding: 1rem;
+	}
+	.ozon-lead-modal.hidden {
+		display: none;
+	}
+	.ozon-lead-backdrop {
+		position: absolute;
+		inset: 0;
+		background: rgba(15, 23, 42, 0.55);
+		backdrop-filter: blur(4px);
+		-webkit-backdrop-filter: blur(4px);
+	}
+	.ozon-lead-card {
+		position: relative;
+		width: 100%;
+		max-width: 480px;
+		max-height: calc(100vh - 2rem);
+		overflow-y: auto;
+		background: #ffffff;
+		border-radius: 18px;
+		box-shadow: 0 32px 60px rgba(0, 0, 0, 0.28);
+		padding: 1.6rem 1.5rem 1.4rem;
+		font-family: var(--font-main, 'Manrope', sans-serif);
+		color: #0f172a;
+	}
+	.ozon-lead-close {
+		position: absolute;
+		top: 0.55rem;
+		right: 0.55rem;
+		width: 36px;
+		height: 36px;
+		border-radius: 50%;
+		border: none;
+		background: rgba(15, 23, 42, 0.06);
+		font-size: 1.4rem;
+		line-height: 1;
+		cursor: pointer;
+		color: #475569;
+		transition: background 0.18s ease, color 0.18s ease;
+	}
+	.ozon-lead-close:hover,
+	.ozon-lead-close:focus-visible {
+		background: rgba(15, 23, 42, 0.12);
+		color: #0f172a;
+		outline: none;
+	}
+	.ozon-lead-eyebrow {
+		display: inline-block;
+		padding: 0.3rem 0.7rem;
+		background: rgba(0, 91, 255, 0.1);
+		color: #005bff;
+		font-size: 0.72rem;
+		font-weight: 800;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+		border-radius: 999px;
+	}
+	.ozon-lead-head h2 {
+		margin: 0.6rem 0 0.45rem;
+		font-family: var(--font-heading, 'Manrope', sans-serif);
+		font-size: clamp(1.3rem, 2.2vw, 1.55rem);
+		line-height: 1.2;
+		color: #0f172a;
+		letter-spacing: -0.01em;
+	}
+	.ozon-lead-lead {
+		margin: 0 0 1rem;
+		font-size: 0.95rem;
+		line-height: 1.5;
+		color: #475569;
+	}
+	.ozon-lead-form {
+		display: grid;
+		gap: 0.7rem;
+	}
+	.ozon-lead-field {
+		display: grid;
+		gap: 0.3rem;
+	}
+	.ozon-lead-field span {
+		font-size: 0.82rem;
+		font-weight: 700;
+		color: #334155;
+	}
+	.ozon-lead-field em {
+		color: #ef4444;
+		font-style: normal;
+		font-weight: 800;
+	}
+	.ozon-lead-field input {
+		width: 100%;
+		min-height: 44px;
+		padding: 0.55rem 0.85rem;
+		border-radius: 10px;
+		border: 1px solid #d4dae3;
+		background: #ffffff;
+		font: inherit;
+		color: #0f172a;
+		transition: border-color 0.15s ease, box-shadow 0.15s ease;
+	}
+	.ozon-lead-field input:focus-visible {
+		outline: none;
+		border-color: #005bff;
+		box-shadow: 0 0 0 3px rgba(0, 91, 255, 0.18);
+	}
+	.ozon-lead-fieldset {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		border: none;
+		padding: 0;
+		margin: 0;
+	}
+	.ozon-lead-fieldset legend {
+		display: block;
+		width: 100%;
+		font-size: 0.82rem;
+		font-weight: 700;
+		color: #334155;
+		margin-bottom: 0.3rem;
+	}
+	.ozon-lead-radio {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		padding: 0.45rem 0.85rem;
+		border: 1px solid #d4dae3;
+		border-radius: 999px;
+		font-size: 0.88rem;
+		cursor: pointer;
+		transition: border-color 0.15s ease, background 0.15s ease;
+	}
+	.ozon-lead-radio:hover {
+		border-color: #005bff;
+	}
+	.ozon-lead-radio input {
+		accent-color: #005bff;
+	}
+	.ozon-lead-radio:has(input:checked) {
+		border-color: #005bff;
+		background: rgba(0, 91, 255, 0.08);
+		color: #005bff;
+		font-weight: 700;
+	}
+	.ozon-lead-submit {
+		position: relative;
+		min-height: 50px;
+		padding: 0 1.1rem;
+		margin-top: 0.4rem;
+		border-radius: 12px;
+		border: none;
+		background: #005bff;
+		color: #ffffff;
+		font-family: inherit;
+		font-weight: 800;
+		font-size: 1rem;
+		cursor: pointer;
+		transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+		box-shadow: 0 8px 18px rgba(0, 91, 255, 0.25);
+	}
+	.ozon-lead-submit:hover:not(:disabled),
+	.ozon-lead-submit:focus-visible {
+		background: #1e6bff;
+		transform: translateY(-1px);
+		box-shadow: 0 12px 22px rgba(0, 91, 255, 0.32);
+		outline: none;
+	}
+	.ozon-lead-submit:disabled {
+		opacity: 0.65;
+		cursor: progress;
+	}
+	.ozon-lead-spinner {
+		display: none;
+		width: 14px;
+		height: 14px;
+		margin-left: 0.4rem;
+		border: 2px solid rgba(255, 255, 255, 0.4);
+		border-top-color: #ffffff;
+		border-radius: 50%;
+		animation: ozon-lead-spin 0.7s linear infinite;
+		vertical-align: middle;
+	}
+	.ozon-lead-submit.busy .ozon-lead-spinner {
+		display: inline-block;
+	}
+	.ozon-lead-submit.busy .ozon-lead-submit-label {
+		opacity: 0.6;
+	}
+	@keyframes ozon-lead-spin {
+		to { transform: rotate(360deg); }
+	}
+	.ozon-lead-error {
+		margin: 0.2rem 0 0;
+		padding: 0.55rem 0.7rem;
+		background: rgba(239, 68, 68, 0.1);
+		border: 1px solid rgba(239, 68, 68, 0.35);
+		border-radius: 10px;
+		color: #b91c1c;
+		font-size: 0.85rem;
+		line-height: 1.4;
+	}
+	.ozon-lead-error.hidden {
+		display: none;
+	}
+	.ozon-lead-fineprint {
+		margin: 0.2rem 0 0;
+		font-size: 0.75rem;
+		color: #94a3b8;
+		line-height: 1.4;
+	}
+
+	/* Success stage */
+	.ozon-lead-stage.hidden {
+		display: none;
+	}
+	.ozon-lead-success-icon {
+		width: 56px;
+		height: 56px;
+		margin: 0.2rem auto 0.6rem;
+		border-radius: 50%;
+		background: #dcfce7;
+		color: #16a34a;
+		display: grid;
+		place-items: center;
+		font-size: 1.6rem;
+		font-weight: 800;
+	}
+	.ozon-lead-stage[data-stage="success"] {
+		text-align: center;
+	}
+	.ozon-lead-stage[data-stage="success"] h2 {
+		margin: 0 0 0.4rem;
+		font-family: var(--font-heading, 'Manrope', sans-serif);
+		font-size: 1.4rem;
+		color: #0f172a;
+	}
+	.ozon-lead-stage[data-stage="success"] > p {
+		margin: 0 0 1rem;
+		color: #475569;
+		font-size: 0.95rem;
+		line-height: 1.5;
+	}
+	.ozon-lead-steps {
+		text-align: left;
+		list-style: none;
+		counter-reset: ozon-step;
+		margin: 0 0 1rem;
+		padding: 0;
+		display: grid;
+		gap: 0.75rem;
+	}
+	.ozon-lead-steps li {
+		position: relative;
+		padding: 0.7rem 0.85rem 0.7rem 2.6rem;
+		background: #f8fafc;
+		border: 1px solid #e2e8f0;
+		border-radius: 12px;
+		counter-increment: ozon-step;
+	}
+	.ozon-lead-steps li::before {
+		content: counter(ozon-step);
+		position: absolute;
+		top: 0.75rem;
+		left: 0.85rem;
+		width: 1.4rem;
+		height: 1.4rem;
+		border-radius: 50%;
+		background: #005bff;
+		color: #ffffff;
+		font-size: 0.78rem;
+		font-weight: 800;
+		display: grid;
+		place-items: center;
+	}
+	.ozon-lead-steps li strong {
+		display: block;
+		font-size: 0.95rem;
+		color: #0f172a;
+		font-weight: 700;
+		margin-bottom: 0.2rem;
+	}
+	.ozon-lead-steps li span {
+		font-size: 0.85rem;
+		color: #475569;
+		line-height: 1.4;
+	}
+	.ozon-lead-steps li a {
+		color: #005bff;
+		text-decoration: none;
+		font-weight: 700;
+	}
+	.ozon-lead-refbox {
+		display: flex;
+		align-items: center;
+		gap: 0.55rem;
+		margin-top: 0.55rem;
+		padding: 0.55rem 0.7rem;
+		background: #ffffff;
+		border: 1px dashed #cbd5e1;
+		border-radius: 10px;
+	}
+	.ozon-lead-refbox code {
+		flex: 1;
+		font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+		font-size: 0.95rem;
+		font-weight: 700;
+		color: #0f172a;
+		letter-spacing: 0.02em;
+	}
+	.ozon-lead-refcopy {
+		flex: 0 0 auto;
+		padding: 0.4rem 0.7rem;
+		border-radius: 8px;
+		border: 1px solid #d4dae3;
+		background: #ffffff;
+		color: #005bff;
+		font-family: inherit;
+		font-weight: 700;
+		font-size: 0.8rem;
+		cursor: pointer;
+		transition: background 0.15s ease, border-color 0.15s ease;
+	}
+	.ozon-lead-refcopy:hover:not(:disabled) {
+		background: rgba(0, 91, 255, 0.08);
+		border-color: #005bff;
+	}
+	.ozon-lead-refcopy:disabled {
+		opacity: 0.55;
+		cursor: not-allowed;
+	}
+	.ozon-lead-refcopy-default,
+	.ozon-lead-refcopy-done {
+		display: inline-block;
+	}
+	.ozon-lead-refcopy-done {
+		display: none;
+	}
+	.ozon-lead-refcopy.copied .ozon-lead-refcopy-default {
+		display: none;
+	}
+	.ozon-lead-refcopy.copied .ozon-lead-refcopy-done {
+		display: inline-block;
+	}
+	.ozon-lead-finish {
+		min-height: 44px;
+		padding: 0 1.2rem;
+		border-radius: 10px;
+		border: 1px solid #d4dae3;
+		background: #ffffff;
+		font-family: inherit;
+		font-weight: 700;
+		color: #0f172a;
+		cursor: pointer;
+		transition: background 0.15s ease, border-color 0.15s ease;
+	}
+	.ozon-lead-finish:hover {
+		background: #f1f5f9;
+		border-color: #94a3b8;
+	}
+
+	/* Body lock when modal is open */
+	:global(body.ozon-lead-modal-open) {
+		overflow: hidden;
+	}
+
+	/* Dark mode */
+	:global(:where(html, body).dark-mode) .ozon-lead-card {
+		background: #14202b;
+		color: #e7eaf0;
+	}
+	:global(:where(html, body).dark-mode) .ozon-lead-close {
+		background: rgba(231, 234, 240, 0.08);
+		color: #cbd5e1;
+	}
+	:global(:where(html, body).dark-mode) .ozon-lead-close:hover {
+		background: rgba(231, 234, 240, 0.15);
+		color: #f8fafc;
+	}
+	:global(:where(html, body).dark-mode) .ozon-lead-head h2,
+	:global(:where(html, body).dark-mode) .ozon-lead-stage[data-stage="success"] h2 {
+		color: #e7eaf0;
+	}
+	:global(:where(html, body).dark-mode) .ozon-lead-lead,
+	:global(:where(html, body).dark-mode) .ozon-lead-stage[data-stage="success"] > p,
+	:global(:where(html, body).dark-mode) .ozon-lead-steps li span,
+	:global(:where(html, body).dark-mode) .ozon-lead-fineprint {
+		color: rgba(231, 234, 240, 0.7);
+	}
+	:global(:where(html, body).dark-mode) .ozon-lead-field span,
+	:global(:where(html, body).dark-mode) .ozon-lead-fieldset legend {
+		color: #cbd5e1;
+	}
+	:global(:where(html, body).dark-mode) .ozon-lead-field input {
+		background: rgba(15, 23, 36, 0.7);
+		border-color: rgba(195, 204, 216, 0.2);
+		color: #e7eaf0;
+	}
+	:global(:where(html, body).dark-mode) .ozon-lead-radio {
+		background: rgba(15, 23, 36, 0.7);
+		border-color: rgba(195, 204, 216, 0.2);
+		color: #e7eaf0;
+	}
+	:global(:where(html, body).dark-mode) .ozon-lead-radio:has(input:checked) {
+		background: rgba(0, 91, 255, 0.2);
+		border-color: #4b89ff;
+		color: #93b5ff;
+	}
+	:global(:where(html, body).dark-mode) .ozon-lead-steps li {
+		background: rgba(15, 23, 36, 0.7);
+		border-color: rgba(195, 204, 216, 0.18);
+	}
+	:global(:where(html, body).dark-mode) .ozon-lead-steps li strong {
+		color: #e7eaf0;
+	}
+	:global(:where(html, body).dark-mode) .ozon-lead-refbox {
+		background: rgba(15, 23, 36, 0.85);
+		border-color: rgba(195, 204, 216, 0.25);
+	}
+	:global(:where(html, body).dark-mode) .ozon-lead-refbox code {
+		color: #e7eaf0;
+	}
+	:global(:where(html, body).dark-mode) .ozon-lead-refcopy {
+		background: rgba(15, 23, 36, 0.7);
+		border-color: rgba(195, 204, 216, 0.2);
+		color: #93b5ff;
+	}
+	:global(:where(html, body).dark-mode) .ozon-lead-finish {
+		background: rgba(15, 23, 36, 0.7);
+		border-color: rgba(195, 204, 216, 0.2);
+		color: #e7eaf0;
+	}
+
+	@media (max-width: 480px) {
+		.ozon-lead-card {
+			padding: 1.3rem 1.1rem;
+		}
+		.ozon-lead-radio {
+			flex: 1 1 100%;
+			justify-content: center;
+		}
+	}
+</style>

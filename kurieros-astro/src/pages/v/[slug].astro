@@ -20,7 +20,15 @@ export async function getStaticPaths() {
 }
 
 const { job } = Astro.props;
-const hasApplyLink = Boolean(job.applyLink && job.applyLink !== '#');
+// `applyLink: 'lead-form:<provider>'` (set in src/data/vacancies.ts)
+// is a magic marker that swaps the external apply CTA for an in-page
+// modal. The page emits a `<button data-lead-form-type=…>` instead of
+// an external `<a>`, and the JSON-LD schema marks the post as having
+// no direct apply URL (the apply happens off-site in the partner's
+// app after we capture the lead via the form).
+const isLeadFormApply = typeof job.applyLink === 'string' && job.applyLink.startsWith('lead-form:');
+const leadFormType = isLeadFormApply ? job.applyLink.slice('lead-form:'.length) : null;
+const hasApplyLink = !isLeadFormApply && Boolean(job.applyLink && job.applyLink !== '#');
 const companyUrl = `/companies/${slugifyCompany(job.company)}/`;
 const parseSalaryValue = (salary: string) => Number(salary.replace(/[^\d]/g, '')) || 0;
 const parseAmountFromText = (value?: string) => {
@@ -487,11 +495,9 @@ const pageSchemaGraph = [
 						<strong data-t={`vacancies.${job.id}.salary`}>{job.salary}</strong>
 						<small class="salary-rate" data-t={`vacancies.${job.id}.details_rate`}>{job.details.rate}</small>
 						<small data-t="vacancy.final_terms_short">Финальные условия уточняются при отклике</small>
-						{hasApplyLink ? (
-							<a
-								href={job.applyLink}
-								target="_blank"
-								rel="noopener noreferrer nofollow sponsored"
+						{isLeadFormApply ? (
+							<button
+								type="button"
 								class="apply-btn-large apply-btn-hero"
 								data-t="vacancy.apply"
 								data-apply-cta
@@ -501,8 +507,26 @@ const pageSchemaGraph = [
 								data-apply-transport={job.transport}
 								data-apply-employment={employmentTypeText}
 								data-apply-salary-max={salaryMaxNumeric || ''}
+								data-lead-form-type={leadFormType}
 							>
-								Откликнуться сейчас
+								Откликнуться через нас
+						</button>
+					) : hasApplyLink ? (
+						<a
+							href={job.applyLink}
+							target="_blank"
+							rel="noopener noreferrer nofollow sponsored"
+							class="apply-btn-large apply-btn-hero"
+							data-t="vacancy.apply"
+							data-apply-cta
+							data-apply-position="vacancy_hero"
+							data-apply-company={job.company}
+							data-apply-city={job.location}
+							data-apply-transport={job.transport}
+							data-apply-employment={employmentTypeText}
+							data-apply-salary-max={salaryMaxNumeric || ''}
+						>
+							Откликнуться сейчас
 						</a>
 					) : (
 						<a href="/contacts/" class="apply-btn-large apply-btn-hero apply-btn-disabled" data-t="vacancy.apply_disabled">
@@ -717,7 +741,26 @@ const pageSchemaGraph = [
 							<strong data-t="vacancy.employment">Оформление:</strong> <span data-t={`vacancies.${job.id}.details_employment_type`}>{job.details.employment_type}</span>
 						</div>
 						
-						{hasApplyLink ? (
+						{isLeadFormApply ? (
+							<>
+								<button
+									type="button"
+									class="apply-btn-large"
+									data-t="vacancy.apply"
+									data-apply-cta
+									data-apply-position="vacancy_sidebar"
+									data-apply-company={job.company}
+									data-apply-city={job.location}
+									data-apply-transport={job.transport}
+									data-apply-employment={employmentTypeText}
+									data-apply-salary-max={salaryMaxNumeric || ''}
+									data-lead-form-type={leadFormType}
+								>
+									Откликнуться через нас
+								</button>
+								<p class="apply-note">Заполните форму — мы&nbsp;перезвоним и&nbsp;поможем зарегистрироваться с&nbsp;нашим реферальным кодом</p>
+							</>
+						) : hasApplyLink ? (
 							<>
 								<a
 									href={job.applyLink}
