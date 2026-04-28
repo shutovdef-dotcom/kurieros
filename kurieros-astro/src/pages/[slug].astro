@@ -176,14 +176,45 @@ const updatedDate = new Intl.DateTimeFormat('ru-RU', {
 	month: 'long',
 	year: 'numeric',
 }).format(new Date());
-const seoTitle =
-	type === 'city'
-		? `Работа курьером ${data.prep} 2026: ${filteredJobs.length} вакансий | КурьерОк`.slice(0, 70)
-		: `Работа курьером ${data.name.toLowerCase()} 2026: ${filteredJobs.length} вакансий | КурьерОк`.slice(0, 70);
+// P0: empty listings need noindex so Google/Yandex don't penalise us for thin
+// content. We also drop them from the sitemap (see astro.config.mjs).
+const isEmptyListing = filteredJobs.length === 0;
+
+// P1: max salary across the matched listings — used in title/description to
+// make the snippet more clickable in search results (cheaper-than-rewrite
+// because the number lives directly in the SERP and beats a generic count).
+const maxSalary = filteredJobs.reduce((acc, job) => {
+	const value = parseSalary(job.salary);
+	return value > acc ? value : acc;
+}, 0);
+const formattedMaxSalary = maxSalary > 0 ? formatMoney(maxSalary) : null;
+const vacancyCountText = `${filteredJobs.length} ${getVacancyPluralText(filteredJobs.length)}`;
+
+const seoTitle = (
+	isEmptyListing
+		? type === 'city'
+			? `Работа курьером ${data.prep} — следите за обновлениями | КурьерОк`
+			: `Работа курьером (${data.name.toLowerCase()}) — следите за обновлениями | КурьерОк`
+		: type === 'city'
+			? formattedMaxSalary
+				? `Курьер ${data.prep} — до ${formattedMaxSalary} ₽/мес · ${vacancyCountText} | КурьерОк`
+				: `Работа курьером ${data.prep} 2026: ${vacancyCountText} | КурьерОк`
+			: formattedMaxSalary
+				? `Курьер ${data.name.toLowerCase()} — до ${formattedMaxSalary} ₽/мес · ${vacancyCountText} | КурьерОк`
+				: `Работа курьером ${data.name.toLowerCase()} 2026: ${vacancyCountText} | КурьерОк`
+).slice(0, 70);
 const seoDescription = (
-	type === 'city'
-		? `Работа курьером ${data.prep} 2026: ${filteredJobs.length} актуальных вакансий от ${companyNames.length} компаний. Доход, выплаты ${paymentTypes.slice(0, 2).join(' / ').toLowerCase() || 'уточняются'}, форматы ${transportTypes.join(', ').toLowerCase() || 'разные'}.`
-		: `Курьер ${data.name.toLowerCase()} 2026: ${filteredJobs.length} вакансий от ${companyNames.length} компаний. Сравните выплаты, требования и оформление до отклика.`
+	isEmptyListing
+		? type === 'city'
+			? `Сейчас активных вакансий курьером ${data.prep} нет — добавьте сайт в избранное и проверьте позже. Сравните условия в других городах России.`
+			: `Сейчас активных вакансий по формату «${data.name}» нет — следите за обновлениями. Посмотрите похожие подборки на главной.`
+		: type === 'city'
+			? formattedMaxSalary
+				? `${vacancyCountText} курьером ${data.prep}: доход до ${formattedMaxSalary} ₽/мес от ${companyNames.length} проверенных компаний (${companyNames.slice(0, 2).join(', ') || 'Y.Eda, Купер'}). Выплаты ${paymentTypes.slice(0, 2).join(' / ').toLowerCase() || 'еженедельно'} — отклик за 1 минуту.`
+				: `Работа курьером ${data.prep} 2026: ${vacancyCountText} от ${companyNames.length} компаний. Доход, выплаты ${paymentTypes.slice(0, 2).join(' / ').toLowerCase() || 'уточняются'}, форматы ${transportTypes.join(', ').toLowerCase() || 'разные'}.`
+			: formattedMaxSalary
+				? `${vacancyCountText} «${data.name}» — доход до ${formattedMaxSalary} ₽/мес. ${companyNames.length} компаний, выплаты ${paymentTypes.slice(0, 2).join(' / ').toLowerCase() || 'регулярные'}. Сравните условия и подайте заявку.`
+				: `Курьер ${data.name.toLowerCase()} 2026: ${vacancyCountText} от ${companyNames.length} компаний. Сравните выплаты, требования и оформление до отклика.`
 ).slice(0, 170);
 const relatedArticles = articlesData
 	.filter((article) => {
@@ -350,7 +381,12 @@ const pageSchemaGraph = [
 ];
 ---
 
-<BaseLayout title={seoTitle} description={seoDescription} schemaGraph={pageSchemaGraph}>
+<BaseLayout
+	title={seoTitle}
+	description={seoDescription}
+	schemaGraph={pageSchemaGraph}
+	robots={isEmptyListing ? 'noindex, follow' : undefined}
+>
 	<Header />
 
 	<main>
