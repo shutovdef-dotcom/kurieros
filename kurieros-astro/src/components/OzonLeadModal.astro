@@ -194,7 +194,10 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		});
 
 		// Click delegation: any element with `data-lead-form-type="ozon"`
-		// opens the modal. Apply CTAs in JobCard / vacancy page set this.
+		// opens the modal. Apply CTAs in JobCard / vacancy page set this
+		// alongside the data-ozon-* attributes that pin the request to a
+		// specific (vacancy, city, hire-object) triple — see
+		// src/data/vacancies.ts for where those are wired up per offer.
 		document.addEventListener('click', (e) => {
 			const trigger = e.target instanceof Element
 				? e.target.closest('[data-lead-form-type="ozon"]')
@@ -205,11 +208,14 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 				company: trigger.dataset.applyCompany || 'Ozon',
 				city: trigger.dataset.applyCity || '',
 				transport: trigger.dataset.applyTransport || '',
-				position: trigger.dataset.applyPosition || ''
+				position: trigger.dataset.applyPosition || '',
+				ozonVacancy: trigger.dataset.ozonVacancy || '',
+				ozonCityId: trigger.dataset.ozonCityId || '',
+				ozonHireObjectUuid: trigger.dataset.ozonHireObjectUuid || ''
 			});
 		});
 
-		const submitToWorker = async (data) => {
+		const submitToWorker = async (data, ctx) => {
 			if (!ozonLeadApi) return { skipped: true };
 			const res = await fetch(ozonLeadApi, {
 				method: 'POST',
@@ -217,7 +223,17 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 				body: JSON.stringify({
 					name: data.name,
 					phone: data.phone,
-					transport: data.transport
+					transport: data.transport,
+					// New per-request fields. The Worker validates the
+					// (vacancy, cityID, hireObjectUUID) triple against
+					// its embedded whitelist and rejects unknowns.
+					// If the trigger didn't carry them (e.g. legacy bundle
+					// or a card with `lead-form:ozon` but no Ozon meta),
+					// the Worker falls back to legacy Москва /
+					// rocket:courier defaults.
+					vacancy: (ctx && ctx.ozonVacancy) || '',
+					cityID: (ctx && ctx.ozonCityId) || '',
+					hireObjectUUID: (ctx && ctx.ozonHireObjectUuid) || ''
 				})
 			});
 			let payload = null;
@@ -255,7 +271,7 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 
 			setBusy(true);
 			try {
-				await submitToWorker({ name, phone: phoneRaw, transport });
+				await submitToWorker({ name, phone: phoneRaw, transport }, ctx);
 				if (typeof window.gtag === 'function') {
 					window.gtag('event', 'ozon_lead_submit', {
 						transport: transportKey,

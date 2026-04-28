@@ -502,6 +502,10 @@ const buildJobsFromVacancies = (
         ...(offer.cityDistricts?.length ? { cityDistricts: offer.cityDistricts } : {}),
         ...(typeof offer.priority === 'number' ? { priority: offer.priority } : {}),
         ...(source.isHot ? { isHot: true } : {}),
+        // Pass Ozon lead-form metadata through so JobCard / vacancy
+        // page can emit data-ozon-* attributes consumed by
+        // OzonLeadModal → Cloudflare Worker.
+        ...(offer.ozonLeadForm ? { ozonLeadForm: offer.ozonLeadForm } : {}),
       };
     }),
   );

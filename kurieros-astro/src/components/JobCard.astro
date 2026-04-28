@@ -96,6 +96,9 @@ const applyEmploymentText = job.details?.employment_type ?? '';
 					data-apply-employment={applyEmploymentText}
 					data-apply-salary-max={salaryMaxNumeric || ''}
 					data-lead-form-type={leadFormType}
+					data-ozon-vacancy={job.ozonLeadForm?.vacancy}
+					data-ozon-city-id={job.ozonLeadForm?.cityID}
+					data-ozon-hire-object-uuid={job.ozonLeadForm?.hireObjectUUID}
 				>Откликнуться через нас</button>
 			) : (
 				<a
