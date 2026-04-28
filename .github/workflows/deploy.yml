@@ -34,12 +34,20 @@ jobs:
           PUBLIC_GOOGLE_SITE_VERIFICATION: QIGlMj-JAXkxvnkeFNNu6hWJ5bslKtguuUxY4ty17bI
           # Ozon lead-form integration. Sourced from repository
           # Variables (Settings → Secrets and variables → Actions →
-          # Variables) so they can be rotated without a code change.
-          # All three are PUBLIC_-prefixed because Astro inlines them
+          # Variables) so the Worker URL can be rotated without a
+          # code change. Astro inlines PUBLIC_-prefixed env vars
           # into client bundles at build time.
-          PUBLIC_OZON_REF_CODE: ${{ vars.PUBLIC_OZON_REF_CODE }}
-          PUBLIC_TELEGRAM_BOT_TOKEN: ${{ vars.PUBLIC_TELEGRAM_BOT_TOKEN }}
-          PUBLIC_TELEGRAM_CHAT_ID: ${{ vars.PUBLIC_TELEGRAM_CHAT_ID }}
+          #
+          # The lead form now POSTs to a Cloudflare Worker proxy
+          # (kurerok-ozon-lead.shutovdef.workers.dev). The referrer
+          # phone, Telegram bot token, and chat ID live as Worker
+          # secrets so they NEVER reach the browser. The legacy
+          # PUBLIC_OZON_REF_CODE / PUBLIC_TELEGRAM_BOT_TOKEN /
+          # PUBLIC_TELEGRAM_CHAT_ID variables are no longer
+          # consumed by the build; remove them from repo Variables
+          # and rotate the bot token (it was previously inlined into
+          # the public bundle).
+          PUBLIC_OZON_LEAD_API: ${{ vars.PUBLIC_OZON_LEAD_API }}
         with:
           path: ./kurieros-astro
           node-version: 22
