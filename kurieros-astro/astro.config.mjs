@@ -1,8 +1,16 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import { getEmptyListingUrls } from './src/utils/listingSlugs';
 
 const site = process.env.SITE_URL || 'https://kurerok.ru';
 const base = process.env.SITE_BASE || '/';
+
+// Pre-compute the set of `/rabota-kurerom-{slug}/` URLs that resolve
+// to ZERO active vacancies. We exclude them from the sitemap (they
+// also get `<meta name="robots" content="noindex, follow">` at the
+// page level — see src/pages/[slug].astro). Avoids thin-content
+// penalties from Google for Jobs and Yandex.
+const emptyListingUrls = getEmptyListingUrls(site);
 
 export default defineConfig({
   site,
@@ -18,7 +26,10 @@ export default defineConfig({
   trailingSlash: 'always',
   integrations: [
     sitemap({
-      filter: (page) => !page.includes('/designs/') && !page.includes('/owner/'),
+      filter: (page) =>
+        !page.includes('/designs/') &&
+        !page.includes('/owner/') &&
+        !emptyListingUrls.has(page),
       changefreq: 'daily',
       lastmod: new Date(),
       // Split the ~5 370-URL catalogue into ~3 chunks so each chunked
