@@ -3,9 +3,10 @@
  *
  * Receives a lead from kurerok.ru's modal, fills the
  * recruitment.ozon.ru/ref-courier-sklad referral form on behalf of
- * the user (their name + phone) using the site owner's referrer
- * credentials stored as Worker secrets, and pings a Telegram bot
- * for owner-side awareness.
+ * the user (their name + phone + chosen vacancy + city + hire
+ * object) using the site owner's referrer credentials stored as
+ * Worker secrets, and pings a Telegram bot for owner-side
+ * awareness.
  *
  * The user never sees the referrer phone — it lives only in env.
  * After successful submission Ozon sends an SMS directly to the
@@ -20,22 +21,42 @@
  *
  * Optional vars (in `wrangler.toml` [vars]):
  *   ALLOWED_ORIGINS         — comma-separated list (default: https://kurerok.ru)
- *   OZON_VACANCY            — combineCustomerVacancy slug (default: rocket:courier)
  *   OZON_CITIZENSHIP_ID     — int (default 7 = РФ)
- *   OZON_CITY_ID            — UUID for the operational city
- *   OZON_HIRE_OBJECT_UUID   — UUID for the hire location
+ *
+ * Per-request POST body (JSON, kurerok.ru → Worker /lead):
+ *   name              — candidate full name
+ *   phone             — candidate phone (any format with ≥10 digits)
+ *   transport         — "auto" / "foot" / "bicycle" / human label (info only,
+ *                       used for the Telegram alert; Ozon ignores it)
+ *   vacancy           — combineCustomerVacancy slug, e.g. "rocket:courier"
+ *   cityID            — UUID of the operational city
+ *   hireObjectUUID    — UUID of the specific hire location
+ *
+ * The (vacancy, cityID, hireObjectUUID) triple is validated against
+ * ALLOWED_TUPLES (whitelist auto-generated from the live form by
+ * tools/build-worker-whitelist.mjs). Defence-in-depth so a malicious
+ * cross-origin POST cannot pivot this proxy to arbitrary Ozon HR
+ * pipelines (e.g. "региональный директор").
+ *
+ * Backwards compatibility: if vacancy / cityID / hireObjectUUID are
+ * absent from the body, the Worker falls back to the original
+ * Москва / `rocket:courier` defaults so older deployed kurerok.ru
+ * bundles keep working through the redeploy window.
  */
+
+import { ALLOWED_TUPLES, ALLOWED_VACANCIES } from './whitelist.js';
 
 const OZON_API = 'https://sigma-bff-api.ozon.ru/v1/actions';
 const OZON_REFERER = 'https://recruitment.ozon.ru/ref-courier-sklad';
 
-// Sensible defaults — Москва, ул. Скотопрогонная, д 35, стр 3 (Ozon HR sandbox)
-// for "Курьер на личном легковом автомобиле".
-const DEFAULTS = {
-	OZON_VACANCY: 'rocket:courier',
-	OZON_CITIZENSHIP_ID: 7,
-	OZON_CITY_ID: '73d71199-1e3c-11e9-90e9-9418826ee072',
-	OZON_HIRE_OBJECT_UUID: '8bc59f96-1fb5-11ed-861d-0242ac120002',
+// Legacy defaults (Москва, rocket:courier, личный легковой авто).
+// Used only when the request omits per-vacancy fields. Kept as a
+// safety net — once the redeployed bundle ships, every request
+// carries explicit (vacancy, cityID, hireObjectUUID).
+const LEGACY_DEFAULTS = {
+	vacancy: 'rocket:courier',
+	cityID: '73d71199-1e3c-11e9-90e9-9418826ee072',
+	hireObjectUUID: '8bc59f96-1fb5-11ed-861d-0242ac120002',
 };
 
 /**
@@ -76,7 +97,7 @@ function escapeHtml(s) {
 	return String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
 }
 
-async function notifyTelegram(env, { name, phone, transport, ozonStatus }) {
+async function notifyTelegram(env, { name, phone, transport, vacancy, cityID, hireObjectUUID, ozonStatus }) {
 	if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return;
 	const text = [
 		'🆕 <b>Новая заявка с kurerok.ru — Ozon</b>',
@@ -84,6 +105,10 @@ async function notifyTelegram(env, { name, phone, transport, ozonStatus }) {
 		`👤 ${escapeHtml(name)}`,
 		`📞 ${escapeHtml(phone)}`,
 		transport ? `🚗 ${escapeHtml(transport)}` : null,
+		'',
+		`💼 Вакансия: <code>${escapeHtml(vacancy)}</code>`,
+		`🏙 Город: <code>${escapeHtml(cityID)}</code>`,
+		`📍 Адрес: <code>${escapeHtml(hireObjectUUID)}</code>`,
 		'',
 		`📤 Ozon API: <b>${escapeHtml(ozonStatus)}</b>`,
 		`🕒 ${new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })}`,
@@ -106,7 +131,7 @@ async function notifyTelegram(env, { name, phone, transport, ozonStatus }) {
 	}
 }
 
-async function submitToOzon(env, { name, phone }) {
+async function submitToOzon(env, { name, phone, vacancy, cityID, hireObjectUUID }) {
 	const referrerName = String(env.OZON_REFERRER_NAME || '').trim();
 	const referrerPhone = String(env.OZON_REFERRER_PHONE || '').trim();
 	if (!referrerName || !referrerPhone) {
@@ -118,10 +143,10 @@ async function submitToOzon(env, { name, phone }) {
 		referrerPhone,
 		fullName: name,
 		phone,
-		combineCustomerVacancy: env.OZON_VACANCY || DEFAULTS.OZON_VACANCY,
-		citizenshipID: Number(env.OZON_CITIZENSHIP_ID || DEFAULTS.OZON_CITIZENSHIP_ID),
-		cityID: env.OZON_CITY_ID || DEFAULTS.OZON_CITY_ID,
-		hireObjectUUID: env.OZON_HIRE_OBJECT_UUID || DEFAULTS.OZON_HIRE_OBJECT_UUID,
+		combineCustomerVacancy: vacancy,
+		citizenshipID: Number(env.OZON_CITIZENSHIP_ID || 7),
+		cityID,
+		hireObjectUUID,
 		utm_source: 'referral_campaign',
 		fullpath: OZON_REFERER,
 	};
@@ -176,6 +201,9 @@ export default {
 		const name = String(body?.name || '').trim();
 		const phoneRaw = String(body?.phone || '').trim();
 		const transport = String(body?.transport || '').trim();
+		const reqVacancy = String(body?.vacancy || '').trim();
+		const reqCityID = String(body?.cityID || '').trim();
+		const reqHireObjectUUID = String(body?.hireObjectUUID || '').trim();
 
 		if (name.length < 2) {
 			return jsonResponse({ ok: false, error: 'name_too_short' }, { status: 400, headers: cors });
@@ -185,15 +213,51 @@ export default {
 			return jsonResponse({ ok: false, error: 'invalid_phone' }, { status: 400, headers: cors });
 		}
 
+		// Resolve vacancy triple. If the bundle is older and didn't send
+		// the new fields, fall back to legacy Москва/rocket:courier
+		// defaults rather than rejecting (graceful degradation through
+		// the redeploy window).
+		const vacancy = reqVacancy || LEGACY_DEFAULTS.vacancy;
+		const cityID = reqCityID || LEGACY_DEFAULTS.cityID;
+		const hireObjectUUID = reqHireObjectUUID || LEGACY_DEFAULTS.hireObjectUUID;
+
+		// Defence-in-depth: a malicious origin (or compromised bundle)
+		// could try to send an unrelated vacancy slug — reject anything
+		// not in the whitelist generated from the live form.
+		if (!ALLOWED_VACANCIES.has(vacancy)) {
+			return jsonResponse(
+				{ ok: false, error: 'invalid_vacancy' },
+				{ status: 400, headers: cors },
+			);
+		}
+		const tupleKey = `${vacancy}|${cityID}|${hireObjectUUID}`;
+		if (!ALLOWED_TUPLES.has(tupleKey)) {
+			return jsonResponse(
+				{ ok: false, error: 'invalid_vacancy_city_combination' },
+				{ status: 400, headers: cors },
+			);
+		}
+
 		try {
-			const ozon = await submitToOzon(env, { name, phone });
-			await notifyTelegram(env, { name, phone, transport, ozonStatus: `OK (${ozon.status})` });
+			const ozon = await submitToOzon(env, { name, phone, vacancy, cityID, hireObjectUUID });
+			await notifyTelegram(env, {
+				name,
+				phone,
+				transport,
+				vacancy,
+				cityID,
+				hireObjectUUID,
+				ozonStatus: `OK (${ozon.status})`,
+			});
 			return jsonResponse({ ok: true }, { status: 200, headers: cors });
 		} catch (err) {
 			await notifyTelegram(env, {
 				name,
 				phone,
 				transport,
+				vacancy,
+				cityID,
+				hireObjectUUID,
 				ozonStatus: `ERROR — ${err.message}`,
 			});
 			return jsonResponse(

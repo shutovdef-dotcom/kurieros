@@ -39,6 +39,25 @@ export type PayModel = {
   paymentFrequency: string;
 };
 
+/**
+ * Identifies a specific (vacancy, city, hire-object) triple on
+ * recruitment.ozon.ru/ref-courier-sklad. Forwarded to the lead-form
+ * Worker so it can submit on the user's behalf to the right Ozon
+ * pipeline. See `src/data/ozon-vacancies.json` for the live catalogue
+ * and `workers/ozon-lead/src/whitelist.js` for the matching server-
+ * side whitelist (regenerate via `node tools/build-worker-whitelist.mjs`).
+ */
+export type OzonLeadFormMeta = {
+  /** combineCustomerVacancy slug, e.g. "rocket:courier", "ff:operator". */
+  vacancy: string;
+  /** UUID of the operational city (Ozon's cityID). */
+  cityID: string;
+  /** UUID of the hire location (Ozon's hireObjectUUID). */
+  hireObjectUUID: string;
+  /** Human-readable address — used only for display, not submission. */
+  hireObjectLabel?: string;
+};
+
 export type VacancyOffer = {
   city: string;
   transport: TransportMode;
@@ -59,6 +78,8 @@ export type VacancyOffer = {
   requirementsOverride?: string[] | LocalizedStringList;
   benefitsOverride?: string[] | LocalizedStringList;
   requiredDocumentsOverride?: string[] | LocalizedStringList;
+  /** Ozon-specific lead-form metadata (only set for Ozon offers). */
+  ozonLeadForm?: OzonLeadFormMeta;
 };
 
 export type VacancyContent = {
@@ -138,4 +159,6 @@ export type GeneratedJob = {
   cityDistricts?: string[];
   priority?: number;
   isHot?: boolean;
+  /** Ozon lead-form metadata (only set for Ozon offers via lead-form:ozon). */
+  ozonLeadForm?: OzonLeadFormMeta;
 };
