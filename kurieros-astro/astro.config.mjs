@@ -32,11 +32,15 @@ export default defineConfig({
         !emptyListingUrls.has(page),
       changefreq: 'daily',
       lastmod: new Date(),
-      // Split the ~5 370-URL catalogue into ~3 chunks so each chunked
-      // sitemap stays small and quick for GSC / Yandex to fetch and
-      // re-process — mitigates the «no referring sitemaps detected»
-      // GSC URL-inspection symptom on individual vacancy URLs.
-      entryLimit: 2500,
+      // Split the ~5 460-URL catalogue (88 fresh Ozon offers added
+      // in #50 pushed the total above 2 chunks of 2 500) into ~6
+      // chunks of ≤1 000 URLs each — keeps every chunked sitemap
+      // under ~350 KB so GSC / Yandex Webmaster can fetch and
+      // re-process it on a single pass. The 17:00 МСК report flagged
+      // the previous 915 KB sitemap as the likely root cause of the
+      // «GSC Pages stuck 4 days» symptom (chunks larger than ~600 KB
+      // tend to back-pressure Google's URL-inspection pipeline).
+      entryLimit: 1000,
       serialize(item) {
         const url = item.url;
         if (url === 'https://kurerok.ru/' || url.endsWith('://kurerok.ru/')) {
