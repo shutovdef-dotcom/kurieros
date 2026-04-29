@@ -276,12 +276,16 @@ const OPERATOR_TEMPLATE: OzonRoleTemplate = {
       'Патент / РВП / ВНЖ для иностранных граждан.',
       'СНИЛС и ИНН.',
     ],
+    // NB: 'сборщик' deliberately omitted — that's a darkstore/supermarket
+    // picker role (Kuper, Ozon Fresh order-picker). FF warehouse operator
+    // does picking too, but matching «сборщик» queries here causes
+    // off-intent impressions and high bounce. Stick to fulfillment-domain
+    // synonyms (оператор склада / комплектовщик / упаковщик / фулфилмент).
     searchTags: [
       'Ozon',
       'Озон',
       'оператор склада',
       'комплектовщик',
-      'сборщик',
       'упаковщик',
       'фулфилмент',
     ],
