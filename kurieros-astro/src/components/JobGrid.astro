@@ -31,7 +31,12 @@ const matchedJobs = jobsData.filter((job) => {
 		job.title.toLowerCase().includes(searchTerm) ||
 		job.company.toLowerCase().includes(searchTerm) ||
 		job.location.toLowerCase().includes(searchTerm) ||
-		job.salary.toLowerCase().includes(searchTerm);
+		job.salary.toLowerCase().includes(searchTerm) ||
+		// Match payment_freq so a category page with `query: 'Ежеднев'`
+		// (or 'Еженед') populates from `job.details.payment_freq` —
+		// otherwise those listings stay empty because none of title /
+		// company / location / salary carry the «Еженедельно» word.
+		job.details.payment_freq.toLowerCase().includes(searchTerm);
 
 	return matchesCity && matchesTag && matchesSearch;
 });
