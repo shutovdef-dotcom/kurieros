@@ -19,6 +19,15 @@ import jobsData from '../data/jobs';
 import { CATEGORIES } from '../data/constants';
 import { getCitiesFromJobs } from './cities';
 
+// Slugs with bespoke content overrides inside src/pages/[slug].astro
+// that always render a non-empty fallback list (e.g. ezhednevnaya-oplata
+// substitutes weekly-payout vacancies because daily-payout doesn't
+// exist in our catalogue). Excluded from the empty-paths set so they
+// stay in the sitemap with `index, follow`.
+const CONTENT_OVERRIDE_CATEGORY_SLUGS = new Set<string>([
+	'ezhednevnaya-oplata',
+]);
+
 export function getEmptyListingPaths(): Set<string> {
 	const empty = new Set<string>();
 
@@ -34,6 +43,9 @@ export function getEmptyListingPaths(): Set<string> {
 	}
 
 	for (const category of CATEGORIES) {
+		if (CONTENT_OVERRIDE_CATEGORY_SLUGS.has(category.slug)) {
+			continue;
+		}
 		const searchTerm = (category.query || '').toLowerCase();
 		const tagFilter = category.tag || 'all';
 		const matched = jobsData.filter((job) => {
@@ -43,7 +55,12 @@ export function getEmptyListingPaths(): Set<string> {
 				job.title.toLowerCase().includes(searchTerm) ||
 				job.company.toLowerCase().includes(searchTerm) ||
 				job.location.toLowerCase().includes(searchTerm) ||
-				job.salary.toLowerCase().includes(searchTerm);
+				job.salary.toLowerCase().includes(searchTerm) ||
+				// Mirror [slug].astro filter: payment_freq match so a
+				// category with `query: 'Еженед'` populates from
+				// details.payment_freq (the «Еженедельно» word lives
+				// nowhere else in GeneratedJob).
+				job.details.payment_freq.toLowerCase().includes(searchTerm);
 			return matchesTag && matchesSearch;
 		});
 		if (matched.length === 0) {
