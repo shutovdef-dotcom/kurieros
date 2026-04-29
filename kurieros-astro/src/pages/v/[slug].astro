@@ -9,6 +9,8 @@ import { vacancySources } from '../../data/vacancies';
 import type { VacancyOffer } from '../../data/vacancyTypes';
 import { slugifyCompany } from '../../utils/companies';
 import { getCityHref } from '../../utils/cities';
+import { fnv1a } from '../../utils/fnv1a';
+import { ozonDataAttrs } from '../../utils/ozonAttrs';
 import { buildBreadcrumbSchema, buildJobPostingSchema } from '../../utils/schema';
 import { knowledgeBaseData, TOPIC_META, type KnowledgeItem } from '../../utils/knowledge';
 
@@ -75,17 +77,6 @@ const matchingOffer =
 			offer.city === job.location &&
 			offer.transport === job.transport,
 	);
-// FNV-1a-ish 32-bit hash for deterministic per-slug jitter (so two
-// different Ozon vacancies in the same city get distinct fallback
-// rates instead of identical numbers across the catalogue).
-const hashStr = (s: string): number => {
-	let h = 2166136261;
-	for (let i = 0; i < s.length; i++) {
-		h ^= s.charCodeAt(i);
-		h = Math.imul(h, 16777619);
-	}
-	return Math.abs(h | 0);
-};
 // Fallback hourly rate for vacancies whose source data has no
 // `pay.hourly` (Ozon, T-Bank, Efin, Альфа). We pick the BEST known
 // hourly rate among all active offers in the same city (Yandex Eda or
@@ -105,7 +96,7 @@ const computeFallbackHourlyRate = (city: string, slug: string): number | null =>
 		}
 	}
 	if (best <= 0) return null;
-	const jitter = hashStr(slug) % 100;       // 0..99, deterministic per slug
+	const jitter = fnv1a(slug) % 100;          // 0..99, deterministic per slug
 	const ratio = 0.88 + jitter / 1000;        // 0.880..0.979 (88-97.9% of best)
 	return Math.round(best * ratio);
 };
@@ -610,10 +601,7 @@ const pageSchemaGraph = [
 								data-apply-employment={employmentTypeText}
 								data-apply-salary-max={salaryMaxNumeric || ''}
 								data-lead-form-type={leadFormType}
-								data-ozon-vacancy={job.ozonLeadForm?.vacancy}
-								data-ozon-customer={job.ozonLeadForm?.customer}
-								data-ozon-city-id={job.ozonLeadForm?.cityID}
-								data-ozon-hire-object-uuid={job.ozonLeadForm?.hireObjectUUID}
+								{...ozonDataAttrs(job.ozonLeadForm)}
 							>
 								Откликнуться через нас
 						</button>
@@ -861,10 +849,7 @@ const pageSchemaGraph = [
 									data-apply-employment={employmentTypeText}
 									data-apply-salary-max={salaryMaxNumeric || ''}
 									data-lead-form-type={leadFormType}
-									data-ozon-vacancy={job.ozonLeadForm?.vacancy}
-									data-ozon-customer={job.ozonLeadForm?.customer}
-									data-ozon-city-id={job.ozonLeadForm?.cityID}
-									data-ozon-hire-object-uuid={job.ozonLeadForm?.hireObjectUUID}
+									{...ozonDataAttrs(job.ozonLeadForm)}
 								>
 									Откликнуться через нас
 								</button>

@@ -1,4 +1,6 @@
 ---
+import { ozonDataAttrs } from '../utils/ozonAttrs';
+
 const { job, isInCompare = false } = Astro.props;
 
 // `applyLink: 'lead-form:<provider>'` is a magic marker (set in
@@ -96,10 +98,7 @@ const applyEmploymentText = job.details?.employment_type ?? '';
 					data-apply-employment={applyEmploymentText}
 					data-apply-salary-max={salaryMaxNumeric || ''}
 					data-lead-form-type={leadFormType}
-					data-ozon-vacancy={job.ozonLeadForm?.vacancy}
-					data-ozon-customer={job.ozonLeadForm?.customer}
-					data-ozon-city-id={job.ozonLeadForm?.cityID}
-					data-ozon-hire-object-uuid={job.ozonLeadForm?.hireObjectUUID}
+					{...ozonDataAttrs(job.ozonLeadForm)}
 				>Откликнуться через нас</button>
 			) : (
 				<a
