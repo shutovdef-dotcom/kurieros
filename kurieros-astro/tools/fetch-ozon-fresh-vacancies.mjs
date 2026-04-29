@@ -84,6 +84,17 @@ for (const { slug, label } of VACANCIES) {
   result.push({ customer: CUSTOMER, vacancy: slug, label, cities: cityEntries });
 }
 
+// Fail fast on transient API errors — see fetch-ozon-vacancies.mjs for
+// rationale. If any city is empty, abort without overwriting the JSON.
+const failedCities = result.flatMap((v) =>
+  v.cities.filter((c) => c.hireObjects.length === 0).map((c) => `${v.customer}:${v.vacancy} → ${c.cityName}`),
+);
+if (failedCities.length > 0) {
+  console.error(`\nAborting: ${failedCities.length} cities returned zero hire objects (transient API failure?). Re-run after Ozon recovers. Affected:`);
+  for (const f of failedCities) console.error(`  - ${f}`);
+  process.exit(1);
+}
+
 const outPath = path.join(__dirname, '..', 'src', 'data', 'ozon-fresh-vacancies.json');
 await fs.writeFile(outPath, JSON.stringify(result, null, 2), 'utf8');
 console.error(`\nWrote ${outPath}`);

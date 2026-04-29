@@ -3,6 +3,18 @@ main = "src/index.js"
 compatibility_date = "2025-04-01"
 workers_dev = true
 
+# Per-IP rate limit: 5 leads in 60 seconds. Anything over -> 429.
+# Required so a bot can't burn Ozon SMS / Telegram quota by curling
+# this endpoint directly (CORS-only protection is browser-side only).
+# Rate-Limit API is in beta on Workers free tier and is eventually
+# consistent — first ~5 reqs in a burst may slip through before the
+# global state propagates, but sustained abuse is throttled.
+[[unsafe.bindings]]
+name = "RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 5, period = 60 }
+
 [vars]
 ALLOWED_ORIGINS = "https://kurerok.ru,https://www.kurerok.ru"
 OZON_CITIZENSHIP_ID = "7"

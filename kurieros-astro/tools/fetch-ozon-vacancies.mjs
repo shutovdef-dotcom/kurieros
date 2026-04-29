@@ -77,6 +77,20 @@ for (const { slug, label } of VACANCIES) {
   result.push({ slug, label, cities: cityEntries });
 }
 
+// Fail fast on transient API errors: if any city ended up with zero
+// hire objects, the upstream API hiccupped during this run. Writing
+// an "empty city" to the JSON would later trip ozonOffers.ts at build
+// time with a misleading "zero hire objects" error. Better to abort
+// here, leave the previous JSON untouched, and let the operator re-run.
+const failedCities = result.flatMap((v) =>
+  v.cities.filter((c) => c.hireObjects.length === 0).map((c) => `${v.slug} → ${c.cityName}`),
+);
+if (failedCities.length > 0) {
+  console.error(`\nAborting: ${failedCities.length} cities returned zero hire objects (transient API failure?). Re-run after Ozon recovers. Affected:`);
+  for (const f of failedCities) console.error(`  - ${f}`);
+  process.exit(1);
+}
+
 const outPath = path.join(__dirname, '..', 'src', 'data', 'ozon-vacancies.json');
 await fs.writeFile(outPath, JSON.stringify(result, null, 2), 'utf8');
 console.error(`\nWrote ${outPath}`);

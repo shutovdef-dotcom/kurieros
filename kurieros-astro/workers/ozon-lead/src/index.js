@@ -201,6 +201,25 @@ export default {
 			return jsonResponse({ ok: false, error: 'not_found' }, { status: 404, headers: cors });
 		}
 
+		// Per-IP rate limit (5 req/60s). Cloudflare-side, applied before
+		// any business logic so spammers can't burn Ozon SMS / Telegram
+		// quota even though CORS doesn't apply to non-browser clients.
+		// Configured in wrangler.toml as `RATE_LIMITER` binding.
+		if (env.RATE_LIMITER && typeof env.RATE_LIMITER.limit === 'function') {
+			const ip = request.headers.get('CF-Connecting-IP')
+				|| request.headers.get('X-Forwarded-For')
+				|| 'unknown';
+			try {
+				const { success } = await env.RATE_LIMITER.limit({ key: ip });
+				if (!success) {
+					return jsonResponse({ ok: false, error: 'rate_limited' }, { status: 429, headers: cors });
+				}
+			} catch (_) {
+				// Best-effort: if the rate-limiter binding misbehaves, do
+				// NOT block the lead — fall through to the normal flow.
+			}
+		}
+
 		let body;
 		try {
 			body = await request.json();
@@ -269,6 +288,13 @@ export default {
 			});
 			return jsonResponse({ ok: true }, { status: 200, headers: cors });
 		} catch (err) {
+			// Include err.detail (Ozon API response body, set by submitToOzon
+			// on non-2xx) so debugging from a Telegram alert doesn't require
+			// digging in Cloudflare logs. Truncated to keep the message under
+			// Telegram's 4096-char hard limit.
+			const detail = err && err.detail
+				? ` | ${String(err.detail).slice(0, 600)}`
+				: '';
 			await notifyTelegram(env, {
 				name,
 				phone,
@@ -276,7 +302,7 @@ export default {
 				vacancy: whitelistSlug,
 				cityID,
 				hireObjectUUID,
-				ozonStatus: `ERROR — ${err.message}`,
+				ozonStatus: `ERROR — ${err.message}${detail}`,
 			});
 			return jsonResponse(
 				{ ok: false, error: 'ozon_submit_failed' },

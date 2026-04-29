@@ -1099,7 +1099,7 @@ const alfaBankRepresentativeOffers = alfaBankVacancies.offers.map((offer, offerI
 // so re-run `node tools/build-worker-whitelist.mjs` and redeploy the
 // Worker after editing the catalogue.
 
-export const vacancySources = [
+const _initialSources = [
   {
     id: 1,
     slug: 'yandex-eda-courier',
@@ -1327,7 +1327,7 @@ const _hashStr = (s: string): number => {
 };
 
 const _cityBestHourly = new Map<string, number>();
-for (const source of vacancySources) {
+for (const source of _initialSources) {
 	if (source.slug.startsWith('ozon-')) continue;
 	for (const offer of source.offers) {
 		if (!offer.isActive) continue;
@@ -1340,9 +1340,17 @@ for (const source of vacancySources) {
 	}
 }
 
-for (const source of vacancySources) {
-	if (!source.slug.startsWith('ozon-')) continue;
-	source.offers = source.offers.map((offer) => {
+// Build the public vacancySources array IMMUTABLY: for Ozon sources
+// without a real pay.hourly, return a fresh source object with new
+// offers; for everything else, return the source unchanged. We never
+// mutate offer.pay or source.offers in place — keeps consumers (jobs.ts,
+// pages/v/[slug].astro) from observing a half-applied state if they
+// happen to import the module before the postprocess runs (current
+// SSG-only flow doesn't hit that, but the immutable shape is safer
+// for tests / future module-graph changes).
+export const vacancySources: VacancySource[] = _initialSources.map((source) => {
+	if (!source.slug.startsWith('ozon-')) return source;
+	const updatedOffers = source.offers.map((offer) => {
 		if (offer.pay.hourly) return offer;
 		const best = _cityBestHourly.get(offer.city);
 		if (!best) return offer;
@@ -1350,9 +1358,7 @@ for (const source of vacancySources) {
 		const jitter = _hashStr(jitterKey) % 100;        // 0..99
 		const ratio = 0.88 + jitter / 1000;               // 0.880..0.979
 		const fallbackHourly = Math.round(best * ratio);
-		return {
-			...offer,
-			pay: buildPay(fallbackHourly),
-		};
+		return { ...offer, pay: buildPay(fallbackHourly) };
 	});
-}
+	return { ...source, offers: updatedOffers };
+});
