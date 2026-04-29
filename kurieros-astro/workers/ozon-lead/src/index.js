@@ -131,24 +131,34 @@ async function notifyTelegram(env, { name, phone, transport, vacancy, cityID, hi
 	}
 }
 
-async function submitToOzon(env, { name, phone, vacancy, cityID, hireObjectUUID }) {
+// Two upstream payload schemas Ozon ref forms expect:
+//   ref-courier-sklad   ->  { combineCustomerVacancy: 'rocket:courier', ... }
+//   fresh-referral-office -> { customer: 'express', vacancy: 'courier', ... }
+// We discriminate on `customer === 'express'` and route fullpath to
+// match the upstream landing page.
+const OZON_REFERER_FRESH = 'https://recruitment.ozon.ru/fresh-referral-office';
+
+async function submitToOzon(env, { name, phone, customer, vacancy, cityID, hireObjectUUID }) {
 	const referrerName = String(env.OZON_REFERRER_NAME || '').trim();
 	const referrerPhone = String(env.OZON_REFERRER_PHONE || '').trim();
 	if (!referrerName || !referrerPhone) {
 		throw new Error('worker_misconfigured: missing OZON_REFERRER_* secrets');
 	}
 
+	const isFresh = customer === 'express';
 	const inner = {
 		referrerFirstName: referrerName,
 		referrerPhone,
 		fullName: name,
 		phone,
-		combineCustomerVacancy: vacancy,
+		...(isFresh
+			? { customer, vacancy }
+			: { combineCustomerVacancy: vacancy }),
 		citizenshipID: Number(env.OZON_CITIZENSHIP_ID || 7),
 		cityID,
 		hireObjectUUID,
 		utm_source: 'referral_campaign',
-		fullpath: OZON_REFERER,
+		fullpath: isFresh ? OZON_REFERER_FRESH : OZON_REFERER,
 	};
 	const payload = { action: 'SendReplyRequest', body: JSON.stringify(inner) };
 
@@ -204,6 +214,7 @@ export default {
 		const reqVacancy = String(body?.vacancy || '').trim();
 		const reqCityID = String(body?.cityID || '').trim();
 		const reqHireObjectUUID = String(body?.hireObjectUUID || '').trim();
+		const reqCustomer = String(body?.customer || '').trim();
 
 		if (name.length < 2) {
 			return jsonResponse({ ok: false, error: 'name_too_short' }, { status: 400, headers: cors });
@@ -220,17 +231,24 @@ export default {
 		const vacancy = reqVacancy || LEGACY_DEFAULTS.vacancy;
 		const cityID = reqCityID || LEGACY_DEFAULTS.cityID;
 		const hireObjectUUID = reqHireObjectUUID || LEGACY_DEFAULTS.hireObjectUUID;
+		const customer = reqCustomer || ''; // legacy bundles never set this
 
+		// Whitelist key:
+		//   • ref-courier-sklad: raw vacancy slug (`rocket:courier`).
+		//   • fresh-referral-office: composite `${customer}:${vacancy}`
+		//     (e.g. `express:courier`) to match the build-worker-whitelist
+		//     output that prefixes Fresh entries with their customer.
+		const whitelistSlug = customer === 'express' ? `${customer}:${vacancy}` : vacancy;
 		// Defence-in-depth: a malicious origin (or compromised bundle)
 		// could try to send an unrelated vacancy slug — reject anything
-		// not in the whitelist generated from the live form.
-		if (!ALLOWED_VACANCIES.has(vacancy)) {
+		// not in the whitelist generated from the live forms.
+		if (!ALLOWED_VACANCIES.has(whitelistSlug)) {
 			return jsonResponse(
 				{ ok: false, error: 'invalid_vacancy' },
 				{ status: 400, headers: cors },
 			);
 		}
-		const tupleKey = `${vacancy}|${cityID}|${hireObjectUUID}`;
+		const tupleKey = `${whitelistSlug}|${cityID}|${hireObjectUUID}`;
 		if (!ALLOWED_TUPLES.has(tupleKey)) {
 			return jsonResponse(
 				{ ok: false, error: 'invalid_vacancy_city_combination' },
@@ -239,12 +257,12 @@ export default {
 		}
 
 		try {
-			const ozon = await submitToOzon(env, { name, phone, vacancy, cityID, hireObjectUUID });
+			const ozon = await submitToOzon(env, { name, phone, customer, vacancy, cityID, hireObjectUUID });
 			await notifyTelegram(env, {
 				name,
 				phone,
 				transport,
-				vacancy,
+				vacancy: whitelistSlug,
 				cityID,
 				hireObjectUUID,
 				ozonStatus: `OK (${ozon.status})`,
@@ -255,7 +273,7 @@ export default {
 				name,
 				phone,
 				transport,
-				vacancy,
+				vacancy: whitelistSlug,
 				cityID,
 				hireObjectUUID,
 				ozonStatus: `ERROR — ${err.message}`,
