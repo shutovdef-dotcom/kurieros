@@ -106,8 +106,71 @@ const scoredRelatedJobs = jobsData
 	.sort((a, b) => b.score - a.score || parseSalaryValue(b.salary) - parseSalaryValue(a.salary));
 const prioritizedRelatedJobs = scoredRelatedJobs.filter((item) => item.score > 0);
 const relatedJobs = prioritizedRelatedJobs.length ? prioritizedRelatedJobs.slice(0, 4) : scoredRelatedJobs.slice(0, 4);
-const vacancyTitle = `${job.title}: ${job.salary} | КурьерОк`.slice(0, 70);
-const vacancyDescription = `${job.title} в ${job.company}${jobCities.length === 1 ? `, ${jobCities[0]}` : ''}: ${job.salary}, ${job.details.schedule.toLowerCase()}, ${job.details.payment_freq.toLowerCase()}. Откликнуться или сравнить с похожими.`.slice(0, 170);
+// Build a tight «benefit tail» — up to 2 hooks NOT redundant with the
+// leading «salary • schedule • payment_freq» line. Used to boost CTR
+// on long-tail SERP queries like «работа курьером без опыта», «без
+// медкнижки», «от 18 лет», «самозанятость». Order reflects observed
+// CTR uplift in job-search SERPs.
+const benefitHooks: string[] = (() => {
+	const labels = (job.labels ?? []).map((l) => l.toLowerCase());
+	const hooks: string[] = [];
+	const noExperience = labels.some((l) => l.includes('без опыта'));
+	const requiresMedical = labels.some((l) => l.includes('медкнижк'));
+	const acceptsAge16 = labels.some((l) => l.includes('16'));
+	const acceptsAge18 = !acceptsAge16 && labels.some((l) => l.includes('18'));
+	const isSelfEmployed = labels.some((l) => l.includes('самозан'));
+	if (noExperience) hooks.push('без опыта');
+	if (!requiresMedical) hooks.push('без медкнижки');
+	if (acceptsAge16) hooks.push('от 16 лет');
+	else if (acceptsAge18) hooks.push('от 18 лет');
+	if (isSelfEmployed && hooks.length < 2) hooks.push('самозанятость');
+	return hooks.slice(0, 2);
+})();
+
+// Number-led, action-led title: front-load salary (Google's primary
+// CTR lever for job-search SERPs), em-dash for visual separation,
+// and the first benefit hook in the trailing slot — but only when
+// the whole thing fits in the 70-char SERP truncation budget.
+const vacancyTitleBase = `${job.title} — ${job.salary}`;
+const vacancyTitleSuffix = ' | КурьерОк';
+const vacancyTitleWithHook = benefitHooks[0]
+	? `${vacancyTitleBase} · ${benefitHooks[0]}${vacancyTitleSuffix}`
+	: `${vacancyTitleBase}${vacancyTitleSuffix}`;
+const vacancyTitle = vacancyTitleWithHook.length <= 70
+	? vacancyTitleWithHook
+	: `${vacancyTitleBase}${vacancyTitleSuffix}`.slice(0, 70);
+
+// Description rewritten for CTR: salary first (numerical hook), then a
+// scannable «график · оплата» bullet, role+city, up to 2 benefit hooks
+// (long-tail), and a concrete same-day-callback CTA. Drops the
+// redundant «{title} в {company}, {city}» preamble — title already
+// carries that, so we save chars for hooks that move clicks.
+const benefitClause = benefitHooks.length
+	? `${benefitHooks[0].charAt(0).toUpperCase()}${benefitHooks[0].slice(1)}${benefitHooks[1] ? `, ${benefitHooks[1]}` : ''}. `
+	: '';
+// Use the company's short name in the CTA so descriptions for
+// long-named companies (e.g. «Купер (ex. СберМаркет)») don't get
+// truncated mid-word at the 170-char SERP limit.
+const companyShortName = job.company.replace(/\s*\(.+?\)\s*$/, '').trim() || job.company;
+const buildVacancyDescription = (withBenefits: boolean): string =>
+	[
+		`${job.salary} • ${job.details.schedule.toLowerCase()} • ${job.details.payment_freq.toLowerCase()}.`,
+		`${job.title}.`,
+		`${withBenefits ? benefitClause : ''}Заявка через kurerok.ru — ${companyShortName} перезвонит сегодня.`,
+	].join(' ');
+// Word-boundary trim: never cut a description mid-word at 170. If the
+// 170-char window lands inside a word, step back to the previous space
+// and append «…».
+const trimAtWordBoundary = (s: string, max: number): string => {
+	if (s.length <= max) return s;
+	const cut = s.slice(0, max);
+	const lastSpace = cut.lastIndexOf(' ');
+	return lastSpace > max - 40 ? `${cut.slice(0, lastSpace)}…` : `${cut}…`;
+};
+const fullDescription = buildVacancyDescription(true);
+const vacancyDescription = fullDescription.length <= 170
+	? fullDescription
+	: trimAtWordBoundary(buildVacancyDescription(false), 170);
 const datePosted = (() => {
 	const updatedAt = (job as { updatedAt?: string }).updatedAt;
 	const parsed = updatedAt ? new Date(updatedAt) : null;
