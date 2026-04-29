@@ -734,8 +734,20 @@ const buildOffersForTemplate = (template: OzonRoleTemplate): VacancyOffer[] => {
     // ingest. For sklad, the slug is already the full
     // combineCustomerVacancy.
     const isFresh = template.customer === 'express';
+    let metaVacancy: string;
+    if (isFresh) {
+      const parts = template.slug.split(':');
+      if (parts.length !== 2 || !parts[1]) {
+        throw new Error(
+          `[ozonOffers] Fresh template ${template.slug} must follow 'customer:vacancy' shape`,
+        );
+      }
+      metaVacancy = parts[1];
+    } else {
+      metaVacancy = template.slug;
+    }
     const ozonLeadForm: OzonLeadFormMeta = {
-      vacancy: isFresh ? template.slug.split(':')[1]! : template.slug,
+      vacancy: metaVacancy,
       ...(template.customer ? { customer: template.customer } : {}),
       cityID: city.cityID,
       hireObjectUUID: hireObject.uuid,

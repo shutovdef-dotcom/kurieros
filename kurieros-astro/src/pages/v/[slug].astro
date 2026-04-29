@@ -212,8 +212,7 @@ const vacancyDescription = fullDescription.length <= 170
 	? fullDescription
 	: trimAtWordBoundary(buildVacancyDescription(false), 170);
 const datePosted = (() => {
-	const updatedAt = (job as { updatedAt?: string }).updatedAt;
-	const parsed = updatedAt ? new Date(updatedAt) : null;
+	const parsed = job.updatedAt ? new Date(job.updatedAt) : null;
 	return parsed && !Number.isNaN(parsed.getTime()) ? parsed.toISOString() : new Date().toISOString();
 })();
 const validThrough = (() => {

@@ -217,7 +217,14 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		});
 
 		const submitToWorker = async (data, ctx) => {
-			if (!ozonLeadApi) return { skipped: true };
+			if (!ozonLeadApi) {
+				// Preview / dev environment: PUBLIC_OZON_LEAD_API not set.
+				// Make the silent skip visible in browser devtools so devs
+				// don't ship a build that swallows real users' submissions.
+				// eslint-disable-next-line no-console
+				console.warn('[ozon-lead] submission skipped — PUBLIC_OZON_LEAD_API is not set in this build');
+				return { skipped: true };
+			}
 			const res = await fetch(ozonLeadApi, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
