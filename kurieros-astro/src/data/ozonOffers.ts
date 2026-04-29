@@ -24,6 +24,7 @@
  */
 
 import ozonVacanciesData from './ozon-vacancies.json';
+import ozonFreshVacanciesData from './ozon-fresh-vacancies.json';
 import { SUPPORTED_LANGUAGES } from './translations';
 import type {
   EmploymentFormat,
@@ -39,26 +40,51 @@ import type {
 
 const OZON_COMPANY_NAME = 'Ozon';
 const OZON_COMPANY_LOGO = '/logos/ozon.svg';
+const OZON_FRESH_COMPANY_NAME = 'Ozon fresh';
+const OZON_FRESH_COMPANY_LOGO = '/logos/ozon-fresh.svg';
 const OZON_LEAD_APPLY = 'lead-form:ozon';
-const OZON_REF_LANDING = 'https://recruitment.ozon.ru/ref-courier-sklad';
+const OZON_REF_LANDING_SKLAD = 'https://recruitment.ozon.ru/ref-courier-sklad';
+const OZON_REF_LANDING_FRESH = 'https://recruitment.ozon.ru/fresh-referral-office';
+// Backwards-compat alias used by the long-standing courier template.
+const OZON_REF_LANDING = OZON_REF_LANDING_SKLAD;
 const OZON_UPDATED_AT = new Date().toISOString().slice(0, 10);
 
 // === Types ===========================================================
 
-type OzonRoleSlug =
+/** sklad slugs — combineCustomerVacancy values from ref-courier-sklad. */
+type OzonSkladSlug =
   | 'rocket:courier'
   | 'ff:truckDriver'
   | 'ff:operator'
   | 'ff:electricStackerDriver'
   | 'ff:brigadier';
 
+/** Fresh slugs — composite `${customer}:${vacancy}` from fresh-referral-office. */
+type OzonFreshSlug =
+  | 'express:courier'
+  | 'express:operator'
+  | 'express:adminPersonal'
+  | 'express:factoryKitchen';
+
+type OzonRoleSlug = OzonSkladSlug | OzonFreshSlug;
+
 type OzonRoleTemplate = {
-  /** combineCustomerVacancy slug (matches whitelist + JSON file). */
+  /** combineCustomerVacancy slug (sklad) or `${customer}:${vacancy}` (Fresh). */
   slug: OzonRoleSlug;
+  /**
+   * `'express'` for Fresh (fresh-referral-office), undefined for sklad
+   * (ref-courier-sklad). Drives Worker payload-shape branching.
+   */
+  customer?: 'express';
   /** URL slug (kurerok.ru/v/<sourceSlug>-<city>-<transport>/). */
   sourceSlug: string;
   /** VacancySource.id — keeps numeric IDs stable across Ozon roles. */
   sourceId: number;
+  /** Display brand on cards (defaults: 'Ozon' / sklad logo). */
+  companyName?: string;
+  companyLogo?: string;
+  /** Where the lead lands upstream (defaults: ref-courier-sklad URL). */
+  refLanding?: string;
   transport: TransportMode;
   content: VacancyContent;
   /** Lower bound for the human-readable monthly salary text. */
@@ -380,12 +406,261 @@ const BRIGADIER_TEMPLATE: OzonRoleTemplate = {
   priorityBase: 1450,
 };
 
+// === Ozon Fresh (fresh-referral-office) templates ====================
+// Все Fresh-офферы используют customer='express' и fullpath
+// `https://recruitment.ozon.ru/fresh-referral-office`. Условия и
+// зарплаты — из открытых источников Ozon Fresh / hh.ru / vc.ru
+// (значения нижней границы; верхняя строится через city-based
+// hourly-fallback в src/data/vacancies.ts).
+
+const FRESH_COURIER_TEMPLATE: OzonRoleTemplate = {
+  slug: 'express:courier',
+  customer: 'express',
+  sourceSlug: 'ozon-fresh-courier',
+  sourceId: 15,
+  companyName: OZON_FRESH_COMPANY_NAME,
+  companyLogo: OZON_FRESH_COMPANY_LOGO,
+  refLanding: OZON_REF_LANDING_FRESH,
+  transport: 'foot',
+  content: {
+    title: 'Курьер Ozon fresh {cityPrep}',
+    shortDescription:
+      'Доставка свежих продуктов из дарксторов Ozon fresh пешком или на велосипеде. Заказы рядом, выплаты раз в неделю, регистрация через Госуслуги.',
+    description:
+      'Ozon fresh — доставка продуктов и готовой еды за 30–60 минут. Курьеры работают пешком, на велосипеде или самокате — заказы выдаются в дарксторе рядом с домом, маршрут выкручивается приложением. График свободный (слоты от 4 часов), выплаты раз в неделю на карту, бонусы за пик-часы и плохую погоду. Подключение через нашу заявку: оставьте контакты — Ozon пришлёт SMS со ссылкой на регистрацию в Госуслугах.',
+    requirements: [
+      'Возраст от 18 лет.',
+      'Гражданство РФ, ЕАЭС или СНГ (для не-ЕАЭС нужны ВНЖ + патент).',
+      'Самозанятость или ИП (поможем оформить за 5 минут через «Мой налог»).',
+      'Готовность пройти онбординг в приложении Ozon Job через Госуслуги.',
+      'Желательно — Android или iOS-смартфон с интернетом.',
+    ],
+    benefits: [
+      'Доход от 80 000 ₽ в месяц при загрузке 5 смен в неделю.',
+      'Еженедельные выплаты напрямую на карту.',
+      'Свободный график — слоты от 4 часов, можно совмещать с учёбой.',
+      'Бонусы за пик-часы (час пик и непогода — повышенный тариф).',
+      'Брендированная форма Ozon fresh за счёт компании.',
+      'Подключение через наш реферальный канал — быстрее проходите оформление.',
+    ],
+    requiredDocuments: [
+      'Паспорт РФ, ЕАЭС или СНГ.',
+      'Регистрация в «Мой налог» (самозанятость) или ИП.',
+      'СНИЛС и ИНН.',
+      'Патент / РВП / ВНЖ для иностранных граждан.',
+    ],
+    searchTags: [
+      'Ozon fresh',
+      'Озон фреш',
+      'курьер',
+      'пеший курьер',
+      'продукты',
+      'дарксторы',
+      'самозанятость',
+    ],
+  },
+  monthlyMinRub: 80_000,
+  rateLine: 'Тариф за заказ + бонусы за пик-часы и плохую погоду',
+  paymentFrequency: 'Еженедельно',
+  scheduleText: 'Свободный график, слоты от 4 часов',
+  ageFrom: 18,
+  citizenship: 'РФ / ЕАЭС / СНГ',
+  medicalBook: 'not_required',
+  employmentFormats: ['self_employed', 'individual_entrepreneur'],
+  uniformText: 'Брендированная форма Ozon fresh за счёт компании',
+  educationText: 'Не требуется',
+  extraTags: ['ozon-fresh', 'foot', 'self-employed', 'lead-form'],
+  priorityBase: 1680,
+  isHot: true,
+};
+
+const FRESH_OPERATOR_TEMPLATE: OzonRoleTemplate = {
+  slug: 'express:operator',
+  customer: 'express',
+  sourceSlug: 'ozon-fresh-order-picker',
+  sourceId: 16,
+  companyName: OZON_FRESH_COMPANY_NAME,
+  companyLogo: OZON_FRESH_COMPANY_LOGO,
+  refLanding: OZON_REF_LANDING_FRESH,
+  transport: 'foot',
+  content: {
+    title: 'Сборщик заказов Ozon fresh {cityPrep}',
+    shortDescription:
+      'Сборка свежих продуктов в даркстор Ozon fresh: 30–60 минут от заказа до отгрузки курьеру. Сменный график, бесплатное питание, ТК РФ.',
+    description:
+      'Ozon fresh — мини-склады с продуктами в радиусе 3 км от клиента. Сборщик получает заказ в приложении, собирает товары по полкам даркстора и отдаёт курьеру за 6–10 минут. Работа в холодных и охлаждённых зонах (отдельные тёплые куртки выдаются), сменный график 2/2 или 5/2, бесплатное горячее питание, оформление по ТК РФ. Подключение через нашу заявку: оставьте контакты — Ozon пришлёт SMS.',
+    requirements: [
+      'Возраст от 18 лет.',
+      'Гражданство РФ, ЕАЭС или СНГ.',
+      'Готовность работать стоя 12 часов и быть в холоде.',
+      'Без опыта — обучение в первую смену.',
+      'Внимательность к артикулам и срокам годности.',
+    ],
+    benefits: [
+      'Доход от 75 000 ₽ в месяц при полной загрузке.',
+      'Сменный график 2/2 или 5/2 на выбор.',
+      'Бесплатное горячее питание в столовой даркстора.',
+      'Оформление по ТК РФ — белая зарплата 2 раза в месяц.',
+      'Тёплая брендированная форма для холодильных зон.',
+      'Подработки в выходные — оплата выше тарифа.',
+    ],
+    requiredDocuments: [
+      'Паспорт РФ, ЕАЭС или СНГ.',
+      'Патент / РВП / ВНЖ для иностранных граждан.',
+      'СНИЛС и ИНН.',
+      'Медкнижка не нужна (выдаётся при необходимости за счёт компании).',
+    ],
+    searchTags: [
+      'Ozon fresh',
+      'Озон фреш',
+      'сборщик заказов',
+      'комплектовщик',
+      'даркстор',
+      'продукты',
+    ],
+  },
+  monthlyMinRub: 75_000,
+  rateLine: 'Сменная оплата + надбавки за выработку и ночные смены',
+  paymentFrequency: '2 раза в месяц',
+  scheduleText: 'Сменный график 2/2 или 5/2',
+  ageFrom: 18,
+  citizenship: 'РФ / ЕАЭС / СНГ',
+  medicalBook: 'not_required',
+  employmentFormats: ['official', 'gph'],
+  uniformText: 'Брендированная форма + тёплая куртка для холодильных зон',
+  educationText: 'Не требуется',
+  extraTags: ['ozon-fresh', 'darkstore', 'lead-form', 'official-employment', 'no-experience'],
+  priorityBase: 1480,
+};
+
+const FRESH_ADMIN_TEMPLATE: OzonRoleTemplate = {
+  slug: 'express:adminPersonal',
+  customer: 'express',
+  sourceSlug: 'ozon-fresh-administrator',
+  sourceId: 17,
+  companyName: OZON_FRESH_COMPANY_NAME,
+  companyLogo: OZON_FRESH_COMPANY_LOGO,
+  refLanding: OZON_REF_LANDING_FRESH,
+  transport: 'foot',
+  content: {
+    title: 'Администратор даркстора Ozon fresh {cityPrep}',
+    shortDescription:
+      'Управление сменой в дарксторе Ozon fresh: контроль сборщиков, приёмка поставок, KPI по скорости. Официальная зарплата, бонусы за выполнение плана.',
+    description:
+      'Ozon fresh ищет администраторов даркстора {cityPrep}. Вы отвечаете за свою смену: распределение задач между сборщиками, приёмка поставок от поставщиков, контроль сроков годности, KPI по скорости отгрузки заказов курьерам. Опыт линейного управления (3–5 человек) приветствуется, но не обязателен — есть программа стажёра. Оформление по ТК РФ, белая зарплата 2 раза в месяц + квартальный бонус за KPI. Подключение через нашу заявку.',
+    requirements: [
+      'Возраст от 21 года.',
+      'Гражданство РФ или ЕАЭС.',
+      'Опыт работы в рознице / общепите / логистике от 1 года (управленческий опыт — плюс).',
+      'Готовность к сменному графику и физическим нагрузкам.',
+      'Уверенный пользователь смартфона и Excel / Google Sheets.',
+    ],
+    benefits: [
+      'Доход от 95 000 ₽ в месяц + квартальный бонус за выполнение KPI.',
+      'Оформление по ТК РФ — белая зарплата 2 раза в месяц.',
+      'Корпоративный ДМС после испытательного срока.',
+      'Программа стажёра для тех, кто переходит из линейной позиции.',
+      'Карьерный путь: администратор → старший администратор → управляющий даркстором.',
+      'Бесплатное питание в столовой даркстора и брендированная форма.',
+    ],
+    requiredDocuments: [
+      'Паспорт РФ или ЕАЭС.',
+      'Трудовая книжка / СНИЛС / ИНН.',
+      'Документы об образовании (если есть).',
+    ],
+    searchTags: [
+      'Ozon fresh',
+      'Озон фреш',
+      'администратор',
+      'управляющий',
+      'даркстор',
+      'старший смены',
+    ],
+  },
+  monthlyMinRub: 95_000,
+  rateLine: 'Оклад + квартальный бонус по KPI',
+  paymentFrequency: '2 раза в месяц',
+  scheduleText: 'Сменный график 5/2 или 2/2',
+  ageFrom: 21,
+  citizenship: 'РФ / ЕАЭС',
+  medicalBook: 'not_required',
+  employmentFormats: ['official'],
+  uniformText: 'Брендированная форма Ozon fresh',
+  educationText: 'Среднее специальное или высшее (приветствуется)',
+  extraTags: ['ozon-fresh', 'darkstore', 'manager', 'lead-form', 'official-employment'],
+  priorityBase: 1380,
+};
+
+const FRESH_KITCHEN_TEMPLATE: OzonRoleTemplate = {
+  slug: 'express:factoryKitchen',
+  customer: 'express',
+  sourceSlug: 'ozon-fresh-kitchen-staff',
+  sourceId: 18,
+  companyName: OZON_FRESH_COMPANY_NAME,
+  companyLogo: OZON_FRESH_COMPANY_LOGO,
+  refLanding: OZON_REF_LANDING_FRESH,
+  transport: 'foot',
+  content: {
+    title: 'Сотрудник фабрики-кухни Ozon fresh {cityPrep}',
+    shortDescription:
+      'Готовка и упаковка готовых блюд для Ozon fresh. Без опыта, обучение за счёт компании, бесплатное питание, медкнижка от Ozon.',
+    description:
+      'Фабрика-кухня Ozon fresh готовит салаты, супы, горячие блюда, выпечку и упаковывает их для доставки. Сотрудники работают на отдельных линиях: нарезка, сборка, упаковка, маркировка. Без опыта — обучение на месте за 1–2 смены, опытные шеф-наставники. Сменный график 2/2 или 5/2, бесплатное горячее питание, медкнижка оформляется за счёт компании. Подключение через нашу заявку.',
+    requirements: [
+      'Возраст от 18 лет.',
+      'Гражданство РФ, ЕАЭС или СНГ.',
+      'Медкнижка обязательна (оформим за счёт компании, если нет).',
+      'Готовность к сменному графику и работе на ногах.',
+      'Аккуратность и внимательность к санитарным нормам.',
+    ],
+    benefits: [
+      'Доход от 70 000 ₽ в месяц при полной загрузке.',
+      'Сменный график 2/2 или 5/2 на выбор.',
+      'Бесплатное горячее питание в столовой фабрики-кухни.',
+      'Медкнижка оформляется за счёт компании.',
+      'Оформление по ТК РФ — белая зарплата 2 раза в месяц.',
+      'Подработки в выходные — оплата выше тарифа.',
+    ],
+    requiredDocuments: [
+      'Паспорт РФ, ЕАЭС или СНГ.',
+      'Патент / РВП / ВНЖ для иностранных граждан.',
+      'Медкнижка (если есть; иначе оформим бесплатно).',
+      'СНИЛС и ИНН.',
+    ],
+    searchTags: [
+      'Ozon fresh',
+      'Озон фреш',
+      'фабрика-кухня',
+      'повар',
+      'упаковщик',
+      'кулинария',
+      'без опыта',
+    ],
+  },
+  monthlyMinRub: 70_000,
+  rateLine: 'Сменная оплата + надбавки за ночные смены',
+  paymentFrequency: '2 раза в месяц',
+  scheduleText: 'Сменный график 2/2 или 5/2',
+  ageFrom: 18,
+  citizenship: 'РФ / ЕАЭС / СНГ',
+  medicalBook: 'required',
+  employmentFormats: ['official', 'gph'],
+  uniformText: 'Брендированная форма + санитарный комплект',
+  educationText: 'Не требуется',
+  extraTags: ['ozon-fresh', 'kitchen', 'lead-form', 'no-experience', 'medical-book-paid'],
+  priorityBase: 1420,
+};
+
 const TEMPLATES: OzonRoleTemplate[] = [
   COURIER_TEMPLATE,
   TRUCK_DRIVER_TEMPLATE,
   OPERATOR_TEMPLATE,
   STACKER_TEMPLATE,
   BRIGADIER_TEMPLATE,
+  FRESH_COURIER_TEMPLATE,
+  FRESH_OPERATOR_TEMPLATE,
+  FRESH_ADMIN_TEMPLATE,
+  FRESH_KITCHEN_TEMPLATE,
 ];
 
 const TEMPLATE_BY_SLUG = new Map<OzonRoleSlug, OzonRoleTemplate>(
@@ -394,7 +669,7 @@ const TEMPLATE_BY_SLUG = new Map<OzonRoleSlug, OzonRoleTemplate>(
 
 // === Generation ======================================================
 
-type RawVacancyEntry = {
+type RawSkladEntry = {
   slug: string;
   label: string;
   cities: Array<{
@@ -404,13 +679,42 @@ type RawVacancyEntry = {
   }>;
 };
 
-const buildOffersForSlug = (slug: OzonRoleSlug): VacancyOffer[] => {
-  const template = TEMPLATE_BY_SLUG.get(slug);
-  if (!template) return [];
-  const data = (ozonVacanciesData as RawVacancyEntry[]).find((v) => v.slug === slug);
-  if (!data) return [];
+type RawFreshEntry = {
+  customer: string;
+  vacancy: string;
+  label: string;
+  cities: Array<{
+    cityName: string;
+    cityID: string;
+    hireObjects: Array<{ name: string; uuid: string }>;
+  }>;
+};
 
-  return data.cities.map((city, cityIndex) => {
+/**
+ * Find the catalogue rows for a given template's slug. Sklad catalogue
+ * keys by raw `combineCustomerVacancy` slug; Fresh catalogue keys by
+ * `${customer}:${vacancy}` constructed locally.
+ */
+const findCatalogueCities = (
+  template: OzonRoleTemplate,
+): RawSkladEntry['cities'] | undefined => {
+  if (template.customer === 'express') {
+    const fresh = (ozonFreshVacanciesData as RawFreshEntry[]).find(
+      (v) => `${v.customer}:${v.vacancy}` === template.slug,
+    );
+    return fresh?.cities;
+  }
+  const sklad = (ozonVacanciesData as RawSkladEntry[]).find(
+    (v) => v.slug === template.slug,
+  );
+  return sklad?.cities;
+};
+
+const buildOffersForTemplate = (template: OzonRoleTemplate): VacancyOffer[] => {
+  const cities = findCatalogueCities(template);
+  if (!cities) return [];
+
+  return cities.map((city, cityIndex) => {
     // Default to the first hire-object UUID per city — most cities only
     // have one. Cities with several addresses (e.g. Москва FF Хоругвино
     // + Подольск) still resolve to a deterministic default; users can
@@ -419,12 +723,20 @@ const buildOffersForSlug = (slug: OzonRoleSlug): VacancyOffer[] => {
     const hireObject = city.hireObjects[0];
     if (!hireObject) {
       throw new Error(
-        `[ozonOffers] ${slug} → ${city.cityName} has zero hire objects in ozon-vacancies.json`,
+        `[ozonOffers] ${template.slug} → ${city.cityName} has zero hire objects in catalogue`,
       );
     }
     const cleanCity = normalizeCity(city.cityName);
+
+    // For Fresh, store the SHORT vacancy slug in the meta (matches
+    // Worker's downstream Ozon API call), but the WHITELIST tuple key
+    // uses `${customer}:${vacancy}` — Worker reconstructs that on
+    // ingest. For sklad, the slug is already the full
+    // combineCustomerVacancy.
+    const isFresh = template.customer === 'express';
     const ozonLeadForm: OzonLeadFormMeta = {
-      vacancy: slug,
+      vacancy: isFresh ? template.slug.split(':')[1]! : template.slug,
+      ...(template.customer ? { customer: template.customer } : {}),
       cityID: city.cityID,
       hireObjectUUID: hireObject.uuid,
       hireObjectLabel: hireObject.name,
@@ -444,7 +756,7 @@ const buildOffersForSlug = (slug: OzonRoleSlug): VacancyOffer[] => {
       },
       isActive: true,
       updatedAt: OZON_UPDATED_AT,
-      sourceUrl: OZON_REF_LANDING,
+      sourceUrl: template.refLanding ?? OZON_REF_LANDING,
       salaryConfidence: 'partner',
       ageFrom: template.ageFrom,
       citizenship: template.citizenship,
@@ -467,8 +779,8 @@ export const ozonVacancySources: VacancySource[] = TEMPLATES.map((template) => (
   id: template.sourceId,
   slug: template.sourceSlug,
   company: {
-    name: OZON_COMPANY_NAME,
-    logo: OZON_COMPANY_LOGO,
+    name: template.companyName ?? OZON_COMPANY_NAME,
+    logo: template.companyLogo ?? OZON_COMPANY_LOGO,
   },
   content: localize(template.content),
   defaults: {
@@ -481,7 +793,7 @@ export const ozonVacancySources: VacancySource[] = TEMPLATES.map((template) => (
     uniform: template.uniformText,
     os: 'Android или iOS',
   },
-  offers: buildOffersForSlug(template.slug),
+  offers: buildOffersForTemplate(template),
   extraTags: template.extraTags,
   ...(template.isHot ? { isHot: true } : {}),
 }));

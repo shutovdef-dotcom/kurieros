@@ -40,16 +40,35 @@ export type PayModel = {
 };
 
 /**
- * Identifies a specific (vacancy, city, hire-object) triple on
- * recruitment.ozon.ru/ref-courier-sklad. Forwarded to the lead-form
- * Worker so it can submit on the user's behalf to the right Ozon
- * pipeline. See `src/data/ozon-vacancies.json` for the live catalogue
+ * Identifies a specific (vacancy, city, hire-object) triple on the
+ * Ozon referral forms. Forwarded to the lead-form Worker so it can
+ * submit on the user's behalf to the right Ozon pipeline.
+ *
+ * Two upstream forms are supported:
+ *   • ref-courier-sklad  → vacancy = `combineCustomerVacancy` slug
+ *     (e.g. `rocket:courier`, `ff:operator`). `customer` is undefined.
+ *   • fresh-referral-office → `customer = 'express'` plus a short
+ *     `vacancy` slug (e.g. `courier`, `adminPersonal`). The Worker
+ *     branches on `customer === 'express'` to pick the matching
+ *     upstream payload shape.
+ *
+ * See `src/data/ozon-vacancies.json` (sklad) and
+ * `src/data/ozon-fresh-vacancies.json` (fresh) for the live catalogues
  * and `workers/ozon-lead/src/whitelist.js` for the matching server-
  * side whitelist (regenerate via `node tools/build-worker-whitelist.mjs`).
  */
 export type OzonLeadFormMeta = {
-  /** combineCustomerVacancy slug, e.g. "rocket:courier", "ff:operator". */
+  /**
+   * For sklad: full `combineCustomerVacancy` slug (e.g. `rocket:courier`).
+   * For Fresh: short slug (`courier`, `adminPersonal`, …) — must be
+   * paired with `customer: 'express'`.
+   */
   vacancy: string;
+  /**
+   * Ozon Fresh discriminator. Set to `'express'` for fresh-referral-office
+   * vacancies; left undefined for ref-courier-sklad legacy flow.
+   */
+  customer?: string;
   /** UUID of the operational city (Ozon's cityID). */
   cityID: string;
   /** UUID of the hire location (Ozon's hireObjectUUID). */
