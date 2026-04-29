@@ -6,6 +6,7 @@ import alfaBankVacanciesSource from './alfa-bank-vacancies.json';
 import { ozonVacancySources } from './ozonOffers';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from './translations';
 import { slugifyCity } from '../utils/cities';
+import { fnv1a } from '../utils/fnv1a';
 import type {
   EmploymentFormat,
   VacancyContent,
@@ -1313,18 +1314,10 @@ const _initialSources = [
 ] satisfies VacancySource[];
 
 // === Ozon hourly fallback ============================================
-// Hash for deterministic per-(slug,city,transport) jitter — keeps two
-// Ozon vacancies in the same city visually distinct (e.g. Москва
-// Operator, Goods Handler, Courier all get different numbers within
-// 88-98% of the city's best Y.Eda/Купер rate).
-const _hashStr = (s: string): number => {
-	let h = 2166136261;
-	for (let i = 0; i < s.length; i++) {
-		h ^= s.charCodeAt(i);
-		h = Math.imul(h, 16777619);
-	}
-	return Math.abs(h | 0);
-};
+// Deterministic per-(slug,city,transport) jitter — keeps two Ozon
+// vacancies in the same city visually distinct (e.g. Москва Operator,
+// Goods Handler, Courier all get different numbers within 88-98% of
+// the city's best Y.Eda/Купер rate). Uses shared FNV-1a util.
 
 const _cityBestHourly = new Map<string, number>();
 for (const source of _initialSources) {
@@ -1355,7 +1348,7 @@ export const vacancySources: VacancySource[] = _initialSources.map((source) => {
 		const best = _cityBestHourly.get(offer.city);
 		if (!best) return offer;
 		const jitterKey = `${source.slug}-${offer.city}-${offer.transport}`;
-		const jitter = _hashStr(jitterKey) % 100;        // 0..99
+		const jitter = fnv1a(jitterKey) % 100;            // 0..99
 		const ratio = 0.88 + jitter / 1000;               // 0.880..0.979
 		const fallbackHourly = Math.round(best * ratio);
 		return { ...offer, pay: buildPay(fallbackHourly) };
