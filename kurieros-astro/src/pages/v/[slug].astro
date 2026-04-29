@@ -472,6 +472,18 @@ const alternativesWithDiff = relatedJobs.map((other) => ({
 	diff: buildAlternativeDifferentiator(other),
 }));
 
+// «Эта роль в других городах» — дешёвый внутренний linkback для
+// пользователей без жёсткой привязки к городу (приехали по запросу
+// «работа курьером Озон» без указания города, или готовы к релокации).
+// Сейчас они часто отскакивают, увидев один город — добавляем
+// 4-12 кнопок «та же вакансия, другие города», отсортированных по
+// зарплате. sourceId — стабильный ключ роли (общий для всех city/transport
+// вариантов одного `VacancySource`), см. `src/data/vacancyTypes.ts:142`.
+const sameRoleOtherCities = jobsData
+	.filter((item) => item.sourceId === job.sourceId && item.slug !== job.slug)
+	.sort((a, b) => parseSalaryValue(b.salary) - parseSalaryValue(a.salary))
+	.slice(0, 12);
+
 const pageSchemaGraph = [
 	{
 		'@type': 'WebPage',
@@ -814,6 +826,26 @@ const pageSchemaGraph = [
 							<a class="vacancy-alternatives-deeplink" href="/guide/">Гид для курьера: возраст, медкнижка, доход, налоги →</a>
 						</div>
 					</section>
+
+					{sameRoleOtherCities.length > 0 && (
+						<section class="vacancy-section vacancy-other-cities" aria-labelledby="vacancy-other-cities-title">
+							<p class="section-eyebrow">Та же вакансия, другие города</p>
+							<h2 id="vacancy-other-cities-title">Эта вакансия в&nbsp;других городах</h2>
+							<p class="vacancy-other-cities-lead">
+								Если можно работать не&nbsp;только {jobCities[0] ?? 'здесь'} — посмотрите ту&nbsp;же вакансию в&nbsp;соседних городах. Сортировка по&nbsp;доходу, чтобы&nbsp;было с&nbsp;чем сравнить.
+							</p>
+							<ul class="vacancy-other-cities-list">
+								{sameRoleOtherCities.map((other) => (
+									<li class="vacancy-other-cities-item">
+										<a class="vacancy-other-cities-link" href={`/v/${other.slug}/`}>
+											<span class="vacancy-other-cities-city" data-t={`vacancies.${other.id}.location`}>{other.location}</span>
+											<span class="vacancy-other-cities-salary" data-t={`vacancies.${other.id}.salary`}>{other.salary}</span>
+										</a>
+									</li>
+								))}
+							</ul>
+						</section>
+					)}
 				</div>
 
 				<aside class="vacancy-sidebar">
@@ -2233,6 +2265,74 @@ const pageSchemaGraph = [
 		background: rgba(22, 61, 43, 0.14);
 		transform: translateX(2px);
 		outline: none;
+	}
+
+	/* Block E: Same role in other cities — last-resort linkback for
+	 * city-agnostic visitors. Vertical list of 12 chips (city + salary)
+	 * sorted by salary desc. Uses the existing `vacancy-card` palette
+	 * for visual coherence with sibling alternatives block. */
+	.vacancy-other-cities {
+		padding: 1.75rem 1.85rem;
+		background: var(--vacancy-card);
+		border: 1px solid var(--vacancy-border);
+		border-radius: 16px;
+		box-shadow: var(--vacancy-shadow);
+		display: grid;
+		gap: 0.85rem;
+	}
+	.vacancy-other-cities h2 {
+		margin: 0;
+		font-family: var(--font-heading, 'Manrope', sans-serif);
+		font-size: clamp(1.4rem, 2.2vw, 1.75rem);
+		line-height: 1.18;
+		letter-spacing: -0.01em;
+		color: var(--vacancy-ink);
+	}
+	.vacancy-other-cities-lead {
+		margin: 0;
+		max-width: 70ch;
+		color: var(--vacancy-muted);
+		font-size: 0.95rem;
+		line-height: 1.55;
+	}
+	.vacancy-other-cities-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+		gap: 0.45rem;
+	}
+	.vacancy-other-cities-item {
+		margin: 0;
+	}
+	.vacancy-other-cities-link {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 0.6rem;
+		padding: 0.7rem 0.95rem;
+		border-radius: 10px;
+		background: var(--vacancy-soft);
+		border: 1px solid var(--vacancy-border);
+		text-decoration: none;
+		color: var(--vacancy-ink);
+		font-size: 0.92rem;
+		transition: border-color 0.18s ease, transform 0.18s ease;
+	}
+	.vacancy-other-cities-link:hover,
+	.vacancy-other-cities-link:focus-visible {
+		border-color: var(--vacancy-action);
+		transform: translateX(2px);
+		outline: none;
+	}
+	.vacancy-other-cities-city {
+		font-weight: 600;
+	}
+	.vacancy-other-cities-salary {
+		color: var(--vacancy-action);
+		font-weight: 700;
+		white-space: nowrap;
 	}
 
 	/* === SEO+AI replacement blocks: Dark mode === */
