@@ -1278,9 +1278,41 @@ const pageSchemaGraph = [
 		display: none;
 	}
 
-	/* Toolbar section — sits below the Hero, full-width inside home-shell */
+	/* Toolbar section — sits below the Hero, full-width inside home-shell.
+	 *
+	 * Sticky on desktop only: keeps the city + 3 filters glued to the
+	 * top of the viewport while the user scrolls through the JobGrid.
+	 * Reduces "fat-finger scroll-back to change filter" friction —
+	 * one of the top measured causes of bounce on category pages.
+	 *
+	 * Mobile is left in normal flow: 52px-tall controls × 2 rows would
+	 * eat ~110px of viewport, leaving too little room for the JobCard
+	 * preview underneath.
+	 *
+	 * `top` value matches the sticky <header> height on desktop (~72px:
+	 * padding 1rem × 2 + ~40px logo height). Header has z-index 100;
+	 * toolbar sits at 50 so it tucks under the header on scroll.
+	 */
 	.home-toolbar-section {
 		margin: var(--space-6) 0 var(--space-8);
+	}
+	@media (min-width: 768px) {
+		.home-toolbar-section {
+			position: sticky;
+			top: 72px;
+			z-index: 50;
+			background: rgba(255, 255, 255, 0.92);
+			-webkit-backdrop-filter: blur(10px);
+			backdrop-filter: blur(10px);
+			padding: var(--space-3) var(--space-4);
+			border-radius: var(--radius-md);
+			border: 1px solid var(--ink-150);
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+		}
+		:where(html, body).dark-mode .home-toolbar-section {
+			background: rgba(28, 30, 36, 0.92);
+			border-color: var(--ink-200);
+		}
 	}
 
 	/* Hero toolbar — k-cityrow layout (handoff): city+lang | cta | fselects */
