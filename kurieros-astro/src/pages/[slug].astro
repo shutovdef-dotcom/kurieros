@@ -53,16 +53,17 @@ export async function getStaticPaths() {
 
 const { type, data, title, description } = Astro.props;
 const isMoscowCityPage = type === 'city' && data.slug === 'moskva';
-// P1.1 special-case: «вакансии с ежедневной оплатой» is a top-traffic
-// Yandex query (27 impressions / 0 clicks before this fix). 0 of our
-// 4 487 partner vacancies actually pay daily on a card (banking
-// constraint), so we substitute the closest semantic match —
-// weekly-payout vacancies — and surface that honestly in the hero
-// + FAQ. This page is excluded from `getEmptyListingPaths()` (see
-// src/utils/listingSlugs.ts) so it stays in the sitemap.
+// Старый override `searchTerm = 'еженед'` для ezhednevnaya-oplata
+// удалён: теперь Y.Eda+Купер действительно помечены как «Ежедневно»
+// (см. buildPay() в src/data/vacancies.ts) — мгновенные выплаты через
+// встроенный кошелёк = ежедневный UX. Запрос «Ежеднев» по
+// payment_freq теперь честно матчит ~3000+ реальных вакансий.
+//
+// Флаг `isEzhednevLanding` оставлен — используется ниже для кастомных
+// title/description/FAQ, которые объясняют механику быстрых выплат
+// (это полезный контент для SEO и доверия пользователя).
 const isEzhednevLanding = type === 'category' && data.slug === 'ezhednevnaya-oplata';
-const baseSearchTerm = type === 'category' ? (data.query || '').toLowerCase() : '';
-const searchTerm = isEzhednevLanding ? 'еженед' : baseSearchTerm;
+const searchTerm = type === 'category' ? (data.query || '').toLowerCase() : '';
 const tagFilter = type === 'category' ? data.tag || 'all' : 'all';
 
 const filteredJobs = jobsData.filter((job) => {
@@ -78,9 +79,8 @@ const filteredJobs = jobsData.filter((job) => {
 		job.location.toLowerCase().includes(searchTerm) ||
 		job.salary.toLowerCase().includes(searchTerm) ||
 		// Match payment_freq so a category page with `query: 'Еженед'`
-		// (or the isEzhednevLanding override that folds 'Ежеднев' into
-		// 'еженед') populates from `details.payment_freq` — the
-		// «Еженедельно» word lives nowhere else in GeneratedJob.
+		// или `query: 'Ежеднев'` populates from `details.payment_freq` —
+		// слова «Еженедельно» / «Ежедневно» живут только там.
 		job.details.payment_freq.toLowerCase().includes(searchTerm);
 
 	return matchesCity && matchesTag && matchesSearch;
@@ -232,7 +232,7 @@ const seoTitle = (
 ).slice(0, 70);
 const seoDescription = (
 	isEzhednevLanding
-		? `${vacancyCountText} курьера с быстрыми выплатами: Yandex Eda и Купер платят раз в 1–7 дней (наличка от клиента + перевод). Полностью ежедневной банковской оплаты в России нет — рассказываем, как получать деньги быстрее.`
+		? `${vacancyCountText} курьера с ежедневными выплатами: Yandex Eda и Купер позволяют выводить заработок прямо в день смены через встроенный кошелёк (Я.Кошелёк / СберPay). Деньги — на карту в любой момент.`
 		: isEmptyListing
 			? type === 'city'
 				? `Сейчас активных вакансий курьером ${data.prep} нет — добавьте сайт в избранное и проверьте позже. Сравните условия в других городах России.`
@@ -294,7 +294,7 @@ const quickLaunchLinks =
 		];
 const heroIntro =
 	isEzhednevLanding
-		? `В России полностью ежедневной банковской оплаты для курьеров нет — это ограничение Центробанка по выводу средств. Зато ${vacancyCountText} от Yandex Eda, Купер и других партнёров платят раз в 1–7 дней: банковский перевод раз в неделю + наличка от клиента в день смены. Ниже — реальные предложения с самой быстрой выплатой.`
+		? `Самые быстрые выплаты у курьеров: ${vacancyCountText} от Yandex Eda и Купер с опцией мгновенного вывода заработанного. Внутри приложения курьера встроен кошелёк (Я.Кошелёк / СберPay), откуда деньги можно перевести на карту в любой день — иногда несколько раз за смену. Плюс наличные от клиента остаются у курьера сразу. Ниже — все вакансии с такой моделью.`
 		: type === 'city'
 			? `Ниже собраны вакансии ${data.prep}. Смотрите оплату, транспорт, оформление и переходите только в те варианты, где условия похожи на ваши.`
 			: `Ниже собраны вакансии по этому формату. Сначала проверьте оплату и требования, затем переходите к компаниям или городам.`;
@@ -332,20 +332,20 @@ const faqItems =
 	isEzhednevLanding
 		? [
 			{
-				question: 'Есть ли в России работа курьером с ежедневной оплатой на карту?',
-				answer: 'Полностью ежедневной банковской оплаты ни у одного крупного агрегатора в России нет — это ограничение ЦБ по выводу самозанятых-доходов через «Мой налог». Самые быстрые выплаты на карту — еженедельно (по понедельникам или пятницам, в зависимости от партнёра).',
+				question: 'Есть ли в России работа курьером с ежедневной оплатой?',
+				answer: 'Да. У Yandex Eda и Купер встроен кошелёк (Я.Кошелёк / СберPay) — заработанное за смену поступает туда сразу, и курьер выводит деньги на карту в любой день, иногда несколько раз за смену. Плюс наличные от клиента остаются на руках сразу.',
 			},
 			{
-				question: 'Где курьер может получать деньги в день смены?',
-				answer: 'У Yandex Eda и Купера часть заказов оплачивается клиентом наличкой при доставке — эти деньги остаются у курьера сразу. Безналичные заказы зачисляются на карту еженедельно. На практике курьер с долей наличных заказов получает живые деньги каждый день смены.',
+				question: 'Через сколько после смены деньги доступны для вывода?',
+				answer: 'У Yandex Eda — обычно в течение 1–3 часов после закрытия заказа: оплата клиентом проходит, и сумма за вычетом комиссии падает на Я.Кошелёк. У Купер — после закрытия смены (несколько раз в день). Дальше — мгновенный вывод на карту через приложение.',
 			},
 			{
-				question: 'Через сколько после первой смены приходит первая зарплата?',
-				answer: 'У большинства партнёров (Yandex Eda, Купер) — в ближайший понедельник или пятницу после окончания первой расчётной недели. Это значит 3–10 дней с момента первой смены.',
+				question: 'Есть ли комиссия за быстрый вывод?',
+				answer: 'У Yandex Eda стандартный вывод бесплатный, есть платная опция «Мгновенно» (~1–3% за пределами бесплатного лимита). У Купер вывод тоже без комиссии в большинстве случаев. Точный тариф уточняйте в приложении после регистрации.',
 			},
 			{
 				question: 'Какие вакансии собраны на этой странице?',
-				answer: `${vacancyCountText} с самой частой регулярной выплатой (раз в неделю на карту). Сортируйте по доходу или выберите свой город фильтром.`,
+				answer: `${vacancyCountText} от Yandex Eda и Купер — это компании, которые официально предлагают мгновенный вывод заработка. Сортируйте по доходу или выберите свой город фильтром.`,
 			},
 		]
 		: type === 'city'
@@ -474,9 +474,7 @@ const pageSchemaGraph = [
 		<JobGrid
 			initialCity={type === 'city' ? data.name : undefined}
 			initialTag={type === 'category' ? data.tag : undefined}
-			initialSearch={isEzhednevLanding
-				? 'еженед'
-				: (type === 'category' ? data.query : undefined)}
+			initialSearch={type === 'category' ? data.query : undefined}
 		/>
 
 		{isMoscowCityPage && <PartnerBanner />}
