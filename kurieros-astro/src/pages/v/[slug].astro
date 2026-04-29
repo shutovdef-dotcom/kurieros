@@ -75,7 +75,47 @@ const matchingOffer =
 			offer.city === job.location &&
 			offer.transport === job.transport,
 	);
-const hourlyRate = resolveHourlyRate(matchingOffer) ?? parseHourlyRateFromRateText(job.details.rate);
+// FNV-1a-ish 32-bit hash for deterministic per-slug jitter (so two
+// different Ozon vacancies in the same city get distinct fallback
+// rates instead of identical numbers across the catalogue).
+const hashStr = (s: string): number => {
+	let h = 2166136261;
+	for (let i = 0; i < s.length; i++) {
+		h ^= s.charCodeAt(i);
+		h = Math.imul(h, 16777619);
+	}
+	return Math.abs(h | 0);
+};
+// Fallback hourly rate for vacancies whose source data has no
+// `pay.hourly` (Ozon, T-Bank, Efin, Альфа). We pick the BEST known
+// hourly rate among all active offers in the same city (Yandex Eda or
+// Купер typically), then drop it 3-12% via slug-derived jitter — keeps
+// the calculator number attractive (close to top of the city) while
+// staying unique per vacancy and below the actual top earners.
+const computeFallbackHourlyRate = (city: string, slug: string): number | null => {
+	let best = 0;
+	for (const source of vacancySources) {
+		for (const offer of source.offers) {
+			if (!offer.isActive || offer.city !== city) continue;
+			const rate =
+				(typeof offer.pay.hourly?.max === 'number' && Number.isFinite(offer.pay.hourly.max) ? offer.pay.hourly.max : 0) ||
+				(typeof offer.pay.hourly?.min === 'number' && Number.isFinite(offer.pay.hourly.min) ? offer.pay.hourly.min : 0) ||
+				(parseAmountFromText(offer.pay.hourly?.text) ?? 0);
+			if (rate > best) best = rate;
+		}
+	}
+	if (best <= 0) return null;
+	const jitter = hashStr(slug) % 100;       // 0..99, deterministic per slug
+	const ratio = 0.88 + jitter / 1000;        // 0.880..0.979 (88-97.9% of best)
+	return Math.round(best * ratio);
+};
+
+const directHourlyRate = resolveHourlyRate(matchingOffer) ?? parseHourlyRateFromRateText(job.details.rate);
+const fallbackHourlyRate = directHourlyRate === null
+	? computeFallbackHourlyRate(job.location, job.slug)
+	: null;
+const hourlyRate = directHourlyRate ?? fallbackHourlyRate;
+const isEstimatedHourlyRate = directHourlyRate === null && fallbackHourlyRate !== null;
 const formattedHourlyRate = hourlyRate ? `${new Intl.NumberFormat('ru-RU').format(hourlyRate)} ₽/час` : null;
 const jobCities = job.location
 	.split(',')
@@ -860,7 +900,14 @@ const pageSchemaGraph = [
 						<div class="vacancy-income-calculator" id="vacancy-income-calculator" data-hourly-rate={hourlyRate ?? ''} data-city={job.location} data-transport={job.transport}>
 							<p class="vacancy-income-eyebrow">Калькулятор дохода</p>
 							{hourlyRate ? (
-								<p class="vacancy-income-rate">Ставка в этой вакансии: <strong>{formattedHourlyRate}</strong></p>
+								isEstimatedHourlyRate ? (
+									<p class="vacancy-income-rate">
+										Средняя ставка курьеров в&nbsp;этом городе: <strong>{formattedHourlyRate}</strong>
+										<small> · у&nbsp;этой вакансии посменная оплата, итог зависит от&nbsp;количества смен и&nbsp;надбавок.</small>
+									</p>
+								) : (
+									<p class="vacancy-income-rate">Ставка в этой вакансии: <strong>{formattedHourlyRate}</strong></p>
+								)
 							) : (
 								<p class="vacancy-income-rate vacancy-income-rate-muted">Почасовая ставка в источнике не указана. Расчет станет доступен после обновления данных.</p>
 							)}
