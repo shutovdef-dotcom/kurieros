@@ -1301,6 +1301,58 @@ export const vacancySources = [
     isHot: true,
   },
   // Ozon — 5 sources (id 10..14), one per backend slug. Generated in
-  // ./ozonOffers.ts from the live form catalogue.
+  // ./ozonOffers.ts from the live form catalogue. Their offers carry a
+  // placeholder `pay: { monthly: { min, text: 'от N ₽/мес' } }` because
+  // Ozon's ref-form publishes only shift rates, not bank-card hourlies.
+  // We post-process them below so each Ozon offer in a city where
+  // Y.Eda or Купер publishes a real hourly rate gets a buildPay()-built
+  // pay object with a comparable «до X ₽/мес» salary tag and an
+  // hourly used by the income calculator. Cities without Y.Eda/Купер
+  // data (rare — Истра, Подольск, etc.) keep the «от N ₽/мес» template.
   ...ozonVacancySources,
 ] satisfies VacancySource[];
+
+// === Ozon hourly fallback ============================================
+// Hash for deterministic per-(slug,city,transport) jitter — keeps two
+// Ozon vacancies in the same city visually distinct (e.g. Москва
+// Operator, Goods Handler, Courier all get different numbers within
+// 88-98% of the city's best Y.Eda/Купер rate).
+const _hashStr = (s: string): number => {
+	let h = 2166136261;
+	for (let i = 0; i < s.length; i++) {
+		h ^= s.charCodeAt(i);
+		h = Math.imul(h, 16777619);
+	}
+	return Math.abs(h | 0);
+};
+
+const _cityBestHourly = new Map<string, number>();
+for (const source of vacancySources) {
+	if (source.slug.startsWith('ozon-')) continue;
+	for (const offer of source.offers) {
+		if (!offer.isActive) continue;
+		const rate =
+			(typeof offer.pay.hourly?.max === 'number' && Number.isFinite(offer.pay.hourly.max) ? offer.pay.hourly.max : 0) ||
+			(typeof offer.pay.hourly?.min === 'number' && Number.isFinite(offer.pay.hourly.min) ? offer.pay.hourly.min : 0);
+		if (rate > (_cityBestHourly.get(offer.city) ?? 0)) {
+			_cityBestHourly.set(offer.city, rate);
+		}
+	}
+}
+
+for (const source of vacancySources) {
+	if (!source.slug.startsWith('ozon-')) continue;
+	source.offers = source.offers.map((offer) => {
+		if (offer.pay.hourly) return offer;
+		const best = _cityBestHourly.get(offer.city);
+		if (!best) return offer;
+		const jitterKey = `${source.slug}-${offer.city}-${offer.transport}`;
+		const jitter = _hashStr(jitterKey) % 100;        // 0..99
+		const ratio = 0.88 + jitter / 1000;               // 0.880..0.979
+		const fallbackHourly = Math.round(best * ratio);
+		return {
+			...offer,
+			pay: buildPay(fallbackHourly),
+		};
+	});
+}
