@@ -183,11 +183,38 @@ const benefitClause = benefitHooks.length
 // long-named companies (e.g. «Купер (ex. СберМаркет)») don't get
 // truncated mid-word at the 170-char SERP limit.
 const companyShortName = job.company.replace(/\s*\(.+?\)\s*$/, '').trim() || job.company;
+
+// «Сравните с X, Y» — single phrase that differentiates kurerok.ru from
+// official company sites for brand-query traffic. GSC показывает 59
+// показов / 0 кликов на «яндекс курьер работа» — пользователь идёт
+// напрямую на yandex.ru/eda и пропускает агрегатор. Эта фраза в
+// description-сниппете говорит SERP-юзеру что у нас он получит
+// СРАВНЕНИЕ нескольких компаний — то, чего нет на официальном сайте.
+//
+// Filter: skip the brand whose alias appears in `job.company`. Need
+// alias matching because actual `job.company` strings вперемешку:
+// «Яндекс Еда» (Cyrillic), «Купер (ex. СберМаркет)», «Ozon» (Latin).
+const COMPARISON_BRANDS: Array<{ display: string; aliases: string[] }> = [
+	{ display: 'Яндекс.Еда', aliases: ['яндекс еда', 'yandex eda', 'я.еда', 'яндекс.еда'] },
+	{ display: 'Купер',      aliases: ['купер', 'kuper', 'сбермаркет'] },
+	{ display: 'Ozon',       aliases: ['ozon', 'озон'] },
+	{ display: 'Самокат',    aliases: ['самокат', 'samokat'] },
+];
+const comparisonAlternatives = COMPARISON_BRANDS.filter((brand) => {
+	const lowerCompany = job.company.toLowerCase();
+	return !brand.aliases.some((alias) => lowerCompany.includes(alias));
+})
+	.slice(0, 2)
+	.map((brand) => brand.display);
+const comparisonClause = comparisonAlternatives.length
+	? `На kurerok.ru сравните с ${comparisonAlternatives.join(', ')}. `
+	: '';
+
 const buildVacancyDescription = (withBenefits: boolean): string =>
 	[
 		`${job.salary} • ${job.details.schedule.toLowerCase()} • ${job.details.payment_freq.toLowerCase()}.`,
 		`${job.title}.`,
-		`${withBenefits ? benefitClause : ''}Заявка через kurerok.ru — ${companyShortName} перезвонит сегодня.`,
+		`${withBenefits ? benefitClause : ''}${comparisonClause}${companyShortName} перезвонит сегодня.`,
 	].join(' ');
 // Word-boundary trim: never cut a description mid-word at 170. If the
 // 170-char window lands inside a word, step back to the previous space
