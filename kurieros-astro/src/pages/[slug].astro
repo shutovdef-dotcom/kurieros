@@ -239,8 +239,8 @@ const seoDescription = (
 				: `Сейчас активных вакансий по формату «${data.name}» нет — следите за обновлениями. Посмотрите похожие подборки на главной.`
 			: type === 'city'
 				? formattedMaxSalary
-					? `${vacancyCountText} курьером ${data.prep}: доход до ${formattedMaxSalary} ₽/мес от ${companyNames.length} проверенных компаний (${companyNames.slice(0, 2).join(', ') || 'Y.Eda, Купер'}). Выплаты ${paymentTypes.slice(0, 2).join(' / ').toLowerCase() || 'еженедельно'} — отклик за 1 минуту.`
-					: `Работа курьером ${data.prep} 2026: ${vacancyCountText} от ${companyNames.length} компаний. Доход, выплаты ${paymentTypes.slice(0, 2).join(' / ').toLowerCase() || 'уточняются'}, форматы ${transportTypes.join(', ').toLowerCase() || 'разные'}.`
+					? `${vacancyCountText} курьером ${data.prep} от прямых работодателей: ${companyNames.slice(0, 2).join(', ') || 'Y.Eda, Купер'}. Доход до ${formattedMaxSalary} ₽/мес. Выплаты ${paymentTypes.slice(0, 2).join(' / ').toLowerCase() || 'еженедельно'}. Свежие данные сегодня.`
+					: `Свежие ${vacancyCountText} курьером ${data.prep} от прямых работодателей: ${companyNames.length} компаний. Выплаты ${paymentTypes.slice(0, 2).join(' / ').toLowerCase() || 'уточняются'}, форматы ${transportTypes.join(', ').toLowerCase() || 'разные'}.`
 				: formattedMaxSalary
 					? `${vacancyCountText} «${data.name}» — доход до ${formattedMaxSalary} ₽/мес. ${companyNames.length} компаний, выплаты ${paymentTypes.slice(0, 2).join(' / ').toLowerCase() || 'регулярные'}. Сравните условия и подайте заявку.`
 					: `Курьер ${data.name.toLowerCase()} 2026: ${vacancyCountText} от ${companyNames.length} компаний. Сравните выплаты, требования и оформление до отклика.`
@@ -353,6 +353,14 @@ const faqItems =
 				{
 					question: `Какие вакансии курьера есть ${data.prep}?`,
 					answer: `На этой странице собраны ${filteredJobs.length} вакансий от ${companyNames.length} компаний. В подборке есть форматы ${transportTypes.join(', ').toLowerCase() || 'с разными типами занятости'} и разные графики работы.`,
+				},
+				{
+					question: 'Это вакансии от прямых работодателей или агрегатора?',
+					answer: `Все ${filteredJobs.length} вакансий ${data.prep} — от прямых работодателей: ${companyNames.slice(0, 3).join(', ') || 'Yandex Eda, Купер, Озон'}. Мы передаём вашу заявку напрямую в HR компании, без посредников. Звонок придёт от самой компании в день подачи заявки.`,
+				},
+				{
+					question: `Свежие ли это вакансии ${data.prep}?`,
+					answer: `Да. Каталог обновляется ежедневно: мы синхронизируемся с реферальными формами Yandex Eda, Купер, Озон и партнёров каждое утро. На карточке каждой вакансии видна дата последнего обновления.`,
 				},
 				{
 					question: `Кому подходит работа курьером ${data.prep}?`,
