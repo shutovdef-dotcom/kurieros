@@ -213,6 +213,24 @@ const maxSalary = filteredJobs.reduce((acc, job) => {
 const formattedMaxSalary = maxSalary > 0 ? formatMoney(maxSalary) : null;
 const vacancyCountText = `${filteredJobs.length} ${getVacancyPluralText(filteredJobs.length)}`;
 
+// Some categories ship with `name` that ALREADY embeds the «Курьер»
+// or «Работа курьером» prefix (constants.ts: «Курьер 16 лет», «Курьер
+// 18 лет», «Работа курьером женщине»). When such a name is composed
+// into a title that ALSO leads with «Курьер … » or «Работа курьером
+// … », the prefix duplicates → «Курьер курьер 16 лет — до 259 560 ₽».
+// `cleanCategoryName` strips that leading prefix once so the
+// composing template can safely prepend its own without doubling.
+// Categories without the prefix («На авто», «Подработка», …) stay
+// unchanged. Falls back to the original `data.name` if the strip
+// would yield an empty string (defensive).
+const cleanCategoryName =
+	type === 'category'
+		? data.name
+				.replace(/^Работа курьером\s*/i, '')
+				.replace(/^Курьер\s*/i, '')
+				.trim() || data.name
+		: '';
+
 const seoTitle = (
 	isEzhednevLanding
 		? formattedMaxSalary
@@ -221,14 +239,14 @@ const seoTitle = (
 		: isEmptyListing
 			? type === 'city'
 				? `Работа курьером ${data.prep} — следите за обновлениями | КурьерОк`
-				: `Работа курьером (${data.name.toLowerCase()}) — следите за обновлениями | КурьерОк`
+				: `Работа курьером (${cleanCategoryName.toLowerCase()}) — следите за обновлениями | КурьерОк`
 			: type === 'city'
 				? formattedMaxSalary
 					? `Курьер ${data.prep} — до ${formattedMaxSalary} ₽/мес · ${vacancyCountText} | КурьерОк`
 					: `Работа курьером ${data.prep} 2026: ${vacancyCountText} | КурьерОк`
 				: formattedMaxSalary
-					? `Курьер ${data.name.toLowerCase()} — до ${formattedMaxSalary} ₽/мес · ${vacancyCountText} | КурьерОк`
-					: `Работа курьером ${data.name.toLowerCase()} 2026: ${vacancyCountText} | КурьерОк`
+					? `Курьер ${cleanCategoryName.toLowerCase()} — до ${formattedMaxSalary} ₽/мес · ${vacancyCountText} | КурьерОк`
+					: `Работа курьером ${cleanCategoryName.toLowerCase()} 2026: ${vacancyCountText} | КурьерОк`
 ).slice(0, 70);
 const seoDescription = (
 	isEzhednevLanding
@@ -243,7 +261,7 @@ const seoDescription = (
 					: `Работа курьером ${data.prep} 2026: ${vacancyCountText} от ${companyNames.length} компаний. Доход, выплаты ${paymentTypes.slice(0, 2).join(' / ').toLowerCase() || 'уточняются'}, форматы ${transportTypes.join(', ').toLowerCase() || 'разные'}.`
 				: formattedMaxSalary
 					? `${vacancyCountText} «${data.name}» — доход до ${formattedMaxSalary} ₽/мес. ${companyNames.length} компаний, выплаты ${paymentTypes.slice(0, 2).join(' / ').toLowerCase() || 'регулярные'}. Сравните условия и подайте заявку.`
-					: `Курьер ${data.name.toLowerCase()} 2026: ${vacancyCountText} от ${companyNames.length} компаний. Сравните выплаты, требования и оформление до отклика.`
+					: `Курьер ${cleanCategoryName.toLowerCase()} 2026: ${vacancyCountText} от ${companyNames.length} компаний. Сравните выплаты, требования и оформление до отклика.`
 ).slice(0, 170);
 const relatedArticles = articlesData
 	.filter((article) => {
