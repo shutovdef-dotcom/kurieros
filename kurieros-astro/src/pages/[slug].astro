@@ -203,6 +203,25 @@ const updatedDate = new Intl.DateTimeFormat('ru-RU', {
 // content. We also drop them from the sitemap (see astro.config.mjs).
 const isEmptyListing = filteredJobs.length === 0;
 
+// «Соседние города» — exit-ramp для search-визитёров. GSC report
+// (2026-05-03) показал: page_depth Метрики 2.49 → 1.62, avg session
+// 5:04 → 2:32. Юзер приходит на small-city из long-tail, видит
+// JobGrid и УХОДИТ — нет «куда ещё кликнуть». Этот блок даёт топ-12
+// городов с наибольшим числом вакансий как явный «следующий шаг»
+// сразу под JobGrid. Только для type='city' — на категории не нужен.
+const nearbyCityLinks =
+	type === 'city'
+		? getCitiesFromJobs(jobsData)
+				.filter((city) => city.slug !== data.slug)
+				.sort((a, b) => b.vacancyCount - a.vacancyCount)
+				.slice(0, 12)
+				.map((city) => ({
+					name: city.name,
+					slug: city.slug,
+					vacancyCount: city.vacancyCount,
+				}))
+		: [];
+
 // P1: max salary across the matched listings — used in title/description to
 // make the snippet more clickable in search results (cheaper-than-rewrite
 // because the number lives directly in the SERP and beats a generic count).
@@ -502,6 +521,28 @@ const pageSchemaGraph = [
 			initialTag={type === 'category' ? data.tag : undefined}
 			initialSearch={type === 'category' ? data.query : undefined}
 		/>
+
+		{nearbyCityLinks.length > 0 && (
+			<section class="nearby-cities" aria-labelledby="nearby-cities-title">
+				<h2 id="nearby-cities-title" class="nearby-cities-title">Не нашли подходящее? Соседние города</h2>
+				<p class="nearby-cities-lead">
+					Те же компании (Yandex Eda, Купер, Озон, Самокат) работают в&nbsp;{nearbyCityLinks.length} крупнейших городах России. Перейдите в&nbsp;любой и&nbsp;посмотрите тарифы, выплаты и&nbsp;условия — вакансии одинаково «свежие, от&nbsp;прямых работодателей».
+				</p>
+				<ul class="nearby-cities-list">
+					{nearbyCityLinks.map((city) => (
+						<li class="nearby-cities-item">
+							<a class="nearby-cities-link" href={`/rabota-kurerom-${city.slug}/`}>
+								<span class="nearby-cities-name">{city.name}</span>
+								<span class="nearby-cities-count">{city.vacancyCount}&nbsp;{getVacancyPluralText(city.vacancyCount)}</span>
+							</a>
+						</li>
+					))}
+				</ul>
+				<p class="nearby-cities-footer">
+					<a href="/cities/" class="nearby-cities-all-link">Все&nbsp;города&nbsp;→</a>
+				</p>
+			</section>
+		)}
 
 		{isMoscowCityPage && <PartnerBanner />}
 	</main>
@@ -1090,5 +1131,117 @@ const pageSchemaGraph = [
 	:where(html, body).dark-mode .listing-faq-item p,
 	:where(html, body).dark-mode .listing-fact-card span {
 		color: var(--ink-600);
+	}
+
+	/* === Nearby cities — exit-ramp ===================================
+	 * P2 fix (analytics report 2026-05-03): page_depth dropped 2.49 →
+	 * 1.62 because search visitors landed on city pages and bounced.
+	 * This block — rendered ONLY for type='city' below the JobGrid —
+	 * gives a clear «next step» to other large cities. Visual style
+	 * matches the existing «alternatives» block on /v/<slug>/ pages
+	 * for consistency.
+	 */
+	.nearby-cities {
+		max-width: 1180px;
+		margin: 2rem auto 1.5rem;
+		padding: 1.75rem 1.85rem;
+		background: var(--bg-card, #ffffff);
+		border: 1px solid var(--ink-200, #d4dae3);
+		border-radius: 16px;
+		box-shadow: var(--shadow-sm);
+		display: grid;
+		gap: 0.85rem;
+	}
+	.nearby-cities-title {
+		margin: 0;
+		font-family: var(--font-heading, 'Manrope', sans-serif);
+		font-size: clamp(1.4rem, 2.2vw, 1.75rem);
+		line-height: 1.18;
+		letter-spacing: -0.01em;
+		color: var(--ink-900, #0f172a);
+	}
+	.nearby-cities-lead {
+		margin: 0;
+		max-width: 70ch;
+		color: var(--ink-600, #687284);
+		font-size: 0.95rem;
+		line-height: 1.55;
+	}
+	.nearby-cities-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+		gap: 0.45rem;
+	}
+	.nearby-cities-item {
+		margin: 0;
+	}
+	.nearby-cities-link {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 0.6rem;
+		padding: 0.7rem 0.95rem;
+		border-radius: 10px;
+		background: rgba(232, 246, 230, 0.55);
+		border: 1px solid rgba(22, 115, 76, 0.16);
+		text-decoration: none;
+		color: var(--ink-900, #0f172a);
+		font-size: 0.92rem;
+		transition: border-color 0.18s ease, transform 0.18s ease, background 0.18s ease;
+	}
+	.nearby-cities-link:hover,
+	.nearby-cities-link:focus-visible {
+		border-color: var(--brand-700, #16734c);
+		background: rgba(232, 246, 230, 0.9);
+		transform: translateX(2px);
+		outline: none;
+	}
+	.nearby-cities-name {
+		font-weight: 600;
+	}
+	.nearby-cities-count {
+		color: var(--brand-700, #16734c);
+		font-weight: 700;
+		white-space: nowrap;
+		font-size: 0.85rem;
+	}
+	.nearby-cities-footer {
+		margin: 0.5rem 0 0;
+	}
+	.nearby-cities-all-link {
+		color: var(--brand-700, #16734c);
+		font-weight: 700;
+		text-decoration: none;
+		font-size: 0.92rem;
+	}
+	.nearby-cities-all-link:hover,
+	.nearby-cities-all-link:focus-visible {
+		text-decoration: underline;
+		outline: none;
+	}
+
+	:where(html, body).dark-mode .nearby-cities {
+		background: var(--ink-100);
+		border-color: var(--ink-200);
+	}
+	:where(html, body).dark-mode .nearby-cities-link {
+		background: rgba(20, 32, 48, 0.65);
+		border-color: rgba(195, 204, 216, 0.18);
+		color: var(--ink-900);
+	}
+	:where(html, body).dark-mode .nearby-cities-link:hover,
+	:where(html, body).dark-mode .nearby-cities-link:focus-visible {
+		background: rgba(20, 32, 48, 0.85);
+		border-color: rgba(76, 175, 128, 0.6);
+	}
+	:where(html, body).dark-mode .nearby-cities-lead {
+		color: rgba(231, 234, 240, 0.7);
+	}
+	:where(html, body).dark-mode .nearby-cities-count,
+	:where(html, body).dark-mode .nearby-cities-all-link {
+		color: #4caf80;
 	}
 </style>
