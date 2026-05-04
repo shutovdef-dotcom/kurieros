@@ -7,71 +7,102 @@ Disallow: /search/
 
 User-agent: GPTBot
 Allow: /
+Disallow: /*?owner-
 User-agent: OAI-SearchBot
 Allow: /
+Disallow: /*?owner-
 User-agent: ChatGPT-User
 Allow: /
+Disallow: /*?owner-
 
 User-agent: ClaudeBot
 Allow: /
+Disallow: /*?owner-
 User-agent: Claude-SearchBot
 Allow: /
+Disallow: /*?owner-
 User-agent: Claude-User
 Allow: /
+Disallow: /*?owner-
 
 User-agent: PerplexityBot
 Allow: /
+Disallow: /*?owner-
 User-agent: Perplexity-User
 Allow: /
+Disallow: /*?owner-
 
 User-agent: Googlebot
 Allow: /
+Disallow: /*?owner-
 User-agent: GoogleOther
 Allow: /
+Disallow: /*?owner-
 User-agent: Google-Extended
 Allow: /
+Disallow: /*?owner-
 
 User-agent: Yandex
 Allow: /
+Disallow: /*?owner-
+Clean-param: owner-mute&owner-unmute /
 User-agent: YandexBot
 Allow: /
+Disallow: /*?owner-
 User-agent: YandexAdditionalBot
 Allow: /
+Disallow: /*?owner-
 
 User-agent: Bingbot
 Allow: /
+Disallow: /*?owner-
 User-agent: Slurp
 Allow: /
+Disallow: /*?owner-
 User-agent: DuckDuckBot
 Allow: /
+Disallow: /*?owner-
 User-agent: facebookexternalhit
 Allow: /
+Disallow: /*?owner-
 User-agent: Twitterbot
 Allow: /
+Disallow: /*?owner-
 User-agent: LinkedInBot
 Allow: /
+Disallow: /*?owner-
 User-agent: Applebot
 Allow: /
+Disallow: /*?owner-
 
 User-agent: Mistral
 Allow: /
+Disallow: /*?owner-
 User-agent: Bytespider
 Allow: /
+Disallow: /*?owner-
 User-agent: CCBot
 Allow: /
+Disallow: /*?owner-
 User-agent: cohere-ai
 Allow: /
+Disallow: /*?owner-
 User-agent: Diffbot
 Allow: /
+Disallow: /*?owner-
 
 User-agent: AhrefsBot
 Crawl-delay: 10
+Disallow: /*?owner-
 User-agent: SemrushBot
 Crawl-delay: 10
+Disallow: /*?owner-
 User-agent: MJ12bot
 Crawl-delay: 10
+Disallow: /*?owner-
 User-agent: DotBot
 Crawl-delay: 10
+Disallow: /*?owner-
 
 Sitemap: https://kurerok.ru/sitemap-index.xml
 
