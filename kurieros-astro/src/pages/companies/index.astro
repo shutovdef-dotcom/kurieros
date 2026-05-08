@@ -7,6 +7,7 @@ import jobsData from '../../data/jobs';
 import reviewsData from '../../data/reviews.json';
 import { getCompaniesFromJobs } from '../../utils/companies';
 import { getCitiesFromJobs } from '../../utils/cities';
+import { formatRussianPlural } from '../../utils/format';
 import { buildBreadcrumbSchema } from '../../utils/schema';
 
 const companies = getCompaniesFromJobs(jobsData, reviewsData)
@@ -148,7 +149,7 @@ const pageSchemaGraph = [
               <img src={company.logo} alt={company.name} />
             </div>
             <h2>{company.name}</h2>
-            <p class="company-meta"><strong>{company.vacancyCount}</strong> <span data-t="companies.active_vacancies">активных вакансий</span></p>
+            <p class="company-meta"><strong>{company.vacancyCount}</strong> <span data-t="companies.active_vacancies">{formatRussianPlural(company.vacancyCount, ['активная вакансия', 'активные вакансии', 'активных вакансий'])}</span></p>
             <p class="company-snippet">{company.shortIntro}</p>
           </article>
         );

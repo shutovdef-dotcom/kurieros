@@ -6,6 +6,7 @@ import jobsData from '../data/jobs';
 import { CATEGORIES } from '../data/constants';
 import { getCitiesFromJobs } from '../utils/cities';
 import { getCompaniesFromJobs } from '../utils/companies';
+import { formatRussianPlural } from '../utils/format';
 import { buildBreadcrumbSchema } from '../utils/schema';
 
 // Match the city-selector dropdown ordering (utils/cities.ts:
@@ -63,26 +64,29 @@ const citySnapshots = topCities.map((city) => {
 	};
 });
 
+// Both helpers now delegate to the shared `formatRussianPlural` from
+// src/utils/format.ts. The vacancy variant additionally returns an
+// i18n key so the city-tile template can data-t the count for non-RU
+// locales — that key shape is preserved.
 const getVacancyPlural = (count: number) => {
-	const mod10 = count % 10;
-	const mod100 = count % 100;
-	if (mod10 === 1 && mod100 !== 11) return { text: 'вакансия', key: 'cities.vacancies_1' };
-	if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return { text: 'вакансии', key: 'cities.vacancies_2' };
-	return { text: 'вакансий', key: 'cities.vacancies_5' };
+	const text = formatRussianPlural(count, ['вакансия', 'вакансии', 'вакансий']);
+	const key =
+		text === 'вакансия' ? 'cities.vacancies_1'
+		: text === 'вакансии' ? 'cities.vacancies_2'
+		: 'cities.vacancies_5';
+	return { text, key };
 };
 
-const getCompanyPlural = (count: number) => {
-	const mod10 = count % 10;
-	const mod100 = count % 100;
-	if (mod10 === 1 && mod100 !== 11) return 'компания';
-	if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'компании';
-	return 'компаний';
-};
+const getCompanyPlural = (count: number) =>
+	formatRussianPlural(count, ['компания', 'компании', 'компаний']);
+
+const getCityPlural = (count: number) =>
+	formatRussianPlural(count, ['город', 'города', 'городов']);
 
 const faqItems = [
 	{
 		question: 'Что есть на странице городов?',
-		answer: `На странице собраны ${cities.length} городов, где уже есть ${totalVacancies} ${getVacancyPlural(totalVacancies).text} курьеров. Это стартовая навигационная точка для перехода в локальные подборки.`,
+		answer: `На странице собраны ${cities.length} ${getCityPlural(cities.length)}, где уже есть ${totalVacancies} ${getVacancyPlural(totalVacancies).text} курьеров. Это стартовая навигационная точка для перехода в локальные подборки.`,
 	},
 	{
 		question: 'Какой следующий шаг после выбора города?',
