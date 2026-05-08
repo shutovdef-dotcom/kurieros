@@ -155,11 +155,11 @@ const TRANSPORT_PRIORITY: Record<TransportMode, number> = {
   auto: 3,
 };
 
-// Temporary fast-mode for local iteration:
-// keep ~2% of offers active to speed up builds while UI/content is in flux.
-const LIGHT_MODE_ENABLED = false;
-const LIGHT_MODE_KEEP_PERCENT = 2;
-const LIGHT_MODE_STRIDE = Math.max(1, Math.round(100 / LIGHT_MODE_KEEP_PERCENT));
+// Was a dev-iteration toggle (`LIGHT_MODE_*`) that subsampled offers
+// to speed up local builds. Removed — the site is a CPA-referral
+// aggregator with no concept of «inactive» vacancies (every offer
+// goes to a partner referral link), so all generated offers are
+// uniformly `isActive: true`.
 
 const YANDEX_EDA_EMPLOYMENT_FORMATS = ['gph', 'self_employed'] satisfies EmploymentFormat[];
 
@@ -440,15 +440,14 @@ const createOffer = (
   cityIndex: number,
 ): VacancyOffer => {
   const hourly = cityRate.rates[transport];
-  const transportIndex = TRANSPORT_MODES.indexOf(transport);
-  const flatOfferIndex = cityIndex * TRANSPORT_MODES.length + transportIndex;
-  const isOfferActive = !LIGHT_MODE_ENABLED || flatOfferIndex % LIGHT_MODE_STRIDE === 0;
 
   return {
     city: cityRate.city,
     transport,
     pay: buildPay(hourly),
-    isActive: isOfferActive,
+    // Always-active per CPA-aggregator policy (PR #C3 — no concept
+    // of disabled vacancies on this site).
+    isActive: true,
     updatedAt: UPDATED_AT,
     sourceUrl: YANDEX_EDA_PAY_SOURCE_URL,
     salaryConfidence: 'partner',
@@ -814,7 +813,9 @@ const tBankOperatorOffers = tBankVacancies.operatorB2B.offers.map((offer, cityIn
     transport: 'remote',
     transportProvision: 'not_required',
     pay: buildTBankPay(incomeRange.min, incomeRange.max),
-    isActive: offer.hiringActive ?? true,
+    // Always-active per CPA-aggregator policy. The `hiringActive`
+    // field on the JSON source is now ignored.
+    isActive: true,
     updatedAt: tBankVacancies.updatedAt,
     sourceUrl: tBankVacancies.sourceUrl,
     salaryConfidence: 'partner',
@@ -838,7 +839,8 @@ const tBankRepresentativeOffers = tBankVacancies.representative.offers.map((offe
     city: offer.city,
     transport,
     pay: buildTBankPay(incomeRange.min, incomeRange.max),
-    isActive: offer.hiringActive ?? true,
+    // Always-active per CPA-aggregator policy.
+    isActive: true,
     updatedAt: tBankVacancies.updatedAt,
     sourceUrl: tBankVacancies.sourceUrl,
     salaryConfidence: 'partner',

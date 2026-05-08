@@ -387,17 +387,13 @@ type HowToStep = { name: string; text: string };
 const buildHowToSteps = (): HowToStep[] => {
 	const steps: HowToStep[] = [];
 
-	steps.push(
-		hasApplyLink
-			? {
-					name: `Заполните анкету на сайте ${job.company}`,
-					text: `Перейдите по кнопке отклика в карточке. Укажите контакты, город${jobCities[0] ? ` (${jobCities[0]})` : ''}, удобный формат смен и подтвердите согласие на обработку данных.`,
-				}
-			: {
-					name: 'Уточните условия через страницу контактов',
-					text: 'Прямой ссылки на отклик пока нет — оставьте заявку через контакты, мы подскажем актуальные условия и подключим к работодателю.',
-				},
-	);
+	// Disabled-vacancy HowTo branch removed per C3 — every vacancy has a
+	// real applyLink so we always render the «Fill in the partner form»
+	// step.
+	steps.push({
+		name: `Заполните анкету на сайте ${job.company}`,
+		text: `Перейдите по кнопке отклика в карточке. Укажите контакты, город${jobCities[0] ? ` (${jobCities[0]})` : ''}, удобный формат смен и подтвердите согласие на обработку данных.`,
+	});
 
 	if (isBankRepresentativeRole) {
 		steps.push({
@@ -462,11 +458,9 @@ const quickFactSummary = (() => {
 	) {
 		parts.push(`Транспорт: ${job.details.transport_provision.toLowerCase()}.`);
 	}
-	parts.push(
-		hasApplyLink
-			? 'Откликнуться можно сразу — кнопка ведёт на сайт работодателя.'
-			: 'Условия уточняются через страницу контактов.',
-	);
+	// Disabled-vacancy summary branch removed per C3 — every vacancy
+	// has a real applyLink, so the message is unconditional.
+	parts.push('Откликнуться можно сразу — кнопка ведёт на сайт работодателя.');
 	return parts.join(' ');
 })();
 
@@ -645,7 +639,7 @@ const pageSchemaGraph = [
 							>
 								Откликнуться через нас
 						</button>
-					) : hasApplyLink ? (
+					) : (
 						<a
 							href={job.applyLink}
 							target="_blank"
@@ -662,12 +656,11 @@ const pageSchemaGraph = [
 						>
 							Откликнуться сейчас
 						</a>
-					) : (
-						<a href="/contacts/" class="apply-btn-large apply-btn-hero apply-btn-disabled" data-t="vacancy.apply_disabled">
-							Уточнить условия
-						</a>
 					)}
-					<p class="apply-note apply-note-hero" data-t={hasApplyLink ? 'vacancy.apply_note_hero' : 'vacancy.apply_disabled_note_hero'}>{hasApplyLink ? 'Переход на анкету работодателя или партнёра' : 'Оставьте контакт, чтобы уточнить условия'}</p>
+					{/* Disabled-fallback CTA («Уточнить условия» → /contacts/) removed
+					    per C3 — site is a CPA-referral aggregator, every vacancy
+					    has a real applyLink. */}
+					<p class="apply-note apply-note-hero" data-t="vacancy.apply_note_hero">Переход на анкету работодателя или партнёра</p>
 				</div>
 			</section>
 
@@ -915,7 +908,7 @@ const pageSchemaGraph = [
 								</button>
 								<p class="apply-note">Заполните форму — мы&nbsp;перезвоним и&nbsp;поможем зарегистрироваться с&nbsp;нашим реферальным кодом</p>
 							</>
-						) : hasApplyLink ? (
+						) : (
 							<>
 								<a
 									href={job.applyLink}
@@ -935,14 +928,8 @@ const pageSchemaGraph = [
 								</a>
 								<p class="apply-note" data-t="vacancy.apply_note">Вы перейдете на сайт прямого работодателя</p>
 							</>
-						) : (
-							<>
-								<a href="/contacts/" class="apply-btn-large apply-btn-disabled" data-t="vacancy.apply_disabled">
-									Уточнить условия
-								</a>
-								<p class="apply-note" data-t="vacancy.apply_disabled_note">Для этой вакансии прямая ссылка пока не добавлена</p>
-							</>
 						)}
+						{/* Disabled-fallback sidebar CTA removed per C3. */}
 						<div class="vacancy-income-calculator" id="vacancy-income-calculator" data-hourly-rate={hourlyRate ?? ''} data-city={job.location} data-transport={job.transport}>
 							<p class="vacancy-income-eyebrow">Калькулятор дохода</p>
 							{hourlyRate ? (
