@@ -280,6 +280,11 @@ const pageSchemaGraph = [
 							<option value="individual_entrepreneur">Тип трудоустройства: ИП</option>
 							<option value="official">Тип трудоустройства: ТК РФ</option>
 						</select>
+						<select id="vacancy-citizenship-filter" class="home-filter-select" aria-label="Фильтр по гражданству">
+							<option value="all">Гражданство: любое</option>
+							<option value="rf">Гражданство: РФ</option>
+							<option value="cis">Гражданство: СНГ</option>
+						</select>
 					</div>
 				</div>
 			</section>
@@ -1314,7 +1319,9 @@ const pageSchemaGraph = [
 			gap: var(--space-3);
 		}
 		.home-filter-row {
-			grid-template-columns: 1fr;
+			/* 2-column layout on mobile (4 filters total → 2 rows of 2).
+			   Was 1fr stack — wasted vertical space. */
+			grid-template-columns: repeat(2, minmax(0, 1fr));
 			gap: var(--space-2);
 		}
 		.toolbar-top {
@@ -1495,20 +1502,14 @@ const pageSchemaGraph = [
 		height: auto !important;
 		min-height: 52px !important;
 	}
-	.home-filter-row {
-		/* 3 columns on desktop / tablet, stacks to 1 on narrow screens.
-		   Final 3-column rule lives in the v2 toolbar block below
-		   (the @media (min-width: 768px) at the very bottom of this
-		   stylesheet wins via cascade order). */
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-	}
+	/* .home-filter-row layout — final canonical rule lives at the very
+	   bottom of this stylesheet (4 columns desktop, 2 columns mobile).
+	   Earlier 3/1-column overrides removed because they targeted the
+	   pre-citizenship layout (3 filters total). */
 	@media (max-width: 480px) {
 		/* .toolbar-top stays as flex-direction: row — city + language pill
 		   share one line per UX feedback. Stacking ate ~120px of vertical
 		   space without functional benefit. */
-		.home-filter-row {
-			grid-template-columns: 1fr;
-		}
 	}
 	/* Neutral input pills (city pill, lang pill, filter selects) — uniform
 	   white surface. `.hero-city-link` removed from this group: it's a
@@ -1612,16 +1613,18 @@ const pageSchemaGraph = [
 
 	.home-filter-row {
 		display: grid;
-		grid-template-columns: 1fr;
+		/* 4 filters total: Возраст / Транспорт / Тип трудоустройства /
+		   Гражданство. Mobile = 2x2 grid (per UX request). Desktop
+		   override at 768px+ flattens to 1x4. */
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: var(--space-3);
 		/* margin-top removed — the parent `.hero-toolbar` already provides
-		   `gap: var(--space-3)` between siblings. Stacking margin + gap
-		   produced an inconsistent 24px separator vs the standard 12px. */
+		   `gap: var(--space-3)` between siblings. */
 		margin-top: 0;
 	}
 	@media (min-width: 768px) {
 		.home-filter-row {
-			grid-template-columns: repeat(3, minmax(0, 1fr));
+			grid-template-columns: repeat(4, minmax(0, 1fr));
 		}
 	}
 	.home-filter-select {
