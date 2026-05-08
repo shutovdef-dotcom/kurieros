@@ -52,6 +52,13 @@
   --warning-bg: #fcefd5;  --warning-fg: #7a4a0a;
   --danger-bg:  #fbe2dc;  --danger-fg:  #903517;
   --info-bg:    #e2ecf6;  --info-fg:    #1f4a78;
+  /* Vivid alarm colors — meant to stay bright in both modes (no dark-mode override) */
+  --color-danger:  #ef4444;
+  --color-warning: #facc15;
+  --color-success: #22c55e;
+  /* Partner brand colors — kept literal so they always match the
+     vendor's official identity guideline. */
+  --brand-ozon: #005bff;
 
   /* ── Type ────────────────────────────────────────────────── */
   --font-main:    'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;

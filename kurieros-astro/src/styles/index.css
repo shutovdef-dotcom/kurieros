@@ -333,7 +333,7 @@ body.dark-mode .logo svg {
     position: absolute;
     top: -8px;
     right: -12px;
-    background: #f43f5e;
+    background: var(--color-danger);
     color: white;
     font-size: 9px;
     padding: 1px 5px;
