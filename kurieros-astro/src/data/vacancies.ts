@@ -1114,7 +1114,10 @@ const _initialSources = [
     slug: 'yandex-eda-courier',
     company: {
       name: 'Яндекс Еда',
-      logo: 'https://upload.wikimedia.org/wikipedia/commons/5/57/Yandex_Eats_icon.svg',
+      // Local SVG instead of Wikimedia hot-linking — Wikimedia
+      // hot-linking is fragile (policy restrictions, lazy CDN behaviour)
+      // and the bundled `/public/logos/yandex-eda.svg` exists for this.
+      logo: '/logos/yandex-eda.svg',
     },
     content: yandexEdaContentByLanguage,
     defaults: {
