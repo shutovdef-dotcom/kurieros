@@ -16,31 +16,40 @@ import type {
   VacancySource,
 } from './vacancyTypes';
 
-const YANDEX_EDA_APPLY_LINK = 'https://my2go.ru/mitpJ?erid=2VtzqwSDctu';
+// Partner URLs/logos centralized in `./partnerLinks.ts` so they are
+// rotatable from one place. Keep the local ALL_CAPS aliases as
+// re-exports to minimise the diff in the rest of this large file.
+import {
+  YANDEX_EDA_APPLY,
+  KUPER_LOGO,
+  KUPER_FOOT_AND_BIKE_APPLY,
+  KUPER_PACKER_APPLY,
+  KUPER_AUTO_APPLY,
+  T_BANK_LOGO,
+  T_BANK_APPLY,
+  EFIN_LOGO,
+  EFIN_APPLY,
+} from './partnerLinks';
+
+const YANDEX_EDA_APPLY_LINK = YANDEX_EDA_APPLY;
 const YANDEX_EDA_PAY_SOURCE_URL =
   'https://docs.google.com/spreadsheets/d/17gBp0k07GCPS3Ugf7JACHogCoYpZtYZRsQnnEhIedwY/edit?gid=1115757494#gid=1115757494';
 const UPDATED_AT = '2026-04-17';
 
 const KUPER_COMPANY_NAME = 'Купер (ex. СберМаркет)';
-const KUPER_COMPANY_LOGO =
-  'https://agents.pampadu.ru/api/file/ViewFile?type=1&name=c0a42c37-73f4-4de0-a4f9-fd0689380a79.png';
-const KUPER_FOOT_AND_BIKE_APPLY_LINK =
-  'https://trk.ppdu.ru/click/qHQDwLuc?erid=2SDnjeL6Zwp&landingId=2739';
-const KUPER_PACKER_APPLY_LINK =
-  'https://trk.ppdu.ru/click/qHQDwLuc?erid=2SDnjeL6Zwp&landingId=2740';
-const KUPER_AUTO_APPLY_LINK =
-  'https://trk.ppdu.ru/click/qHQDwLuc?erid=2SDnjeL6Zwp&landingId=2741';
+const KUPER_COMPANY_LOGO = KUPER_LOGO;
+const KUPER_FOOT_AND_BIKE_APPLY_LINK = KUPER_FOOT_AND_BIKE_APPLY;
+const KUPER_PACKER_APPLY_LINK = KUPER_PACKER_APPLY;
+const KUPER_AUTO_APPLY_LINK = KUPER_AUTO_APPLY;
 const KUPER_DEFAULT_CITIZENSHIP = 'РФ / ЕАЭС / СНГ';
 const T_BANK_COMPANY_NAME = 'Т-Банк';
-const T_BANK_COMPANY_LOGO =
-  'https://agents.pampadu.ru/api/file/ViewFile?type=1&name=23a3b3dd-48a4-4edf-a2a6-c5d681389c1a.png';
-const T_BANK_APPLY_LINK = 'https://trk.ppdu.ru/click/X76Tf6si?erid=2SDnjcbs16H';
+const T_BANK_COMPANY_LOGO = T_BANK_LOGO;
+const T_BANK_APPLY_LINK = T_BANK_APPLY;
 const T_BANK_CITIZENSHIP = 'РФ / ЕАЭС';
 const T_BANK_EMPLOYMENT_FORMATS = ['gph', 'self_employed'] satisfies EmploymentFormat[];
 const EFIN_COMPANY_NAME = 'Efin';
-const EFIN_COMPANY_LOGO =
-  'https://agents.pampadu.ru/api/file/ViewFile?type=1&name=314d3acb-aba3-488c-9ddb-9c41dece71ca.png';
-const EFIN_APPLY_LINK = 'https://trk.ppdu.ru/click/VuqTAiCx?erid=2SDnjdmxiVK';
+const EFIN_COMPANY_LOGO = EFIN_LOGO;
+const EFIN_APPLY_LINK = EFIN_APPLY;
 const EFIN_CITIZENSHIP = 'РФ';
 const EFIN_EMPLOYMENT_FORMATS = ['self_employed'] satisfies EmploymentFormat[];
 // === Ozon ============================================================
@@ -53,10 +62,12 @@ const EFIN_EMPLOYMENT_FORMATS = ['self_employed'] satisfies EmploymentFormat[];
 // Worker (workers/ozon-lead/), which holds the referrer phone +
 // Telegram bot token as server-side secrets.
 
+// Альфа-Банк partner constants — apply/logo proxied through partnerLinks.ts.
+import { ALFA_BANK_LOGO, ALFA_BANK_APPLY } from './partnerLinks';
+
 const ALFA_BANK_COMPANY_NAME = 'Альфа-Банк';
-const ALFA_BANK_COMPANY_LOGO = '/logos/alfa-bank.svg';
-const ALFA_BANK_APPLY_LINK =
-  'https://pxl.leads.su/click/00012fe3aecb294c077b1c68b4594cb0?erid=2W5zFJdQNW4';
+const ALFA_BANK_COMPANY_LOGO = ALFA_BANK_LOGO;
+const ALFA_BANK_APPLY_LINK = ALFA_BANK_APPLY;
 const ALFA_BANK_CITIZENSHIP = 'РФ / Беларусь / Казахстан';
 const ALFA_BANK_EMPLOYMENT_FORMATS = ['official'] satisfies EmploymentFormat[];
 
