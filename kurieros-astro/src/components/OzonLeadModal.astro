@@ -335,7 +335,7 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		box-shadow: 0 32px 60px rgba(0, 0, 0, 0.28);
 		padding: 1.6rem 1.5rem 1.4rem;
 		font-family: var(--font-main, 'Manrope', sans-serif);
-		color: #0f172a;
+		color: var(--ink-900);
 	}
 	.ozon-lead-close {
 		position: absolute;
@@ -349,13 +349,13 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		font-size: 1.4rem;
 		line-height: 1;
 		cursor: pointer;
-		color: #475569;
+		color: var(--ink-600);
 		transition: background 0.18s ease, color 0.18s ease;
 	}
 	.ozon-lead-close:hover,
 	.ozon-lead-close:focus-visible {
 		background: rgba(15, 23, 42, 0.12);
-		color: #0f172a;
+		color: var(--ink-900);
 		outline: none;
 	}
 	.ozon-lead-eyebrow {
@@ -374,14 +374,14 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		font-family: var(--font-heading, 'Manrope', sans-serif);
 		font-size: clamp(1.3rem, 2.2vw, 1.55rem);
 		line-height: 1.2;
-		color: #0f172a;
+		color: var(--ink-900);
 		letter-spacing: -0.01em;
 	}
 	.ozon-lead-lead {
 		margin: 0 0 1rem;
 		font-size: 0.95rem;
 		line-height: 1.5;
-		color: #475569;
+		color: var(--ink-600);
 	}
 	.ozon-lead-form {
 		display: grid;
@@ -409,7 +409,7 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		border: 1px solid #d4dae3;
 		background: var(--ink-0);
 		font: inherit;
-		color: #0f172a;
+		color: var(--ink-900);
 		transition: border-color 0.15s ease, box-shadow 0.15s ease;
 	}
 	.ozon-lead-field input:focus-visible {
@@ -519,7 +519,7 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 	.ozon-lead-fineprint {
 		margin: 0.2rem 0 0;
 		font-size: 0.75rem;
-		color: #94a3b8;
+		color: var(--ink-400);
 		line-height: 1.4;
 	}
 
@@ -546,11 +546,11 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		margin: 0 0 0.4rem;
 		font-family: var(--font-heading, 'Manrope', sans-serif);
 		font-size: 1.4rem;
-		color: #0f172a;
+		color: var(--ink-900);
 	}
 	.ozon-lead-stage[data-stage="success"] > p {
 		margin: 0 0 1rem;
-		color: #475569;
+		color: var(--ink-600);
 		font-size: 0.95rem;
 		line-height: 1.5;
 	}
@@ -589,13 +589,13 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 	.ozon-lead-steps li strong {
 		display: block;
 		font-size: 0.95rem;
-		color: #0f172a;
+		color: var(--ink-900);
 		font-weight: 700;
 		margin-bottom: 0.2rem;
 	}
 	.ozon-lead-steps li span {
 		font-size: 0.85rem;
-		color: #475569;
+		color: var(--ink-600);
 		line-height: 1.4;
 	}
 	.ozon-lead-steps li a {
@@ -610,7 +610,7 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		margin-top: 0.55rem;
 		padding: 0.55rem 0.7rem;
 		background: var(--ink-0);
-		border: 1px dashed #cbd5e1;
+		border: 1px dashed var(--ink-300);
 		border-radius: 10px;
 	}
 	.ozon-lead-refbox code {
@@ -618,7 +618,7 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 		font-size: 0.95rem;
 		font-weight: 700;
-		color: #0f172a;
+		color: var(--ink-900);
 		letter-spacing: 0.02em;
 	}
 	.ozon-lead-refcopy {
@@ -663,13 +663,13 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		background: var(--ink-0);
 		font-family: inherit;
 		font-weight: 700;
-		color: #0f172a;
+		color: var(--ink-900);
 		cursor: pointer;
 		transition: background 0.15s ease, border-color 0.15s ease;
 	}
 	.ozon-lead-finish:hover {
 		background: #f1f5f9;
-		border-color: #94a3b8;
+		border-color: var(--ink-400);
 	}
 
 	/* Body lock when modal is open */
@@ -684,7 +684,7 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 	}
 	:global(:where(html, body).dark-mode) .ozon-lead-close {
 		background: rgba(231, 234, 240, 0.08);
-		color: #cbd5e1;
+		color: var(--ink-300);
 	}
 	:global(:where(html, body).dark-mode) .ozon-lead-close:hover {
 		background: rgba(231, 234, 240, 0.15);
@@ -702,7 +702,7 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 	}
 	:global(:where(html, body).dark-mode) .ozon-lead-field span,
 	:global(:where(html, body).dark-mode) .ozon-lead-fieldset legend {
-		color: #cbd5e1;
+		color: var(--ink-300);
 	}
 	:global(:where(html, body).dark-mode) .ozon-lead-field input {
 		background: rgba(15, 23, 36, 0.7);
