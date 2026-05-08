@@ -86,6 +86,17 @@
   --shadow-lg: 0 12px 32px rgba(38,29,18,0.08), 0 4px 8px rgba(38,29,18,0.04);
   --shadow-focus: 0 0 0 2px var(--ink-0), 0 0 0 4px var(--brand-600);
 
+  /* ── Scrim / glass overlays (translucent UI surfaces) ─────────
+     Used for glassmorphic panels, sticky bars, hover overlays.
+     Auto-flipped in dark mode so consumers don't need their own
+     :where(.dark-mode) variants. */
+  --scrim-light-soft:    rgba(255, 255, 255, 0.82);
+  --scrim-light-strong:  rgba(255, 255, 255, 0.96);
+  --scrim-dark-soft:     rgba(15, 17, 16, 0.6);
+  --scrim-dark-strong:   rgba(15, 17, 16, 0.85);
+  --scrim-border-mid:    rgba(148, 163, 184, 0.16);
+  --scrim-shadow-soft:   rgba(38, 29, 18, 0.06);
+
   /* ── Motion ──────────────────────────────────────────────── */
   --transition: 160ms cubic-bezier(.2,.7,.3,1);
   --transition-slow: 240ms cubic-bezier(.2,.7,.3,1);
@@ -146,6 +157,14 @@
   --shadow-md: 0 6px 16px rgba(0,0,0,.55), 0 2px 4px rgba(0,0,0,.3);
   --shadow-lg: 0 16px 36px rgba(0,0,0,.6);
   --shadow-focus: 0 0 0 2px var(--ink-0), 0 0 0 4px var(--brand-500);
+
+  /* Scrim overrides — flip light↔dark so consumers stay scrim-* agnostic. */
+  --scrim-light-soft:    rgba(19, 17, 16, 0.72);
+  --scrim-light-strong:  rgba(19, 17, 16, 0.92);
+  --scrim-dark-soft:     rgba(255, 255, 255, 0.08);
+  --scrim-dark-strong:   rgba(255, 255, 255, 0.18);
+  --scrim-border-mid:    rgba(195, 204, 216, 0.18);
+  --scrim-shadow-soft:   rgba(0, 0, 0, 0.38);
 
   /* Legacy aliases re-declared so var(--ink-*) resolves to dark values.
      CSS custom properties don't auto-recompute through var() across scopes. */
