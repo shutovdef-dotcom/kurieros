@@ -606,13 +606,13 @@ const pageSchemaGraph = [
 		background: var(--brand-700);
 		color: #ffffff;
 		border: 1px solid var(--brand-700);
-		box-shadow: 0 8px 20px rgba(22, 115, 76, 0.22);
+		box-shadow: 0 8px 20px rgba(var(--brand-700-rgb), 0.22);
 	}
 	.hero-v2-cta-primary:hover,
 	.hero-v2-cta-primary:focus-visible {
 		background: var(--brand-600);
 		transform: translateY(-1px);
-		box-shadow: 0 12px 26px rgba(22, 115, 76, 0.32);
+		box-shadow: 0 12px 26px rgba(var(--brand-700-rgb), 0.32);
 		outline: none;
 	}
 	.hero-v2-cta-secondary {
@@ -866,7 +866,7 @@ const pageSchemaGraph = [
 	.home-filter-select:focus-visible {
 		outline: none;
 		border-color: var(--brand-700);
-		box-shadow: 0 0 0 3px rgba(22, 115, 76, 0.18);
+		box-shadow: 0 0 0 3px rgba(var(--brand-700-rgb), 0.18);
 	}
 	.home-discovery-section {
 		display: grid;
@@ -918,7 +918,7 @@ const pageSchemaGraph = [
 	}
 	.city-selector-container:focus-within {
 		border-color: var(--brand-700);
-		box-shadow: 0 0 0 3px rgba(22, 115, 76, 0.18);
+		box-shadow: 0 0 0 3px rgba(var(--brand-700-rgb), 0.18);
 	}
 	.city-selector-container::after {
 		content: '▼';

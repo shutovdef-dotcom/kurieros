@@ -19,6 +19,9 @@
   --brand-700: #1d5634;
   --brand-800: #163f27;
   --brand-900: #0e2818;
+  /* RGB channels for use inside rgba(var(--brand-700-rgb), <alpha>).
+     Keep in sync with --brand-700 above (and the dark-mode override). */
+  --brand-700-rgb: 29, 86, 52;
 
   /* ── Accent (CTA, sun-warm tags) ─────────────────────── */
   --accent-50:  #fdf1ec;
@@ -141,6 +144,7 @@
   --brand-500: #6fd093;
   --brand-600: #8adfa9;
   --brand-700: #b1ebc4;
+  --brand-700-rgb: 177, 235, 196;
 
   --accent-50: #3a1f15;
   --accent-100:#4a2618;
