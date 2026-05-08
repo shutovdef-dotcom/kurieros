@@ -883,7 +883,10 @@ const pageSchemaGraph = [
 	.hero-toolbar {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		/* Standardized vertical rhythm — was a mix of 8px/12px/0.5rem
+		   across the codebase. --space-3 (12px) is the canonical
+		   "tight related elements" spacing per themes.css. */
+		gap: var(--space-3);
 		margin-top: 0;
 		margin-bottom: 0;
 		width: 100%;
@@ -1388,18 +1391,21 @@ const pageSchemaGraph = [
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		background: var(--ink-0);
-		border: 1px solid var(--ink-200);
-		border-left: 3px solid var(--brand-700);
+		/* CTA tinted in --brand-50 with a thicker brand border so it
+		   reads as the obvious next-step button among the white
+		   dropdowns. Was indistinguishable (white surface, hairline
+		   left accent only). */
+		background: var(--brand-50);
+		border: 2px solid var(--brand-300);
 		border-radius: var(--radius-md);
 		padding: var(--space-4) var(--space-5);
-		color: var(--ink-900);
+		color: var(--brand-800);
 		font-family: var(--font-main);
 		font-size: var(--fs-16);
 		font-weight: 700;
 		text-decoration: none;
-		margin-top: var(--space-3);
-		transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+		margin-top: 0;
+		transition: background var(--transition), border-color var(--transition), box-shadow var(--transition), transform var(--transition);
 	}
 	.hero-city-link::after {
 		/* ↓ instead of → so the icon hints «scroll down to vacancies»
@@ -1413,6 +1419,7 @@ const pageSchemaGraph = [
 	}
 	.hero-city-link:hover,
 	.hero-city-link:focus-visible {
+		background: var(--brand-100);
 		border-color: var(--brand-500);
 		box-shadow: var(--shadow-sm);
 		outline: none;
