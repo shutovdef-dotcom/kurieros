@@ -132,6 +132,16 @@ const hasVacancies = jobsData.length > 0;
 <div class="job-grid-container">
 	<div class="compare-inline-alert hidden" id="compare-limit-message" aria-live="polite"></div>
 
+	<!-- Surfaces when the filter dropdowns hide every card on the page.
+	     filterJobs() shows the notice AND restores all cards so the user
+	     never lands on an empty list. -->
+	<div class="no-filter-match hidden" id="no-filter-match" role="status" aria-live="polite">
+		<p>
+			<strong>По заданным критериям ничего не найдено.</strong>
+			Посмотрите другие вакансии — показываем все доступные.
+		</p>
+	</div>
+
 	<section id="vacancies">
 		<div class="jobs-grid" id="jobs-grid">
 			{filteredJobs.length > 0 ? (
@@ -209,6 +219,32 @@ const hasVacancies = jobsData.length > 0;
 		border-radius: var(--radius-lg);
 		border: 1px dashed var(--ink-200);
 		color: var(--ink-600);
+	}
+	.no-filter-match {
+		background: var(--brand-50);
+		border: 1px solid var(--brand-300);
+		border-radius: var(--radius-md);
+		padding: var(--space-3) var(--space-4);
+		margin: 0 0 var(--space-4);
+		color: var(--brand-800);
+		font-size: var(--fs-14);
+		line-height: 1.45;
+	}
+	.no-filter-match.hidden {
+		display: none;
+	}
+	.no-filter-match p {
+		margin: 0;
+	}
+	.no-filter-match strong {
+		display: block;
+		font-weight: 700;
+		margin-bottom: 2px;
+	}
+	:global(body.dark-mode) .no-filter-match {
+		background: var(--brand-50);
+		border-color: var(--brand-200);
+		color: var(--brand-700);
 	}
 	.no-results h3 {
 		font-family: var(--font-heading);
@@ -520,10 +556,14 @@ const hasVacancies = jobsData.length > 0;
 			const citizenshipValue = citizenshipFilterSelect?.value || 'all';
 			const selectedCitizenshipTag = citizenshipValue === 'all' ? 'all' : 'cit:' + citizenshipValue;
 
-			// Live query so the filter runs against the *current* DOM —
-			// after a city switch the grid innerHTML is replaced, so a
-			// snapshot from DOMContentLoaded would be stale.
-			document.querySelectorAll('.job-card').forEach((card) => {
+			// Two-pass:
+			//   1. Mark each card as match/no-match into a Map
+			//   2. If at least one match → apply visibility per the map
+			//      If zero matches → show every card AND surface the
+			//      «no filter match» notice (per UX spec — user must
+			//      never land on an empty grid).
+			const cards = Array.from(document.querySelectorAll('.job-card'));
+			const matches = cards.filter((card) => {
 				const location = (card.dataset.location || '').toLowerCase();
 				const matchesCity = !selectedCity || location.includes(selectedCity.toLowerCase()) || location === 'вся россия';
 				const matchesSearchTerm = matchesSearch(card, term);
@@ -531,13 +571,28 @@ const hasVacancies = jobsData.length > 0;
 				const matchesTransport = hasTag(card, selectedTransportTag);
 				const matchesEmployment = hasTag(card, selectedEmploymentTag);
 				const matchesCitizenship = hasTag(card, selectedCitizenshipTag);
-
-				if (matchesSearchTerm && matchesCity && matchesAge && matchesTransport && matchesEmployment && matchesCitizenship) {
-					card.style.display = 'flex';
-				} else {
-					card.style.display = 'none';
-				}
+				return matchesSearchTerm && matchesCity && matchesAge && matchesTransport && matchesEmployment && matchesCitizenship;
 			});
+
+			const noMatchNotice = document.getElementById('no-filter-match');
+			const anyDropdownActive = (
+				(ageFilterSelect && ageFilterSelect.value !== 'all') ||
+				(transportFilterSelect && transportFilterSelect.value !== 'all') ||
+				(employmentFilterSelect && employmentFilterSelect.value !== 'all') ||
+				(citizenshipFilterSelect && citizenshipFilterSelect.value !== 'all')
+			);
+
+			if (matches.length === 0 && anyDropdownActive) {
+				// Fall back to the full city/category set with a banner.
+				cards.forEach((card) => { card.style.display = 'flex'; });
+				noMatchNotice?.classList.remove('hidden');
+			} else {
+				const matchSet = new Set(matches);
+				cards.forEach((card) => {
+					card.style.display = matchSet.has(card) ? 'flex' : 'none';
+				});
+				noMatchNotice?.classList.add('hidden');
+			}
 		}
 
 		filterJobs();
