@@ -2,34 +2,67 @@
 import { vacancySources } from '../data/jobs';
 import { sortCityNamesByPopulation } from '../utils/cities';
 
-const yandexAutoOffers = vacancySources
+// Per-transport rate maps so the calculator can show a realistic
+// hourly per (city × transport). Was auto-only; now keys: 'auto',
+// 'bicycle', 'foot'. («remote» is excluded — it's not really a
+// transport-driven rate in the courier income context.)
+type TransportKey = 'auto' | 'bicycle' | 'foot';
+const TRANSPORT_KEYS: readonly TransportKey[] = ['auto', 'bicycle', 'foot'];
+
+const yandexOffers = vacancySources
     .filter((source) => /яндекс|yandex/i.test(source.company.name) || /yandex/i.test(source.slug))
     .flatMap((source) => source.offers)
-    .filter((offer) => offer.isActive && offer.transport === 'auto');
+    .filter((offer) => offer.isActive);
 
-const rateByCity = new Map<string, number>();
+const ratesByTransport: Record<TransportKey, Map<string, number>> = {
+    auto: new Map(),
+    bicycle: new Map(),
+    foot: new Map(),
+};
 
-for (const offer of yandexAutoOffers) {
+for (const offer of yandexOffers) {
+    const transport = offer.transport as TransportKey | string;
+    if (!TRANSPORT_KEYS.includes(transport as TransportKey)) continue;
+    const map = ratesByTransport[transport as TransportKey];
+
     const hourlyCandidates = [offer.pay.hourly?.max, offer.pay.hourly?.min];
     const hourlyRate = hourlyCandidates.find((value) => Number.isFinite(value));
     if (typeof hourlyRate !== 'number') continue;
 
-    const currentBest = rateByCity.get(offer.city) ?? 0;
+    const currentBest = map.get(offer.city) ?? 0;
     if (hourlyRate > currentBest) {
-        rateByCity.set(offer.city, hourlyRate);
+        map.set(offer.city, hourlyRate);
     }
 }
 
-const fallbackRate =
-    rateByCity.size > 0
-        ? Math.round(Array.from(rateByCity.values()).reduce((sum, value) => sum + value, 0) / rateByCity.size)
-        : 350;
+const fallbackByTransport: Record<TransportKey, number> = {
+    auto: 350,
+    bicycle: 280,
+    foot: 220,
+};
+for (const t of TRANSPORT_KEYS) {
+    const map = ratesByTransport[t];
+    if (map.size > 0) {
+        fallbackByTransport[t] = Math.round(
+            Array.from(map.values()).reduce((sum, value) => sum + value, 0) / map.size
+        );
+    }
+}
 
-const sortedCities = sortCityNamesByPopulation(Array.from(rateByCity.keys()));
-const cityRates = Object.fromEntries(rateByCity.entries()) as Record<string, number>;
+// Cities — union of cities present in any transport's rate map, sorted
+// by population. The dropdown stays uniform across transport changes.
+const allCities = new Set<string>();
+for (const t of TRANSPORT_KEYS) {
+    for (const c of ratesByTransport[t].keys()) allCities.add(c);
+}
+const sortedCities = sortCityNamesByPopulation(Array.from(allCities));
 
-const ratesJson = JSON.stringify(cityRates);
-const fallbackRateJson = JSON.stringify(fallbackRate);
+// Serialize the 2D map as { transport: { city: rate, … }, … }.
+const ratesObject = Object.fromEntries(
+    TRANSPORT_KEYS.map((t) => [t, Object.fromEntries(ratesByTransport[t].entries())])
+);
+const ratesJson = JSON.stringify(ratesObject);
+const fallbackRateJson = JSON.stringify(fallbackByTransport);
 ---
 
 <section class="calculator-section home-section" id="income-calculator">
@@ -78,6 +111,17 @@ const fallbackRateJson = JSON.stringify(fallbackRate);
                     </select>
                 </div>
             </div>
+
+            <div class="calc-field">
+                <label for="calc-transport-select">Транспорт</label>
+                <div class="select-wrapper">
+                    <select id="calc-transport-select" class="calc-select">
+                        <option value="auto">На авто</option>
+                        <option value="bicycle">Велосипед / самокат</option>
+                        <option value="foot">Пешком</option>
+                    </select>
+                </div>
+            </div>
         </div>
 
         <div class="calc-divider"></div>
@@ -105,12 +149,15 @@ const fallbackRateJson = JSON.stringify(fallbackRate);
 </section>
 
 <script is:inline define:vars={{ ratesJson, fallbackRateJson }}>
+    // 2D map: rates[transport][city] = hourly rub. Per A7 the user
+    // picks both city AND transport (auto / bicycle / foot).
     const rates = JSON.parse(ratesJson);
     const fallbackRate = JSON.parse(fallbackRateJson);
 
     const daysRange = document.getElementById('days-range');
     const hoursRange = document.getElementById('hours-range');
     const citySelect = document.getElementById('calc-city-select');
+    const transportSelect = document.getElementById('calc-transport-select');
     const daysVal = document.getElementById('days-val');
     const hoursVal = document.getElementById('hours-val');
     const totalAmount = document.getElementById('total-amount');
@@ -121,7 +168,11 @@ const fallbackRateJson = JSON.stringify(fallbackRate);
         const days = Number.parseInt(daysRange.value, 10);
         const hours = Number.parseInt(hoursRange.value, 10);
         const cityName = citySelect.value;
-        const rate = Number(rates[cityName]) || fallbackRate;
+        const transport = transportSelect ? transportSelect.value : 'auto';
+        const ratesForTransport = rates[transport] || rates.auto || {};
+        const transportFallback =
+            (fallbackRate && fallbackRate[transport]) || fallbackRate.auto || 350;
+        const rate = Number(ratesForTransport[cityName]) || transportFallback;
         // AUDIT-OK (A8): the *1.2 multiplier is the owner-confirmed
         // "tips + peak hours" allowance. Disclaimer in the UI mentions
         // tips and bonus surcharges; the explicit factor stays implicit
@@ -154,10 +205,12 @@ const fallbackRateJson = JSON.stringify(fallbackRate);
     daysRange?.addEventListener('input', calculate);
     hoursRange?.addEventListener('input', calculate);
     citySelect?.addEventListener('change', calculate);
+    transportSelect?.addEventListener('change', calculate);
 
     daysRange?.addEventListener('change', dispatchCalculatorSubmit);
     hoursRange?.addEventListener('change', dispatchCalculatorSubmit);
     citySelect?.addEventListener('change', dispatchCalculatorSubmit);
+    transportSelect?.addEventListener('change', dispatchCalculatorSubmit);
 
     document.addEventListener('DOMContentLoaded', calculate);
 </script>
