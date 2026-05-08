@@ -1,0 +1,126 @@
+---
+/**
+ * Sticky bottom apply CTA for /v/[slug]/ pages.
+ *
+ * Why: on mobile the user reports the apply button isn't visible
+ * while scrolling — only at the very top (hero) and at the very
+ * bottom (sidebar after main scrolls down). Between those two
+ * there's nothing tappable. Existing CSS at [slug].astro:1782 sets
+ * `.apply-btn-hero { position: fixed }` on mobile, but something is
+ * overriding it on the user's device — debugging that requires the
+ * live page; meanwhile this component delivers the behaviour
+ * reliably without depending on that rule.
+ *
+ * Behaviour:
+ *  - Watches `.apply-btn-hero` with IntersectionObserver.
+ *  - When the hero button is OUT of viewport → bar is shown.
+ *  - When it's back in viewport → bar is hidden (no duplication).
+ *  - Tap on bar → programmatic .click() on the source `.apply-btn-hero`.
+ *    That preserves all existing flow: external nav for default cards,
+ *    OzonLeadModal for Ozon cards, GA4 `apply_click` event via the
+ *    BaseLayout delegate (which listens for any `[data-apply-cta]` click).
+ *  - Skipped when there's no `.apply-btn-hero` on the page (disabled
+ *    vacancies render `.apply-btn-disabled` — those need a contact-form,
+ *    not an apply tap).
+ *
+ * Z-index: 91, one above the existing mobile-fixed rule (90), so if
+ * that rule does fire on some devices the new bar still wins
+ * visually — no double-button cluttering the screen.
+ */
+---
+
+<a
+	id="vacancy-sticky-apply"
+	class="vacancy-sticky-apply hidden"
+	href="#"
+	role="button"
+	aria-label="Откликнуться на вакансию"
+>
+	<span class="vacancy-sticky-apply-icon" aria-hidden="true">🔥</span>
+	<span class="vacancy-sticky-apply-label">Откликнуться</span>
+	<span class="vacancy-sticky-apply-arrow" aria-hidden="true">→</span>
+</a>
+
+<style>
+	.vacancy-sticky-apply {
+		position: fixed;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 91;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.6rem;
+		padding: 14px 18px;
+		background: linear-gradient(135deg, #ff6a3d 0%, #ff3d6a 100%);
+		color: #ffffff;
+		font-weight: 800;
+		font-size: 1rem;
+		letter-spacing: 0.01em;
+		text-decoration: none;
+		box-shadow: 0 -6px 16px rgba(0, 0, 0, 0.18);
+		transform: translateY(0);
+		transition: transform 0.18s ease, opacity 0.18s ease;
+	}
+	.vacancy-sticky-apply:active {
+		transform: translateY(0) scale(0.985);
+	}
+	.vacancy-sticky-apply.hidden {
+		transform: translateY(110%);
+		opacity: 0;
+		pointer-events: none;
+	}
+	.vacancy-sticky-apply-icon {
+		font-size: 1.1rem;
+	}
+	.vacancy-sticky-apply-arrow {
+		font-size: 1.05rem;
+	}
+	body.has-vacancy-sticky-apply main {
+		padding-bottom: 80px;
+	}
+</style>
+
+<script is:inline>
+	(function () {
+		const bar = document.getElementById('vacancy-sticky-apply');
+		if (!bar) return;
+		const labelEl = bar.querySelector('.vacancy-sticky-apply-label');
+		const heroBtn = document.querySelector('.apply-btn-hero');
+		// Disabled vacancies render .apply-btn-disabled instead — no
+		// applyLink to forward. Skip silently rather than show a fake bar.
+		if (!heroBtn || heroBtn.classList.contains('apply-btn-disabled')) return;
+
+		document.body.classList.add('has-vacancy-sticky-apply');
+
+		// Mirror the hero label so copy stays in sync if it ever changes
+		// (e.g. «Откликнуться сейчас» / «Откликнуться через нас»).
+		if (labelEl) {
+			const heroText = (heroBtn.textContent || '').trim();
+			if (heroText) labelEl.textContent = heroText;
+		}
+
+		// Hide the bar while the hero button is in viewport — no point
+		// showing two side-by-side. As soon as the user scrolls past it,
+		// the bar slides in.
+		if (typeof IntersectionObserver === 'function') {
+			const io = new IntersectionObserver(function (entries) {
+				const heroVisible = entries.some(function (e) { return e.isIntersecting; });
+				bar.classList.toggle('hidden', heroVisible);
+			}, { threshold: 0 });
+			io.observe(heroBtn);
+		} else {
+			// Fallback for browsers without IO support — show always.
+			bar.classList.remove('hidden');
+		}
+
+		bar.addEventListener('click', function (e) {
+			e.preventDefault();
+			// Forward the tap to the real hero CTA so all existing
+			// behaviour runs unchanged (external link / OzonLeadModal /
+			// GA4 `apply_click` via BaseLayout delegate).
+			heroBtn.click();
+		});
+	})();
+</script>
