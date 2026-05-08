@@ -1717,9 +1717,12 @@ const pageSchemaGraph = [
 		.vacancy-company-info {
 			flex-direction: column;
 		}
-		.vacancy-facts {
-			grid-template-columns: 1fr;
-		}
+		/* Keep .vacancy-facts at 2 columns even on the narrowest phones —
+		   user feedback: "Их надо сделать более компактными для мобильной
+		   версии, чтобы они были по два блока на одной строке". The
+		   inherited rule from @media (max-width: 768px) above sets
+		   grid-template-columns: repeat(2, minmax(0, 1fr)) and we no
+		   longer override it down to a single column at 520px. */
 	}
 
 	/* === Visual refresh overrides (Apply CTAs, sidebar, mobile sticky) === */
