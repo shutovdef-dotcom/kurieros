@@ -1489,26 +1489,26 @@ const pageSchemaGraph = [
 		display: block;
 		width: 100%;
 		background: var(--vacancy-action);
-		color: #ffffff;
+		color: var(--ink-0);
 		text-align: center;
 		padding: 1.15rem 1.1rem;
-		border-radius: 8px;
+		border-radius: var(--radius-md);
 		border: 1px solid var(--vacancy-action);
 		font-weight: 900;
 		margin-top: 2rem;
 		text-decoration: none;
-		box-shadow: 0 10px 24px rgba(22, 61, 43, 0.12);
+		box-shadow: var(--shadow-md);
 		transition: transform 0.2s, box-shadow 0.2s, background 0.2s, border-color 0.2s;
 	}
 	.apply-btn-large:hover {
 		transform: translateY(-1px);
 		background: var(--vacancy-action-hover);
 		border-color: var(--vacancy-action-hover);
-		box-shadow: 0 12px 28px rgba(22, 61, 43, 0.16);
+		box-shadow: var(--shadow-lg);
 	}
 	.apply-btn-large:focus-visible {
-		outline: 3px solid rgba(75, 130, 105, 0.35);
-		outline-offset: 3px;
+		outline: none;
+		box-shadow: var(--shadow-focus);
 	}
 	.apply-btn-hero {
 		margin-top: 1rem;
