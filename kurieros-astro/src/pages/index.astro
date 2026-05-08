@@ -1229,6 +1229,11 @@ const pageSchemaGraph = [
 	@media (max-width: 768px) {
 		.home-shell {
 			padding-top: 4mm;
+			/* `<main>` already supplies 16px (1rem) of horizontal padding;
+			   the desktop 1.5rem inline padding from .home-shell on top of
+			   that ate ~50px on a 375px screen and pushed the hero off
+			   centre. On phones the wrapper just inherits main's padding. */
+			padding-inline: 0;
 		}
 		/* Old mobile .home-hero-* rules removed. */
 		.home-section {
