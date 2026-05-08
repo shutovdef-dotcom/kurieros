@@ -507,8 +507,10 @@ const pageSchemaGraph = [
 		margin: 0;
 		font-family: var(--font-heading);
 		font-weight: 800;
-		font-size: clamp(2.1rem, 5vw, 3.5rem);
-		line-height: 1.05;
+		/* clamp lower-bound 1.55rem keeps the title compact on phones
+		   (was 2.1rem → 33.6px → 4-line H1 that ate the whole viewport). */
+		font-size: clamp(1.55rem, 5vw, 3.5rem);
+		line-height: 1.1;
 		letter-spacing: -0.02em;
 		color: var(--ink-900);
 		text-wrap: balance;
@@ -543,7 +545,11 @@ const pageSchemaGraph = [
 		margin: 0.25rem 0 0;
 		padding: 0;
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+		/* minmax(140px) lets two cards fit side-by-side at ~343px-wide
+		   hero (was 180px → forced single column on phones, hero became
+		   tall enough to push the JobGrid past the fold). Above 768px
+		   the auto-fit still produces 4 columns naturally. */
+		grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
 		gap: 0.7rem;
 	}
 	.hero-v2-feature {
@@ -1235,6 +1241,29 @@ const pageSchemaGraph = [
 			   centre. On phones the wrapper just inherits main's padding. */
 			padding-inline: 0;
 		}
+		.hero-v2 {
+			padding: 1.1rem 1rem 1.4rem;
+			gap: 0.85rem;
+		}
+		.hero-v2-features {
+			/* Force 2-column layout on phones — auto-fit at minmax(140px, 1fr)
+			   was collapsing to a single column when card content (e.g.
+			   «Прозрачные выплаты») exceeded the 140px floor, making the hero
+			   ~900px tall and pushing the JobGrid past the fold. 2x2 keeps
+			   it ~600px and fits in a 812px viewport. */
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 0.5rem;
+		}
+		.hero-v2-feature {
+			padding: 0.7rem 0.75rem;
+			grid-template-columns: auto;
+			grid-template-rows: auto auto auto;
+			column-gap: 0;
+		}
+		.hero-v2-lead {
+			margin: 0;
+			max-width: none;
+		}
 		/* Old mobile .home-hero-* rules removed. */
 		.home-section {
 			padding: 1.2rem;
@@ -1252,22 +1281,27 @@ const pageSchemaGraph = [
 			grid-template-columns: 1fr;
 		}
 		.toolbar-top {
-			flex-direction: column;
+			/* Keep city + language on one row on mobile per UX feedback —
+			   stacking made them eat ~120px of vertical space and pushed
+			   the JobGrid further down. */
+			flex-direction: row;
+			align-items: stretch;
+			gap: 0.5rem;
 			width: 100%;
 		}
 		.city-selector-container {
-			width: 100%;
+			flex: 1 1 auto;
 			min-width: 0;
-			height: 4.2rem;
+			height: 3.2rem;
 			padding: 0 0.5rem !important;
 			padding-right: 1.5rem !important;
 		}
 		.hero-lang-switcher {
-			flex-basis: auto;
-			width: 100%;
+			flex: 0 0 auto;
+			width: auto;
 		}
 		.hero-lang-switcher :global(.lang-toggle) {
-			min-height: 4.2rem;
+			min-height: 3.2rem;
 		}
 		.city-icon {
 			left: 0.9rem;
@@ -1427,9 +1461,9 @@ const pageSchemaGraph = [
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
 	@media (max-width: 480px) {
-		.toolbar-top {
-			flex-direction: column;
-		}
+		/* .toolbar-top stays as flex-direction: row — city + language pill
+		   share one line per UX feedback. Stacking ate ~120px of vertical
+		   space without functional benefit. */
 		.home-filter-row {
 			grid-template-columns: 1fr;
 		}
