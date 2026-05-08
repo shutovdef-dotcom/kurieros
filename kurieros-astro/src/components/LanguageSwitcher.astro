@@ -187,7 +187,10 @@ const languageMeta = Object.fromEntries(
         z-index: 1100;
         display: flex;
         width: min(13rem, calc(100vw - 2rem));
+        /* 100dvh tracks dynamic viewport so the dropdown doesn't overflow
+           the visible area on iOS Chrome where the toolbar collapses on scroll */
         max-height: min(24rem, calc(100vh - 7rem));
+        max-height: min(24rem, calc(100dvh - 7rem));
         flex-direction: column;
         gap: 0.15rem;
         overflow-y: auto;

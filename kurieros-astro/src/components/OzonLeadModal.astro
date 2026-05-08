@@ -328,7 +328,10 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		position: relative;
 		width: 100%;
 		max-width: 480px;
+		/* 100dvh tracks dynamic viewport so the modal doesn't overflow
+		   the visible area on iOS Chrome where the toolbar collapses on scroll */
 		max-height: calc(100vh - 2rem);
+		max-height: calc(100dvh - 2rem);
 		overflow-y: auto;
 		background: var(--ink-0);
 		border-radius: 18px;

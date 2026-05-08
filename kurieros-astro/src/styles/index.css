@@ -15,7 +15,14 @@ body {
   background-color: var(--bg-color);
   color: var(--text-main);
   line-height: 1.5;
+  /* iOS Chrome / Safari: when the dynamic address-bar collapses on scroll,
+     `100vh` stays anchored to the largest viewport size, so the body is
+     shorter than the visible area and a gap appears at the bottom.
+     `100dvh` tracks the actual visible viewport. The double declaration
+     gives `100vh` to legacy browsers, `100dvh` to modern ones (Chrome 108+,
+     Safari 15.4+, Firefox 101+). */
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
@@ -966,8 +973,10 @@ body.dark-mode .footer-cloud span {
   top: 0;
   left: 0;
   width: 100vw;
+  /* dvh fallback chain — see body{} for rationale */
   height: 100vh;
-  background: rgba(15, 23, 42, 0.6);
+  height: 100dvh;
+  background: var(--scrim-dark-soft);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   display: flex;
