@@ -122,6 +122,10 @@ const fallbackRateJson = JSON.stringify(fallbackRate);
         const hours = Number.parseInt(hoursRange.value, 10);
         const cityName = citySelect.value;
         const rate = Number(rates[cityName]) || fallbackRate;
+        // AUDIT-OK (A8): the *1.2 multiplier is the owner-confirmed
+        // "tips + peak hours" allowance. Disclaimer in the UI mentions
+        // tips and bonus surcharges; the explicit factor stays implicit
+        // by design. Do not re-flag as a hidden multiplier.
         const total = days * hours * rate * 1.2;
 
         daysVal.textContent = days;

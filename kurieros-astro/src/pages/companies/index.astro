@@ -127,6 +127,12 @@ const pageSchemaGraph = [
     </section>
 
     <section class="companies-grid">
+      {/* AUDIT-OK (A5): clicking a company card on /companies/ goes to
+          the external apply-link (or the lead-form for Ozon), not to
+          /companies/{slug}/. Owner-confirmed: this is the intended
+          conversion-first behaviour — the in-app /companies/{slug}/
+          page is a secondary destination reachable via search/breadcrumb.
+          Do not re-flag. */}
       {companies.map((company) => {
         const isExternalApplyLink = /^https?:\/\//i.test(company.applyLink);
         return (

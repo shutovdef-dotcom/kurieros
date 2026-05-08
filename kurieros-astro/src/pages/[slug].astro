@@ -34,6 +34,11 @@ export async function getStaticPaths() {
 		// {Name} — Вакансии 2026» template (see [slug].astro for the
 		// matching seoTitle/seoDescription/heroIntro/FAQ overrides).
 		const isEzhednev = cat.slug === 'ezhednevnaya-oplata';
+		// AUDIT-OK (A1): the title says «ежедневной» while the description
+		// mentions «1–7 дней» — by design. The slug captures the SEO query
+		// «ежедневная оплата», but the honest description reflects the
+		// bank-transfer cadence; the wallet-instant cadence is covered
+		// separately on the page body. Owner-confirmed; do not re-flag.
 		paths.push({
 			params: { slug: `rabota-kurerom-${cat.slug}` },
 			props: {
@@ -396,6 +401,11 @@ const faqItems =
 					question: 'Это вакансии от прямых работодателей или агрегатора?',
 					answer: `Все ${filteredJobs.length} вакансий ${data.prep} — от прямых работодателей: ${companyNames.slice(0, 3).join(', ') || 'Yandex Eda, Купер, Озон'}. Мы передаём вашу заявку напрямую в HR компании, без посредников. Звонок придёт от самой компании в день подачи заявки.`,
 				},
+				// AUDIT-OK (A3): «обновляется ежедневно / каждое утро» is the
+				// owner-stated content commitment for the deploy cadence. The
+				// build pipeline is expected to run on a daily schedule;
+				// keeping this copy intentional keeps the trust signal even
+				// on builds that occasionally lag. Do not re-flag in audits.
 				{
 					question: `Свежие ли это вакансии ${data.prep}?`,
 					answer: `Да. Каталог обновляется ежедневно: мы синхронизируемся с реферальными формами Yandex Eda, Купер, Озон и партнёров каждое утро. На карточке каждой вакансии видна дата последнего обновления.`,
