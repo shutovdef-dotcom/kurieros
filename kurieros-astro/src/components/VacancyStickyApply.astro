@@ -80,6 +80,18 @@
 	body.has-vacancy-sticky-apply main {
 		padding-bottom: 80px;
 	}
+
+	/* Mobile: .bottom-nav (Header.astro) lives at z-index 1000 with
+	   height 65px. Lift the sticky bar above it; bump main padding so
+	   the last in-flow element isn't hidden behind both stacked. */
+	@media (max-width: 768px) {
+		.vacancy-sticky-apply {
+			bottom: 65px;
+		}
+		body.has-vacancy-sticky-apply main {
+			padding-bottom: 130px;
+		}
+	}
 </style>
 
 <script is:inline>

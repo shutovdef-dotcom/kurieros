@@ -1776,23 +1776,13 @@ const pageSchemaGraph = [
 		box-shadow: var(--shadow-xs);
 	}
 
-	/* Mobile sticky CTA — appears only on small screens, fixed to bottom */
-	@media (max-width: 768px) {
-		main {
-			padding-bottom: 80px;
-		}
-		.apply-btn-hero {
-			position: fixed;
-			left: 0;
-			right: 0;
-			bottom: 0;
-			z-index: 90;
-			border-radius: 0;
-			width: 100%;
-			padding: 16px;
-			box-shadow: 0 -4px 12px rgba(38, 29, 18, 0.08);
-		}
-	}
+	/* Mobile sticky CTA — superseded by VacancyStickyApply.astro
+	   component (the existing rule below would render at z-index 90,
+	   while .bottom-nav (Header.astro) is z-index 1000 — so on mobile
+	   the apply button silently went *under* the bottom nav and
+	   "disappeared" from the income block. The component now drives
+	   the sticky bottom CTA on both mobile + desktop, and is offset
+	   above .bottom-nav on mobile via its own @media block. */
 
 	/* === KB-driven section (replaces old fit/anti/check/FAQ/transparency blocks) === */
 	.vacancy-kb-section {
