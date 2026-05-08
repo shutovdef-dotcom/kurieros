@@ -1,0 +1,91 @@
+---
+/**
+ * Job listing filter row — Возраст / Транспорт / Тип трудоустройства / Гражданство.
+ *
+ * Renders a 2x2 grid on mobile (≤768px) and a 1x4 row on desktop.
+ * Used by:
+ *   - src/pages/index.astro (home page)
+ *   - src/pages/[slug].astro (city + category listings)
+ *
+ * The matching JS lives in src/components/JobGrid.astro — it queries
+ * the dropdowns by stable id (`vacancy-*-filter`) and updates the
+ * visible .job-card set on `change`. There must be at most ONE
+ * instance of this component on the page, since the IDs are unique.
+ */
+---
+
+<div class="job-filter-row">
+	<select id="vacancy-age-filter" class="job-filter-select" aria-label="Фильтр по возрасту">
+		<option value="all">Возраст: любой</option>
+		<option value="16plus">Возраст: с 16 лет</option>
+		<option value="18plus">Возраст: с 18 лет</option>
+	</select>
+	<select id="vacancy-transport-filter" class="job-filter-select" aria-label="Фильтр по транспорту">
+		<option value="all">Транспорт: любой</option>
+		<option value="foot">Транспорт: пешком</option>
+		<option value="bicycle">Транспорт: велосипед / самокат</option>
+		<option value="auto">Транспорт: авто</option>
+		<option value="remote">Транспорт: работа из дома</option>
+	</select>
+	<select id="vacancy-employment-filter" class="job-filter-select" aria-label="Фильтр по типу трудоустройства">
+		<option value="all">Тип трудоустройства: любой</option>
+		<option value="gph">Тип трудоустройства: ГПХ</option>
+		<option value="self_employed">Тип трудоустройства: самозанятость</option>
+		<option value="individual_entrepreneur">Тип трудоустройства: ИП</option>
+		<option value="official">Тип трудоустройства: ТК РФ</option>
+	</select>
+	<select id="vacancy-citizenship-filter" class="job-filter-select" aria-label="Фильтр по гражданству">
+		<option value="all">Гражданство: любое</option>
+		<option value="rf">Гражданство: РФ</option>
+		<option value="cis">Гражданство: СНГ</option>
+	</select>
+</div>
+
+<style>
+	.job-filter-row {
+		display: grid;
+		/* 2x2 on mobile (4 filters → two rows of two), flat 1x4 on
+		   desktop. Same canonical layout as the home toolbar. */
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--space-3);
+		margin: 0 0 var(--space-4);
+	}
+	@media (min-width: 768px) {
+		.job-filter-row {
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+		}
+	}
+	.job-filter-select {
+		width: 100%;
+		min-height: 44px;
+		padding: 0 32px 0 12px;
+		appearance: none;
+		-webkit-appearance: none;
+		background: var(--ink-0);
+		background-image: linear-gradient(45deg, transparent 50%, var(--ink-500) 50%),
+			linear-gradient(135deg, var(--ink-500) 50%, transparent 50%);
+		background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
+		background-size: 5px 5px, 5px 5px;
+		background-repeat: no-repeat;
+		border: 1px solid var(--ink-200);
+		border-radius: var(--radius-md);
+		font-family: var(--font-main);
+		font-size: var(--fs-14);
+		color: var(--ink-900);
+		cursor: pointer;
+		transition: border-color var(--transition), box-shadow var(--transition);
+	}
+	.job-filter-select:hover {
+		border-color: var(--brand-500);
+	}
+	.job-filter-select:focus-visible {
+		outline: none;
+		border-color: var(--brand-500);
+		box-shadow: var(--shadow-focus);
+	}
+	:global(body.dark-mode) .job-filter-select {
+		background-color: var(--ink-100);
+		color: var(--ink-800);
+		border-color: var(--ink-200);
+	}
+</style>

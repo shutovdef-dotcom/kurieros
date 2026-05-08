@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import JobGrid from '../components/JobGrid.astro';
+import JobFilters from '../components/JobFilters.astro';
 import PartnerBanner from '../components/PartnerBanner.astro';
 import articlesData from '../data/articles.json';
 import jobsData from '../data/jobs';
@@ -516,6 +517,10 @@ const pageSchemaGraph = [
 			</div>
 		</section>
 
+		<section class="listing-filters" aria-label="Фильтры вакансий">
+			<JobFilters />
+		</section>
+
 		<JobGrid
 			initialCity={type === 'city' ? data.name : undefined}
 			initialTag={type === 'category' ? data.tag : undefined}
@@ -557,9 +562,14 @@ const pageSchemaGraph = [
 	.listing-geo-grid,
 	.listing-local-grid,
 	.listing-faq-section,
+	.listing-filters,
 	.listing-trust-panel {
 		max-width: 1180px;
 		margin-inline: auto;
+	}
+	.listing-filters {
+		padding: 0 1rem;
+		margin-bottom: var(--space-3);
 	}
 
 	.listing-hero {
