@@ -6,6 +6,7 @@ import jobsData from '../../data/jobs';
 import reviewsData from '../../data/reviews.json';
 import { getCompaniesFromJobs } from '../../utils/companies';
 import { getCityHref } from '../../utils/cities';
+import { formatRussianPlural } from '../../utils/format';
 import { buildBreadcrumbSchema } from '../../utils/schema';
 
 export async function getStaticPaths() {
@@ -16,14 +17,11 @@ export async function getStaticPaths() {
 }
 
 const { company } = Astro.props;
-const formatVacancyCount = (count: number) => {
-  const mod10 = count % 10;
-  const mod100 = count % 100;
-
-  if (mod10 === 1 && mod100 !== 11) return `${count} вакансия`;
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return `${count} вакансии`;
-  return `${count} вакансий`;
-};
+// Replaced the local copy of plural-form logic with the shared helper
+// from `src/utils/format.ts` (`formatRussianPlural`). Inline `${count} <form>`
+// so call-sites read naturally.
+const formatVacancyCount = (count: number) =>
+  `${count} ${formatRussianPlural(count, ['вакансия', 'вакансии', 'вакансий'])}`;
 const companyTitle = `Работа в ${company.name}: вакансии, отзывы, условия | КурьерОк`;
 const companyDescription = `${company.name}: ${formatVacancyCount(company.vacancyCount)}, ${company.primaryTransport.toLowerCase()}, ${company.paymentPreview[0] || 'формат выплат уточняйте в карточках'}. Сравните условия и отзывы перед откликом.`.slice(0, 170);
 const latestReviewTimestamp = company.reviews.length
@@ -189,8 +187,8 @@ const pageSchemaGraph = [
           <p class="company-summary">{company.shortIntro}</p>
           <div class="company-meta-row">
             <span class="meta-pill">Обновлено {updatedDate}</span>
-            <span class="meta-pill">{company.vacancyCount} активных вакансий</span>
-            <span class="meta-pill">{company.reviewCount ? `${company.reviewCount} отзывов` : 'Отзывы пополняются'}</span>
+            <span class="meta-pill">{company.vacancyCount} {formatRussianPlural(company.vacancyCount, ['активная вакансия', 'активные вакансии', 'активных вакансий'])}</span>
+            <span class="meta-pill">{company.reviewCount ? `${company.reviewCount} ${formatRussianPlural(company.reviewCount, ['отзыв', 'отзыва', 'отзывов'])}` : 'Отзывы пополняются'}</span>
           </div>
           <div class="company-action-row">
             <a href="#company-vacancies" class="hero-link">Смотреть вакансии</a>
