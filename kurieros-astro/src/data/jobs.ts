@@ -32,15 +32,24 @@ const EMPLOYMENT_TAGS: Record<EmploymentFormat, string> = {
 };
 
 // Citizenship tag derived from the free-form `citizenship` field.
-// Source values are strings like `РФ / ЕАЭС` or `РФ / ЕАЭС / СНГ`.
+// Source values include `РФ / ЕАЭС`, `РФ / ЕАЭС / СНГ`, or
+// per-country listings like `РФ / Беларусь / Казахстан` (Alfa-Bank).
 // Map to two coarse categories the user filters by:
 //   `cit:rf`  — RF citizens accepted (currently every job)
-//   `cit:cis` — CIS citizens accepted (jobs that include ЕАЭС or СНГ)
+//   `cit:cis` — CIS-area citizens accepted (jobs that include ЕАЭС,
+//                СНГ, or any named CIS country)
 // A single job may carry both tags when it accepts both groups.
+const CIS_COUNTRY_TOKENS = [
+  'ЕАЭС', 'СНГ',
+  'Беларусь', 'Казахстан', 'Армения', 'Кыргызстан', 'Киргизия',
+  'Узбекистан', 'Таджикистан', 'Молдова', 'Азербайджан', 'Грузия',
+];
 const getCitizenshipTags = (citizenship: string): string[] => {
   const tags: string[] = [];
   if (citizenship.includes('РФ')) tags.push('cit:rf');
-  if (citizenship.includes('СНГ') || citizenship.includes('ЕАЭС')) tags.push('cit:cis');
+  if (CIS_COUNTRY_TOKENS.some((token) => citizenship.includes(token))) {
+    tags.push('cit:cis');
+  }
   return tags;
 };
 
