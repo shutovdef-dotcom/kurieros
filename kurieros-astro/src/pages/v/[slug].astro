@@ -1059,25 +1059,28 @@ const pageSchemaGraph = [
 
 <style>
 	.vacancy-page {
-		--vacancy-ink: #1d2b24;
-		--vacancy-muted: #51635c;
-		--vacancy-eyebrow: #61746b;
-		--vacancy-border: #dfe7dd;
-		--vacancy-border-strong: #d9e2d6;
-		--vacancy-chip-border: #c9dccf;
-		--vacancy-card: #ffffff;
-		--vacancy-soft: #f6faf8;
-		--vacancy-soft-strong: #eff8f4;
-		--vacancy-action: #163d2b;
-		--vacancy-action-hover: #1f574c;
-		--vacancy-focus: #4b8269;
-		--vacancy-panel-gradient: linear-gradient(135deg, rgba(245, 249, 242, 0.96) 0%, rgba(255, 255, 255, 0.98) 54%, rgba(242, 250, 253, 0.96) 100%);
-		--vacancy-card-gradient: linear-gradient(180deg, #ffffff 0%, #f7fbf8 100%);
-		--vacancy-route-gradient: linear-gradient(180deg, #ffffff 0%, #eff8f4 100%);
-		--vacancy-shadow: 0 8px 24px rgba(24, 45, 34, 0.04);
-		--vacancy-shadow-strong: 0 18px 44px rgba(24, 45, 34, 0.08);
+		/* All --vacancy-* tokens route through global design tokens
+		   (themes.css). Dark-mode values are overridden below in
+		   :global(body.dark-mode) .vacancy-page. */
+		--vacancy-ink: var(--ink-800);
+		--vacancy-muted: var(--ink-500);
+		--vacancy-eyebrow: var(--ink-500);
+		--vacancy-border: var(--ink-200);
+		--vacancy-border-strong: var(--ink-200);
+		--vacancy-chip-border: var(--ink-200);
+		--vacancy-card: var(--ink-0);
+		--vacancy-soft: var(--ink-50);
+		--vacancy-soft-strong: var(--ink-100);
+		--vacancy-action: var(--brand-800);
+		--vacancy-action-hover: var(--brand-700);
+		--vacancy-focus: var(--brand-500);
+		--vacancy-panel-gradient: linear-gradient(135deg, var(--ink-50) 0%, var(--ink-0) 54%, var(--ink-50) 100%);
+		--vacancy-card-gradient: linear-gradient(180deg, var(--ink-0) 0%, var(--ink-50) 100%);
+		--vacancy-route-gradient: linear-gradient(180deg, var(--ink-0) 0%, var(--ink-50) 100%);
+		--vacancy-shadow: var(--shadow-sm);
+		--vacancy-shadow-strong: var(--shadow-md);
 		padding: 2rem 0 4rem;
-		background: linear-gradient(180deg, #ffffff 0%, #f6faf8 100%);
+		background: linear-gradient(180deg, var(--ink-0) 0%, var(--ink-50) 100%);
 		color: var(--vacancy-ink);
 	}
 	.container-narrow {
@@ -1641,29 +1644,32 @@ const pageSchemaGraph = [
 		line-height: 1.45;
 	}
 	:global(body.dark-mode) .vacancy-page {
-		--vacancy-ink: #edf2f7;
-		--vacancy-muted: #c3ccd8;
-		--vacancy-eyebrow: #a7d8c5;
-		--vacancy-border: rgba(195, 204, 216, 0.24);
-		--vacancy-border-strong: rgba(195, 204, 216, 0.28);
-		--vacancy-chip-border: rgba(195, 204, 216, 0.28);
-		--vacancy-card: rgba(58, 68, 81, 0.66);
-		--vacancy-soft: rgba(67, 77, 90, 0.78);
-		--vacancy-soft-strong: rgba(79, 91, 105, 0.94);
+		/* All values derived from global --ink-*/--brand-* tokens
+		   so /v/[slug] dark mode stays in lock-step with the rest of
+		   the site (warm coal palette, not cool slate). */
+		--vacancy-ink: var(--ink-800);
+		--vacancy-muted: var(--ink-500);
+		--vacancy-eyebrow: var(--ink-600);
+		--vacancy-border: var(--ink-200);
+		--vacancy-border-strong: var(--ink-300);
+		--vacancy-chip-border: var(--ink-200);
+		--vacancy-card: var(--ink-100);
+		--vacancy-soft: var(--ink-150);
+		--vacancy-soft-strong: var(--ink-200);
 		--vacancy-action: var(--dm-green-surface);
 		--vacancy-action-hover: var(--dm-green-surface-hover);
 		--vacancy-focus: var(--dm-green-focus);
 		--vacancy-panel-gradient: linear-gradient(
 			135deg,
-			rgba(76, 88, 103, 0.68) 0%,
-			rgba(64, 75, 88, 0.62) 52%,
-			rgba(54, 64, 76, 0.7) 100%
+			var(--ink-150) 0%,
+			var(--ink-100) 52%,
+			var(--ink-150) 100%
 		);
-		--vacancy-card-gradient: linear-gradient(180deg, rgba(68, 79, 94, 0.74) 0%, rgba(57, 67, 79, 0.72) 100%);
-		--vacancy-route-gradient: linear-gradient(180deg, rgba(68, 79, 94, 0.74) 0%, rgba(57, 67, 79, 0.72) 100%);
-		--vacancy-shadow: 0 12px 28px rgba(15, 23, 42, 0.24);
-		--vacancy-shadow-strong: 0 24px 42px rgba(15, 23, 42, 0.34);
-		background: #2f3742;
+		--vacancy-card-gradient: linear-gradient(180deg, var(--ink-100) 0%, var(--ink-150) 100%);
+		--vacancy-route-gradient: linear-gradient(180deg, var(--ink-100) 0%, var(--ink-150) 100%);
+		--vacancy-shadow: var(--shadow-md);
+		--vacancy-shadow-strong: var(--shadow-lg);
+		background: var(--ink-50);
 	}
 	:global(body.dark-mode) .vacancy-logo,
 	:global(body.dark-mode) .fact-card,
