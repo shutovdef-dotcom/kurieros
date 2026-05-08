@@ -273,7 +273,8 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 		<meta property="twitter:description" content={description} />
 		<meta property="twitter:image" content={resolvedImageUrl} />
 
-		<meta name="theme-color" content="#16734c" />
+		<!-- theme-color is HTML attribute (no var() support); kept in sync with --brand-700 from src/styles/themes.css -->
+		<meta name="theme-color" content="#1d5634" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
