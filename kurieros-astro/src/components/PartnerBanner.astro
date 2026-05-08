@@ -1,4 +1,6 @@
 ---
+import { PARTNER_BANNER_DEFAULT_HREF } from '../data/partnerLinks';
+
 interface Props {
 	href?: string;
 	imageSrc?: string;
@@ -6,7 +8,7 @@ interface Props {
 }
 
 const {
-	href = 'https://trk.ppdu.ru/click/gtLv8Qo4?erid=2SDnjceSYW1',
+	href = PARTNER_BANNER_DEFAULT_HREF,
 	imageSrc = '/banners/masters-728x90.jpg',
 	imageAlt = 'Ищем мастеров по ремонту: доход 200 000 ₽ в месяц',
 } = Astro.props as Props;
