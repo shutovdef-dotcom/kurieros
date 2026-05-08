@@ -240,8 +240,10 @@ const pageSchemaGraph = [
           </a>
           <a class="compare-help-card" href="/guide/vyplaty/">
             <span class="compare-help-kicker">Выплаты</span>
-            <h3>Где платят чаще — еженедельно или раз в месяц?</h3>
-            <p>Яндекс.Еда, Купер, Самокат — еженедельно. Альфа-Банк по ТК РФ — 2 раза в месяц.</p>
+            <h3>Как часто приходят деньги?</h3>
+            <p>
+              Яндекс.Еда, Купер и Самокат — <strong class="payment-freq-highlight">мгновенный вывод через встроенный кошелёк (раз в несколько часов)</strong>; банковская выплата — раз в неделю. Альфа-Банк по ТК РФ — 2 раза в месяц.
+            </p>
             <span class="compare-help-link">Открыть гид →</span>
           </a>
           <a class="compare-help-card" href="/guide/oformlenie/">
@@ -1460,6 +1462,21 @@ const pageSchemaGraph = [
     font-size: 14px;
     line-height: 1.5;
     color: var(--ink-700);
+  }
+  /* Highlight «мгновенный вывод через кошелёк» — owner-emphasised in
+     the payment-frequency answer (A4). Soft mint underlay to keep the
+     phrase visually distinct from the surrounding copy without leaving
+     the link card's clickable area. */
+  .payment-freq-highlight {
+    background: var(--brand-100);
+    color: var(--brand-800);
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+  }
+  :global(body.dark-mode) .payment-freq-highlight {
+    background: var(--brand-50);
+    color: var(--brand-700);
   }
   .compare-help-link {
     margin-top: 4px;
