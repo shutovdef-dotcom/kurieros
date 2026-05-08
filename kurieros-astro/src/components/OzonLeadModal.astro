@@ -397,7 +397,7 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 	.ozon-lead-field span {
 		font-size: 0.82rem;
 		font-weight: 700;
-		color: #334155;
+		color: var(--ink-700);
 	}
 	.ozon-lead-field em {
 		color: var(--color-danger);
@@ -409,7 +409,7 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		min-height: 44px;
 		padding: 0.55rem 0.85rem;
 		border-radius: 10px;
-		border: 1px solid #d4dae3;
+		border: 1px solid var(--ink-200);
 		background: var(--ink-0);
 		font: inherit;
 		color: var(--ink-900);
@@ -433,7 +433,7 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		width: 100%;
 		font-size: 0.82rem;
 		font-weight: 700;
-		color: #334155;
+		color: var(--ink-700);
 		margin-bottom: 0.3rem;
 	}
 	.ozon-lead-radio {
@@ -441,7 +441,7 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		align-items: center;
 		gap: 0.35rem;
 		padding: 0.45rem 0.85rem;
-		border: 1px solid #d4dae3;
+		border: 1px solid var(--ink-200);
 		border-radius: 999px;
 		font-size: 0.88rem;
 		cursor: pointer;
@@ -535,8 +535,8 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		height: 56px;
 		margin: 0.2rem auto 0.6rem;
 		border-radius: 50%;
-		background: #dcfce7;
-		color: #16a34a;
+		background: var(--brand-50);
+		color: var(--brand-600);
 		display: grid;
 		place-items: center;
 		font-size: 1.6rem;
@@ -569,8 +569,8 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 	.ozon-lead-steps li {
 		position: relative;
 		padding: 0.7rem 0.85rem 0.7rem 2.6rem;
-		background: #f8fafc;
-		border: 1px solid #e2e8f0;
+		background: var(--ink-50);
+		border: 1px solid var(--ink-800);
 		border-radius: 12px;
 		counter-increment: ozon-step;
 	}
@@ -628,7 +628,7 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		flex: 0 0 auto;
 		padding: 0.4rem 0.7rem;
 		border-radius: 8px;
-		border: 1px solid #d4dae3;
+		border: 1px solid var(--ink-200);
 		background: var(--ink-0);
 		color: var(--brand-ozon);
 		font-family: inherit;
@@ -662,7 +662,7 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		min-height: 44px;
 		padding: 0 1.2rem;
 		border-radius: 10px;
-		border: 1px solid #d4dae3;
+		border: 1px solid var(--ink-200);
 		background: var(--ink-0);
 		font-family: inherit;
 		font-weight: 700;
@@ -671,7 +671,7 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		transition: background 0.15s ease, border-color 0.15s ease;
 	}
 	.ozon-lead-finish:hover {
-		background: #f1f5f9;
+		background: var(--ink-50);
 		border-color: var(--ink-400);
 	}
 
@@ -683,7 +683,7 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 	/* Dark mode */
 	:global(:where(html, body).dark-mode) .ozon-lead-card {
 		background: #14202b;
-		color: #e7eaf0;
+		color: var(--ink-800);
 	}
 	:global(:where(html, body).dark-mode) .ozon-lead-close {
 		background: rgba(231, 234, 240, 0.08);
@@ -691,11 +691,11 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 	}
 	:global(:where(html, body).dark-mode) .ozon-lead-close:hover {
 		background: rgba(231, 234, 240, 0.15);
-		color: #f8fafc;
+		color: var(--ink-50);
 	}
 	:global(:where(html, body).dark-mode) .ozon-lead-head h2,
 	:global(:where(html, body).dark-mode) .ozon-lead-stage[data-stage="success"] h2 {
-		color: #e7eaf0;
+		color: var(--ink-800);
 	}
 	:global(:where(html, body).dark-mode) .ozon-lead-lead,
 	:global(:where(html, body).dark-mode) .ozon-lead-stage[data-stage="success"] > p,
@@ -710,41 +710,41 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 	:global(:where(html, body).dark-mode) .ozon-lead-field input {
 		background: rgba(15, 23, 36, 0.7);
 		border-color: rgba(195, 204, 216, 0.2);
-		color: #e7eaf0;
+		color: var(--ink-800);
 	}
 	:global(:where(html, body).dark-mode) .ozon-lead-radio {
 		background: rgba(15, 23, 36, 0.7);
 		border-color: rgba(195, 204, 216, 0.2);
-		color: #e7eaf0;
+		color: var(--ink-800);
 	}
 	:global(:where(html, body).dark-mode) .ozon-lead-radio:has(input:checked) {
 		background: rgba(0, 91, 255, 0.2);
 		border-color: #4b89ff;
-		color: #93b5ff;
+		color: var(--brand-ozon);
 	}
 	:global(:where(html, body).dark-mode) .ozon-lead-steps li {
 		background: rgba(15, 23, 36, 0.7);
 		border-color: rgba(195, 204, 216, 0.18);
 	}
 	:global(:where(html, body).dark-mode) .ozon-lead-steps li strong {
-		color: #e7eaf0;
+		color: var(--ink-800);
 	}
 	:global(:where(html, body).dark-mode) .ozon-lead-refbox {
 		background: rgba(15, 23, 36, 0.85);
 		border-color: rgba(195, 204, 216, 0.25);
 	}
 	:global(:where(html, body).dark-mode) .ozon-lead-refbox code {
-		color: #e7eaf0;
+		color: var(--ink-800);
 	}
 	:global(:where(html, body).dark-mode) .ozon-lead-refcopy {
 		background: rgba(15, 23, 36, 0.7);
 		border-color: rgba(195, 204, 216, 0.2);
-		color: #93b5ff;
+		color: var(--brand-ozon);
 	}
 	:global(:where(html, body).dark-mode) .ozon-lead-finish {
 		background: rgba(15, 23, 36, 0.7);
 		border-color: rgba(195, 204, 216, 0.2);
-		color: #e7eaf0;
+		color: var(--ink-800);
 	}
 
 	@media (max-width: 480px) {
