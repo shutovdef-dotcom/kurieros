@@ -8,10 +8,21 @@ import { getCitiesFromJobs } from '../utils/cities';
 import { getCompaniesFromJobs } from '../utils/companies';
 import { buildBreadcrumbSchema } from '../utils/schema';
 
-const cities = getCitiesFromJobs(jobsData).map((city) => ({
-	...city,
-	href: `/rabota-kurerom-${city.slug}/`,
-}));
+// Match the city-selector dropdown ordering (utils/cities.ts:
+// `sortCityNamesByPopulation`) — Moscow / Petersburg / large cities
+// first, alphabetical only as a tiebreak. The previous default
+// alphabetical order from `getCitiesFromJobs()` buried major cities
+// behind small ones (Абаза, Абакан, Агидель…).
+const cities = getCitiesFromJobs(jobsData)
+	.map((city) => ({
+		...city,
+		href: `/rabota-kurerom-${city.slug}/`,
+	}))
+	.sort(
+		(a, b) =>
+			b.population - a.population ||
+			a.name.localeCompare(b.name, 'ru'),
+	);
 
 const totalVacancies = cities.reduce((sum, city) => sum + city.vacancyCount, 0);
 const topCities = [...cities].sort((a, b) => b.vacancyCount - a.vacancyCount).slice(0, 4);
