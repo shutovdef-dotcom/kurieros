@@ -98,10 +98,14 @@ const relatedCompanies = companyNames.slice(0, 6).map((company) => ({
 	href: `/companies/${slugifyCompany(company)}/`,
 }));
 const paymentTypes = Array.from(new Set(filteredJobs.map((job) => job.details.payment_freq)));
+// B2 contextual rule: chip labels use the compact form («Пешком»);
+// breadcrumb / footer cloud / category card use the full form
+// («Пеший курьер»). This map drives tag-chip rendering, so it stays
+// compact.
 const transportLabelMap: Record<string, string> = {
 	auto: 'На авто',
 	bicycle: 'На велосипеде или самокате',
-	foot: 'Пеший формат',
+	foot: 'Пешком',
 };
 const transportTypes = Array.from(
 	new Set(
