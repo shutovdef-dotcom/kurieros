@@ -167,11 +167,17 @@ const applyEmploymentText = job.details?.employment_type ?? '';
 		display: grid;
 		place-items: center;
 		overflow: hidden;
+		/* Inner padding so wide-aspect logos like Купер (420×264) keep
+		   a visible margin around the artwork inside the 48×48 frame. */
+		padding: 4px;
 	}
 	.company-logo img {
 		width: 100%;
 		height: 100%;
-		object-fit: cover;
+		/* `contain` preserves the full logo regardless of aspect ratio.
+		   `cover` was cropping wide rectangular logos (e.g. Купер) to a
+		   centre slice, leaving only the swirl icon visible. */
+		object-fit: contain;
 	}
 
 	.job-content {
