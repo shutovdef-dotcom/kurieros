@@ -413,6 +413,7 @@ const hasVacancies = jobsData.length > 0;
 		const ageFilterSelect = document.getElementById('vacancy-age-filter');
 		const transportFilterSelect = document.getElementById('vacancy-transport-filter');
 		const employmentFilterSelect = document.getElementById('vacancy-employment-filter');
+		const citizenshipFilterSelect = document.getElementById('vacancy-citizenship-filter');
 		syncCompareList();
 
 		document.querySelectorAll('.btn-compare').forEach((btn) => {
@@ -506,12 +507,18 @@ const hasVacancies = jobsData.length > 0;
 			filterJobs();
 		});
 
+		citizenshipFilterSelect?.addEventListener('change', () => {
+			filterJobs();
+		});
+
 		function filterJobs() {
 			const term = normalizedInitialSearch;
 			const selectedAgeTag = mapAgeFilterToTag(ageFilterSelect?.value || 'all');
 			const selectedTransportTag = transportFilterSelect?.value || 'all';
 			const employmentValue = employmentFilterSelect?.value || 'all';
 			const selectedEmploymentTag = employmentValue === 'all' ? 'all' : 'emp:' + employmentValue;
+			const citizenshipValue = citizenshipFilterSelect?.value || 'all';
+			const selectedCitizenshipTag = citizenshipValue === 'all' ? 'all' : 'cit:' + citizenshipValue;
 
 			// Live query so the filter runs against the *current* DOM —
 			// after a city switch the grid innerHTML is replaced, so a
@@ -523,8 +530,9 @@ const hasVacancies = jobsData.length > 0;
 				const matchesAge = hasTag(card, selectedAgeTag);
 				const matchesTransport = hasTag(card, selectedTransportTag);
 				const matchesEmployment = hasTag(card, selectedEmploymentTag);
+				const matchesCitizenship = hasTag(card, selectedCitizenshipTag);
 
-				if (matchesSearchTerm && matchesCity && matchesAge && matchesTransport && matchesEmployment) {
+				if (matchesSearchTerm && matchesCity && matchesAge && matchesTransport && matchesEmployment && matchesCitizenship) {
 					card.style.display = 'flex';
 				} else {
 					card.style.display = 'none';

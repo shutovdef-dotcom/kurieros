@@ -31,6 +31,19 @@ const EMPLOYMENT_TAGS: Record<EmploymentFormat, string> = {
   official: 'emp:official',
 };
 
+// Citizenship tag derived from the free-form `citizenship` field.
+// Source values are strings like `РФ / ЕАЭС` or `РФ / ЕАЭС / СНГ`.
+// Map to two coarse categories the user filters by:
+//   `cit:rf`  — RF citizens accepted (currently every job)
+//   `cit:cis` — CIS citizens accepted (jobs that include ЕАЭС or СНГ)
+// A single job may carry both tags when it accepts both groups.
+const getCitizenshipTags = (citizenship: string): string[] => {
+  const tags: string[] = [];
+  if (citizenship.includes('РФ')) tags.push('cit:rf');
+  if (citizenship.includes('СНГ') || citizenship.includes('ЕАЭС')) tags.push('cit:cis');
+  return tags;
+};
+
 type LocalizedLabels<T extends string> = Record<SupportedLanguage, Record<T, string>>;
 
 const TRANSPORT_LABELS: LocalizedLabels<TransportMode> = {
@@ -469,6 +482,7 @@ const buildJobsFromVacancies = (
           TRANSPORT_TAGS[transport],
           getAgeTag(ageFrom),
           ...formats.map((format) => EMPLOYMENT_TAGS[format]),
+          ...getCitizenshipTags(getCitizenship(source, offer)),
           ...(source.extraTags ?? []),
         ]),
         labels: buildLabels(content.labels, [transport], ageFrom, formats, medicalBook, language),
