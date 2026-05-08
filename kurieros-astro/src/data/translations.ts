@@ -1639,9 +1639,18 @@ const russianReviewUi = {
   },
 };
 
+// `russianReviewUi.form` is a Russian-only fallback. The localized form
+// templates (with placeholders) are already populated for every language
+// by the previous SUPPORTED_LANGUAGES.forEach above using
+// `reviewFormFooterTranslations`. Earlier this loop unconditionally
+// overwrote `.form` with Russian for EVERY language, breaking i18n for
+// uz, tg, ky, hy, kk, az, uk, be, hi, vi, zh — review-modal labels
+// rendered in Cyrillic instead of the user's locale. Now scoped to `ru`.
 SUPPORTED_LANGUAGES.forEach((language) => {
   Object.assign(translations[language].reviews, russianReviewUi.reviews);
-  (translations[language] as Record<string, unknown>).form = russianReviewUi.form;
+  if (language === 'ru') {
+    (translations[language] as Record<string, unknown>).form = russianReviewUi.form;
+  }
 });
 
 const vpnCloseTranslations: Record<SupportedLanguage, string> = {

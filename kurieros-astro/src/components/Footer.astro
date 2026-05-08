@@ -1,4 +1,8 @@
 ---
+// Copyright year is computed at SSR build time so the footer never
+// becomes stale after a year-rollover without a code change. Replaces
+// a hardcoded `2026` that would have read «© 2026 КурьерОк» forever.
+const currentYear = new Date().getFullYear();
 ---
 <footer>
     <div class="footer-content">
@@ -32,7 +36,7 @@
         </div>
     </div>
     <div class="footer-bottom">
-        &copy; 2026 КурьерОк.
+        &copy; {currentYear} КурьерОк.
     </div>
 </footer>
 
