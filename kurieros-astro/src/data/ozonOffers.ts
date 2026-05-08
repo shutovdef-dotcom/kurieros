@@ -41,7 +41,10 @@ import type {
 const OZON_COMPANY_NAME = 'Ozon';
 const OZON_COMPANY_LOGO = '/logos/ozon.svg';
 const OZON_FRESH_COMPANY_NAME = 'Ozon fresh';
-const OZON_FRESH_COMPANY_LOGO = '/logos/ozon-fresh.svg';
+// `ozon-fresh.svg` was never added to /public/logos/ — fall back to
+// the parent Ozon brand mark to avoid the broken-image placeholder.
+// Replace with a dedicated `/logos/ozon-fresh.svg` once design ships it.
+const OZON_FRESH_COMPANY_LOGO = '/logos/ozon.svg';
 const OZON_LEAD_APPLY = 'lead-form:ozon';
 const OZON_REF_LANDING_SKLAD = 'https://recruitment.ozon.ru/ref-courier-sklad';
 const OZON_REF_LANDING_FRESH = 'https://recruitment.ozon.ru/fresh-referral-office';
