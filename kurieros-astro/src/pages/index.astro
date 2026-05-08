@@ -1281,22 +1281,27 @@ const pageSchemaGraph = [
 			grid-template-columns: 1fr;
 		}
 		.toolbar-top {
-			flex-direction: column;
+			/* Keep city + language on one row on mobile per UX feedback —
+			   stacking made them eat ~120px of vertical space and pushed
+			   the JobGrid further down. */
+			flex-direction: row;
+			align-items: stretch;
+			gap: 0.5rem;
 			width: 100%;
 		}
 		.city-selector-container {
-			width: 100%;
+			flex: 1 1 auto;
 			min-width: 0;
-			height: 4.2rem;
+			height: 3.2rem;
 			padding: 0 0.5rem !important;
 			padding-right: 1.5rem !important;
 		}
 		.hero-lang-switcher {
-			flex-basis: auto;
-			width: 100%;
+			flex: 0 0 auto;
+			width: auto;
 		}
 		.hero-lang-switcher :global(.lang-toggle) {
-			min-height: 4.2rem;
+			min-height: 3.2rem;
 		}
 		.city-icon {
 			left: 0.9rem;
@@ -1456,9 +1461,9 @@ const pageSchemaGraph = [
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
 	@media (max-width: 480px) {
-		.toolbar-top {
-			flex-direction: column;
-		}
+		/* .toolbar-top stays as flex-direction: row — city + language pill
+		   share one line per UX feedback. Stacking ate ~120px of vertical
+		   space without functional benefit. */
 		.home-filter-row {
 			grid-template-columns: 1fr;
 		}
