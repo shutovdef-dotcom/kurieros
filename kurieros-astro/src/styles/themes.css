@@ -95,6 +95,8 @@
   --primary-hover:  var(--brand-600);
   --bg-color:       var(--ink-50);
   --surface-color:  var(--ink-0);
+  --surface-100:    var(--ink-0);   /* card / elevated surface (light) */
+  --surface-200:    var(--ink-50);  /* page recess / pressed surface (light) */
   --text-main:      var(--ink-700);
   --text-muted:     var(--ink-500);
   --border-color:   var(--ink-200);
@@ -151,6 +153,8 @@
   --primary-hover:  var(--brand-600);
   --bg-color:       var(--ink-50);
   --surface-color:  var(--ink-100);
+  --surface-100:    var(--ink-100); /* card surface (dark) */
+  --surface-200:    var(--ink-150); /* recess / pressed surface (dark) */
   --text-main:      var(--ink-700);
   --text-muted:     var(--ink-500);
   --border-color:   var(--ink-200);
