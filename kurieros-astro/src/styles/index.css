@@ -372,9 +372,9 @@ main {
 
 .btn-primary {
   background-color: var(--text-main);
-  color: white;
+  color: var(--ink-0);
   padding: 0.85rem 1.1rem;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--text-main);
   font-weight: 700;
   font-size: 0.94rem;
@@ -389,7 +389,7 @@ main {
 .apply-btn:hover,
 .btn-compare:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-primary:active {
@@ -617,20 +617,9 @@ main {
   gap: 0.25rem;
 }
 
-.apply-btn {
-  background: var(--text-main);
-  color: white;
-  border: 1px solid var(--text-main);
-  padding: 0.8rem 1rem;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 0.9rem;
-  text-align: center;
-  cursor: pointer;
-  text-decoration: none;
-  width: 100%;
-  transition: var(--transition);
-}
+/* `.apply-btn` is owned by src/components/JobCard.astro (scoped rule
+   defines colors, hover/focus). Global declaration removed — was dead
+   code overridden by JobCard's `data-astro-cid-*` scoped variant. */
 
 footer {
   background: var(--surface-color);
@@ -922,17 +911,10 @@ body.dark-mode .footer-cloud span {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  .apply-btn {
-    width: 100%;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    transition: var(--transition);
-  }
-
-  .apply-btn:hover {
-    background: var(--primary-color);
-    color: white;
-  }
+  /* `.apply-btn` mobile sizing/colors are owned by JobCard.astro's
+     scoped rule and the .job-actions media-query inside that file —
+     keeping the mobile global rules here would just duplicate.
+     Removed: width/padding/border-radius/transition + :hover. */
 
   footer { padding: 4rem 2rem 2rem 2rem; }
   .footer-content {
