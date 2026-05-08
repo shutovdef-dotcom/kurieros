@@ -1,0 +1,158 @@
+---
+/**
+ * Per-card mobile sticky apply CTA — POC for kurerok.ru home page.
+ *
+ * The visible-on-screen JobCard apply button is mirrored at the
+ * bottom of the viewport. Tap on the bar → programmatic `.click()`
+ * on the source element, so the existing flow runs unchanged:
+ *   - default <a data-apply-cta> → browser opens partner URL.
+ *   - Ozon <button data-lead-form-type="ozon"> → existing click
+ *     delegate opens OzonLeadModal.
+ *   - GA4 `apply_click` event fires either way (the delegate in
+ *     BaseLayout.astro listens to any `[data-apply-cta]`).
+ *
+ * Visibility rules:
+ *   - Mobile only (≤ 768 px). Desktop already shows the buttons inline.
+ *   - Hidden when no `[data-apply-cta]` is currently in viewport
+ *     (hero / footer / empty filter).
+ *   - Hidden when the top-most visible CTA has no parsed salary
+ *     (defensive — main-branch JobCard always carries one).
+ *   - Top-most-in-DOM-order wins when multiple visible (stable, no
+ *     visual jitter when two cards share the viewport).
+ *
+ * SCOPE: This file is mounted ONLY in src/pages/index.astro for
+ * the POC. Once the UX is validated we can mount it in
+ * /src/pages/[slug].astro (city / category listings) too — no
+ * code changes here should be needed.
+ */
+---
+
+<a
+	id="mobile-apply-sticky"
+	class="mobile-apply-sticky hidden"
+	href="#"
+	role="button"
+	aria-label="Откликнуться на вакансию, видимую на экране"
+>
+	<span class="mobile-apply-sticky-icon" aria-hidden="true">🔥</span>
+	<span class="mobile-apply-sticky-label">Откликнуться</span>
+	<span class="mobile-apply-sticky-arrow" aria-hidden="true">→</span>
+</a>
+
+<style>
+	.mobile-apply-sticky {
+		display: none;
+	}
+	@media (max-width: 768px) {
+		.mobile-apply-sticky {
+			position: fixed;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			z-index: 90;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 0.6rem;
+			padding: 14px 18px;
+			background: linear-gradient(135deg, #ff6a3d 0%, #ff3d6a 100%);
+			color: #ffffff;
+			font-weight: 800;
+			font-size: 1rem;
+			letter-spacing: 0.01em;
+			text-decoration: none;
+			box-shadow: 0 -6px 16px rgba(0, 0, 0, 0.18);
+			transform: translateY(0);
+			transition: transform 0.18s ease, opacity 0.18s ease;
+		}
+		.mobile-apply-sticky:active {
+			transform: translateY(0) scale(0.985);
+		}
+		.mobile-apply-sticky.hidden {
+			transform: translateY(110%);
+			opacity: 0;
+			pointer-events: none;
+		}
+		.mobile-apply-sticky-icon {
+			font-size: 1.1rem;
+		}
+		.mobile-apply-sticky-arrow {
+			font-size: 1.05rem;
+		}
+		body.has-mobile-apply-sticky main {
+			padding-bottom: 80px;
+		}
+	}
+</style>
+
+<script is:inline>
+	(function () {
+		const bar = document.getElementById('mobile-apply-sticky');
+		if (!bar) return;
+		const labelEl = bar.querySelector('.mobile-apply-sticky-label');
+		if (!labelEl) return;
+		document.body.classList.add('has-mobile-apply-sticky');
+
+		const ctas = Array.from(document.querySelectorAll('[data-apply-cta]'));
+		if (ctas.length === 0) return;
+
+		// Map preserves insertion order. We populate it in DOM order so
+		// "first intersecting entry" === "top-most visible card" — stable
+		// even when two cards share the viewport.
+		const visible = new Map();
+		ctas.forEach(function (el) { visible.set(el, false); });
+
+		let currentTarget = null;
+
+		function formatSalaryShort(n) {
+			if (!Number.isFinite(n) || n < 1000) return '';
+			if (n >= 1000000) {
+				const m = n / 1000000;
+				return (m % 1 === 0 ? m.toFixed(0) : m.toFixed(1)) + ' M ₽';
+			}
+			return Math.round(n / 1000) + 'K ₽';
+		}
+
+		function update() {
+			let next = null;
+			for (const el of ctas) {
+				if (visible.get(el)) { next = el; break; }
+			}
+			if (next === currentTarget) return;
+			currentTarget = next;
+			if (!next) {
+				bar.classList.add('hidden');
+				return;
+			}
+			const salary = Number(next.dataset.applySalaryMax || 0);
+			const salaryShort = formatSalaryShort(salary);
+			if (!salaryShort) {
+				// Defensive: every JobCard CTA on main carries a salary,
+				// but skip rather than show a half-baked label if some
+				// future card lacks it.
+				bar.classList.add('hidden');
+				return;
+			}
+			const isOzon = next.dataset.leadFormType === 'ozon';
+			labelEl.textContent = (isOzon ? 'Через нас · до ' : 'Откликнуться · до ') + salaryShort;
+			bar.classList.remove('hidden');
+		}
+
+		const io = new IntersectionObserver(function (entries) {
+			for (const entry of entries) {
+				visible.set(entry.target, entry.isIntersecting);
+			}
+			update();
+		}, { threshold: 0.4 });
+		ctas.forEach(function (el) { io.observe(el); });
+
+		bar.addEventListener('click', function (e) {
+			e.preventDefault();
+			if (currentTarget) {
+				// Forward the tap to the real CTA so all existing
+				// behaviour runs: external link / Ozon modal / GA4 event.
+				currentTarget.click();
+			}
+		});
+	})();
+</script>
