@@ -9,6 +9,17 @@ interface Props {
 	limit?: number;
 	moreHref?: string;
 	moreLabel?: string;
+	/**
+	 * Two `limit` modes (C2):
+	 *   • `revealable=false` (default — home page): top-N curated via
+	 *     `distributeAcrossCities` + a more-link to /cities/.
+	 *   • `revealable=true` (city / category listings): render every
+	 *     matched job — first `limit` visible, the rest stashed in a
+	 *     `<template>` inside `#jobs-grid` and revealed in batches by
+	 *     the bottom-nav «Вакансии» button. Keeps the initial render
+	 *     light while keeping all city jobs reachable on the same page.
+	 */
+	revealable?: boolean;
 }
 
 const {
@@ -18,6 +29,7 @@ const {
 	limit,
 	moreHref = '/cities/',
 	moreLabel = 'Открыть все города',
+	revealable = false,
 } = Astro.props;
 const availableJobIds = jobsData.map((job) => job.id);
 
@@ -121,10 +133,24 @@ const distributeAcrossCities = (jobs: JobItem[], max: number): JobItem[] => {
 	return out;
 };
 
-const filteredJobs = typeof limit === 'number' && limit > 0
-	? distributeAcrossCities(matchedJobs, limit)
+const limitActive = typeof limit === 'number' && limit > 0;
+// `limitActive && !revealable` is the legacy curated-home mode: pick a
+// distributed top-N and link to /cities/ for "more". `limitActive &&
+// revealable` (C2) keeps every matched job rendered on the same page —
+// first N visible, the rest in a hidden <template> the bottom-nav
+// «Вакансии» button reveals in batches.
+const filteredJobs = (limitActive && !revealable)
+	? distributeAcrossCities(matchedJobs, limit!)
 	: matchedJobs;
-const hasMore = typeof limit === 'number' && limit > 0 && matchedJobs.length > limit;
+const visibleJobs = limitActive && revealable
+	? filteredJobs.slice(0, limit!)
+	: filteredJobs;
+const overflowJobs = limitActive && revealable
+	? filteredJobs.slice(limit!)
+	: [];
+const overflowCount = overflowJobs.length;
+const batchSize = limitActive ? limit! : 24;
+const hasMore = limitActive && !revealable && matchedJobs.length > limit!;
 const totalMatched = matchedJobs.length;
 const hasVacancies = jobsData.length > 0;
 ---
@@ -143,9 +169,14 @@ const hasVacancies = jobsData.length > 0;
 	</div>
 
 	<section id="vacancies">
-		<div class="jobs-grid" id="jobs-grid">
-			{filteredJobs.length > 0 ? (
-				filteredJobs.map((job) => (
+		<div
+			class="jobs-grid"
+			id="jobs-grid"
+			data-overflow-count={overflowCount}
+			data-batch-size={batchSize}
+		>
+			{visibleJobs.length > 0 ? (
+				visibleJobs.map((job) => (
 					<JobCard job={job} />
 				))
 			) : (
@@ -160,6 +191,17 @@ const hasVacancies = jobsData.length > 0;
 					</p>
 					{hasVacancies && <a class="btn-secondary" href="/" data-t="jobgrid.reset">Сбросить всё</a>}
 				</div>
+			)}
+			{/* C2 overflow stash — bottom-nav «Вакансии» reveals in batches.
+			    Lives inside #jobs-grid so the home page's
+			    `grid.innerHTML = newGrid.innerHTML` city-fetch swap copies
+			    it along with the visible cards. */}
+			{overflowCount > 0 && (
+				<template class="jobs-grid-overflow">
+					{overflowJobs.map((job) => (
+						<JobCard job={job} />
+					))}
+				</template>
 			)}
 		</div>
 		{hasMore && (
@@ -498,9 +540,15 @@ const hasVacancies = jobsData.length > 0;
 			if (!newGrid || newGrid.children.length === 0) {
 				const safe = String(cityName || citySlug).replace(/[<>&"]/g, '');
 				grid.innerHTML = '<div class="no-results"><h3>В городе ' + safe + ' нет активных вакансий</h3><p>Полный список доступен на странице города.</p><a class="btn-primary" href="/rabota-kurerom-' + citySlug + '/">Открыть страницу города</a></div>';
+				grid.setAttribute('data-overflow-count', '0');
 				return;
 			}
 			grid.innerHTML = newGrid.innerHTML;
+			// Mirror the fetched city's overflow count + batch size so the
+			// bottom-nav «Вакансии» reveal logic (C2) keeps working after
+			// the home grid is hot-swapped.
+			grid.setAttribute('data-overflow-count', newGrid.getAttribute('data-overflow-count') || '0');
+			grid.setAttribute('data-batch-size', newGrid.getAttribute('data-batch-size') || '24');
 			rebindCompareButtons();
 			filterJobs();
 		}
@@ -596,5 +644,44 @@ const hasVacancies = jobsData.length > 0;
 		}
 
 		filterJobs();
+
+		// C2: reveal-more-jobs — pop the next `data-batch-size` cards out
+		// of the in-grid <template class="jobs-grid-overflow"> and append
+		// them to the live grid. Decrements `data-overflow-count` so the
+		// bottom-nav button knows when to fall back to default-href nav.
+		// Returns the number of cards revealed (0 when nothing to show).
+		function revealMoreJobs() {
+			if (!grid) return 0;
+			const tpl = grid.querySelector('template.jobs-grid-overflow');
+			if (!tpl || !('content' in tpl)) return 0;
+			const remaining = tpl.content.querySelectorAll('.job-card');
+			if (remaining.length === 0) {
+				grid.setAttribute('data-overflow-count', '0');
+				return 0;
+			}
+			const batchSize = Number.parseInt(grid.dataset.batchSize || '24', 10) || 24;
+			const take = Math.min(batchSize, remaining.length);
+			for (let i = 0; i < take; i++) {
+				const card = remaining[i];
+				grid.insertBefore(card.cloneNode(true), tpl);
+				card.remove();
+			}
+			const next = tpl.content.querySelectorAll('.job-card').length;
+			grid.setAttribute('data-overflow-count', String(next));
+			rebindCompareButtons();
+			filterJobs();
+			return take;
+		}
+
+		window.addEventListener('kurieros:reveal-more-jobs', () => {
+			const revealed = revealMoreJobs();
+			if (revealed > 0) {
+				// Smooth-scroll the first newly revealed card into view so
+				// the user sees the new content without manual scrolling.
+				const cards = grid?.querySelectorAll('.job-card');
+				const firstNew = cards?.[cards.length - revealed];
+				firstNew?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			}
+		});
 	});
 </script>
