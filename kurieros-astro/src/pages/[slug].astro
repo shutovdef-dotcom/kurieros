@@ -539,6 +539,8 @@ const pageSchemaGraph = [
 			initialCity={type === 'city' ? data.name : undefined}
 			initialTag={type === 'category' ? data.tag : undefined}
 			initialSearch={type === 'category' ? data.query : undefined}
+			limit={24}
+			revealable
 		/>
 
 		{nearbyCityLinks.length > 0 && (
