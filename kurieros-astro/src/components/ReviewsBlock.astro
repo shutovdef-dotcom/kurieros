@@ -1,19 +1,22 @@
 ---
 import reviewsData from '../data/reviews.json';
 import ReviewModal from './ReviewModal.astro';
+import { seededShuffle } from '../utils/seededShuffle';
 
 export interface Props {
-  jobId?: number; // Optional: If provided, filter by job. If not, show random 3
+  jobId?: number; // Optional: If provided, filter by job. If not, show stable 3
   compact?: boolean; // Optional: If true, show smaller block for homepage
 }
 
 const { jobId, compact = false } = Astro.props;
 
-// Helper to shuffle array
-const shuffle = (arr: any[]) => [...arr].sort(() => 0.5 - Math.random());
-
 // Filter and prepare display data
-let displayReviews = [];
+//
+// Per D3: reviews must be STABLE across builds — no `Math.random()`
+// in render. Vacancy pages are deterministic via the jobId filter;
+// the home-page case uses `seededShuffle` with a fixed seed so the
+// same 3 reviews appear on every rebuild.
+let displayReviews: any[] = [];
 let overallRating = 0;
 let totalReviewsCount = 0;
 
@@ -25,8 +28,8 @@ if (jobId) {
     overallRating = Number((sum / totalReviewsCount).toFixed(1));
   }
 } else {
-  // Homepage logic: 3 random
-  displayReviews = shuffle(reviewsData).slice(0, 3);
+  // Homepage logic: 3 deterministic picks (stable across builds).
+  displayReviews = seededShuffle(reviewsData, 'reviews-home').slice(0, 3);
   totalReviewsCount = reviewsData.length;
 }
 
