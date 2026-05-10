@@ -61,7 +61,14 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 			<form id="ozon-lead-form" class="ozon-lead-form" novalidate>
 				<label class="ozon-lead-field">
 					<span>Имя <em>*</em></span>
-					<input type="text" name="name" required autocomplete="name" minlength="2" />
+					<input
+						type="text"
+						name="name"
+						required
+						autocomplete="given-name"
+						enterkeyhint="next"
+						minlength="2"
+					/>
 				</label>
 				<label class="ozon-lead-field">
 					<span>Телефон <em>*</em></span>
@@ -70,10 +77,16 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 						name="phone"
 						required
 						autocomplete="tel"
+						inputmode="tel"
+						enterkeyhint="send"
 						placeholder="+7 (___) ___-__-__"
 						pattern="[+\d\s\(\)\-]{10,}"
 					/>
 				</label>
+				<p class="ozon-lead-privacy">
+					<span aria-hidden="true">🔒</span>
+					Передаём номер только в Ozon. Спама не будет.
+				</p>
 				<fieldset class="ozon-lead-fieldset">
 					<legend>Транспорт</legend>
 					<label class="ozon-lead-radio">
@@ -361,8 +374,20 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		color: var(--ink-900);
 		outline: none;
 	}
+	/* Force vertical column so the eyebrow pill never sits next to
+	   the H2 / description on medium widths. inline-block + block
+	   normally stack, but we lock the order explicitly via flex
+	   to defend against future parent-context surprises. */
+	.ozon-lead-head {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.55rem;
+		margin-bottom: 0.4rem;
+	}
 	.ozon-lead-eyebrow {
 		display: inline-block;
+		max-width: 100%;
 		padding: 0.3rem 0.7rem;
 		background: rgba(0, 91, 255, 0.1);
 		color: var(--brand-ozon);
@@ -371,17 +396,18 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		letter-spacing: 0.05em;
 		text-transform: uppercase;
 		border-radius: 999px;
+		white-space: nowrap;
 	}
 	.ozon-lead-head h2 {
-		margin: 0.6rem 0 0.45rem;
+		margin: 0;
 		font-family: var(--font-heading, 'Manrope', sans-serif);
-		font-size: clamp(1.3rem, 2.2vw, 1.55rem);
-		line-height: 1.2;
+		font-size: 1.3rem;
+		line-height: 1.25;
 		color: var(--ink-900);
 		letter-spacing: -0.01em;
 	}
 	.ozon-lead-lead {
-		margin: 0 0 1rem;
+		margin: 0 0 0.6rem;
 		font-size: 0.95rem;
 		line-height: 1.5;
 		color: var(--ink-600);
@@ -524,6 +550,25 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		font-size: 0.75rem;
 		color: var(--ink-400);
 		line-height: 1.4;
+	}
+	.ozon-lead-privacy {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		margin: 0.1rem 0 0;
+		padding: 0.45rem 0.6rem;
+		background: var(--ink-50);
+		border-radius: 8px;
+		font-size: 0.78rem;
+		color: var(--ink-600);
+		line-height: 1.35;
+	}
+	.ozon-lead-privacy span[aria-hidden] {
+		font-size: 0.85rem;
+	}
+	:global(:where(html, body).dark-mode) .ozon-lead-privacy {
+		background: rgba(15, 23, 36, 0.65);
+		color: rgba(231, 234, 240, 0.75);
 	}
 
 	/* Success stage */
