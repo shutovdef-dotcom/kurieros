@@ -354,6 +354,15 @@ const salaryMaxNumeric = (() => {
 		.filter((n: number) => Number.isFinite(n) && n > 0);
 	return numbers.length ? Math.max(...numbers) : 0;
 })();
+// Ceiling-anchored CTA copy: when the parsed monthly max is meaningful
+// (≥10k), the apply button advertises it as «зп до Nк. руб» — concrete
+// payoff in the click decision. Floor to a thousand keeps the number
+// from over-promising (298800 → 298к, not 299к). Hourly/per-shift
+// values fall below the threshold and the button reads plain
+// «Откликнуться» so it never displays «до 0к. руб».
+const applyLabel = salaryMaxNumeric >= 10000
+	? `Откликнуться, зп до ${Math.floor(salaryMaxNumeric / 1000)}к. руб`
+	: 'Откликнуться';
 
 // === SEO+AI block helpers (replace removed «Дальше» block) ===
 
@@ -626,7 +635,6 @@ const pageSchemaGraph = [
 							<button
 								type="button"
 								class="apply-btn-large apply-btn-hero"
-								data-t="vacancy.apply"
 								data-apply-cta
 								data-apply-position="vacancy_hero"
 								data-apply-company={job.company}
@@ -637,7 +645,7 @@ const pageSchemaGraph = [
 								data-lead-form-type={leadFormType}
 								{...ozonDataAttrs(job.ozonLeadForm)}
 							>
-								Откликнуться через нас
+								{applyLabel}
 						</button>
 					) : (
 						<a
@@ -645,7 +653,6 @@ const pageSchemaGraph = [
 							target="_blank"
 							rel="noopener noreferrer nofollow sponsored"
 							class="apply-btn-large apply-btn-hero"
-							data-t="vacancy.apply"
 							data-apply-cta
 							data-apply-position="vacancy_hero"
 							data-apply-company={job.company}
@@ -654,7 +661,7 @@ const pageSchemaGraph = [
 							data-apply-employment={employmentTypeText}
 							data-apply-salary-max={salaryMaxNumeric || ''}
 						>
-							Откликнуться сейчас
+							{applyLabel}
 						</a>
 					)}
 					{/* Disabled-fallback CTA («Уточнить условия» → /contacts/) removed
@@ -893,7 +900,6 @@ const pageSchemaGraph = [
 								<button
 									type="button"
 									class="apply-btn-large"
-									data-t="vacancy.apply"
 									data-apply-cta
 									data-apply-position="vacancy_sidebar"
 									data-apply-company={job.company}
@@ -904,7 +910,7 @@ const pageSchemaGraph = [
 									data-lead-form-type={leadFormType}
 									{...ozonDataAttrs(job.ozonLeadForm)}
 								>
-									Откликнуться через нас
+									{applyLabel}
 								</button>
 								<p class="apply-note">Заполните форму — мы&nbsp;перезвоним и&nbsp;поможем зарегистрироваться с&nbsp;нашим реферальным кодом</p>
 							</>
@@ -915,7 +921,6 @@ const pageSchemaGraph = [
 									target="_blank"
 									rel="noopener noreferrer nofollow sponsored"
 									class="apply-btn-large"
-									data-t="vacancy.apply"
 									data-apply-cta
 									data-apply-position="vacancy_sidebar"
 									data-apply-company={job.company}
@@ -924,7 +929,7 @@ const pageSchemaGraph = [
 									data-apply-employment={employmentTypeText}
 									data-apply-salary-max={salaryMaxNumeric || ''}
 								>
-									Откликнуться сейчас
+									{applyLabel}
 								</a>
 								<p class="apply-note" data-t="vacancy.apply_note">Вы перейдете на сайт прямого работодателя</p>
 							</>

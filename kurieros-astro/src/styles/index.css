@@ -600,21 +600,11 @@ main {
   color: var(--text-main);
 }
 
-.job-row-actions {
-  display: flex;
-  justify-content: center;
-  padding-left: 1rem;
-  border-left: 1px solid var(--border-color);
-  min-width: 240px;
-}
-
-.job-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-  align-items: stretch;
-  width: 100%;
-}
+/* `.job-row-actions` and `.job-actions` are owned by the scoped rule
+   inside src/components/JobCard.astro. The previous global rules here
+   described an obsolete side-by-side layout (action zone with left
+   border, fixed min-width) and produced a stray vertical line at the
+   left edge of the buttons after the layout moved to bottom-of-card. */
 
 .location {
   font-size: 0.875rem;

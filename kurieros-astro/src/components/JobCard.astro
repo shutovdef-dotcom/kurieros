@@ -29,9 +29,34 @@ const salaryMaxNumeric = (() => {
 	return numbers.length ? Math.max(...numbers) : 0;
 })();
 const applyEmploymentText = job.details?.employment_type ?? '';
+// Ceiling-anchored CTA: when the parsed monthly max is meaningful
+// (≥10k) the button advertises it as «зп до Nк. руб», giving the
+// user a concrete payoff in the click decision. Floor to a thousand
+// keeps the number from over-promising (298800 → 298к, not 299к).
+// Hourly/per-shift values fall below the threshold and quietly fall
+// back to the plain CTA so the button never reads «до 0к. руб».
+const applyLabel = salaryMaxNumeric >= 10000
+	? `Откликнуться, зп до ${Math.floor(salaryMaxNumeric / 1000)}к. руб`
+	: 'Откликнуться';
+// QW13 demo — surface a prominent «Без опыта» badge.
+// Trigger combines two signals so it actually fires on real data:
+//   1) Explicit `'Без опыта'` in labels (currently dormant — no
+//      vacancySource sets it, but kept for forward-compat).
+//   2) `'16plus'` in tags — deterministic entry-level marker derived
+//      in jobs.ts:`getAgeTag(ageFrom)` for vacancies that accept
+//      16-year-olds (the truly low-barrier subset).
+// The `data-no-experience` attr lets demo CSS key off only the
+// vacancies that genuinely qualify.
+const hasNoExperience = (Array.isArray(job.labels) && job.labels.includes('Без опыта'))
+	|| (Array.isArray(job.tags) && job.tags.includes('16plus'));
 ---
 
-<div class="job-card" data-tags={job.tags.join(',')} data-location={job.location}>
+<div
+	class="job-card"
+	data-tags={job.tags.join(',')}
+	data-location={job.location}
+	data-no-experience={hasNoExperience ? 'true' : undefined}
+>
 	{job.isHot && <div class="hot-badge">🔥 ТОП</div>}
 	<div class="job-row-main">
 		<div class="company-logo">
@@ -46,38 +71,47 @@ const applyEmploymentText = job.details?.employment_type ?? '';
 				</div>
 				<div class="salary-tag" data-t={`vacancies.${job.id}.salary`}>{job.salary}</div>
 			</div>
-			<div class="job-meta">
-				<div class="location">
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
-						<circle cx="12" cy="10" r="3"></circle>
+		</div>
+	</div>
+	<div class="job-meta">
+		<div class="location">
+			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+				<circle cx="12" cy="10" r="3"></circle>
+			</svg>
+			<span data-t={`vacancies.${job.id}.location`}>{job.location}</span>
+		</div>
+		<div class="tags">
+			{job.labels.map((label: string, i: number) => (
+				<span class="tag" data-t={`vacancies.${job.id}.label_${i}`}>{label}</span>
+			))}
+		</div>
+	</div>
+	<div class="job-columns">
+		<div class="job-column">
+			<span class="job-column-label" data-t="job.salary">Зарплата</span>
+			<strong data-t={`vacancies.${job.id}.salary`}>{job.salary}</strong>
+		</div>
+		<div class="job-column">
+			<span class="job-column-label" data-t="job.schedule">График</span>
+			<strong data-t={`vacancies.${job.id}.details_schedule`}>{job.details.schedule}</strong>
+		</div>
+		<div class="job-column">
+			<span class="job-column-label" data-t="job.education">Образование</span>
+			<strong data-t={`vacancies.${job.id}.details_education`}>{job.details.education}</strong>
+		</div>
+		<div class="job-column">
+			<span class="job-column-label" data-t="job.experience">Опыт</span>
+			{hasNoExperience ? (
+				<span class="job-column-noexp" aria-label="Без опыта">
+					<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<polyline points="20 6 9 17 4 12"></polyline>
 					</svg>
-					<span data-t={`vacancies.${job.id}.location`}>{job.location}</span>
-				</div>
-				<div class="tags">
-					{job.labels.map((label: string, i: number) => (
-						<span class="tag" data-t={`vacancies.${job.id}.label_${i}`}>{label}</span>
-					))}
-				</div>
-			</div>
-			<div class="job-columns">
-				<div class="job-column">
-					<span class="job-column-label" data-t="job.salary">Зарплата</span>
-					<strong data-t={`vacancies.${job.id}.salary`}>{job.salary}</strong>
-				</div>
-				<div class="job-column">
-					<span class="job-column-label" data-t="job.schedule">График</span>
-					<strong data-t={`vacancies.${job.id}.details_schedule`}>{job.details.schedule}</strong>
-				</div>
-				<div class="job-column">
-					<span class="job-column-label" data-t="job.education">Образование</span>
-					<strong data-t={`vacancies.${job.id}.details_education`}>{job.details.education}</strong>
-				</div>
-				<div class="job-column">
-					<span class="job-column-label" data-t="job.experience">Опыт</span>
-					<strong>{job.labels.includes('Без опыта') ? <span data-t="job.no_experience">Без опыта</span> : <span data-t="job.see_vacancy">См. вакансию</span>}</strong>
-				</div>
-			</div>
+					Без опыта
+				</span>
+			) : (
+				<strong><span data-t="job.see_vacancy">См. вакансию</span></strong>
+			)}
 		</div>
 	</div>
 	<div class="job-row-actions">
@@ -89,7 +123,6 @@ const applyEmploymentText = job.details?.employment_type ?? '';
 				<button
 					type="button"
 					class="apply-btn"
-					data-t="job.apply"
 					data-apply-cta
 					data-apply-position="grid_card"
 					data-apply-company={job.company}
@@ -99,14 +132,13 @@ const applyEmploymentText = job.details?.employment_type ?? '';
 					data-apply-salary-max={salaryMaxNumeric || ''}
 					data-lead-form-type={leadFormType}
 					{...ozonDataAttrs(job.ozonLeadForm)}
-				>Откликнуться через нас</button>
+				>{applyLabel}</button>
 			) : (
 				<a
 					href={applyHref}
 					class="apply-btn"
 					target={applyExternal ? '_blank' : undefined}
 					rel={applyExternal ? 'noopener noreferrer nofollow sponsored' : undefined}
-					data-t="job.apply"
 					data-apply-cta
 					data-apply-position="grid_card"
 					data-apply-company={job.company}
@@ -114,7 +146,7 @@ const applyEmploymentText = job.details?.employment_type ?? '';
 					data-apply-transport={job.transport}
 					data-apply-employment={applyEmploymentText}
 					data-apply-salary-max={salaryMaxNumeric || ''}
-				>Заполнить заявку</a>
+				>{applyLabel}</a>
 			)}
 		</div>
 	</div>
@@ -151,6 +183,36 @@ const applyEmploymentText = job.details?.employment_type ?? '';
 		border-radius: var(--radius-sm) 0 0 var(--radius-sm);
 		letter-spacing: 0.04em;
 		box-shadow: var(--shadow-sm);
+	}
+
+	/* QW13 — «Без опыта» green pill rendered inline inside the «Опыт»
+	   column instead of a separate row, so entry-level vacancies don't
+	   stretch the card vertically vs. the «См. вакансию» fallback. */
+	.job-column-noexp {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		align-self: flex-start;
+		padding: 4px 9px;
+		background: #e8f6ec;
+		color: #117a3a;
+		border: 1px solid #b8e3c4;
+		border-radius: var(--radius-pill);
+		font-size: 12px;
+		font-weight: 700;
+		line-height: 1.35;
+		letter-spacing: 0.01em;
+		max-width: 100%;
+		white-space: nowrap;
+	}
+	.job-column-noexp svg {
+		flex-shrink: 0;
+		display: block;
+	}
+	:global(body.dark-mode) .job-column-noexp {
+		background: rgba(46, 160, 67, 0.18);
+		color: #67d086;
+		border-color: rgba(46, 160, 67, 0.45);
 	}
 
 	.job-row-main {
@@ -266,41 +328,67 @@ const applyEmploymentText = job.details?.employment_type ?? '';
 	.job-columns {
 		display: grid;
 		grid-template-columns: repeat(4, minmax(0, 1fr));
-		gap: var(--space-3);
+		gap: 0;
 		padding-top: var(--space-3);
 		border-top: 1px dashed var(--ink-200);
 	}
-	@media (max-width: 640px) {
+	@media (max-width: 480px) {
+		/* Очень узкий моб — 4 колонки физически не помещаются. */
 		.job-columns {
-			grid-template-columns: repeat(2, 1fr);
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			row-gap: var(--space-3);
 		}
 	}
 	.job-column {
 		display: flex;
 		flex-direction: column;
 		gap: 2px;
+		min-width: 0;
+		padding: 0 4px;
+		/* Вертикальный пунктир в стиле горизонтального dashed-разделителя
+		   между описанием и колонками. На первой колонке каждой
+		   логической строки убирается. */
+		border-left: 1px dashed var(--ink-200);
+	}
+	.job-column:first-child {
+		padding-left: 0;
+		border-left: none;
+	}
+	@media (max-width: 480px) {
+		.job-column:nth-child(2n+1) {
+			padding-left: 0;
+			border-left: none;
+		}
+		.job-column:nth-child(2n) {
+			padding-left: 4px;
+			border-left: 1px dashed var(--ink-200);
+		}
 	}
 	.job-column-label {
-		font-size: var(--fs-12);
+		font-size: 10px;
 		text-transform: uppercase;
-		letter-spacing: 0.05em;
+		letter-spacing: 0.02em;
 		color: var(--ink-500);
 		font-weight: 600;
+		line-height: 1.2;
+		overflow-wrap: anywhere;
 	}
 	.job-column strong {
-		font-size: var(--fs-14);
+		font-size: var(--fs-13);
 		font-weight: 600;
 		color: var(--ink-800);
+		min-width: 0;
+		overflow-wrap: anywhere;
 	}
 
 	.job-row-actions {
 		display: flex;
-		justify-content: flex-end;
 	}
 	.job-actions {
 		display: flex;
+		flex-direction: column;
 		gap: var(--space-3);
-		flex-wrap: wrap;
+		width: 100%;
 	}
 	.btn-compare,
 	.apply-btn {
