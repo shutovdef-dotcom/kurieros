@@ -178,7 +178,12 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 			stageForm?.classList.remove('hidden');
 			stageSuccess?.classList.add('hidden');
 			clearError();
-			setTimeout(() => form?.querySelector('input[name="name"]')?.focus(), 50);
+			// QW12 — на мобильном (touch-input) фокус мгновенно открывает
+			// клавиатуру → перекрывает половину модалки, scroll прыгает.
+			// Автофокус оставляем только на desktop (`pointer: fine`).
+			if (!window.matchMedia('(pointer: coarse)').matches) {
+				setTimeout(() => form?.querySelector('input[name="name"]')?.focus(), 50);
+			}
 			if (typeof window.gtag === 'function') {
 				window.gtag('event', 'ozon_lead_open', {
 					context_company: context?.company || '',
