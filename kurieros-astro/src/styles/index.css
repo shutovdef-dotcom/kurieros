@@ -193,6 +193,26 @@ body.dark-mode .logo svg {
   }
 }
 
+/* Mobile (≤768): on narrow viewports the absolute-positioned
+   `.header-controls` (theme toggle + language switcher) overlap the
+   centered `.header-left` (logo) — at 375 px the toggle's left edge
+   lands ~9 px inside the logo's bounding box, which reads visually as
+   "logo + toggle stuck together" (user feedback).  Switch the header
+   to a normal `space-between` flex layout on mobile so the logo sits
+   flush-left and the controls sit flush-right with real breathing
+   room in between. */
+@media (max-width: 768px) {
+  header {
+    justify-content: space-between;
+  }
+  .header-controls {
+    position: static;
+    transform: none;
+    right: auto;
+    top: auto;
+  }
+}
+
 /* ---------------------------------
    MULTI-VARIANT NAVIGATION STYLES
    --------------------------------- */
