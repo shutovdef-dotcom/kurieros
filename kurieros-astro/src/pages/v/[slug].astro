@@ -627,6 +627,48 @@ const pageSchemaGraph = [
 						{cityLinks.slice(0, 2).map((city) => (
 							<a href={city.href} class="meta-pill meta-pill-link">{city.name}</a>
 						))}
+						<div class="share-wrap">
+							<button
+								class="share-btn"
+								type="button"
+								aria-label="Поделиться вакансией"
+								aria-haspopup="menu"
+								aria-expanded="false"
+								data-share-vacancy
+								data-share-slug={job.slug}
+								data-share-title={job.title}
+								data-share-salary={job.salary}
+							>
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+									<circle cx="18" cy="5" r="3"></circle>
+									<circle cx="6" cy="12" r="3"></circle>
+									<circle cx="18" cy="19" r="3"></circle>
+									<line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+									<line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+								</svg>
+								<span>Поделиться</span>
+							</button>
+							<div class="share-dropdown" role="menu" hidden>
+								<button type="button" role="menuitem" class="share-option" data-share-target="telegram">
+									<span class="share-option-icon" aria-hidden="true">✈️</span> Telegram
+								</button>
+								<button type="button" role="menuitem" class="share-option" data-share-target="whatsapp">
+									<span class="share-option-icon" aria-hidden="true">💬</span> WhatsApp
+								</button>
+								<button type="button" role="menuitem" class="share-option" data-share-target="vk">
+									<span class="share-option-icon" aria-hidden="true">🌐</span> ВКонтакте
+								</button>
+								<button type="button" role="menuitem" class="share-option" data-share-target="max">
+									<span class="share-option-icon" aria-hidden="true">Ⓜ️</span> МАХ
+								</button>
+								<button type="button" role="menuitem" class="share-option" data-share-target="copy">
+									<span class="share-option-icon" aria-hidden="true">📋</span> Скопировать ссылку
+								</button>
+								<button type="button" role="menuitem" class="share-option share-option-native" data-share-target="native" hidden>
+									<span class="share-option-icon" aria-hidden="true">📤</span> Ещё…
+								</button>
+							</div>
+						</div>
 					</div>
 				</div>
 					<div class="vacancy-salary-card">
@@ -1025,6 +1067,107 @@ const pageSchemaGraph = [
 	}
 </script>
 
+<script is:inline>
+	// HV19 (rev) — Share button on detail page with RU-market options.
+	// Always shows custom dropdown (Telegram / WhatsApp / VK / МАХ /
+	// Copy / Ещё). «Ещё» calls `navigator.share()` and is shown only
+	// when the API is supported (mobile mainly).
+	(function () {
+		if (typeof navigator.share === 'function') {
+			document.querySelectorAll('.share-option-native').forEach((b) => b.removeAttribute('hidden'));
+		}
+
+		function closeAllDropdowns() {
+			document.querySelectorAll('.share-dropdown:not([hidden])').forEach((d) => {
+				d.setAttribute('hidden', '');
+				const trigger = d.parentElement && d.parentElement.querySelector('[data-share-vacancy]');
+				if (trigger) trigger.setAttribute('aria-expanded', 'false');
+			});
+		}
+
+		document.addEventListener('click', (event) => {
+			const target = event.target;
+			if (!(target instanceof Element)) return;
+
+			const shareBtn = target.closest('[data-share-vacancy]');
+			if (shareBtn) {
+				event.preventDefault();
+				event.stopPropagation();
+				const wrap = shareBtn.closest('.share-wrap');
+				const dropdown = wrap && wrap.querySelector('.share-dropdown');
+				if (!dropdown) return;
+				document.querySelectorAll('.share-dropdown:not([hidden])').forEach((d) => {
+					if (d !== dropdown) d.setAttribute('hidden', '');
+				});
+				const willOpen = dropdown.hasAttribute('hidden');
+				if (willOpen) {
+					dropdown.removeAttribute('hidden');
+					shareBtn.setAttribute('aria-expanded', 'true');
+				} else {
+					dropdown.setAttribute('hidden', '');
+					shareBtn.setAttribute('aria-expanded', 'false');
+				}
+				return;
+			}
+
+			const shareOption = target.closest('[data-share-target]');
+			if (shareOption) {
+				event.preventDefault();
+				const wrap = shareOption.closest('.share-wrap');
+				const trigger = wrap && wrap.querySelector('[data-share-vacancy]');
+				if (!trigger) return;
+				const slug = trigger.dataset.shareSlug || '';
+				const title = trigger.dataset.shareTitle || 'Вакансия курьера';
+				const salary = trigger.dataset.shareSalary || '';
+				const url = 'https://kurerok.ru/v/' + slug + '/?utm_source=share&utm_medium=user';
+				const text = title + (salary ? ' · ' + salary : '');
+				const action = shareOption.dataset.shareTarget;
+
+				if (action === 'telegram') {
+					window.open('https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(text), '_blank', 'noopener,noreferrer');
+				} else if (action === 'whatsapp') {
+					window.open('https://wa.me/?text=' + encodeURIComponent(text + '\n' + url), '_blank', 'noopener,noreferrer');
+				} else if (action === 'vk') {
+					window.open('https://vk.com/share.php?url=' + encodeURIComponent(url) + '&title=' + encodeURIComponent(title) + '&description=' + encodeURIComponent(salary), '_blank', 'noopener,noreferrer');
+				} else if (action === 'max') {
+					// МАХ — российский мессенджер от VK / Ростелекома.
+					// Web-share URL: https://max.ru/share?url=...&text=...
+					// Если глубокая ссылка не сработает — пользователь увидит
+					// web-страницу МАХ'а и сможет поделиться там.
+					window.open('https://max.ru/share?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(text), '_blank', 'noopener,noreferrer');
+				} else if (action === 'copy') {
+					if (navigator.clipboard && navigator.clipboard.writeText) {
+						navigator.clipboard.writeText(url).then(() => {
+							const orig = shareOption.innerHTML;
+							shareOption.innerHTML = '<span class="share-option-icon" aria-hidden="true">✓</span> Ссылка скопирована';
+							setTimeout(() => { shareOption.innerHTML = orig; }, 1500);
+						}).catch(() => {});
+					}
+				} else if (action === 'native') {
+					if (typeof navigator.share === 'function') {
+						navigator.share({ title, text, url }).catch(() => {});
+					}
+				}
+
+				if (action !== 'copy') closeAllDropdowns();
+
+				if (typeof window.gtag === 'function') {
+					window.gtag('event', 'share_vacancy', { vacancy_slug: slug, method: action });
+				}
+				return;
+			}
+
+			if (!target.closest('.share-wrap')) {
+				closeAllDropdowns();
+			}
+		}, true);
+
+		document.addEventListener('keydown', (event) => {
+			if (event.key === 'Escape') closeAllDropdowns();
+		});
+	})();
+</script>
+
 <style>
 	.vacancy-page {
 		/* All --vacancy-* tokens route through global design tokens
@@ -1167,6 +1310,103 @@ const pageSchemaGraph = [
 		text-decoration: none;
 		color: var(--vacancy-ink);
 	}
+
+	/* Share button + dropdown (HV19 reposition — only on detail page).
+	   Inline pill-style button at the end of `.vacancy-meta-row`,
+	   dropdown pops below. RU-ориентированные опции: Telegram,
+	   WhatsApp, ВКонтакте, МАХ, Copy + «Ещё…» (native share-sheet
+	   через `navigator.share`, виден только когда API поддерживается). */
+	.share-wrap {
+		position: relative;
+		display: inline-flex;
+		margin-left: auto;
+	}
+	.share-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		min-height: 2.25rem;
+		padding: 0.45rem 0.85rem;
+		border-radius: 8px;
+		border: 1px solid var(--vacancy-border);
+		background: rgba(255, 255, 255, 0.9);
+		color: var(--vacancy-ink);
+		font-family: inherit;
+		font-size: 0.82rem;
+		font-weight: 700;
+		cursor: pointer;
+		transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+	}
+	.share-btn:hover,
+	.share-btn:focus-visible {
+		background: var(--brand-50, #ecf5ef);
+		color: var(--brand-700, #117a3a);
+		border-color: var(--brand-300, #b8e3c4);
+		outline: none;
+	}
+	.share-dropdown {
+		position: absolute;
+		top: calc(100% + 6px);
+		right: 0;
+		min-width: 220px;
+		padding: 6px;
+		background: #ffffff;
+		border: 1px solid var(--vacancy-border);
+		border-radius: 12px;
+		box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		z-index: 50;
+	}
+	.share-dropdown[hidden] {
+		display: none;
+	}
+	.share-option {
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		padding: 9px 12px;
+		background: transparent;
+		border: none;
+		border-radius: 6px;
+		color: var(--vacancy-ink);
+		font-family: inherit;
+		font-size: 0.9rem;
+		font-weight: 500;
+		cursor: pointer;
+		text-align: left;
+		transition: background 0.12s ease;
+	}
+	.share-option:hover,
+	.share-option:focus-visible {
+		background: #f4f6fa;
+		outline: none;
+	}
+	.share-option-icon {
+		font-size: 1rem;
+		line-height: 1;
+	}
+	:global(:where(html, body).dark-mode) .share-btn {
+		background: rgba(15, 23, 36, 0.85);
+		color: #e7eaf0;
+		border-color: rgba(195, 204, 216, 0.25);
+	}
+	:global(:where(html, body).dark-mode) .share-btn:hover {
+		color: #67d086;
+		border-color: rgba(94, 191, 156, 0.5);
+	}
+	:global(:where(html, body).dark-mode) .share-dropdown {
+		background: #1b2533;
+		border-color: rgba(195, 204, 216, 0.18);
+	}
+	:global(:where(html, body).dark-mode) .share-option {
+		color: #e7eaf0;
+	}
+	:global(:where(html, body).dark-mode) .share-option:hover {
+		background: rgba(231, 234, 240, 0.08);
+	}
+
 	.vacancy-hero-actions {
 		display: flex;
 		flex-wrap: wrap;
@@ -1684,12 +1924,34 @@ const pageSchemaGraph = [
 		}
 
 		.vacancy-header h1 {
-			font-size: 2.35rem;
-			max-width: 14ch;
+			font-size: 1.55rem;
+			line-height: 1.2;
+			max-width: none;
 		}
 
+		/* Mobile hero — keep logo + title in a row so the title sits in
+		   the empty space to the right of the logo (instead of dropping
+		   below it). Logo shrinks 80→56 so titles like «Автокурьер в
+		   Яндекс Еда в Москве» fit in the remaining ~250px on a 375px
+		   viewport without overflow. */
 		.vacancy-company-info {
-			flex-direction: column;
+			flex-direction: row;
+			gap: 0.85rem;
+			align-items: flex-start;
+		}
+		.vacancy-logo {
+			width: 56px;
+			height: 56px;
+			padding: 0.3rem;
+			flex-shrink: 0;
+		}
+		.vacancy-kicker {
+			margin-bottom: 0.3rem;
+			font-size: 0.65rem;
+		}
+		.vacancy-company-info > div {
+			min-width: 0;
+			flex: 1;
 		}
 		/* Keep .vacancy-facts at 2 columns even on the narrowest phones —
 		   user feedback: "Их надо сделать более компактными для мобильной
