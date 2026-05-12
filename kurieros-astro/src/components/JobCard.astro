@@ -53,6 +53,8 @@ const hasNoExperience = (Array.isArray(job.labels) && job.labels.includes('Бе�
 
 <div
 	class="job-card"
+	data-id={job.id}
+	data-slug={job.slug}
 	data-tags={job.tags.join(',')}
 	data-location={job.location}
 	data-no-experience={hasNoExperience ? 'true' : undefined}
@@ -118,6 +120,23 @@ const hasNoExperience = (Array.isArray(job.labels) && job.labels.includes('Бе�
 		<div class="job-actions">
 			<button class={`btn-compare ${isInCompare ? 'active' : ''}`} data-id={job.id} type="button">
 				{isInCompare ? <><span data-t="job.in_compare">В сравнении</span> ✓</> : <span data-t="job.compare">+ Сравнить</span>}
+			</button>
+			<button
+				class="share-btn"
+				type="button"
+				aria-label="Поделиться вакансией"
+				data-share-vacancy
+				data-share-slug={job.slug}
+				data-share-title={job.title}
+				data-share-salary={job.salary}
+			>
+				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<circle cx="18" cy="5" r="3"></circle>
+					<circle cx="6" cy="12" r="3"></circle>
+					<circle cx="18" cy="19" r="3"></circle>
+					<line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+					<line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+				</svg>
 			</button>
 			{isLeadFormApply ? (
 				<button
@@ -433,4 +452,208 @@ const hasNoExperience = (Array.isArray(job.labels) && job.labels.includes('Бе�
 	.apply-btn:focus-visible {
 		box-shadow: var(--shadow-focus);
 	}
+
+	/* HV19 — Share button.
+	   Маленькая квадратная кнопка-иконка между «Сравнить» и «Откликнуться».
+	   На mobile native share-sheet, на desktop fallback на WhatsApp Web. */
+	.share-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 44px;
+		height: 44px;
+		flex-shrink: 0;
+		border-radius: var(--radius-md);
+		background: var(--ink-0);
+		color: var(--ink-600);
+		border: 1px solid var(--ink-200);
+		cursor: pointer;
+		transition: background var(--transition), color var(--transition), border-color var(--transition);
+	}
+	.share-btn:hover,
+	.share-btn:focus-visible {
+		background: var(--brand-50);
+		color: var(--brand-700);
+		border-color: var(--brand-300);
+		outline: none;
+	}
+	.share-btn:focus-visible {
+		box-shadow: var(--shadow-focus);
+	}
+	:global(body.dark-mode) .share-btn {
+		background: rgba(15, 23, 36, 0.65);
+		color: var(--ink-300);
+		border-color: rgba(195, 204, 216, 0.2);
+	}
+	:global(body.dark-mode) .share-btn:hover {
+		color: var(--brand-300);
+		border-color: rgba(94, 191, 156, 0.4);
+	}
+
+	/* HV9 — Viewed-vacancy marker.
+	   Карточка приглушена (opacity 0.65) после клика по job-title; при hover
+	   возвращается к полной непрозрачности. Маленький badge «✓ просмотрено»
+	   в правом-нижнем углу. */
+	.job-card.viewed {
+		opacity: 0.7;
+		transition: opacity 0.2s ease;
+	}
+	.job-card.viewed:hover {
+		opacity: 1;
+	}
+	.job-card.viewed::after {
+		content: "✓ просмотрено";
+		position: absolute;
+		bottom: 8px;
+		right: 8px;
+		font-size: 10px;
+		font-weight: 600;
+		letter-spacing: 0.02em;
+		color: var(--ink-500);
+		background: var(--ink-50);
+		border: 1px solid var(--ink-150, var(--ink-200));
+		padding: 2px 6px;
+		border-radius: 4px;
+		pointer-events: none;
+	}
+	:global(body.dark-mode) .job-card.viewed::after {
+		background: rgba(195, 204, 216, 0.1);
+		color: var(--ink-300);
+		border-color: rgba(195, 204, 216, 0.2);
+	}
+
+	/* HV11 — Compact JobCard on mobile.
+	   Сжимаем padding/gap/heights чтобы 3 карточки помещались выше fold
+	   на iPhone 12 mini (375×812). Все интерактивные элементы остаются
+	   ≥40px (WCAG 2.5.5 minimum). */
+	@media (max-width: 768px) {
+		.job-card {
+			gap: var(--space-3);
+			padding: var(--space-4);
+		}
+		.job-row-main {
+			gap: 10px;
+		}
+		.company-logo {
+			width: 40px;
+			height: 40px;
+		}
+		.job-title {
+			font-size: var(--fs-16);
+			line-height: 1.25;
+		}
+		.salary-tag {
+			font-size: var(--fs-13);
+			padding: 4px 10px;
+		}
+		.job-columns {
+			padding-top: var(--space-2);
+		}
+		.btn-compare,
+		.apply-btn,
+		.share-btn {
+			height: 40px;
+		}
+		.share-btn {
+			width: 40px;
+		}
+		.btn-compare,
+		.apply-btn {
+			padding: 0 14px;
+		}
+	}
 </style>
+
+<script>
+	// HV9 + HV19 — viewed-vacancy marker + share button.
+	// Hoisted script (no `is:inline`) — Astro дедуплицирует и инжектит
+	// один раз на страницу, даже если JobCard рендерится N раз.
+
+	const VIEWED_KEY = 'kurieros:viewed-vacancies';
+	const MAX_VIEWED = 200; // cap localStorage usage
+
+	function readViewed(): Set<string> {
+		try {
+			const raw = localStorage.getItem(VIEWED_KEY);
+			if (!raw) return new Set();
+			const arr = JSON.parse(raw);
+			return new Set(Array.isArray(arr) ? arr.map(String) : []);
+		} catch {
+			return new Set();
+		}
+	}
+
+	function persistViewed(set: Set<string>) {
+		try {
+			const arr = Array.from(set).slice(-MAX_VIEWED);
+			localStorage.setItem(VIEWED_KEY, JSON.stringify(arr));
+		} catch {
+			/* private mode / quota — silently skip */
+		}
+	}
+
+	function markViewedCards() {
+		const viewed = readViewed();
+		if (viewed.size === 0) return;
+		document.querySelectorAll<HTMLElement>('.job-card[data-id]').forEach((card) => {
+			const id = card.dataset.id;
+			if (id && viewed.has(id)) card.classList.add('viewed');
+		});
+	}
+
+	// Initial mark + re-mark after city-swap / reveal-more (grid swaps innerHTML).
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', markViewedCards, { once: true });
+	} else {
+		markViewedCards();
+	}
+	window.addEventListener('kurieros:city-selected', () => setTimeout(markViewedCards, 100));
+	window.addEventListener('kurieros:reveal-more-jobs', markViewedCards);
+
+	// Click delegation: capture clicks on `.job-card .job-title` and persist.
+	document.addEventListener('click', (event) => {
+		const target = event.target;
+		if (!(target instanceof Element)) return;
+
+		const titleLink = target.closest('.job-card .job-title');
+		if (titleLink) {
+			const card = titleLink.closest<HTMLElement>('.job-card[data-id]');
+			const id = card?.dataset.id;
+			if (id) {
+				const viewed = readViewed();
+				viewed.add(id);
+				persistViewed(viewed);
+				card.classList.add('viewed');
+			}
+			return;
+		}
+
+		// HV19 — Share button delegation.
+		const shareBtn = target.closest<HTMLElement>('[data-share-vacancy]');
+		if (shareBtn) {
+			event.preventDefault();
+			const slug = shareBtn.dataset.shareSlug || '';
+			const title = shareBtn.dataset.shareTitle || 'Вакансия курьера';
+			const salary = shareBtn.dataset.shareSalary || '';
+			const url = `https://kurerok.ru/v/${slug}/?utm_source=share&utm_medium=user`;
+			const text = `${title}${salary ? ' · ' + salary : ''}\n${url}`;
+
+			if (typeof navigator.share === 'function') {
+				navigator.share({ title, text, url }).catch(() => {
+					/* user cancelled — silently skip */
+				});
+			} else {
+				// Desktop fallback: WhatsApp Web with pre-filled text.
+				const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+				window.open(waUrl, '_blank', 'noopener,noreferrer');
+			}
+
+			if (typeof (window as any).gtag === 'function') {
+				(window as any).gtag('event', 'share_vacancy', {
+					vacancy_slug: slug,
+					method: typeof navigator.share === 'function' ? 'native' : 'wa_fallback',
+				});
+			}
+		}
+	}, true);
+</script>
