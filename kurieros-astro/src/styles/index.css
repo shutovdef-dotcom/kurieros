@@ -755,17 +755,23 @@ body.dark-mode .btn-compare.active {
   color: var(--dm-green-text);
 }
 
+/* Theme toggle in dark mode — neutral coal grey (not green) to visually
+   separate from the brand-green logo pin sitting next to it in header.
+   Previously used `--dm-green-surface-strong` which made logo + toggle
+   read as a single green blob (user feedback). Background uses --ink-200
+   (lighter coal) because --ink-100 matches the header background, which
+   would make the toggle invisible. */
 body.dark-mode .theme-toggle {
-  background: var(--dm-green-surface-strong);
-  border-color: var(--dm-green-border);
-  color: #bde8d8;
+  background: var(--ink-200);
+  border: 1px solid var(--ink-300);
+  color: var(--ink-800);
 }
 
 body.dark-mode .theme-toggle:hover,
 body.dark-mode .theme-toggle:focus-visible {
-  background: var(--dm-green-surface-hover);
-  border-color: var(--dm-green-surface-hover);
-  color: var(--dm-green-text);
+  background: var(--ink-300);
+  border-color: var(--ink-400);
+  color: var(--ink-900);
 }
 
 body.dark-mode .main-nav a:hover,
