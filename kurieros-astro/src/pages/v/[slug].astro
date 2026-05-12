@@ -5,6 +5,7 @@ import Footer from '../../components/Footer.astro';
 import VacancyStickyApply from '../../components/VacancyStickyApply.astro';
 import ReviewsBlock from '../../components/ReviewsBlock.astro';
 import PartnerBanner from '../../components/PartnerBanner.astro';
+import JobCard from '../../components/JobCard.astro';
 import jobsData from '../../data/jobs';
 import { vacancySources } from '../../data/vacancies';
 import type { VacancyOffer } from '../../data/vacancyTypes';
@@ -138,6 +139,14 @@ const scoredRelatedJobs = jobsData
 	.sort((a, b) => b.score - a.score || parseSalaryValue(b.salary) - parseSalaryValue(a.salary));
 const prioritizedRelatedJobs = scoredRelatedJobs.filter((item) => item.score > 0);
 const relatedJobs = prioritizedRelatedJobs.length ? prioritizedRelatedJobs.slice(0, 4) : scoredRelatedJobs.slice(0, 4);
+// HV20 — «Похожие на эту вакансию» секция. Расширяем top-4 до top-6
+// и рендерим через настоящий <JobCard> (с CTA, share, viewed marker).
+// Существующая «Альтернативы и разделы» (text-only with diff explainer)
+// остаётся на месте — служит для intellectual-сравнения; HV20 даёт
+// action-oriented карточки для прямого перехода.
+const similarJobs = prioritizedRelatedJobs.length
+	? prioritizedRelatedJobs.slice(0, 6)
+	: scoredRelatedJobs.slice(0, 6);
 // Build a tight «benefit tail» — up to 2 hooks NOT redundant with the
 // leading «salary • schedule • payment_freq» line. Used to boost CTR
 // on long-tail SERP queries like «работа курьером без опыта», «без
@@ -854,6 +863,21 @@ const pageSchemaGraph = [
 							<a class="vacancy-alternatives-deeplink" href="/guide/">Гид для курьера: возраст, медкнижка, доход, налоги →</a>
 						</div>
 					</section>
+
+					{similarJobs.length > 0 && (
+						<section class="vacancy-section vacancy-similar" aria-labelledby="vacancy-similar-title">
+							<p class="section-eyebrow">Похожие предложения</p>
+							<h2 id="vacancy-similar-title">Похожие на эту вакансию</h2>
+							<p class="vacancy-similar-lead">
+								Реальные карточки с откликом в один тап — отсортированы по близости к этой вакансии и по доходу.
+							</p>
+							<div class="vacancy-similar-grid">
+								{similarJobs.map((other) => (
+									<JobCard job={other} />
+								))}
+							</div>
+						</section>
+					)}
 
 					{sameRoleOtherCities.length > 0 && (
 						<section class="vacancy-section vacancy-other-cities" aria-labelledby="vacancy-other-cities-title">
@@ -2322,6 +2346,27 @@ const pageSchemaGraph = [
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 		gap: 0.45rem;
+	}
+
+	/* HV20 — Similar vacancies grid (full JobCard reuse).
+	   Main content area на detail page уже, чем home grid (sidebar
+	   занимает часть ширины), поэтому только 1-2 колонки. */
+	.vacancy-similar-lead {
+		margin: 0 0 var(--space-4);
+		max-width: 70ch;
+		color: var(--vacancy-muted);
+		font-size: 0.95rem;
+		line-height: 1.55;
+	}
+	.vacancy-similar-grid {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: var(--space-4);
+	}
+	@media (min-width: 900px) {
+		.vacancy-similar-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
 	}
 	.vacancy-other-cities-item {
 		margin: 0;

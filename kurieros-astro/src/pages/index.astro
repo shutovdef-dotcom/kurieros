@@ -416,11 +416,97 @@ const pageSchemaGraph = [
 			}
 		}
 
+		// HV4 — Geo banner for first-time visitors.
+		// IANA timezone → primary city of region. VPN typically rewrites IP
+		// but не трогает системную таймзону, поэтому работает даже под VPN.
+		const TZ_TO_CITY = {
+			'Europe/Moscow': 'Москва',
+			'Europe/Kaliningrad': 'Калининград',
+			'Europe/Samara': 'Самара',
+			'Europe/Volgograd': 'Волгоград',
+			'Europe/Saratov': 'Саратов',
+			'Europe/Astrakhan': 'Астрахань',
+			'Europe/Ulyanovsk': 'Ульяновск',
+			'Europe/Kirov': 'Киров',
+			'Asia/Yekaterinburg': 'Екатеринбург',
+			'Asia/Omsk': 'Омск',
+			'Asia/Novosibirsk': 'Новосибирск',
+			'Asia/Krasnoyarsk': 'Красноярск',
+			'Asia/Irkutsk': 'Иркутск',
+			'Asia/Yakutsk': 'Якутск',
+			'Asia/Vladivostok': 'Владивосток',
+			'Asia/Magadan': 'Магадан',
+			'Asia/Kamchatka': 'Петропавловск-Камчатский',
+			'Asia/Anadyr': 'Анадырь',
+			'Asia/Chita': 'Чита'
+		};
+		const GEO_BANNER_DISMISSED_KEY = 'kurieros:geo-banner-dismissed';
+
+		function getTzCity() {
+			try {
+				const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+				const city = TZ_TO_CITY[tz];
+				return city && availableCities.includes(city) ? city : '';
+			} catch (_) {
+				return '';
+			}
+		}
+
+		function showGeoBanner(city) {
+			const banner = document.createElement('div');
+			banner.id = 'geo-banner';
+			banner.className = 'geo-banner';
+			banner.setAttribute('role', 'region');
+			banner.setAttribute('aria-label', 'Предложение по городу');
+			banner.innerHTML = '<span class="geo-banner-text">📍 Похоже, ваш город — <strong>' + city + '</strong>. Показать только эти вакансии?</span><div class="geo-banner-actions"><button type="button" class="geo-banner-btn geo-banner-btn-primary" data-action="apply">Да, показать</button><button type="button" class="geo-banner-btn geo-banner-btn-secondary" data-action="dismiss">Все города</button></div>';
+			const target = document.querySelector('.home-toolbar-section');
+			if (target && target.parentElement) {
+				target.parentElement.insertBefore(banner, target);
+			}
+
+			banner.addEventListener('click', (event) => {
+				const action = event.target && event.target.dataset && event.target.dataset.action;
+				if (!action) return;
+				if (action === 'apply') {
+					applyCity(city, 'geo-banner');
+				} else {
+					// Dismiss → silent legacy fallback (Moscow default).
+					const fallback = getFallbackCity();
+					if (fallback) applyCity(fallback, 'default');
+				}
+				try { localStorage.setItem(GEO_BANNER_DISMISSED_KEY, '1'); } catch (_) {}
+				banner.remove();
+				if (typeof window.gtag === 'function') {
+					window.gtag('event', 'geo_banner_action', { action, city });
+				}
+			});
+		}
+
+		async function maybeShowGeoBannerOrAutoApply() {
+			// 1. Try IP-geo (existing infrastructure).
+			const ipData = await getIpData();
+			const ipCity = normalizeDetectedCity(ipData && ipData.city);
+			// 2. Fallback to timezone-mapped city.
+			const suggested = ipCity || getTzCity();
+			if (suggested && availableCities.includes(suggested)) {
+				showGeoBanner(suggested);
+				return;
+			}
+			// 3. Final fallback — silent default (Moscow).
+			const fallback = getFallbackCity();
+			if (fallback) applyCity(fallback, 'default');
+		}
+
 			const savedCity = localStorage.getItem(STORAGE_KEY);
+			const geoBannerDismissed = localStorage.getItem(GEO_BANNER_DISMISSED_KEY) === '1';
 			if (savedCity && availableCities.includes(savedCity)) {
 				applyCity(savedCity, 'saved');
-			} else {
+			} else if (geoBannerDismissed) {
+				// User already declined the banner once — honor that by
+				// using the legacy silent default flow.
 				detectCityByGeo();
+			} else {
+				maybeShowGeoBannerOrAutoApply();
 			}
 
 		citySelect?.addEventListener('change', (event) => {
@@ -1472,6 +1558,81 @@ const pageSchemaGraph = [
 			background: rgba(28, 30, 36, 0.92);
 			border-color: var(--ink-200);
 		}
+	}
+
+	/* HV4 — Geo banner.
+	   Селекторы `:global()` потому что банер инжектится через
+	   `document.createElement` (без Astro data-astro-cid-* атрибутов). */
+	:global(.geo-banner) {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-4);
+		padding: 12px 16px;
+		background: var(--brand-50);
+		border: 1px solid var(--brand-300);
+		border-radius: var(--radius-md);
+		margin-bottom: var(--space-3);
+		font-size: var(--fs-14);
+		line-height: 1.45;
+	}
+	:global(.geo-banner-text) {
+		color: var(--brand-800);
+	}
+	:global(.geo-banner-text strong) {
+		font-weight: 700;
+	}
+	:global(.geo-banner-actions) {
+		display: flex;
+		gap: 8px;
+		flex-shrink: 0;
+	}
+	:global(.geo-banner-btn) {
+		padding: 8px 14px;
+		border-radius: var(--radius-md);
+		font-family: var(--font-main);
+		font-size: var(--fs-13);
+		font-weight: 600;
+		cursor: pointer;
+		white-space: nowrap;
+		transition: background 0.15s ease, border-color 0.15s ease;
+	}
+	:global(.geo-banner-btn-primary) {
+		background: var(--brand-700);
+		color: #fff;
+		border: 1px solid var(--brand-700);
+	}
+	:global(.geo-banner-btn-primary:hover) {
+		background: var(--brand-800);
+		border-color: var(--brand-800);
+	}
+	:global(.geo-banner-btn-secondary) {
+		background: var(--ink-0);
+		color: var(--ink-700);
+		border: 1px solid var(--ink-200);
+	}
+	:global(.geo-banner-btn-secondary:hover) {
+		background: var(--ink-50);
+		border-color: var(--ink-300);
+	}
+	@media (max-width: 640px) {
+		:global(.geo-banner) {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+		:global(.geo-banner-actions) {
+			width: 100%;
+		}
+		:global(.geo-banner-btn) {
+			flex: 1 1 auto;
+		}
+	}
+	:global(body.dark-mode .geo-banner) {
+		background: rgba(94, 191, 156, 0.12);
+		border-color: rgba(94, 191, 156, 0.35);
+	}
+	:global(body.dark-mode .geo-banner-text) {
+		color: var(--ink-200);
 	}
 
 	/* Hero toolbar — k-cityrow layout (handoff): city+lang | cta | fselects.
