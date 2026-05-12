@@ -60,6 +60,41 @@ const hasNoExperience = (Array.isArray(job.labels) && job.labels.includes('Бе�
 	data-no-experience={hasNoExperience ? 'true' : undefined}
 >
 	{job.isHot && <div class="hot-badge">🔥 ТОП</div>}
+	<div class="share-wrap">
+		<button
+			class="share-btn"
+			type="button"
+			aria-label="Поделиться вакансией"
+			aria-haspopup="menu"
+			aria-expanded="false"
+			data-share-vacancy
+			data-share-slug={job.slug}
+			data-share-title={job.title}
+			data-share-salary={job.salary}
+		>
+			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+				<circle cx="18" cy="5" r="3"></circle>
+				<circle cx="6" cy="12" r="3"></circle>
+				<circle cx="18" cy="19" r="3"></circle>
+				<line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+				<line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+			</svg>
+		</button>
+		<div class="share-dropdown" role="menu" hidden>
+			<button type="button" role="menuitem" class="share-option" data-share-target="telegram">
+				<span class="share-option-icon" aria-hidden="true">✈️</span> Telegram
+			</button>
+			<button type="button" role="menuitem" class="share-option" data-share-target="whatsapp">
+				<span class="share-option-icon" aria-hidden="true">💬</span> WhatsApp
+			</button>
+			<button type="button" role="menuitem" class="share-option" data-share-target="vk">
+				<span class="share-option-icon" aria-hidden="true">🌐</span> ВКонтакте
+			</button>
+			<button type="button" role="menuitem" class="share-option" data-share-target="copy">
+				<span class="share-option-icon" aria-hidden="true">📋</span> Скопировать ссылку
+			</button>
+		</div>
+	</div>
 	<div class="job-row-main">
 		<div class="company-logo">
 			<img src={job.companyLogo} alt={`${job.company} logo`} width="48" height="48" loading="lazy" decoding="async" />
@@ -120,23 +155,6 @@ const hasNoExperience = (Array.isArray(job.labels) && job.labels.includes('Бе�
 		<div class="job-actions">
 			<button class={`btn-compare ${isInCompare ? 'active' : ''}`} data-id={job.id} type="button">
 				{isInCompare ? <><span data-t="job.in_compare">В сравнении</span> ✓</> : <span data-t="job.compare">+ Сравнить</span>}
-			</button>
-			<button
-				class="share-btn"
-				type="button"
-				aria-label="Поделиться вакансией"
-				data-share-vacancy
-				data-share-slug={job.slug}
-				data-share-title={job.title}
-				data-share-salary={job.salary}
-			>
-				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-					<circle cx="18" cy="5" r="3"></circle>
-					<circle cx="6" cy="12" r="3"></circle>
-					<circle cx="18" cy="19" r="3"></circle>
-					<line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-					<line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-				</svg>
 			</button>
 			{isLeadFormApply ? (
 				<button
@@ -453,22 +471,34 @@ const hasNoExperience = (Array.isArray(job.labels) && job.labels.includes('Бе�
 		box-shadow: var(--shadow-focus);
 	}
 
-	/* HV19 — Share button.
-	   Маленькая квадратная кнопка-иконка между «Сравнить» и «Откликнуться».
-	   На mobile native share-sheet, на desktop fallback на WhatsApp Web. */
+	/* HV19 — Share button in absolute top-right corner (does NOT take
+	   vertical space in the card). Clicking on touch devices opens
+	   native share-sheet; on desktop opens custom RU dropdown
+	   (Telegram / WhatsApp / VK / Copy link). */
+	.share-wrap {
+		position: absolute;
+		top: 10px;
+		right: 12px;
+		z-index: 3;
+	}
+	.job-card.viewed .share-wrap {
+		/* Viewed cards have opacity 0.78 — but share button stays full opacity. */
+		opacity: 1.28;
+	}
 	.share-btn {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 44px;
-		height: 44px;
-		flex-shrink: 0;
-		border-radius: var(--radius-md);
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
 		background: var(--ink-0);
 		color: var(--ink-600);
 		border: 1px solid var(--ink-200);
 		cursor: pointer;
+		padding: 0;
 		transition: background var(--transition), color var(--transition), border-color var(--transition);
+		box-shadow: var(--shadow-sm);
 	}
 	.share-btn:hover,
 	.share-btn:focus-visible {
@@ -480,46 +510,96 @@ const hasNoExperience = (Array.isArray(job.labels) && job.labels.includes('Бе�
 	.share-btn:focus-visible {
 		box-shadow: var(--shadow-focus);
 	}
+	/* Hot-card has «ТОП» badge at top-right — shift share-btn left to clear it. */
+	.job-card:has(.hot-badge) .share-wrap {
+		right: 64px;
+	}
+
+	.share-dropdown {
+		position: absolute;
+		top: calc(100% + 4px);
+		right: 0;
+		min-width: 200px;
+		background: var(--ink-0);
+		border: 1px solid var(--ink-200);
+		border-radius: var(--radius-md);
+		box-shadow: var(--shadow-md);
+		padding: 6px;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		z-index: 10;
+	}
+	.share-dropdown[hidden] {
+		display: none;
+	}
+	.share-option {
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		padding: 8px 12px;
+		background: transparent;
+		border: none;
+		border-radius: var(--radius-sm, 6px);
+		color: var(--ink-800);
+		font-family: var(--font-main);
+		font-size: var(--fs-14);
+		font-weight: 500;
+		cursor: pointer;
+		text-align: left;
+		transition: background 0.12s ease;
+	}
+	.share-option:hover,
+	.share-option:focus-visible {
+		background: var(--ink-50);
+		outline: none;
+	}
+	.share-option-icon {
+		font-size: 1rem;
+		line-height: 1;
+	}
+
 	:global(body.dark-mode) .share-btn {
-		background: rgba(15, 23, 36, 0.65);
+		background: rgba(15, 23, 36, 0.92);
 		color: var(--ink-300);
-		border-color: rgba(195, 204, 216, 0.2);
+		border-color: rgba(195, 204, 216, 0.25);
 	}
 	:global(body.dark-mode) .share-btn:hover {
 		color: var(--brand-300);
-		border-color: rgba(94, 191, 156, 0.4);
+		border-color: rgba(94, 191, 156, 0.5);
+	}
+	:global(body.dark-mode) .share-dropdown {
+		background: #1b2533;
+		border-color: rgba(195, 204, 216, 0.18);
+	}
+	:global(body.dark-mode) .share-option {
+		color: #e7eaf0;
+	}
+	:global(body.dark-mode) .share-option:hover {
+		background: rgba(231, 234, 240, 0.08);
 	}
 
 	/* HV9 — Viewed-vacancy marker.
-	   Карточка приглушена (opacity 0.65) после клика по job-title; при hover
-	   возвращается к полной непрозрачности. Маленький badge «✓ просмотрено»
-	   в правом-нижнем углу. */
+	   Inline-маркер сразу после названия компании («Яндекс Еда · просмотрено»).
+	   Pseudo-element `::after` на `.company-name` не вступает в конфликт с
+	   i18n-логикой BaseLayout (`textContent = ...`), потому что generated
+	   content псевдо-элементов не входит в textContent. */
 	.job-card.viewed {
-		opacity: 0.7;
+		opacity: 0.78;
 		transition: opacity 0.2s ease;
 	}
 	.job-card.viewed:hover {
 		opacity: 1;
 	}
-	.job-card.viewed::after {
-		content: "✓ просмотрено";
-		position: absolute;
-		bottom: 8px;
-		right: 8px;
-		font-size: 10px;
-		font-weight: 600;
-		letter-spacing: 0.02em;
+	.job-card.viewed .company-name::after {
+		content: " · просмотрено";
+		font-size: var(--fs-12);
+		font-weight: 500;
 		color: var(--ink-500);
-		background: var(--ink-50);
-		border: 1px solid var(--ink-150, var(--ink-200));
-		padding: 2px 6px;
-		border-radius: 4px;
-		pointer-events: none;
+		letter-spacing: 0.01em;
 	}
-	:global(body.dark-mode) .job-card.viewed::after {
-		background: rgba(195, 204, 216, 0.1);
-		color: var(--ink-300);
-		border-color: rgba(195, 204, 216, 0.2);
+	:global(body.dark-mode) .job-card.viewed .company-name::after {
+		color: var(--ink-400, rgba(231, 234, 240, 0.55));
 	}
 
 	/* HV11 — Compact JobCard on mobile.
@@ -550,15 +630,8 @@ const hasNoExperience = (Array.isArray(job.labels) && job.labels.includes('Бе�
 			padding-top: var(--space-2);
 		}
 		.btn-compare,
-		.apply-btn,
-		.share-btn {
-			height: 40px;
-		}
-		.share-btn {
-			width: 40px;
-		}
-		.btn-compare,
 		.apply-btn {
+			height: 40px;
 			padding: 0 14px;
 		}
 	}
@@ -628,32 +701,110 @@ const hasNoExperience = (Array.isArray(job.labels) && job.labels.includes('Бе�
 			return;
 		}
 
-		// HV19 — Share button delegation.
+		// HV19 — Share button: touch → native share, desktop → RU dropdown.
 		const shareBtn = target.closest<HTMLElement>('[data-share-vacancy]');
 		if (shareBtn) {
 			event.preventDefault();
+			event.stopPropagation();
 			const slug = shareBtn.dataset.shareSlug || '';
 			const title = shareBtn.dataset.shareTitle || 'Вакансия курьера';
 			const salary = shareBtn.dataset.shareSalary || '';
 			const url = `https://kurerok.ru/v/${slug}/?utm_source=share&utm_medium=user`;
 			const text = `${title}${salary ? ' · ' + salary : ''}\n${url}`;
 
-			if (typeof navigator.share === 'function') {
-				navigator.share({ title, text, url }).catch(() => {
-					/* user cancelled — silently skip */
-				});
-			} else {
-				// Desktop fallback: WhatsApp Web with pre-filled text.
-				const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
-				window.open(waUrl, '_blank', 'noopener,noreferrer');
+			// Prefer native share on touch devices — iOS/Android sheet
+			// already includes Telegram/WhatsApp/VK/Copy as installed apps.
+			const isTouch = window.matchMedia('(pointer: coarse)').matches;
+			if (isTouch && typeof navigator.share === 'function') {
+				navigator.share({ title, text, url }).catch(() => {});
+				if (typeof (window as any).gtag === 'function') {
+					(window as any).gtag('event', 'share_vacancy', { vacancy_slug: slug, method: 'native' });
+				}
+				return;
 			}
 
-			if (typeof (window as any).gtag === 'function') {
-				(window as any).gtag('event', 'share_vacancy', {
-					vacancy_slug: slug,
-					method: typeof navigator.share === 'function' ? 'native' : 'wa_fallback',
-				});
+			// Desktop / no native share — toggle custom RU dropdown.
+			const wrap = shareBtn.closest('.share-wrap');
+			const dropdown = wrap?.querySelector('.share-dropdown') as HTMLElement | null;
+			if (!dropdown) return;
+			// Close any other open dropdowns first.
+			document.querySelectorAll('.share-dropdown:not([hidden])').forEach((d) => {
+				if (d !== dropdown) d.setAttribute('hidden', '');
+			});
+			const willOpen = dropdown.hasAttribute('hidden');
+			if (willOpen) {
+				dropdown.removeAttribute('hidden');
+				shareBtn.setAttribute('aria-expanded', 'true');
+			} else {
+				dropdown.setAttribute('hidden', '');
+				shareBtn.setAttribute('aria-expanded', 'false');
 			}
+			return;
+		}
+
+		// HV19 — Share dropdown option click (Telegram / WhatsApp / VK / Copy).
+		const shareOption = target.closest<HTMLElement>('[data-share-target]');
+		if (shareOption) {
+			event.preventDefault();
+			const wrap = shareOption.closest('.share-wrap') as HTMLElement | null;
+			const trigger = wrap?.querySelector('[data-share-vacancy]') as HTMLElement | null;
+			const slug = trigger?.dataset.shareSlug || '';
+			const title = trigger?.dataset.shareTitle || 'Вакансия курьера';
+			const salary = trigger?.dataset.shareSalary || '';
+			const url = `https://kurerok.ru/v/${slug}/?utm_source=share&utm_medium=user`;
+			const text = `${title}${salary ? ' · ' + salary : ''}`;
+			const action = shareOption.dataset.shareTarget;
+
+			if (action === 'telegram') {
+				const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+				window.open(tgUrl, '_blank', 'noopener,noreferrer');
+			} else if (action === 'whatsapp') {
+				const waUrl = `https://wa.me/?text=${encodeURIComponent(text + '\n' + url)}`;
+				window.open(waUrl, '_blank', 'noopener,noreferrer');
+			} else if (action === 'vk') {
+				const vkUrl = `https://vk.com/share.php?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&description=${encodeURIComponent(salary)}`;
+				window.open(vkUrl, '_blank', 'noopener,noreferrer');
+			} else if (action === 'copy') {
+				if (navigator.clipboard?.writeText) {
+					navigator.clipboard.writeText(url).then(() => {
+						// Optional: brief inline feedback via the option label.
+						const orig = shareOption.innerHTML;
+						shareOption.innerHTML = '<span class="share-option-icon" aria-hidden="true">✓</span> Ссылка скопирована';
+						setTimeout(() => { shareOption.innerHTML = orig; }, 1500);
+					}).catch(() => {});
+				}
+			}
+
+			// Close dropdown + emit analytics.
+			const dropdown = wrap?.querySelector('.share-dropdown') as HTMLElement | null;
+			if (action !== 'copy' && dropdown) {
+				dropdown.setAttribute('hidden', '');
+				trigger?.setAttribute('aria-expanded', 'false');
+			}
+			if (typeof (window as any).gtag === 'function') {
+				(window as any).gtag('event', 'share_vacancy', { vacancy_slug: slug, method: action });
+			}
+			return;
+		}
+
+		// Click outside any open share-dropdown — close all.
+		if (!target.closest('.share-wrap')) {
+			document.querySelectorAll('.share-dropdown:not([hidden])').forEach((d) => {
+				d.setAttribute('hidden', '');
+				const wrap = (d.parentElement as HTMLElement | null);
+				const trigger = wrap?.querySelector('[data-share-vacancy]') as HTMLElement | null;
+				trigger?.setAttribute('aria-expanded', 'false');
+			});
 		}
 	}, true);
+
+	// Close share dropdown on Escape.
+	document.addEventListener('keydown', (event) => {
+		if (event.key !== 'Escape') return;
+		document.querySelectorAll('.share-dropdown:not([hidden])').forEach((d) => {
+			d.setAttribute('hidden', '');
+			const trigger = d.parentElement?.querySelector('[data-share-vacancy]') as HTMLElement | null;
+			trigger?.setAttribute('aria-expanded', 'false');
+		});
+	});
 </script>

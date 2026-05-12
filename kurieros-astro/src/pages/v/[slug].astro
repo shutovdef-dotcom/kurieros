@@ -138,15 +138,39 @@ const scoredRelatedJobs = jobsData
 	})
 	.sort((a, b) => b.score - a.score || parseSalaryValue(b.salary) - parseSalaryValue(a.salary));
 const prioritizedRelatedJobs = scoredRelatedJobs.filter((item) => item.score > 0);
-const relatedJobs = prioritizedRelatedJobs.length ? prioritizedRelatedJobs.slice(0, 4) : scoredRelatedJobs.slice(0, 4);
-// HV20 — «Похожие на эту вакансию» секция. Расширяем top-4 до top-6
-// и рендерим через настоящий <JobCard> (с CTA, share, viewed marker).
-// Существующая «Альтернативы и разделы» (text-only with diff explainer)
-// остаётся на месте — служит для intellectual-сравнения; HV20 даёт
-// action-oriented карточки для прямого перехода.
-const similarJobs = prioritizedRelatedJobs.length
-	? prioritizedRelatedJobs.slice(0, 6)
-	: scoredRelatedJobs.slice(0, 6);
+// HV20 — «Похожие на эту вакансию» с трёхуровневой сортировкой:
+//   Tier 1 (top): другая компания + тот же транспорт + тот же город
+//                 — самые релевантные «прямые альтернативы».
+//   Tier 2:       любая вакансия из того же города (включая ту же
+//                 компанию на другом транспорте, или другие компании).
+//   Tier 3:       вакансии из других городов — fill, если предыдущих
+//                 не хватило для top-6.
+// Внутри каждого tier сортировка по убыванию зарплаты.
+type SimilarTier = 1 | 2 | 3;
+function getSimilarityTier(item: typeof job): SimilarTier {
+	const itemCities = item.location
+		.split(',')
+		.map((city: string) => city.trim())
+		.filter((city: string) => city && city !== 'Вся Россия');
+	const isSameCity =
+		itemCities.some((city: string) => currentCitySet.has(city)) ||
+		item.location === 'Вся Россия';
+	const isSameTransport = item.transport === job.transport;
+	const isDifferentCompany = item.company !== job.company;
+	if (isDifferentCompany && isSameTransport && isSameCity) return 1;
+	if (isSameCity) return 2;
+	return 3;
+}
+const similarJobs = jobsData
+	.filter((item) => item.slug !== job.slug)
+	.map((item) => ({
+		item,
+		tier: getSimilarityTier(item),
+		salaryValue: parseSalaryValue(item.salary),
+	}))
+	.sort((a, b) => a.tier - b.tier || b.salaryValue - a.salaryValue)
+	.slice(0, 6)
+	.map(({ item }) => item);
 // Build a tight «benefit tail» — up to 2 hooks NOT redundant with the
 // leading «salary • schedule • payment_freq» line. Used to boost CTR
 // on long-tail SERP queries like «работа курьером без опыта», «без
@@ -482,36 +506,6 @@ const quickFactSummary = (() => {
 	return parts.join(' ');
 })();
 
-// Block: alternatives. Auto-generated differentiator string explains
-// WHY each related vacancy is worth a click ("другая компания / другой
-// транспорт / другие выплаты"), so users (and crawlers) get value
-// from the cross-link, not just generic "похожие вакансии".
-type AlternativeJob = (typeof relatedJobs)[number];
-const TRANSPORT_LABEL_MAP: Record<string, string> = {
-	foot: 'пеший формат',
-	bicycle: 'велоформат',
-	auto: 'авто',
-	remote: 'удалённо',
-};
-const buildAlternativeDifferentiator = (other: AlternativeJob): string => {
-	if (other.company !== job.company) return `Другая компания — ${other.company}`;
-	if (other.location !== job.location) return `Другой город — ${other.location}`;
-	if (other.transport !== job.transport) {
-		return `Другой транспорт — ${TRANSPORT_LABEL_MAP[other.transport] ?? other.transport}`;
-	}
-	if (other.details.payment_freq !== job.details.payment_freq) {
-		return `Другая частота выплат — ${other.details.payment_freq.toLowerCase()}`;
-	}
-	if (other.details.employment_type !== job.details.employment_type) {
-		return `Другое оформление — ${other.details.employment_type}`;
-	}
-	return 'Похожие условия — для прямого сравнения';
-};
-const alternativesWithDiff = relatedJobs.map((other) => ({
-	job: other,
-	diff: buildAlternativeDifferentiator(other),
-}));
-
 // «Эта роль в других городах» — дешёвый внутренний linkback для
 // пользователей без жёсткой привязки к городу (приехали по запросу
 // «работа курьером Озон» без указания города, или готовы к релокации).
@@ -819,50 +813,6 @@ const pageSchemaGraph = [
 							</p>
 						</section>
 					)}
-
-					<section class="vacancy-section vacancy-alternatives" id="vacancy-alternatives" aria-labelledby="vacancy-alternatives-title">
-						<p class="section-eyebrow">Альтернативы и разделы</p>
-						<h2 id="vacancy-alternatives-title">Что ещё посмотреть и&nbsp;с&nbsp;чем&nbsp;сравнить</h2>
-						<p class="vacancy-alternatives-lead">
-							Если хочется выбрать осознанно — рядом подобраны самые близкие вакансии с&nbsp;коротким объяснением,
-							чем они отличаются от&nbsp;этой, и&nbsp;ключевые разделы сайта по&nbsp;теме.
-						</p>
-
-						<div class="vacancy-alternatives-grid">
-							{alternativesWithDiff.map(({ job: other, diff }) => (
-								<a class="vacancy-alternative-card" href={`/v/${other.slug}/`}>
-									<span class="vacancy-alternative-diff">{diff}</span>
-									<strong class="vacancy-alternative-title" data-t={`vacancies.${other.id}.title`}>{other.title}</strong>
-									<span class="vacancy-alternative-company" data-t={`vacancies.${other.id}.company`}>{other.company}</span>
-									<dl class="vacancy-alternative-meta">
-										<div>
-											<dt>Доход</dt>
-											<dd data-t={`vacancies.${other.id}.salary`}>{other.salary}</dd>
-										</div>
-										<div>
-											<dt>Город</dt>
-											<dd data-t={`vacancies.${other.id}.location`}>{other.location}</dd>
-										</div>
-										<div>
-											<dt>Выплаты</dt>
-											<dd data-t={`vacancies.${other.id}.details_payment_freq`}>{other.details.payment_freq}</dd>
-										</div>
-									</dl>
-								</a>
-							))}
-						</div>
-
-						<div class="vacancy-alternatives-deeplinks">
-							<a class="vacancy-alternatives-deeplink" href="/compare/">Сравнить</a>
-							<a class="vacancy-alternatives-deeplink" href={companyUrl}>Все вакансии {job.company} →</a>
-							{cityLinks.length > 0 && (
-								<a class="vacancy-alternatives-deeplink" href={cityLinks[0].href}>
-									Курьерские вакансии в {cityLinks[0].name} →
-								</a>
-							)}
-							<a class="vacancy-alternatives-deeplink" href="/guide/">Гид для курьера: возраст, медкнижка, доход, налоги →</a>
-						</div>
-					</section>
 
 					{similarJobs.length > 0 && (
 						<section class="vacancy-section vacancy-similar" aria-labelledby="vacancy-similar-title">
