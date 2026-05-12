@@ -1335,6 +1335,36 @@ const pageSchemaGraph = [
 		display: inline-flex;
 		margin-left: auto;
 	}
+	/* Mobile: drop the auto-margin so the share button doesn't get pushed
+	   to the right edge of a wrapped row, which left an awkward empty
+	   strip between «Москва» and «Поделиться» (user feedback).  Instead
+	   the share button flows naturally alongside the meta pills. */
+	@media (max-width: 768px) {
+		.share-wrap {
+			margin-left: 0;
+		}
+	}
+	/* Narrow phones: collapse the share button to icon-only so it fits on
+	   the same row as the meta pills («Обновлено …», «Москва») instead of
+	   wrapping to its own line.  Also tighten the row gap and pill padding
+	   so the three items fit within the ~300 px content width on a 375 px
+	   viewport. */
+	@media (max-width: 520px) {
+		.vacancy-meta-row {
+			gap: 0.4rem;
+		}
+		.meta-pill {
+			padding: 0.4rem 0.6rem;
+		}
+		.share-btn span {
+			display: none;
+		}
+		.share-btn {
+			padding: 0.4rem 0.55rem;
+			min-width: 2.25rem;
+			justify-content: center;
+		}
+	}
 	.share-btn {
 		display: inline-flex;
 		align-items: center;
