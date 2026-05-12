@@ -453,20 +453,28 @@ const pageSchemaGraph = [
 		}
 
 		function showGeoBanner(city) {
-			const banner = document.createElement('div');
-			banner.id = 'geo-banner';
-			banner.className = 'geo-banner';
-			banner.setAttribute('role', 'region');
-			banner.setAttribute('aria-label', 'Предложение по городу');
-			banner.innerHTML = '<span class="geo-banner-text">📍 Похоже, ваш город — <strong>' + city + '</strong>. Показать только эти вакансии?</span><div class="geo-banner-actions"><button type="button" class="geo-banner-btn geo-banner-btn-primary" data-action="apply">Да, показать</button><button type="button" class="geo-banner-btn geo-banner-btn-secondary" data-action="dismiss">Все города</button></div>';
-			const target = document.querySelector('.home-toolbar-section');
-			if (target && target.parentElement) {
-				target.parentElement.insertBefore(banner, target);
-			}
+			const modal = document.createElement('div');
+			modal.id = 'geo-banner';
+			modal.className = 'geo-banner-modal';
+			modal.setAttribute('role', 'dialog');
+			modal.setAttribute('aria-modal', 'true');
+			modal.setAttribute('aria-labelledby', 'geo-banner-title');
+			modal.innerHTML =
+				'<div class="geo-banner-backdrop" data-action="dismiss"></div>' +
+				'<div class="geo-banner-card" role="document">' +
+					'<div class="geo-banner-icon" aria-hidden="true">📍</div>' +
+					'<h2 id="geo-banner-title" class="geo-banner-title">Похоже, ваш город — <strong>' + city + '</strong></h2>' +
+					'<p class="geo-banner-body">Показать только вакансии в этом городе?</p>' +
+					'<div class="geo-banner-actions">' +
+						'<button type="button" class="geo-banner-btn geo-banner-btn-primary" data-action="apply">Да, показать</button>' +
+						'<button type="button" class="geo-banner-btn geo-banner-btn-secondary" data-action="dismiss">Все города</button>' +
+					'</div>' +
+				'</div>';
 
-			banner.addEventListener('click', (event) => {
-				const action = event.target && event.target.dataset && event.target.dataset.action;
-				if (!action) return;
+			document.body.appendChild(modal);
+			document.body.classList.add('geo-banner-open');
+
+			const close = (action) => {
 				if (action === 'apply') {
 					applyCity(city, 'geo-banner');
 				} else {
@@ -475,9 +483,21 @@ const pageSchemaGraph = [
 					if (fallback) applyCity(fallback, 'default');
 				}
 				try { localStorage.setItem(GEO_BANNER_DISMISSED_KEY, '1'); } catch (_) {}
-				banner.remove();
+				document.body.classList.remove('geo-banner-open');
+				modal.remove();
 				if (typeof window.gtag === 'function') {
 					window.gtag('event', 'geo_banner_action', { action, city });
+				}
+			};
+
+			modal.addEventListener('click', (event) => {
+				const action = event.target && event.target.dataset && event.target.dataset.action;
+				if (action) close(action);
+			});
+			document.addEventListener('keydown', function escHandler(e) {
+				if (e.key === 'Escape') {
+					close('dismiss');
+					document.removeEventListener('keydown', escHandler);
 				}
 			});
 		}
@@ -1560,79 +1580,120 @@ const pageSchemaGraph = [
 		}
 	}
 
-	/* HV4 — Geo banner.
-	   Селекторы `:global()` потому что банер инжектится через
-	   `document.createElement` (без Astro data-astro-cid-* атрибутов). */
-	:global(.geo-banner) {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: var(--space-4);
-		padding: 12px 16px;
-		background: var(--brand-50);
-		border: 1px solid var(--brand-300);
-		border-radius: var(--radius-md);
-		margin-bottom: var(--space-3);
-		font-size: var(--fs-14);
-		line-height: 1.45;
+	/* HV4 — Geo banner as a centered modal overlay.
+	   Все селекторы `:global()` потому что модалка инжектится через
+	   `document.createElement` (без Astro data-astro-cid-* атрибутов).
+	   В dark-mode используем явные RGB-цвета вместо var()-токенов
+	   которые сливаются с background'ом темной темы. */
+	:global(.geo-banner-modal) {
+		position: fixed;
+		inset: 0;
+		z-index: 9100;
+		display: grid;
+		place-items: center;
+		padding: 1rem;
 	}
-	:global(.geo-banner-text) {
-		color: var(--brand-800);
+	:global(.geo-banner-backdrop) {
+		position: absolute;
+		inset: 0;
+		background: rgba(15, 23, 42, 0.55);
+		backdrop-filter: blur(4px);
+		-webkit-backdrop-filter: blur(4px);
 	}
-	:global(.geo-banner-text strong) {
+	:global(.geo-banner-card) {
+		position: relative;
+		max-width: 440px;
+		width: 100%;
+		background: #ffffff;
+		border-radius: 18px;
+		padding: 1.6rem 1.5rem 1.4rem;
+		text-align: center;
+		box-shadow: 0 32px 60px rgba(0, 0, 0, 0.28);
+		font-family: var(--font-main, 'Manrope', sans-serif);
+		color: #0f1724;
+	}
+	:global(.geo-banner-icon) {
+		font-size: 2.2rem;
+		line-height: 1;
+		margin-bottom: 0.4rem;
+	}
+	:global(.geo-banner-title) {
+		margin: 0 0 0.4rem;
+		font-family: var(--font-heading, 'Manrope', sans-serif);
+		font-size: 1.25rem;
+		line-height: 1.3;
 		font-weight: 700;
+		color: #0f1724;
+		letter-spacing: -0.01em;
+	}
+	:global(.geo-banner-title strong) {
+		color: var(--brand-700, #117a3a);
+		font-weight: 800;
+	}
+	:global(.geo-banner-body) {
+		margin: 0 0 1.2rem;
+		font-size: 0.95rem;
+		line-height: 1.5;
+		color: #4a5468;
 	}
 	:global(.geo-banner-actions) {
 		display: flex;
-		gap: 8px;
-		flex-shrink: 0;
+		gap: 10px;
 	}
 	:global(.geo-banner-btn) {
-		padding: 8px 14px;
-		border-radius: var(--radius-md);
-		font-family: var(--font-main);
-		font-size: var(--fs-13);
-		font-weight: 600;
+		flex: 1 1 0;
+		padding: 12px 14px;
+		border-radius: 10px;
+		font-family: inherit;
+		font-size: 0.95rem;
+		font-weight: 700;
 		cursor: pointer;
-		white-space: nowrap;
-		transition: background 0.15s ease, border-color 0.15s ease;
+		transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+		min-height: 44px;
 	}
 	:global(.geo-banner-btn-primary) {
-		background: var(--brand-700);
-		color: #fff;
-		border: 1px solid var(--brand-700);
+		background: var(--brand-700, #117a3a);
+		color: #ffffff;
+		border: 1px solid var(--brand-700, #117a3a);
 	}
 	:global(.geo-banner-btn-primary:hover) {
-		background: var(--brand-800);
-		border-color: var(--brand-800);
+		background: var(--brand-800, #0e6730);
 	}
 	:global(.geo-banner-btn-secondary) {
-		background: var(--ink-0);
-		color: var(--ink-700);
-		border: 1px solid var(--ink-200);
+		background: #ffffff;
+		color: #2a3447;
+		border: 1px solid #d4d9e2;
 	}
 	:global(.geo-banner-btn-secondary:hover) {
-		background: var(--ink-50);
-		border-color: var(--ink-300);
+		background: #f4f6fa;
+		border-color: #b8bfca;
 	}
-	@media (max-width: 640px) {
-		:global(.geo-banner) {
-			flex-direction: column;
-			align-items: flex-start;
-		}
-		:global(.geo-banner-actions) {
-			width: 100%;
-		}
-		:global(.geo-banner-btn) {
-			flex: 1 1 auto;
-		}
+	:global(body.geo-banner-open) {
+		overflow: hidden;
 	}
-	:global(body.dark-mode .geo-banner) {
-		background: rgba(94, 191, 156, 0.12);
-		border-color: rgba(94, 191, 156, 0.35);
+
+	/* Dark mode — explicit non-transparent colors so text doesn't blend. */
+	:global(:where(html, body).dark-mode .geo-banner-card) {
+		background: #1b2533;
+		color: #e7eaf0;
 	}
-	:global(body.dark-mode .geo-banner-text) {
-		color: var(--ink-200);
+	:global(:where(html, body).dark-mode .geo-banner-title) {
+		color: #e7eaf0;
+	}
+	:global(:where(html, body).dark-mode .geo-banner-title strong) {
+		color: #67d086;
+	}
+	:global(:where(html, body).dark-mode .geo-banner-body) {
+		color: rgba(231, 234, 240, 0.78);
+	}
+	:global(:where(html, body).dark-mode .geo-banner-btn-secondary) {
+		background: rgba(231, 234, 240, 0.06);
+		color: #e7eaf0;
+		border-color: rgba(231, 234, 240, 0.22);
+	}
+	:global(:where(html, body).dark-mode .geo-banner-btn-secondary:hover) {
+		background: rgba(231, 234, 240, 0.12);
+		border-color: rgba(231, 234, 240, 0.32);
 	}
 
 	/* Hero toolbar — k-cityrow layout (handoff): city+lang | cta | fselects.
