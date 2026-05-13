@@ -121,23 +121,6 @@ const cityLinks = jobCities.map((city) => ({
 }));
 const primaryTransportTag = job.tags.find((tag: string) => ['auto', 'bicycle', 'foot'].includes(tag));
 const currentCitySet = new Set(jobCities);
-const scoredRelatedJobs = jobsData
-	.filter((item) => item.slug !== job.slug)
-	.map((item) => {
-		const itemCities = item.location
-			.split(',')
-			.map((city) => city.trim())
-			.filter((city) => city && city !== 'Вся Россия');
-		const score =
-			(item.company === job.company ? 5 : 0) +
-			(primaryTransportTag && item.tags.includes(primaryTransportTag) ? 3 : 0) +
-			(itemCities.some((city) => currentCitySet.has(city)) ? 2 : 0) +
-			(item.details.payment_freq === job.details.payment_freq ? 1 : 0);
-
-		return { ...item, score };
-	})
-	.sort((a, b) => b.score - a.score || parseSalaryValue(b.salary) - parseSalaryValue(a.salary));
-const prioritizedRelatedJobs = scoredRelatedJobs.filter((item) => item.score > 0);
 // HV20 — «Похожие на эту вакансию» с трёхуровневой сортировкой:
 //   Tier 1 (top): другая компания + тот же транспорт + тот же город
 //                 — самые релевантные «прямые альтернативы».
@@ -1579,28 +1562,6 @@ const pageSchemaGraph = [
 		background: rgba(231, 234, 240, 0.08);
 	}
 
-	.vacancy-hero-actions {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.75rem;
-	}
-	.hero-link {
-		display: inline-flex;
-		align-items: center;
-		min-height: 2.6rem;
-		padding: 0.65rem 1rem;
-		border: 1px solid var(--vacancy-chip-border);
-		border-radius: 8px;
-		background: var(--vacancy-card);
-		color: var(--vacancy-ink);
-		text-decoration: none;
-		font-weight: 800;
-		transition: var(--transition);
-	}
-	.hero-link:hover {
-		transform: translateY(-1px);
-		box-shadow: 0 8px 18px rgba(24, 45, 34, 0.07);
-	}
 	.vacancy-salary-card {
 		position: relative;
 		z-index: 1;
@@ -1628,30 +1589,6 @@ const pageSchemaGraph = [
 	.salary-rate {
 		line-height: 1.35;
 		opacity: 0.92;
-	}
-	.vacancy-answer-panel {
-		display: grid;
-		grid-template-columns: minmax(220px, 0.36fr) minmax(0, 1fr);
-		gap: 1.5rem;
-		align-items: start;
-		margin-bottom: 1rem;
-		padding: 1.5rem;
-		border: 1px solid var(--vacancy-border);
-		border-radius: 8px;
-		background: var(--vacancy-card);
-		box-shadow: var(--vacancy-shadow);
-	}
-	.vacancy-answer-panel h2,
-	.vacancy-answer-panel p {
-		margin: 0;
-	}
-	.vacancy-answer-panel p {
-		color: var(--vacancy-muted);
-		line-height: 1.8;
-	}
-	.vacancy-answer-panel-bottom {
-		margin-top: 1.5rem;
-		margin-bottom: 0;
 	}
 	.vacancy-facts {
 		display: grid;
@@ -1736,38 +1673,6 @@ const pageSchemaGraph = [
 	.vacancy-list li {
 		margin-bottom: 0.5rem;
 	}
-	.vacancy-guidance-section {
-		border: 1px solid var(--vacancy-border);
-		background: var(--vacancy-card-gradient);
-	}
-	.answer-grid {
-		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-		gap: 1rem;
-	}
-	.answer-card {
-		padding: 1rem;
-		border-radius: 8px;
-		border: 1px solid var(--vacancy-border);
-		background: var(--vacancy-soft);
-		color: var(--vacancy-ink);
-		line-height: 1.6;
-	}
-	.answer-grid-two {
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-	}
-	.answer-card-warning {
-		border-color: #efd7bd;
-		background: #fff8ef;
-	}
-	.numbered-list li::marker {
-		color: var(--vacancy-action);
-		font-weight: 900;
-	}
-	.faq-stack {
-		display: grid;
-		gap: 1rem;
-	}
 	.faq-item {
 		padding: 1.1rem;
 		border: 1px solid var(--vacancy-border);
@@ -1782,67 +1687,6 @@ const pageSchemaGraph = [
 		margin: 0;
 		color: var(--vacancy-muted);
 		line-height: 1.7;
-	}
-	.trust-stack {
-		display: grid;
-		gap: 0.9rem;
-		margin-bottom: 1rem;
-	}
-	.trust-item {
-		padding: 1rem;
-		border: 1px solid var(--vacancy-border);
-		border-radius: 8px;
-		background: var(--vacancy-card);
-		line-height: 1.7;
-		color: var(--vacancy-ink);
-	}
-	.trust-links {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.75rem;
-	}
-	.vacancy-route-grid {
-		display: grid;
-		grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
-		gap: 1rem;
-	}
-	.route-card {
-		padding: 1rem;
-		border: 1px solid var(--vacancy-border);
-		border-radius: 8px;
-		background: var(--vacancy-card);
-	}
-	.route-card h3 {
-		margin: 0 0 0.9rem;
-		font-size: 1rem;
-	}
-	.route-chip-row {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.75rem;
-	}
-	.related-jobs-grid {
-		display: grid;
-		gap: 0.75rem;
-	}
-	.related-job-card {
-		display: grid;
-		gap: 0.4rem;
-		padding: 0.95rem 1rem;
-		border-radius: 8px;
-		border: 1px solid var(--vacancy-border);
-		background: var(--vacancy-route-gradient);
-		text-decoration: none;
-		color: var(--vacancy-ink);
-	}
-	.related-job-card span {
-		color: var(--vacancy-muted);
-	}
-	.related-job-meta {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.6rem;
-		font-size: 0.85rem;
 	}
 	.vacancy-card-sidebar {
 		background: var(--vacancy-card);
@@ -1865,46 +1709,10 @@ const pageSchemaGraph = [
 	.detail-item span {
 		color: var(--vacancy-ink);
 	}
-	.apply-btn-large {
-		display: block;
-		width: 100%;
-		background: var(--vacancy-action);
-		color: var(--ink-0);
-		text-align: center;
-		padding: 1.15rem 1.1rem;
-		border-radius: var(--radius-md);
-		border: 1px solid var(--vacancy-action);
-		font-weight: 900;
-		margin-top: 2rem;
-		text-decoration: none;
-		box-shadow: var(--shadow-md);
-		transition: transform 0.2s, box-shadow 0.2s, background 0.2s, border-color 0.2s;
-	}
-	.apply-btn-large:hover {
-		transform: translateY(-1px);
-		background: var(--vacancy-action-hover);
-		border-color: var(--vacancy-action-hover);
-		box-shadow: var(--shadow-lg);
-	}
-	.apply-btn-large:focus-visible {
-		outline: none;
-		box-shadow: var(--shadow-focus);
-	}
-	.apply-btn-hero {
-		margin-top: 1rem;
-	}
-	.apply-btn-disabled {
-		background: var(--vacancy-soft);
-		color: var(--vacancy-ink);
-		border: 1px solid var(--vacancy-border);
-		box-shadow: none;
-	}
-	.apply-btn-disabled:hover {
-		transform: none;
-		background: var(--vacancy-soft);
-		border-color: var(--vacancy-border);
-		color: var(--vacancy-ink);
-	}
+	/* `.apply-btn-large`, `.apply-btn-hero`, `.apply-btn-disabled` are
+	   defined in the `Visual refresh overrides` block below — the older
+	   `--vacancy-action`-based definitions previously above were dead
+	   weight overridden by the refreshed rules and have been removed. */
 	.apply-note {
 		text-align: center;
 		font-size: 0.75rem;
@@ -2054,16 +1862,9 @@ const pageSchemaGraph = [
 	:global(body.dark-mode) .vacancy-logo,
 	:global(body.dark-mode) .fact-card,
 	:global(body.dark-mode) .meta-pill,
-	:global(body.dark-mode) .hero-link,
 	:global(body.dark-mode) .faq-item,
-	:global(body.dark-mode) .trust-item,
-	:global(body.dark-mode) .route-card,
 	:global(body.dark-mode) .vacancy-income-output {
 		background: rgba(67, 77, 90, 0.86);
-	}
-	:global(body.dark-mode) .answer-card-warning {
-		background: rgba(96, 74, 53, 0.72);
-		border-color: rgba(239, 215, 189, 0.34);
 	}
 	:global(body.dark-mode) .vacancy-income-range {
 		background: rgba(148, 163, 184, 0.34);
@@ -2072,15 +1873,9 @@ const pageSchemaGraph = [
 		.vacancy-facts {
 			grid-template-columns: repeat(3, minmax(0, 1fr));
 		}
-		.answer-grid,
-		.answer-grid-two,
-		.vacancy-route-grid {
-			grid-template-columns: 1fr;
-		}
 	}
 	@media (max-width: 768px) {
-		.vacancy-header,
-		.vacancy-answer-panel {
+		.vacancy-header {
 			grid-template-columns: 1fr;
 		}
 		.vacancy-salary-card {
@@ -2575,126 +2370,6 @@ const pageSchemaGraph = [
 		line-height: 1.5;
 	}
 
-	/* Block D: Alternatives + cross-links */
-	.vacancy-alternatives {
-		padding: 1.75rem 1.85rem;
-		background: var(--vacancy-card);
-		border: 1px solid var(--vacancy-border);
-		border-radius: 16px;
-		box-shadow: var(--vacancy-shadow);
-		display: grid;
-		gap: 0.95rem;
-	}
-	.vacancy-alternatives h2 {
-		margin: 0;
-		font-family: var(--font-heading, 'Manrope', sans-serif);
-		font-size: clamp(1.4rem, 2.2vw, 1.75rem);
-		line-height: 1.18;
-		letter-spacing: -0.01em;
-		color: var(--vacancy-ink);
-	}
-	.vacancy-alternatives-lead {
-		margin: 0;
-		max-width: 70ch;
-		color: var(--vacancy-muted);
-		font-size: 0.95rem;
-		line-height: 1.55;
-	}
-	.vacancy-alternatives-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-		gap: 0.7rem;
-	}
-	.vacancy-alternative-card {
-		display: grid;
-		gap: 0.35rem;
-		padding: 1rem 1.1rem;
-		text-decoration: none;
-		color: var(--vacancy-ink);
-		background: var(--vacancy-soft);
-		border: 1px solid var(--vacancy-border);
-		border-radius: 12px;
-		transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
-	}
-	.vacancy-alternative-card:hover,
-	.vacancy-alternative-card:focus-visible {
-		border-color: var(--vacancy-action);
-		transform: translateY(-2px);
-		box-shadow: var(--vacancy-shadow);
-		outline: none;
-	}
-	.vacancy-alternative-diff {
-		display: inline-block;
-		padding: 0.18rem 0.55rem;
-		border-radius: 999px;
-		background: rgba(22, 61, 43, 0.07);
-		color: var(--vacancy-action);
-		font-size: 0.7rem;
-		font-weight: 800;
-		letter-spacing: 0.02em;
-		text-transform: uppercase;
-		width: fit-content;
-	}
-	.vacancy-alternative-title {
-		font-family: var(--font-heading, 'Manrope', sans-serif);
-		font-weight: 700;
-		font-size: 1rem;
-		line-height: 1.3;
-		color: var(--vacancy-ink);
-	}
-	.vacancy-alternative-company {
-		font-size: 0.85rem;
-		color: var(--vacancy-muted);
-	}
-	.vacancy-alternative-meta {
-		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-		gap: 0.4rem;
-		margin: 0.35rem 0 0;
-	}
-	.vacancy-alternative-meta > div {
-		display: grid;
-		gap: 0.1rem;
-	}
-	.vacancy-alternative-meta dt {
-		margin: 0;
-		font-size: 0.68rem;
-		font-weight: 800;
-		letter-spacing: 0.04em;
-		text-transform: uppercase;
-		color: var(--vacancy-eyebrow);
-	}
-	.vacancy-alternative-meta dd {
-		margin: 0;
-		font-size: 0.84rem;
-		color: var(--vacancy-ink);
-		line-height: 1.3;
-	}
-	.vacancy-alternatives-deeplinks {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.55rem;
-		margin-top: 0.25rem;
-	}
-	.vacancy-alternatives-deeplink {
-		display: inline-flex;
-		align-items: center;
-		padding: 0.55rem 0.95rem;
-		border-radius: 999px;
-		background: rgba(22, 61, 43, 0.07);
-		color: var(--vacancy-action);
-		font-weight: 700;
-		font-size: 0.88rem;
-		text-decoration: none;
-		transition: background 0.18s ease, transform 0.18s ease;
-	}
-	.vacancy-alternatives-deeplink:hover,
-	.vacancy-alternatives-deeplink:focus-visible {
-		background: rgba(22, 61, 43, 0.14);
-		transform: translateX(2px);
-		outline: none;
-	}
-
 	/* Block E: Same role in other cities — last-resort linkback for
 	 * city-agnostic visitors. Vertical list of 12 chips (city + salary)
 	 * sorted by salary desc. Uses the existing `vacancy-card` palette
@@ -2798,45 +2473,34 @@ const pageSchemaGraph = [
 	}
 
 	:global(:where(html, body).dark-mode) .vacancy-howto,
-	:global(:where(html, body).dark-mode) .vacancy-income-scenarios,
-	:global(:where(html, body).dark-mode) .vacancy-alternatives {
+	:global(:where(html, body).dark-mode) .vacancy-income-scenarios {
 		background: rgba(20, 32, 48, 0.7);
 		border-color: rgba(195, 204, 216, 0.18);
 	}
 	:global(:where(html, body).dark-mode) .vacancy-howto h2,
 	:global(:where(html, body).dark-mode) .vacancy-income-scenarios h2,
-	:global(:where(html, body).dark-mode) .vacancy-alternatives h2,
 	:global(:where(html, body).dark-mode) .vacancy-howto-body h3,
-	:global(:where(html, body).dark-mode) .vacancy-alternative-title,
-	:global(:where(html, body).dark-mode) .vacancy-alternative-meta dd,
 	:global(:where(html, body).dark-mode) .vacancy-income-table tbody td,
 	:global(:where(html, body).dark-mode) .vacancy-income-table tbody th {
 		color: var(--ink-800);
 	}
 	:global(:where(html, body).dark-mode) .vacancy-howto-lead,
 	:global(:where(html, body).dark-mode) .vacancy-income-scenarios-lead,
-	:global(:where(html, body).dark-mode) .vacancy-alternatives-lead,
-	:global(:where(html, body).dark-mode) .vacancy-howto-body p,
-	:global(:where(html, body).dark-mode) .vacancy-alternative-company {
+	:global(:where(html, body).dark-mode) .vacancy-howto-body p {
 		color: rgba(231, 234, 240, 0.7);
 	}
 	:global(:where(html, body).dark-mode) .vacancy-howto .section-eyebrow,
 	:global(:where(html, body).dark-mode) .vacancy-income-scenarios .section-eyebrow,
-	:global(:where(html, body).dark-mode) .vacancy-alternatives .section-eyebrow,
 	:global(:where(html, body).dark-mode) .vacancy-income-table thead th,
-	:global(:where(html, body).dark-mode) .vacancy-alternative-meta dt,
 	:global(:where(html, body).dark-mode) .vacancy-income-scenarios-note {
 		color: rgba(231, 234, 240, 0.55);
 	}
 	:global(:where(html, body).dark-mode) .vacancy-howto-step,
-	:global(:where(html, body).dark-mode) .vacancy-alternative-card,
 	:global(:where(html, body).dark-mode) .vacancy-income-table thead th {
 		background: rgba(15, 23, 36, 0.65);
 		border-color: rgba(195, 204, 216, 0.16);
 	}
-	:global(:where(html, body).dark-mode) .vacancy-howto-step:hover,
-	:global(:where(html, body).dark-mode) .vacancy-alternative-card:hover,
-	:global(:where(html, body).dark-mode) .vacancy-alternative-card:focus-visible {
+	:global(:where(html, body).dark-mode) .vacancy-howto-step:hover {
 		border-color: rgba(76, 175, 128, 0.55);
 	}
 	:global(:where(html, body).dark-mode) .vacancy-howto-num {
@@ -2854,25 +2518,12 @@ const pageSchemaGraph = [
 	:global(:where(html, body).dark-mode) .vacancy-income-row-std td strong {
 		color: var(--brand-500);
 	}
-	:global(:where(html, body).dark-mode) .vacancy-alternative-diff,
-	:global(:where(html, body).dark-mode) .vacancy-alternatives-deeplink {
-		background: rgba(76, 175, 128, 0.15);
-		color: var(--brand-500);
-	}
-	:global(:where(html, body).dark-mode) .vacancy-alternatives-deeplink:hover,
-	:global(:where(html, body).dark-mode) .vacancy-alternatives-deeplink:focus-visible {
-		background: rgba(76, 175, 128, 0.25);
-	}
 
 	@media (max-width: 600px) {
 		.vacancy-quick-summary,
 		.vacancy-howto,
-		.vacancy-income-scenarios,
-		.vacancy-alternatives {
+		.vacancy-income-scenarios {
 			padding: 1.2rem 1rem;
-		}
-		.vacancy-alternative-meta {
-			grid-template-columns: 1fr;
 		}
 	}
 </style>
