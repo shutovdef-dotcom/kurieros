@@ -21,6 +21,6 @@ kurieros-astro/docs/API_SETUP.md
 # «Очистка проекта от артефактов Kurieros».
 kurieros-astro/src/components/Quiz.astro
 kurieros-astro/src/data/cities.json
-kurieros-astro/src/pages/[city]/
+kurieros-astro/src/pages/\[city\]/
 kurieros-astro/src/pages/admin/
 kurieros-astro/task.md
