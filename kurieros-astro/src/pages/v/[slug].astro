@@ -1235,27 +1235,27 @@ const pageSchemaGraph = [
 		margin-bottom: 2rem;
 		box-shadow: var(--vacancy-shadow-strong);
 		position: relative;
-		overflow: hidden;
+		/* `overflow: hidden` was used to clip the decorative `::after` blob
+		   that overflowed the right/bottom edges.  But it also clipped the
+		   `.share-dropdown`, leaving only «Telegram» visible when the
+		   share button was opened (user feedback).  Anchor the blob fully
+		   inside the section (`inset: auto 0 0 auto` below) so we can keep
+		   `overflow: visible` and let the dropdown escape. */
+		overflow: visible;
 	}
 	/* Decorative blob in the bottom-right corner of the hero card.
-	   `bottom: -8rem` previously pushed the pseudo 128 px past the
-	   section bottom, which combined with `overflow: hidden` produced
-	   a 128 px phantom scroll area inside the section.  On mobile,
-	   something (browser anchor-scroll / focus restore) set
-	   `section.scrollTop = 128`, which shifted the salary card and
-	   hero-main visually up and exposed a 128 px dark empty strip
-	   between the share button and the info-cards grid (user
-	   screenshot). Anchoring the pseudo at `bottom: 0` keeps it within
-	   the section's content box, so `scrollHeight === offsetHeight`
-	   and the section can never scroll internally.  The decorative
-	   tint still sits in the bottom-right corner. */
+	   Both `right` and `bottom` are anchored at `0` so the blob is
+	   entirely inside the section.  This lets the section keep
+	   `overflow: visible` (so the share dropdown can escape) while
+	   still showing the decorative tint in the corner. */
 	.vacancy-header::after {
 		content: "";
 		position: absolute;
-		inset: auto -6rem 0 auto;
+		inset: auto 0 0 auto;
 		width: 18rem;
 		height: 18rem;
 		background: rgba(22, 61, 43, 0.06);
+		border-radius: 0 0 8px 0;
 		pointer-events: none;
 	}
 	.vacancy-hero-main {
@@ -1375,6 +1375,23 @@ const pageSchemaGraph = [
 			padding: 0.4rem 0.55rem;
 			min-width: 2.25rem;
 			justify-content: center;
+		}
+		/* The share button is now icon-only and flush against the left
+		   edge of the viewport.  Anchor the dropdown to the share-wrap's
+		   LEFT edge (default `right: 0` made it extend 138 px past the
+		   left viewport edge — user feedback).  Also open it UPWARD so
+		   the user can see all 5 options without having to scroll past
+		   the bottom of the viewport.
+
+		   The compound selector `.share-wrap .share-dropdown` bumps
+		   specificity to 0,2,0 so this rule beats the base rule at 0,1,0
+		   — Astro's PostCSS hoists `@media` blocks BEFORE the base rule,
+		   so without the bump the base rule wins by source order. */
+		.share-wrap .share-dropdown {
+			top: auto;
+			right: auto;
+			bottom: calc(100% + 6px);
+			left: 0;
 		}
 	}
 	.share-btn {
