@@ -1237,10 +1237,22 @@ const pageSchemaGraph = [
 		position: relative;
 		overflow: hidden;
 	}
+	/* Decorative blob in the bottom-right corner of the hero card.
+	   `bottom: -8rem` previously pushed the pseudo 128 px past the
+	   section bottom, which combined with `overflow: hidden` produced
+	   a 128 px phantom scroll area inside the section.  On mobile,
+	   something (browser anchor-scroll / focus restore) set
+	   `section.scrollTop = 128`, which shifted the salary card and
+	   hero-main visually up and exposed a 128 px dark empty strip
+	   between the share button and the info-cards grid (user
+	   screenshot). Anchoring the pseudo at `bottom: 0` keeps it within
+	   the section's content box, so `scrollHeight === offsetHeight`
+	   and the section can never scroll internally.  The decorative
+	   tint still sits in the bottom-right corner. */
 	.vacancy-header::after {
 		content: "";
 		position: absolute;
-		inset: auto -6rem -8rem auto;
+		inset: auto -6rem 0 auto;
 		width: 18rem;
 		height: 18rem;
 		background: rgba(22, 61, 43, 0.06);
