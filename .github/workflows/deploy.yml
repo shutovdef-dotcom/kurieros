@@ -97,22 +97,35 @@ jobs:
           echo "Found $TOTAL URLs in sitemaps"
           [ "$TOTAL" -eq 0 ] && { echo "Empty sitemap, skipping"; exit 0; }
 
-          # Submit in batches of 10000 (IndexNow per-request cap)
+          # Submit in batches of 10000 (IndexNow per-request cap).
+          # Build the JSON payload entirely via `jq` reading the URL list
+          # from disk (`--rawfile`) and write it to a file, then have curl
+          # POST from that file (`--data-binary @file`).  The previous
+          # approach passed the full JSON through shell variables and
+          # `--argjson urls "$URLS_JSON"` / `--data "$PAYLOAD"`, which
+          # blew past the kernel ARG_MAX on ~5,500-URL payloads with
+          # `Argument list too long` (E2BIG).  File-based plumbing is
+          # bounded only by disk and avoids that ceiling entirely.
           split -l 10000 /tmp/indexnow/urls.txt /tmp/indexnow/batch_
           for batch in /tmp/indexnow/batch_*; do
-            URLS_JSON=$(jq -Rsn --rawfile f "$batch" '$f | split("\n") | map(select(length > 0))')
-            PAYLOAD=$(jq -n \
+            COUNT=$(wc -l < "$batch" | tr -d ' ')
+            PAYLOAD_FILE="/tmp/indexnow/payload-$(basename "$batch").json"
+            jq -n \
               --arg host "$HOST" \
               --arg key "$KEY" \
               --arg keyLoc "$KEY_LOCATION" \
-              --argjson urls "$URLS_JSON" \
-              '{host: $host, key: $key, keyLocation: $keyLoc, urlList: $urls}')
+              --rawfile rawurls "$batch" \
+              '{
+                host: $host,
+                key: $key,
+                keyLocation: $keyLoc,
+                urlList: ($rawurls | split("\n") | map(select(length > 0)))
+              }' > "$PAYLOAD_FILE"
 
             HTTP=$(curl -s -o /tmp/indexnow/response.txt -w "%{http_code}" \
               -X POST "https://api.indexnow.org/indexnow" \
               -H "Content-Type: application/json; charset=utf-8" \
-              --data "$PAYLOAD")
-            COUNT=$(echo "$URLS_JSON" | jq 'length')
+              --data-binary @"$PAYLOAD_FILE")
             echo "Batch $(basename "$batch"): $COUNT URLs, HTTP $HTTP"
             [ -s /tmp/indexnow/response.txt ] && cat /tmp/indexnow/response.txt
             # IndexNow returns: 200 OK / 202 Accepted / 422 if some URLs invalid (still ok)
