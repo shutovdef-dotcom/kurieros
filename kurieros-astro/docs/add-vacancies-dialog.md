@@ -107,7 +107,8 @@ Codex или любом ином агенте, у которого есть до
 - src/pages/companies/[slug].astro + src/utils/companies.ts — страницы компаний.
 - src/pages/owner/vacancies.astro         — закрытая owner-форма, которая
   генерирует объект для вставки в vacancySources.
-- public/vacancy-translations/*.json и src/data/vacancy-translations/*.json
+- public/vacancy-translations/<lang>/<sourceSlug>.json и
+  src/data/vacancy-translations/<lang>/<sourceSlug>.json
   — сгенерированные переводы, не редактировать руками без причины
   (перегенерируется через npm run generate:vacancy-translations).
 - src/data/reviews.json                   — генерируется npm run generate:reviews.
@@ -806,8 +807,8 @@ const build<Company>ApplyLink = (city: string, role: <RoleType>) => {
     - `src/data/vacancies.ts`
     - (опционально) `src/data/<company>-vacancies.json`
     - (опционально) `public/logos/<company>.svg`
-    - Авто-генерируемые: `src/data/vacancy-translations/*.json`,
-      `public/vacancy-translations/*.json`, `public/llms-full.txt`
+    - Авто-генерируемые: `src/data/vacancy-translations/<lang>/<sourceSlug>.json`,
+      `public/vacancy-translations/<lang>/<sourceSlug>.json`, `public/llms-full.txt`
       (нормально, не трогать). Чужие исходники в diff — баг.
 12. **Smoke-test в dev** (опционально, но рекомендуется):
     `npm run dev -- --host 127.0.0.1 --port 4321`, открыть

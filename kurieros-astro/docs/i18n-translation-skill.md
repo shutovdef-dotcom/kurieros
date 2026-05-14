@@ -152,7 +152,7 @@ than silently shipping mangled RU pages.
 
 ## Adding a New Language
 
-1. Add the lang code to `SUPPORTED_LANGUAGES` in `src/data/translations.ts`.
+1. Add the lang code to `SUPPORTED_LANGUAGES` in `src/data/translations/types.ts`.
 2. Create `src/data/i18n/clauses/<lang>.json` with translations for all
    clauseIds in `ru-clauses.json`.
 3. Decide if it's Cyrillic-script or not:

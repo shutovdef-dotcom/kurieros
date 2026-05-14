@@ -78,7 +78,10 @@ docs/           вспомогательные заметки
 
 - `src/data/vacancies.ts` — исходники базовых вакансий
 - `src/data/jobs.ts` — сгенерированный список вакансий
-- `src/data/translations.ts` и `src/data/vacancy-translations/*.json` — переводы
+- `src/data/translations/` — общий shell-UI словарь (Russian only после PR #131)
+- `src/data/i18n/clauses/<lang>.json` — клаузный словарь переводов (PR #130)
+- `src/data/vacancy-translations-source/<lang>.json` — собранные per-source фрагменты, генерируются из клаузных словарей
+- `public/vacancy-translations/<lang>/<sourceSlug>.json` — runtime-фрагменты, грузятся в браузере
 - `src/data/articles.json` — блог
 - `src/data/reviews.json` — отзывы
 
