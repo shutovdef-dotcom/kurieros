@@ -51,6 +51,15 @@ export const ALFA_BANK_LOGO = '/logos/alfa-bank.svg';
 export const ALFA_BANK_APPLY =
   'https://pxl.leads.su/click/00012fe3aecb294c077b1c68b4594cb0?erid=2W5zFJdQNW4';
 
+// === Бургер Кинг ====================================================
+// Burger King повар-кассир (cook-cashier) — CPA via pampadu (oid=2085).
+// Logo hot-links from pampadu's CDN; replace with /logos/burger-king.svg
+// once a local SVG is available.
+export const BURGER_KING_LOGO =
+  'https://agents.pampadu.ru/api/file/ViewFile?type=1&name=7caae4b8-79dc-44ba-9f4e-811e4e415e02.png';
+export const BURGER_KING_APPLY =
+  'https://trk.ppdu.ru/click?uid=119136&oid=2085&erid=2SDnjdu6ZqS';
+
 // === Ozon ===========================================================
 // Ozon Fresh shares the parent SVG (PR #98).
 export const OZON_LOGO = '/logos/ozon.svg';
@@ -82,6 +91,7 @@ export const PARTNER_LINKS = {
   tBank: { apply: T_BANK_APPLY, logo: T_BANK_LOGO },
   efin: { apply: EFIN_APPLY, logo: EFIN_LOGO },
   alfaBank: { apply: ALFA_BANK_APPLY, logo: ALFA_BANK_LOGO },
+  burgerKing: { apply: BURGER_KING_APPLY, logo: BURGER_KING_LOGO },
   ozon: {
     logo: OZON_LOGO,
     freshLogo: OZON_FRESH_LOGO,
