@@ -462,13 +462,19 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 				async function fetchFragment(lang, sourceSlug) {
 					const cacheKey = lang + '/' + sourceSlug;
 					if (loadedFragments.has(cacheKey)) return null;
-					// Append the build-time version so a redeploy invalidates any cached
-					// fragment from a prior site version. Without it, the previous
-					// `cache: 'force-cache'` mode pinned returning visitors to whatever
-					// translation they saw on their first visit (forever).
+					// Immutable-asset cache pattern: every URL carries the build-time
+					// version (`?v=<vacancyTranslationsVersion>`), and `force-cache` tells
+					// the browser to serve the disk cache forever for any URL it has
+					// already seen — zero network roundtrip on subsequent visits.
+					// A redeploy mints a new version, producing a fresh URL → cache
+					// miss → re-download once → cached again until the next deploy.
+					// This was originally added in #ed99d40 to keep returning visitors
+					// off the network entirely; PR #133 dropped force-cache to fix the
+					// "stale forever" bug, but with `?v=` cache-busting the original
+					// pattern is safe again (PR #134).
 					const url = VACANCY_TRANSLATIONS_BASE + '/' + lang + '/' + sourceSlug + '.json?v=' + VACANCY_TRANSLATIONS_VERSION;
 					try {
-						const response = await fetch(url);
+						const response = await fetch(url, { cache: 'force-cache' });
 						if (!response.ok) return null;
 						const fragment = await response.json();
 						loadedFragments.add(cacheKey);
