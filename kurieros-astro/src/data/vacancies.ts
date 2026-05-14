@@ -151,6 +151,7 @@ const TRANSPORT_PRIORITY: Record<TransportMode, number> = {
   foot: 1,
   bicycle: 2,
   auto: 3,
+  remote: 4,
 };
 
 // Was a dev-iteration toggle (`LIGHT_MODE_*`) that subsampled offers
