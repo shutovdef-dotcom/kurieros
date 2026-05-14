@@ -55,6 +55,7 @@ const hasNoExperience = (Array.isArray(job.labels) && job.labels.includes('Бе�
 	class="job-card"
 	data-id={job.id}
 	data-slug={job.slug}
+	data-vacancy-source-slug={job.sourceSlug}
 	data-tags={job.tags.join(',')}
 	data-location={job.location}
 	data-no-experience={hasNoExperience ? 'true' : undefined}

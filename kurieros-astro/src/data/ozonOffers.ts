@@ -25,10 +25,8 @@
 
 import ozonVacanciesData from './ozon-vacancies.json';
 import ozonFreshVacanciesData from './ozon-fresh-vacancies.json';
-import { SUPPORTED_LANGUAGES } from './translations';
 import type {
   EmploymentFormat,
-  LocalizedVacancyContent,
   OzonLeadFormMeta,
   TransportMode,
   VacancyContent,
@@ -117,24 +115,6 @@ type OzonRoleTemplate = {
 };
 
 // === Helpers =========================================================
-
-const localize = (ru: VacancyContent): LocalizedVacancyContent =>
-  Object.fromEntries(
-    SUPPORTED_LANGUAGES.map((language) => [
-      language,
-      {
-        ...ru,
-        title: language === 'ru'
-          ? ru.title
-          : ru.title.replace('{cityPrep}', '— {city}'),
-        requirements: [...ru.requirements],
-        benefits: [...ru.benefits],
-        requiredDocuments: [...ru.requiredDocuments],
-        searchTags: ru.searchTags ? [...ru.searchTags] : undefined,
-        labels: ru.labels ? [...ru.labels] : undefined,
-      },
-    ]),
-  ) as LocalizedVacancyContent;
 
 const formatRub = (n: number) =>
   new Intl.NumberFormat('ru-RU').format(n).replace(/ /g, ' ');
@@ -810,7 +790,7 @@ export const ozonVacancySources: VacancySource[] = TEMPLATES.map((template) => (
     name: template.companyName ?? OZON_COMPANY_NAME,
     logo: template.companyLogo ?? OZON_COMPANY_LOGO,
   },
-  content: localize(template.content),
+  content: template.content,
   defaults: {
     ageFrom: template.ageFrom,
     medicalBook: template.medicalBook,

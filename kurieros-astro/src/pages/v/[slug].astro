@@ -585,7 +585,7 @@ const pageSchemaGraph = [
 >
 	<Header />
 
-	<main class="vacancy-page">
+	<main class="vacancy-page" data-vacancy-source-slug={job.sourceSlug}>
 		<div class="container container-narrow">
 			<nav class="breadcrumb" aria-label="Breadcrumb">
 				<a href="/" data-t="nav.main">Главная</a> &gt; <a href="/companies/" data-t="nav.companies">Компании</a> &gt; <a href={companyUrl} data-t={`vacancies.${job.id}.company`}>{job.company}</a> &gt; <span data-t={`vacancies.${job.id}.title`}>{job.title}</span>

@@ -1,0 +1,24 @@
+{
+  "alfa-bank-representative": {},
+  "burger-king-cook-cashier": {},
+  "efin-bank-representative": {},
+  "kuper-auto-courier": {},
+  "kuper-bike-courier": {},
+  "kuper-foot-courier": {},
+  "kuper-order-picker": {},
+  "ozon-courier": {},
+  "ozon-electric-stacker-driver": {},
+  "ozon-fresh-administrator": {},
+  "ozon-fresh-courier": {},
+  "ozon-fresh-kitchen-staff": {},
+  "ozon-fresh-order-picker": {},
+  "ozon-goods-handler": {},
+  "ozon-truck-driver": {},
+  "ozon-warehouse-operator": {},
+  "tbank-outbound-b2b-operator": {},
+  "tbank-representative": {},
+  "yandex-eda-courier": {
+    "shortDescription": "Ya.Pro аркылуу үйгө жакын буйрутмаларды жеткирүү, 2 сааттан эркин график жана ачык киреше.",
+    "description": "Yandex Eats курьерлерди кабыл алат. Туташуу шаары: {city}. Буйрутмаларды Ya.Pro тиркемеси аркылуу түшүнүктүү маршруттар менен жеткиресиз: районду тандап, 2 сааттан слотко чыгып, тыныгуу алып, буйрутма кирешесин алдын ала көрө аласыз."
+  }
+}

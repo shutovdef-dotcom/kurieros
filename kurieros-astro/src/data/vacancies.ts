@@ -1,17 +1,14 @@
-import descriptionTranslationsSource from './vacancy-description-translations.json';
 import kuperPayRatesSource from './kuper-pay-rates.json';
 import tBankVacanciesSource from './tbank-vacancies.json';
 import efinVacanciesSource from './efin-vacancies.json';
 import alfaBankVacanciesSource from './alfa-bank-vacancies.json';
 import burgerKingVacanciesSource from './burger-king-vacancies.json';
 import { ozonVacancySources } from './ozonOffers';
-import { SUPPORTED_LANGUAGES, type SupportedLanguage } from './translations';
 import { slugifyCity } from '../utils/cities';
 import { fnv1a } from '../utils/fnv1a';
 import type {
   EmploymentFormat,
   VacancyContent,
-  LocalizedVacancyContent,
   TransportMode,
   VacancyOffer,
   VacancySource,
@@ -177,18 +174,12 @@ const buildYandexEdaApplyLink = (city: string, transport: TransportMode) => {
   return url.toString();
 };
 
-type DescriptionTranslation = {
-  shortDescription: string;
-  description: string;
-};
-
 type YandexEdaCityRate = {
   city: string;
   citizenship: string;
   rates: Record<TransportMode, number>;
 };
 
-const descriptionTranslations = descriptionTranslationsSource as Record<SupportedLanguage, DescriptionTranslation>;
 const kuperPayRates = kuperPayRatesSource as KuperPayRates;
 const tBankVacancies = tBankVacanciesSource as TBankVacanciesData;
 const efinVacancies = efinVacanciesSource as EfinVacanciesData;
@@ -414,26 +405,17 @@ const getRequiredDocumentOverrides = (citizenship: string) => {
   ];
 };
 
-const yandexEdaContentByLanguage: LocalizedVacancyContent = Object.fromEntries(
-  SUPPORTED_LANGUAGES.map((language) => {
-    const translation = descriptionTranslations[language] ?? descriptionTranslations.ru;
-
-    return [
-      language,
-      {
-        title: language === 'ru'
-          ? '{transportTitle} в Яндекс Еда {cityPrep}'
-          : '{transportTitle} в Яндекс Еда — {city}',
-        shortDescription: translation.shortDescription,
-        description: translation.description,
-        requirements: [...requirements],
-        benefits: [...benefits],
-        requiredDocuments: [...baseRequiredDocuments],
-        searchTags: ['Яндекс Еда', 'курьер', 'Я.Про', 'доставка еды', 'свободный график'],
-      },
-    ];
-  }),
-) as LocalizedVacancyContent;
+const yandexEdaContent: VacancyContent = {
+  title: '{transportTitle} в Яндекс Еда {cityPrep}',
+  shortDescription:
+    'Доставка заказов через Я.Про рядом с домом, свободный график от 2 часов и прозрачный доход.',
+  description:
+    'Яндекс Еда набирает курьеров. Город подключения: {city}. Вы доставляете заказы по понятным маршрутам через приложение «Я.Про»: можно выбирать район, выходить на слоты от 2 часов, брать паузы и видеть доход по заказам заранее.',
+  requirements: [...requirements],
+  benefits: [...benefits],
+  requiredDocuments: [...baseRequiredDocuments],
+  searchTags: ['Яндекс Еда', 'курьер', 'Я.Про', 'доставка еды', 'свободный график'],
+};
 
 const createOffer = (
   cityRate: YandexEdaCityRate,
@@ -493,24 +475,6 @@ const buildKuperApplyLink = (baseLink: string, city: string, role: 'foot' | 'bik
 
   return url.toString();
 };
-
-const createKuperLocalizedContent = (ruContent: VacancyContent): LocalizedVacancyContent =>
-  Object.fromEntries(
-    SUPPORTED_LANGUAGES.map((language) => [
-      language,
-      {
-        ...ruContent,
-        title: language === 'ru'
-          ? ruContent.title
-          : ruContent.title.replace('{cityPrep}', '— {city}'),
-        requirements: [...ruContent.requirements],
-        benefits: [...ruContent.benefits],
-        requiredDocuments: [...ruContent.requiredDocuments],
-        labels: ruContent.labels ? [...ruContent.labels] : undefined,
-        searchTags: ruContent.searchTags ? [...ruContent.searchTags] : undefined,
-      },
-    ]),
-  ) as LocalizedVacancyContent;
 
 type KuperRole = 'foot' | 'bike' | 'auto' | 'packer';
 
@@ -579,7 +543,7 @@ const kuperCommonBenefits = [
   'Бонус за приглашённых друзей (по реферальной программе).',
 ];
 
-const kuperFootContent = createKuperLocalizedContent({
+const kuperFootContent: VacancyContent = {
   title: 'Пеший курьер в Купер {cityPrep}',
   shortDescription: 'Курьер Купера: доставляйте заказы рядом с домом пешком или на велосипеде.',
   description:
@@ -596,9 +560,9 @@ const kuperFootContent = createKuperLocalizedContent({
   requiredDocuments: [...kuperRequiredDocuments],
   labels: ['Пеший курьер', 'Можно на велосипеде', 'Еженедельные выплаты'],
   searchTags: ['Купер', 'пеший курьер', 'доставка', 'подработка'],
-});
+};
 
-const kuperBikeContent = createKuperLocalizedContent({
+const kuperBikeContent: VacancyContent = {
   title: 'Велокурьер в Купер {cityPrep}',
   shortDescription: 'Доставляйте заказы на велосипеде или самокате в удобном районе.',
   description:
@@ -615,9 +579,9 @@ const kuperBikeContent = createKuperLocalizedContent({
   requiredDocuments: [...kuperRequiredDocuments],
   labels: ['Велокурьер', 'Аренда электровелосипеда 0 ₽', 'Еженедельные выплаты'],
   searchTags: ['Купер', 'велокурьер', 'самокат', 'доставка'],
-});
+};
 
-const kuperAutoContent = createKuperLocalizedContent({
+const kuperAutoContent: VacancyContent = {
   title: 'Автокурьер в Купер {cityPrep}',
   shortDescription: 'Плановая и быстрая доставка заказов на авто с еженедельными выплатами.',
   description:
@@ -634,9 +598,9 @@ const kuperAutoContent = createKuperLocalizedContent({
   requiredDocuments: [...kuperRequiredDocuments],
   labels: ['Автокурьер', 'Плановая доставка', 'Еженедельные выплаты'],
   searchTags: ['Купер', 'автокурьер', 'доставка на авто', 'плановая доставка'],
-});
+};
 
-const kuperPackerContent = createKuperLocalizedContent({
+const kuperPackerContent: VacancyContent = {
   title: 'Сборщик заказов в Купер {cityPrep}',
   shortDescription: 'Собирайте интернет-заказы в магазинах METRO, «Лента Онлайн» и других партнёров.',
   description:
@@ -650,7 +614,7 @@ const kuperPackerContent = createKuperLocalizedContent({
   requiredDocuments: [...kuperRequiredDocuments],
   labels: ['Сборщик заказов', 'Плановая доставка', 'Еженедельные выплаты'],
   searchTags: ['Купер', 'сборщик заказов', 'магазин', 'плановая доставка'],
-});
+};
 
 const kuperFootAndBikeShiftByCity = Object.entries(kuperPayRates.footAndBikeShiftByCity);
 // For auto profile use "Плановая" shifts where they exist, and fallback to "Быстрая".
@@ -777,7 +741,7 @@ const getRepresentativeTransport = (workMode?: string | null): TransportMode => 
   return 'foot';
 };
 
-const tBankOperatorContent = createKuperLocalizedContent({
+const tBankOperatorContent: VacancyContent = {
   title: tBankVacancies.operatorB2B.title,
   shortDescription: tBankVacancies.operatorB2B.shortDescription,
   description: tBankVacancies.operatorB2B.description,
@@ -786,7 +750,7 @@ const tBankOperatorContent = createKuperLocalizedContent({
   requiredDocuments: [...tBankVacancies.operatorB2B.requiredDocuments],
   labels: ['Удалённо', 'B2B-продажи'],
   searchTags: ['Т-Банк', 'оператор', 'B2B-продажи', 'удалённая работа'],
-});
+};
 
 const representativeTitleTemplate = tBankVacancies.representative.titleTemplate.includes('в %city-name%')
   ? tBankVacancies.representative.titleTemplate.replace('в %city-name%', '{cityPrep}')
@@ -794,7 +758,7 @@ const representativeTitleTemplate = tBankVacancies.representative.titleTemplate.
     ? tBankVacancies.representative.titleTemplate.replace('%city-name%', '{cityPrep}')
     : tBankVacancies.representative.title;
 
-const tBankRepresentativeContent = createKuperLocalizedContent({
+const tBankRepresentativeContent: VacancyContent = {
   title: representativeTitleTemplate,
   shortDescription: tBankVacancies.representative.shortDescription,
   description: tBankVacancies.representative.description,
@@ -803,7 +767,7 @@ const tBankRepresentativeContent = createKuperLocalizedContent({
   requiredDocuments: [...tBankVacancies.representative.requiredDocuments],
   labels: ['Разъездная работа', 'Гибкий график'],
   searchTags: ['Т-Банк', 'представитель', 'разъездная работа', 'работа с клиентами'],
-});
+};
 
 const tBankOperatorOffers = tBankVacancies.operatorB2B.offers.map((offer, cityIndex) => {
   const incomeRange = resolveTBankIncomeRange(offer);
@@ -929,7 +893,7 @@ const buildEfinSchedule = (offer: EfinOfferSource) => {
   return 'Гибкий график, время встреч выбираете самостоятельно';
 };
 
-const efinRepresentativeContent = createKuperLocalizedContent({
+const efinRepresentativeContent: VacancyContent = {
   title: 'Представитель банка в Efin {cityPrep} {transportSuffix}',
   shortDescription:
     'Разъездная работа с еженедельными выплатами: оплачивается каждая встреча с клиентом банка.',
@@ -961,7 +925,7 @@ const efinRepresentativeContent = createKuperLocalizedContent({
   ],
   labels: ['Разъездная работа', 'Еженедельные выплаты', 'Оплата за встречи'],
   searchTags: ['Efin', 'выездной представитель банка', 'банковские продукты', 'самозанятость'],
-});
+};
 
 const efinRepresentativeOffers = efinVacancies.offers.map((offer, cityIndex) => ({
   city: offer.city,
@@ -1058,7 +1022,7 @@ const buildAlfaBankBenefitsOverride = (offer: AlfaBankOfferSource) => {
   };
 };
 
-const alfaBankRepresentativeContent = createKuperLocalizedContent({
+const alfaBankRepresentativeContent: VacancyContent = {
   title: '{transportBankRoleTitle} Альфа-Банка {cityPrep}',
   shortDescription:
     'Разъездная работа в Альфа-Банке: доставка банковских продуктов клиентам, подписание документов и помощь с подключением сервисов банка.',
@@ -1091,7 +1055,7 @@ const alfaBankRepresentativeContent = createKuperLocalizedContent({
     'Документ об образовании, если потребуется на этапе проверки.',
   ],
   searchTags: ['Альфа-Банк', 'представитель банка', 'банковские продукты', 'официальное трудоустройство'],
-});
+};
 
 const alfaBankRepresentativeOffers = alfaBankVacancies.offers.map((offer, offerIndex) => ({
   city: offer.city,
@@ -1186,7 +1150,7 @@ const buildBurgerKingPay = (monthlyMin: number, monthlyMax: number): VacancyOffe
   };
 };
 
-const burgerKingCookCashierContent = createKuperLocalizedContent({
+const burgerKingCookCashierContent: VacancyContent = {
   title: 'Повар-кассир в Бургер Кинг {cityPrep}',
   shortDescription:
     'Работа в ресторане Бургер Кинг: приготовление блюд, касса, выдача заказов. Гибкий график, оплата 2 раза в месяц.',
@@ -1217,7 +1181,7 @@ const burgerKingCookCashierContent = createKuperLocalizedContent({
     'Медкнижка (можно оформить за счёт компании).',
   ],
   searchTags: ['Бургер Кинг', 'Burger King', 'повар', 'кассир', 'фастфуд', 'ресторан', 'без опыта', 'официальное трудоустройство'],
-});
+};
 
 const burgerKingCookCashierOffers = burgerKingVacancies.offers.map((offer) => ({
   city: offer.city,
@@ -1259,7 +1223,7 @@ const _initialSources = [
       // and the bundled `/public/logos/yandex-eda.svg` exists for this.
       logo: '/logos/yandex-eda.svg',
     },
-    content: yandexEdaContentByLanguage,
+    content: yandexEdaContent,
     defaults: {
       ageFrom: 18,
       medicalBook: 'required',
