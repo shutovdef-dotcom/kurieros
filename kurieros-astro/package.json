@@ -8,7 +8,11 @@
   "scripts": {
     "generate": "astro sync",
     "pregenerate": "npm run generate:data",
-    "generate:data": "npm run generate:vacancy-translations && npm run generate:reviews && npm run generate:llms",
+    "generate:data": "npm run i18n:assemble && npm run generate:vacancy-translations && npm run generate:reviews && npm run generate:llms",
+    "i18n:extract": "tsx scripts/i18n/extract-clauses.ts",
+    "i18n:analyze": "tsx scripts/i18n/analyze-tokens.ts",
+    "i18n:assemble": "tsx scripts/i18n/assemble-translations.ts",
+    "i18n:test": "tsx scripts/i18n/test-translations.ts",
     "generate:vacancy-translations": "tsx scripts/generate-vacancy-translations.ts",
     "generate:reviews": "tsx scripts/generate-reviews.ts",
     "generate:llms": "node scripts/generate-llms.mjs",

@@ -1,24 +1,465 @@
 {
-  "alfa-bank-representative": {},
-  "burger-king-cook-cashier": {},
-  "efin-bank-representative": {},
-  "kuper-auto-courier": {},
-  "kuper-bike-courier": {},
-  "kuper-foot-courier": {},
-  "kuper-order-picker": {},
-  "ozon-courier": {},
-  "ozon-electric-stacker-driver": {},
-  "ozon-fresh-administrator": {},
-  "ozon-fresh-courier": {},
-  "ozon-fresh-kitchen-staff": {},
-  "ozon-fresh-order-picker": {},
-  "ozon-goods-handler": {},
-  "ozon-truck-driver": {},
-  "ozon-warehouse-operator": {},
-  "tbank-outbound-b2b-operator": {},
-  "tbank-representative": {},
+  "alfa-bank-representative": {
+    "shortDescription": "Alfa-Bank-da səyyar iş: bank məhsullarının müştərilərə çatdırılması, sənədlərin imzalanması və bankın xidmətlərinin qoşulmasına kömək.",
+    "description": "Alfa-Bank səyyar müştərilərlə işləmək üçün nümayəndələr axtarır. Bank məhsullarını çatdırmaq, müştərilərlə şəhərin rahat nöqtələrində görüşmək, sənədləri imzalamaq, bankın xidmət və təklifləri üzrə məsləhət vermək, həmçinin əlavə xidmətlərin qoşulmasına kömək etmək lazımdır. Format təcrübəsiz namizədlərə uyğundur: startdan əvvəl təlim, dəstək və anlaşıqlı işə giriş var. Bank rəsmi rəsmiləşdirmə, çevik qrafik, inkişaf imkanları və korporativ güzəştlərə, endirimlərə və təhsil proqramlarına giriş təklif edir.",
+    "requirements": [
+      "18 yaşdan yuxarı; 40 yaşdan sonra bank əlavə olaraq namizədin təcrübəsinə və bacarıqlarına baxır.",
+      "РФ, Belarus və ya Qazaxıstan vətəndaşlığı.",
+      "Orta ixtisaslı və yuxarı təhsil; orta təhsilli namizədlər ayrıca nəzərdən keçirilə bilər.",
+      "Səyyar iş xarakterinə və satışlara hazırlıq.",
+      "Səliqəli zahiri görünüş, bədənin görünən hissələrində tatu olmadan.",
+      "Güclü vurğusuz səlis nitq.",
+      "Məhkumluğun olmaması və son 90 təqvim günü ərzində rekrutinq CRM-də aktiv statusun olmaması.",
+      "Avtomobilin olması regionlarda üstünlük ola bilər; avtomobil tələb olunan sətirlər üçün yalnız avtoformat yaradılır."
+    ],
+    "benefits": [
+      "ТК РФ üzrə rəsmiləşdirmə.",
+      "Əməkhaqqı 120 000 ₽-dən; gəlir çatdırılmalardan və əlavə bank xidmətlərinin qoşulmasından asılıdır.",
+      "Çevik qrafik: 5/2, 2/2, 4/2 və ya 3/2.",
+      "Rahat dress-kod.",
+      "Bank xidmətləri üçün güzəştli şərtlər və tərəfdaşlardan endirimlər.",
+      "Xəstəlik vərəqəsinin 10 günədək ödənilməsi.",
+      "Mentorla karyera artımı.",
+      "Alfa-Academy-də pulsuz təlim, vebinarlar və korporativ kitabxanalara giriş.",
+      "Korporativ icmalar və tədbirlər: kitab klubları, kinoklublar, idman və kiberturnirlər."
+    ],
+    "requiredDocuments": [
+      "Pasport.",
+      "ТК РФ üzrə rəsmiləşdirmə üçün sənədlər.",
+      "Yoxlama mərhələsində lazım olarsa, təhsil sənədi."
+    ]
+  },
+  "burger-king-cook-cashier": {
+    "shortDescription": "Burger King restoranında iş: yeməklərin hazırlanması, kassa, sifarişlərin verilməsi. Çevik qrafik, ayda 2 dəfə ödəniş.",
+    "description": "Burger King Rusiyanın fast-food sahəsində ən böyük işəgötürənlərdən biridir. Restoranda iş {cityPrep}: korporativ standartlara uyğun yeməklərin hazırlanması, kassada iş və qonaqlarla hesablaşma, sifarişlərin yığılması və verilməsi, zalda və iş yerində təmizliyin saxlanması. Təcrübə tələb olunmur — təlim ilk gündən ödənilir. Tələbələrə və birləşdirənlərə uyğundur: çevik qrafik, əlavə iş və ya tam növbə mümkündür. Yemək və forma — pulsuz, tibb kitabçasını şirkət hesabına rəsmiləşdiririk. Aydın əməkhaqqı ayda 2 dəfə + aylıq bonuslar.",
+    "requirements": [
+      "Yaş 18+.",
+      "İş təcrübəsi tələb olunmur — hər şeyi yerində öyrədəcəyik.",
+      "Rus dilinə sərbəst sahib olmaq.",
+      "Komandada işləməyə və qonaqlarla ünsiyyət qurmağa hazırlıq."
+    ],
+    "benefits": [
+      "ТК РФ üzrə rəsmiləşdirmə, staj hesablanması, ödənişli xəstəlik vərəqələri və məzuniyyətlərlə.",
+      "Ayda 2 dəfə əməkhaqqı + hər ay bonuslar.",
+      "İlk gündən ödənişli təlim.",
+      "Çevik qrafik: əlavə iş və ya tam növbələr, təhsillə birləşdirmək mümkündür.",
+      "Növbə müddətində pulsuz yemək.",
+      "Forma pulsuz verilir.",
+      "Tibb kitabçası şirkət hesabına rəsmiləşdirilir.",
+      "Ev yaxınlığında rahat restoran seçmək imkanı.",
+      "Karyera artımı: aşpaz-kassirdən restoran müdirinə qədər.",
+      "«Dostunu gətir» bonusu: 50+ saat işləyən hər dost üçün 10 000 ₽."
+    ],
+    "requiredDocuments": [
+      "Pasport.",
+      "СНИЛС.",
+      "ИНН.",
+      "Tibb kitabçası (şirkət hesabına rəsmiləşdirilə bilər)."
+    ]
+  },
+  "efin-bank-representative": {
+    "shortDescription": "Həftəlik ödənişlərlə səyyar iş: bank müştərisi ilə hər görüş ödənilir.",
+    "description": "Efin-də işləyərkən həftəlik ödənişlər və birbaşa təsir göstərdiyiniz gəlir alırsınız: hər görüş ayrıca ödənilir. Format çevik və rahatdır — qrafiki özünüz seçirsiniz. Rəsmiləşdirmə və məhsulların verilməsi kağızsız mobil tətbiq vasitəsilə həyata keçirilir, burada xəritədən dilərləri götürmək olar. Sürətli start, işə qəbulun uzun gözləməsi olmadan, dilərlərin sıxlığı isə bankların geniş tərəfdaş şəbəkəsi sayəsində yüksəkdir. Əlavə olaraq çay pulu, referal ödənişləri və mükafatlı mütəmadi müsabiqələr mövcuddur.",
+    "requirements": [
+      "Müştərilərə bank məhsullarını çatdırmaq.",
+      "Müştərilərə bank məhsulları və xidmətləri üzrə məsləhət vermək."
+    ],
+    "benefits": [
+      "Həftəlik mükafat ödənişləri.",
+      "Hər müştəri ilə görüşə görə ödəniş: gəlir səviyyəsi sizin fəallığınızdan asılıdır.",
+      "Görüşün orta dəyəri — təxminən 400 ₽.",
+      "Müstəqil müəyyən etdiyiniz çevik və rahat qrafik.",
+      "Kağızsız rəsmiləşdirmə və məhsulların verilməsi: yalnız smartfon lazımdır.",
+      "Bank ştatına rəsmiləşdirilmənin uzun gözləməsi olmadan sürətli start.",
+      "Rayonda dilərlərin yüksək sıxlığı və görüşlərin daimi axını.",
+      "Dilərlər üzrə lazımi məlumatlarla rahat mobil tətbiq.",
+      "Startda və iş prosesində dəstək.",
+      "Dəyərli mükafatlarla mütəmadi müsabiqələr.",
+      "«Öz komandanı topla» proqramı üzrə əlavə mükafat — tövsiyəyə görə 10 000-dən 15 000 ₽-dək.",
+      "reki.efin.ru xidmətinin müştərilərindən çay pulu və tövsiyələrdən əlavə gəlir."
+    ],
+    "requiredDocuments": [
+      "РФ vətəndaşının pasportu propiska göstərilməklə.",
+      "СНИЛС.",
+      "ИНН.",
+      "Rəsmiləşdirilmiş özünüməşğul statusu."
+    ]
+  },
+  "kuper-auto-courier": {
+    "shortDescription": "Avtomobillə həftəlik ödənişlərlə planlı və sürətli sifariş çatdırılması.",
+    "description": "Kuper-də avtokuryer vakansiyası: sifarişləri avtomobillə çatdırın, rahat rayon seçin və hər həftə ödənişlər alın.",
+    "requirements": [
+      "Tətbiqdəki marşrut üzrə yığılmış sifarişləri müştərilərə çatdırmaq.",
+      "Planlı çatdırılmanın taym-slotlarına və sifarişin ötürülməsi qaydalarına riayət etmək.",
+      "Lazım gəldikdə tətbiq vasitəsilə dəstək və müştəri ilə əlaqə saxlamaq."
+    ],
+    "benefits": [
+      "Karta həftəlik ödənişlər.",
+      "Çevik qrafik: rahat slotları və rayonu seçmək olar.",
+      "Kuper-in və tərəfdaşların xidmətlərindən endirimlər və bonuslar.",
+      "Məntəqənin şərtlərinə uyğun brendləşdirilmiş forma.",
+      "Dəvət olunmuş dostlar üçün bonus (referal proqramı üzrə).",
+      "Moskva üçün şirkətin avtomobilinin icarəsi mövcuddur."
+    ],
+    "requiredDocuments": [
+      "РФ vətəndaşları üçün: propiskası olan pasport və tibb kitabçası; məşğulluğun özünüməşğul kimi rəsmiləşdirilməsi."
+    ]
+  },
+  "kuper-bike-courier": {
+    "shortDescription": "Rahat rayonda velosiped və ya skuterlə sifarişləri çatdırın.",
+    "description": "Kuper sürətli çatdırılma üçün velokuryerlər axtarır. Qrafikinizə uyğun slotlarla rahat rayonda iş.",
+    "requirements": [
+      "Müştərilərə velosipedlə və ya skuterlə sifarişləri çatdırmaq.",
+      "Çatdırılma müddətində sifarişin keyfiyyətinə və saxlanmasına nəzarət etmək.",
+      "Marşrut və statuslar üçün Kuper tətbiqindən istifadə etmək."
+    ],
+    "benefits": [
+      "Karta həftəlik ödənişlər.",
+      "Çevik qrafik: rahat slotları və rayonu seçmək olar.",
+      "Kuper-in və tərəfdaşların xidmətlərindən endirimlər və bonuslar.",
+      "Məntəqənin şərtlərinə uyğun brendləşdirilmiş forma.",
+      "Dəvət olunmuş dostlar üçün bonus (referal proqramı üzrə).",
+      "Bütün şəhərlərdə elektrovelosipedin 0 ₽-ə icarəsi mövcuddur."
+    ],
+    "requiredDocuments": [
+      "РФ vətəndaşları üçün: propiskası olan pasport və tibb kitabçası; məşğulluğun özünüməşğul kimi rəsmiləşdirilməsi."
+    ]
+  },
+  "kuper-foot-courier": {
+    "shortDescription": "Kuper kuryeri: ev yaxınlığında piyada və ya velosipedlə sifarişləri çatdırın.",
+    "description": "Kuper ən iri onlayn alış-veriş xidmətidir. Piyada kuryer vəzifəsində ev yaxınlığındakı mağazalardan və restoranlardan sifarişləri çatdırmaq olar.",
+    "requirements": [
+      "3 km radiusunda mağazalardan və restoranlardan müştərilərə sifarişləri çatdırmaq.",
+      "Marşrut və sifariş statusu almaq üçün tətbiqdən istifadə etmək.",
+      "Sifarişi müştəriyə ötürərkən nəzakətli olmaq."
+    ],
+    "benefits": [
+      "Karta həftəlik ödənişlər.",
+      "Çevik qrafik: rahat slotları və rayonu seçmək olar.",
+      "Kuper-in və tərəfdaşların xidmətlərindən endirimlər və bonuslar.",
+      "Məntəqənin şərtlərinə uyğun brendləşdirilmiş forma.",
+      "Dəvət olunmuş dostlar üçün bonus (referal proqramı üzrə).",
+      "Çatdırılmaları piyada, velosipedlə və ya skuterlə yerinə yetirmək olar."
+    ],
+    "requiredDocuments": [
+      "РФ vətəndaşları üçün: propiskası olan pasport və tibb kitabçası; məşğulluğun özünüməşğul kimi rəsmiləşdirilməsi."
+    ]
+  },
+  "kuper-order-picker": {
+    "shortDescription": "İnternet-sifarişləri METRO, Lenta Online və digər tərəfdaşların mağazalarında yığın.",
+    "description": "Kuper-də sifariş yığıcısı planlı çatdırılma üçün müştəri sifarişlərinin dəqiq və səliqəli yığılmasına cavabdehdir.",
+    "requirements": [
+      "Tətbiqdə müştəri siyahısı üzrə malları yığmaq.",
+      "Malların yararlılıq müddətlərini və zahiri görünüşünü yoxlamaq.",
+      "Yığılmış sifarişləri taym-slot çərçivəsində kuryerə ötürmək."
+    ],
+    "benefits": [
+      "Karta həftəlik ödənişlər.",
+      "Çevik qrafik: rahat slotları və rayonu seçmək olar.",
+      "Kuper-in və tərəfdaşların xidmətlərindən endirimlər və bonuslar.",
+      "Məntəqənin şərtlərinə uyğun brendləşdirilmiş forma.",
+      "Dəvət olunmuş dostlar üçün bonus (referal proqramı üzrə)."
+    ],
+    "requiredDocuments": [
+      "РФ vətəndaşları üçün: propiskası olan pasport və tibb kitabçası; məşğulluğun özünüməşğul kimi rəsmiləşdirilməsi."
+    ]
+  },
+  "ozon-courier": {
+    "shortDescription": "Şəxsi minik və ya Ozon-un xidməti avtomobilində sifarişlərin çatdırılması. Çevik qrafik, həftəlik ödənişlər, Gosuslugi vasitəsilə qeydiyyat.",
+    "description": "Ozon {city} müştərilərinə sifarişlərin çatdırılması üçün avtokuryerlər axtarır. Şəxsi minik və ya yük avtomobilində işləmək, ya da şirkətin xidməti avtomobilini götürmək mümkündür. Format — özünüməşğulluq və ya ИП. Qeydiyyat və təlim Gosuslugi vasitəsilə Ozon Job tətbiqində keçir. Azad qrafik, digər əlavə işlərlə birləşdirmək olar. Birbaşa karta həftədə bir dəfə ödənişlər. Bizim müraciətimiz vasitəsilə qoşulma: əlaqələri buraxın — onları Ozon-a ötürəcəyik, sonra sizə qeydiyyat üçün keçidlə SMS gələcək.",
+    "requirements": [
+      "18 yaşdan yuxarı.",
+      "РФ və ya ЕАЭС vətəndaşlığı.",
+      "Şəxsi və ya xidməti avtomobil (minik / yük).",
+      "B kateqoriyalı qüvvədə olan sürücülük vəsiqəsi.",
+      "Özünüməşğulluq və ya ИП (Moy nalog vasitəsilə 5 dəqiqədə rəsmiləşdirməyə kömək edəcəyik).",
+      "Gosuslugi vasitəsilə Ozon Job tətbiqində onbordinqdən keçməyə hazırlıq."
+    ],
+    "benefits": [
+      "Tam yüklənmə zamanı ayda 100 000 ₽-dən gəlir.",
+      "Birbaşa karta həftəlik ödənişlər.",
+      "Azad qrafik — slotları tətbiqdə özünüz götürürsünüz.",
+      "İlk növbədən sonra referal kodu ilə qeydiyyat üçün bonus.",
+      "Avtomobilin brendləşdirilməsinə görə əlavə bonuslar.",
+      "Onbordinqin bütün mərhələlərində bizdən birbaşa dəstək."
+    ],
+    "requiredDocuments": [
+      "РФ və ya ЕАЭС pasportu.",
+      "B kateqoriyalı sürücülük vəsiqəsi.",
+      "Nəqliyyat vasitəsinin qeydiyyat şəhadətnaməsi və ya icarə müqaviləsi.",
+      "Moy nalog-da qeydiyyat (özünüməşğulluq) və ya ИП."
+    ]
+  },
+  "ozon-electric-stacker-driver": {
+    "shortDescription": "Ozon anbarında elektroştabeler və riçtrakın idarə edilməsi. Növbəli qrafik, ТК üzrə rəsmiləşdirmə, şirkət hesabına təlim və icazə.",
+    "description": "Ozon elektroştabeler sürücülərini dəvət edir {cityPrep} — anbarda paletlərin daşınması, yükləmə və boşaltma. Müasir texnika (Jungheinrich, Linde), piyadalar və texnika üçün ayrıca dəhlizlər. Əgər qüvvədə olan vəsiqəniz yoxdursa — Ozon təlim və icazəni ödəyəcək. Növbəli qrafik 2/2 və ya 5/2, pulsuz yemək və korporativ nəqliyyat. Bizim müraciətimiz vasitəsilə qoşulma.",
+    "requirements": [
+      "21 yaşdan yuxarı.",
+      "РФ və ya ЕАЭС vətəndaşlığı.",
+      "Yükləyici sürücüsü vəsiqəsi (yoxdursa — şirkət hesabına öyrədəcəyik).",
+      "Diqqətlilik və növbəli qrafikə hazırlıq."
+    ],
+    "benefits": [
+      "Tam yüklənmə zamanı ayda 90 000 ₽-dən gəlir.",
+      "Pulsuz təlim və yükləyici sürücüsü vəsiqəsi.",
+      "Jungheinrich / Linde müasir texnikası.",
+      "Yeməkxanada pulsuz isti yemək.",
+      "Metrodan / dəmir yolu stansiyasından korporativ nəqliyyat.",
+      "ТК РФ üzrə rəsmiləşdirmə — ayda 2 dəfə ağ əməkhaqqı."
+    ],
+    "requiredDocuments": [
+      "РФ və ya ЕАЭС pasportu.",
+      "Yükləyici sürücüsü vəsiqəsi (varsa).",
+      "СНИЛС və ИНН."
+    ]
+  },
+  "ozon-fresh-administrator": {
+    "shortDescription": "Ozon fresh darkstorunda növbənin idarə edilməsi: yığıcıların nəzarəti, tədarüklərin qəbulu, sürət üzrə KPI. Rəsmi əməkhaqqı, planın yerinə yetirilməsinə görə bonuslar.",
+    "description": "Ozon fresh darkstor administratorlarını axtarır {cityPrep}. Siz növbənizə cavabdehsiniz: yığıcılar arasında tapşırıqların bölüşdürülməsi, təchizatçılardan tədarüklərin qəbulu, yararlılıq müddətinin nəzarəti, kuryerlərə sifarişlərin göndərilmə sürətinə görə KPI. Xətti idarəetmə təcrübəsi (3–5 adam) qarşılanır, lakin məcburi deyil — təcrübəçi proqramı var. ТК РФ üzrə rəsmiləşdirmə, ayda 2 dəfə ağ əməkhaqqı + KPI-yə görə rüblük bonus. Bizim müraciətimiz vasitəsilə qoşulma.",
+    "requirements": [
+      "21 yaşdan yuxarı.",
+      "РФ və ya ЕАЭС vətəndaşlığı.",
+      "Pərakəndə satış / ictimai iaşə / logistika sahəsində 1 ildən iş təcrübəsi (idarəetmə təcrübəsi — plyus).",
+      "Növbəli qrafikə və fiziki yüklərə hazırlıq.",
+      "Smartfonun və Excel / Google Sheets-in inamlı istifadəçisi."
+    ],
+    "benefits": [
+      "Ayda 95 000 ₽-dən gəlir + KPI-nin yerinə yetirilməsinə görə rüblük bonus.",
+      "ТК РФ üzrə rəsmiləşdirmə — ayda 2 dəfə ağ əməkhaqqı.",
+      "Sınaq müddətindən sonra korporativ ДМС.",
+      "Xətti vəzifədən keçənlər üçün təcrübəçi proqramı.",
+      "Karyera yolu: administrator → baş administrator → darkstor müdiri.",
+      "Darkstor yeməkxanasında pulsuz yemək və brendləşdirilmiş forma."
+    ],
+    "requiredDocuments": [
+      "РФ və ya ЕАЭС pasportu.",
+      "Əmək kitabçası / СНИЛС / ИНН.",
+      "Təhsil sənədləri (varsa)."
+    ]
+  },
+  "ozon-fresh-courier": {
+    "shortDescription": "Ozon fresh darkstorlarından təzə məhsulların piyada və ya velosipedlə çatdırılması. Yaxınlıqda sifarişlər, həftədə bir dəfə ödənişlər, Gosuslugi vasitəsilə qeydiyyat.",
+    "description": "Ozon fresh — 30–60 dəqiqəyə məhsulların və hazır yeməyin çatdırılması. Kuryerlər piyada, velosipedlə və ya skuterlə işləyirlər — sifarişlər ev yaxınlığındakı darkstorda verilir, marşrut tətbiqlə qurulur. Azad qrafik (4 saatdan slotlar), həftədə bir dəfə karta ödənişlər, pik saatlar və pis hava üçün bonuslar. Bizim müraciətimiz vasitəsilə qoşulma: əlaqələri buraxın — Ozon Gosuslugi-də qeydiyyat üçün keçidlə SMS göndərəcək.",
+    "requirements": [
+      "18 yaşdan yuxarı.",
+      "РФ, ЕАЭС və ya СНГ vətəndaşlığı (ЕАЭС-dən kənar olanlar üçün ВНЖ + patent lazımdır).",
+      "Özünüməşğulluq və ya ИП (Moy nalog vasitəsilə 5 dəqiqədə rəsmiləşdirməyə kömək edəcəyik).",
+      "Gosuslugi vasitəsilə Ozon Job tətbiqində onbordinqdən keçməyə hazırlıq.",
+      "Arzu olunandır — internetlə Android və ya iOS-smartfon."
+    ],
+    "benefits": [
+      "Həftədə 5 növbə yüklənmə zamanı ayda 80 000 ₽-dən gəlir.",
+      "Birbaşa karta həftəlik ödənişlər.",
+      "Azad qrafik — 4 saatdan slotlar, təhsillə birləşdirmək olar.",
+      "Pik saatlar üçün bonuslar (pik saat və pis hava — yüksək tarif).",
+      "Şirkət hesabına Ozon fresh brendləşdirilmiş forması.",
+      "Bizim referal kanalımız vasitəsilə qoşulma — rəsmiləşdirməni daha sürətli keçirsiniz."
+    ],
+    "requiredDocuments": [
+      "РФ, ЕАЭС və ya СНГ pasportu.",
+      "Moy nalog-da qeydiyyat (özünüməşğulluq) və ya ИП.",
+      "СНИЛС və ИНН.",
+      "Xarici vətəndaşlar üçün Patent / РВП / ВНЖ."
+    ]
+  },
+  "ozon-fresh-kitchen-staff": {
+    "shortDescription": "Ozon fresh üçün hazır yeməklərin bişirilməsi və qablaşdırılması. Təcrübəsiz, şirkət hesabına təlim, pulsuz yemək, Ozon-dan tibb kitabçası.",
+    "description": "Ozon fresh fabrik-mətbəxi salatlar, şorbalar, isti yeməklər, çörək məhsulları hazırlayır və onları çatdırılma üçün qablaşdırır. İşçilər ayrı xətlərdə işləyirlər: doğramaq, yığmaq, qablaşdırmaq, markalamaq. Təcrübəsiz — 1–2 növbədə yerində təlim, təcrübəli şef-mentorlar. Növbəli qrafik 2/2 və ya 5/2, pulsuz isti yemək, tibb kitabçası şirkət hesabına rəsmiləşdirilir. Bizim müraciətimiz vasitəsilə qoşulma.",
+    "requirements": [
+      "18 yaşdan yuxarı.",
+      "РФ, ЕАЭС və ya СНГ vətəndaşlığı.",
+      "Tibb kitabçası məcburidir (yoxdursa, şirkət hesabına rəsmiləşdirəcəyik).",
+      "Növbəli qrafikə və ayaqda işə hazırlıq.",
+      "Səliqəlilik və sanitar normalara qarşı diqqət."
+    ],
+    "benefits": [
+      "Tam yüklənmə zamanı ayda 70 000 ₽-dən gəlir.",
+      "Seçimə görə növbəli qrafik 2/2 və ya 5/2.",
+      "Fabrik-mətbəx yeməkxanasında pulsuz isti yemək.",
+      "Tibb kitabçası şirkət hesabına rəsmiləşdirilir.",
+      "ТК РФ üzrə rəsmiləşdirmə — ayda 2 dəfə ağ əməkhaqqı.",
+      "Həftə sonu əlavə işlər — ödəniş tarifdən yüksəkdir."
+    ],
+    "requiredDocuments": [
+      "РФ, ЕАЭС və ya СНГ pasportu.",
+      "Xarici vətəndaşlar üçün Patent / РВП / ВНЖ.",
+      "Tibb kitabçası (varsa; əks halda pulsuz rəsmiləşdirəcəyik).",
+      "СНИЛС və ИНН."
+    ]
+  },
+  "ozon-fresh-order-picker": {
+    "shortDescription": "Ozon fresh darkstor-a təzə məhsulların yığılması: sifarişdən kuryerə təhvil verilməsinədək 30–60 dəqiqə. Növbəli qrafik, pulsuz yemək, ТК РФ.",
+    "description": "Ozon fresh — müştəridən 3 km radiusunda məhsullarla mini-anbarlar. Yığıcı tətbiqdə sifariş alır, malları darkstor rəflərindən yığır və 6–10 dəqiqədə kuryerə verir. Soyuq və soyudulmuş zonalarda iş (ayrıca isti gödəkçələr verilir), növbəli qrafik 2/2 və ya 5/2, pulsuz isti yemək, ТК РФ üzrə rəsmiləşdirmə. Bizim müraciətimiz vasitəsilə qoşulma: əlaqələri buraxın — Ozon SMS göndərəcək.",
+    "requirements": [
+      "18 yaşdan yuxarı.",
+      "РФ, ЕАЭС və ya СНГ vətəndaşlığı.",
+      "Ayaqda 12 saat işləməyə və soyuqda olmağa hazırlıq.",
+      "Təcrübəsiz — ilk növbədə təlim.",
+      "Artikullara və yararlılıq müddətinə qarşı diqqət."
+    ],
+    "benefits": [
+      "Tam yüklənmə zamanı ayda 75 000 ₽-dən gəlir.",
+      "Seçimə görə növbəli qrafik 2/2 və ya 5/2.",
+      "Darkstor yeməkxanasında pulsuz isti yemək.",
+      "ТК РФ üzrə rəsmiləşdirmə — ayda 2 dəfə ağ əməkhaqqı.",
+      "Soyuducu zonalar üçün isti brendləşdirilmiş forma.",
+      "Həftə sonu əlavə işlər — ödəniş tarifdən yüksəkdir."
+    ],
+    "requiredDocuments": [
+      "РФ, ЕАЭС və ya СНГ pasportu.",
+      "Xarici vətəndaşlar üçün Patent / РВП / ВНЖ.",
+      "СНИЛС və ИНН.",
+      "Tibb kitabçası lazım deyil (lazım gəldikdə şirkət hesabına verilir)."
+    ]
+  },
+  "ozon-goods-handler": {
+    "shortDescription": "Ozon anbarında malların qəbulu, qablaşdırılması və göndərilməsi. Növbəli qrafik, həftəlik ödənişlər, şirkət hesabına təlim.",
+    "description": "Ozon mal emalı mütəxəssislərini dəvət edir {cityPrep} — daxilolmaların qəbulu, müştəri sifarişlərinin qablaşdırılması, maşınlara göndərmə. İsti müasir anbarda iş, küçəsiz. Təcrübəsiz — 1 növbədə yerində təlim. Növbəli qrafik 2/2 və ya 5/2, pulsuz yemək, metrodan korporativ nəqliyyat. Bizim müraciətimiz vasitəsilə qoşulma: əlaqələri buraxın — Ozon SMS göndərəcək.",
+    "requirements": [
+      "18 yaşdan yuxarı.",
+      "РФ, ЕАЭС və ya СНГ vətəndaşlığı.",
+      "Ayaqda işləməyə və 15 kq-dək yük qaldırmağa hazırlıq.",
+      "Təcrübəsiz — ilk növbədə təlim."
+    ],
+    "benefits": [
+      "Tam yüklənmə zamanı ayda 65 000 ₽-dən gəlir.",
+      "Seçimə görə növbəli qrafik 2/2 və ya 5/2.",
+      "Yeməkxanada pulsuz isti yemək.",
+      "Ən yaxın metrodan / stansiyadan korporativ nəqliyyat.",
+      "Həftə sonu əlavə işlər — ödəniş tarifdən yüksəkdir.",
+      "Güzəştli tibbi komissiya və forma."
+    ],
+    "requiredDocuments": [
+      "РФ, ЕАЭС və ya СНГ pasportu.",
+      "Xarici vətəndaşlar üçün Patent / РВП / ВНЖ.",
+      "СНИЛС və ИНН."
+    ]
+  },
+  "ozon-truck-driver": {
+    "shortDescription": "Şirkətin yük avtomobilində Ozon anbarları və paylama məntəqələri arasında malların çatdırılması. Rəsmi rəsmiləşdirmə, sabit gəlir.",
+    "description": "Ozon şirkətin yük avtomobilinə sürücü-ekspeditorları dəvət edir {cityPrep}. Marşrutlar — Ozon anbarları, darkstorlar və paylama məntəqələri arasında. ТК РФ və ya ГПХ üzrə rəsmiləşdirmə, pulsuz tibbi komissiya, korporativ rabitə və forma. Sabit qrafik 5/2 və ya 2/2, iş saatından artıq və gecə növbələrinin ödənişi. Bizim müraciətimiz vasitəsilə qoşulma: əlaqələri buraxın — Ozon rəsmiləşdirmə üçün sizinlə əlaqə saxlayacaq.",
+    "requirements": [
+      "21 yaşdan yuxarı.",
+      "РФ və ya ЕАЭС vətəndaşlığı.",
+      "B / C kateqoriyalı sürücülük vəsiqəsi (1 ildən stajla).",
+      "Növbəli işə və regional səviyyəli ezamiyyətlərə hazırlıq.",
+      "Sənədlərə qarşı diqqət və yük üçün məsuliyyət."
+    ],
+    "benefits": [
+      "ТК РФ üzrə rəsmi rəsmiləşdirmə — ayda 2 dəfə ağ əməkhaqqı.",
+      "Yük avtomobili və yanacaq şirkət hesabına.",
+      "Korporativ tibbi komissiya və forma.",
+      "İş saatından artıq, gecə növbələri və həftə sonu işinə görə əlavə ödəniş.",
+      "Anbarlarda güzəştli korporativ rabitə və yemək.",
+      "Bizim referal kanalımız vasitəsilə qoşulma — rəsmiləşdirməni daha sürətli keçirsiniz."
+    ],
+    "requiredDocuments": [
+      "РФ və ya ЕАЭС pasportu.",
+      "B / C kateqoriyalı sürücülük vəsiqəsi.",
+      "Əmək kitabçası / СНИЛС / ИНН.",
+      "Tibbi arayış (varsa; əks halda pulsuz keçərsiniz)."
+    ]
+  },
+  "ozon-warehouse-operator": {
+    "shortDescription": "Ozon fulfilment anbarında sifarişlərin yığılması, qablaşdırılması və çeşidlənməsi. Növbəli qrafik, həftəlik ödənişlər, pulsuz yemək.",
+    "description": "Ozon {cityPrep} anbar operatorlarını dəvət edir — müştəri sifarişlərinin yığılması, malların qablaşdırılması və çeşidlənməsi. Müasir isti anbarda iş, küçə və hava şəraitsiz. Növbəli qrafik 2/2 və ya 5/2 — rahatı seçirsiniz, həftə sonu əlavə işləmək olar. Pulsuz yemək, metrodan / dəmir yolu stansiyasından korporativ nəqliyyat, güzəştli tibbi komissiya. Bizim müraciətimiz vasitəsilə qoşulma: əlaqələri buraxın — Ozon növbəyə dəvətlə SMS göndərəcək.",
+    "requirements": [
+      "18 yaşdan yuxarı.",
+      "РФ, ЕАЭС və ya СНГ vətəndaşlığı.",
+      "Ayaqda işləməyə və 15 kq-dək yük qaldırmağa hazırlıq.",
+      "Təcrübəsiz — 1 növbədə yerində təlim."
+    ],
+    "benefits": [
+      "Tam yüklənmə zamanı ayda 70 000 ₽-dən gəlir.",
+      "Seçimə görə növbəli qrafik 2/2 və ya 5/2.",
+      "Yeməkxanada pulsuz isti yemək.",
+      "Ən yaxın metrodan / stansiyadan korporativ nəqliyyat.",
+      "Güzəştli tibbi komissiya və forma.",
+      "Həftə sonu əlavə işlər — ödəniş tarifdən yüksəkdir."
+    ],
+    "requiredDocuments": [
+      "РФ, ЕАЭС və ya СНГ pasportu.",
+      "Xarici vətəndaşlar üçün Patent / РВП / ВНЖ.",
+      "СНИЛС və ИНН."
+    ]
+  },
+  "tbank-outbound-b2b-operator": {
+    "shortDescription": "T-Bank-da uzaqdan vakansiya: təqdim olunan baza üzrə çıxış B2B-zənglər və biznes üçün məhsulların satışları. Tavansız işəmuzd gəlir, çevik qrafik və startda təlim.",
+    "description": "Çıxış B2B-satışlarının operatoru potensial müştərilərin bazası ilə işləyir: çıxış zəngləri edir, biznes üçün bank məhsullarını təqdim edir, ehtiyacı müəyyən edir, suallara cavab verir və müştərini ərizənin rəsmiləşdirilməsinə qədər gətirməyə kömək edir. İş formatı tamamilə uzaqdandır: kompüter və ya noutbuk, sabit internet və qulaqlıq lazımdır. Çevik qrafik, Moskva üzrə mövcud intervallarda hər gün işləmək imkanı ilə. Nəqliyyat və yanacaq şərtləri: Uzaqdan format, yanacaq kompensasiyası tətbiq olunmur.",
+    "requirements": [
+      "9 sinifdən (və ya yuxarı) təhsil.",
+      "Kompüterdən və əsas iş alətlərindən inamlı istifadə.",
+      "Səlis şifahi nitq, nəzakətli ünsiyyət və əsaslandırma bacarıqları.",
+      "Çıxış zənglərinə və müştəri etirazları ilə işə hazırlıq.",
+      "Uzaqdan iş üçün kompüter/noutbuk, sabit internet və qulaqlığın olması."
+    ],
+    "benefits": [
+      "Mükafata görə tavansız işəmuzd ödəniş sistemi.",
+      "Şərtlər yerinə yetirildikdə əlavə ödənişlər/bonuslar.",
+      "İşin tamamilə uzaqdan formatı.",
+      "Çevik qrafik: mövcud intervallarda hər gün işləmək olar.",
+      "Startda ödənişli uzaqdan təlim.",
+      "Həyat sığortası, kartlar üzrə xüsusi tariflər və şirkət tərəfdaşlarından endirimlər."
+    ],
+    "requiredDocuments": [
+      "РФ pasportu",
+      "СНИЛС"
+    ]
+  },
+  "tbank-representative": {
+    "shortDescription": "Hazır görüşlərlə səyyar iş: bank məhsullarının müştərilərə çatdırılması və şərtlər üzrə məsləhət. İşəmuzd gəlir, həftədə 2 gündən çevik qrafik.",
+    "description": "T-Bank nümayəndəsi əvvəlcədən razılaşdırılmış görüşlərə gedir və müştərilərə şirkətin məhsullarını çatdırır: kartlar, SIM-kartlar, sığorta polisləri və sənədlər. Müştəri axtarışı lazım deyil: dilərlər artıq rəsmiləşdirilib. Sizin tapşırığınız — görüşü keyfiyyətlə keçirmək, məhsulun üstünlükləri haqqında danışmaq və lazım gəldikdə əlavə xidmətlər təklif etməkdir. Nəqliyyat və yanacaq şərtləri: yanacağa və yürüşə görə əlavə ödəniş/kompensasiya var (zona/şəhər şərtlərinə görə).",
+    "requirements": [
+      "9 sinifdən (bir sıra şəhərlərdə) və ya 11 sinifdən təhsil — regionun şərtlərinə uyğun.",
+      "Satış, bank sahəsi, sığorta və ya pərakəndə satış təcrübəsi üstünlük olacaq.",
+      "Səlis nitq, nəzakətli ünsiyyət və müştəriyə yanaşma tapmaq bacarığı.",
+      "Səyyar formata və təyin olunmuş marşrut üzrə müştərilərlə görüşlərə hazırlıq."
+    ],
+    "benefits": [
+      "İşəmuzd ödəniş sistemi: gəlirin həcmi görüşlərin sayından və keyfiyyətindən asılıdır.",
+      "Çevik qrafik: həftədə 2 gündən, günlər və saatlar regionun mövcud slotlarında seçilə bilər.",
+      "Avtomobillə səyahətlərin istifadə olunduğu regionlarda benzin xərclərinin kompensasiyası.",
+      "Bir sıra şəhərlər üçün çatdırılma zonasında nəqliyyat vəsiqəsi (Moskva və Sankt-Peterburq daxil olmaqla).",
+      "Təhsillə və ya digər məşğulluqla birləşdirmək olar.",
+      "Kartlar üzrə xüsusi tariflər, tərəfdaşlardan endirimlər və həyat sığortası."
+    ],
+    "requiredDocuments": [
+      "РФ pasportu",
+      "СНИЛС"
+    ]
+  },
   "yandex-eda-courier": {
-    "shortDescription": "Ya.Pro ilə evə yaxın sifarişlərin çatdırılması, 2 saatdan sərbəst qrafik və şəffaf gəlir.",
-    "description": "Yandex Eats kuryerləri işə dəvət edir. Qoşulma şəhəri: {city}. Sifarişləri Ya.Pro tətbiqi ilə aydın marşrutlar üzrə çatdırırsınız: rayon seçmək, 2 saatdan növbəyə çıxmaq, fasilə götürmək və sifariş gəlirini əvvəlcədən görmək mümkündür."
+    "shortDescription": "Ev yaxınlığında Ya.Pro vasitəsilə sifarişlərin çatdırılması, 2 saatdan azad qrafik və şəffaf gəlir.",
+    "description": "Yandex Eda kuryerlər toplayır. Qoşulma şəhəri: {city}. Siz «Ya.Pro» tətbiqi vasitəsilə anlaşıqlı marşrutlarla sifarişləri çatdırırsınız: rayonu seçə, 2 saatdan slotlara çıxa, fasilələr götürə və sifarişlər üzrə gəliri əvvəlcədən görə bilərsiniz.",
+    "requirements": [
+      "«Ya.Pro» tətbiqi vasitəsilə anlaşıqlı marşrutlarla sifarişləri çatdırmaq.",
+      "Tətbiqdəki təlimatlara əməl etmək — mürəkkəb logistika və lazımsız ünsiyyət olmadan."
+    ],
+    "benefits": [
+      "Şəffaf gəlir: pik saatlarda bonuslar və yüksək tariflər.",
+      "Ağır sifarişlərə görə əlavə ödəniş, müştərilərdən çay pulu və gözləməyə görə əlavə ödəniş.",
+      "Referal proqram: dəvət edilmiş hər dost üçün 25 000 ₽-dək alın.",
+      "2 saatdan azad qrafik: çatdırılmalara nə vaxt çıxacağınızı özünüz qərar verirsiniz.",
+      "Rayonun seçimi: ev yaxınlığında və ya daha çox sifariş olan yerdə işləyin.",
+      "«Yoldakı sifarişlər»: xəritədə getmək istədiyiniz nöqtəni göstərin — sistem marşrut üzrə sifarişləri seçəcək.",
+      "Lazımi nöqtənin yaxınlığında olduğunuzda slotu tamamlaya və ya fasilə verə bilərsiniz.",
+      "Yandex Lavka-dan 95 ₽-ə kombo-naharlar.",
+      "Yandex Eda-da gündəlik 300 ₽-lik promokod.",
+      "Yandex Lavka-da məhsullara, ev malları, hazır yemək və çörək məhsullarına 20% endirim.",
+      "Beri Zaryad xidməti vasitəsilə Powerbank icarəsi gündə 100 ₽-dən.",
+      "Sizin və yaxınlarınız üçün pulsuz Yandex Plus abunəliyi.",
+      "İstənilən havada çatdırılmalar üçün ixtisaslaşdırılmış geyim.",
+      "Çatdırılma müddətində pulsuz sığorta.",
+      "«Ya.Pro»: sürətli qeydiyyat və start (rəsmiləşdirmədən bir neçə saat sonra).",
+      "«Ya.Pro»: gəlir və çatdırılma vaxtının göstərilməsi ilə yaxınlıqdakı sifarişlərin seçimi.",
+      "«Ya.Pro»: gəlir, çay pulu və ödənişlər üzrə şəffaf statistika.",
+      "«Ya.Pro»: optimal marşrutlarla daxili naviqator.",
+      "«Ya.Pro»: yüksək yüklənmə və gəlir olan rayonlar haqqında məsləhətlər.",
+      "«Ya.Pro»: tətbiq vasitəsilə bonus və endirimlərə giriş.",
+      "«Ya.Pro»: zəif internet bağlantısı zamanı sabit iş."
+    ],
+    "requiredDocuments": [
+      "РФ vətəndaşları üçün: propiskası olan pasport və tibb kitabçası; ГПХ müqaviləsi və ya özünüməşğulluq vasitəsilə rəsmiləşdirmə."
+    ]
   }
 }
