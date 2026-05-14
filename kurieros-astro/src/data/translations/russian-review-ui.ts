@@ -1,13 +1,8 @@
-// Russian-only fallback for the review modal labels.
-//
-// .reviews is merged into translations.reviews — only adds the leave_review
-// key (already same value as in review-form-footer.ts).
-//
-// .form REPLACES translations.form (set earlier by review-form-footer.ts).
-// This drops the 5 *_placeholder keys from review-form-footer; ReviewModal
-// uses inline `placeholder=` HTML attributes for those fields, so the keys
-// are unused dead data anyway. TODO: remove the duplication entirely
-// (track via audit finding M7 — immutable shell-dict assembly).
+// Russian-only review-form labels. Composed into translations.form by
+// translations/index.ts (overrides the .form contribution from
+// review-form-footer.ts since review modal labels stay Russian per PR #131
+// policy). The .reviews property contributes the leave_review key only —
+// merged with reviewFormFooterTranslations.reviews via spread.
 
 export const russianReviewUi = {
   reviews: {

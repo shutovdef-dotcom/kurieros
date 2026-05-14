@@ -113,10 +113,21 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 			{googleSiteVerification && <meta name="google-site-verification" content={googleSiteVerification} />}
 		<meta name="format-detection" content="telephone=no" />
 
-		<!-- Manrope (primary UI font, design tokens use it) -->
+		<!-- Manrope (primary UI font, design tokens use it).
+		     Non-blocking preload pattern: a plain `<link rel="stylesheet">`
+		     to a third-party CSS endpoint stalls HTML parsing until the
+		     stylesheet downloads (~50–150ms RTT to Google's CDN), even
+		     with `display=swap` (which only controls the resulting
+		     @font-face rules, not the CSS request itself). Fetch as
+		     `preload as=style` instead, then promote to `stylesheet`
+		     once the asset is in the cache so subsequent paints see it.
+		     The `<noscript>` fallback ensures the font still loads on
+		     browsers with JS disabled (where the onload handler can't
+		     run). -->
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+		<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+		<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap"></noscript>
 
 			<!-- Theme Persistence -->
 			<script is:inline>
@@ -443,7 +454,51 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 						set(key, value) { try { localStorage.setItem(key, value); } catch (_) { /* ignore */ } },
 					};
 					// TRANS-1: track loaded (lang, sourceSlug) pairs instead of whole languages.
+					// SSG = full-page navigation = `loadedFragments` resets on every page,
+					// so each navigation re-pays the JSON.parse + Object.assign merge cost
+					// (16-fragment Moscow listing measured ~19MB raw in Phase 2). Persist
+					// each parsed fragment in sessionStorage keyed by build version so
+					// repeat visits in the same tab skip the parse + the Object.assign.
 					const loadedFragments = new Set();
+					const SESSION_KEY_PREFIX = 'kurieros_vt_';
+
+					function sessionKey(lang, sourceSlug) {
+						return SESSION_KEY_PREFIX + lang + '/' + sourceSlug + '/' + VACANCY_TRANSLATIONS_VERSION;
+					}
+
+					function loadFragmentFromSession(lang, sourceSlug) {
+						try {
+							const raw = sessionStorage.getItem(sessionKey(lang, sourceSlug));
+							if (!raw) return null;
+							return JSON.parse(raw);
+						} catch (_) {
+							return null;
+						}
+					}
+
+					function storeFragmentInSession(lang, sourceSlug, fragment) {
+						try {
+							sessionStorage.setItem(sessionKey(lang, sourceSlug), JSON.stringify(fragment));
+						} catch (_) {
+							// QuotaExceededError or SecurityError (Safari Private Browsing,
+							// restricted WKWebViews) — skip persistence and let the next
+							// page navigation refetch via the HTTP cache. The HTTP layer
+							// (force-cache + ?v=<build>) already prevents network hits.
+						}
+					}
+
+					// One-time cleanup: drop any sessionStorage entries from prior
+					// build versions so quota usage doesn't bloat across deploys.
+					try {
+						const currentSuffix = '/' + VACANCY_TRANSLATIONS_VERSION;
+						for (let i = sessionStorage.length - 1; i >= 0; i--) {
+							const key = sessionStorage.key(i);
+							if (key && key.indexOf(SESSION_KEY_PREFIX) === 0 && !key.endsWith(currentSuffix)) {
+								sessionStorage.removeItem(key);
+							}
+						}
+					} catch (_) { /* sessionStorage unavailable — nothing to clean */ }
+
 					window.translations = translations;
 					
 					function getSafeLang(lang) {
@@ -499,6 +554,21 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 				async function fetchFragment(lang, sourceSlug) {
 					const cacheKey = lang + '/' + sourceSlug;
 					if (loadedFragments.has(cacheKey)) return null;
+					// SessionStorage check first — survives full-page navigation
+					// (BFCache miss) within the same tab, so a returning visitor
+					// pays neither the network roundtrip nor the JSON.parse cost
+					// for already-seen fragments. The HTTP layer (force-cache
+					// + ?v=<build>) is still the primary source of truth across
+					// tabs and after a tab close; sessionStorage is the fast path
+					// for in-tab repeats. Versioned key (suffix `/<build>`) means
+					// a redeploy invalidates every entry naturally — combined
+					// with the one-time cleanup at IIFE start, stale entries do
+					// not pile up across deploys.
+					const sessionFragment = loadFragmentFromSession(lang, sourceSlug);
+					if (sessionFragment) {
+						loadedFragments.add(cacheKey);
+						return sessionFragment;
+					}
 					// Immutable-asset cache pattern: every URL carries the build-time
 					// version (`?v=<vacancyTranslationsVersion>`), and `force-cache` tells
 					// the browser to serve the disk cache forever for any URL it has
@@ -528,6 +598,7 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 						}
 						const fragment = await response.json();
 						loadedFragments.add(cacheKey);
+						storeFragmentInSession(lang, sourceSlug, fragment);
 						return fragment;
 					} catch (error) {
 						window.dispatchEvent(new CustomEvent('kurieros:fragment-load-failed', {
