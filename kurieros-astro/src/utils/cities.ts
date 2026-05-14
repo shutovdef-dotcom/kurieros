@@ -1,4 +1,5 @@
 import { CITY_BLOCKLIST, CITY_DATASET } from '../data/cities-dataset';
+import { cyrillicToLatin } from './transliterate';
 
 type JobLike = {
 	location?: string;
@@ -29,19 +30,8 @@ const ALL_RUSSIA_KEY = normalizeCityKey('Вся Россия');
 export const isCityBlocked = (name: string) =>
 	BLOCKLIST_KEYS.has(normalizeCityKey(name));
 
-const SLUG_MAP: Record<string, string> = {
-	а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'e', ж: 'zh', з: 'z',
-	и: 'i', й: 'y', к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r',
-	с: 's', т: 't', у: 'u', ф: 'f', х: 'h', ц: 'ts', ч: 'ch', ш: 'sh', щ: 'sch',
-	ъ: '', ы: 'y', ь: '', э: 'e', ю: 'yu', я: 'ya'
-};
-
 export const slugifyCity = (name: string) =>
-	name
-		.toLowerCase()
-		.split('')
-		.map((char) => SLUG_MAP[char] ?? char)
-		.join('')
+	cyrillicToLatin(name)
 		.replace(/[^a-z0-9]+/g, '-')
 		.replace(/^-+|-+$/g, '');
 

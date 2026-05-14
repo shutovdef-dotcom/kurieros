@@ -1,4 +1,5 @@
 import { getVacancyPluralText, humanJoin, parseSalary } from './format';
+import { cyrillicToLatin } from './transliterate';
 
 export type JobLike = {
   slug: string;
@@ -51,24 +52,9 @@ const TRANSPORT_LABELS: Record<string, string> = {
   foot: 'Пешком',
 };
 
-const CYRILLIC_MAP: Record<string, string> = {
-  а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'e', ж: 'zh', з: 'z', и: 'i',
-  й: 'y', к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r', с: 's', т: 't',
-  у: 'u', ф: 'f', х: 'h', ц: 'ts', ч: 'ch', ш: 'sh', щ: 'sch', ъ: '', ы: 'y', ь: '',
-  э: 'e', ю: 'yu', я: 'ya',
-};
-
-const transliterate = (value: string) =>
-  value
-    .trim()
-    .toLowerCase()
-    .split('')
-    .map((char) => CYRILLIC_MAP[char] ?? char)
-    .join('');
-
 export const slugifyCompany = (name: string) =>
   COMPANY_SLUGS[name] ||
-  transliterate(name)
+  cyrillicToLatin(name.trim())
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .replace(/--+/g, '-');
