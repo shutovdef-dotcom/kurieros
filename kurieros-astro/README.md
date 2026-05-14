@@ -43,12 +43,6 @@ npm run preview
 - `PUBLIC_GA4_MEASUREMENT_ID` — ID счётчика Google Analytics 4 (например, `G-XXXXXXX`)
 - `PUBLIC_YANDEX_METRIKA_ID` — ID счётчика Яндекс.Метрики
 
-Также добавлена закрытая owner-страница `/owner/seo` (доступ по коду):
-
-- `PUBLIC_OWNER_SEO_HASH` — SHA-256 хэш кода доступа для `/owner/seo`
-- `PUBLIC_GSC_PROPERTY_URL` — URL свойства Search Console (например, `sc-domain:kurerok.ru` или `https://kurerok.ru/`)
-- `PUBLIC_YANDEX_WEBMASTER_HOST` — хост для Яндекс.Вебмастера (например, `https:kurerok.ru:443`)
-
 ## Структура проекта
 
 ```text
