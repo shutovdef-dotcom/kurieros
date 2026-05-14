@@ -1,24 +1,465 @@
 {
-  "alfa-bank-representative": {},
-  "burger-king-cook-cashier": {},
-  "efin-bank-representative": {},
-  "kuper-auto-courier": {},
-  "kuper-bike-courier": {},
-  "kuper-foot-courier": {},
-  "kuper-order-picker": {},
-  "ozon-courier": {},
-  "ozon-electric-stacker-driver": {},
-  "ozon-fresh-administrator": {},
-  "ozon-fresh-courier": {},
-  "ozon-fresh-kitchen-staff": {},
-  "ozon-fresh-order-picker": {},
-  "ozon-goods-handler": {},
-  "ozon-truck-driver": {},
-  "ozon-warehouse-operator": {},
-  "tbank-outbound-b2b-operator": {},
-  "tbank-representative": {},
+  "alfa-bank-representative": {
+    "shortDescription": "Công việc di chuyển tại Alfa-Bank: giao sản phẩm ngân hàng cho khách hàng, ký giấy tờ và hỗ trợ kết nối dịch vụ ngân hàng.",
+    "description": "Alfa-Bank đang tìm đại diện làm việc với khách hàng tại hiện trường. Cần giao các sản phẩm ngân hàng, gặp khách hàng tại các điểm thuận tiện trong thành phố, ký giấy tờ, tư vấn về dịch vụ và ưu đãi của ngân hàng, cũng như giúp kết nối các dịch vụ bổ sung. Hình thức phù hợp với ứng viên không có kinh nghiệm: trước khi bắt đầu có đào tạo, hỗ trợ và hướng dẫn rõ ràng vào công việc. Ngân hàng cung cấp đăng ký chính thức, lịch trình linh hoạt, cơ hội phát triển và quyền truy cập vào các phúc lợi công ty, giảm giá và chương trình đào tạo.",
+    "requirements": [
+      "Tuổi từ 18; sau 40 tuổi ngân hàng sẽ xem xét thêm kinh nghiệm và kỹ năng của ứng viên.",
+      "Quốc tịch РФ, Belarus hoặc Kazakhstan.",
+      "Trình độ học vấn từ trung cấp trở lên; ứng viên có trình độ trung học có thể được xem xét riêng.",
+      "Sẵn sàng cho tính chất công việc di chuyển và bán hàng.",
+      "Ngoại hình gọn gàng, không có hình xăm ở những phần dễ thấy của cơ thể.",
+      "Lời nói chuẩn mực không có giọng địa phương quá nặng.",
+      "Không có tiền án và không có trạng thái hoạt động trong CRM tuyển dụng trong 90 ngày qua.",
+      "Có xe có thể là lợi thế ở các tỉnh; đối với các dòng có yêu cầu xe chỉ tạo định dạng xe."
+    ],
+    "benefits": [
+      "Đăng ký theo ТК РФ.",
+      "Lương từ 120 000 ₽; thu nhập phụ thuộc vào số lượt giao và kết nối các dịch vụ ngân hàng bổ sung.",
+      "Lịch trình linh hoạt: 5/2, 2/2, 4/2 hoặc 3/2.",
+      "Quy định trang phục thoải mái.",
+      "Điều kiện ưu đãi cho dịch vụ ngân hàng và giảm giá từ đối tác.",
+      "Thanh toán nghỉ ốm đến 10 ngày.",
+      "Phát triển sự nghiệp với cố vấn.",
+      "Đào tạo miễn phí tại Alfa-Academy, webinar và truy cập thư viện công ty.",
+      "Cộng đồng và sự kiện công ty: câu lạc bộ sách, câu lạc bộ phim, thể thao và giải đấu thể thao điện tử."
+    ],
+    "requiredDocuments": [
+      "Hộ chiếu.",
+      "Giấy tờ để đăng ký theo ТК РФ.",
+      "Bằng cấp giáo dục, nếu cần ở giai đoạn kiểm tra."
+    ]
+  },
+  "burger-king-cook-cashier": {
+    "shortDescription": "Làm việc tại nhà hàng Burger King: chế biến món ăn, quầy thu ngân, giao đơn hàng. Lịch trình linh hoạt, trả lương 2 lần mỗi tháng.",
+    "description": "Burger King là một trong những nhà tuyển dụng lớn nhất nước Nga trong lĩnh vực thức ăn nhanh. Làm việc tại nhà hàng {cityPrep}: chế biến món ăn theo tiêu chuẩn công ty, làm việc tại quầy thu ngân và tính tiền cho khách, tập hợp và giao đơn hàng, giữ gìn vệ sinh khu vực và nơi làm việc. Không cần kinh nghiệm — đào tạo được trả lương từ ngày đầu tiên. Phù hợp cho sinh viên và người làm kiêm: lịch trình linh hoạt, có thể làm thêm hoặc ca đầy đủ. Ăn uống và đồng phục — miễn phí, sổ y tế chúng tôi làm bằng chi phí công ty. Lương rõ ràng 2 lần mỗi tháng + thưởng hàng tháng.",
+    "requirements": [
+      "Tuổi 18+.",
+      "Không yêu cầu kinh nghiệm làm việc — chúng tôi sẽ dạy mọi thứ tại chỗ.",
+      "Thông thạo tiếng Nga.",
+      "Sẵn sàng làm việc trong nhóm và giao tiếp với khách."
+    ],
+    "benefits": [
+      "Đăng ký theo ТК РФ với tính thâm niên, nghỉ ốm và nghỉ phép có lương.",
+      "Lương 2 lần mỗi tháng + thưởng mỗi tháng.",
+      "Đào tạo có trả lương từ ngày đầu tiên.",
+      "Lịch trình linh hoạt: làm thêm hoặc ca đầy đủ, có thể kết hợp với việc học.",
+      "Ăn uống miễn phí trong ca.",
+      "Đồng phục được cấp miễn phí.",
+      "Sổ y tế được làm bằng chi phí công ty.",
+      "Cơ hội chọn nhà hàng thuận tiện gần nhà.",
+      "Phát triển sự nghiệp: từ đầu bếp-thu ngân đến quản lý nhà hàng.",
+      "Thưởng «giới thiệu bạn bè»: 10 000 ₽ cho mỗi người bạn đã làm việc 50+ giờ."
+    ],
+    "requiredDocuments": [
+      "Hộ chiếu.",
+      "СНИЛС.",
+      "ИНН.",
+      "Sổ y tế (có thể làm bằng chi phí công ty)."
+    ]
+  },
+  "efin-bank-representative": {
+    "shortDescription": "Công việc di chuyển với thanh toán hàng tuần: mỗi cuộc gặp khách hàng của ngân hàng đều được trả lương.",
+    "description": "Khi làm việc tại Efin, bạn nhận được thanh toán hàng tuần và thu nhập mà bạn ảnh hưởng trực tiếp: mỗi cuộc gặp được thanh toán riêng. Hình thức linh hoạt và thoải mái — bạn tự chọn lịch trình. Đăng ký và cấp sản phẩm diễn ra không cần giấy tờ qua ứng dụng di động, nơi có thể nhận đơn từ bản đồ. Khởi đầu nhanh, không cần chờ đợi lâu để tuyển dụng, và mật độ đơn hàng cao nhờ mạng lưới đối tác ngân hàng rộng. Ngoài ra còn có tiền tip, thanh toán giới thiệu và các cuộc thi thường xuyên với giải thưởng.",
+    "requirements": [
+      "Giao các sản phẩm ngân hàng cho khách hàng.",
+      "Tư vấn cho khách hàng về sản phẩm và dịch vụ của ngân hàng."
+    ],
+    "benefits": [
+      "Thanh toán tiền thưởng hàng tuần.",
+      "Trả công cho mỗi cuộc gặp khách hàng: mức thu nhập phụ thuộc vào hoạt động của bạn.",
+      "Chi phí trung bình của cuộc gặp — khoảng 400 ₽.",
+      "Lịch trình linh hoạt và thoải mái mà bạn tự quyết định.",
+      "Đăng ký và cấp sản phẩm không cần giấy: chỉ cần smartphone.",
+      "Khởi đầu nhanh, không cần chờ đợi lâu để vào biên chế ngân hàng.",
+      "Mật độ đơn hàng cao trong khu vực và dòng cuộc gặp liên tục.",
+      "Ứng dụng di động tiện lợi với thông tin cần thiết về đơn đăng ký.",
+      "Hỗ trợ ban đầu và trong quá trình làm việc.",
+      "Các cuộc thi thường xuyên với những giải thưởng giá trị.",
+      "Thưởng bổ sung theo chương trình «Lập đội của bạn» — từ 10 000 đến 15 000 ₽ cho mỗi lời giới thiệu.",
+      "Thu nhập bổ sung từ tiền tip và giới thiệu của khách hàng dịch vụ reki.efin.ru."
+    ],
+    "requiredDocuments": [
+      "Hộ chiếu công dân РФ kèm thông tin propiska.",
+      "СНИЛС.",
+      "ИНН.",
+      "Trạng thái tự kinh doanh đã đăng ký."
+    ]
+  },
+  "kuper-auto-courier": {
+    "shortDescription": "Giao hàng theo kế hoạch và nhanh bằng ô tô với thanh toán hàng tuần.",
+    "description": "Vị trí tài xế giao hàng bằng ô tô tại Kuper: giao đơn hàng bằng ô tô, chọn khu vực thuận tiện và nhận thanh toán hàng tuần.",
+    "requirements": [
+      "Giao đơn hàng đã thu gom cho khách theo lộ trình từ ứng dụng.",
+      "Tuân thủ khung giờ giao hàng theo kế hoạch và quy tắc bàn giao đơn hàng.",
+      "Duy trì liên lạc với bộ phận hỗ trợ và khách hàng qua ứng dụng khi cần."
+    ],
+    "benefits": [
+      "Thanh toán hàng tuần vào thẻ.",
+      "Lịch trình linh hoạt: có thể chọn khung giờ và khu vực thuận tiện.",
+      "Giảm giá và ưu đãi từ các dịch vụ Kuper và đối tác.",
+      "Đồng phục có logo theo điều kiện điểm.",
+      "Thưởng cho bạn bè được mời (theo chương trình giới thiệu).",
+      "Đối với Moskva có thể thuê xe của công ty."
+    ],
+    "requiredDocuments": [
+      "Đối với công dân РФ: hộ chiếu kèm propiska và sổ y tế; đăng ký theo hình thức tự kinh doanh."
+    ]
+  },
+  "kuper-bike-courier": {
+    "shortDescription": "Giao đơn hàng bằng xe đạp hoặc xe scooter trong khu vực thuận tiện.",
+    "description": "Kuper đang tìm nhân viên giao hàng bằng xe đạp để giao nhanh. Làm việc tại khu vực thuận tiện, với các khung giờ phù hợp với lịch của bạn.",
+    "requirements": [
+      "Giao đơn hàng cho khách bằng xe đạp hoặc xe scooter.",
+      "Theo dõi chất lượng và sự an toàn của đơn hàng trong quá trình giao.",
+      "Sử dụng ứng dụng Kuper cho lộ trình và trạng thái."
+    ],
+    "benefits": [
+      "Thanh toán hàng tuần vào thẻ.",
+      "Lịch trình linh hoạt: có thể chọn khung giờ và khu vực thuận tiện.",
+      "Giảm giá và ưu đãi từ các dịch vụ Kuper và đối tác.",
+      "Đồng phục có logo theo điều kiện điểm.",
+      "Thưởng cho bạn bè được mời (theo chương trình giới thiệu).",
+      "Tại tất cả các thành phố đều có thể thuê xe đạp điện với giá 0 ₽."
+    ],
+    "requiredDocuments": [
+      "Đối với công dân РФ: hộ chiếu kèm propiska và sổ y tế; đăng ký theo hình thức tự kinh doanh."
+    ]
+  },
+  "kuper-foot-courier": {
+    "shortDescription": "Nhân viên giao hàng Kuper: giao đơn hàng gần nhà bằng đi bộ hoặc xe đạp.",
+    "description": "Kuper là dịch vụ mua sắm online lớn nhất. Ở vị trí giao hàng đi bộ có thể giao đơn từ các cửa hàng và nhà hàng gần nhà.",
+    "requirements": [
+      "Giao đơn hàng cho khách từ các cửa hàng và nhà hàng trong bán kính lên đến 3 km.",
+      "Sử dụng ứng dụng để nhận lộ trình và trạng thái đơn hàng.",
+      "Lịch sự khi bàn giao đơn hàng cho khách."
+    ],
+    "benefits": [
+      "Thanh toán hàng tuần vào thẻ.",
+      "Lịch trình linh hoạt: có thể chọn khung giờ và khu vực thuận tiện.",
+      "Giảm giá và ưu đãi từ các dịch vụ Kuper và đối tác.",
+      "Đồng phục có logo theo điều kiện điểm.",
+      "Thưởng cho bạn bè được mời (theo chương trình giới thiệu).",
+      "Có thể giao hàng bằng đi bộ, xe đạp hoặc xe scooter."
+    ],
+    "requiredDocuments": [
+      "Đối với công dân РФ: hộ chiếu kèm propiska và sổ y tế; đăng ký theo hình thức tự kinh doanh."
+    ]
+  },
+  "kuper-order-picker": {
+    "shortDescription": "Thu gom đơn hàng online tại các cửa hàng METRO, «Lenta Online» và các đối tác khác.",
+    "description": "Người thu gom đơn hàng tại Kuper chịu trách nhiệm thu gom chính xác và cẩn thận các đơn hàng của khách để giao theo kế hoạch.",
+    "requirements": [
+      "Thu gom hàng theo danh sách khách hàng trong ứng dụng.",
+      "Kiểm tra hạn sử dụng và hình thức bên ngoài của hàng hóa.",
+      "Bàn giao đơn hàng đã thu gom cho người giao hàng trong khung giờ."
+    ],
+    "benefits": [
+      "Thanh toán hàng tuần vào thẻ.",
+      "Lịch trình linh hoạt: có thể chọn khung giờ và khu vực thuận tiện.",
+      "Giảm giá và ưu đãi từ các dịch vụ Kuper và đối tác.",
+      "Đồng phục có logo theo điều kiện điểm.",
+      "Thưởng cho bạn bè được mời (theo chương trình giới thiệu)."
+    ],
+    "requiredDocuments": [
+      "Đối với công dân РФ: hộ chiếu kèm propiska và sổ y tế; đăng ký theo hình thức tự kinh doanh."
+    ]
+  },
+  "ozon-courier": {
+    "shortDescription": "Giao đơn hàng bằng xe con cá nhân hoặc xe công ty Ozon. Lịch trình linh hoạt, thanh toán hàng tuần, đăng ký qua Gosuslugi.",
+    "description": "Ozon đang tìm tài xế giao hàng bằng ô tô để giao đơn cho khách hàng {city}. Có thể làm việc bằng xe con hoặc xe tải cá nhân, hoặc lấy xe công ty. Hình thức — tự kinh doanh hoặc ИП. Đăng ký và đào tạo diễn ra trong ứng dụng Ozon Job qua Gosuslugi. Lịch trình tự do, có thể kết hợp với các công việc làm thêm khác. Thanh toán mỗi tuần một lần trực tiếp vào thẻ. Kết nối qua đơn đăng ký của chúng tôi: để lại thông tin liên hệ — chúng tôi sẽ chuyển cho Ozon, sau đó bạn sẽ nhận được SMS kèm liên kết đăng ký.",
+    "requirements": [
+      "Tuổi từ 18.",
+      "Quốc tịch РФ hoặc ЕАЭС.",
+      "Xe cá nhân hoặc xe công ty (xe con / xe tải).",
+      "Bằng lái xe hạng B đang có hiệu lực.",
+      "Tự kinh doanh hoặc ИП (chúng tôi sẽ giúp đăng ký trong 5 phút qua «Moy nalog»).",
+      "Sẵn sàng hoàn thành onboarding trong ứng dụng Ozon Job qua Gosuslugi."
+    ],
+    "benefits": [
+      "Thu nhập từ 100 000 ₽ mỗi tháng khi tải đầy đủ.",
+      "Thanh toán hàng tuần trực tiếp vào thẻ.",
+      "Lịch trình tự do — bạn tự lấy khung giờ trong ứng dụng.",
+      "Thưởng khi đăng ký bằng mã giới thiệu sau ca đầu tiên.",
+      "Thưởng bổ sung cho việc dán thương hiệu lên xe.",
+      "Hỗ trợ trực tiếp từ chúng tôi ở mọi giai đoạn onboarding."
+    ],
+    "requiredDocuments": [
+      "Hộ chiếu РФ hoặc ЕАЭС.",
+      "Bằng lái xe hạng B.",
+      "СТС hoặc hợp đồng thuê xe.",
+      "Đăng ký tại «Moy nalog» (tự kinh doanh) hoặc ИП."
+    ]
+  },
+  "ozon-electric-stacker-driver": {
+    "shortDescription": "Điều khiển xe nâng điện và reach truck tại kho Ozon. Lịch ca, đăng ký theo ТК, đào tạo và cấp phép bằng chi phí công ty.",
+    "description": "Ozon mời các tài xế xe nâng điện {cityPrep} — di chuyển pallet trong kho, bốc xếp và dỡ hàng. Thiết bị hiện đại (Jungheinrich, Linde), hành lang riêng cho người đi bộ và thiết bị. Nếu bạn không có giấy phép hiệu lực — Ozon sẽ trả tiền đào tạo và cấp phép. Lịch ca 2/2 hoặc 5/2, ăn uống miễn phí và xe đưa đón của công ty. Kết nối qua đơn đăng ký của chúng tôi.",
+    "requirements": [
+      "Tuổi từ 21.",
+      "Quốc tịch РФ hoặc ЕАЭС.",
+      "Chứng chỉ tài xế xe nâng (nếu không có — chúng tôi sẽ đào tạo bằng chi phí công ty).",
+      "Cẩn thận và sẵn sàng làm theo lịch ca."
+    ],
+    "benefits": [
+      "Thu nhập từ 90 000 ₽ mỗi tháng khi tải đầy đủ.",
+      "Đào tạo miễn phí và chứng chỉ tài xế xe nâng.",
+      "Thiết bị hiện đại Jungheinrich / Linde.",
+      "Bữa ăn nóng miễn phí tại căn tin.",
+      "Xe đưa đón công ty từ tàu điện ngầm / ga tàu.",
+      "Đăng ký theo ТК РФ — lương trắng 2 lần mỗi tháng."
+    ],
+    "requiredDocuments": [
+      "Hộ chiếu РФ hoặc ЕАЭС.",
+      "Chứng chỉ tài xế xe nâng (nếu có).",
+      "СНИЛС và ИНН."
+    ]
+  },
+  "ozon-fresh-administrator": {
+    "shortDescription": "Quản lý ca trong darkstore Ozon fresh: kiểm soát nhân viên thu gom, tiếp nhận hàng, KPI về tốc độ. Lương chính thức, thưởng cho việc hoàn thành kế hoạch.",
+    "description": "Ozon fresh đang tìm quản trị viên darkstore {cityPrep}. Bạn chịu trách nhiệm cho ca của mình: phân chia nhiệm vụ giữa các nhân viên thu gom, tiếp nhận hàng từ nhà cung cấp, kiểm soát hạn sử dụng, KPI về tốc độ giao đơn cho người giao hàng. Kinh nghiệm quản lý tuyến (3–5 người) được hoan nghênh nhưng không bắt buộc — có chương trình thực tập. Đăng ký theo ТК РФ, lương trắng 2 lần mỗi tháng + thưởng quý cho KPI. Kết nối qua đơn đăng ký của chúng tôi.",
+    "requirements": [
+      "Tuổi từ 21.",
+      "Quốc tịch РФ hoặc ЕАЭС.",
+      "Kinh nghiệm làm việc trong bán lẻ / dịch vụ ăn uống / logistics từ 1 năm (kinh nghiệm quản lý — cộng điểm).",
+      "Sẵn sàng làm theo lịch ca và chịu được tải trọng vật lý.",
+      "Người dùng tự tin smartphone và Excel / Google Sheets."
+    ],
+    "benefits": [
+      "Thu nhập từ 95 000 ₽ mỗi tháng + thưởng quý cho việc đạt KPI.",
+      "Đăng ký theo ТК РФ — lương trắng 2 lần mỗi tháng.",
+      "Bảo hiểm y tế công ty sau thời gian thử việc.",
+      "Chương trình thực tập cho những người chuyển từ vị trí tuyến.",
+      "Lộ trình nghề nghiệp: quản trị viên → quản trị viên cấp cao → quản lý darkstore.",
+      "Ăn uống miễn phí tại căn tin darkstore và đồng phục có logo."
+    ],
+    "requiredDocuments": [
+      "Hộ chiếu РФ hoặc ЕАЭС.",
+      "Sổ lao động / СНИЛС / ИНН.",
+      "Bằng cấp giáo dục (nếu có)."
+    ]
+  },
+  "ozon-fresh-courier": {
+    "shortDescription": "Giao thực phẩm tươi từ các darkstore Ozon fresh bằng đi bộ hoặc xe đạp. Đơn hàng gần đó, thanh toán mỗi tuần một lần, đăng ký qua Gosuslugi.",
+    "description": "Ozon fresh — giao thực phẩm và đồ ăn sẵn trong 30–60 phút. Người giao hàng làm việc bằng đi bộ, xe đạp hoặc xe scooter — đơn hàng được phát tại darkstore gần nhà, lộ trình được ứng dụng tính toán. Lịch trình tự do (khung giờ từ 4 giờ), thanh toán mỗi tuần một lần vào thẻ, thưởng cho giờ cao điểm và thời tiết xấu. Kết nối qua đơn đăng ký của chúng tôi: để lại thông tin liên hệ — Ozon sẽ gửi SMS kèm liên kết đăng ký tại Gosuslugi.",
+    "requirements": [
+      "Tuổi từ 18.",
+      "Quốc tịch РФ, ЕАЭС hoặc СНГ (với người không thuộc ЕАЭС cần ВНЖ + patent).",
+      "Tự kinh doanh hoặc ИП (chúng tôi sẽ giúp đăng ký trong 5 phút qua «Moy nalog»).",
+      "Sẵn sàng hoàn thành onboarding trong ứng dụng Ozon Job qua Gosuslugi.",
+      "Mong muốn — smartphone Android hoặc iOS có internet."
+    ],
+    "benefits": [
+      "Thu nhập từ 80 000 ₽ mỗi tháng khi tải 5 ca mỗi tuần.",
+      "Thanh toán hàng tuần trực tiếp vào thẻ.",
+      "Lịch trình tự do — khung giờ từ 4 giờ, có thể kết hợp với việc học.",
+      "Thưởng cho giờ cao điểm (giờ cao điểm và thời tiết xấu — biểu phí cao hơn).",
+      "Đồng phục Ozon fresh có logo bằng chi phí công ty.",
+      "Kết nối qua kênh giới thiệu của chúng tôi — hoàn thành đăng ký nhanh hơn."
+    ],
+    "requiredDocuments": [
+      "Hộ chiếu РФ, ЕАЭС hoặc СНГ.",
+      "Đăng ký tại «Moy nalog» (tự kinh doanh) hoặc ИП.",
+      "СНИЛС và ИНН.",
+      "Patent / РВП / ВНЖ cho công dân nước ngoài."
+    ]
+  },
+  "ozon-fresh-kitchen-staff": {
+    "shortDescription": "Nấu và đóng gói các món ăn sẵn cho Ozon fresh. Không cần kinh nghiệm, đào tạo bằng chi phí công ty, ăn uống miễn phí, sổ y tế từ Ozon.",
+    "description": "Bếp công nghiệp Ozon fresh chế biến salad, súp, món nóng, bánh nướng và đóng gói chúng để giao hàng. Nhân viên làm việc trên các dây chuyền riêng: cắt, thu gom, đóng gói, dán nhãn. Không cần kinh nghiệm — đào tạo tại chỗ trong 1–2 ca, đầu bếp-cố vấn có kinh nghiệm. Lịch ca 2/2 hoặc 5/2, bữa ăn nóng miễn phí, sổ y tế được làm bằng chi phí công ty. Kết nối qua đơn đăng ký của chúng tôi.",
+    "requirements": [
+      "Tuổi từ 18.",
+      "Quốc tịch РФ, ЕАЭС hoặc СНГ.",
+      "Sổ y tế bắt buộc (chúng tôi sẽ làm bằng chi phí công ty nếu không có).",
+      "Sẵn sàng làm việc theo ca và làm việc đứng.",
+      "Cẩn thận và chú ý đến các tiêu chuẩn vệ sinh."
+    ],
+    "benefits": [
+      "Thu nhập từ 70 000 ₽ mỗi tháng khi tải đầy đủ.",
+      "Lịch ca 2/2 hoặc 5/2 tự chọn.",
+      "Bữa ăn nóng miễn phí tại căn tin bếp công nghiệp.",
+      "Sổ y tế được làm bằng chi phí công ty.",
+      "Đăng ký theo ТК РФ — lương trắng 2 lần mỗi tháng.",
+      "Làm thêm vào cuối tuần — trả cao hơn biểu phí."
+    ],
+    "requiredDocuments": [
+      "Hộ chiếu РФ, ЕАЭС hoặc СНГ.",
+      "Patent / РВП / ВНЖ cho công dân nước ngoài.",
+      "Sổ y tế (nếu có; ngược lại chúng tôi sẽ làm miễn phí).",
+      "СНИЛС và ИНН."
+    ]
+  },
+  "ozon-fresh-order-picker": {
+    "shortDescription": "Thu gom thực phẩm tươi tại darkstore Ozon fresh: 30–60 phút từ khi đặt hàng đến khi giao cho người giao hàng. Lịch ca, ăn uống miễn phí, ТК РФ.",
+    "description": "Ozon fresh — kho nhỏ với thực phẩm trong bán kính 3 km từ khách hàng. Người thu gom nhận đơn trong ứng dụng, thu gom hàng từ kệ darkstore và bàn giao cho người giao hàng trong 6–10 phút. Làm việc trong khu vực lạnh và đông lạnh (áo khoác ấm riêng được cấp), lịch ca 2/2 hoặc 5/2, bữa ăn nóng miễn phí, đăng ký theo ТК РФ. Kết nối qua đơn đăng ký của chúng tôi: để lại thông tin liên hệ — Ozon sẽ gửi SMS.",
+    "requirements": [
+      "Tuổi từ 18.",
+      "Quốc tịch РФ, ЕАЭС hoặc СНГ.",
+      "Sẵn sàng làm việc đứng 12 giờ và chịu được lạnh.",
+      "Không cần kinh nghiệm — đào tạo trong ca đầu tiên.",
+      "Cẩn thận với mã hàng và hạn sử dụng."
+    ],
+    "benefits": [
+      "Thu nhập từ 75 000 ₽ mỗi tháng khi tải đầy đủ.",
+      "Lịch ca 2/2 hoặc 5/2 tự chọn.",
+      "Bữa ăn nóng miễn phí tại căn tin darkstore.",
+      "Đăng ký theo ТК РФ — lương trắng 2 lần mỗi tháng.",
+      "Đồng phục ấm có logo cho khu vực lạnh.",
+      "Làm thêm vào cuối tuần — trả cao hơn biểu phí."
+    ],
+    "requiredDocuments": [
+      "Hộ chiếu РФ, ЕАЭС hoặc СНГ.",
+      "Patent / РВП / ВНЖ cho công dân nước ngoài.",
+      "СНИЛС và ИНН.",
+      "Không cần sổ y tế (được cấp khi cần bằng chi phí công ty)."
+    ]
+  },
+  "ozon-goods-handler": {
+    "shortDescription": "Tiếp nhận, đóng gói và xuất hàng tại kho Ozon. Lịch ca, thanh toán hàng tuần, đào tạo bằng chi phí công ty.",
+    "description": "Ozon mời các chuyên gia xử lý hàng hóa {cityPrep} — tiếp nhận hàng đến, đóng gói đơn hàng của khách, xuất hàng lên xe. Làm việc trong kho ấm hiện đại, không có đường phố. Không cần kinh nghiệm — đào tạo tại chỗ trong 1 ca. Lịch ca 2/2 hoặc 5/2, ăn uống miễn phí, xe đưa đón của công ty từ tàu điện ngầm. Kết nối qua đơn đăng ký của chúng tôi: để lại thông tin liên hệ — Ozon sẽ gửi SMS.",
+    "requirements": [
+      "Tuổi từ 18.",
+      "Quốc tịch РФ, ЕАЭС hoặc СНГ.",
+      "Sẵn sàng làm việc đứng và nâng vật nặng đến 15 kg.",
+      "Không cần kinh nghiệm — đào tạo trong ca đầu tiên."
+    ],
+    "benefits": [
+      "Thu nhập từ 65 000 ₽ mỗi tháng khi tải đầy đủ.",
+      "Lịch ca 2/2 hoặc 5/2 tự chọn.",
+      "Bữa ăn nóng miễn phí tại căn tin.",
+      "Xe đưa đón công ty từ ga tàu điện ngầm / ga tàu gần nhất.",
+      "Làm thêm vào cuối tuần — trả cao hơn biểu phí.",
+      "Khám sức khỏe ưu đãi và đồng phục."
+    ],
+    "requiredDocuments": [
+      "Hộ chiếu РФ, ЕАЭС hoặc СНГ.",
+      "Patent / РВП / ВНЖ cho công dân nước ngoài.",
+      "СНИЛС và ИНН."
+    ]
+  },
+  "ozon-truck-driver": {
+    "shortDescription": "Giao hàng giữa các kho và điểm phát hàng Ozon bằng xe tải của công ty. Đăng ký chính thức, thu nhập ổn định.",
+    "description": "Ozon mời các tài xế-điều phối lái xe tải của công ty {cityPrep}. Lộ trình — giữa các kho Ozon, darkstore và điểm phát hàng. Đăng ký theo ТК РФ hoặc ГПХ, khám sức khỏe miễn phí, liên lạc công ty và đồng phục. Lịch trình ổn định 5/2 hoặc 2/2, trả lương cho giờ làm thêm và ca đêm. Kết nối qua đơn đăng ký của chúng tôi: để lại thông tin liên hệ — Ozon sẽ liên hệ với bạn để đăng ký.",
+    "requirements": [
+      "Tuổi từ 21.",
+      "Quốc tịch РФ hoặc ЕАЭС.",
+      "Bằng lái xe hạng B / C (kinh nghiệm từ 1 năm).",
+      "Sẵn sàng làm việc theo ca và đi công tác trong khu vực.",
+      "Cẩn thận với giấy tờ và trách nhiệm với hàng hóa."
+    ],
+    "benefits": [
+      "Đăng ký chính thức theo ТК РФ — lương trắng 2 lần mỗi tháng.",
+      "Xe tải và nhiên liệu bằng chi phí công ty.",
+      "Khám sức khỏe công ty và đồng phục.",
+      "Phụ cấp cho giờ làm thêm, ca đêm và làm việc cuối tuần.",
+      "Liên lạc công ty ưu đãi và bữa ăn tại kho.",
+      "Kết nối qua kênh giới thiệu của chúng tôi — bạn hoàn thành đăng ký nhanh hơn."
+    ],
+    "requiredDocuments": [
+      "Hộ chiếu РФ hoặc ЕАЭС.",
+      "Bằng lái xe hạng B / C.",
+      "Sổ lao động / СНИЛС / ИНН.",
+      "Giấy chứng nhận y tế (nếu có; ngược lại bạn sẽ vượt qua miễn phí)."
+    ]
+  },
+  "ozon-warehouse-operator": {
+    "shortDescription": "Thu gom, đóng gói và phân loại đơn hàng tại kho fulfillment Ozon. Lịch ca, thanh toán hàng tuần, ăn uống miễn phí.",
+    "description": "Ozon mời các nhân viên kho {cityPrep} — thu gom đơn hàng của khách, đóng gói và phân loại hàng hóa. Làm việc trong kho ấm hiện đại, không có đường phố và thời tiết. Lịch ca 2/2 hoặc 5/2 — bạn chọn lịch thuận tiện, có thể làm thêm vào cuối tuần. Ăn uống miễn phí, xe đưa đón công ty từ tàu điện ngầm / ga tàu, khám sức khỏe ưu đãi. Kết nối qua đơn đăng ký của chúng tôi: để lại thông tin liên hệ — Ozon sẽ gửi SMS kèm lời mời vào ca.",
+    "requirements": [
+      "Tuổi từ 18.",
+      "Quốc tịch РФ, ЕАЭС hoặc СНГ.",
+      "Sẵn sàng làm việc đứng và nâng vật nặng đến 15 kg.",
+      "Không cần kinh nghiệm — đào tạo tại chỗ trong 1 ca."
+    ],
+    "benefits": [
+      "Thu nhập từ 70 000 ₽ mỗi tháng khi tải đầy đủ.",
+      "Lịch ca 2/2 hoặc 5/2 tự chọn.",
+      "Bữa ăn nóng miễn phí tại căn tin.",
+      "Xe đưa đón công ty từ ga tàu điện ngầm / ga tàu gần nhất.",
+      "Khám sức khỏe ưu đãi và đồng phục.",
+      "Làm thêm vào cuối tuần — trả cao hơn biểu phí."
+    ],
+    "requiredDocuments": [
+      "Hộ chiếu РФ, ЕАЭС hoặc СНГ.",
+      "Patent / РВП / ВНЖ cho công dân nước ngoài.",
+      "СНИЛС và ИНН."
+    ]
+  },
+  "tbank-outbound-b2b-operator": {
+    "shortDescription": "Vị trí từ xa tại T-Bank: gọi B2B đi theo cơ sở được cung cấp và bán sản phẩm cho doanh nghiệp. Thu nhập theo sản phẩm không giới hạn, lịch trình linh hoạt và đào tạo ban đầu.",
+    "description": "Nhân viên bán hàng B2B gọi ra ngoài làm việc với cơ sở khách hàng tiềm năng: thực hiện cuộc gọi đi, giới thiệu sản phẩm ngân hàng dành cho doanh nghiệp, xác định nhu cầu, trả lời câu hỏi và giúp đưa khách hàng đến việc nộp đơn. Hình thức làm việc hoàn toàn từ xa: cần máy tính hoặc laptop, internet ổn định và tai nghe. Lịch trình linh hoạt, có khả năng làm việc hàng ngày trong các khung giờ có sẵn tại Moskva. Điều kiện vận chuyển và nhiên liệu: Hình thức từ xa, không áp dụng đền bù nhiên liệu.",
+    "requirements": [
+      "Trình độ học vấn từ lớp 9 (hoặc cao hơn).",
+      "Sử dụng thành thạo máy tính và các công cụ làm việc cơ bản.",
+      "Lời nói thành thạo, giao tiếp lịch sự và kỹ năng lập luận.",
+      "Sẵn sàng gọi điện ra ngoài và làm việc với phản đối của khách hàng.",
+      "Có máy tính/laptop, internet ổn định và tai nghe cho công việc từ xa."
+    ],
+    "benefits": [
+      "Hệ thống trả lương theo sản phẩm không giới hạn về tiền thưởng.",
+      "Thanh toán/thưởng bổ sung khi đáp ứng các điều kiện.",
+      "Hình thức làm việc hoàn toàn từ xa.",
+      "Lịch trình linh hoạt: có thể làm việc hàng ngày trong các khung giờ có sẵn.",
+      "Đào tạo từ xa có trả lương ban đầu.",
+      "Bảo hiểm nhân thọ, biểu phí đặc biệt cho thẻ và giảm giá từ đối tác công ty."
+    ],
+    "requiredDocuments": [
+      "Hộ chiếu РФ",
+      "СНИЛС"
+    ]
+  },
+  "tbank-representative": {
+    "shortDescription": "Công việc di chuyển với các cuộc gặp đã chuẩn bị sẵn: giao sản phẩm ngân hàng cho khách hàng và tư vấn về điều kiện. Thu nhập theo sản phẩm, lịch trình linh hoạt từ 2 ngày mỗi tuần.",
+    "description": "Đại diện T-Bank đi đến các cuộc gặp đã thỏa thuận trước và bàn giao cho khách hàng các sản phẩm của công ty: thẻ, SIM, hợp đồng bảo hiểm và giấy tờ. Không cần tìm khách hàng: đơn đăng ký đã được lập. Nhiệm vụ của bạn là tổ chức cuộc gặp một cách chất lượng, kể về ưu điểm của sản phẩm và khi cần đề xuất các dịch vụ bổ sung. Điều kiện vận chuyển và nhiên liệu: Có phụ cấp/đền bù nhiên liệu và quãng đường (theo điều kiện khu vực/thành phố).",
+    "requirements": [
+      "Trình độ học vấn từ lớp 9 (ở một số thành phố) hoặc từ lớp 11 — theo điều kiện khu vực.",
+      "Kinh nghiệm trong bán hàng, ngân hàng, bảo hiểm hoặc bán lẻ sẽ là lợi thế.",
+      "Lời nói chuẩn mực, giao tiếp lịch sự và khả năng tìm cách tiếp cận khách hàng.",
+      "Sẵn sàng cho hình thức di chuyển và cuộc gặp với khách hàng theo lộ trình được giao."
+    ],
+    "benefits": [
+      "Hệ thống trả lương theo sản phẩm: mức thu nhập phụ thuộc vào số lượng và chất lượng cuộc gặp.",
+      "Lịch trình linh hoạt: từ 2 ngày mỗi tuần, ngày và giờ có thể chọn trong các khung giờ có sẵn của khu vực.",
+      "Đền bù chi phí xăng tại các tỉnh sử dụng việc đi lại bằng ô tô.",
+      "Vé giao thông trong khu vực giao hàng cho một số thành phố (bao gồm Moskva và Sankt-Peterburg).",
+      "Có thể kết hợp với việc học hoặc công việc khác.",
+      "Biểu phí đặc biệt cho thẻ, giảm giá từ đối tác và bảo hiểm nhân thọ."
+    ],
+    "requiredDocuments": [
+      "Hộ chiếu РФ",
+      "СНИЛС"
+    ]
+  },
   "yandex-eda-courier": {
-    "shortDescription": "Giao đơn qua Ya.Pro gần nhà, lịch linh hoạt từ 2 giờ và thu nhập minh bạch.",
-    "description": "Yandex Eats đang tuyển shipper. Thành phố kết nối: {city}. Bạn giao đơn theo tuyến rõ ràng qua ứng dụng Ya.Pro: có thể chọn khu vực, nhận ca từ 2 giờ, tạm nghỉ và xem trước thu nhập của đơn."
+    "shortDescription": "Giao đơn hàng qua Ya.Pro gần nhà, lịch trình tự do từ 2 giờ và thu nhập minh bạch.",
+    "description": "Yandex Eda đang tuyển nhân viên giao hàng. Thành phố kết nối: {city}. Bạn giao đơn hàng theo lộ trình rõ ràng qua ứng dụng «Ya.Pro»: có thể chọn khu vực, làm khung giờ từ 2 giờ, nghỉ giải lao và xem thu nhập từ đơn hàng trước.",
+    "requirements": [
+      "Giao đơn hàng theo lộ trình rõ ràng qua ứng dụng «Ya.Pro».",
+      "Tuân theo hướng dẫn trong ứng dụng — không có logistics phức tạp và giao tiếp thừa."
+    ],
+    "benefits": [
+      "Thu nhập minh bạch: thưởng và biểu phí cao hơn vào giờ cao điểm.",
+      "Phụ cấp cho đơn hàng nặng, tiền tip từ khách hàng và phụ cấp chờ đợi.",
+      "Chương trình giới thiệu: nhận đến 25 000 ₽ cho mỗi bạn được mời.",
+      "Lịch trình tự do từ 2 giờ: bạn tự quyết định khi nào ra ngoài giao hàng.",
+      "Lựa chọn khu vực: làm việc gần nhà hoặc ở nơi có nhiều đơn hàng hơn.",
+      "«Đơn hàng trên đường»: đánh dấu trên bản đồ điểm bạn cần đến — hệ thống sẽ chọn đơn theo lộ trình.",
+      "Có thể kết thúc khung giờ hoặc tạm dừng khi bạn ở gần điểm cần đến.",
+      "Combo bữa ăn giá 95 ₽ từ «Yandex Lavka».",
+      "Mã khuyến mại hàng ngày 300 ₽ tại «Yandex Eda».",
+      "Giảm 20% tại «Yandex Lavka» cho thực phẩm, hàng gia dụng, đồ ăn sẵn và bánh nướng.",
+      "Thuê Powerbank từ 100 ₽ mỗi ngày qua dịch vụ «Beri Zaryad».",
+      "Đăng ký «Yandex Plus» miễn phí cho bạn và những người thân.",
+      "Quần áo chuyên dụng cho việc giao hàng trong mọi thời tiết.",
+      "Bảo hiểm miễn phí trong thời gian giao hàng.",
+      "«Ya.Pro»: đăng ký nhanh và bắt đầu (sau vài giờ kể từ khi đăng ký).",
+      "«Ya.Pro»: chọn đơn hàng gần đó kèm thông tin thu nhập và thời gian giao.",
+      "«Ya.Pro»: thống kê minh bạch về thu nhập, tiền tip và thanh toán.",
+      "«Ya.Pro»: tích hợp định vị với lộ trình tối ưu.",
+      "«Ya.Pro»: gợi ý về các khu vực có tải trọng và thu nhập cao.",
+      "«Ya.Pro»: truy cập ưu đãi và giảm giá qua ứng dụng.",
+      "«Ya.Pro»: hoạt động ổn định khi internet kém."
+    ],
+    "requiredDocuments": [
+      "Đối với công dân РФ: hộ chiếu kèm propiska và sổ y tế; đăng ký qua hợp đồng ГПХ hoặc tự kinh doanh."
+    ]
   }
 }
