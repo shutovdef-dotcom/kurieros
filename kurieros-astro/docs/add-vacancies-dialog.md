@@ -12,9 +12,10 @@ Codex или любом ином агенте, у которого есть до
 готовый к `npm run generate:data && npm run build`, с пройденной
 валидацией и финальным отчётом.
 
-Не входит в задачу: переводы на 11 не-RU языков (заполняются автоматом
-через `createKuperLocalizedContent` и помечаются как требующие ручной
-проверки), Ozon-каталог (закрытая подсистема, не трогать).
+Не входит в задачу: качественные переводы на 11 не-RU языков (автоматом
+ставятся пустые stub'ы в файлах `src/data/vacancy-translations-source/<lang>.json`,
+которые fallback'ятся к русскому до тех пор пока кто-то не заполнит реальные
+переводы), Ozon-каталог (закрытая подсистема, не трогать).
 
 Ниже — сначала контекст и схема данных (для холодного старта агента),
 затем алгоритм работы, парсинг входа, нормализация, валидация и формат
@@ -191,13 +192,17 @@ Codex или любом ином агенте, у которого есть до
    - utm_medium=vacancy
    - utm_campaign=<company-or-role-slug>
    - utm_content=<citySlug>-<transport-or-role>
-7. Для контента используй createKuperLocalizedContent (внутренний
-   helper в vacancies.ts, не экспортируется): он размножит ru-контент
-   на все 12 языков, заменит {cityPrep} на «— {city}» в не-RU. Если
-   добавляешь компанию через отдельный JSON-файл и нужно вызвать
-   helper извне — экспортируй его (`export const`) или продублируй
-   логику в новом модуле. В финале обязательно отметь, что переводы
-   автозаполнены русским текстом и требуют ручного перевода.
+7. Контент пиши ПЛОСКИМ объектом `content: VacancyContent` — только
+   на русском, без обёрток. Резолвер `resolveLocalizedContent()` в
+   `jobs.ts` сам мерджит переводы из per-language файлов
+   `src/data/vacancy-translations-source/<lang>.json` поверх русского.
+   Переводимые поля: `shortDescription`, `description`, `requirements`,
+   `benefits`, `requiredDocuments`. Title/labels/searchTags/city/salary
+   НЕ переводим — они русские на всех языках по политике (см.
+   правила skill'а ниже). При создании новой вакансии **обязательно**
+   добавь stub `"<your-slug>": {}` во все 11 lang-файлов — strict-mode
+   build script упадёт без этого. В финальном отчёте отметь сколько
+   stub-ключей × языков ждут перевода.
 8. Добавь новый объект в _initialSources (внутри vacancies.ts), не
    мутируй чужие записи. Финальный экспорт vacancySources собирается
    автоматически (Ozon hourly-fallback не затронет твою компанию,
@@ -329,9 +334,9 @@ offers:
 **Что skill НЕ делает:**
 - Не правит Ozon (`ozonOffers.ts`, `ozon-vacancies.json`,
   `ozon-fresh-vacancies.json`, `workers/ozon-lead/`).
-- Не делает ручной перевод 11 не-RU языков (использует
-  `createKuperLocalizedContent` для авто-заполнения и явно флагает
-  пользователю, что переводы — заглушка).
+- Не делает ручной перевод 11 не-RU языков. Добавляет пустые stub'ы
+  `"<slug>": {}` в каждый из 11 файлов `src/data/vacancy-translations-source/<lang>.json`
+  как маркер «нужны переводы», и явно флагает пользователю.
 - Не модифицирует существующие vacancySources чужих компаний.
 - Не коммитит и не пушит — оставляет изменения в worktree, отчитывается.
 
@@ -371,8 +376,11 @@ offers:
      на каждую роль (как Kuper: foot/bike/auto/picker = 4 источника).
    - `company.name`, `company.logo` — импортом из `partnerLinks.ts`,
      не литералом.
-   - `content.ru` — полностью; остальные 11 языков —
-     `createKuperLocalizedContent(ruContent)` с пометкой «нужны переводы».
+   - `content` — плоский RU-объект `VacancyContent` (БЕЗ обёрток вроде
+     `createKuperLocalizedContent`). Title/labels/searchTags остаются RU
+     на всех языках по политике. Переводимые поля (shortDescription,
+     description, requirements, benefits, requiredDocuments) идут через
+     отдельный реестр — см. §«Переводы».
    - `defaults` — общие для всей компании
      (`ageFrom`, `medicalBook`, `employmentFormats`, `schedule`,
      `education`, `citizenship`, `uniform`, `os`).
@@ -563,21 +571,95 @@ pensnarik/russian-cities, население ≥ 5000). Slugifier — `slugifyCi
 
 ```ts
 content: {
-  ru: {
-    title: '<Должность> <Компании> в {city}',
-    shortDescription: '<Должность> в <Компании>: гибкий график и регулярные выплаты.',
-    description: 'Компания <Компания> ищет <должность> в {city}. Полный набор условий — на странице партнёра.',
-    requirements: ['Смартфон на Android или iOS'],
-    benefits: ['Свободный график', 'Регулярные выплаты'],
-    requiredDocuments: ['Паспорт', 'ИНН', 'СНИЛС'],
-    labels: ['Свободный график', 'Без опыта'],
-    searchTags: ['<компания>', '<должность>'],
-  },
-  // остальные 11 языков — createKuperLocalizedContent(content.ru)
+  title: '<Должность> <Компании> {cityPrep}',
+  shortDescription: '<Должность> в <Компании>: гибкий график и регулярные выплаты.',
+  description: 'Компания <Компания> ищет <должность> {cityPrep}. Полный набор условий — на странице партнёра.',
+  requirements: ['Смартфон на Android или iOS'],
+  benefits: ['Свободный график', 'Регулярные выплаты'],
+  requiredDocuments: ['Паспорт', 'ИНН', 'СНИЛС'],
+  labels: ['Свободный график', 'Без опыта'],
+  searchTags: ['<компания>', '<должность>'],
 }
+// Translations: добавь stub во все 11 файлов
+// src/data/vacancy-translations-source/<lang>.json:
+//   "<slug>": {}
+// Без stub'а strict-mode build script упадёт.
 ```
 
 В отчёте обязательно: **«контент — заглушка, заменить»**.
+
+---
+
+## Переводы — единая система (TRANS-1)
+
+**Архитектура хранения:**
+- `VacancySource.content` в `vacancies.ts` / `ozonOffers.ts` — **только русский**,
+  плоский объект `VacancyContent`. Никаких `createKuperLocalizedContent` или
+  Object.fromEntries по языкам — это удалено.
+- Per-language overrides — в `src/data/vacancy-translations-source/<lang>.json`
+  × 11 файлов (uz, tg, ky, hy, kk, az, uk, be, hi, vi, zh). `ru.json` нет —
+  русский живёт в коде.
+- Резолвер `resolveLocalizedContent(source, language)` в `jobs.ts` мержит
+  RU из кода с overrides из per-lang файлов. Fallback к RU если перевода
+  нет.
+
+**Что переводим:** `shortDescription`, `description`, `requirements`,
+`benefits`, `requiredDocuments`. Что НЕ переводим: `title`, `labels`,
+`searchTags`, city name, salary numbers. (Title содержит название
+должности + компании + города — это бренд + личные имена, политика «не
+переводим».)
+
+**Runtime (TRANS-1):** Build emits per-source фрагменты в
+`public/vacancy-translations/<lang>/<sourceSlug>.json` (12 langs × 19
+sources = 228 файлов). Клиент при переключении языка грузит только
+фрагменты тех источников, которые видны на текущей странице (через
+`data-vacancy-source-slug` атрибут на карточке/hero). Детальная страница
+грузит 1 фрагмент (~80KB-2MB) вместо старого комбинированного 20MB файла.
+
+**Что делает skill при добавлении новой вакансии:**
+
+1. Авторит RU `content: VacancyContent` плоско в `vacancies.ts`.
+2. **Обязательно** добавляет stub `"<slug>": {}` в КАЖДЫЙ из 11
+   файлов `src/data/vacancy-translations-source/<lang>.json`.
+   Без этого strict-mode build script упадёт с понятной ошибкой.
+3. В финальном отчёте флагает: «11 stub'ов добавлено в lang-файлы,
+   5 переводимых полей × 11 языков = 55 ключей ждут реального перевода».
+
+**Stub-пример (что положить в каждый lang-файл):**
+
+```json
+// src/data/vacancy-translations-source/uz.json (и в 10 остальных)
+{
+  "alfa-bank-representative": {},
+  ...
+  "<your-new-slug>": {}
+}
+```
+
+**Реальный перевод (отдельная задача, не в этот skill):** заполнить
+поля в lang-файле:
+
+```json
+// src/data/vacancy-translations-source/uz.json
+{
+  "your-new-slug": {
+    "shortDescription": "Узбекский короткий текст",
+    "description": "Узбекский полный текст с {city}",
+    "requirements": ["Требование 1 узбекским", "Требование 2"],
+    "benefits": ["Преимущество 1", "Преимущество 2"],
+    "requiredDocuments": ["Паспорт"]
+  }
+}
+```
+
+Резолвер сам подтянет — пересборка не нужна, только `npm run build`.
+
+**Build-time проверки (auto в `generate-vacancy-translations.ts`):**
+
+- Каждый `source.slug` ИЗ vacancies.ts/ozonOffers.ts должен быть ключом
+  в каждом lang-файле (даже как `{}`) — иначе build error.
+- Лишние ключи в lang-файлах (не соответствующие никаким source.slug) —
+  тоже build error. Если переименовываешь slug — обнови все 11 файлов.
 
 ---
 
@@ -694,8 +776,11 @@ const build<Company>ApplyLink = (city: string, role: <RoleType>) => {
    `'lead-form:ozon'` в Ozon-коде, но мы Ozon не трогаем).
    Дополнительно: `grep -nE "applyLink:\s*[A-Z_]+_APPLY[^_]" src/data/vacancies.ts`
    — тоже должно быть пусто (значит UTM не построен через helper).
-5. **content.ru заполнен полностью**; остальные языки — либо руками,
-   либо `createKuperLocalizedContent`.
+5. **`VacancySource.content` — плоский RU-объект** (без обёрток). Для
+   каждого нового slug'а проверь что во всех 11 файлах
+   `src/data/vacancy-translations-source/<lang>.json` появилась запись
+   `"<slug>": {}` (минимум stub). Strict-mode build script ловит
+   отсутствующие slug'и с понятной ошибкой.
 6. **Slug не пересекается** с существующими:
    `grep -nE 'slug: ['"'"'"]<новый-slug>' src/data/vacancies.ts src/data/ozonOffers.ts`
    — только одна запись (твоя).
@@ -746,8 +831,11 @@ const build<Company>ApplyLink = (city: string, role: <RoleType>) => {
   оффере.
 - **Города, где partner-данные противоречат** базовому описанию
   (требуется override или раздельная VacancySource).
-- **Переводы** заполнены RU-текстом через `createKuperLocalizedContent`
-  → 11 языков нужно перевести вручную (или прогнать через переводчик).
+- **Переводы** — RU fallback на всех 11 не-RU языках. Stub'ы
+  `"<slug>": {}` добавлены во все файлы
+  `src/data/vacancy-translations-source/<lang>.json`. Реальные переводы
+  (shortDescription, description, requirements, benefits, requiredDocuments)
+  нужно дописать вручную или через переводчика — это отдельная задача.
 - **referralLink уже содержит `utm_source=`** → возможен конфликт UTM,
   спросить, перезаписывать ли.
 - **min > max** или одинаковые нулевые значения в исходных данных.
@@ -798,7 +886,7 @@ const build<Company>ApplyLink = (city: string, role: <RoleType>) => {
 - <список из секции «Что обязательно флагать»>
 
 Следующие шаги:
-- Перевести 11 не-RU языков (сейчас RU-заглушка через createKuperLocalizedContent).
+- Перевести 5 полей (shortDescription, description, requirements, benefits, requiredDocuments) на 11 не-RU языков. Stub'ы уже стоят в `src/data/vacancy-translations-source/<lang>.json` под ключом `"<slug>"`.
 - Проверить визуально 1-2 страницы вакансии в браузере.
 - Закоммитить (skill сам не коммитит).
 ```

@@ -1,0 +1,24 @@
+{
+  "alfa-bank-representative": {},
+  "burger-king-cook-cashier": {},
+  "efin-bank-representative": {},
+  "kuper-auto-courier": {},
+  "kuper-bike-courier": {},
+  "kuper-foot-courier": {},
+  "kuper-order-picker": {},
+  "ozon-courier": {},
+  "ozon-electric-stacker-driver": {},
+  "ozon-fresh-administrator": {},
+  "ozon-fresh-courier": {},
+  "ozon-fresh-kitchen-staff": {},
+  "ozon-fresh-order-picker": {},
+  "ozon-goods-handler": {},
+  "ozon-truck-driver": {},
+  "ozon-warehouse-operator": {},
+  "tbank-outbound-b2b-operator": {},
+  "tbank-representative": {},
+  "yandex-eda-courier": {
+    "shortDescription": "Giao đơn qua Ya.Pro gần nhà, lịch linh hoạt từ 2 giờ và thu nhập minh bạch.",
+    "description": "Yandex Eats đang tuyển shipper. Thành phố kết nối: {city}. Bạn giao đơn theo tuyến rõ ràng qua ứng dụng Ya.Pro: có thể chọn khu vực, nhận ca từ 2 giờ, tạm nghỉ và xem trước thu nhập của đơn."
+  }
+}

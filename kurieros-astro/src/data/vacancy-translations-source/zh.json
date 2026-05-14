@@ -1,0 +1,24 @@
+{
+  "alfa-bank-representative": {},
+  "burger-king-cook-cashier": {},
+  "efin-bank-representative": {},
+  "kuper-auto-courier": {},
+  "kuper-bike-courier": {},
+  "kuper-foot-courier": {},
+  "kuper-order-picker": {},
+  "ozon-courier": {},
+  "ozon-electric-stacker-driver": {},
+  "ozon-fresh-administrator": {},
+  "ozon-fresh-courier": {},
+  "ozon-fresh-kitchen-staff": {},
+  "ozon-fresh-order-picker": {},
+  "ozon-goods-handler": {},
+  "ozon-truck-driver": {},
+  "ozon-warehouse-operator": {},
+  "tbank-outbound-b2b-operator": {},
+  "tbank-representative": {},
+  "yandex-eda-courier": {
+    "shortDescription": "通过 Ya.Pro 在家附近配送订单，2小时起弹性时间，收入透明。",
+    "description": "Yandex Eats 正在招聘配送员。接入城市：{city}。您通过 Ya.Pro 应用按清晰路线配送订单：可选择区域，2小时起接单，随时暂停，并提前看到订单收入。"
+  }
+}

@@ -9,10 +9,53 @@ import type {
   PayModel,
   TransportProvision,
   TransportMode,
+  VacancyContent,
   VacancyOffer,
   VacancySource,
 } from './vacancyTypes';
 import { isCityBlocked, slugifyCity } from '../utils/cities';
+
+// === Per-language translation overrides =============================
+// Loaded from src/data/vacancy-translations-source/<lang>.json.
+// Each file maps source.slug → partial VacancyContent overrides for
+// fields we DO translate (shortDescription, description, requirements,
+// benefits, requiredDocuments). The fields we DON'T translate (title,
+// labels, searchTags, city, salary) are NEVER read from these files
+// even if present.
+import uzOverrides from './vacancy-translations-source/uz.json';
+import tgOverrides from './vacancy-translations-source/tg.json';
+import kyOverrides from './vacancy-translations-source/ky.json';
+import hyOverrides from './vacancy-translations-source/hy.json';
+import kkOverrides from './vacancy-translations-source/kk.json';
+import azOverrides from './vacancy-translations-source/az.json';
+import ukOverrides from './vacancy-translations-source/uk.json';
+import beOverrides from './vacancy-translations-source/be.json';
+import hiOverrides from './vacancy-translations-source/hi.json';
+import viOverrides from './vacancy-translations-source/vi.json';
+import zhOverrides from './vacancy-translations-source/zh.json';
+
+type TranslatableField =
+  | 'shortDescription'
+  | 'description'
+  | 'requirements'
+  | 'benefits'
+  | 'requiredDocuments';
+
+type LangOverrides = Record<string, Partial<Pick<VacancyContent, TranslatableField>>>;
+
+const TRANSLATION_OVERRIDES: Partial<Record<SupportedLanguage, LangOverrides>> = {
+  uz: uzOverrides as LangOverrides,
+  tg: tgOverrides as LangOverrides,
+  ky: kyOverrides as LangOverrides,
+  hy: hyOverrides as LangOverrides,
+  kk: kkOverrides as LangOverrides,
+  az: azOverrides as LangOverrides,
+  uk: ukOverrides as LangOverrides,
+  be: beOverrides as LangOverrides,
+  hi: hiOverrides as LangOverrides,
+  vi: viOverrides as LangOverrides,
+  zh: zhOverrides as LangOverrides,
+};
 
 const TRANSPORT_TAGS: Record<TransportMode, string> = {
   foot: 'foot',
@@ -309,13 +352,15 @@ const formatAmount = (value: number) => new Intl.NumberFormat('ru-RU').format(va
 
 const getCompanyName = (name: string, _language: SupportedLanguage) => name;
 
-const getCityPrep = (city: string, language: SupportedLanguage) => {
-  if (language === 'ru') {
-    return cityPrepositions.get(city) ?? `в ${city}`;
-  }
-
-  return city;
-};
+// `{cityPrep}` always interpolates to Russian prepositional case ("в Москве",
+// "в Санкт-Петербурге"). Since title/labels/searchTags stay in Russian on
+// all language pages (policy: only descriptions/requirements/benefits/docs
+// get translated), and since untranslated content falls back to Russian,
+// the prepositional placeholder should always produce Russian grammar —
+// regardless of the page's display language. Translators writing target-
+// language descriptions should use the bare `{city}` placeholder instead.
+const getCityPrep = (city: string, _language: SupportedLanguage) =>
+  cityPrepositions.get(city) ?? `в ${city}`;
 
 const interpolate = (value: string, offer: VacancyOffer, language: SupportedLanguage) =>
   value
@@ -336,8 +381,32 @@ const resolveList = (
   return Array.isArray(value) ? value : value[language] ?? value.ru ?? [];
 };
 
-const getContent = (source: VacancySource, language: SupportedLanguage) =>
-  source.content[language] ?? source.content.ru;
+// Resolve VacancyContent for a given source × language. RU is the source
+// of truth (from VacancySource.content). For non-RU languages, only the
+// 5 translatable fields are read from the per-language JSON overrides
+// — everything else (title, labels, searchTags) stays RU by policy.
+// If override is missing for a slug or field, fall back to RU.
+const resolveLocalizedContent = (
+  source: VacancySource,
+  language: SupportedLanguage,
+): VacancyContent => {
+  if (language === 'ru') return source.content;
+
+  const langOverrides = TRANSLATION_OVERRIDES[language];
+  const slugOverrides = langOverrides?.[source.slug];
+  if (!slugOverrides) return source.content;
+
+  return {
+    title: source.content.title,
+    shortDescription: slugOverrides.shortDescription ?? source.content.shortDescription,
+    description: slugOverrides.description ?? source.content.description,
+    requirements: slugOverrides.requirements ?? source.content.requirements,
+    benefits: slugOverrides.benefits ?? source.content.benefits,
+    requiredDocuments: slugOverrides.requiredDocuments ?? source.content.requiredDocuments,
+    labels: source.content.labels,
+    searchTags: source.content.searchTags,
+  };
+};
 
 const getAgeFrom = (source: VacancySource, offer: VacancyOffer) =>
   offer.ageFrom ?? source.defaults.ageFrom;
@@ -465,7 +534,7 @@ const buildJobsFromVacancies = (
       .filter((offer) => offer.isActive && !isCityBlocked(offer.city))
       .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
       .map((offer, index) => {
-      const content = getContent(source, language);
+      const content = resolveLocalizedContent(source, language);
       const ageFrom = getAgeFrom(source, offer);
       const transport = offer.transport;
       const formats = getEmploymentFormats(source, offer);
@@ -481,6 +550,7 @@ const buildJobsFromVacancies = (
       return {
         id: getGeneratedId(source, offer, index),
         sourceId: source.id,
+        sourceSlug: source.slug,
         slug: `${source.slug}-${citySlug}-${transport}`,
         title: interpolate(content.title, offer, language),
         company: getCompanyName(source.company.name, language),
@@ -533,40 +603,57 @@ const buildJobsFromVacancies = (
     }),
   );
 
-export const buildJobTranslations = (sources: VacancySource[]) =>
-  Object.fromEntries(
-    SUPPORTED_LANGUAGES.map((language) => [
-      language,
-      Object.fromEntries(
-        buildJobsFromVacancies(sources, language).map((job) => [
-          String(job.id),
-          {
-            page_title: PAGE_TITLE_TEXT[language](job.title),
-            page_description: PAGE_DESCRIPTION_TEXT[language](job).slice(0, 170),
-            updated_date: formatUpdatedDate(job.updatedAt, language),
-            title: job.title,
-            company: job.company,
-            salary: job.salary,
-            location: job.location,
-            shortDescription: job.shortDescription,
-            description: job.description,
-            ...Object.fromEntries(job.labels.map((label, index) => [`label_${index}`, label])),
-            ...Object.fromEntries(job.requirements.map((requirement, index) => [`req_${index}`, requirement])),
-            ...Object.fromEntries(job.benefits.map((benefit, index) => [`ben_${index}`, benefit])),
-            ...Object.fromEntries(job.requiredDocuments.map((document, index) => [`doc_${index}`, document])),
-            details_schedule: job.details.schedule,
-            details_education: job.details.education,
-            details_payment_freq: job.details.payment_freq,
-            details_age: job.details.age,
-            details_citizenship: job.details.citizenship,
-            details_rate: job.details.rate,
-            details_employment_type: job.details.employment_type,
-            details_transport_provision: job.details.transport_provision,
-          },
-        ]),
-      ),
-    ]),
-  ) as Record<SupportedLanguage, Record<string, Record<string, string>>>;
+// Build flat translation object for one job (used by both per-source
+// fragment emission and any future consumer).
+const buildJobTranslationEntry = (job: GeneratedJob, language: SupportedLanguage) => ({
+  page_title: PAGE_TITLE_TEXT[language](job.title),
+  page_description: PAGE_DESCRIPTION_TEXT[language](job).slice(0, 170),
+  updated_date: formatUpdatedDate(job.updatedAt, language),
+  title: job.title,
+  company: job.company,
+  salary: job.salary,
+  location: job.location,
+  shortDescription: job.shortDescription,
+  description: job.description,
+  ...Object.fromEntries(job.labels.map((label, index) => [`label_${index}`, label])),
+  ...Object.fromEntries(job.requirements.map((requirement, index) => [`req_${index}`, requirement])),
+  ...Object.fromEntries(job.benefits.map((benefit, index) => [`ben_${index}`, benefit])),
+  ...Object.fromEntries(job.requiredDocuments.map((document, index) => [`doc_${index}`, document])),
+  details_schedule: job.details.schedule,
+  details_education: job.details.education,
+  details_payment_freq: job.details.payment_freq,
+  details_age: job.details.age,
+  details_citizenship: job.details.citizenship,
+  details_rate: job.details.rate,
+  details_employment_type: job.details.employment_type,
+  details_transport_provision: job.details.transport_provision,
+});
+
+/**
+ * TRANS-1: build translations grouped by (language × source.slug × jobId).
+ * Emitter (scripts/generate-vacancy-translations.ts) writes one file
+ * per (language, source.slug) pair instead of one giant 20 MB file per
+ * language. Client loads only fragments for vacancies currently
+ * visible on the page — typical detail-page download drops from 20 MB
+ * to ~80 KB.
+ */
+export const buildJobTranslationsBySource = (sources: VacancySource[]) => {
+  const idToSlug = new Map(sources.map((source) => [source.id, source.slug]));
+  return Object.fromEntries(
+    SUPPORTED_LANGUAGES.map((language) => {
+      const bySlug: Record<string, Record<string, ReturnType<typeof buildJobTranslationEntry>>> = {};
+      for (const slug of idToSlug.values()) {
+        bySlug[slug] = {};
+      }
+      for (const job of buildJobsFromVacancies(sources, language)) {
+        const slug = idToSlug.get(job.sourceId);
+        if (!slug) continue;
+        bySlug[slug][String(job.id)] = buildJobTranslationEntry(job, language);
+      }
+      return [language, bySlug];
+    }),
+  ) as Record<SupportedLanguage, Record<string, Record<string, ReturnType<typeof buildJobTranslationEntry>>>>;
+};
 
 const jobsData = buildJobsFromVacancies(vacancySources);
 

@@ -1,0 +1,24 @@
+{
+  "alfa-bank-representative": {},
+  "burger-king-cook-cashier": {},
+  "efin-bank-representative": {},
+  "kuper-auto-courier": {},
+  "kuper-bike-courier": {},
+  "kuper-foot-courier": {},
+  "kuper-order-picker": {},
+  "ozon-courier": {},
+  "ozon-electric-stacker-driver": {},
+  "ozon-fresh-administrator": {},
+  "ozon-fresh-courier": {},
+  "ozon-fresh-kitchen-staff": {},
+  "ozon-fresh-order-picker": {},
+  "ozon-goods-handler": {},
+  "ozon-truck-driver": {},
+  "ozon-warehouse-operator": {},
+  "tbank-outbound-b2b-operator": {},
+  "tbank-representative": {},
+  "yandex-eda-courier": {
+    "shortDescription": "Ya.Pro ilə evə yaxın sifarişlərin çatdırılması, 2 saatdan sərbəst qrafik və şəffaf gəlir.",
+    "description": "Yandex Eats kuryerləri işə dəvət edir. Qoşulma şəhəri: {city}. Sifarişləri Ya.Pro tətbiqi ilə aydın marşrutlar üzrə çatdırırsınız: rayon seçmək, 2 saatdan növbəyə çıxmaq, fasilə götürmək və sifariş gəlirini əvvəlcədən görmək mümkündür."
+  }
+}

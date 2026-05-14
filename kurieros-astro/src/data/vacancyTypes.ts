@@ -112,8 +112,6 @@ export type VacancyContent = {
   searchTags?: string[];
 };
 
-export type LocalizedVacancyContent = Record<SupportedLanguage, VacancyContent>;
-
 export type VacancySource = {
   id: number;
   slug: string;
@@ -121,7 +119,16 @@ export type VacancySource = {
     name: string;
     logo: string;
   };
-  content: LocalizedVacancyContent;
+  /**
+   * Russian-source content. Per-language overrides live in
+   * `src/data/vacancy-translations-source/<lang>.json` and are merged on
+   * top of this by `resolveLocalizedContent()` in `jobs.ts`. The fields
+   * that ACTUALLY get translated are `shortDescription`, `description`,
+   * `requirements`, `benefits`, `requiredDocuments`. `title`, `labels`,
+   * `searchTags` stay RU on all language pages (by policy — see
+   * `docs/add-vacancies-dialog.md`).
+   */
+  content: VacancyContent;
   defaults: {
     ageFrom: number;
     medicalBook?: MedicalBookRequirement;
@@ -140,6 +147,13 @@ export type VacancySource = {
 export type GeneratedJob = {
   id: number;
   sourceId: number;
+  /**
+   * URL-friendly slug of the parent VacancySource (e.g. `burger-king-cook-cashier`).
+   * Used by the client i18n loader (TRANS-1) to know which translation
+   * fragment to fetch (`/vacancy-translations/<lang>/<sourceSlug>.json`).
+   * Emitted as `data-vacancy-source-slug` on JobCard and detail-page hero.
+   */
+  sourceSlug: string;
   slug: string;
   title: string;
   company: string;

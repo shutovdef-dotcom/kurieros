@@ -101,10 +101,10 @@ content:
     Для городов вне `CITY_DATASET` — дефолт «в `<Город>`».
 - Оба работают в `title`, `shortDescription`, `description`, `requirements[]`,
   `benefits[]`, `requiredDocuments[]`.
-- Для не-RU языков `createKuperLocalizedContent` заменяет `{cityPrep}` на
-  «— {city}» (потому что в большинстве языков сайта нет русского предложного
-  падежа). Если хочешь правильную локализованную форму — заполняй
-  `content.<lang>.title` руками, не через helper.
+- `{cityPrep}` всегда резолвится в русский падеж — даже на не-RU
+  страницах. Это потому что title/labels/searchTags на сайте всегда
+  русские (policy), а реальные переводы описаний используют плейсхолдер
+  `{city}` (без падежа). См. правила переводов в `add-vacancies-dialog.md`.
 - `requiredDocuments` — базовый список документов для вакансии.
 - Если для конкретного транспорта нужны дополнительные документы, они
   добавляются на уровне `offer.requiredDocumentsOverride`.

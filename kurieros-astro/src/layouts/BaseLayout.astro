@@ -6,9 +6,11 @@ import OzonLeadModal from '../components/OzonLeadModal.astro';
 import { SUPPORTED_LANGUAGES, translations, type SupportedLanguage } from '../data/translations';
 
 const supportedLanguages = SUPPORTED_LANGUAGES;
-const vacancyTranslationPaths = Object.fromEntries(
-	supportedLanguages.map((language) => [language, `/vacancy-translations/${language}.json`]),
-) as Record<SupportedLanguage, string>;
+// TRANS-1: per-source fragments live at /vacancy-translations/<lang>/<sourceSlug>.json.
+// Client scans visible cards for `data-vacancy-source-slug` and loads only
+// the fragments it needs (typical detail page: 1 fragment ~80KB-2MB,
+// instead of the old combined 20MB <lang>.json).
+const vacancyTranslationsBase = '/vacancy-translations';
 
 interface Props {
 	title?: string;
@@ -387,14 +389,15 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 				}
 			})();
 		</script>
-		<script is:inline define:vars={{ translations, supportedLanguages, vacancyTranslationPaths }}>
+		<script is:inline define:vars={{ translations, supportedLanguages, vacancyTranslationsBase }}>
 			// Global i18n Manager
 				(function() {
 					const STORAGE_KEY = 'site-lang';
 					const DEFAULT_LANG = 'ru';
 					const SUPPORTED_LANGS = supportedLanguages;
-					const VACANCY_TRANSLATION_PATHS = vacancyTranslationPaths;
-					const loadedVacancyTranslations = new Set();
+					const VACANCY_TRANSLATIONS_BASE = vacancyTranslationsBase;
+					// TRANS-1: track loaded (lang, sourceSlug) pairs instead of whole languages.
+					const loadedFragments = new Set();
 					window.translations = translations;
 					
 					function getSafeLang(lang) {
@@ -434,36 +437,61 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 					return Boolean(document.querySelector('[data-t^="vacancies."]'));
 				}
 
-				async function ensureVacancyTranslations(lang) {
-					if (lang === DEFAULT_LANG || loadedVacancyTranslations.has(lang) || !pageHasVacancyTranslationKeys()) {
-						return;
-					}
+				// TRANS-1: collect distinct source slugs from cards/hero on the
+				// current page. Each card and the detail-page hero carries
+				// `data-vacancy-source-slug` (set in JobCard.astro and v/[slug].astro).
+				function getVisibleVacancySourceSlugs() {
+					const nodes = document.querySelectorAll('[data-vacancy-source-slug]');
+					const slugs = new Set();
+					nodes.forEach((node) => {
+						const slug = node.dataset.vacancySourceSlug;
+						if (slug) slugs.add(slug);
+					});
+					return Array.from(slugs);
+				}
 
-					const sourcePath = VACANCY_TRANSLATION_PATHS[lang];
-					if (!sourcePath) {
-						return;
-					}
-
+				async function fetchFragment(lang, sourceSlug) {
+					const cacheKey = lang + '/' + sourceSlug;
+					if (loadedFragments.has(cacheKey)) return null;
+					const url = VACANCY_TRANSLATIONS_BASE + '/' + lang + '/' + sourceSlug + '.json';
 					try {
-						const response = await fetch(sourcePath, { cache: 'force-cache' });
-						if (!response.ok) {
-							return;
-						}
-
-						const payload = await response.json();
-						const langDictionary = translations[lang] || {};
-						const currentVacancies = langDictionary.vacancies || {};
-						translations[lang] = {
-							...langDictionary,
-							vacancies: {
-								...currentVacancies,
-								...payload,
-							},
-						};
-						loadedVacancyTranslations.add(lang);
+						const response = await fetch(url, { cache: 'force-cache' });
+						if (!response.ok) return null;
+						const fragment = await response.json();
+						loadedFragments.add(cacheKey);
+						return fragment;
 					} catch (error) {
-						console.warn('Failed to load vacancy translations', lang, error);
+						console.warn('Failed to load vacancy translations fragment', lang, sourceSlug, error);
+						return null;
 					}
+				}
+
+				// Renamed from `ensureVacancyTranslations` to clarify per-fragment
+				// loading semantics. External callers use the same i18n manager API
+				// (`window.kurieros_i18n.ensureVacancyTranslations`) which we keep
+				// as a back-compatible alias below.
+				async function ensureVacancyTranslations(lang) {
+					if (lang === DEFAULT_LANG || !pageHasVacancyTranslationKeys()) {
+						return;
+					}
+					const slugs = getVisibleVacancySourceSlugs();
+					if (slugs.length === 0) return;
+
+					const fragments = await Promise.all(
+						slugs.map((slug) => fetchFragment(lang, slug)),
+					);
+
+					const langDictionary = translations[lang] || {};
+					const currentVacancies = langDictionary.vacancies || {};
+					const merged = { ...currentVacancies };
+					for (const fragment of fragments) {
+						if (!fragment) continue;
+						Object.assign(merged, fragment);
+					}
+					translations[lang] = {
+						...langDictionary,
+						vacancies: merged,
+					};
 				}
 
 				function getNestedValue(obj, path) {
