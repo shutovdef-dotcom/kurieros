@@ -3,8 +3,8 @@
  *
  * Centralised so partner links (referral apply URLs, externally hosted
  * logos, partner-banner click destinations) are rotatable from one
- * place. Search for `PARTNER_LINKS` to audit / update — every
- * partner-link consumer in the codebase should pull from this module.
+ * place. Every partner-link consumer in the codebase should pull from
+ * this module.
  *
  * Conventions:
  *   • `*_APPLY` — referral landing URL the user is sent to when
@@ -23,8 +23,6 @@
 
 // === Yandex Eda =====================================================
 export const YANDEX_EDA_APPLY = 'https://my2go.ru/mitpJ?erid=2VtzqwSDctu';
-// Local SVG (PR #106 — replaced the Wikimedia hot-link).
-export const YANDEX_EDA_LOGO = '/logos/yandex-eda.svg';
 
 // === Купер (ex. СберМаркет) =========================================
 export const KUPER_LOGO =
@@ -75,29 +73,3 @@ export const OZON_LEAD_APPLY = 'lead-form:ozon';
 // === PartnerBanner default href =====================================
 export const PARTNER_BANNER_DEFAULT_HREF =
   'https://trk.ppdu.ru/click/gtLv8Qo4?erid=2SDnjceSYW1';
-
-/**
- * Aggregate object for grep-friendly auditing. Each entry mirrors the
- * standalone constants above; callers may import either form.
- */
-export const PARTNER_LINKS = {
-  yandexEda: { apply: YANDEX_EDA_APPLY, logo: YANDEX_EDA_LOGO },
-  kuper: {
-    logo: KUPER_LOGO,
-    footAndBikeApply: KUPER_FOOT_AND_BIKE_APPLY,
-    packerApply: KUPER_PACKER_APPLY,
-    autoApply: KUPER_AUTO_APPLY,
-  },
-  tBank: { apply: T_BANK_APPLY, logo: T_BANK_LOGO },
-  efin: { apply: EFIN_APPLY, logo: EFIN_LOGO },
-  alfaBank: { apply: ALFA_BANK_APPLY, logo: ALFA_BANK_LOGO },
-  burgerKing: { apply: BURGER_KING_APPLY, logo: BURGER_KING_LOGO },
-  ozon: {
-    logo: OZON_LOGO,
-    freshLogo: OZON_FRESH_LOGO,
-    refLandingSklad: OZON_REF_LANDING_SKLAD,
-    refLandingFresh: OZON_REF_LANDING_FRESH,
-    leadApply: OZON_LEAD_APPLY,
-  },
-  partnerBanner: { defaultHref: PARTNER_BANNER_DEFAULT_HREF },
-} as const;
