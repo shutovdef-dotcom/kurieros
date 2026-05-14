@@ -5,6 +5,16 @@ import { getEmptyListingUrls } from './src/utils/listingSlugs';
 const site = process.env.SITE_URL || 'https://kurerok.ru';
 const base = process.env.SITE_BASE || '/';
 
+// Single timestamp captured ONCE at config load (not per-page during SSG).
+// Astro evaluates each page's frontmatter independently across the 5793-page
+// build; using `Date.now()` inside a layout produced a different `?v=` for
+// every page, defeating the `force-cache` strategy (cross-page navigation
+// kept missing the cache because URLs differed). Threading the value through
+// `vite.define` gives every page the same compile-time constant — a redeploy
+// still mints a fresh stamp (config re-evaluates), but in-build navigations
+// reuse the same cached fragments. See PR #134 + follow-up fix.
+const buildTimestamp = String(Date.now());
+
 // Pre-compute the set of `/rabota-kurerom-{slug}/` URLs that resolve
 // to ZERO active vacancies. We exclude them from the sitemap (they
 // also get `<meta name="robots" content="noindex, follow">` at the
@@ -21,6 +31,12 @@ export default defineConfig({
   build: {
     format: 'directory',
     inlineStylesheets: 'always'
+  },
+
+  vite: {
+    define: {
+      __BUILD_TIMESTAMP__: JSON.stringify(buildTimestamp),
+    },
   },
 
   trailingSlash: 'always',

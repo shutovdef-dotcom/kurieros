@@ -18,7 +18,14 @@ const supportedLanguages = SUPPORTED_LANGUAGES;
 // subsequent translation edits (saw this in the wild after #131/#132 ran:
 // returning visitors kept seeing pre-revert Armenian titles).
 const vacancyTranslationsBase = '/vacancy-translations';
-const vacancyTranslationsVersion = String(Date.now());
+// `__BUILD_TIMESTAMP__` is injected by `vite.define` in astro.config.mjs and
+// is the SAME string for every page in a single build. Using `Date.now()`
+// here ran per-page (Astro evaluates each page's frontmatter independently),
+// stamping a different `?v=` into each of the 5793 HTML files and defeating
+// the cross-page `force-cache` strategy. The Vite-injected constant gives
+// every page the same compile-time stamp; a redeploy mints a fresh value.
+declare const __BUILD_TIMESTAMP__: string;
+const vacancyTranslationsVersion = __BUILD_TIMESTAMP__;
 
 interface Props {
 	title?: string;
@@ -110,16 +117,26 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 			<!-- Theme Persistence -->
 			<script is:inline>
 				(function() {
-					const savedTheme = localStorage.getItem('site-theme');
-					const bodyClass = savedTheme && savedTheme !== 'default'
-						? `theme-${savedTheme}`
+					// Safari Private Browsing and restricted WKWebViews throw a
+					// SecurityError on `localStorage.getItem`. If that happens we
+					// fall back to the default light theme rather than letting the
+					// IIFE crash (which would leave dataset.initialTheme unset and
+					// produce a flash of unstyled content / wrong color scheme).
+					var savedTheme = null;
+					var savedColorMode = null;
+					try {
+						savedTheme = localStorage.getItem('site-theme');
+						savedColorMode = localStorage.getItem('site-color-mode');
+					} catch (_) { /* localStorage unavailable — use defaults */ }
+
+					var bodyClass = savedTheme && savedTheme !== 'default'
+						? 'theme-' + savedTheme
 						: '';
 					document.documentElement.dataset.initialTheme = bodyClass;
 
-					const savedColorMode = localStorage.getItem('site-color-mode');
-					const hasSavedMode = savedColorMode === 'dark' || savedColorMode === 'light';
-					const systemPrefersDark = window.matchMedia?.('(prefers-color-scheme: dark)')?.matches;
-					const colorMode = hasSavedMode ? savedColorMode : (systemPrefersDark ? 'dark' : 'light');
+					var hasSavedMode = savedColorMode === 'dark' || savedColorMode === 'light';
+					var systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+					var colorMode = hasSavedMode ? savedColorMode : (systemPrefersDark ? 'dark' : 'light');
 					document.documentElement.dataset.initialColorMode = colorMode;
 					document.documentElement.style.colorScheme = colorMode;
 					// Apply dark-mode class to <html> before first paint to avoid FOUC.
@@ -134,7 +151,7 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 					// inserts <body>, so the body-prefixed rules attach in the same
 					// frame as the html-prefixed ones — eliminating the race entirely.
 					(function syncBodyDarkClass() {
-						const isDark = colorMode === 'dark';
+						var isDark = colorMode === 'dark';
 						if (document.body) {
 							document.body.classList.toggle('dark-mode', isDark);
 							return;
@@ -405,6 +422,14 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 					const SUPPORTED_LANGS = supportedLanguages;
 					const VACANCY_TRANSLATIONS_BASE = vacancyTranslationsBase;
 					const VACANCY_TRANSLATIONS_VERSION = vacancyTranslationsVersion;
+					// Safari Private Browsing + restricted WKWebViews throw a
+					// SecurityError on any localStorage access. Wrap reads/writes
+					// so the i18n manager still initializes (falls back to system
+					// language detection) instead of crashing the whole IIFE.
+					const safeStorage = {
+						get(key) { try { return localStorage.getItem(key); } catch (_) { return null; } },
+						set(key, value) { try { localStorage.setItem(key, value); } catch (_) { /* ignore */ } },
+					};
 					// TRANS-1: track loaded (lang, sourceSlug) pairs instead of whole languages.
 					const loadedFragments = new Set();
 					window.translations = translations;
@@ -546,10 +571,10 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 					}
 				}
 
-					const savedLang = localStorage.getItem(STORAGE_KEY);
+					const savedLang = safeStorage.get(STORAGE_KEY);
 					const initialLang = getSafeLang(savedLang || detectSystemLanguage());
 					if (savedLang !== initialLang) {
-						localStorage.setItem(STORAGE_KEY, initialLang);
+						safeStorage.set(STORAGE_KEY, initialLang);
 					}
 
 				window.kurieros_i18n = {
@@ -559,7 +584,7 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 					async setLanguage(lang) {
 						lang = getSafeLang(lang);
 						this.currentLang = lang;
-						localStorage.setItem(STORAGE_KEY, lang);
+						safeStorage.set(STORAGE_KEY, lang);
 						await this.ensureVacancyTranslations(lang);
 						this.applyTranslations();
 						window.dispatchEvent(new CustomEvent('kurieros:lang-change', { detail: { lang } }));
