@@ -23,7 +23,7 @@
 (64–94 K ₽/мес ≈ 364–534 ₽/ч).
 
 **Где живёт проблема:**
-- `src/components/IncomeCalculator.astro:12-50` — карта `ratesByTransport`
+- `src/components/IncomeCalculator.astro` (поиск по `ratesByTransport`) — карта `ratesByTransport`
   строится **только** из офферов Yandex Eda
   (`/яндекс|yandex/i.test(source.company.name)`). Hourly текущей вакансии
   игнорируется.

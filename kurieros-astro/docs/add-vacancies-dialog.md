@@ -105,8 +105,6 @@ Codex или любом ином агенте, у которого есть до
   node tools/build-worker-whitelist.mjs.
 - src/pages/[slug].astro                  — страницы городов и категорий.
 - src/pages/companies/[slug].astro + src/utils/companies.ts — страницы компаний.
-- src/pages/owner/vacancies.astro         — закрытая owner-форма, которая
-  генерирует объект для вставки в vacancySources.
 - public/vacancy-translations/<lang>/<sourceSlug>.json и
   src/data/vacancy-translations/<lang>/<sourceSlug>.json
   — сгенерированные переводы, не редактировать руками без причины
