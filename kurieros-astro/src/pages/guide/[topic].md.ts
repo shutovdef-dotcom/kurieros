@@ -1,4 +1,4 @@
-import type { APIRoute, GetStaticPaths } from 'astro';
+import type { APIRoute, InferGetStaticPropsType } from 'astro';
 import {
 	TOPIC_META,
 	getItemsByTopic,
@@ -11,11 +11,13 @@ import {
 // AI assistants and LLM clients can fetch the same KB content as plain
 // Markdown without HTML noise. Mirrors /guide/{slug}/ exactly.
 
-export const getStaticPaths: GetStaticPaths = () =>
+export const getStaticPaths = () =>
 	Object.entries(TOPIC_META).map(([topic, meta]) => ({
 		params: { topic: meta.slug },
 		props: { topic, meta },
 	}));
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
 const renderItem = (item: KnowledgeItem, slug: string): string => {
 	const lines: string[] = [];
@@ -46,8 +48,8 @@ const renderItem = (item: KnowledgeItem, slug: string): string => {
 	return lines.join('\n');
 };
 
-export const GET: APIRoute = ({ props }) => {
-	const { topic, meta } = props as { topic: string; meta: (typeof TOPIC_META)[string] };
+export const GET: APIRoute<Props> = ({ props }) => {
+	const { topic, meta } = props;
 	const items = getItemsByTopic(topic);
 	const lines: string[] = [];
 	lines.push(`# ${meta.title}`);

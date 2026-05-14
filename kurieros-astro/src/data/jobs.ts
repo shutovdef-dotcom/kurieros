@@ -158,7 +158,11 @@ const MEDICAL_BOOK_LABELS: Record<MedicalBookRequirement, string> = {
   unknown: 'Уточняется',
 };
 
-const COMMON_LABELS: Record<string, string> = {
+// `as const satisfies Record<string, string>` keeps each property's
+// literal type while statically verifying the dictionary still
+// matches the wider string-map contract — `COMMON_LABELS.typo`
+// becomes a compile error instead of `string | undefined` at runtime.
+const COMMON_LABELS = {
   noExperience: 'Без опыта',
   flexible: 'Свободный график',
   medicalBook: 'Нужна медкнижка',
@@ -166,7 +170,7 @@ const COMMON_LABELS: Record<string, string> = {
   weekly: 'Еженедельно',
   yes: 'Да',
   notRequired: 'Не требуется',
-};
+} as const satisfies Record<string, string>;
 
 const SCHEDULE_LABEL = 'Свободный график от 2 часов';
 
@@ -486,6 +490,16 @@ const buildJobTranslationEntry = (job: GeneratedJob, language: SupportedLanguage
   details_transport_provision: job.details.transport_provision,
 });
 
+// Documented public contract for the TRANS-1 fragment shape.
+// Outer key = language; middle key = vacancy source.slug; inner key =
+// stringified job.id; value = a flat translation entry produced by
+// `buildJobTranslationEntry`.
+export type JobTranslationEntry = ReturnType<typeof buildJobTranslationEntry>;
+export type TranslationsBySource = Record<
+  SupportedLanguage,
+  Record<string, Record<string, JobTranslationEntry>>
+>;
+
 /**
  * TRANS-1: build translations grouped by (language × source.slug × jobId).
  * Emitter (scripts/generate-vacancy-translations.ts) writes one file
@@ -494,11 +508,13 @@ const buildJobTranslationEntry = (job: GeneratedJob, language: SupportedLanguage
  * visible on the page — typical detail-page download drops from 20 MB
  * to ~80 KB.
  */
-export const buildJobTranslationsBySource = (sources: VacancySource[]) => {
+export const buildJobTranslationsBySource = (
+  sources: VacancySource[],
+): TranslationsBySource => {
   const idToSlug = new Map(sources.map((source) => [source.id, source.slug]));
   return Object.fromEntries(
     SUPPORTED_LANGUAGES.map((language) => {
-      const bySlug: Record<string, Record<string, ReturnType<typeof buildJobTranslationEntry>>> = {};
+      const bySlug: Record<string, Record<string, JobTranslationEntry>> = {};
       for (const slug of idToSlug.values()) {
         bySlug[slug] = {};
       }
@@ -509,7 +525,9 @@ export const buildJobTranslationsBySource = (sources: VacancySource[]) => {
       }
       return [language, bySlug];
     }),
-  ) as Record<SupportedLanguage, Record<string, Record<string, ReturnType<typeof buildJobTranslationEntry>>>>;
+    // `Object.fromEntries` always widens to `Record<string, V>`; cast
+    // back to the documented `Record<SupportedLanguage, ...>` contract.
+  ) as TranslationsBySource;
 };
 
 const jobsData = buildJobsFromVacancies(vacancySources);

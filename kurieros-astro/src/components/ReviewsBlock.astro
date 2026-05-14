@@ -450,21 +450,20 @@ const renderStars = (rating: number) => {
     }
 
     // Escaping basic HTML to prevent XSS
-    function escapeHTML(str) {
+    const HTML_ESCAPES: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;',
+    };
+    function escapeHTML(str: string | null | undefined): string {
       if (!str) return '';
-      return str.replace(/[&<>'"]/g,
-        tag => ({
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          "'": '&#39;',
-          '"': '&quot;'
-        }[tag] || tag)
-      );
+      return str.replace(/[&<>'"]/g, (tag: string) => HTML_ESCAPES[tag] || tag);
     }
 
-    function renderStars(ratingStr) {
-      const rating = parseFloat(ratingStr) || 5;
+    function renderStars(ratingStr: string | number): string {
+      const rating = parseFloat(String(ratingStr)) || 5;
       const fullStars = Math.floor(rating);
       const halfStar = rating % 1 >= 0.5 ? 1 : 0;
       const emptyStars = 5 - fullStars - halfStar;
@@ -476,23 +475,40 @@ const renderStars = (rating: number) => {
     // При сабмите ReviewModal он покажет окно успешной отправки, 
     // но мы ДОЛЖНЫ добавить логику вставки в DOM
     
-    form?.addEventListener('submit', (e) => {
+    type StoredReview = {
+      name: string;
+      city: string;
+      pros: string;
+      cons: string;
+      comment: string;
+      rating: string;
+      date: string;
+      jobId: string | null;
+    };
+
+    // `.value` is exposed by HTMLInputElement and HTMLTextAreaElement,
+    // but `getElementById` only narrows to HTMLElement. Read via a
+    // type-guarded helper so we keep the value-or-fallback pattern
+    // without `as any`.
+    function getInputValue(id: string, fallback: string): string {
+      const el = document.getElementById(id);
+      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+        return el.value;
+      }
+      return fallback;
+    }
+
+    form?.addEventListener('submit', () => {
       // Это выполнится до setTimeout в ReviewModal.astro
-      const nameElem = document.getElementById('review-name');
-      const cityElem = document.getElementById('review-city');
-      const prosElem = document.getElementById('review-pros');
-      const consElem = document.getElementById('review-cons');
-      const commentElem = document.getElementById('review-comment');
-      const ratingElem = document.getElementById('review-rating');
-      
-      const newReview = {
-        name: nameElem ? nameElem.value : 'Аноним',
-        city: cityElem ? cityElem.value : 'Город',
-        pros: prosElem ? prosElem.value : '',
-        cons: consElem ? consElem.value : '',
-        comment: commentElem ? commentElem.value : '',
-        rating: ratingElem ? ratingElem.value : '5',
-        date: new Date().toISOString()
+      const newReview: StoredReview = {
+        name: getInputValue('review-name', 'Аноним'),
+        city: getInputValue('review-city', 'Город'),
+        pros: getInputValue('review-pros', ''),
+        cons: getInputValue('review-cons', ''),
+        comment: getInputValue('review-comment', ''),
+        rating: getInputValue('review-rating', '5'),
+        date: new Date().toISOString(),
+        jobId: null,
       };
 
       // 1. Поиск контейнера с отзывами
@@ -501,10 +517,10 @@ const renderStars = (rating: number) => {
       if (!container) return;
 
       const template = document.getElementById('review-card-template');
-      if (!template) return;
+      if (!(template instanceof HTMLTemplateElement)) return;
 
-      const clone = template.content.cloneNode(true);
-      
+      const clone = template.content.cloneNode(true) as DocumentFragment;
+
       // Заполняем данные
       const tName = clone.querySelector('.t-name');
       const tCity = clone.querySelector('.t-city');
@@ -531,7 +547,8 @@ const renderStars = (rating: number) => {
         newGrid.className = 'reviews-grid';
         newGrid.id = container.id;
         newGrid.appendChild(clone);
-        container.parentNode.replaceChild(newGrid, container);
+        const parent = container.parentNode;
+        if (parent) parent.replaceChild(newGrid, container);
       } else {
         // Вставляем первым элементом
         container.insertBefore(clone, container.firstChild);
@@ -541,8 +558,7 @@ const renderStars = (rating: number) => {
       const savedReviews = loadStoredReviews();
       // Если мы на странице конкретной вакансии (можем узнать по кнопке)
       const openBtn = document.querySelector('.open-review-modal');
-      const jobId = openBtn ? openBtn.getAttribute('data-job-id') : null;
-      newReview.jobId = jobId;
+      newReview.jobId = openBtn ? openBtn.getAttribute('data-job-id') : null;
       savedReviews.push(newReview);
       try {
         localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(savedReviews));
@@ -556,25 +572,32 @@ const renderStars = (rating: number) => {
     if (savedReviews.length > 0) {
       const openBtn = document.querySelector('.open-review-modal');
       const currentJobId = openBtn ? openBtn.getAttribute('data-job-id') : null;
-      
-      const targetReviews = savedReviews.filter(r => currentJobId ? r.jobId === currentJobId : true);
+
+      const targetReviews = savedReviews.filter((r) =>
+        currentJobId ? r.jobId === currentJobId : true,
+      );
       const container = document.querySelector('.reviews-grid, .no-reviews-box');
       const template = document.getElementById('review-card-template');
-      
-      if (container && template && targetReviews.length > 0) {
-        let activeContainer = container;
+
+      if (
+        container &&
+        template instanceof HTMLTemplateElement &&
+        targetReviews.length > 0
+      ) {
+        let activeContainer: Element = container;
         if (activeContainer.classList.contains('no-reviews-box')) {
           const newGrid = document.createElement('div');
           newGrid.className = 'reviews-grid';
           newGrid.id = container.id;
-          container.parentNode.replaceChild(newGrid, container);
+          const parent = container.parentNode;
+          if (parent) parent.replaceChild(newGrid, container);
           activeContainer = newGrid;
         }
 
         // Если это главная (currentJobId === null или пустой), лимитируем показ?
         // Для упрощения, просто покажем последние оставленные
-        targetReviews.slice(-3).forEach(review => {
-          const clone = template.content.cloneNode(true);
+        targetReviews.slice(-3).forEach((review) => {
+          const clone = template.content.cloneNode(true) as DocumentFragment;
           const tName = clone.querySelector('.t-name');
           const tCity = clone.querySelector('.t-city');
           const tRating = clone.querySelector('.t-rating');

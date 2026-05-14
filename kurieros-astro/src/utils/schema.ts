@@ -5,9 +5,30 @@ type BreadcrumbItem = {
   url: string;
 };
 
+// Schema.org MonetaryAmount with embedded QuantitativeValue — narrow
+// shape constructed inside `buildJobPostingSchema`. The monthly branch
+// supplies maxValue + minValue (range bracket); the hourly branch
+// emits just the rate (no range), hence the optional fields.
+type MonetaryAmountSchema = {
+  '@type': 'MonetaryAmount';
+  currency: string;
+  value: {
+    '@type': 'QuantitativeValue';
+    value: number;
+    unitText: string;
+    maxValue?: number;
+    minValue?: number;
+  };
+};
+
+// `Astro.site` is typed as `URL | undefined` because consumers may
+// not configure the global `site` in astro.config — but ours always
+// is (`astro.config.mjs` falls back to `'https://kurerok.ru'`).
+// Accepting undefined here keeps the type system honest at every
+// call site without forcing each caller to assert non-null.
 export const buildBreadcrumbSchema = (
   items: BreadcrumbItem[],
-  site: URL | string,
+  site: URL | string | undefined,
 ) => ({
   '@type': 'BreadcrumbList',
   itemListElement: items.map((item, index) => ({
@@ -236,7 +257,7 @@ export const buildJobPostingSchema = (input: JobPostingInput) => {
 
   const employmentType = mapEmploymentTypeToSchema(input.employmentTypeLabel);
 
-  const baseSalary: Record<string, unknown> | undefined = (() => {
+  const baseSalary: MonetaryAmountSchema | undefined = (() => {
     if (input.baseSalaryMonthly && input.baseSalaryMonthly > 0) {
       return {
         '@type': 'MonetaryAmount',

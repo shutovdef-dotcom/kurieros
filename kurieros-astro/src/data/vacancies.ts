@@ -146,7 +146,12 @@ type AlfaBankVacanciesData = {
   offers: AlfaBankOfferSource[];
 };
 
-const TRANSPORT_MODES = ['foot', 'bicycle', 'auto'] satisfies TransportMode[];
+// Yandex Eda offers no remote-courier mode — the on-site transport
+// modes are foot/bicycle/auto only. Remote stays in the global
+// `TransportMode` union (used by other partners like T-Bank operators).
+type YandexEdaTransportMode = Exclude<TransportMode, 'remote'>;
+
+const TRANSPORT_MODES = ['foot', 'bicycle', 'auto'] satisfies YandexEdaTransportMode[];
 const TRANSPORT_PRIORITY: Record<TransportMode, number> = {
   foot: 1,
   bicycle: 2,
@@ -178,7 +183,7 @@ const buildYandexEdaApplyLink = (city: string, transport: TransportMode) => {
 type YandexEdaCityRate = {
   city: string;
   citizenship: string;
-  rates: Record<TransportMode, number>;
+  rates: Record<YandexEdaTransportMode, number>;
 };
 
 const kuperPayRates = kuperPayRatesSource as KuperPayRates;
@@ -420,7 +425,7 @@ const yandexEdaContent: VacancyContent = {
 
 const createOffer = (
   cityRate: YandexEdaCityRate,
-  transport: TransportMode,
+  transport: YandexEdaTransportMode,
   cityIndex: number,
 ): VacancyOffer => {
   const hourly = cityRate.rates[transport];
