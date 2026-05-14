@@ -459,17 +459,51 @@ const pageSchemaGraph = [
 			modal.setAttribute('role', 'dialog');
 			modal.setAttribute('aria-modal', 'true');
 			modal.setAttribute('aria-labelledby', 'geo-banner-title');
-			modal.innerHTML =
-				'<div class="geo-banner-backdrop" data-action="dismiss"></div>' +
-				'<div class="geo-banner-card" role="document">' +
-					'<div class="geo-banner-icon" aria-hidden="true">📍</div>' +
-					'<h2 id="geo-banner-title" class="geo-banner-title">Похоже, ваш город — <strong>' + city + '</strong></h2>' +
-					'<p class="geo-banner-body">Показать только вакансии в этом городе?</p>' +
-					'<div class="geo-banner-actions">' +
-						'<button type="button" class="geo-banner-btn geo-banner-btn-primary" data-action="apply">Да, показать</button>' +
-						'<button type="button" class="geo-banner-btn geo-banner-btn-secondary" data-action="dismiss">Все города</button>' +
-					'</div>' +
-				'</div>';
+
+			// Build modal markup with DOM API (city is dynamic, comes from
+			// external geo-IP / window.kurieros_user — never trust as HTML).
+			const backdrop = document.createElement('div');
+			backdrop.className = 'geo-banner-backdrop';
+			backdrop.dataset.action = 'dismiss';
+
+			const card = document.createElement('div');
+			card.className = 'geo-banner-card';
+			card.setAttribute('role', 'document');
+
+			const icon = document.createElement('div');
+			icon.className = 'geo-banner-icon';
+			icon.setAttribute('aria-hidden', 'true');
+			icon.textContent = '📍';
+
+			const title = document.createElement('h2');
+			title.id = 'geo-banner-title';
+			title.className = 'geo-banner-title';
+			const cityStrong = document.createElement('strong');
+			cityStrong.textContent = city; // auto-escaped — XSS-safe
+			title.append('Похоже, ваш город — ', cityStrong);
+
+			const body = document.createElement('p');
+			body.className = 'geo-banner-body';
+			body.textContent = 'Показать только вакансии в этом городе?';
+
+			const actions = document.createElement('div');
+			actions.className = 'geo-banner-actions';
+
+			const applyBtn = document.createElement('button');
+			applyBtn.type = 'button';
+			applyBtn.className = 'geo-banner-btn geo-banner-btn-primary';
+			applyBtn.dataset.action = 'apply';
+			applyBtn.textContent = 'Да, показать';
+
+			const dismissBtn = document.createElement('button');
+			dismissBtn.type = 'button';
+			dismissBtn.className = 'geo-banner-btn geo-banner-btn-secondary';
+			dismissBtn.dataset.action = 'dismiss';
+			dismissBtn.textContent = 'Все города';
+
+			actions.append(applyBtn, dismissBtn);
+			card.append(icon, title, body, actions);
+			modal.append(backdrop, card);
 
 			document.body.appendChild(modal);
 			document.body.classList.add('geo-banner-open');

@@ -743,8 +743,26 @@ const hasVacancies = jobsData.length > 0;
 			const doc = new DOMParser().parseFromString(html, 'text/html');
 			const newGrid = doc.getElementById('jobs-grid');
 			if (!newGrid || newGrid.children.length === 0) {
-				const safe = String(cityName || citySlug).replace(/[<>&"]/g, '');
-				grid.innerHTML = '<div class="no-results"><h3>В городе ' + safe + ' нет активных вакансий</h3><p>Полный список доступен на странице города.</p><a class="btn-primary" href="/rabota-kurerom-' + citySlug + '/">Открыть страницу города</a></div>';
+				// Build «no results» fallback with DOM API — citySlug/cityName
+				// come from a static map today, but routing this through
+				// textContent + property-set href makes the surface XSS-proof
+				// even if a future change feeds user-influenced values in.
+				const wrap = document.createElement('div');
+				wrap.className = 'no-results';
+
+				const heading = document.createElement('h3');
+				heading.textContent = `В городе ${String(cityName || citySlug)} нет активных вакансий`;
+
+				const lead = document.createElement('p');
+				lead.textContent = 'Полный список доступен на странице города.';
+
+				const link = document.createElement('a');
+				link.className = 'btn-primary';
+				link.href = `/rabota-kurerom-${encodeURIComponent(citySlug)}/`;
+				link.textContent = 'Открыть страницу города';
+
+				wrap.append(heading, lead, link);
+				grid.replaceChildren(wrap);
 				grid.setAttribute('data-overflow-count', '0');
 				return;
 			}

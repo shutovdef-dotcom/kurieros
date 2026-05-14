@@ -416,13 +416,43 @@ const renderStars = (rating: number) => {
 </style>
 
 <script>
-  // Скрипт для обработки добавления отзывов через LocalStorage 
+  // Скрипт для обработки добавления отзывов через LocalStorage
   // и визуального апдейта на странице без перезагрузки
   document.addEventListener('DOMContentLoaded', () => {
+    // Safe loader for локальные отзывы из LocalStorage.
+    // Wraps both `localStorage.getItem` (Safari private mode → SecurityError)
+    // and `JSON.parse` (corrupted data → SyntaxError) in try/catch, then
+    // validates the array shape so a tampered-with cache can't crash the
+    // render loop or yield records with missing/typed-wrong fields.
+    const REVIEWS_STORAGE_KEY = 'kurieros_local_reviews';
+    function loadStoredReviews() {
+      let raw;
+      try {
+        raw = localStorage.getItem(REVIEWS_STORAGE_KEY) || '[]';
+      } catch (_) {
+        return []; // Safari private mode etc.
+      }
+      let parsed;
+      try {
+        parsed = JSON.parse(raw);
+      } catch (_) {
+        return []; // corrupted data
+      }
+      if (!Array.isArray(parsed)) return [];
+      return parsed.filter((r) =>
+        r &&
+        typeof r === 'object' &&
+        typeof r.name === 'string' &&
+        typeof r.comment === 'string' &&
+        // Form stores rating as a string ("5"); be liberal in accepting both.
+        (typeof r.rating === 'string' || typeof r.rating === 'number')
+      );
+    }
+
     // Escaping basic HTML to prevent XSS
     function escapeHTML(str) {
       if (!str) return '';
-      return str.replace(/[&<>'"]/g, 
+      return str.replace(/[&<>'"]/g,
         tag => ({
           '&': '&amp;',
           '<': '&lt;',
@@ -432,7 +462,7 @@ const renderStars = (rating: number) => {
         }[tag] || tag)
       );
     }
-    
+
     function renderStars(ratingStr) {
       const rating = parseFloat(ratingStr) || 5;
       const fullStars = Math.floor(rating);
@@ -508,17 +538,21 @@ const renderStars = (rating: number) => {
       }
 
       // Сохранение в LocalStorage
-      const savedReviews = JSON.parse(localStorage.getItem('kurieros_local_reviews') || '[]');
+      const savedReviews = loadStoredReviews();
       // Если мы на странице конкретной вакансии (можем узнать по кнопке)
       const openBtn = document.querySelector('.open-review-modal');
       const jobId = openBtn ? openBtn.getAttribute('data-job-id') : null;
       newReview.jobId = jobId;
       savedReviews.push(newReview);
-      localStorage.setItem('kurieros_local_reviews', JSON.stringify(savedReviews));
+      try {
+        localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(savedReviews));
+      } catch (_) {
+        // Safari private mode / quota — silent: review still rendered above.
+      }
     });
 
     // Загрузка локальных отзывов при рендере страницы
-    const savedReviews = JSON.parse(localStorage.getItem('kurieros_local_reviews') || '[]');
+    const savedReviews = loadStoredReviews();
     if (savedReviews.length > 0) {
       const openBtn = document.querySelector('.open-review-modal');
       const currentJobId = openBtn ? openBtn.getAttribute('data-job-id') : null;
