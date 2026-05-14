@@ -246,6 +246,3 @@ export const getCompaniesFromJobs = (jobs: JobLike[], reviews: ReviewLike[] = []
     })
     .sort((a, b) => a.name.localeCompare(b.name, 'ru'));
 };
-
-export const getCompanyBySlug = (jobs: JobLike[], reviews: ReviewLike[], slug: string) =>
-  getCompaniesFromJobs(jobs, reviews).find((company) => company.slug === slug);

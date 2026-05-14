@@ -5,7 +5,6 @@ import { buildJobTranslationsBySource, vacancySources } from '../src/data/jobs';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../src/data/translations';
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const sourceOutputDir = resolve(rootDir, 'src/data/vacancy-translations');
 const publicOutputDir = resolve(rootDir, 'public/vacancy-translations');
 const overridesDir = resolve(rootDir, 'src/data/vacancy-translations-source');
 
@@ -71,35 +70,22 @@ if (validationErrors.length > 0) {
 
 const translationsBySource = buildJobTranslationsBySource(vacancySources);
 
-// Wipe both output dirs and recreate as empty (kills any stale combined
+// Wipe output dir and recreate as empty (kills any stale combined
 // <lang>.json or stale fragments from previous runs).
-await Promise.all([
-  rm(sourceOutputDir, { recursive: true, force: true }),
-  rm(publicOutputDir, { recursive: true, force: true }),
-]);
-await Promise.all([
-  mkdir(sourceOutputDir, { recursive: true }),
-  mkdir(publicOutputDir, { recursive: true }),
-]);
+await rm(publicOutputDir, { recursive: true, force: true });
+await mkdir(publicOutputDir, { recursive: true });
 
 let fragmentCount = 0;
 await Promise.all(
   SUPPORTED_LANGUAGES.map(async (language) => {
-    const langSourceDir = resolve(sourceOutputDir, language);
     const langPublicDir = resolve(publicOutputDir, language);
-    await Promise.all([
-      mkdir(langSourceDir, { recursive: true }),
-      mkdir(langPublicDir, { recursive: true }),
-    ]);
+    await mkdir(langPublicDir, { recursive: true });
 
     const bySlug = translationsBySource[language] ?? {};
     await Promise.all(
       Object.entries(bySlug).map(async ([slug, jobs]) => {
-        const body = `${JSON.stringify(jobs, null, 2)}\n`;
-        await Promise.all([
-          writeFile(resolve(langSourceDir, `${slug}.json`), body, 'utf8'),
-          writeFile(resolve(langPublicDir, `${slug}.json`), body, 'utf8'),
-        ]);
+        const body = `${JSON.stringify(jobs)}\n`;
+        await writeFile(resolve(langPublicDir, `${slug}.json`), body, 'utf8');
         fragmentCount += 1;
       }),
     );

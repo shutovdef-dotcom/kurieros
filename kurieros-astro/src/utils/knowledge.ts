@@ -101,18 +101,6 @@ export const knowledgeBaseData: KnowledgeBase = knowledgeBase as unknown as Know
 export const getItemsByTopic = (topic: string): KnowledgeItem[] =>
 	knowledgeBaseData.items.filter((item) => item.topic === topic);
 
-export const getAllTopicSlugs = (): string[] =>
-	Object.values(TOPIC_META).map((meta) => meta.slug);
-
-export const getTopicBySlug = (
-	slug: string,
-): { topic: string; meta: (typeof TOPIC_META)[string] } | undefined => {
-	const entry = Object.entries(TOPIC_META).find(([, value]) => value.slug === slug);
-	if (!entry) return undefined;
-	const [topic, meta] = entry;
-	return { topic, meta };
-};
-
 export const getSourceById = (id: string): KnowledgeSource | undefined =>
 	knowledgeBaseData.sources.find((source) => source.id === id);
 
