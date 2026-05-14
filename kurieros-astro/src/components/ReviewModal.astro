@@ -223,13 +223,17 @@
     const successBody = document.getElementById('review-success-body');
     
     // Rating logic
-    const stars = document.querySelectorAll('#stars-select span');
-    const ratingInput = document.getElementById('review-rating');
+    const stars = document.querySelectorAll<HTMLElement>('#stars-select span');
+    const ratingInputEl = document.getElementById('review-rating');
+    const ratingInput =
+      ratingInputEl instanceof HTMLInputElement ? ratingInputEl : null;
 
-    stars.forEach(star => {
-      star.addEventListener('mouseover', function() {
-        const value = parseInt(this.getAttribute('data-value') || '0');
-        stars.forEach(s => {
+    stars.forEach((star) => {
+      star.addEventListener('mouseover', (event) => {
+        const target = event.currentTarget;
+        if (!(target instanceof HTMLElement)) return;
+        const value = parseInt(target.getAttribute('data-value') || '0');
+        stars.forEach((s) => {
           if (parseInt(s.getAttribute('data-value') || '0') <= value) {
             s.classList.add('active');
           } else {
@@ -238,10 +242,10 @@
         });
       });
 
-      star.addEventListener('mouseout', function() {
-        stars.forEach(s => s.classList.remove('active'));
+      star.addEventListener('mouseout', () => {
+        stars.forEach((s) => s.classList.remove('active'));
         const selectedValue = parseInt(ratingInput?.value || '0');
-        stars.forEach(s => {
+        stars.forEach((s) => {
           if (parseInt(s.getAttribute('data-value') || '0') <= selectedValue) {
             s.classList.add('selected');
           } else {
@@ -250,11 +254,13 @@
         });
       });
 
-      star.addEventListener('click', function() {
-        const value = this.getAttribute('data-value');
+      star.addEventListener('click', (event) => {
+        const target = event.currentTarget;
+        if (!(target instanceof HTMLElement)) return;
+        const value = target.getAttribute('data-value');
         if (ratingInput && value) {
           ratingInput.value = value;
-          stars.forEach(s => {
+          stars.forEach((s) => {
             if (parseInt(s.getAttribute('data-value') || '0') <= parseInt(value)) {
               s.classList.add('selected');
             } else {

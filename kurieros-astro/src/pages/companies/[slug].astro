@@ -255,22 +255,31 @@ const pageSchemaGraph = [
           <a href="/compare/" class="hero-link">Сравнить</a>
         </div>
         <div class="vacancies-grid">
-          {company.jobs.map((job) => (
-            <article class="job-card">
-              <div class="job-card-top">
-                <span class="job-salary">{job.salary}</span>
-                <span class="job-city">{job.location}</span>
-              </div>
-              <h3><a href={`/v/${job.slug}/`}>{job.title}</a></h3>
-              <p>{job.shortDescription || job.title}</p>
-              <div class="chip-row">
-                {job.labels.slice(0, 3).map((label) => (
-                  <span class="chip">{label}</span>
-                ))}
-              </div>
-              <a class="job-link" href={`/v/${job.slug}/`}>Открыть карточку вакансии</a>
-            </article>
-          ))}
+          {company.jobs.map((job) => {
+            // `JobLike` (in src/utils/companies.ts) is a deliberately narrow
+            // contract for the helper — but at runtime each item is a
+            // `GeneratedJob` (carries `labels: string[]`). Read labels via
+            // a guarded cast through `unknown` so TS picks up the wider
+            // shape only at this access site.
+            const maybeLabels = (job as unknown as { labels?: string[] }).labels;
+            const labels: string[] = Array.isArray(maybeLabels) ? maybeLabels : [];
+            return (
+              <article class="job-card">
+                <div class="job-card-top">
+                  <span class="job-salary">{job.salary}</span>
+                  <span class="job-city">{job.location}</span>
+                </div>
+                <h3><a href={`/v/${job.slug}/`}>{job.title}</a></h3>
+                <p>{job.shortDescription || job.title}</p>
+                <div class="chip-row">
+                  {labels.slice(0, 3).map((label: string) => (
+                    <span class="chip">{label}</span>
+                  ))}
+                </div>
+                <a class="job-link" href={`/v/${job.slug}/`}>Открыть карточку вакансии</a>
+              </article>
+            );
+          })}
         </div>
       </section>
 

@@ -1,4 +1,4 @@
-import type { APIRoute, GetStaticPaths } from 'astro';
+import type { APIRoute, InferGetStaticPropsType } from 'astro';
 import jobsData from '../../../data/jobs';
 import { getCitiesFromJobs } from '../../../utils/cities';
 
@@ -7,14 +7,16 @@ import { getCitiesFromJobs } from '../../../utils/cities';
 // Allows the home page to lazily fetch jobs for any selected city
 // without inlining the full ~3.7 MB catalog into HTML.
 
-export const getStaticPaths: GetStaticPaths = () =>
+export const getStaticPaths = () =>
 	getCitiesFromJobs(jobsData).map((city) => ({
 		params: { slug: city.slug },
 		props: { city },
 	}));
 
-export const GET: APIRoute = ({ props }) => {
-	const { city } = props as { city: { name: string; slug: string } };
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+export const GET: APIRoute<Props> = ({ props }) => {
+	const { city } = props;
 	const cityName = city.name;
 	const cityLower = cityName.toLowerCase();
 

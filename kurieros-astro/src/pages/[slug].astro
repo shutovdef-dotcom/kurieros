@@ -5,7 +5,20 @@ import Footer from '../components/Footer.astro';
 import JobGrid from '../components/JobGrid.astro';
 import JobFilters from '../components/JobFilters.astro';
 import PartnerBanner from '../components/PartnerBanner.astro';
-import articlesData from '../data/articles.json';
+import articlesDataRaw from '../data/articles.json';
+
+// `articles.json` ships empty (`[]`); TS narrows the default JSON
+// import to `never[]`, which fouls every `article.title`/`.description`
+// access downstream. Once articles ship we'll get richer fields, but
+// the contract is fixed: title + description (used for keyword
+// matching) + slug/date (consumed by blog.astro).
+type Article = {
+	title: string;
+	description: string;
+	slug: string;
+	date: string;
+};
+const articlesData = articlesDataRaw as Article[];
 import jobsData from '../data/jobs';
 import { CATEGORIES } from '../data/constants';
 import { getCitiesFromJobs } from '../utils/cities';
@@ -14,7 +27,23 @@ import { formatMoney, getVacancyPluralText, humanJoin, parseSalary } from '../ut
 import { buildBreadcrumbSchema, buildPlaceSchema } from '../utils/schema';
 
 export async function getStaticPaths() {
-	const paths = [];
+	type CityProps = {
+		type: 'city';
+		data: ReturnType<typeof getCitiesFromJobs>[number];
+		title: string;
+		description: string;
+	};
+	type CategoryProps = {
+		type: 'category';
+		data: (typeof CATEGORIES)[number];
+		title: string;
+		description: string;
+	};
+	type StaticPath = {
+		params: { slug: string };
+		props: CityProps | CategoryProps;
+	};
+	const paths: StaticPath[] = [];
 
 	getCitiesFromJobs(jobsData).forEach((city) => {
 		paths.push({

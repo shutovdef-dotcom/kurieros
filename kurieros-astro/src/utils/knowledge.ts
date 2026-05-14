@@ -96,7 +96,11 @@ export const TOPIC_META: Readonly<
 	},
 };
 
-export const knowledgeBaseData: KnowledgeBase = knowledgeBase as unknown as KnowledgeBase;
+// `satisfies` keeps the precise inferred JSON type while statically
+// asserting it conforms to `KnowledgeBase` — replaces the previous
+// `as unknown as KnowledgeBase` double cast (which silently widened
+// the JSON's narrow literal types away with no structural check).
+export const knowledgeBaseData = knowledgeBase satisfies KnowledgeBase;
 
 export const getItemsByTopic = (topic: string): KnowledgeItem[] =>
 	knowledgeBaseData.items.filter((item) => item.topic === topic);
