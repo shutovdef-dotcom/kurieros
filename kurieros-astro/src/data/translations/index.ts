@@ -19,26 +19,39 @@ import { russianReviewUi } from './russian-review-ui';
 import { vpnCloseTranslations } from './vpn-close';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from './types';
 
-// Compose the shell dict by layering the per-feature modules onto base.
-// Each `Object.assign` mutates `base` in place — `base` is module-scoped
-// so no other consumer sees the unmerged form.
-(base.nav as Record<string, string>).main = navMainTranslations;
-(base as Record<string, unknown>).vacancy = vacancyCommonTranslations;
-Object.assign(base.reviews, reviewFormFooterTranslations.reviews);
-(base as Record<string, unknown>).form = reviewFormFooterTranslations.form;
-Object.assign(base.footer, reviewFormFooterTranslations.footer);
-Object.assign(base.reviews, russianReviewUi.reviews);
-(base as Record<string, unknown>).form = russianReviewUi.form;
-base.vpn.btn_close = vpnCloseTranslations;
+// Compose the assembled shell dict immutably. Spreads keep `base` and
+// each per-feature module untouched, and the inferred `composedBase`
+// type carries every key (including the non-base `vacancy` and `form`
+// branches) so callers stay strongly typed without casts.
+//
+// `form` is supplied by `russianReviewUi` (review modal labels stay
+// Russian per PR #131 policy). `review-form-footer.ts` historically
+// also exposed a `.form` block whose 5 *_placeholder keys were silently
+// overwritten by this assignment and never read by any template — they
+// have been dropped from `review-form-footer.ts` accordingly.
+const composedBase = {
+  ...base,
+  nav: { ...base.nav, main: navMainTranslations },
+  vacancy: vacancyCommonTranslations,
+  reviews: {
+    ...base.reviews,
+    ...reviewFormFooterTranslations.reviews,
+    ...russianReviewUi.reviews,
+  },
+  form: russianReviewUi.form,
+  footer: { ...base.footer, ...reviewFormFooterTranslations.footer },
+  vpn: { ...base.vpn, btn_close: vpnCloseTranslations },
+};
+
+type ShellDict = typeof composedBase;
 
 // Project the single shell dict into every language slot. Deep clone
 // per language so runtime per-language vacancy merges (BaseLayout) stay
 // isolated. The data is ~3 KB, paid once at boot.
-type ShellDict = typeof base;
 export const translations: Record<SupportedLanguage, ShellDict> = Object.fromEntries(
   SUPPORTED_LANGUAGES.map((language) => [
     language,
-    JSON.parse(JSON.stringify(base)) as ShellDict,
+    JSON.parse(JSON.stringify(composedBase)) as ShellDict,
   ]),
 ) as Record<SupportedLanguage, ShellDict>;
 
