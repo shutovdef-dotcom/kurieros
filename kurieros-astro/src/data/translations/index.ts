@@ -1,15 +1,15 @@
 // Translation dictionary assembler.
 //
-// Was a single 1664-line `src/data/translations.ts` (D6 in the audit
-// batch). Split into per-purpose slices so each is editable on its
-// own without dragging a megabyte of context. Runtime semantics are
-// preserved EXACTLY: same merge order, same Russian-only `.form`
-// scope, same final shape.
+// Shell UI strings are Russian-only (per PR #131 policy). Per-vacancy
+// content translations live in /vacancy-translations/<lang>/<slug>.json
+// and merge into `translations[lang].vacancies` at runtime via the
+// inline manager in BaseLayout.astro.
 //
-// Consumer imports (`import { translations, SUPPORTED_LANGUAGES, ... }
-// from '../data/translations'`) automatically resolve to this file via
-// directory-index resolution — the standalone `translations.ts` was
-// removed in the same commit.
+// This module builds a single Russian shell dict from the per-feature
+// files, then projects it into every `SupportedLanguage` slot of the
+// exported `translations` map. Each slot is an independent deep clone
+// so the runtime vacancy-merge step (BaseLayout) can mutate one
+// language's `.vacancies` without leaking into another.
 
 import { base } from './base';
 import { navMainTranslations } from './nav-main';
@@ -17,53 +17,30 @@ import { vacancyCommonTranslations } from './vacancy';
 import { reviewFormFooterTranslations } from './review-form-footer';
 import { russianReviewUi } from './russian-review-ui';
 import { vpnCloseTranslations } from './vpn-close';
-import { SUPPORTED_LANGUAGES } from './types';
+import { SUPPORTED_LANGUAGES, type SupportedLanguage } from './types';
 
-// One-time post-load mutation — the original file did the same, and
-// `base` is freshly created on every module load so no other consumer
-// observes the unmerged version. Keeping mutation here (vs. an
-// immutable spread reduce) preserves byte-for-byte runtime equivalence
-// with the pre-split file.
-SUPPORTED_LANGUAGES.forEach((language) => {
-  (base[language].nav as Record<string, string>).main = navMainTranslations[language];
-  (base[language] as Record<string, unknown>).vacancy = vacancyCommonTranslations[language];
-});
+// Compose the shell dict by layering the per-feature modules onto base.
+// Each `Object.assign` mutates `base` in place — `base` is module-scoped
+// so no other consumer sees the unmerged form.
+(base.nav as Record<string, string>).main = navMainTranslations;
+(base as Record<string, unknown>).vacancy = vacancyCommonTranslations;
+Object.assign(base.reviews, reviewFormFooterTranslations.reviews);
+(base as Record<string, unknown>).form = reviewFormFooterTranslations.form;
+Object.assign(base.footer, reviewFormFooterTranslations.footer);
+Object.assign(base.reviews, russianReviewUi.reviews);
+(base as Record<string, unknown>).form = russianReviewUi.form;
+base.vpn.btn_close = vpnCloseTranslations;
 
-SUPPORTED_LANGUAGES.forEach((language) => {
-  Object.assign(base[language].reviews, reviewFormFooterTranslations[language].reviews);
-  (base[language] as Record<string, unknown>).form = reviewFormFooterTranslations[language].form;
-  Object.assign(base[language].footer, reviewFormFooterTranslations[language].footer);
-});
+// Project the single shell dict into every language slot. Deep clone
+// per language so runtime per-language vacancy merges (BaseLayout) stay
+// isolated. The data is ~3 KB, paid once at boot.
+type ShellDict = typeof base;
+export const translations: Record<SupportedLanguage, ShellDict> = Object.fromEntries(
+  SUPPORTED_LANGUAGES.map((language) => [
+    language,
+    JSON.parse(JSON.stringify(base)) as ShellDict,
+  ]),
+) as Record<SupportedLanguage, ShellDict>;
 
-// `russianReviewUi.form` is a Russian-only fallback. The localized form
-// templates (with placeholders) are already populated for every language
-// by the previous SUPPORTED_LANGUAGES.forEach above using
-// `reviewFormFooterTranslations`. Earlier this loop unconditionally
-// overwrote `.form` with Russian for EVERY language, breaking i18n for
-// uz, tg, ky, hy, kk, az, uk, be, hi, vi, zh — review-modal labels
-// rendered in Cyrillic instead of the user's locale. Now scoped to `ru`.
-SUPPORTED_LANGUAGES.forEach((language) => {
-  Object.assign(base[language].reviews, russianReviewUi.reviews);
-  if (language === 'ru') {
-    (base[language] as Record<string, unknown>).form = russianReviewUi.form;
-  }
-});
-
-SUPPORTED_LANGUAGES.forEach((language) => {
-  base[language].vpn.btn_close = vpnCloseTranslations[language];
-});
-
-// Policy revert (#130 follow-up): the shell UI (navigation, vacancy-page
-// labels, buttons, footer, review form, VPN close) renders in Russian for
-// EVERY language. Per-vacancy content translations (shortDescription,
-// description, requirements, benefits, requiredDocuments) are unaffected
-// — those load at runtime from public/vacancy-translations/<lang>/<slug>.json
-// and bypass this `translations` registry entirely.
-SUPPORTED_LANGUAGES.forEach((language) => {
-  if (language === 'ru') return;
-  base[language] = JSON.parse(JSON.stringify(base.ru)) as typeof base.ru;
-});
-
-export const translations = base;
 export { SUPPORTED_LANGUAGES } from './types';
 export type { SupportedLanguage } from './types';
