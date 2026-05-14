@@ -53,6 +53,17 @@ SUPPORTED_LANGUAGES.forEach((language) => {
   base[language].vpn.btn_close = vpnCloseTranslations[language];
 });
 
+// Policy revert (#130 follow-up): the shell UI (navigation, vacancy-page
+// labels, buttons, footer, review form, VPN close) renders in Russian for
+// EVERY language. Per-vacancy content translations (shortDescription,
+// description, requirements, benefits, requiredDocuments) are unaffected
+// — those load at runtime from public/vacancy-translations/<lang>/<slug>.json
+// and bypass this `translations` registry entirely.
+SUPPORTED_LANGUAGES.forEach((language) => {
+  if (language === 'ru') return;
+  base[language] = JSON.parse(JSON.stringify(base.ru)) as typeof base.ru;
+});
+
 export const translations = base;
 export { SUPPORTED_LANGUAGES } from './types';
 export type { SupportedLanguage } from './types';

@@ -330,8 +330,11 @@ const DATE_LOCALES: Record<SupportedLanguage, string> = {
   zh: 'zh-CN',
 };
 
-const formatUpdatedDate = (date: string, language: SupportedLanguage) =>
-  new Intl.DateTimeFormat(DATE_LOCALES[language], {
+// Russian-locale date formatting on every page (e.g. "18 апреля 2026 г.")
+// per #130 follow-up policy revert. `_language` retained in signature to
+// avoid touching call sites.
+const formatUpdatedDate = (date: string, _language: SupportedLanguage) =>
+  new Intl.DateTimeFormat(DATE_LOCALES.ru, {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -342,11 +345,17 @@ const cityPrepositions = new Map(CITY_DATASET.map((city) => [city.name, city.pre
 
 const unique = <T>(items: T[]) => Array.from(new Set(items.filter(Boolean)));
 
+// Policy revert (#130 follow-up): vacancy titles, transport labels, role
+// labels, employment labels, citizenship labels, schedule labels, salary
+// formatters, page meta — all render in Russian regardless of `language`.
+// Only the 5 content fields (shortDescription/description/requirements/
+// benefits/requiredDocuments) translate; those go through
+// resolveLocalizedContent() which reads TRANSLATION_OVERRIDES.
 const getLocalizedLabel = <T extends string>(
   labels: LocalizedLabels<T>,
-  language: SupportedLanguage,
+  _language: SupportedLanguage,
   key: T,
-) => labels[language]?.[key] ?? labels.ru[key];
+) => labels.ru[key];
 
 const formatAmount = (value: number) => new Intl.NumberFormat('ru-RU').format(value);
 
@@ -431,22 +440,22 @@ const getTransportProvision = (offer: VacancyOffer): TransportProvision => {
 const getSchedule = (source: VacancySource, offer: VacancyOffer, language: SupportedLanguage) => {
   const schedule = offer.schedule ?? source.defaults.schedule;
 
-  return schedule === SCHEDULE_LABELS.ru ? SCHEDULE_LABELS[language] : schedule;
+  return schedule === SCHEDULE_LABELS.ru ? SCHEDULE_LABELS.ru : schedule;
 };
 
 const getEducation = (source: VacancySource, language: SupportedLanguage) =>
   source.defaults.education === COMMON_LABELS.ru.noEducation || !source.defaults.education
-    ? COMMON_LABELS[language].noEducation
+    ? COMMON_LABELS.ru.noEducation
     : source.defaults.education;
 
 const getPaymentFrequency = (value: string, language: SupportedLanguage) =>
-  value === COMMON_LABELS.ru.weekly ? COMMON_LABELS[language].weekly : value;
+  value === COMMON_LABELS.ru.weekly ? COMMON_LABELS.ru.weekly : value;
 
 const getCitizenshipLabel = (value: string, language: SupportedLanguage) => {
-  if (value.includes('вне ЕАЭС')) return CITIZENSHIP_LABELS[language].all;
-  if (value.includes('ЕАЭС')) return CITIZENSHIP_LABELS[language].rfEaes;
-  if (value === 'РФ') return CITIZENSHIP_LABELS[language].rf;
-  if (value.includes('при наличии документов')) return CITIZENSHIP_LABELS[language].default;
+  if (value.includes('вне ЕАЭС')) return CITIZENSHIP_LABELS.ru.all;
+  if (value.includes('ЕАЭС')) return CITIZENSHIP_LABELS.ru.rfEaes;
+  if (value === 'РФ') return CITIZENSHIP_LABELS.ru.rf;
+  if (value.includes('при наличии документов')) return CITIZENSHIP_LABELS.ru.default;
 
   return value;
 };
@@ -458,7 +467,7 @@ const getGeneratedId = (source: VacancySource, offer: VacancyOffer, index: numbe
 
 const getSalaryText = (pay: PayModel, language: SupportedLanguage) =>
   pay.monthly?.max
-    ? MONTHLY_SALARY_TEXT[language](formatAmount(pay.monthly.max))
+    ? MONTHLY_SALARY_TEXT.ru(formatAmount(pay.monthly.max))
     : pay.monthly?.text ??
       pay.guaranteed?.text ??
       pay.perShift?.text ??
@@ -468,7 +477,7 @@ const getSalaryText = (pay: PayModel, language: SupportedLanguage) =>
 
 const getRateText = (pay: PayModel, language: SupportedLanguage) => {
   if (pay.hourly?.max && pay.perShift?.max && pay.monthly?.max) {
-    return RATE_TEXT[language](
+    return RATE_TEXT.ru(
       formatAmount(pay.hourly.max),
       formatAmount(pay.perShift.max),
       formatAmount(pay.monthly.max),
@@ -522,7 +531,7 @@ const buildLabels = (
       ...transport.map((mode) => getLocalizedLabel(TRANSPORT_LABELS, language, mode)),
       ageFrom <= 16 ? 'С 16 лет' : '18+',
       formats[0] ? getLocalizedLabel(EMPLOYMENT_LABELS, language, formats[0]) : '',
-      medicalBook === 'required' ? COMMON_LABELS[language].medicalBook : '',
+      medicalBook === 'required' ? COMMON_LABELS.ru.medicalBook : '',
     ]);
 
 const buildJobsFromVacancies = (
@@ -574,11 +583,11 @@ const buildJobsFromVacancies = (
           rate: getRateText(offer.pay, language),
           schedule: getSchedule(source, offer, language),
           education: getEducation(source, language),
-          age: language === 'ru' ? `от ${ageFrom} лет` : `18+`,
+          age: `от ${ageFrom} лет`,
           payment_freq: getPaymentFrequency(offer.pay.paymentFrequency, language),
           citizenship: getCitizenshipLabel(getCitizenship(source, offer), language),
           medical_book: getLocalizedLabel(MEDICAL_BOOK_LABELS, language, medicalBook),
-          self_employed: formats.includes('self_employed') ? COMMON_LABELS[language].yes : COMMON_LABELS[language].notRequired,
+          self_employed: formats.includes('self_employed') ? COMMON_LABELS.ru.yes : COMMON_LABELS.ru.notRequired,
           employment_type: formats.map((format) => getLocalizedLabel(EMPLOYMENT_LABELS, language, format)).join(' / '),
           transport_provision: getLocalizedLabel(TRANSPORT_PROVISION_LABELS, language, transportProvision),
           uniform: source.defaults.uniform ?? 'Уточняется',
@@ -606,8 +615,8 @@ const buildJobsFromVacancies = (
 // Build flat translation object for one job (used by both per-source
 // fragment emission and any future consumer).
 const buildJobTranslationEntry = (job: GeneratedJob, language: SupportedLanguage) => ({
-  page_title: PAGE_TITLE_TEXT[language](job.title),
-  page_description: PAGE_DESCRIPTION_TEXT[language](job).slice(0, 170),
+  page_title: PAGE_TITLE_TEXT.ru(job.title),
+  page_description: PAGE_DESCRIPTION_TEXT.ru(job).slice(0, 170),
   updated_date: formatUpdatedDate(job.updatedAt, language),
   title: job.title,
   company: job.company,
