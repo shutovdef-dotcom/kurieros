@@ -83,8 +83,12 @@ const structuredData = JSON.stringify(
 const isProduction = import.meta.env.PROD;
 const ga4MeasurementId = String(import.meta.env.PUBLIC_GA4_MEASUREMENT_ID ?? '').trim();
 const yandexMetrikaId = String(import.meta.env.PUBLIC_YANDEX_METRIKA_ID ?? '').trim();
-const yandexVerification = String(import.meta.env.PUBLIC_YANDEX_VERIFICATION ?? '9a662580de5ebac5').trim();
-const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION ?? 'QIGlMj-JAXkxvnkeFNNu6hWJ5bslKtguuUxY4ty17bI').trim();
+// Verification tokens are set per environment via .env.example vars.
+// Hardcoded fallbacks were removed (M19): tokens that drift in source
+// outlive their post-rotation usefulness in git history. When a var is
+// empty the corresponding <meta> tag is skipped entirely below.
+const yandexVerification = String(import.meta.env.PUBLIC_YANDEX_VERIFICATION ?? '').trim();
+const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION ?? '').trim();
 ---
 
 <!doctype html>
@@ -105,8 +109,8 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
 		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
 		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-			<meta name="yandex-verification" content={yandexVerification} />
-			<meta name="google-site-verification" content={googleSiteVerification} />
+			{yandexVerification && <meta name="yandex-verification" content={yandexVerification} />}
+			{googleSiteVerification && <meta name="google-site-verification" content={googleSiteVerification} />}
 		<meta name="format-detection" content="telephone=no" />
 
 		<!-- Manrope (primary UI font, design tokens use it) -->
@@ -366,9 +370,17 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 					const { timeout = 5000 } = options;
 					const controller = new AbortController();
 					const id = setTimeout(() => controller.abort(), timeout);
-					const response = await fetch(resource, { ...options, signal: controller.signal });
-					clearTimeout(id);
-					return response;
+					// try/finally: previously `clearTimeout(id)` ran only on the success
+					// path. On a fetch throw (e.g. ipapi.co network error → ipwho.is
+					// fallback), the dangling 5s timer would fire later and call
+					// .abort() on a settled controller — no-op, but the controller
+					// stays referenced until the timer fires, leaking memory in the
+					// geolocation fallback chain.
+					try {
+						return await fetch(resource, { ...options, signal: controller.signal });
+					} finally {
+						clearTimeout(id);
+					}
 				}
 
 				function normalizeGeoData(raw) {
@@ -500,11 +512,27 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 					const url = VACANCY_TRANSLATIONS_BASE + '/' + lang + '/' + sourceSlug + '.json?v=' + VACANCY_TRANSLATIONS_VERSION;
 					try {
 						const response = await fetch(url, { cache: 'force-cache' });
-						if (!response.ok) return null;
+						if (!response.ok) {
+							// 4xx is persistent (missing fragment, bad slug) — mark loaded
+							// so we never re-request the same URL from this session and
+							// avoid a self-DoS retry storm on every language switch.
+							// 5xx may be transient (origin/CDN hiccup) — leave uncached
+							// so the next applyTranslations() can retry.
+							if (response.status >= 400 && response.status < 500) {
+								loadedFragments.add(cacheKey);
+							}
+							window.dispatchEvent(new CustomEvent('kurieros:fragment-load-failed', {
+								detail: { lang, sourceSlug, status: response.status, url },
+							}));
+							return null;
+						}
 						const fragment = await response.json();
 						loadedFragments.add(cacheKey);
 						return fragment;
 					} catch (error) {
+						window.dispatchEvent(new CustomEvent('kurieros:fragment-load-failed', {
+							detail: { lang, sourceSlug, error: String(error), url },
+						}));
 						console.warn('Failed to load vacancy translations fragment', lang, sourceSlug, error);
 						return null;
 					}
@@ -586,6 +614,13 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 						this.currentLang = lang;
 						safeStorage.set(STORAGE_KEY, lang);
 						await this.ensureVacancyTranslations(lang);
+						// Guard against rapid double-clicks: a later setLanguage call may
+						// have updated `currentLang` while we awaited fragment loading.
+						// Without this check, an earlier-completing fetch (e.g. RU→UZ→TG
+						// where UZ resolves first) would call applyTranslations() against
+						// the now-current TG dictionary using UZ fragment data → wrong
+						// language renders. The later call's own await will handle apply.
+						if (this.currentLang !== lang) return;
 						this.applyTranslations();
 						window.dispatchEvent(new CustomEvent('kurieros:lang-change', { detail: { lang } }));
 					},
