@@ -10,7 +10,15 @@ const supportedLanguages = SUPPORTED_LANGUAGES;
 // Client scans visible cards for `data-vacancy-source-slug` and loads only
 // the fragments it needs (typical detail page: 1 fragment ~80KB-2MB,
 // instead of the old combined 20MB <lang>.json).
+//
+// Cache-busting: every build emits a fresh `?v=<buildTimestamp>` query
+// parameter. This ensures the browser refetches the fragment whenever the
+// site is redeployed — without it, the prior `cache: 'force-cache'` mode
+// would pin users to whatever fragment they saw first, surviving any
+// subsequent translation edits (saw this in the wild after #131/#132 ran:
+// returning visitors kept seeing pre-revert Armenian titles).
 const vacancyTranslationsBase = '/vacancy-translations';
+const vacancyTranslationsVersion = String(Date.now());
 
 interface Props {
 	title?: string;
@@ -389,13 +397,14 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 				}
 			})();
 		</script>
-		<script is:inline define:vars={{ translations, supportedLanguages, vacancyTranslationsBase }}>
+		<script is:inline define:vars={{ translations, supportedLanguages, vacancyTranslationsBase, vacancyTranslationsVersion }}>
 			// Global i18n Manager
 				(function() {
 					const STORAGE_KEY = 'site-lang';
 					const DEFAULT_LANG = 'ru';
 					const SUPPORTED_LANGS = supportedLanguages;
 					const VACANCY_TRANSLATIONS_BASE = vacancyTranslationsBase;
+					const VACANCY_TRANSLATIONS_VERSION = vacancyTranslationsVersion;
 					// TRANS-1: track loaded (lang, sourceSlug) pairs instead of whole languages.
 					const loadedFragments = new Set();
 					window.translations = translations;
@@ -453,9 +462,13 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 				async function fetchFragment(lang, sourceSlug) {
 					const cacheKey = lang + '/' + sourceSlug;
 					if (loadedFragments.has(cacheKey)) return null;
-					const url = VACANCY_TRANSLATIONS_BASE + '/' + lang + '/' + sourceSlug + '.json';
+					// Append the build-time version so a redeploy invalidates any cached
+					// fragment from a prior site version. Without it, the previous
+					// `cache: 'force-cache'` mode pinned returning visitors to whatever
+					// translation they saw on their first visit (forever).
+					const url = VACANCY_TRANSLATIONS_BASE + '/' + lang + '/' + sourceSlug + '.json?v=' + VACANCY_TRANSLATIONS_VERSION;
 					try {
-						const response = await fetch(url, { cache: 'force-cache' });
+						const response = await fetch(url);
 						if (!response.ok) return null;
 						const fragment = await response.json();
 						loadedFragments.add(cacheKey);
