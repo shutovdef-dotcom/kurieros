@@ -291,21 +291,52 @@ const pageSchemaGraph = [
     const jobsById = new Map(compareJobs.map((job) => [job.id, job]));
     const hasAvailableJobs = totalCompareJobs > 0;
     let fullCatalogPromise = null;
+    let catalogLoaded = false;
+    let catalogLoadError = null;
 
     function ensureFullCatalog() {
       if (fullCatalogPromise) return fullCatalogPromise;
       fullCatalogPromise = fetch('/api/compare-jobs.json', { cache: 'force-cache' })
-        .then((response) => (response.ok ? response.json() : []))
+        .then((response) => {
+          if (!response.ok) {
+            return Promise.reject(new Error(`HTTP ${response.status}`));
+          }
+          return response.json();
+        })
         .then((jobs) => {
           if (Array.isArray(jobs)) {
             for (const job of jobs) {
               jobsById.set(job.id, job);
             }
           }
+          catalogLoaded = true;
+          catalogLoadError = null;
           return jobs;
         })
-        .catch(() => []);
+        .catch((err) => {
+          console.error('compare: failed to load /api/compare-jobs.json', err);
+          catalogLoadError = err;
+          // Surface a user-visible error if we have nothing to show.
+          showCatalogError();
+          return [];
+        });
       return fullCatalogPromise;
+    }
+
+    function showCatalogError() {
+      // Only show the error banner if the inline preselected catalog is empty
+      // (i.e. we genuinely have nothing to display) AND the user hasn't already
+      // got a populated table on screen.
+      if (jobsById.size > 0) return;
+      grid.style.setProperty('--cols', '0');
+      grid.innerHTML = `
+        <div class="compare-empty-state" id="compare-error" role="alert">
+          <h3>Не удалось загрузить данные</h3>
+          <p>Попробуйте обновить страницу позже. Если проблема повторяется, напишите нам.</p>
+          <a href="/" class="btn-primary compare-empty-state-link">Вернуться на главную</a>
+        </div>
+      `;
+      applyScopedStyles(grid);
     }
     const scopeAttribute = Array.from(grid.getAttributeNames()).find((name) => name.startsWith('data-astro-cid'));
 
@@ -362,11 +393,21 @@ const pageSchemaGraph = [
     }
 
     function readCompareIds() {
+      // Until the full catalog has loaded, return ALL stored IDs unfiltered.
+      // Filtering against jobsById too early would drop valid IDs that live
+      // outside the inline preselected subset, and a follow-up writeCompareIds
+      // would erase them permanently from localStorage.
+      if (!catalogLoaded) return readStoredCompareIds();
       return readStoredCompareIds().filter((id) => jobsById.has(id));
     }
 
     function writeCompareIds(ids) {
-      localStorage.setItem('compareList', JSON.stringify(ids));
+      try {
+        localStorage.setItem('compareList', JSON.stringify(ids));
+      } catch (err) {
+        // QuotaExceededError or SecurityError (private mode) — keep in-memory state consistent
+        console.warn('compareList write failed', err);
+      }
       window.dispatchEvent(new CustomEvent('compareUpdate'));
     }
 
@@ -374,7 +415,9 @@ const pageSchemaGraph = [
       const storedIds = readStoredCompareIds();
       const validIds = storedIds.filter((id) => jobsById.has(id));
 
-      if (JSON.stringify(storedIds) !== JSON.stringify(validIds)) {
+      // Only persist the pruned list once the full catalog is in memory —
+      // otherwise we'd silently drop IDs that simply weren't inlined yet.
+      if (catalogLoaded && JSON.stringify(storedIds) !== JSON.stringify(validIds)) {
         writeCompareIds(validIds);
       }
 
@@ -484,8 +527,13 @@ const pageSchemaGraph = [
       const storedIds = readStoredCompareIds();
       const needsCatalog = storedIds.some((id) => !jobsById.has(id));
       if (needsCatalog) {
-        // User saved IDs we don't have in preselected — load full catalog.
+        // User saved IDs we don't have in preselected — load full catalog
+        // BEFORE pruning/writing, so we don't erase valid stored IDs.
         ensureFullCatalog().then(() => {
+          if (catalogLoadError && jobsById.size === 0) {
+            // showCatalogError() already rendered a message into the grid.
+            return;
+          }
           const jobs = getSelectedJobs();
           renderComparisonTable(jobs);
           renderCompanyLinks(jobs);
