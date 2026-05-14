@@ -8,7 +8,7 @@
   "scripts": {
     "generate": "astro sync",
     "pregenerate": "npm run generate:data",
-    "generate:data": "npm run i18n:assemble && npm run generate:vacancy-translations && npm run generate:reviews && npm run generate:llms",
+    "generate:data": "npm run i18n:extract && npm run i18n:assemble && npm run i18n:test && npm run generate:vacancy-translations && npm run generate:reviews && npm run generate:llms",
     "i18n:extract": "tsx scripts/i18n/extract-clauses.ts",
     "i18n:analyze": "tsx scripts/i18n/analyze-tokens.ts",
     "i18n:assemble": "tsx scripts/i18n/assemble-translations.ts",
@@ -22,6 +22,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "typecheck": "astro check",
     "local:build": "./scripts/build-local.sh",
     "local:preview": "./scripts/preview-local.sh",
     "local:dev": "./scripts/dev-local.sh"
@@ -31,6 +32,8 @@
     "astro": "^6.1.3"
   },
   "devDependencies": {
-    "tsx": "^4.21.0"
+    "@astrojs/check": "^0.9.9",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
   }
 }
