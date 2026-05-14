@@ -3,3 +3,27 @@ node-v22.14.0-darwin-arm64/
 
 # Per-worktree Claude Code config (launch.json for Preview MCP, etc.)
 .claude/
+
+# `ingenerka/` — отдельный параллельный Astro-проект (сайт инженерных
+# /сантехнических услуг), не относится к kurerok.ru.  Лежит в этой
+# кодовой базе как песочница.
+ingenerka/
+
+# Инфраструктура автопостинга и сопутствующая документация — относятся
+# к проекту `ingenerka`, на kurerok.ru не используются.
+kurieros-astro/infra/
+kurieros-astro/docs/API_SETUP.md
+
+# Остальные артефакты ingenerka, разложенные внутри kurieros-astro:
+# квиз сантехнических услуг, города Подольск/Одинцово/Коммунарка,
+# динамические [city]-лендинги, admin-доска задач, общий task-list.
+# Проверено: каждый из этих файлов ссылается только на ingenerka-
+# контент (Сантехника/Электромонтаж/«монтаж под ключ»), к kurerok.ru
+# отношения не имеет.  Включая task.md, который явно озаглавлен
+# «Marketing Project: Plumbing & Electrical» и упоминает задачу
+# «Очистка проекта от артефактов Kurieros».
+kurieros-astro/src/components/Quiz.astro
+kurieros-astro/src/data/cities.json
+kurieros-astro/src/pages/\[city\]/
+kurieros-astro/src/pages/admin/
+kurieros-astro/task.md

@@ -62,3 +62,76 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  indexnow:
+    # Notifies Bing, Yandex, Naver, Seznam, Yep about all sitemap URLs after deploy.
+    # Key file is served at https://kurerok.ru/67329f22c3fc65f5bae72b458b279dae.txt
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for fresh sitemap on production
+        run: sleep 60
+      - name: Fetch sitemap URLs and push to IndexNow API
+        run: |
+          set -euo pipefail
+          KEY="67329f22c3fc65f5bae72b458b279dae"
+          HOST="kurerok.ru"
+          KEY_LOCATION="https://${HOST}/${KEY}.txt"
+
+          # Verify the key file is reachable on production
+          curl -sf "$KEY_LOCATION" >/dev/null || { echo "Key file not reachable, skipping"; exit 0; }
+
+          # Collect all <loc> URLs from sitemap-index + child sitemaps
+          mkdir -p /tmp/indexnow
+          curl -s "https://${HOST}/sitemap-index.xml" \
+            | grep -oE '<loc>[^<]+</loc>' \
+            | sed 's|<loc>||;s|</loc>||' > /tmp/indexnow/sitemaps.txt
+          : > /tmp/indexnow/urls.txt
+          while read -r sm; do
+            curl -s "$sm" \
+              | grep -oE '<loc>[^<]+</loc>' \
+              | sed 's|<loc>||;s|</loc>||' >> /tmp/indexnow/urls.txt
+          done < /tmp/indexnow/sitemaps.txt
+
+          TOTAL=$(wc -l < /tmp/indexnow/urls.txt | tr -d ' ')
+          echo "Found $TOTAL URLs in sitemaps"
+          [ "$TOTAL" -eq 0 ] && { echo "Empty sitemap, skipping"; exit 0; }
+
+          # Submit in batches of 10000 (IndexNow per-request cap).
+          # Build the JSON payload entirely via `jq` reading the URL list
+          # from disk (`--rawfile`) and write it to a file, then have curl
+          # POST from that file (`--data-binary @file`).  The previous
+          # approach passed the full JSON through shell variables and
+          # `--argjson urls "$URLS_JSON"` / `--data "$PAYLOAD"`, which
+          # blew past the kernel ARG_MAX on ~5,500-URL payloads with
+          # `Argument list too long` (E2BIG).  File-based plumbing is
+          # bounded only by disk and avoids that ceiling entirely.
+          split -l 10000 /tmp/indexnow/urls.txt /tmp/indexnow/batch_
+          for batch in /tmp/indexnow/batch_*; do
+            COUNT=$(wc -l < "$batch" | tr -d ' ')
+            PAYLOAD_FILE="/tmp/indexnow/payload-$(basename "$batch").json"
+            jq -n \
+              --arg host "$HOST" \
+              --arg key "$KEY" \
+              --arg keyLoc "$KEY_LOCATION" \
+              --rawfile rawurls "$batch" \
+              '{
+                host: $host,
+                key: $key,
+                keyLocation: $keyLoc,
+                urlList: ($rawurls | split("\n") | map(select(length > 0)))
+              }' > "$PAYLOAD_FILE"
+
+            HTTP=$(curl -s -o /tmp/indexnow/response.txt -w "%{http_code}" \
+              -X POST "https://api.indexnow.org/indexnow" \
+              -H "Content-Type: application/json; charset=utf-8" \
+              --data-binary @"$PAYLOAD_FILE")
+            echo "Batch $(basename "$batch"): $COUNT URLs, HTTP $HTTP"
+            [ -s /tmp/indexnow/response.txt ] && cat /tmp/indexnow/response.txt
+            # IndexNow returns: 200 OK / 202 Accepted / 422 if some URLs invalid (still ok)
+            case "$HTTP" in
+              200|202) ;;
+              *) echo "::warning::IndexNow returned HTTP $HTTP for $(basename "$batch")" ;;
+            esac
+          done
+          echo "IndexNow notification complete: $TOTAL URLs across $(ls /tmp/indexnow/batch_* | wc -l) batch(es)"
