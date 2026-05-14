@@ -928,36 +928,51 @@ export const CITY_DATASET: readonly CityRecord[] = [
   { name: "Макарьев", slug: "makarev", prep: "в Макарьеве", population: 5528 },
   { name: "Орлов", slug: "orlov", prep: "в Орлове", population: 5508 },
   { name: "Пыталово", slug: "pytalovo", prep: "в Пыталове", population: 5263 },
+  // === Added 2026-05-14 — Burger King повар-кассир catalog =============
+  // Sochi annexes + SPb suburbs + Moscow-oblast satellites + Tula. These
+  // are real urban areas (pop >5K) absent from the original pensnarik
+  // pull. Inserted out-of-order at the tail — pop rank for these 8 will
+  // sort below Пыталово (5263) even though their actual population is
+  // higher. Resort by population if rank ordering matters for UI.
+  { name: "Адлер", slug: "adler", prep: "в Адлере", population: 109000 },
+  { name: "Парголово", slug: "pargolovo", prep: "в Парголове", population: 80000 },
+  { name: "Лазаревское", slug: "lazarevskoe", prep: "в Лазаревском", population: 67000 },
+  { name: "Шушары", slug: "shushary", prep: "в Шушарах", population: 40000 },
+  { name: "Малаховка", slug: "malahovka", prep: "в Малаховке", population: 24000 },
+  { name: "Селятино", slug: "selyatino", prep: "в Селятине", population: 14000 },
+  { name: "Немчиновка", slug: "nemchinovka", prep: "в Немчиновке", population: 9000 },
+  // Settlements with type prefix preserved (population ~0–5K). Prep-case
+  // declines the type word, not the proper name (which often stays in
+  // nominative for indeclinable settlements). Population set to nominal
+  // values; below the 5K threshold so they only appear in BK catalog.
+  { name: "посёлок Джубга", slug: "poselok-dzhubga", prep: "в посёлке Джубга", population: 5000 },
+  { name: "аул Новая Адыгея", slug: "aul-novaya-adygeya", prep: "в ауле Новая Адыгея", population: 4000 },
+  { name: "деревня Марфино", slug: "derevnya-marfino", prep: "в деревне Марфино", population: 4000 },
+  { name: "деревня Борисовичи", slug: "derevnya-borisovichi", prep: "в деревне Борисовичи", population: 3000 },
+  { name: "деревня Радумля", slug: "derevnya-radumlya", prep: "в деревне Радумля", population: 2500 },
+  { name: "деревня Островцы", slug: "derevnya-ostrovtsy", prep: "в деревне Островцы", population: 2000 },
+  { name: "рабочий посёлок Лопатино", slug: "rabochiy-poselok-lopatino", prep: "в рабочем посёлке Лопатино", population: 500 },
 ] as const;
 
 // Cities with population < 5000 or unknown population. Vacancies in these cities are excluded from generation.
 export const CITY_BLOCKLIST: readonly string[] = [
-  "Лопатино",
   "Луховка",
-  "Путилково",
-  "Немчиновка",
-  "Парголово",
   "Сходня",
   "Томилино",
-  "Адлер",
   "Андреевка",
   "Апаринки",
   "Боброво",
   "Верхнерусское",
-  "Внуковское",
   "д.Картмазово",
   "д.Ликино",
   "Дмитровское",
-  "Железнодорожный",
   "Климовск",
   "Коммунарка",
   "Красково",
   "Красная Поляна",
   "Красный Бор",
-  "Марфино",
   "Монино",
   "Нахабино",
-  "Новая Адыгея",
   "Новодрожжино",
   "Новые Псарьки",
   "Павлино",
@@ -968,7 +983,6 @@ export const CITY_BLOCKLIST: readonly string[] = [
   "Черная Грязь",
   "Шолохово",
   "Юдино",
-  "Селятино",
   "Абан",
   "Абатское",
   "Агаповка",
@@ -1037,7 +1051,6 @@ export const CITY_BLOCKLIST: readonly string[] = [
   "Кузьмоловский",
   "Куюки",
   "Лебяжье",
-  "Малаховка",
   "Марусино",
   "Матвеев Курган",
   "Навля",
@@ -1054,7 +1067,6 @@ export const CITY_BLOCKLIST: readonly string[] = [
   "Озинки",
   "Октябрьское",
   "Орловский",
-  "Островцы",
   "Первомайский",
   "Перелюб",
   "Пестравка",
@@ -1108,7 +1120,6 @@ export const CITY_BLOCKLIST: readonly string[] = [
   "Шелковская",
   "Шемурша",
   "Шиханы-2",
-  "Шушары",
   "Эстосадок",
   "Южный",
   "Юрино",
@@ -1146,7 +1157,6 @@ export const CITY_BLOCKLIST: readonly string[] = [
   "Горный",
   "Депутатский",
   "Джалиль",
-  "Джубга",
   "Дивное",
   "Добринка",
   "Донское",
@@ -1227,7 +1237,6 @@ export const CITY_BLOCKLIST: readonly string[] = [
   "Полтавская",
   "Поспелиха",
   "Приаргунск",
-  "Придорожный",
   "Раевская",
   "Раздольное",
   "Роза",

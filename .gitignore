@@ -1,2 +1,5 @@
 
 node-v22.14.0-darwin-arm64/
+
+# Per-worktree Claude Code config (launch.json for Preview MCP, etc.)
+.claude/

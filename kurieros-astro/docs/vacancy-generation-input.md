@@ -95,39 +95,67 @@ content:
 
 Важно:
 
-- `{city}` можно использовать в `title`, `description`, `requirements`, `benefits`, `requiredDocuments`. Генератор заменит его на город оффера.
+- Поддерживаются **два плейсхолдера** (резолвятся в `jobs.ts:interpolate()`):
+  - `{city}` — имя города как есть («Москва»).
+  - `{cityPrep}` — предложный падеж («в Москве», «в Санкт-Петербурге»).
+    Для городов вне `CITY_DATASET` — дефолт «в `<Город>`».
+- Оба работают в `title`, `shortDescription`, `description`, `requirements[]`,
+  `benefits[]`, `requiredDocuments[]`.
+- Для не-RU языков `createKuperLocalizedContent` заменяет `{cityPrep}` на
+  «— {city}» (потому что в большинстве языков сайта нет русского предложного
+  падежа). Если хочешь правильную локализованную форму — заполняй
+  `content.<lang>.title` руками, не через helper.
 - `requiredDocuments` — базовый список документов для вакансии.
-- Если для конкретного транспорта нужны дополнительные документы, они добавляются на уровне `offer.requiredDocumentsOverride`.
+- Если для конкретного транспорта нужны дополнительные документы, они
+  добавляются на уровне `offer.requiredDocumentsOverride`.
 
 ## 5. Транспорт
 
-Поддерживаемые значения:
+Поддерживаемые значения (`TransportMode` в `src/data/vacancyTypes.ts`):
 
 | Код | Значение |
 | --- | --- |
 | `foot` | Пеший курьер |
 | `bicycle` | Велокурьер, самокат |
 | `auto` | Автокурьер |
+| `remote` | Удалённая работа без выхода на маршрут (оператор поддержки, диспетчер) |
+
+Дополнительно — `transportProvision` (`'own' | 'company' | 'not_required'`),
+кто предоставляет транспорт. По умолчанию в `jobs.ts`:
+
+| Транспорт | Default `transportProvision` |
+| --- | --- |
+| `foot`, `remote` | `not_required` |
+| `bicycle`, `auto` | `own` |
+
+Указывай явно, только если логика отличается от дефолта (например, велосипед
+выдаёт компания → `company`).
 
 ## 6. Таблица зарплат по городам и транспорту
 
 Лучший формат для Google Sheets:
 
-| city | transport | monthlyMin | monthlyMax | monthlyText | rate | paymentFrequency | currency | salaryConfidence | isActive | updatedAt | sourceUrl | priority | cityDistricts |
-| --- | --- | ---: | ---: | --- | --- | --- | --- | --- | --- | --- | --- | ---: | --- |
-| Москва | foot | 80000 | 140000 | до 140 000 ₽/мес | Оплата за заказ + бонусы | Еженедельно | RUB | official | true | 2026-04-17 | https://example.com | 100 | ЦАО, ЮАО |
-| Москва | bicycle | 100000 | 180000 | до 180 000 ₽/мес | Оплата за заказ + бонусы | Еженедельно | RUB | official | true | 2026-04-17 | https://example.com | 110 | ЦАО, ЮАО |
-| Казань | auto | 90000 | 160000 | до 160 000 ₽/мес | Оплата за заказ + компенсации | Еженедельно | RUB | partner | false | 2026-04-17 | https://example.com | 80 | |
+| city | transport | transportProvision | monthlyMin | monthlyMax | monthlyText | hourlyMin | hourlyMax | hourlyText | guaranteedText | bonusText | rate | paymentFrequency | currency | salaryConfidence | isActive | updatedAt | sourceUrl | priority | cityDistricts |
+| --- | --- | --- | ---: | ---: | --- | ---: | ---: | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | ---: | --- |
+| Москва | foot |  | 80000 | 140000 | до 140 000 ₽/мес | 350 | 600 | 350–600 ₽/час | гарантируем 80 000 ₽/мес | +5 % за вечерние смены | Оплата за заказ + бонусы | Еженедельно | RUB | official | true | 2026-04-17 | https://example.com | 100 | ЦАО, ЮАО |
+| Москва | bicycle | own | 100000 | 180000 | до 180 000 ₽/мес | 450 | 700 | 450–700 ₽/час |  |  | Оплата за заказ + бонусы | Еженедельно | RUB | official | true | 2026-04-17 | https://example.com | 110 | ЦАО, ЮАО |
+| Москва | bicycle | company | 90000 | 150000 | до 150 000 ₽/мес |  |  |  | гарантируем 60 000 ₽/мес |  | Оплата за заказ + аренда велосипеда | Еженедельно | RUB | official | true | 2026-04-17 | https://example.com | 90 |  |
+| Казань | auto | own | 90000 | 160000 | до 160 000 ₽/мес |  |  |  |  |  | Оплата за заказ + компенсации | Еженедельно | RUB | partner | false | 2026-04-17 | https://example.com | 80 | |
+| Москва | remote | not_required | 60000 | 90000 | до 90 000 ₽/мес |  |  |  | гарантируем 50 000 ₽/мес |  | Оклад + KPI | 2 раза в месяц | RUB | official | true | 2026-04-17 | https://example.com | 70 |  |
 
 Поля:
 
 | Поле | Обязательное | Значение |
 | --- | --- | --- |
 | `city` | да | Город найма |
-| `transport` | да | `foot`, `bicycle`, `auto` |
+| `transport` | да | `foot`, `bicycle`, `auto`, `remote` |
+| `transportProvision` | нет | `own`, `company`, `not_required`. Если пусто — берётся дефолт по транспорту (см. §5). |
 | `monthlyMin` | желательно | Минимальная месячная оплата числом |
 | `monthlyMax` | желательно | Максимальная месячная оплата числом |
 | `monthlyText` | да | Красивый текст для карточки |
+| `hourlyMin` / `hourlyMax` / `hourlyText` | желательно | Часовая ставка — нужна калькулятору дохода. Без неё Ozon в этом городе получит fallback по соседним брендам. |
+| `guaranteedText` | нет | Гарантированный минимум одной строкой (например, «гарантируем 80 000 ₽/мес»). Маппится в `pay.guaranteed.text`. |
+| `bonusText` | нет | Бонус-структура одной строкой. Маппится в `pay.bonusText`. |
 | `rate` | желательно | Как считается ставка |
 | `paymentFrequency` | да | Например: `Еженедельно`, `Ежедневно`, `2 раза в месяц` |
 | `currency` | да | Сейчас `RUB` |
@@ -176,6 +204,41 @@ content:
 | Москва | bicycle | 16 | compensated | self_employed | Свой велосипед или самокат | Быстрое подключение | Документ на велосипед не нужен |
 
 Разделитель внутри ячеек: `;`.
+
+### Локализованные override
+
+`requirementsOverride`, `benefitsOverride` и `requiredDocumentsOverride`
+поддерживают **две формы**:
+
+1. **Плоский массив строк** — одинаково для всех 12 языков (то, что в таблице
+   выше).
+2. **Объект `Partial<Record<SupportedLanguage, string[]>>`** — отдельный
+   список на каждый язык. Используй, когда город требует юридически точной
+   формулировки на не-русских языках.
+
+```yaml
+# 1. Плоский массив — одинаково для всех языков
+requirementsOverride:
+  - "Права категории B"
+  - "Стаж вождения от 1 года"
+
+# 2. Локализованный объект — на каждый язык свой список
+requirementsOverride:
+  ru:
+    - "Права категории B"
+    - "Стаж вождения от 1 года"
+  uz:
+    - "B toifa haydovchilik guvohnomasi"
+    - "Kamida 1 yillik haydash tajribasi"
+  uk:
+    - "Права категорії B"
+    - "Стаж водіння від 1 року"
+```
+
+Логика резолва (`resolveList` в `src/data/jobs.ts`): если язык не указан в
+локализованном объекте — берётся `value.ru`. Если и `ru` нет — пустой
+список. То есть достаточно заполнить `ru`, а остальные языки можно
+добавлять точечно по мере необходимости.
 
 ## 9. Документы
 
@@ -255,6 +318,7 @@ defaults:
 offers:
   - city: "Москва"
     transport: "auto"
+    transportProvision: "own"      # явно: курьер на своём авто
     isActive: true
     updatedAt: "2026-04-17"
     sourceUrl: "https://example.com"
@@ -276,6 +340,13 @@ offers:
         min: 100000
         max: 180000
         text: "до 180 000 ₽/мес"
+      hourly:
+        min: 450
+        max: 700
+        text: "450–700 ₽/час"
+      guaranteed:
+        text: "гарантируем 80 000 ₽/мес"
+      bonusText: "+5 % к выплате за вечерние смены"
       rate: "Оплата за заказ + бонусы"
       paymentFrequency: "Еженедельно"
     requirementsOverride:
@@ -283,6 +354,38 @@ offers:
     requiredDocumentsOverride:
       - "Водительское удостоверение категории B"
       - "СТС автомобиля"
+
+  # Пример remote-офиса с локализованным override на 3 языка
+  - city: "Москва"
+    transport: "remote"
+    transportProvision: "not_required"
+    isActive: true
+    updatedAt: "2026-04-17"
+    salaryConfidence: "official"
+    applyLink: "https://example.com/apply-remote"
+    employmentFormats:
+      - "official"
+    schedule: "5/2, 09:00–18:00"
+    pay:
+      currency: "RUB"
+      monthly:
+        min: 60000
+        max: 90000
+        text: "до 90 000 ₽/мес"
+      guaranteed:
+        text: "гарантируем 50 000 ₽/мес"
+      rate: "Оклад + KPI"
+      paymentFrequency: "2 раза в месяц"
+    requirementsOverride:
+      ru:
+        - "Опыт работы в поддержке от 6 месяцев"
+        - "Стабильный интернет"
+      uz:
+        - "Qo'llab-quvvatlash bo'limida kamida 6 oylik ish tajribasi"
+        - "Barqaror internet"
+      uk:
+        - "Досвід роботи в підтримці від 6 місяців"
+        - "Стабільний інтернет"
 ```
 
 ## 11. Как лучше присылать данные
@@ -307,4 +410,38 @@ offers:
 | Ссылка отклика | `#` |
 | Точность зарплаты | `partner` |
 | Активность offer | `true`, если явно не указано обратное |
+| `transportProvision` | по транспорту: `foot`/`remote` → `not_required`, `bicycle`/`auto` → `own` |
+
+## 12. Партнёрские ссылки и логотипы
+
+Все `*_APPLY` URL и `*_LOGO` пути живут в **`src/data/partnerLinks.ts`** —
+там же агрегатор `PARTNER_LINKS`. Для новой компании:
+
+1. Добавь константы `<COMPANY>_APPLY` и `<COMPANY>_LOGO` в `partnerLinks.ts`.
+2. Добавь запись в `PARTNER_LINKS` (для аудита через grep).
+3. В `vacancies.ts` импортируй константы и используй их — НЕ вставляй URL
+   литералом.
+
+Зачем: один источник правды для ротации реферальных ссылок (`erid`,
+`utm_*`) без поиска по всему репо.
+
+## 13. Ozon — закрытая подсистема, не входит в этот формат
+
+Этот документ описывает **только** добавление CPA-вакансий с реф-ссылкой
+(стандартный флоу: клик → внешний редирект на лендинг партнёра). Ozon
+сюда не относится — он уже добавлен и работает на отдельном механизме:
+
+- 9 готовых ролей (5 sklad + 4 fresh) в `src/data/ozonOffers.ts`,
+  генерируются из `src/data/ozon-vacancies.json` и
+  `src/data/ozon-fresh-vacancies.json`.
+- Магический префикс `applyLink: 'lead-form:ozon'` открывает встроенную
+  `OzonLeadModal.astro` вместо редиректа.
+- Модалка POST'ит лид в Cloudflare Worker `workers/ozon-lead/`, который
+  валидирует тройку `(vacancy, cityID, hireObjectUUID)` и проксирует в
+  `recruitment.ozon.ru`.
+
+**Эту подсистему не расширяют в рамках «добавить новую вакансию».** Если
+поступает CPA-партнёр с обычной реф-ссылкой — иди по основному флоу
+(§§1–11). Если кто-то просит «как Ozon» (модалка, лид-форма) — это
+отдельный, не-CPA сценарий, переспроси.
 
