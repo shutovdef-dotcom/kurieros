@@ -24,6 +24,7 @@ import {
 	buildVacancyCountText,
 	cleanCategoryName,
 } from '../utils/cityListingPage';
+import { filterJobsByCriteria } from '../utils/jobFilters';
 
 // `articles.json` ships empty (`[]`); TS narrows the default JSON
 // import to `never[]`, which fouls every `article.title`/`.description`
@@ -107,24 +108,15 @@ const isEzhednevLanding = type === 'category' && data.slug === 'ezhednevnaya-opl
 const searchTerm = type === 'category' ? (data.query || '').toLowerCase() : '';
 const tagFilter = type === 'category' ? data.tag || 'all' : 'all';
 
-const filteredJobs = jobsData.filter((job) => {
-	const matchesCity =
-		type !== 'city' ||
-		job.location.toLowerCase().includes(data.name.toLowerCase()) ||
-		job.location === 'Вся Россия';
-	const matchesTag = tagFilter === 'all' || job.tags.includes(tagFilter);
-	const matchesSearch =
-		!searchTerm ||
-		job.title.toLowerCase().includes(searchTerm) ||
-		job.company.toLowerCase().includes(searchTerm) ||
-		job.location.toLowerCase().includes(searchTerm) ||
-		job.salary.toLowerCase().includes(searchTerm) ||
-		// Match payment_freq so a category page with `query: 'Еженед'`
-		// или `query: 'Ежеднев'` populates from `details.payment_freq` —
-		// слова «Еженедельно» / «Ежедневно» живут только там.
-		job.details.payment_freq.toLowerCase().includes(searchTerm);
-
-	return matchesCity && matchesTag && matchesSearch;
+// Single source of truth for the city/tag/search predicate lives in
+// `src/utils/jobFilters.ts` — sitemap emitter + JobGrid + this page
+// MUST agree on which jobs land where, so any drift would noindex
+// listings while still emitting them in the sitemap (or vice versa).
+// On non-city pages, the city criterion stays absent (matches all).
+const filteredJobs = filterJobsByCriteria(jobsData, {
+	city: type === 'city' ? data.name : null,
+	tag: tagFilter,
+	search: searchTerm,
 });
 
 const companyNames = Array.from(new Set(filteredJobs.map((job) => job.company)));

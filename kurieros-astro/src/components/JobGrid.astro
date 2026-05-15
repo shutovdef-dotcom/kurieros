@@ -2,6 +2,7 @@
 /* eslint-disable max-lines -- TODO(H14): decompose JobGrid.astro (~996 LOC after skip-blank/comments) into focused per-concern components, then remove this disable. */
 import JobCard from './JobCard.astro';
 import jobsData from '../data/jobs';
+import { filterJobsByCriteria } from '../utils/jobFilters';
 
 interface Props {
 	initialCity?: string;
@@ -34,24 +35,15 @@ const {
 } = Astro.props;
 const availableJobIds = jobsData.map((job) => job.id);
 
-const matchedJobs = jobsData.filter((job) => {
-	const searchTerm = initialSearch.toLowerCase();
-	const cityTerm = initialCity.toLowerCase();
-	const matchesCity = !initialCity || job.location.toLowerCase().includes(cityTerm) || job.location === 'Вся Россия';
-	const matchesTag = initialTag === 'all' || job.tags.includes(initialTag);
-	const matchesSearch =
-		!searchTerm ||
-		job.title.toLowerCase().includes(searchTerm) ||
-		job.company.toLowerCase().includes(searchTerm) ||
-		job.location.toLowerCase().includes(searchTerm) ||
-		job.salary.toLowerCase().includes(searchTerm) ||
-		// Match payment_freq so a category page with `query: 'Ежеднев'`
-		// (or 'Еженед') populates from `job.details.payment_freq` —
-		// otherwise those listings stay empty because none of title /
-		// company / location / salary carry the «Еженедельно» word.
-		job.details.payment_freq.toLowerCase().includes(searchTerm);
-
-	return matchesCity && matchesTag && matchesSearch;
+// Server-side frontmatter filter — single source of truth lives in
+// `src/utils/jobFilters.ts` (shared with [slug].astro and the sitemap
+// emitter so SSR + sitemap inclusion can't drift). The client-side
+// DOM filter lower in this same file (search for `function filterJobs`)
+// is a separate DOM-dataset adapter; semantics are kept in sync by hand.
+const matchedJobs = filterJobsByCriteria(jobsData, {
+	city: initialCity,
+	tag: initialTag,
+	search: initialSearch,
 });
 
 // When `limit` is used (home page), distribute selection across companies
@@ -819,6 +811,10 @@ const hasVacancies = jobsData.length > 0;
 			filterJobs();
 		});
 
+		// see src/utils/jobFilters.ts for the source-of-truth predicate;
+		// this is the DOM-side adapter (reads card.dataset.*, layers
+		// in age/transport/employment/citizenship dropdown filters on
+		// top). Keep the city/search semantics in sync with jobFilters.
 		function filterJobs() {
 			const term = normalizedInitialSearch;
 			const selectedAgeTag = mapAgeFilterToTag(ageFilterSelect?.value || 'all');
