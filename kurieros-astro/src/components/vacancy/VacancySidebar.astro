@@ -1,0 +1,380 @@
+---
+import VacancyTKey from '../VacancyTKey.astro';
+import { ozonDataAttrs } from '../../utils/ozonAttrs';
+import type { GeneratedJob } from '../../data/vacancyTypes';
+
+interface Props {
+	job: GeneratedJob;
+	isLeadFormApply: boolean;
+	leadFormType: string | null;
+	salaryMaxNumeric: number;
+	applyLabel: string;
+	employmentTypeText: string;
+	hourlyRate: number | null;
+	formattedHourlyRate: string | null;
+	isEstimatedHourlyRate: boolean;
+}
+
+const {
+	job,
+	isLeadFormApply,
+	leadFormType,
+	salaryMaxNumeric,
+	applyLabel,
+	employmentTypeText,
+	hourlyRate,
+	formattedHourlyRate,
+	isEstimatedHourlyRate,
+} = Astro.props;
+---
+
+<aside class="vacancy-sidebar">
+	<div class="vacancy-card-sidebar">
+		<h3 data-t="vacancy.details_title">Детали</h3>
+		<div class="detail-item">
+			<strong data-t="vacancy.location">Локация:</strong> <VacancyTKey jobId={job.id} field="location" fallback={job.location} />
+		</div>
+		<div class="detail-item">
+			<strong data-t="job.schedule">График:</strong> <VacancyTKey jobId={job.id} field="details_schedule" fallback={job.details.schedule} />
+		</div>
+		<div class="detail-item">
+			<strong data-t="vacancy.payment">Оплата:</strong> <VacancyTKey jobId={job.id} field="details_payment_freq" fallback={job.details.payment_freq} />
+		</div>
+		<div class="detail-item">
+			<strong data-t="vacancy.age">Возраст:</strong> <VacancyTKey jobId={job.id} field="details_age" fallback={job.details.age} />
+		</div>
+		<div class="detail-item">
+			<strong data-t="vacancy.employment">Оформление:</strong> <VacancyTKey jobId={job.id} field="details_employment_type" fallback={job.details.employment_type} />
+		</div>
+
+		{isLeadFormApply ? (
+			<>
+				<button
+					type="button"
+					class="apply-btn-large"
+					data-apply-cta
+					data-apply-position="vacancy_sidebar"
+					data-apply-company={job.company}
+					data-apply-city={job.location}
+					data-apply-transport={job.transport}
+					data-apply-employment={employmentTypeText}
+					data-apply-salary-max={salaryMaxNumeric || ''}
+					data-lead-form-type={leadFormType}
+					{...ozonDataAttrs(job.ozonLeadForm)}
+				>
+					{applyLabel}
+				</button>
+				<p class="apply-note">Заполните форму — мы&nbsp;перезвоним и&nbsp;поможем зарегистрироваться с&nbsp;нашим реферальным кодом</p>
+			</>
+		) : (
+			<>
+				<a
+					href={job.applyLink}
+					target="_blank"
+					rel="noopener noreferrer nofollow sponsored"
+					class="apply-btn-large"
+					data-apply-cta
+					data-apply-position="vacancy_sidebar"
+					data-apply-company={job.company}
+					data-apply-city={job.location}
+					data-apply-transport={job.transport}
+					data-apply-employment={employmentTypeText}
+					data-apply-salary-max={salaryMaxNumeric || ''}
+				>
+					{applyLabel}
+				</a>
+				<p class="apply-note" data-t="vacancy.apply_note">Вы перейдете на сайт прямого работодателя</p>
+			</>
+		)}
+		{/* Disabled-fallback sidebar CTA removed per C3. */}
+		<div class="vacancy-income-calculator" id="vacancy-income-calculator" data-hourly-rate={hourlyRate ?? ''} data-city={job.location} data-transport={job.transport}>
+			<p class="vacancy-income-eyebrow">Калькулятор дохода</p>
+			{hourlyRate ? (
+				isEstimatedHourlyRate ? (
+					<p class="vacancy-income-rate">
+						Средняя ставка курьеров в&nbsp;этом городе: <strong>{formattedHourlyRate}</strong>
+						<small> · у&nbsp;этой вакансии посменная оплата, итог зависит от&nbsp;количества смен и&nbsp;надбавок.</small>
+					</p>
+				) : (
+					<p class="vacancy-income-rate">Ставка в этой вакансии: <strong>{formattedHourlyRate}</strong></p>
+				)
+			) : (
+				<p class="vacancy-income-rate vacancy-income-rate-muted">Почасовая ставка в источнике не указана. Расчет станет доступен после обновления данных.</p>
+			)}
+			<div class="vacancy-income-controls">
+				<label class="vacancy-income-label" for="vacancy-days-range">
+					<span>Дней в месяц</span>
+					<strong id="vacancy-days-value">22</strong>
+				</label>
+				<input
+					class="vacancy-income-range"
+					type="range"
+					id="vacancy-days-range"
+					min="1"
+					max="31"
+					step="1"
+					value="22"
+					disabled={hourlyRate === null}
+				/>
+				<label class="vacancy-income-label" for="vacancy-hours-range">
+					<span>Часов в день</span>
+					<strong id="vacancy-hours-value">8</strong>
+				</label>
+				<input
+					class="vacancy-income-range"
+					type="range"
+					id="vacancy-hours-range"
+					min="1"
+					max="16"
+					step="1"
+					value="8"
+					disabled={hourlyRate === null}
+				/>
+			</div>
+			<div class="vacancy-income-output" aria-live="polite">
+				<span data-t="calculator.result">Примерный доход</span>
+				<strong id="vacancy-income-total">{hourlyRate ? `${new Intl.NumberFormat('ru-RU').format(hourlyRate * 22 * 8)} ₽` : 'Нет данных по ставке'}</strong>
+				<small id="vacancy-income-formula">{hourlyRate ? `22 дн × 8 ч × ${formattedHourlyRate}` : 'Калькулятор ожидает почасовую ставку этой вакансии.'}</small>
+			</div>
+		</div>
+	</div>
+</aside>
+
+<style>
+	.vacancy-card-sidebar {
+		background: var(--vacancy-card);
+		padding: 2rem;
+		border-radius: 8px;
+		border: 1px solid var(--vacancy-border);
+		box-shadow: var(--vacancy-shadow);
+		position: sticky;
+		top: 2rem;
+	}
+	.detail-item {
+		display: flex;
+		justify-content: space-between;
+		padding: 0.75rem 0;
+		border-bottom: 1px solid var(--vacancy-border);
+		color: var(--vacancy-muted);
+		gap: 1rem;
+	}
+	.detail-item strong,
+	.detail-item span {
+		color: var(--vacancy-ink);
+	}
+
+	/* === Apply CTA (sidebar) === */
+	.apply-btn-large {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--accent-500);
+		color: var(--ink-0);
+		border: none;
+		border-radius: var(--radius-md);
+		padding: 14px 28px;
+		font-family: var(--font-main);
+		font-weight: 700;
+		font-size: var(--fs-16);
+		text-decoration: none;
+		transition: background var(--transition);
+	}
+	.apply-btn-large:hover {
+		background: var(--accent-400);
+	}
+	.apply-btn-large:focus-visible {
+		outline: none;
+		box-shadow: var(--shadow-focus);
+	}
+	.apply-note {
+		text-align: center;
+		font-size: 0.75rem;
+		color: var(--vacancy-muted);
+		margin-top: 0.5rem;
+	}
+
+	/* === Income calculator (sidebar) === */
+	.vacancy-income-calculator {
+		display: grid;
+		gap: 0.8rem;
+		margin-top: 1rem;
+		padding: 0.95rem;
+		border-radius: 8px;
+		border: 1px solid var(--vacancy-border-strong);
+		background: var(--vacancy-soft);
+	}
+	.vacancy-income-eyebrow {
+		margin: 0;
+		font-size: 0.72rem;
+		font-weight: 900;
+		text-transform: uppercase;
+		letter-spacing: 0;
+		color: var(--vacancy-eyebrow);
+	}
+	.vacancy-income-rate {
+		margin: 0;
+		font-size: 0.82rem;
+		line-height: 1.45;
+		color: var(--vacancy-ink);
+	}
+	.vacancy-income-rate strong {
+		font-size: 0.94rem;
+	}
+	.vacancy-income-rate-muted {
+		color: var(--vacancy-muted);
+	}
+	.vacancy-income-controls {
+		display: grid;
+		gap: 0.45rem;
+	}
+	.vacancy-income-label {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.6rem;
+		font-size: 0.79rem;
+		color: var(--vacancy-muted);
+	}
+	.vacancy-income-label strong {
+		min-width: 2.4rem;
+		text-align: center;
+		padding: 0.2rem 0.45rem;
+		border-radius: 999px;
+		background: var(--vacancy-soft-strong);
+		color: var(--vacancy-ink);
+		font-size: 0.78rem;
+	}
+	.vacancy-income-range {
+		-webkit-appearance: none;
+		appearance: none;
+		width: 100%;
+		height: 0.42rem;
+		border-radius: 999px;
+		background: #d7e4dc;
+		outline: none;
+	}
+	.vacancy-income-range::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		appearance: none;
+		width: 0.95rem;
+		height: 0.95rem;
+		border-radius: 50%;
+		background: var(--vacancy-action);
+		border: 2px solid #ffffff;
+		box-shadow: 0 3px 10px rgba(22, 61, 43, 0.24);
+		cursor: pointer;
+	}
+	.vacancy-income-range::-moz-range-thumb {
+		width: 0.95rem;
+		height: 0.95rem;
+		border-radius: 50%;
+		background: var(--vacancy-action);
+		border: 2px solid #ffffff;
+		box-shadow: 0 3px 10px rgba(22, 61, 43, 0.24);
+		cursor: pointer;
+	}
+	.vacancy-income-range:disabled {
+		opacity: 0.55;
+		cursor: not-allowed;
+	}
+	.vacancy-income-output {
+		display: grid;
+		gap: 0.18rem;
+		padding: 0.68rem;
+		border-radius: 8px;
+		background: var(--vacancy-card);
+		border: 1px solid var(--vacancy-border);
+	}
+	.vacancy-income-output span {
+		font-size: 0.72rem;
+		text-transform: uppercase;
+		font-weight: 800;
+		color: var(--vacancy-muted);
+	}
+	.vacancy-income-output strong {
+		font-size: 1.2rem;
+		line-height: 1.2;
+		color: var(--vacancy-ink);
+	}
+	.vacancy-income-output small {
+		font-size: 0.72rem;
+		line-height: 1.35;
+		color: var(--vacancy-muted);
+	}
+
+	/* === Layout (sidebar wrapper) === */
+	.vacancy-sidebar {
+		align-self: start;
+	}
+	@media (min-width: 1024px) {
+		.vacancy-sidebar {
+			position: sticky;
+			top: 80px;
+		}
+	}
+	.vacancy-sidebar > * {
+		background: var(--ink-0);
+		border: 1px solid var(--ink-200);
+		border-radius: var(--radius-lg);
+		box-shadow: var(--shadow-xs);
+	}
+
+	:global(body.dark-mode) .vacancy-income-output {
+		background: rgba(67, 77, 90, 0.86);
+	}
+	:global(body.dark-mode) .vacancy-income-range {
+		background: rgba(148, 163, 184, 0.34);
+	}
+</style>
+
+<script is:inline>
+	const vacancyIncomeCalculator = document.getElementById('vacancy-income-calculator');
+
+	if (vacancyIncomeCalculator) {
+		const hourlyRate = Number.parseInt(vacancyIncomeCalculator.dataset.hourlyRate ?? '', 10);
+		if (Number.isFinite(hourlyRate) && hourlyRate > 0) {
+			const daysRange = vacancyIncomeCalculator.querySelector('#vacancy-days-range');
+			const hoursRange = vacancyIncomeCalculator.querySelector('#vacancy-hours-range');
+			const daysValue = vacancyIncomeCalculator.querySelector('#vacancy-days-value');
+			const hoursValue = vacancyIncomeCalculator.querySelector('#vacancy-hours-value');
+			const totalValue = vacancyIncomeCalculator.querySelector('#vacancy-income-total');
+			const formulaValue = vacancyIncomeCalculator.querySelector('#vacancy-income-formula');
+
+			let lastTotal = 0;
+
+			const updateIncome = () => {
+				const days = Number.parseInt(daysRange?.value ?? '22', 10);
+				const hours = Number.parseInt(hoursRange?.value ?? '8', 10);
+				const total = Math.round(days * hours * hourlyRate);
+				const formattedRate = `${hourlyRate.toLocaleString('ru-RU')} ₽/час`;
+
+				if (daysValue) daysValue.textContent = String(days);
+				if (hoursValue) hoursValue.textContent = String(hours);
+				if (totalValue) totalValue.textContent = `${total.toLocaleString('ru-RU')} ₽`;
+				if (formulaValue) formulaValue.textContent = `${days} дн × ${hours} ч × ${formattedRate}`;
+				lastTotal = total;
+			};
+
+			const dispatchVacancyCalcSubmit = () => {
+				const days = Number.parseInt(daysRange?.value ?? '22', 10);
+				const hours = Number.parseInt(hoursRange?.value ?? '8', 10);
+				window.dispatchEvent(new CustomEvent('kurieros:calculator-submit', {
+					detail: {
+						source: 'vacancy_income_calculator',
+						city: vacancyIncomeCalculator.dataset.city || '',
+						transport: vacancyIncomeCalculator.dataset.transport || '',
+						hours_per_day: hours,
+						days_per_month: days,
+						result_monthly: lastTotal
+					}
+				}));
+			};
+
+			daysRange?.addEventListener('input', updateIncome);
+			hoursRange?.addEventListener('input', updateIncome);
+			daysRange?.addEventListener('change', dispatchVacancyCalcSubmit);
+			hoursRange?.addEventListener('change', dispatchVacancyCalcSubmit);
+			updateIncome();
+		}
+	}
+</script>

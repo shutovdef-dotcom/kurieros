@@ -1,0 +1,42 @@
+---
+import VacancyTKey from '../VacancyTKey.astro';
+import type { GeneratedJob } from '../../data/vacancyTypes';
+
+interface Props {
+	job: GeneratedJob;
+	companyUrl: string;
+}
+
+const { job, companyUrl } = Astro.props;
+---
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+	<a href="/" data-t="nav.main">Главная</a> &gt; <a href="/companies/" data-t="nav.companies">Компании</a> &gt; <VacancyTKey jobId={job.id} field="company" fallback={job.company} as="a" href={companyUrl} /> &gt; <VacancyTKey jobId={job.id} field="title" fallback={job.title} />
+</nav>
+
+<style>
+	.breadcrumb {
+		margin-bottom: 2rem;
+		font-size: 0.875rem;
+		color: var(--vacancy-muted);
+	}
+	.breadcrumb a {
+		color: var(--vacancy-action);
+		text-decoration: none;
+		font-weight: 700;
+	}
+	/* Dark-mode override: `--vacancy-action` resolves to `--dm-green-surface`
+	   (~#1d3a26) which is almost identical to the body background
+	   (~#1a1714), making breadcrumb links invisible. Use a brighter green
+	   that holds contrast against the dark warm-coal background. */
+	:global(body.dark-mode) .breadcrumb {
+		color: rgba(231, 234, 240, 0.72);
+	}
+	:global(body.dark-mode) .breadcrumb a {
+		color: var(--brand-500, #6fd093);
+	}
+	:global(body.dark-mode) .breadcrumb a:hover,
+	:global(body.dark-mode) .breadcrumb a:focus-visible {
+		color: var(--brand-600, #8adfa9);
+	}
+</style>

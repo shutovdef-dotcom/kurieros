@@ -1,0 +1,74 @@
+---
+interface Props {
+	summary: string;
+}
+
+const { summary } = Astro.props;
+---
+
+<section class="vacancy-section vacancy-quick-summary" id="vacancy-quick-summary" aria-labelledby="vacancy-quick-summary-title">
+	<p class="section-eyebrow">Кратко о вакансии</p>
+	<h2 id="vacancy-quick-summary-title">Главное о вакансии в одном абзаце</h2>
+	<p id="vacancy-quick-summary-text" class="vacancy-quick-summary-text">{summary}</p>
+</section>
+
+<style>
+	.vacancy-section {
+		/* Margin-bottom inherited from the parent's `.vacancy-section`
+		   rule — replicated here because Astro CSS scoping ties the
+		   parent rule to the parent's cid hash. */
+		margin-bottom: 1.5rem;
+	}
+
+	/* Block A: Quick fact summary (Speakable) */
+	.vacancy-quick-summary {
+		padding: 1.6rem 1.85rem;
+		background: var(--vacancy-soft-strong);
+		border: 1px solid var(--vacancy-chip-border);
+		border-radius: 16px;
+		box-shadow: var(--vacancy-shadow);
+		display: grid;
+		gap: 0.55rem;
+	}
+	.vacancy-quick-summary .section-eyebrow {
+		margin: 0;
+		font-size: 0.78rem;
+		font-weight: 800;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--vacancy-eyebrow);
+	}
+	.vacancy-quick-summary h2 {
+		margin: 0;
+		font-family: var(--font-heading, 'Manrope', sans-serif);
+		font-size: clamp(1.25rem, 2vw, 1.55rem);
+		line-height: 1.18;
+		color: var(--vacancy-ink);
+		letter-spacing: -0.01em;
+	}
+	.vacancy-quick-summary-text {
+		margin: 0;
+		font-size: 1.02rem;
+		line-height: 1.6;
+		color: var(--vacancy-ink);
+		max-width: 78ch;
+	}
+
+	:global(:where(html, body).dark-mode) .vacancy-quick-summary {
+		background: rgba(22, 30, 44, 0.78);
+		border-color: rgba(195, 204, 216, 0.2);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-quick-summary h2,
+	:global(:where(html, body).dark-mode) .vacancy-quick-summary-text {
+		color: var(--ink-800);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-quick-summary .section-eyebrow {
+		color: rgba(231, 234, 240, 0.55);
+	}
+
+	@media (max-width: 600px) {
+		.vacancy-quick-summary {
+			padding: 1.2rem 1rem;
+		}
+	}
+</style>

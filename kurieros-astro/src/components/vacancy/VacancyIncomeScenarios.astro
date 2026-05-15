@@ -1,0 +1,196 @@
+---
+interface IncomeScenario {
+	key: string;
+	label: string;
+	hours: number;
+	shifts: number;
+	income: string;
+}
+
+interface Props {
+	formattedHourlyRate: string;
+	scenarios: IncomeScenario[];
+	requiresSelfEmployedRegistration: boolean;
+}
+
+const { formattedHourlyRate, scenarios, requiresSelfEmployedRegistration } = Astro.props;
+---
+
+<section class="vacancy-section vacancy-income-scenarios" id="vacancy-income-scenarios" aria-labelledby="vacancy-income-scenarios-title">
+	<p class="section-eyebrow">Расчёт дохода</p>
+	<h2 id="vacancy-income-scenarios-title">Сколько можно заработать на этой вакансии</h2>
+	<p class="vacancy-income-scenarios-lead">
+		Базовая ставка — <strong>{formattedHourlyRate}</strong>. Цифры ниже — оценка дохода до&nbsp;налогов
+		при разных режимах смен. Реальная сумма зависит от спроса, бонусов и&nbsp;района.
+	</p>
+	<div class="vacancy-income-table-wrap">
+		<table class="vacancy-income-table">
+			<thead>
+				<tr>
+					<th scope="col">Режим</th>
+					<th scope="col">Часы за смену</th>
+					<th scope="col">Смен в&nbsp;месяц</th>
+					<th scope="col">Месячный доход</th>
+				</tr>
+			</thead>
+			<tbody>
+				{scenarios.map((scenario) => (
+					<tr class={`vacancy-income-row vacancy-income-row-${scenario.key}`}>
+						<th scope="row">{scenario.label}</th>
+						<td>{scenario.hours} ч</td>
+						<td>{scenario.shifts}</td>
+						<td><strong>{scenario.income}</strong></td>
+					</tr>
+				))}
+			</tbody>
+		</table>
+	</div>
+	<p class="vacancy-income-scenarios-note">
+		{requiresSelfEmployedRegistration
+			? 'Налог самозанятого: 4% с дохода от физлиц, 6% — с юрлиц. Чистый доход = сумма выше минус налог.'
+			: 'Указанные суммы — до удержания налогов; их размер зависит от формата оформления.'}
+	</p>
+</section>
+
+<style>
+	.vacancy-section {
+		margin-bottom: 1.5rem;
+	}
+
+	.section-eyebrow {
+		margin-bottom: 0.55rem;
+		font-size: 0.74rem;
+		font-weight: 900;
+		letter-spacing: 0;
+		text-transform: uppercase;
+		color: var(--vacancy-eyebrow);
+	}
+
+	/* Block C: Income scenarios table */
+	.vacancy-income-scenarios {
+		padding: 1.75rem 1.85rem;
+		background: var(--vacancy-card);
+		border: 1px solid var(--vacancy-border);
+		border-radius: 16px;
+		box-shadow: var(--vacancy-shadow);
+		display: grid;
+		gap: 0.85rem;
+	}
+	.vacancy-income-scenarios h2 {
+		margin: 0;
+		font-family: var(--font-heading, 'Manrope', sans-serif);
+		font-size: clamp(1.4rem, 2.2vw, 1.75rem);
+		line-height: 1.18;
+		letter-spacing: -0.01em;
+		color: var(--vacancy-ink);
+	}
+	.vacancy-income-scenarios-lead {
+		margin: 0;
+		max-width: 70ch;
+		color: var(--vacancy-muted);
+		font-size: 0.95rem;
+		line-height: 1.55;
+	}
+	.vacancy-income-scenarios-lead strong {
+		color: var(--vacancy-ink);
+		font-weight: 800;
+	}
+	.vacancy-income-table-wrap {
+		overflow-x: auto;
+	}
+	.vacancy-income-table {
+		width: 100%;
+		border-collapse: separate;
+		border-spacing: 0;
+		font-size: 0.95rem;
+		min-width: 360px;
+	}
+	.vacancy-income-table thead th {
+		text-align: left;
+		padding: 0.7rem 0.9rem;
+		font-size: 0.78rem;
+		font-weight: 800;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: var(--vacancy-eyebrow);
+		border-bottom: 1px solid var(--vacancy-border);
+		background: var(--vacancy-soft);
+	}
+	.vacancy-income-table thead th:first-child {
+		border-top-left-radius: 12px;
+	}
+	.vacancy-income-table thead th:last-child {
+		border-top-right-radius: 12px;
+		text-align: right;
+	}
+	.vacancy-income-table tbody th {
+		text-align: left;
+		font-weight: 700;
+		color: var(--vacancy-ink);
+	}
+	.vacancy-income-table tbody td,
+	.vacancy-income-table tbody th {
+		padding: 0.85rem 0.9rem;
+		border-bottom: 1px solid var(--vacancy-border);
+		color: var(--vacancy-ink);
+	}
+	.vacancy-income-table tbody tr:last-child td,
+	.vacancy-income-table tbody tr:last-child th {
+		border-bottom: none;
+	}
+	.vacancy-income-table tbody td:last-child {
+		text-align: right;
+	}
+	.vacancy-income-row-std {
+		background: var(--vacancy-soft-strong);
+	}
+	.vacancy-income-row-std th,
+	.vacancy-income-row-std td strong {
+		color: var(--vacancy-action);
+	}
+	.vacancy-income-scenarios-note {
+		margin: 0;
+		font-size: 0.85rem;
+		color: var(--vacancy-eyebrow);
+		line-height: 1.5;
+	}
+
+	:global(:where(html, body).dark-mode) .vacancy-income-scenarios {
+		background: rgba(20, 32, 48, 0.7);
+		border-color: rgba(195, 204, 216, 0.18);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-income-scenarios h2,
+	:global(:where(html, body).dark-mode) .vacancy-income-table tbody td,
+	:global(:where(html, body).dark-mode) .vacancy-income-table tbody th {
+		color: var(--ink-800);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-income-scenarios-lead {
+		color: rgba(231, 234, 240, 0.7);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-income-scenarios .section-eyebrow,
+	:global(:where(html, body).dark-mode) .vacancy-income-table thead th,
+	:global(:where(html, body).dark-mode) .vacancy-income-scenarios-note {
+		color: rgba(231, 234, 240, 0.55);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-income-table thead th {
+		background: rgba(15, 23, 36, 0.65);
+		border-color: rgba(195, 204, 216, 0.16);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-income-table tbody td,
+	:global(:where(html, body).dark-mode) .vacancy-income-table tbody th {
+		border-bottom-color: rgba(195, 204, 216, 0.14);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-income-row-std {
+		background: rgba(76, 175, 128, 0.12);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-income-row-std th,
+	:global(:where(html, body).dark-mode) .vacancy-income-row-std td strong {
+		color: var(--brand-500);
+	}
+
+	@media (max-width: 600px) {
+		.vacancy-income-scenarios {
+			padding: 1.2rem 1rem;
+		}
+	}
+</style>

@@ -1,0 +1,86 @@
+---
+import VacancyTKey from '../VacancyTKey.astro';
+import type { GeneratedJob } from '../../data/vacancyTypes';
+
+interface Props {
+	job: GeneratedJob;
+}
+
+const { job } = Astro.props;
+---
+
+<section class="vacancy-section vacancy-description-section">
+	<h2 data-t="vacancy.desc_title">Описание вакансии</h2>
+	<VacancyTKey jobId={job.id} field="description" fallback={job.description} as="p" class="vacancy-description" />
+
+	<div class="vacancy-subsection">
+		<h3 data-t="vacancy.req_title">Требования</h3>
+		<ul class="vacancy-list">
+			{job.requirements.map((req: string, idx: number) => (
+				<VacancyTKey jobId={job.id} field={`req_${idx}` as const} fallback={req} as="li" />
+			))}
+		</ul>
+	</div>
+
+	{job.requiredDocuments.length > 0 && (
+		<div class="vacancy-subsection">
+			<h3 data-t="vacancy.docs_title">Документы для оформления</h3>
+			<ul class="vacancy-list">
+				{job.requiredDocuments.map((document: string, idx: number) => (
+					<VacancyTKey jobId={job.id} field={`doc_${idx}` as const} fallback={document} as="li" />
+				))}
+			</ul>
+		</div>
+	)}
+
+	<div class="vacancy-subsection">
+		<h3 data-t="vacancy.ben_title">Преимущества</h3>
+		<ul class="vacancy-list">
+			{job.benefits.map((benefit: string, idx: number) => (
+				<VacancyTKey jobId={job.id} field={`ben_${idx}` as const} fallback={benefit} as="li" />
+			))}
+		</ul>
+	</div>
+</section>
+
+<style>
+	.vacancy-section {
+		background: var(--vacancy-card);
+		padding: 2rem;
+		border-radius: 8px;
+		border: 1px solid var(--vacancy-border);
+		margin-bottom: 1.5rem;
+		box-shadow: var(--vacancy-shadow);
+	}
+	.vacancy-section h2 {
+		margin-top: 0;
+		margin-bottom: 1rem;
+		font-size: 1.5rem;
+	}
+	.vacancy-list {
+		padding-left: 1.5rem;
+	}
+	.vacancy-list li {
+		margin-bottom: 0.5rem;
+	}
+	.vacancy-description {
+		white-space: pre-wrap;
+	}
+	.vacancy-description-section {
+		display: grid;
+		gap: 1.5rem;
+	}
+	.vacancy-description-section h2 {
+		margin-bottom: 0;
+	}
+	.vacancy-subsection {
+		padding-top: 1.35rem;
+		border-top: 1px solid var(--vacancy-border);
+	}
+	.vacancy-subsection h3 {
+		margin: 0 0 0.9rem;
+		font-size: 1.08rem;
+		line-height: 1.3;
+		color: var(--vacancy-ink);
+	}
+</style>
