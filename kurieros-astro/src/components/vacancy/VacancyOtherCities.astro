@@ -1,0 +1,114 @@
+---
+import VacancyTKey from '../VacancyTKey.astro';
+import type { GeneratedJob } from '../../data/vacancyTypes';
+
+interface Props {
+	jobs: GeneratedJob[];
+	currentCity: string;
+}
+
+const { jobs, currentCity } = Astro.props;
+---
+
+{jobs.length > 0 && (
+	<section class="vacancy-section vacancy-other-cities" aria-labelledby="vacancy-other-cities-title">
+		<p class="section-eyebrow">Та же вакансия, другие города</p>
+		<h2 id="vacancy-other-cities-title">Эта вакансия в&nbsp;других городах</h2>
+		<p class="vacancy-other-cities-lead">
+			Если можно работать не&nbsp;только {currentCity} — посмотрите ту&nbsp;же вакансию в&nbsp;соседних городах. Сортировка по&nbsp;доходу, чтобы&nbsp;было с&nbsp;чем сравнить.
+		</p>
+		<ul class="vacancy-other-cities-list">
+			{jobs.map((other) => (
+				<li class="vacancy-other-cities-item">
+					<a class="vacancy-other-cities-link" href={`/v/${other.slug}/`}>
+						<VacancyTKey jobId={other.id} field="location" fallback={other.location} class="vacancy-other-cities-city" />
+						<VacancyTKey jobId={other.id} field="salary" fallback={other.salary} class="vacancy-other-cities-salary" />
+					</a>
+				</li>
+			))}
+		</ul>
+	</section>
+)}
+
+<style>
+	.vacancy-section {
+		margin-bottom: 1.5rem;
+	}
+
+	.section-eyebrow {
+		margin-bottom: 0.55rem;
+		font-size: 0.74rem;
+		font-weight: 900;
+		letter-spacing: 0;
+		text-transform: uppercase;
+		color: var(--vacancy-eyebrow);
+	}
+
+	/* Block E: Same role in other cities — last-resort linkback for
+	 * city-agnostic visitors. Vertical list of 12 chips (city + salary)
+	 * sorted by salary desc. Uses the existing `vacancy-card` palette
+	 * for visual coherence with sibling alternatives block. */
+	.vacancy-other-cities {
+		padding: 1.75rem 1.85rem;
+		background: var(--vacancy-card);
+		border: 1px solid var(--vacancy-border);
+		border-radius: 16px;
+		box-shadow: var(--vacancy-shadow);
+		display: grid;
+		gap: 0.85rem;
+	}
+	.vacancy-other-cities h2 {
+		margin: 0;
+		font-family: var(--font-heading, 'Manrope', sans-serif);
+		font-size: clamp(1.4rem, 2.2vw, 1.75rem);
+		line-height: 1.18;
+		letter-spacing: -0.01em;
+		color: var(--vacancy-ink);
+	}
+	.vacancy-other-cities-lead {
+		margin: 0;
+		max-width: 70ch;
+		color: var(--vacancy-muted);
+		font-size: 0.95rem;
+		line-height: 1.55;
+	}
+	.vacancy-other-cities-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+		gap: 0.45rem;
+	}
+	.vacancy-other-cities-item {
+		margin: 0;
+	}
+	.vacancy-other-cities-link {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 0.6rem;
+		padding: 0.7rem 0.95rem;
+		border-radius: 10px;
+		background: var(--vacancy-soft);
+		border: 1px solid var(--vacancy-border);
+		text-decoration: none;
+		color: var(--vacancy-ink);
+		font-size: 0.92rem;
+		transition: border-color 0.18s ease, transform 0.18s ease;
+	}
+	.vacancy-other-cities-link:hover,
+	.vacancy-other-cities-link:focus-visible {
+		border-color: var(--vacancy-action);
+		transform: translateX(2px);
+		outline: none;
+	}
+	.vacancy-other-cities-city {
+		font-weight: 600;
+	}
+	.vacancy-other-cities-salary {
+		color: var(--vacancy-action);
+		font-weight: 700;
+		white-space: nowrap;
+	}
+</style>

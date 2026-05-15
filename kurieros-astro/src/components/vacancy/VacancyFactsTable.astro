@@ -1,0 +1,75 @@
+---
+interface FactCard {
+	label: string;
+	labelKey: string;
+	value: string;
+	valueKey: string;
+}
+
+interface Props {
+	factCards: FactCard[];
+}
+
+const { factCards } = Astro.props;
+---
+
+<section class="vacancy-facts" id="vacancy-facts" aria-label="Краткие факты о вакансии">
+	{factCards.map((fact) => (
+		<div class="fact-card">
+			<span data-t={fact.labelKey}>{fact.label}</span>
+			<strong data-t={fact.valueKey}>{fact.value}</strong>
+		</div>
+	))}
+</section>
+
+<style>
+	.vacancy-facts {
+		display: grid;
+		grid-template-columns: repeat(6, minmax(0, 1fr));
+		gap: 0.8rem;
+		margin-bottom: 2rem;
+	}
+	.fact-card {
+		display: grid;
+		gap: 0.22rem;
+		min-height: 5.35rem;
+		padding: 0.72rem 0.82rem;
+		border: 1px solid var(--vacancy-border-strong);
+		border-radius: 8px;
+		background: rgba(255, 255, 255, 0.9);
+		box-shadow: 0 6px 18px rgba(24, 45, 34, 0.04);
+	}
+	.fact-card span {
+		font-size: 0.68rem;
+		font-weight: 900;
+		letter-spacing: 0;
+		text-transform: uppercase;
+		line-height: 1.2;
+		color: var(--vacancy-eyebrow);
+	}
+	.fact-card strong {
+		align-self: start;
+		font-size: 0.9rem;
+		line-height: 1.28;
+		color: var(--vacancy-ink);
+	}
+	@media (max-width: 1100px) {
+		.vacancy-facts {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+	}
+	@media (max-width: 768px) {
+		.vacancy-facts {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+	/* Keep .vacancy-facts at 2 columns even on the narrowest phones —
+	   user feedback: "Их надо сделать более компактными для мобильной
+	   версии, чтобы они были по два блока на одной строке". The
+	   inherited rule from @media (max-width: 768px) above sets
+	   grid-template-columns: repeat(2, minmax(0, 1fr)) and we no
+	   longer override it down to a single column at 520px. */
+	:global(body.dark-mode) .fact-card {
+		background: rgba(67, 77, 90, 0.86);
+	}
+</style>

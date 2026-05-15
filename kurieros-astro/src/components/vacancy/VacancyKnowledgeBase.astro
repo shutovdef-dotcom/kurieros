@@ -1,0 +1,231 @@
+---
+import { TOPIC_META, type KnowledgeItem } from '../../utils/knowledge';
+
+interface Props {
+	companyName: string;
+	updatedDate: string;
+	items: KnowledgeItem[];
+}
+
+const { companyName, updatedDate, items } = Astro.props;
+
+const topicMeta = (item: KnowledgeItem) => TOPIC_META[item.topic];
+---
+
+<section class="vacancy-section vacancy-kb-section" id="vacancy-faq" aria-labelledby="vacancy-kb-title">
+	<p class="section-eyebrow">База знаний</p>
+	<h2 id="vacancy-kb-title">Что ещё стоит знать о работе в&nbsp;{companyName}</h2>
+	<p class="vacancy-kb-lead">
+		Короткие ответы на главные вопросы кандидатов — собраны из&nbsp;официальных
+		источников и&nbsp;адаптированы под формат этой вакансии. Если хочется
+		разобраться подробнее — открой полный гид по&nbsp;нужной теме.
+	</p>
+	<div class="vacancy-kb-grid">
+		{items.map((item, index) => (
+			<details class="vacancy-kb-item" open={index === 0}>
+				<summary class="vacancy-kb-question">
+					<span>{item.question}</span>
+					<span class="vacancy-kb-toggle" aria-hidden="true"></span>
+				</summary>
+				<div class="vacancy-kb-answer">
+					<p>{item.answer_short}</p>
+					{topicMeta(item)?.slug && (
+						<a class="vacancy-kb-deeplink" href={`/guide/${topicMeta(item)!.slug}/`}>
+							<span>Полный гид: {topicMeta(item)!.title}</span>
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+						</a>
+					)}
+				</div>
+			</details>
+		))}
+	</div>
+	<p class="vacancy-kb-meta">
+		Карточка обновлена {updatedDate}. Перед откликом сверяйте условия на&nbsp;сайте работодателя.
+	</p>
+</section>
+
+<style>
+	/* === KB-driven section (replaces old fit/anti/check/FAQ/transparency blocks) === */
+	.vacancy-section {
+		/* Margin-bottom inherited from the parent's `.vacancy-section`
+		   rule — replicated here because Astro CSS scoping ties the
+		   parent rule to the parent's cid hash and would no longer
+		   match this child's markup. */
+		margin-bottom: 1.5rem;
+	}
+	.vacancy-kb-section {
+		display: grid;
+		gap: 1rem;
+		padding: 1.75rem 1.85rem;
+		background: var(--vacancy-card);
+		border: 1px solid var(--vacancy-border);
+		border-radius: 16px;
+		box-shadow: var(--vacancy-shadow);
+	}
+	.vacancy-kb-section .section-eyebrow {
+		margin: 0;
+		font-size: 0.78rem;
+		font-weight: 800;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--vacancy-eyebrow);
+	}
+	.vacancy-kb-section h2 {
+		margin: 0;
+		font-family: var(--font-heading, 'Manrope', sans-serif);
+		font-size: clamp(1.4rem, 2.2vw, 1.75rem);
+		line-height: 1.18;
+		color: var(--vacancy-ink);
+		letter-spacing: -0.01em;
+	}
+	.vacancy-kb-lead {
+		margin: 0;
+		max-width: 70ch;
+		color: var(--vacancy-muted);
+		font-size: 0.95rem;
+		line-height: 1.5;
+	}
+	.vacancy-kb-grid {
+		display: grid;
+		gap: 0.5rem;
+		margin-top: 0.25rem;
+	}
+	.vacancy-kb-item {
+		border: 1px solid var(--vacancy-border);
+		border-radius: 12px;
+		background: var(--vacancy-soft);
+		transition: border-color 0.18s ease, background 0.18s ease;
+		overflow: hidden;
+	}
+	.vacancy-kb-item[open] {
+		border-color: var(--vacancy-chip-border);
+		background: var(--vacancy-soft-strong);
+	}
+	.vacancy-kb-question {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 0.95rem 1.1rem;
+		font-family: var(--font-heading, 'Manrope', sans-serif);
+		font-weight: 700;
+		font-size: 1rem;
+		color: var(--vacancy-ink);
+		cursor: pointer;
+		list-style: none;
+		user-select: none;
+		line-height: 1.35;
+	}
+	.vacancy-kb-question::-webkit-details-marker {
+		display: none;
+	}
+	.vacancy-kb-toggle {
+		flex: 0 0 auto;
+		position: relative;
+		width: 22px;
+		height: 22px;
+		display: inline-block;
+	}
+	.vacancy-kb-toggle::before,
+	.vacancy-kb-toggle::after {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 12px;
+		height: 2px;
+		background: var(--vacancy-action);
+		border-radius: 2px;
+		transform: translate(-50%, -50%);
+		transition: transform 0.18s ease, opacity 0.18s ease;
+	}
+	.vacancy-kb-toggle::after {
+		transform: translate(-50%, -50%) rotate(90deg);
+	}
+	.vacancy-kb-item[open] .vacancy-kb-toggle::after {
+		transform: translate(-50%, -50%) rotate(0deg);
+		opacity: 0;
+	}
+	.vacancy-kb-answer {
+		display: grid;
+		gap: 0.75rem;
+		padding: 0 1.1rem 1.05rem;
+		color: var(--vacancy-muted);
+		font-size: 0.95rem;
+		line-height: 1.55;
+	}
+	.vacancy-kb-answer p {
+		margin: 0;
+	}
+	.vacancy-kb-deeplink {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0.45rem 0.8rem;
+		border-radius: 999px;
+		background: rgba(22, 61, 43, 0.07);
+		color: var(--vacancy-action);
+		font-weight: 700;
+		font-size: 0.85rem;
+		text-decoration: none;
+		width: fit-content;
+		transition: background 0.18s ease, transform 0.18s ease;
+	}
+	.vacancy-kb-deeplink:hover,
+	.vacancy-kb-deeplink:focus-visible {
+		background: rgba(22, 61, 43, 0.13);
+		transform: translateX(2px);
+		outline: none;
+	}
+	.vacancy-kb-meta {
+		margin: 0.5rem 0 0;
+		font-size: 0.82rem;
+		color: var(--vacancy-eyebrow);
+	}
+
+	/* Dark mode */
+	:global(:where(html, body).dark-mode) .vacancy-kb-section {
+		background: rgba(20, 32, 48, 0.7);
+		border-color: rgba(195, 204, 216, 0.18);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-kb-section .section-eyebrow,
+	:global(:where(html, body).dark-mode) .vacancy-kb-meta {
+		color: rgba(231, 234, 240, 0.55);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-kb-section h2 {
+		color: var(--ink-800);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-kb-lead,
+	:global(:where(html, body).dark-mode) .vacancy-kb-answer {
+		color: rgba(231, 234, 240, 0.75);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-kb-item {
+		background: rgba(15, 23, 36, 0.65);
+		border-color: rgba(195, 204, 216, 0.16);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-kb-item[open] {
+		background: rgba(20, 32, 48, 0.85);
+		border-color: rgba(76, 175, 128, 0.4);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-kb-question {
+		color: var(--ink-800);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-kb-toggle::before,
+	:global(:where(html, body).dark-mode) .vacancy-kb-toggle::after {
+		background: var(--brand-500);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-kb-deeplink {
+		background: rgba(76, 175, 128, 0.15);
+		color: var(--brand-500);
+	}
+	:global(:where(html, body).dark-mode) .vacancy-kb-deeplink:hover,
+	:global(:where(html, body).dark-mode) .vacancy-kb-deeplink:focus-visible {
+		background: rgba(76, 175, 128, 0.25);
+	}
+
+	@media (max-width: 600px) {
+		.vacancy-kb-section {
+			padding: 1.2rem 1rem;
+		}
+	}
+</style>

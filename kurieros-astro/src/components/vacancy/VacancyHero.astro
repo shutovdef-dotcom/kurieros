@@ -1,0 +1,725 @@
+---
+import VacancyTKey from '../VacancyTKey.astro';
+import { ozonDataAttrs } from '../../utils/ozonAttrs';
+import type { GeneratedJob } from '../../data/vacancyTypes';
+
+interface CityLink {
+	name: string;
+	href: string;
+}
+
+interface Props {
+	job: GeneratedJob;
+	companyUrl: string;
+	cityLinks: CityLink[];
+	updatedDate: string;
+	isLeadFormApply: boolean;
+	leadFormType: string | null;
+	salaryMaxNumeric: number;
+	applyLabel: string;
+	employmentTypeText: string;
+}
+
+const {
+	job,
+	companyUrl,
+	cityLinks,
+	updatedDate,
+	isLeadFormApply,
+	leadFormType,
+	salaryMaxNumeric,
+	applyLabel,
+	employmentTypeText,
+} = Astro.props;
+---
+
+<section class="vacancy-header">
+	<div class="vacancy-hero-main">
+		<div class="vacancy-company-info">
+			<img src={job.companyLogo} alt={job.company} class="vacancy-logo" width="80" height="80" loading="eager" decoding="async" />
+			<div>
+				<div class="vacancy-kicker" data-t="vacancy.card_kicker">Карточка вакансии</div>
+				<VacancyTKey jobId={job.id} field="title" fallback={job.title} as="h1" />
+				<VacancyTKey jobId={job.id} field="company" fallback={job.company} as="a" class="vacancy-company-name" href={companyUrl} />
+			</div>
+		</div>
+		<p class="vacancy-ai-summary" data-t="vacancy.hero_summary">
+			{job.title} в {job.company} — это вакансия для кандидатов, которые хотят заранее понять доход, график,
+			требования и формат оформления перед переходом к отклику.
+		</p>
+		<div class="vacancy-meta-row">
+			<span class="meta-pill"><span data-t="vacancy.updated">Обновлено</span>&nbsp;<VacancyTKey jobId={job.id} field="updated_date" fallback={updatedDate} /></span>
+			{cityLinks.slice(0, 2).map((city) => (
+				<a href={city.href} class="meta-pill meta-pill-link">{city.name}</a>
+			))}
+			<div class="share-wrap">
+				<button
+					class="share-btn"
+					type="button"
+					aria-label="Поделиться вакансией"
+					aria-haspopup="true"
+					aria-expanded="false"
+					aria-controls="share-menu"
+					data-share-vacancy
+					data-share-slug={job.slug}
+					data-share-title={job.title}
+					data-share-salary={job.salary}
+				>
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<circle cx="18" cy="5" r="3"></circle>
+						<circle cx="6" cy="12" r="3"></circle>
+						<circle cx="18" cy="19" r="3"></circle>
+						<line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+						<line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+					</svg>
+					<span>Поделиться</span>
+				</button>
+				<div class="share-dropdown" id="share-menu" aria-label="Поделиться вакансией" hidden>
+					<button type="button" class="share-option" data-share-target="telegram">
+						<span class="share-option-icon" aria-hidden="true">
+							<svg viewBox="0 0 24 24" fill="#26A5E4"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212-.07-.060-.174-.041-.249-.024-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+						</span> Telegram
+					</button>
+					<button type="button" class="share-option" data-share-target="whatsapp">
+						<span class="share-option-icon" aria-hidden="true">
+							<svg viewBox="0 0 24 24" fill="#25D366"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.71.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+						</span> WhatsApp
+					</button>
+					<button type="button" class="share-option" data-share-target="vk">
+						<span class="share-option-icon" aria-hidden="true">
+							<svg viewBox="0 0 24 24" fill="#0077FF"><path d="M15.07 2H8.93C3.33 2 2 3.33 2 8.93v6.13C2 20.67 3.33 22 8.93 22h6.13c5.6 0 6.94-1.33 6.94-6.93V8.93C22 3.33 20.66 2 15.07 2zm3.07 14.27h-1.45c-.55 0-.72-.45-1.71-1.42-.88-.84-1.25-.94-1.47-.94-.31 0-.4.08-.4.51v1.27c0 .36-.12.58-1.07.58-1.59 0-3.34-.94-4.58-2.69-1.86-2.55-2.37-4.47-2.37-4.85 0-.22.08-.42.51-.42h1.45c.39 0 .53.17.68.59.71 2.07 1.9 3.86 2.4 3.86.18 0 .27-.08.27-.55V9.96c-.06-.96-.59-1.05-.59-1.39 0-.16.13-.32.34-.32h2.28c.32 0 .43.16.43.55v3.07c0 .32.13.43.23.43.18 0 .33-.11.66-.43 1.01-1.13 1.74-2.86 1.74-2.86.09-.21.27-.41.66-.41h1.45c.43 0 .53.22.43.51-.18.84-1.94 3.29-1.94 3.29-.16.25-.22.36 0 .64.16.21.69.66 1.04 1.07.66.74 1.16 1.36 1.3 1.78.13.43-.08.65-.52.65z"/></svg>
+						</span> ВКонтакте
+					</button>
+					<button type="button" class="share-option" data-share-target="max">
+						<span class="share-option-icon" aria-hidden="true">
+							<svg viewBox="0 0 24 24"><rect width="24" height="24" rx="6" fill="#3366FF"/><path d="M5.5 17V7h2l2.5 4.5L12.5 7h2v10h-2v-6.2L10.5 14h-1L7.5 10.8V17zM16 17l2.4-3.2L16 9.7h2.3l1.3 2.2L21 9.7h2.2l-2.5 3.9L23 17h-2.3l-1.4-2.3L18 17z" fill="#fff"/></svg>
+						</span> МАХ
+					</button>
+					<button type="button" class="share-option" data-share-target="copy">
+						<span class="share-option-icon" aria-hidden="true">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+						</span> Скопировать ссылку
+					</button>
+					<button type="button" class="share-option share-option-native" data-share-target="native" hidden>
+						<span class="share-option-icon" aria-hidden="true">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+						</span> Ещё…
+					</button>
+				</div>
+				<span class="share-status" role="status" aria-live="polite" data-share-status></span>
+			</div>
+		</div>
+	</div>
+		<div class="vacancy-salary-card">
+			<span data-t="vacancy.income">Доход</span>
+			<VacancyTKey jobId={job.id} field="salary" fallback={job.salary} as="strong" />
+			<VacancyTKey jobId={job.id} field="details_rate" fallback={job.details.rate} as="small" class="salary-rate" />
+			<small data-t="vacancy.final_terms_short">Финальные условия уточняются при отклике</small>
+			{isLeadFormApply ? (
+				<button
+					type="button"
+					class="apply-btn-large apply-btn-hero"
+					data-apply-cta
+					data-apply-position="vacancy_hero"
+					data-apply-company={job.company}
+					data-apply-city={job.location}
+					data-apply-transport={job.transport}
+					data-apply-employment={employmentTypeText}
+					data-apply-salary-max={salaryMaxNumeric || ''}
+					data-lead-form-type={leadFormType}
+					{...ozonDataAttrs(job.ozonLeadForm)}
+				>
+					{applyLabel}
+			</button>
+		) : (
+			<a
+				href={job.applyLink}
+				target="_blank"
+				rel="noopener noreferrer nofollow sponsored"
+				class="apply-btn-large apply-btn-hero"
+				data-apply-cta
+				data-apply-position="vacancy_hero"
+				data-apply-company={job.company}
+				data-apply-city={job.location}
+				data-apply-transport={job.transport}
+				data-apply-employment={employmentTypeText}
+				data-apply-salary-max={salaryMaxNumeric || ''}
+			>
+				{applyLabel}
+			</a>
+		)}
+		{/* Disabled-fallback CTA («Уточнить условия» → /contacts/) removed
+		    per C3 — site is a CPA-referral aggregator, every vacancy
+		    has a real applyLink. */}
+		<p class="apply-note apply-note-hero" data-t="vacancy.apply_note_hero">Переход на анкету работодателя или партнёра</p>
+	</div>
+</section>
+
+<style>
+	.vacancy-header {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(250px, 0.32fr);
+		gap: 2rem;
+		align-items: stretch;
+		background: var(--vacancy-panel-gradient);
+		padding: 2.25rem;
+		border: 1px solid var(--vacancy-border-strong);
+		border-radius: 8px;
+		margin-bottom: 2rem;
+		box-shadow: var(--vacancy-shadow-strong);
+		position: relative;
+		/* `overflow: hidden` was used to clip the decorative `::after` blob
+		   that overflowed the right/bottom edges.  But it also clipped the
+		   `.share-dropdown`, leaving only «Telegram» visible when the
+		   share button was opened (user feedback).  Anchor the blob fully
+		   inside the section (`inset: auto 0 0 auto` below) so we can keep
+		   `overflow: visible` and let the dropdown escape. */
+		overflow: visible;
+	}
+	/* Decorative blob in the bottom-right corner of the hero card.
+	   Both `right` and `bottom` are anchored at `0` so the blob is
+	   entirely inside the section.  This lets the section keep
+	   `overflow: visible` (so the share dropdown can escape) while
+	   still showing the decorative tint in the corner. */
+	.vacancy-header::after {
+		content: "";
+		position: absolute;
+		inset: auto 0 0 auto;
+		width: 18rem;
+		height: 18rem;
+		background: rgba(22, 61, 43, 0.06);
+		border-radius: 0 0 8px 0;
+		pointer-events: none;
+	}
+	.vacancy-hero-main {
+		position: relative;
+		z-index: 1;
+		display: grid;
+		gap: 1.25rem;
+	}
+	.vacancy-company-info {
+		display: flex;
+		gap: 1.5rem;
+		align-items: flex-start;
+	}
+	.vacancy-logo {
+		width: 80px;
+		height: 80px;
+		object-fit: contain;
+		border-radius: 8px;
+		background: white;
+		padding: 0.5rem;
+		border: 1px solid var(--vacancy-border);
+		box-shadow: 0 6px 18px rgba(24, 45, 34, 0.05);
+	}
+	.vacancy-kicker {
+		margin-bottom: 0.55rem;
+		font-size: 0.74rem;
+		font-weight: 900;
+		letter-spacing: 0;
+		text-transform: uppercase;
+		color: var(--vacancy-eyebrow);
+	}
+	.vacancy-header h1 {
+		max-width: 13ch;
+		margin-bottom: 0.35rem;
+		font-size: 3.8rem;
+		line-height: 0.98;
+		letter-spacing: 0;
+		text-wrap: balance;
+		color: var(--vacancy-ink);
+	}
+	.vacancy-company-name {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		color: var(--vacancy-action);
+		text-decoration: none;
+		font-weight: 800;
+	}
+	.vacancy-company-name:hover {
+		text-decoration: underline;
+	}
+	.vacancy-ai-summary {
+		max-width: 70ch;
+		margin: 0;
+		color: var(--vacancy-muted);
+		font-size: 1.12rem;
+		line-height: 1.75;
+	}
+	.vacancy-meta-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.65rem;
+	}
+	.meta-pill {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.25rem;
+		padding: 0.45rem 0.8rem;
+		border-radius: 8px;
+		border: 1px solid var(--vacancy-border);
+		background: rgba(255, 255, 255, 0.9);
+		color: var(--vacancy-muted);
+		font-size: 0.82rem;
+		font-weight: 700;
+	}
+	.meta-pill-link {
+		text-decoration: none;
+		color: var(--vacancy-ink);
+	}
+
+	/* Share button + dropdown (HV19 reposition — only on detail page).
+	   Inline pill-style button at the end of `.vacancy-meta-row`,
+	   dropdown pops below. RU-ориентированные опции: Telegram,
+	   WhatsApp, ВКонтакте, МАХ, Copy + «Ещё…» (native share-sheet
+	   через `navigator.share`, виден только когда API поддерживается). */
+	.share-wrap {
+		position: relative;
+		display: inline-flex;
+		margin-left: auto;
+	}
+	/* Mobile: drop the auto-margin so the share button doesn't get pushed
+	   to the right edge of a wrapped row, which left an awkward empty
+	   strip between «Москва» and «Поделиться» (user feedback).  Instead
+	   the share button flows naturally alongside the meta pills. */
+	@media (max-width: 768px) {
+		.share-wrap {
+			margin-left: 0;
+		}
+	}
+	/* Narrow phones: collapse the share button to icon-only so it fits on
+	   the same row as the meta pills («Обновлено …», «Москва») instead of
+	   wrapping to its own line.  Also tighten the row gap and pill padding
+	   so the three items fit within the ~300 px content width on a 375 px
+	   viewport. */
+	@media (max-width: 520px) {
+		.vacancy-meta-row {
+			gap: 0.4rem;
+		}
+		.meta-pill {
+			padding: 0.4rem 0.6rem;
+		}
+		.share-btn span {
+			display: none;
+		}
+		.share-btn {
+			padding: 0.4rem 0.55rem;
+			min-width: 2.25rem;
+			justify-content: center;
+		}
+		/* The share button is now icon-only and flush against the left
+		   edge of the viewport.  Anchor the dropdown to the share-wrap's
+		   LEFT edge (default `right: 0` made it extend 138 px past the
+		   left viewport edge — user feedback).  Also open it UPWARD so
+		   the user can see all 5 options without having to scroll past
+		   the bottom of the viewport.
+
+		   The compound selector `.share-wrap .share-dropdown` bumps
+		   specificity to 0,2,0 so this rule beats the base rule at 0,1,0
+		   — Astro's PostCSS hoists `@media` blocks BEFORE the base rule,
+		   so without the bump the base rule wins by source order. */
+		.share-wrap .share-dropdown {
+			top: auto;
+			right: auto;
+			bottom: calc(100% + 6px);
+			left: 0;
+		}
+	}
+	.share-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		min-height: 2.25rem;
+		padding: 0.45rem 0.85rem;
+		border-radius: 8px;
+		border: 1px solid var(--vacancy-border);
+		background: rgba(255, 255, 255, 0.9);
+		color: var(--vacancy-ink);
+		font-family: inherit;
+		font-size: 0.82rem;
+		font-weight: 700;
+		cursor: pointer;
+		transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+	}
+	.share-btn:hover,
+	.share-btn:focus-visible {
+		background: var(--brand-50, #ecf5ef);
+		color: var(--brand-700, #117a3a);
+		border-color: var(--brand-300, #b8e3c4);
+	}
+	.share-btn:focus-visible {
+		outline: 2px solid var(--brand-500, #6fd093);
+		outline-offset: 2px;
+	}
+	.share-dropdown {
+		position: absolute;
+		top: calc(100% + 6px);
+		right: 0;
+		min-width: 220px;
+		padding: 6px;
+		background: #ffffff;
+		border: 1px solid var(--vacancy-border);
+		border-radius: 12px;
+		box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		z-index: 50;
+	}
+	.share-dropdown[hidden] {
+		display: none;
+	}
+	.share-option {
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		padding: 9px 12px;
+		background: transparent;
+		border: none;
+		border-radius: 6px;
+		color: var(--vacancy-ink);
+		font-family: inherit;
+		font-size: 0.9rem;
+		font-weight: 500;
+		cursor: pointer;
+		text-align: left;
+		transition: background 0.12s ease;
+	}
+	.share-option:hover,
+	.share-option:focus-visible {
+		background: #f4f6fa;
+	}
+	.share-option:focus-visible {
+		outline: 2px solid var(--brand-500, #6fd093);
+		outline-offset: -2px;
+	}
+	/* Visually-hidden but available to screen readers — for «Ссылка
+	   скопирована» / «Не удалось скопировать» announcements via
+	   `role="status" aria-live="polite"`. */
+	.share-status {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+	.share-option-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 20px;
+		height: 20px;
+		flex-shrink: 0;
+		/* Keeps the success-state «✓» char (set by JS after copy)
+		   centered the same way as the SVG icons. */
+		font-size: 1rem;
+		line-height: 1;
+	}
+	.share-option-icon svg {
+		width: 100%;
+		height: 100%;
+		display: block;
+	}
+	:global(:where(html, body).dark-mode) .share-btn {
+		background: rgba(15, 23, 36, 0.85);
+		color: #e7eaf0;
+		border-color: rgba(195, 204, 216, 0.25);
+	}
+	:global(:where(html, body).dark-mode) .share-btn:hover {
+		color: #67d086;
+		border-color: rgba(94, 191, 156, 0.5);
+	}
+	:global(:where(html, body).dark-mode) .share-dropdown {
+		background: #1b2533;
+		border-color: rgba(195, 204, 216, 0.18);
+	}
+	:global(:where(html, body).dark-mode) .share-option {
+		color: #e7eaf0;
+	}
+	:global(:where(html, body).dark-mode) .share-option:hover {
+		background: rgba(231, 234, 240, 0.08);
+	}
+
+	.vacancy-salary-card {
+		position: relative;
+		z-index: 1;
+		display: grid;
+		align-content: start;
+		gap: 0.65rem;
+		min-height: 100%;
+		padding: 1.5rem;
+		border-radius: 8px;
+		background: var(--vacancy-card-gradient);
+		border: 1px solid var(--vacancy-border);
+		color: var(--vacancy-ink);
+		box-shadow: 0 6px 18px rgba(24, 45, 34, 0.05);
+	}
+	.vacancy-salary-card span,
+	.vacancy-salary-card small {
+		color: var(--vacancy-muted);
+	}
+	.vacancy-salary-card strong {
+		font-size: 2.1rem;
+		line-height: 1;
+		letter-spacing: 0;
+		color: var(--vacancy-ink);
+	}
+	.salary-rate {
+		line-height: 1.35;
+		opacity: 0.92;
+	}
+	.apply-note-hero {
+		margin: 0;
+		color: var(--vacancy-muted);
+		line-height: 1.45;
+	}
+
+	/* === Visual refresh overrides (Apply CTAs) === */
+	.apply-btn-large {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--accent-500);
+		color: var(--ink-0);
+		border: none;
+		border-radius: var(--radius-md);
+		padding: 14px 28px;
+		font-family: var(--font-main);
+		font-weight: 700;
+		font-size: var(--fs-16);
+		text-decoration: none;
+		transition: background var(--transition);
+	}
+	.apply-btn-large:hover {
+		background: var(--accent-400);
+	}
+	.apply-btn-large:focus-visible {
+		outline: none;
+		box-shadow: var(--shadow-focus);
+	}
+	.apply-btn-hero {
+		min-height: 52px;
+		padding: 16px 32px;
+		font-size: var(--fs-18);
+	}
+	.apply-btn-disabled {
+		background: var(--ink-100);
+		color: var(--ink-700);
+		pointer-events: none;
+		cursor: not-allowed;
+	}
+	.apply-note {
+		text-align: center;
+		font-size: 0.75rem;
+		color: var(--vacancy-muted);
+		margin-top: 0.5rem;
+	}
+
+	@media (max-width: 768px) {
+		.vacancy-header {
+			grid-template-columns: 1fr;
+		}
+		.vacancy-salary-card {
+			order: -1;
+		}
+	}
+	@media (max-width: 520px) {
+		.vacancy-header {
+			padding: 1.25rem;
+		}
+
+		.vacancy-header h1 {
+			font-size: 1.55rem;
+			line-height: 1.2;
+			max-width: none;
+		}
+
+		/* Mobile hero — keep logo + title in a row so the title sits in
+		   the empty space to the right of the logo (instead of dropping
+		   below it). Logo shrinks 80→56 so titles like «Автокурьер в
+		   Яндекс Еда в Москве» fit in the remaining ~250px on a 375px
+		   viewport without overflow. */
+		.vacancy-company-info {
+			flex-direction: row;
+			gap: 0.85rem;
+			align-items: flex-start;
+		}
+		.vacancy-logo {
+			width: 56px;
+			height: 56px;
+			padding: 0.3rem;
+			flex-shrink: 0;
+		}
+		.vacancy-kicker {
+			margin-bottom: 0.3rem;
+			font-size: 0.65rem;
+		}
+		.vacancy-company-info > div {
+			min-width: 0;
+			flex: 1;
+		}
+	}
+
+	:global(body.dark-mode) .vacancy-logo,
+	:global(body.dark-mode) .meta-pill {
+		background: rgba(67, 77, 90, 0.86);
+	}
+</style>
+
+<script is:inline>
+	// HV19 (rev) — Share button on detail page with RU-market options.
+	// Always shows custom dropdown (Telegram / WhatsApp / VK / МАХ /
+	// Copy / Ещё). «Ещё» calls `navigator.share()` and is shown only
+	// when the API is supported (mobile mainly).
+	(function () {
+		if (typeof navigator.share === 'function') {
+			document.querySelectorAll('.share-option-native').forEach((b) => b.removeAttribute('hidden'));
+		}
+
+		// Track the trigger that opened the dropdown so Escape can restore focus.
+		let lastTrigger = null;
+
+		function closeAllDropdowns(restoreFocus) {
+			document.querySelectorAll('.share-dropdown:not([hidden])').forEach((d) => {
+				d.setAttribute('hidden', '');
+				const trigger = d.parentElement && d.parentElement.querySelector('[data-share-vacancy]');
+				if (trigger) trigger.setAttribute('aria-expanded', 'false');
+			});
+			if (restoreFocus && lastTrigger) {
+				try { lastTrigger.focus(); } catch (e) { /* element gone */ }
+			}
+			lastTrigger = null;
+		}
+
+		function announce(wrap, message) {
+			const status = wrap && wrap.querySelector('[data-share-status]');
+			if (!status) return;
+			status.textContent = '';
+			// Force the live region to re-announce by clearing then setting on next tick.
+			setTimeout(() => { status.textContent = message; }, 10);
+		}
+
+		function flashOption(shareOption, html, ms) {
+			const orig = shareOption.innerHTML;
+			shareOption.innerHTML = html;
+			setTimeout(() => { shareOption.innerHTML = orig; }, ms || 1500);
+		}
+
+		function openExternal(url) {
+			const opened = window.open(url, '_blank', 'noopener,noreferrer');
+			if (!opened) {
+				console.warn('share: popup blocked or failed to open', url);
+			}
+			return !!opened;
+		}
+
+		document.addEventListener('click', (event) => {
+			const target = event.target;
+			if (!(target instanceof Element)) return;
+
+			const shareBtn = target.closest('[data-share-vacancy]');
+			if (shareBtn) {
+				event.preventDefault();
+				event.stopPropagation();
+				const wrap = shareBtn.closest('.share-wrap');
+				const dropdown = wrap && wrap.querySelector('.share-dropdown');
+				if (!dropdown) {
+					console.warn('share: dropdown panel missing in wrap', wrap);
+					return;
+				}
+				document.querySelectorAll('.share-dropdown:not([hidden])').forEach((d) => {
+					if (d !== dropdown) d.setAttribute('hidden', '');
+				});
+				const willOpen = dropdown.hasAttribute('hidden');
+				if (willOpen) {
+					dropdown.removeAttribute('hidden');
+					shareBtn.setAttribute('aria-expanded', 'true');
+					lastTrigger = shareBtn;
+				} else {
+					dropdown.setAttribute('hidden', '');
+					shareBtn.setAttribute('aria-expanded', 'false');
+					lastTrigger = null;
+				}
+				return;
+			}
+
+			const shareOption = target.closest('[data-share-target]');
+			if (shareOption) {
+				event.preventDefault();
+				const wrap = shareOption.closest('.share-wrap');
+				const trigger = wrap && wrap.querySelector('[data-share-vacancy]');
+				if (!trigger) {
+					console.warn('share: trigger missing for option', shareOption);
+					return;
+				}
+				const slug = trigger.dataset.shareSlug || '';
+				const title = trigger.dataset.shareTitle || 'Вакансия курьера';
+				const salary = trigger.dataset.shareSalary || '';
+				// Always share the canonical prod URL — even from staging/preview
+				// the link should resolve to the live vacancy.
+				const url = 'https://kurerok.ru/v/' + encodeURIComponent(slug) + '/?utm_source=share&utm_medium=user';
+				const text = title + (salary ? ' · ' + salary : '');
+				const action = shareOption.dataset.shareTarget;
+
+				if (action === 'telegram') {
+					openExternal('https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(text));
+				} else if (action === 'whatsapp') {
+					openExternal('https://wa.me/?text=' + encodeURIComponent(text + '\n' + url));
+				} else if (action === 'vk') {
+					openExternal('https://vk.com/share.php?url=' + encodeURIComponent(url) + '&title=' + encodeURIComponent(title) + '&description=' + encodeURIComponent(salary));
+				} else if (action === 'max') {
+					// МАХ — российский мессенджер от VK / Ростелекома.
+					// Web-share URL: https://max.ru/share?url=...&text=...
+					openExternal('https://max.ru/share?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(text));
+				} else if (action === 'copy') {
+					if (navigator.clipboard && navigator.clipboard.writeText) {
+						navigator.clipboard.writeText(url).then(() => {
+							flashOption(shareOption, '<span class="share-option-icon" aria-hidden="true">✓</span> Ссылка скопирована');
+							announce(wrap, 'Ссылка скопирована');
+						}).catch((err) => {
+							console.warn('share: clipboard write failed', err);
+							flashOption(shareOption, '<span class="share-option-icon" aria-hidden="true">!</span> Не удалось скопировать');
+							announce(wrap, 'Не удалось скопировать ссылку');
+						});
+					} else {
+						// Older browser / non-secure context — clipboard API absent.
+						flashOption(shareOption, '<span class="share-option-icon" aria-hidden="true">!</span> Копирование недоступно');
+						announce(wrap, 'Копирование ссылок недоступно в этом браузере');
+					}
+				} else if (action === 'native') {
+					if (typeof navigator.share === 'function') {
+						navigator.share({ title, text, url }).catch((err) => {
+							// AbortError = user dismissed the share sheet, normal flow.
+							if (err && err.name !== 'AbortError') {
+								console.warn('share: navigator.share failed', err);
+							}
+						});
+					}
+				}
+
+				if (action !== 'copy') closeAllDropdowns(false);
+
+				if (typeof window.gtag === 'function') {
+					window.gtag('event', 'share_vacancy', { vacancy_slug: slug, method: action });
+				}
+				return;
+			}
+
+			if (!target.closest('.share-wrap')) {
+				closeAllDropdowns(false);
+			}
+		}, true);
+
+		document.addEventListener('keydown', (event) => {
+			if (event.key !== 'Escape') return;
+			const open = document.querySelector('.share-dropdown:not([hidden])');
+			if (!open) return;
+			closeAllDropdowns(true);
+		});
+	})();
+</script>

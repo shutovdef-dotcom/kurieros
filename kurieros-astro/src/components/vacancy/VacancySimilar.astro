@@ -1,0 +1,71 @@
+---
+import JobCard from '../JobCard.astro';
+import type { GeneratedJob } from '../../data/vacancyTypes';
+
+interface Props {
+	jobs: GeneratedJob[];
+}
+
+const { jobs } = Astro.props;
+---
+
+{jobs.length > 0 && (
+	<section class="vacancy-section vacancy-similar" aria-labelledby="vacancy-similar-title">
+		<p class="section-eyebrow">Похожие предложения</p>
+		<h2 id="vacancy-similar-title">Похожие на эту вакансию</h2>
+		<p class="vacancy-similar-lead">
+			Реальные карточки с откликом в один тап — отсортированы по близости к этой вакансии и по доходу.
+		</p>
+		<div class="vacancy-similar-grid">
+			{jobs.map((other) => (
+				<JobCard job={other} />
+			))}
+		</div>
+	</section>
+)}
+
+<style>
+	.vacancy-section {
+		background: var(--vacancy-card);
+		padding: 2rem;
+		border-radius: 8px;
+		border: 1px solid var(--vacancy-border);
+		margin-bottom: 1.5rem;
+		box-shadow: var(--vacancy-shadow);
+	}
+	.vacancy-section h2 {
+		margin-top: 0;
+		margin-bottom: 1rem;
+		font-size: 1.5rem;
+	}
+
+	.section-eyebrow {
+		margin-bottom: 0.55rem;
+		font-size: 0.74rem;
+		font-weight: 900;
+		letter-spacing: 0;
+		text-transform: uppercase;
+		color: var(--vacancy-eyebrow);
+	}
+
+	/* HV20 — Similar vacancies grid (full JobCard reuse).
+	   Main content area на detail page уже, чем home grid (sidebar
+	   занимает часть ширины), поэтому только 1-2 колонки. */
+	.vacancy-similar-lead {
+		margin: 0 0 var(--space-4);
+		max-width: 70ch;
+		color: var(--vacancy-muted);
+		font-size: 0.95rem;
+		line-height: 1.55;
+	}
+	.vacancy-similar-grid {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: var(--space-4);
+	}
+	@media (min-width: 900px) {
+		.vacancy-similar-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+</style>
