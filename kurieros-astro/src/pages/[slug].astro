@@ -1,18 +1,15 @@
 ---
-/* eslint-disable max-lines -- TODO(H14): decompose [slug].astro (~1149 LOC after skip-blank/comments) into focused per-concern components, then remove this disable. */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import JobGrid from '../components/JobGrid.astro';
 import JobFilters from '../components/JobFilters.astro';
 import PartnerBanner from '../components/PartnerBanner.astro';
-import articlesDataRaw from '../data/articles.json';
 import jobsData from '../data/jobs';
 import { CATEGORIES } from '../data/constants';
 import { getCitiesFromJobs } from '../utils/cities';
 import { formatMoney, getVacancyPluralText, parseSalary } from '../utils/format';
 import {
-	type Article,
 	buildFactCards,
 	buildFaqItems,
 	buildHeroIntro,
@@ -24,13 +21,6 @@ import {
 	buildVacancyCountText,
 	cleanCategoryName,
 } from '../utils/cityListingPage';
-
-// `articles.json` ships empty (`[]`); TS narrows the default JSON
-// import to `never[]`, which fouls every `article.title`/`.description`
-// access downstream. Once articles ship we'll get richer fields, but
-// the contract is fixed: title + description (used for keyword
-// matching) + slug/date (consumed by blog.astro).
-const articlesData = articlesDataRaw as Article[];
 
 export async function getStaticPaths() {
 	type CityProps = {
@@ -96,8 +86,8 @@ const { type, data, title } = Astro.props;
 const isMoscowCityPage = type === 'city' && data.slug === 'moskva';
 // Старый override `searchTerm = 'еженед'` для ezhednevnaya-oplata
 // удалён: теперь Y.Eda+Купер действительно помечены как «Ежедневно»
-// (см. buildPay() в src/data/vacancies.ts) — мгновенные выплаты через
-// встроенный кошелёк = ежедневный UX. Запрос «Ежеднев» по
+// (см. buildPay() в src/data/sources/shared.ts) — мгновенные выплаты
+// через встроенный кошелёк = ежедневный UX. Запрос «Ежеднев» по
 // payment_freq теперь честно матчит ~3000+ реальных вакансий.
 //
 // Флаг `isEzhednevLanding` оставлен — используется ниже для кастомных
@@ -185,12 +175,6 @@ const factCards = buildFactCards({
 	transportTypes,
 	paymentTypes,
 });
-
-// articlesData currently ships empty, but the import wiring is kept
-// so the page can light up the «related articles» surface as soon as
-// content lands without another refactor. Touching the import alone
-// would silently regress that path.
-void articlesData;
 
 const faqItems = buildFaqItems({
 	type,
@@ -299,13 +283,8 @@ const pageSchemaGraph = buildPageSchemaGraph({
 
 <style>
 	.listing-hero,
-	.listing-vacancy-launch,
 	.listing-fact-grid,
-	.listing-geo-grid,
-	.listing-local-grid,
-	.listing-faq-section,
-	.listing-filters,
-	.listing-trust-panel {
+	.listing-filters {
 		max-width: 1180px;
 		margin-inline: auto;
 	}
@@ -368,31 +347,7 @@ const pageSchemaGraph = buildPageSchemaGraph({
 		color: var(--accent-color);
 	}
 
-	.listing-trust-panel {
-		display: grid;
-		grid-template-columns: minmax(220px, 0.32fr) minmax(0, 1fr);
-		gap: 1.5rem;
-		align-items: start;
-		margin-bottom: 1rem;
-		padding: 1.5rem;
-		border: 1px solid var(--scrim-border-mid);
-		border-radius: 8px;
-		background: rgba(255, 255, 255, 0.74);
-		box-shadow: var(--shadow-sm);
-	}
-
-	.listing-trust-panel h2,
-	.listing-trust-panel p {
-		margin: 0;
-	}
-
-	.listing-trust-panel p {
-		color: var(--text-muted);
-		line-height: 1.8;
-	}
-
-	.listing-hero-actions,
-	.listing-vacancy-launch-actions {
+	.listing-hero-actions {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.8rem;
@@ -431,38 +386,6 @@ const pageSchemaGraph = buildPageSchemaGraph({
 		box-shadow: 0 10px 24px rgba(22, 61, 43, 0.12);
 	}
 
-	.listing-vacancy-launch {
-		display: grid;
-		grid-template-columns: minmax(260px, 0.42fr) minmax(0, 1fr);
-		gap: 1rem;
-		align-items: start;
-		margin-bottom: 1rem;
-		padding: 1.35rem;
-		border: 1px solid var(--scrim-border-mid);
-		border-radius: 8px;
-		background: var(--scrim-light-soft);
-		box-shadow: var(--shadow-sm);
-	}
-
-	.listing-vacancy-launch h2,
-	.listing-vacancy-launch p {
-		margin: 0;
-	}
-
-	.listing-vacancy-launch-copy {
-		display: grid;
-		gap: 0.55rem;
-	}
-
-	.listing-vacancy-launch-copy p:not(.section-eyebrow) {
-		color: var(--text-muted);
-		line-height: 1.65;
-	}
-
-	.listing-vacancy-launch-actions {
-		margin-top: 0;
-	}
-
 	.listing-fact-grid {
 		display: grid;
 		grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -495,194 +418,6 @@ const pageSchemaGraph = buildPageSchemaGraph({
 		line-height: 1.32;
 	}
 
-	.listing-geo-grid {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 1rem;
-		margin-bottom: 1.5rem;
-		padding: 0 1rem;
-	}
-
-	.listing-local-grid {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 1rem;
-		margin-bottom: 1.5rem;
-		padding: 0 1rem;
-	}
-
-	.listing-geo-card,
-	.listing-local-card,
-	.listing-faq-section {
-		padding: 1.5rem;
-		border-radius: 8px;
-		background: var(--bg-card);
-		box-shadow: var(--shadow-sm);
-	}
-
-	.listing-geo-card {
-		border: 1px solid rgba(var(--brand-700-rgb), 0.16);
-		background:
-			linear-gradient(180deg, var(--scrim-light-strong), rgba(247, 251, 248, 0.96)),
-			var(--bg-card);
-	}
-
-	.listing-local-card {
-		border: 1px solid var(--scrim-border-mid);
-		background: var(--scrim-light-soft);
-		box-shadow: var(--shadow-sm);
-	}
-
-	.listing-geo-card-caution {
-		border-color: rgba(249, 115, 22, 0.16);
-	}
-
-	.listing-geo-card h2,
-	.listing-local-card h2,
-	.listing-faq-section h2 {
-		margin-top: 0;
-		margin-bottom: 1rem;
-		font-size: 1.55rem;
-	}
-
-	.listing-bullet-list {
-		margin: 0;
-		padding-left: 1.35rem;
-		color: var(--text-main);
-	}
-
-	.listing-bullet-list li {
-		margin-bottom: 0.7rem;
-		line-height: 1.7;
-	}
-
-	.numbered-list li::marker {
-		color: var(--accent-color);
-		font-weight: 900;
-	}
-
-	.listing-faq-section {
-		margin: 0 1rem 1.5rem;
-	}
-
-	.listing-company-section {
-		max-width: 1180px;
-		margin: 0 auto 1.5rem;
-		padding: 0 1rem;
-	}
-
-	.listing-company-section h2 {
-		margin: 0 0 1rem;
-		font-size: 1.55rem;
-	}
-
-	.listing-company-grid {
-		display: grid;
-		grid-template-columns: repeat(4, minmax(0, 1fr));
-		gap: 1rem;
-	}
-
-	.listing-company-card {
-		display: grid;
-		gap: 0.45rem;
-		padding: 1.2rem;
-		border: 1px solid var(--scrim-border-mid);
-		border-radius: 8px;
-		background: var(--scrim-light-soft);
-		box-shadow: var(--shadow-sm);
-		color: var(--text-main);
-		text-decoration: none;
-		transition: var(--transition);
-	}
-
-	.listing-company-card:hover {
-		transform: translateY(-2px);
-		border-color: var(--text-main);
-		box-shadow: var(--shadow-md);
-	}
-
-	.listing-company-card span,
-	.listing-company-card small {
-		color: var(--text-muted);
-		line-height: 1.6;
-	}
-
-	.listing-faq-grid {
-		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-		gap: 1rem;
-	}
-
-	.listing-faq-item {
-		padding: 1.1rem;
-		border: 1px solid var(--scrim-border-mid);
-		border-radius: 8px;
-		background: rgba(255, 255, 255, 0.72);
-	}
-
-	.listing-faq-item h3 {
-		margin: 0 0 0.45rem;
-		font-size: 1rem;
-	}
-
-	.listing-faq-item p {
-		margin: 0;
-		color: var(--text-muted);
-		line-height: 1.7;
-	}
-
-	.listing-trust-panel {
-		margin: 0 1rem 2rem;
-	}
-
-	.listing-link-grid {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 1rem;
-		max-width: 1180px;
-		margin: 0 auto 2rem;
-		padding: 0 1rem;
-	}
-
-	.listing-link-card {
-		padding: 1.5rem;
-		border-radius: 8px;
-		border: 1px solid var(--scrim-border-mid);
-		background: var(--scrim-light-soft);
-		box-shadow: var(--shadow-sm);
-	}
-
-	.link-chip-row {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.65rem;
-	}
-
-	.link-chip,
-	.related-article-link {
-		display: inline-flex;
-		align-items: center;
-		min-height: 2.4rem;
-		padding: 0.65rem 0.9rem;
-		border-radius: 8px;
-		border: 1px solid rgba(var(--brand-700-rgb), 0.18);
-		background: rgba(var(--brand-700-rgb), 0.08);
-		color: var(--text-main);
-		text-decoration: none;
-		font-weight: 800;
-	}
-
-	.related-article-stack {
-		display: grid;
-		gap: 0.7rem;
-	}
-
-	.listing-empty-note {
-		margin: 0;
-		color: var(--text-muted);
-		line-height: 1.7;
-	}
-
 	@media (min-width: 768px) {
 		.listing-hero {
 			padding: 2rem 1rem 0.75rem;
@@ -691,36 +426,18 @@ const pageSchemaGraph = buildPageSchemaGraph({
 	}
 
 	@media (max-width: 960px) {
-		.listing-fact-grid,
-		.listing-faq-grid,
-		.listing-company-grid {
+		.listing-fact-grid {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
-		}
-
-		.listing-geo-grid,
-		.listing-link-grid,
-		.listing-local-grid {
-			grid-template-columns: 1fr;
 		}
 	}
 
 	@media (max-width: 768px) {
-		.listing-vacancy-launch,
-		.listing-trust-panel {
-			grid-template-columns: 1fr;
-		}
-
 		.listing-breadcrumb {
 			display: none;
 		}
 	}
 
 	@media (max-width: 640px) {
-		.listing-faq-grid,
-		.listing-company-grid {
-			grid-template-columns: 1fr;
-		}
-
 		.listing-hero-panel {
 			padding: 1rem;
 			border-radius: 8px;
@@ -734,24 +451,8 @@ const pageSchemaGraph = buildPageSchemaGraph({
 			font-size: 2.4rem;
 		}
 
-		.listing-hero,
-		.listing-vacancy-launch,
-		.listing-local-grid,
-		.listing-geo-grid,
-		.listing-faq-section,
-		.listing-trust-panel,
-		.listing-link-grid {
+		.listing-hero {
 			padding-inline: 1rem;
-		}
-
-		.listing-vacancy-launch,
-		.listing-local-grid,
-		.listing-geo-grid,
-		.listing-faq-section,
-		.listing-trust-panel,
-		.listing-link-grid {
-			padding-left: 1rem;
-			padding-right: 1rem;
 		}
 	}
 
@@ -769,92 +470,24 @@ const pageSchemaGraph = buildPageSchemaGraph({
 		font-weight: 800;
 		line-height: 1.15;
 	}
-	.listing-hero p,
-	.listing-hero .listing-lede {
+	.listing-hero p {
 		color: var(--ink-600);
-	}
-	.listing-trust-panel {
-		background: var(--ink-0);
-		border: 1px solid var(--ink-200);
-		border-radius: var(--radius-lg);
-	}
-	.listing-link-grid > a,
-	.listing-link-grid > * {
-		background: var(--ink-0);
-		border: 1px solid var(--ink-200);
-		border-radius: var(--radius-md);
-		transition: border-color var(--transition), box-shadow var(--transition);
-	}
-	.listing-link-grid > a:hover,
-	.listing-link-grid > a:focus-visible {
-		border-color: var(--brand-500);
-		box-shadow: var(--shadow-sm);
-		outline: none;
-	}
-	.listing-faq-section h2,
-	.listing-faq-section h3 {
-		font-family: var(--font-heading);
-		color: var(--ink-900);
-		letter-spacing: -0.01em;
 	}
 
 	/* Color contrast fixes — make headings/text readable in light theme */
-	.listing-hero-panel h1,
-	.listing-vacancy-launch h2,
-	.listing-trust-panel h2,
-	.listing-trust-panel h3,
-	.listing-spotlight h2,
-	.listing-spotlight-card h3,
-	.listing-company-card h2,
-	.listing-company-card h3,
-	.listing-link-grid h2,
-	.listing-link-grid h3 {
+	.listing-hero-panel h1 {
 		color: var(--ink-900);
 	}
-	.listing-fact-card strong,
-	.listing-trust-panel p,
-	.listing-vacancy-launch p:not(.section-eyebrow),
-	.listing-link-grid p,
-	.listing-spotlight-card p,
-	.listing-company-card p {
+	.listing-fact-card strong {
 		color: var(--ink-700);
 	}
 	.listing-fact-card span {
 		color: var(--ink-500);
 	}
 
-	.link-chip {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		background: var(--ink-0);
-		border: 1px solid var(--ink-200);
-		color: var(--ink-700);
-		border-radius: var(--radius-pill);
-		font-weight: 600;
-		font-size: var(--fs-13);
-		padding: 8px 14px;
-		text-decoration: none;
-		transition: border-color var(--transition), color var(--transition), background var(--transition);
-	}
-	.link-chip:hover,
-	.link-chip:focus-visible {
-		border-color: var(--brand-500);
-		color: var(--brand-700);
-		background: var(--brand-50);
-		outline: none;
-	}
-
 	/* Dark-mode overrides for hardcoded light backgrounds in legacy rules */
 	:where(html, body).dark-mode .listing-hero-panel,
-	:where(html, body).dark-mode .listing-vacancy-launch,
-	:where(html, body).dark-mode .listing-trust-panel,
 	:where(html, body).dark-mode .listing-fact-card,
-	:where(html, body).dark-mode .listing-faq-section,
-	:where(html, body).dark-mode .listing-faq-item,
-	:where(html, body).dark-mode .listing-spotlight-card,
-	:where(html, body).dark-mode .listing-company-card,
-	:where(html, body).dark-mode .listing-route-card,
 	:where(html, body).dark-mode .listing-secondary-link {
 		background-color: var(--ink-100);
 		background-image: none;
@@ -863,24 +496,10 @@ const pageSchemaGraph = buildPageSchemaGraph({
 		box-shadow: var(--shadow-xs);
 	}
 	:where(html, body).dark-mode .listing-hero-panel h1,
-	:where(html, body).dark-mode .listing-vacancy-launch h2,
-	:where(html, body).dark-mode .listing-trust-panel h2,
-	:where(html, body).dark-mode .listing-trust-panel h3,
-	:where(html, body).dark-mode .listing-spotlight-card h3,
-	:where(html, body).dark-mode .listing-company-card h2,
-	:where(html, body).dark-mode .listing-company-card h3,
-	:where(html, body).dark-mode .listing-faq-section h2,
-	:where(html, body).dark-mode .listing-faq-section h3,
-	:where(html, body).dark-mode .listing-faq-item h3,
 	:where(html, body).dark-mode .listing-fact-card strong {
 		color: var(--ink-900);
 	}
 	:where(html, body).dark-mode .listing-hero-panel > p:not(.section-eyebrow),
-	:where(html, body).dark-mode .listing-vacancy-launch p:not(.section-eyebrow),
-	:where(html, body).dark-mode .listing-trust-panel p,
-	:where(html, body).dark-mode .listing-spotlight-card p,
-	:where(html, body).dark-mode .listing-company-card p,
-	:where(html, body).dark-mode .listing-faq-item p,
 	:where(html, body).dark-mode .listing-fact-card span {
 		color: var(--ink-600);
 	}

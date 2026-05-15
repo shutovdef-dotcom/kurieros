@@ -302,7 +302,7 @@ const kuperDefaults: VacancySource['defaults'] = {
   os: 'Android или iOS',
 };
 
-export const kuperFootSource: VacancySource = {
+const kuperFootSource: VacancySource = {
   id: 2,
   slug: 'kuper-foot-courier',
   company: { name: KUPER_COMPANY_NAME, logo: KUPER_COMPANY_LOGO },
@@ -313,7 +313,7 @@ export const kuperFootSource: VacancySource = {
   isHot: true,
 };
 
-export const kuperBikeSource: VacancySource = {
+const kuperBikeSource: VacancySource = {
   id: 3,
   slug: 'kuper-bike-courier',
   company: { name: KUPER_COMPANY_NAME, logo: KUPER_COMPANY_LOGO },
@@ -324,7 +324,7 @@ export const kuperBikeSource: VacancySource = {
   isHot: true,
 };
 
-export const kuperAutoSource: VacancySource = {
+const kuperAutoSource: VacancySource = {
   id: 4,
   slug: 'kuper-auto-courier',
   company: { name: KUPER_COMPANY_NAME, logo: KUPER_COMPANY_LOGO },
@@ -335,7 +335,7 @@ export const kuperAutoSource: VacancySource = {
   isHot: true,
 };
 
-export const kuperPackerSource: VacancySource = {
+const kuperPackerSource: VacancySource = {
   id: 5,
   slug: 'kuper-order-picker',
   company: { name: KUPER_COMPANY_NAME, logo: KUPER_COMPANY_LOGO },
