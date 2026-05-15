@@ -70,7 +70,7 @@ const hasNoExperience = (Array.isArray(job.labels) && job.labels.includes('Бе�
 			<div class="job-heading">
 				{/* Use <VacancyTKey> for any new vacancies.* keys; co-emits proper data attribute */}
 				<div>
-					<a href={`/v/${job.slug}/`} class="job-title" data-t={`vacancies.${job.id}.title`}>{job.title}</a>
+					<VacancyTKey jobId={job.id} field="title" fallback={job.title} as="a" class="job-title" href={`/v/${job.slug}/`} />
 					<VacancyTKey jobId={job.id} field="company" fallback={job.company} as="div" class="company-name" />
 					{job.shortDescription && <VacancyTKey jobId={job.id} field="shortDescription" fallback={job.shortDescription} as="p" class="job-short-desc" />}
 				</div>
@@ -84,26 +84,26 @@ const hasNoExperience = (Array.isArray(job.labels) && job.labels.includes('Бе�
 				<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
 				<circle cx="12" cy="10" r="3"></circle>
 			</svg>
-			<span data-t={`vacancies.${job.id}.location`}>{job.location}</span>
+			<VacancyTKey jobId={job.id} field="location" fallback={job.location} />
 		</div>
 		<div class="tags">
 			{job.labels.map((label: string, i: number) => (
-				<span class="tag" data-t={`vacancies.${job.id}.label_${i}`}>{label}</span>
+				<VacancyTKey jobId={job.id} field={`label_${i}` as const} fallback={label} class="tag" />
 			))}
 		</div>
 	</div>
 	<div class="job-columns">
 		<div class="job-column">
 			<span class="job-column-label" data-t="job.salary">Зарплата</span>
-			<strong data-t={`vacancies.${job.id}.salary`}>{job.salary}</strong>
+			<VacancyTKey jobId={job.id} field="salary" fallback={job.salary} as="strong" />
 		</div>
 		<div class="job-column">
 			<span class="job-column-label" data-t="job.schedule">График</span>
-			<strong data-t={`vacancies.${job.id}.details_schedule`}>{job.details.schedule}</strong>
+			<VacancyTKey jobId={job.id} field="details_schedule" fallback={job.details.schedule} as="strong" />
 		</div>
 		<div class="job-column">
 			<span class="job-column-label" data-t="job.education">Образование</span>
-			<strong data-t={`vacancies.${job.id}.details_education`}>{job.details.education}</strong>
+			<VacancyTKey jobId={job.id} field="details_education" fallback={job.details.education} as="strong" />
 		</div>
 		<div class="job-column">
 			<span class="job-column-label" data-t="job.experience">Опыт</span>

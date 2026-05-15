@@ -6,6 +6,7 @@ import VacancyStickyApply from '../../components/VacancyStickyApply.astro';
 import ReviewsBlock from '../../components/ReviewsBlock.astro';
 import PartnerBanner from '../../components/PartnerBanner.astro';
 import JobCard from '../../components/JobCard.astro';
+import VacancyTKey from '../../components/VacancyTKey.astro';
 import jobsData from '../../data/jobs';
 import { vacancySources } from '../../data/vacancies';
 import type { VacancyOffer } from '../../data/vacancyTypes';
@@ -596,7 +597,7 @@ const fragmentPreloadUrl = `/vacancy-translations/ru/${job.sourceSlug}.json?v=${
 	<main class="vacancy-page" data-vacancy-source-slug={job.sourceSlug}>
 		<div class="container container-narrow">
 			<nav class="breadcrumb" aria-label="Breadcrumb">
-				<a href="/" data-t="nav.main">Главная</a> &gt; <a href="/companies/" data-t="nav.companies">Компании</a> &gt; <a href={companyUrl} data-t={`vacancies.${job.id}.company`}>{job.company}</a> &gt; <span data-t={`vacancies.${job.id}.title`}>{job.title}</span>
+				<a href="/" data-t="nav.main">Главная</a> &gt; <a href="/companies/" data-t="nav.companies">Компании</a> &gt; <VacancyTKey jobId={job.id} field="company" fallback={job.company} as="a" href={companyUrl} /> &gt; <VacancyTKey jobId={job.id} field="title" fallback={job.title} />
 			</nav>
 
 			<section class="vacancy-header">
@@ -605,8 +606,8 @@ const fragmentPreloadUrl = `/vacancy-translations/ru/${job.sourceSlug}.json?v=${
 						<img src={job.companyLogo} alt={job.company} class="vacancy-logo" width="80" height="80" loading="eager" decoding="async" />
 						<div>
 							<div class="vacancy-kicker" data-t="vacancy.card_kicker">Карточка вакансии</div>
-							<h1 data-t={`vacancies.${job.id}.title`}>{job.title}</h1>
-							<a href={companyUrl} class="vacancy-company-name" data-t={`vacancies.${job.id}.company`}>{job.company}</a>
+							<VacancyTKey jobId={job.id} field="title" fallback={job.title} as="h1" />
+							<VacancyTKey jobId={job.id} field="company" fallback={job.company} as="a" class="vacancy-company-name" href={companyUrl} />
 						</div>
 					</div>
 					<p class="vacancy-ai-summary" data-t="vacancy.hero_summary">
@@ -614,7 +615,7 @@ const fragmentPreloadUrl = `/vacancy-translations/ru/${job.sourceSlug}.json?v=${
 						требования и формат оформления перед переходом к отклику.
 					</p>
 					<div class="vacancy-meta-row">
-						<span class="meta-pill"><span data-t="vacancy.updated">Обновлено</span>&nbsp;<span data-t={`vacancies.${job.id}.updated_date`}>{updatedDate}</span></span>
+						<span class="meta-pill"><span data-t="vacancy.updated">Обновлено</span>&nbsp;<VacancyTKey jobId={job.id} field="updated_date" fallback={updatedDate} /></span>
 						{cityLinks.slice(0, 2).map((city) => (
 							<a href={city.href} class="meta-pill meta-pill-link">{city.name}</a>
 						))}
@@ -678,8 +679,8 @@ const fragmentPreloadUrl = `/vacancy-translations/ru/${job.sourceSlug}.json?v=${
 				</div>
 					<div class="vacancy-salary-card">
 						<span data-t="vacancy.income">Доход</span>
-						<strong data-t={`vacancies.${job.id}.salary`}>{job.salary}</strong>
-						<small class="salary-rate" data-t={`vacancies.${job.id}.details_rate`}>{job.details.rate}</small>
+						<VacancyTKey jobId={job.id} field="salary" fallback={job.salary} as="strong" />
+						<VacancyTKey jobId={job.id} field="details_rate" fallback={job.details.rate} as="small" class="salary-rate" />
 						<small data-t="vacancy.final_terms_short">Финальные условия уточняются при отклике</small>
 						{isLeadFormApply ? (
 							<button
@@ -734,13 +735,13 @@ const fragmentPreloadUrl = `/vacancy-translations/ru/${job.sourceSlug}.json?v=${
 				<div class="vacancy-main">
 					<section class="vacancy-section vacancy-description-section">
 						<h2 data-t="vacancy.desc_title">Описание вакансии</h2>
-						<p class="vacancy-description" data-t={`vacancies.${job.id}.description`}>{job.description}</p>
+						<VacancyTKey jobId={job.id} field="description" fallback={job.description} as="p" class="vacancy-description" />
 
 						<div class="vacancy-subsection">
 							<h3 data-t="vacancy.req_title">Требования</h3>
 							<ul class="vacancy-list">
 								{job.requirements.map((req: string, idx: number) => (
-									<li data-t={`vacancies.${job.id}.req_${idx}`}>{req}</li>
+									<VacancyTKey jobId={job.id} field={`req_${idx}` as const} fallback={req} as="li" />
 								))}
 							</ul>
 						</div>
@@ -750,7 +751,7 @@ const fragmentPreloadUrl = `/vacancy-translations/ru/${job.sourceSlug}.json?v=${
 								<h3 data-t="vacancy.docs_title">Документы для оформления</h3>
 								<ul class="vacancy-list">
 									{job.requiredDocuments.map((document: string, idx: number) => (
-										<li data-t={`vacancies.${job.id}.doc_${idx}`}>{document}</li>
+										<VacancyTKey jobId={job.id} field={`doc_${idx}` as const} fallback={document} as="li" />
 									))}
 								</ul>
 							</div>
@@ -760,7 +761,7 @@ const fragmentPreloadUrl = `/vacancy-translations/ru/${job.sourceSlug}.json?v=${
 							<h3 data-t="vacancy.ben_title">Преимущества</h3>
 							<ul class="vacancy-list">
 								{job.benefits.map((benefit: string, idx: number) => (
-									<li data-t={`vacancies.${job.id}.ben_${idx}`}>{benefit}</li>
+									<VacancyTKey jobId={job.id} field={`ben_${idx}` as const} fallback={benefit} as="li" />
 								))}
 							</ul>
 						</div>
@@ -887,8 +888,8 @@ const fragmentPreloadUrl = `/vacancy-translations/ru/${job.sourceSlug}.json?v=${
 								{sameRoleOtherCities.map((other) => (
 									<li class="vacancy-other-cities-item">
 										<a class="vacancy-other-cities-link" href={`/v/${other.slug}/`}>
-											<span class="vacancy-other-cities-city" data-t={`vacancies.${other.id}.location`}>{other.location}</span>
-											<span class="vacancy-other-cities-salary" data-t={`vacancies.${other.id}.salary`}>{other.salary}</span>
+											<VacancyTKey jobId={other.id} field="location" fallback={other.location} class="vacancy-other-cities-city" />
+											<VacancyTKey jobId={other.id} field="salary" fallback={other.salary} class="vacancy-other-cities-salary" />
 										</a>
 									</li>
 								))}
@@ -901,19 +902,19 @@ const fragmentPreloadUrl = `/vacancy-translations/ru/${job.sourceSlug}.json?v=${
 					<div class="vacancy-card-sidebar">
 						<h3 data-t="vacancy.details_title">Детали</h3>
 						<div class="detail-item">
-							<strong data-t="vacancy.location">Локация:</strong> <span data-t={`vacancies.${job.id}.location`}>{job.location}</span>
+							<strong data-t="vacancy.location">Локация:</strong> <VacancyTKey jobId={job.id} field="location" fallback={job.location} />
 						</div>
 						<div class="detail-item">
-							<strong data-t="job.schedule">График:</strong> <span data-t={`vacancies.${job.id}.details_schedule`}>{job.details.schedule}</span>
+							<strong data-t="job.schedule">График:</strong> <VacancyTKey jobId={job.id} field="details_schedule" fallback={job.details.schedule} />
 						</div>
 						<div class="detail-item">
-							<strong data-t="vacancy.payment">Оплата:</strong> <span data-t={`vacancies.${job.id}.details_payment_freq`}>{job.details.payment_freq}</span>
+							<strong data-t="vacancy.payment">Оплата:</strong> <VacancyTKey jobId={job.id} field="details_payment_freq" fallback={job.details.payment_freq} />
 						</div>
 						<div class="detail-item">
-							<strong data-t="vacancy.age">Возраст:</strong> <span data-t={`vacancies.${job.id}.details_age`}>{job.details.age}</span>
+							<strong data-t="vacancy.age">Возраст:</strong> <VacancyTKey jobId={job.id} field="details_age" fallback={job.details.age} />
 						</div>
 						<div class="detail-item">
-							<strong data-t="vacancy.employment">Оформление:</strong> <span data-t={`vacancies.${job.id}.details_employment_type`}>{job.details.employment_type}</span>
+							<strong data-t="vacancy.employment">Оформление:</strong> <VacancyTKey jobId={job.id} field="details_employment_type" fallback={job.details.employment_type} />
 						</div>
 						
 						{isLeadFormApply ? (
