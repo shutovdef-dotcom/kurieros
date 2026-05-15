@@ -1,4 +1,3 @@
-import { CITIES } from './constants';
 import { CITY_DATASET } from './cities-dataset';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from './translations';
 import { vacancySources } from './vacancies';
@@ -204,7 +203,31 @@ const formatUpdatedDate = (date: string, _language: SupportedLanguage) =>
     year: 'numeric',
   }).format(new Date(date));
 
-const cityCodes = new Map(CITIES.map((city, index) => [city.name, index + 1]));
+// CITY_CODES — fixed (frozen) numeric codes used to build vacancy `id` values
+// via getGeneratedId(). MUST NOT be reordered or extended: any change to a
+// city's code rewrites every job ID for that city, breaking external
+// bookmarks and analytics. Cities not listed here fall back to
+// `900 + offer-index + 1` per getGeneratedId() (preserved historical
+// behaviour). The list captures the original order/length of the legacy
+// CITIES array (15 cities) at the moment of its removal — keep it that way.
+const CITY_CODES: Record<string, number> = {
+  'Москва': 1,
+  'Санкт-Петербург': 2,
+  'Екатеринбург': 3,
+  'Новосибирск': 4,
+  'Казань': 5,
+  'Нижний Новгород': 6,
+  'Челябинск': 7,
+  'Самара': 8,
+  'Омск': 9,
+  'Ростов-на-Дону': 10,
+  'Уфа': 11,
+  'Красноярск': 12,
+  'Воронеж': 13,
+  'Пермь': 14,
+  'Волгоград': 15,
+};
+const cityCodes = new Map<string, number>(Object.entries(CITY_CODES));
 const cityPrepositions = new Map(CITY_DATASET.map((city) => [city.name, city.prep]));
 
 const unique = <T>(items: T[]) => Array.from(new Set(items.filter(Boolean)));

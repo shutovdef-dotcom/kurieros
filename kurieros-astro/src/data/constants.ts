@@ -1,20 +1,10 @@
-export const CITIES = [
-    { name: "Москва", slug: "moskva", prep: "в Москве" },
-    { name: "Санкт-Петербург", slug: "spb", prep: "в Санкт-Петербурге" },
-    { name: "Екатеринбург", slug: "ekaterinburg", prep: "в Екатеринбурге" },
-    { name: "Новосибирск", slug: "novosibirsk", prep: "в Новосибирске" },
-    { name: "Казань", slug: "kazan", prep: "в Казани" },
-    { name: "Нижний Новгород", slug: "nizhniy-novgorod", prep: "в Нижнем Новгороде" },
-    { name: "Челябинск", slug: "chelyabinsk", prep: "в Челябинске" },
-    { name: "Самара", slug: "samara", prep: "в Самаре" },
-    { name: "Омск", slug: "omsk", prep: "в Омске" },
-    { name: "Ростов-на-Дону", slug: "rostov-na-donu", prep: "в Ростове-на-Дону" },
-    { name: "Уфа", slug: "ufa", prep: "в Уфе" },
-    { name: "Красноярск", slug: "krasnoyarsk", prep: "в Красноярске" },
-    { name: "Воронеж", slug: "voronezh", prep: "в Воронеже" },
-    { name: "Пермь", slug: "perm", prep: "в Перми" },
-    { name: "Волгоград", slug: "volgograd", prep: "в Волгограде" }
-];
+// NOTE: The legacy `CITIES` constant was removed in M8 — its single consumer
+// (src/data/jobs.ts cityCodes Map) now uses an internal CITY_CODES record
+// with frozen numeric codes, so vacancy `id` values stay byte-stable.
+// CITY_DATASET in src/data/cities-dataset.ts is now the single source of
+// truth for city metadata (name, slug, prep, population). Note also that
+// the legacy CITIES used `slug: "spb"` for Санкт-Петербург; the canonical
+// slug is `sankt-peterburg` (see CITY_DATASET).
 
 export const CATEGORIES = [
     { name: "Еда", query: "Еда", slug: "eda" },
