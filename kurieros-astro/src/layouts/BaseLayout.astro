@@ -3,9 +3,17 @@ import '../styles/index.css';
 import '../styles/themes.css';
 import VPNModal from '../components/VPNModal.astro';
 import OzonLeadModal from '../components/OzonLeadModal.astro';
-import { SUPPORTED_LANGUAGES, translations, type SupportedLanguage } from '../data/translations';
+import { SUPPORTED_LANGUAGES, translations as allTranslations, type SupportedLanguage } from '../data/translations';
 
 const supportedLanguages = SUPPORTED_LANGUAGES;
+// M2: shell-UI dictionary is Russian-only (post PR #131), so the 11 non-RU
+// slots in `allTranslations` were byte-identical clones of `ru`. Inlining
+// all 12 via `define:vars` cost ~147 KB of duplicate JSON literal per HTML
+// page (12 × ~13 KB shell dicts). Ship just the RU slot; the runtime falls
+// back to it for every non-RU lang. Per-language `.vacancies` slots are
+// still created on-demand by `ensureVacancyTranslations` once fragments
+// load, so nothing downstream loses data.
+const translations = { ru: allTranslations.ru };
 // TRANS-1: per-source fragments live at /vacancy-translations/<lang>/<sourceSlug>.json.
 // Client scans visible cards for `data-vacancy-source-slug` and loads only
 // the fragments it needs (typical detail page: 1 fragment ~80KB-2MB,
@@ -551,17 +559,35 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 					return Array.from(slugs);
 				}
 
+				// M1: fragments are emitted in compact format `{ defaults, entries }`.
+				// `defaults` holds fields that are byte-identical across every entry
+				// of a source × language (typical: company, requirements, benefits,
+				// docs, most details_* — ~35 of 46 fields). `entries[jobId]` only
+				// carries the fields that genuinely vary per (city, transport):
+				// page_title, title, salary, location, updated_date, details_schedule.
+				// Expand back into the flat `{ jobId: {...allFields} }` shape the
+				// runtime merger and downstream `applyTranslations` lookups expect.
+				function expandFragment(fragment) {
+					if (!fragment || typeof fragment !== 'object') return {};
+					const defaults = fragment.defaults || {};
+					const entries = fragment.entries || {};
+					const expanded = {};
+					for (const id in entries) {
+						if (Object.prototype.hasOwnProperty.call(entries, id)) {
+							expanded[id] = Object.assign({}, defaults, entries[id]);
+						}
+					}
+					return expanded;
+				}
+
 				async function fetchFragment(lang, sourceSlug) {
 					const cacheKey = lang + '/' + sourceSlug;
 					if (loadedFragments.has(cacheKey)) return null;
 					// SessionStorage check first — survives full-page navigation
 					// (BFCache miss) within the same tab, so a returning visitor
 					// pays neither the network roundtrip nor the JSON.parse cost
-					// for already-seen fragments. The HTTP layer (force-cache
-					// + ?v=<build>) is still the primary source of truth across
-					// tabs and after a tab close; sessionStorage is the fast path
-					// for in-tab repeats. Versioned key (suffix `/<build>`) means
-					// a redeploy invalidates every entry naturally — combined
+					// for already-seen fragments. Versioned key (suffix `/<build>`)
+					// means a redeploy invalidates every entry naturally; combined
 					// with the one-time cleanup at IIFE start, stale entries do
 					// not pile up across deploys.
 					const sessionFragment = loadFragmentFromSession(lang, sourceSlug);
@@ -569,16 +595,13 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 						loadedFragments.add(cacheKey);
 						return sessionFragment;
 					}
-					// Immutable-asset cache pattern: every URL carries the build-time
-					// version (`?v=<vacancyTranslationsVersion>`), and `force-cache` tells
-					// the browser to serve the disk cache forever for any URL it has
-					// already seen — zero network roundtrip on subsequent visits.
-					// A redeploy mints a new version, producing a fresh URL → cache
-					// miss → re-download once → cached again until the next deploy.
-					// This was originally added in #ed99d40 to keep returning visitors
-					// off the network entirely; PR #133 dropped force-cache to fix the
-					// "stale forever" bug, but with `?v=` cache-busting the original
-					// pattern is safe again (PR #134).
+					// Immutable-asset cache pattern: each URL carries the build-time
+					// `?v=<vacancyTranslationsVersion>` query, and `cache: 'force-cache'`
+					// tells the browser to serve the disk cache for any URL it has
+					// already seen — zero network roundtrip on subsequent visits within
+					// the same build. A redeploy mints a new version, producing fresh
+					// URLs → cache miss → re-download once → cached again until the
+					// next deploy.
 					const url = VACANCY_TRANSLATIONS_BASE + '/' + lang + '/' + sourceSlug + '.json?v=' + VACANCY_TRANSLATIONS_VERSION;
 					try {
 						const response = await fetch(url, { cache: 'force-cache' });
@@ -624,12 +647,20 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 						slugs.map((slug) => fetchFragment(lang, slug)),
 					);
 
-					const langDictionary = translations[lang] || {};
+					// M2: shell-UI dict is RU-only, so non-RU lang slots start
+					// empty — fall back to the RU shell dict so translated entries
+					// merge atop the same baseline.
+					const langDictionary = translations[lang] || translations[DEFAULT_LANG] || {};
 					const currentVacancies = langDictionary.vacancies || {};
 					const merged = { ...currentVacancies };
 					for (const fragment of fragments) {
 						if (!fragment) continue;
-						Object.assign(merged, fragment);
+						// M1: compact-format fragments need expansion before merge.
+						// `expandFragment` materializes each entry as
+						// `{ ...defaults, ...entries[id] }` so the downstream
+						// `applyTranslations` lookup (`vacancies.<jobId>.<field>`)
+						// works against the same flat shape it always has.
+						Object.assign(merged, expandFragment(fragment));
 					}
 					translations[lang] = {
 						...langDictionary,
