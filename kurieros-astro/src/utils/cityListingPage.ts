@@ -7,10 +7,8 @@
  */
 
 import type { GeneratedJob } from '../data/vacancyTypes';
-import { CATEGORIES } from '../data/constants';
 import { getCitiesFromJobs } from './cities';
-import { slugifyCompany } from './companies';
-import { formatMoney, getVacancyPluralText, humanJoin, parseSalary } from './format';
+import { getVacancyPluralText } from './format';
 import { buildBreadcrumbSchema, buildPlaceSchema } from './schema';
 
 // ---------------------------------------------------------------------------
@@ -18,23 +16,8 @@ import { buildBreadcrumbSchema, buildPlaceSchema } from './schema';
 // ---------------------------------------------------------------------------
 
 export type City = ReturnType<typeof getCitiesFromJobs>[number];
-export type Category = (typeof CATEGORIES)[number];
 
 export type ListingType = 'city' | 'category';
-
-export type LinkItem = {
-	name: string;
-	href: string;
-};
-
-export type CityCompanyCard = {
-	name: string;
-	href: string;
-	vacancyCount: number;
-	maxSalary: number;
-	paymentPreview: string[];
-	transportPreview: string[];
-};
 
 export type NearbyCityLink = {
 	name: string;
@@ -47,13 +30,6 @@ export type FactCard = {
 	value: string;
 };
 
-export type Article = {
-	title: string;
-	description: string;
-	slug: string;
-	date: string;
-};
-
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
@@ -62,23 +38,14 @@ export type Article = {
  * B2 contextual rule: chip labels use the compact form («Пешком»);
  * breadcrumb / footer cloud / category card use the full form
  * («Пеший курьер»). This map drives tag-chip rendering, so it stays
- * compact.
+ * compact. Kept module-private — `buildTransportTypes` consumes it as
+ * its default `labels` argument and is the only remaining consumer.
  */
-export const TRANSPORT_LABEL_MAP: Record<string, string> = {
+const TRANSPORT_LABEL_MAP: Record<string, string> = {
 	auto: 'На авто',
 	bicycle: 'На велосипеде или самокате',
 	foot: 'Пешком',
 };
-
-const SCENARIO_SLUGS = [
-	'na-avto',
-	'peshkom',
-	'na-velosipede',
-	'dlya-studentov',
-	'podrabotka',
-	'ezhednevnaya-oplata',
-	'ezhenedelnaya-oplata',
-] as const;
 
 // ---------------------------------------------------------------------------
 // Pure helpers
@@ -95,101 +62,6 @@ export function buildTransportTypes(
 			),
 		),
 	);
-}
-
-export function buildCityScenarioRoutes(
-	availableTags: Set<string>,
-	hasDailyPayments: boolean,
-	hasWeeklyPayments: boolean,
-): LinkItem[] {
-	return SCENARIO_SLUGS.filter((slug) => {
-		if (slug === 'na-avto') return availableTags.has('auto');
-		if (slug === 'peshkom') return availableTags.has('foot');
-		if (slug === 'na-velosipede') return availableTags.has('bicycle');
-		if (slug === 'dlya-studentov') return availableTags.has('16plus');
-		if (slug === 'podrabotka') return availableTags.has('flexible');
-		if (slug === 'ezhednevnaya-oplata') return hasDailyPayments;
-		if (slug === 'ezhenedelnaya-oplata') return hasWeeklyPayments;
-		return false;
-	})
-		.map((slug) => CATEGORIES.find((category) => category.slug === slug))
-		.filter((category): category is Category => Boolean(category))
-		.slice(0, 5)
-		.map((category) => ({
-			name: category.name,
-			href: `/rabota-kurerom-${category.slug}/`,
-		}));
-}
-
-export function buildCityCompanyCards(
-	filteredJobs: GeneratedJob[],
-	labels: Record<string, string> = TRANSPORT_LABEL_MAP,
-): CityCompanyCard[] {
-	type Aggregate = {
-		name: string;
-		href: string;
-		vacancyCount: number;
-		maxSalary: number;
-		payments: Set<string>;
-		transports: Set<string>;
-	};
-
-	const grouped = filteredJobs.reduce<Map<string, Aggregate>>((map, job) => {
-		const existing = map.get(job.company) ?? {
-			name: job.company,
-			href: `/companies/${slugifyCompany(job.company)}/`,
-			vacancyCount: 0,
-			maxSalary: 0,
-			payments: new Set<string>(),
-			transports: new Set<string>(),
-		};
-
-		existing.vacancyCount += 1;
-		existing.maxSalary = Math.max(existing.maxSalary, parseSalary(job.salary));
-		existing.payments.add(job.details.payment_freq);
-		job.tags
-			.filter((tag) => tag in labels)
-			.forEach((tag) => existing.transports.add(labels[tag]));
-
-		map.set(job.company, existing);
-		return map;
-	}, new Map());
-
-	return Array.from(grouped.values())
-		.map((company) => ({
-			name: company.name,
-			href: company.href,
-			vacancyCount: company.vacancyCount,
-			maxSalary: company.maxSalary,
-			paymentPreview: Array.from(company.payments).slice(0, 2),
-			transportPreview: Array.from(company.transports).slice(0, 2),
-		}))
-		.sort((a, b) => b.vacancyCount - a.vacancyCount || b.maxSalary - a.maxSalary)
-		.slice(0, 4);
-}
-
-export function pickSalaryLeader(cityCompanyCards: CityCompanyCard[]): CityCompanyCard | null {
-	if (cityCompanyCards.length === 0) return null;
-	return [...cityCompanyCards].sort((a, b) => b.maxSalary - a.maxSalary)[0] ?? null;
-}
-
-export function buildLocalStartPoints(
-	cityCompanyCards: CityCompanyCard[],
-	salaryLeader: CityCompanyCard | null,
-	transportTypes: string[],
-	cityPrep: string,
-): string[] {
-	return [
-		cityCompanyCards[0]
-			? `Больше всего вариантов сейчас у ${cityCompanyCards[0].name}. Начните с этой компании, если хотите быстро понять рынок ${cityPrep}.`
-			: `В подборке ${cityPrep} уже есть несколько вакансий. Сначала посмотрите компании, где больше открытых позиций.`,
-		salaryLeader
-			? `Самая высокая заявленная сумма сейчас у ${salaryLeader.name}: до ${formatMoney(salaryLeader.maxSalary)} ₽. Проверьте, из чего складывается эта цифра.`
-			: 'Доход зависит от смен, района и транспорта, поэтому лучше сравнить несколько вакансий перед откликом.',
-		transportTypes.length
-			? `В городе есть варианты: ${humanJoin(transportTypes).toLowerCase()}. Можно сразу сузить список по транспорту и графику.`
-			: 'Формат работы зависит от работодателя, поэтому после выбора города полезно открыть страницы по типу доставки.',
-	];
 }
 
 export function buildNearbyCityLinks(
@@ -314,84 +186,6 @@ export function buildSeoDescription(args: SeoDescriptionArgs): string {
 	return raw.slice(0, 170);
 }
 
-export function filterRelatedArticles(
-	articles: Article[],
-	type: ListingType,
-	dataName: string,
-	searchTerm: string,
-): Article[] {
-	const dataNameLc = dataName.toLowerCase();
-	return articles
-		.filter((article) => {
-			const haystack = `${article.title} ${article.description}`.toLowerCase();
-			if (type === 'city') {
-				return haystack.includes(dataNameLc) || haystack.includes('курьер');
-			}
-			return (
-				haystack.includes(dataNameLc) ||
-				haystack.includes(searchTerm) ||
-				haystack.includes('курьер')
-			);
-		})
-		.slice(0, 3);
-}
-
-export function buildRouteLinks(
-	allJobs: GeneratedJob[],
-	type: ListingType,
-	dataName: string,
-	citySlug?: string,
-): LinkItem[] {
-	if (type === 'city') {
-		return [
-			{ name: 'Сравнение вакансий', href: '/compare/' },
-			{ name: 'Компании', href: '/companies/' },
-			{ name: 'Гид: доход курьера', href: '/guide/dohod/' },
-			{ name: 'Гид: оформление', href: '/guide/oformlenie/' },
-			...CATEGORIES.filter((cat) => cat.slug !== citySlug)
-				.slice(0, 3)
-				.map((cat) => ({
-					name: cat.name,
-					href: `/rabota-kurerom-${cat.slug}/`,
-				})),
-		];
-	}
-
-	return [
-		{ name: 'Сравнение вакансий', href: '/compare/' },
-		{ name: 'Города', href: '/cities/' },
-		{ name: 'Гид для курьера', href: '/guide/' },
-		...getCitiesFromJobs(allJobs)
-			.filter((city) => city.name !== dataName)
-			.sort((a, b) => b.vacancyCount - a.vacancyCount)
-			.slice(0, 3)
-			.map((city) => ({
-				name: city.name,
-				href: `/rabota-kurerom-${city.slug}/`,
-			})),
-	];
-}
-
-export function buildQuickLaunchLinks(
-	type: ListingType,
-	cityScenarioRoutes: LinkItem[],
-	routeLinks: LinkItem[],
-): LinkItem[] {
-	if (type === 'city') {
-		return [
-			...cityScenarioRoutes.slice(0, 4),
-			{ name: 'Компании', href: '/companies/' },
-			{ name: 'Сравнение', href: '/compare/' },
-		];
-	}
-
-	return [
-		{ name: 'Сравнение', href: '/compare/' },
-		{ name: 'Города', href: '/cities/' },
-		...routeLinks.slice(2, 5),
-	];
-}
-
 export function buildHeroIntro(
 	type: ListingType,
 	isEzhednevLanding: boolean,
@@ -405,13 +199,6 @@ export function buildHeroIntro(
 		return `Ниже собраны вакансии ${cityPrep}. Смотрите оплату, транспорт, оформление и переходите только в те варианты, где условия похожи на ваши.`;
 	}
 	return `Ниже собраны вакансии по этому формату. Сначала проверьте оплату и требования, затем переходите к компаниям или городам.`;
-}
-
-export function buildLaunchSummary(type: ListingType, cityPrep?: string): string {
-	if (type === 'city') {
-		return `Мы уже оставили в списке только предложения ${cityPrep}. Используйте фильтры, если важен конкретный транспорт или график.`;
-	}
-	return 'Мы уже применили нужный фильтр. Остаётся сравнить несколько вакансий и открыть те, где условия подходят.';
 }
 
 export type FactCardArgs = {
@@ -428,21 +215,6 @@ export function buildFactCards(args: FactCardArgs): FactCard[] {
 		{ label: 'Компании', value: `${companyCount}` },
 		{ label: 'Форматы', value: transportTypes.join(', ') || 'Смешанные форматы' },
 		{ label: 'Выплаты', value: paymentTypes.slice(0, 2).join(' / ') || 'Уточняются в карточке' },
-	];
-}
-
-export function buildFitPoints(type: ListingType, dataName: string, cityPrep?: string): string[] {
-	if (type === 'city') {
-		return [
-			`Тем, кто ищет работу курьером ${cityPrep} и хочет увидеть активные компании в одном списке.`,
-			`Кандидатам, которые выбирают между пешей доставкой, велосипедом, самокатом или автомобилем.`,
-			`Тем, кто хочет сначала спокойно сравнить условия, а уже потом переходить к анкете работодателя.`,
-		];
-	}
-	return [
-		`Тем, кто рассматривает формат "${dataName}" и хочет увидеть несколько вариантов без ручного поиска.`,
-		`Кандидатам, которым важно сравнить выплаты, требования и занятость до перехода к анкете.`,
-		`Тем, кто хочет отсечь неподходящие вакансии и открыть только близкие по условиям.`,
 	];
 }
 
