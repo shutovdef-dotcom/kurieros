@@ -18,7 +18,11 @@
 import jobsData from '../data/jobs';
 import { CATEGORIES } from '../data/constants';
 import { getCitiesFromJobs } from './cities';
-import { filterJobsByCriteria } from './jobFilters';
+import {
+	buildJobsByCityMap,
+	filterJobsByCriteria,
+	getCityJobsFromMap,
+} from './jobFilters';
 
 // Slugs with bespoke content overrides inside src/pages/[slug].astro
 // that always render a non-empty fallback list (e.g. ezhednevnaya-oplata
@@ -33,10 +37,13 @@ export function getEmptyListingPaths(): Set<string> {
 	const empty = new Set<string>();
 
 	// City-listing emptiness uses the same city predicate as the SSR
-	// page in `[slug].astro` (via `filterJobsByCriteria`). Sitemap and
-	// SSR must agree — see jobFilters.ts JSDoc for the full rationale.
+	// page in `[slug].astro`. Sitemap and SSR must agree — see
+	// jobFilters.ts JSDoc for the full rationale. The Map precompute
+	// turns this from O(cities × jobs) (~4.6M ops) into O(jobs +
+	// cities) (audit ref v2 H12).
+	const jobsByCity = buildJobsByCityMap(jobsData);
 	for (const city of getCitiesFromJobs(jobsData)) {
-		const matched = filterJobsByCriteria(jobsData, { city: city.name });
+		const matched = getCityJobsFromMap(jobsByCity, city.name);
 		if (matched.length === 0) {
 			empty.add(`/rabota-kurerom-${city.slug}`);
 		}

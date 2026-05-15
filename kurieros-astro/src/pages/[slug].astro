@@ -21,7 +21,17 @@ import {
 	buildVacancyCountText,
 	cleanCategoryName,
 } from '../utils/cityListingPage';
-import { filterJobsByCriteria } from '../utils/jobFilters';
+import {
+	buildJobsByCityMap,
+	filterJobsByCriteria,
+	getCityJobsFromMap,
+} from '../utils/jobFilters';
+
+// Precompute the per-city job buckets ONCE per build (module load),
+// shared across every static path this file emits. Without this, each
+// of the ~970 city pages re-scanned the full ~4.8k job list — ~4.7M
+// filter ops per build for this file alone (audit ref v2 H12).
+const jobsByCity = buildJobsByCityMap(jobsData);
 
 export async function getStaticPaths() {
 	type CityProps = {
@@ -102,12 +112,23 @@ const tagFilter = type === 'category' ? data.tag || 'all' : 'all';
 // `src/utils/jobFilters.ts` — sitemap emitter + JobGrid + this page
 // MUST agree on which jobs land where, so any drift would noindex
 // listings while still emitting them in the sitemap (or vice versa).
-// On non-city pages, the city criterion stays absent (matches all).
-const filteredJobs = filterJobsByCriteria(jobsData, {
-	city: type === 'city' ? data.name : null,
-	tag: tagFilter,
-	search: searchTerm,
-});
+//
+// For city pages we look up the per-city bucket from the module-level
+// `jobsByCity` Map (O(1)) and only run the tag/search filter on that
+// subset. For category pages there's no city criterion, so we filter
+// the full job list directly. Both branches converge on
+// `filterJobsByCriteria`, keeping the predicate semantics identical
+// to the sitemap emitter. (audit ref v2 H12)
+const filteredJobs =
+	type === 'city'
+		? filterJobsByCriteria(getCityJobsFromMap(jobsByCity, data.name), {
+			tag: tagFilter,
+			search: searchTerm,
+		})
+		: filterJobsByCriteria(jobsData, {
+			tag: tagFilter,
+			search: searchTerm,
+		});
 
 const companyNames = Array.from(new Set(filteredJobs.map((job) => job.company)));
 const paymentTypes = Array.from(new Set(filteredJobs.map((job) => job.details.payment_freq)));
