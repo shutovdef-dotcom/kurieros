@@ -10,34 +10,16 @@ import jobsData from '../data/jobs';
 import { getCityNames, sortCityNamesByPopulation } from '../utils/cities';
 import { slugifyCompany } from '../utils/companies';
 import { buildBreadcrumbSchema } from '../utils/schema';
+import type { CompareData, Feature } from '../scripts/compare/types';
 
-// Compare-page browser-side helpers, split into focused fragments.
-// Each is a JS source string concatenated into the inline DOMContentLoaded
-// callback below. Keeping the script inline (vs. an external bundle) is
-// deliberate: it preserves `define:vars` semantics, avoids an extra HTTP
-// request, and keeps the page first-paint snappy. See per-file headers
-// for the closure variables each fragment expects in scope.
-import compareListRaw from '../scripts/compare/compare-list.js?raw';
-import catalogLoaderRaw from '../scripts/compare/catalog-loader.js?raw';
-import renderRaw from '../scripts/compare/render.js?raw';
-import filtersRaw from '../scripts/compare/filters.js?raw';
-
-/**
- * Strip the leading `// …` JSDoc header (and the blank line that follows
- * it) from a `?raw`-imported helper source. The header is for module
- * authors; shipping it inside the inline `<script>` adds bytes to every
- * `/compare/` response without giving the browser anything useful.
- *
- * Regex: match from start of file, any number of `//`-prefixed lines and
- * blank lines, up to (but not including) the first non-comment line.
- */
-const stripHeaderComment = (src: string): string =>
-  src.replace(/^(?:[ \t]*\/\/[^\n]*\n|[ \t]*\n)+/, '');
-
-const compareListSrc = stripHeaderComment(compareListRaw);
-const catalogLoaderSrc = stripHeaderComment(catalogLoaderRaw);
-const renderSrc = stripHeaderComment(renderRaw);
-const filtersSrc = stripHeaderComment(filtersRaw);
+// Compare-page browser-side logic lives in a single typed ES module
+// (`src/scripts/compare/compareInit.ts`) that Astro bundles and tree-shakes.
+// It used to be four `.js` fragments imported via Vite `?raw` and
+// string-concatenated into an inline `set:html` script — the fragments
+// shared variables through implicit closure with no compile-time check
+// (audit v2 M1). Server data is now handed to the bundled module via a
+// `<script type="application/json">` tag (see the markup below) instead of
+// `define:vars`, which would force `is:inline` and block `import`.
 
 const transportLabelMap: Record<string, string> = {
   auto: 'Авто',
@@ -96,7 +78,10 @@ const compareJobs = jobsData.slice(0, 4).map(mapCompareJob);
 const totalCompareJobs = jobsData.length;
 const availableCities = sortCityNamesByPopulation(getCityNames(jobsData));
 
-const features = [
+// Typed as `Feature[]` so each `key` is checked against `CompareFeatureKey`
+// (the string-valued keys of `CompareJob`) — a typo here is now a compile
+// error, not a blank feature row at runtime.
+const features: Feature[] = [
   { key: 'salary', name: 'Зарплата' },
   { key: 'location', name: 'Район работы' },
   { key: 'transport', name: 'Транспорт' },
@@ -138,96 +123,12 @@ const pageSchemaGraph = [
   ),
 ];
 
-// Assemble the inline browser script body from per-concern fragments.
-// Order matters: catalog-loader and compare-list reference helpers
-// (`applyScopedStyles`, `escapeHtml`) defined in the orchestration core,
-// and `renderSelectedComparison` (defined in core) is called by both
-// `filters.js` and the storage event handler. Concatenating in this
-// order keeps every reference resolvable without forward declarations.
-const compareScriptBody = `
-  document.addEventListener('DOMContentLoaded', () => {
-    const grid = document.querySelector('.compare-grid');
-    if (!grid) return;
-
-    const companyLinks = document.querySelector('[data-compare-companies]');
-    // Bootstrap with the 4 preselected jobs already in HTML.
-    // Full catalog is fetched lazily from /api/compare-jobs.json on demand.
-    const jobsById = new Map(compareJobs.map((job) => [job.id, job]));
-    const hasAvailableJobs = totalCompareJobs > 0;
-    let fullCatalogPromise = null;
-    let catalogLoaded = false;
-    let catalogLoadError = null;
-${catalogLoaderSrc}
-    const scopeAttribute = Array.from(grid.getAttributeNames()).find((name) => name.startsWith('data-astro-cid'));
-
-    function applyScopedStyles(root) {
-      if (!scopeAttribute) return;
-      root.querySelectorAll('*').forEach((element) => {
-        element.setAttribute(scopeAttribute, '');
-      });
-    }
-
-    function escapeHtml(value) {
-      return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-
-    function parseSalaryValue(salary) {
-      return Number(String(salary).replace(/[^\\d]/g, '')) || 0;
-    }
-${compareListSrc}
-${renderSrc}
-    function renderSelectedComparison() {
-      const storedIds = readStoredCompareIds();
-      const needsCatalog = storedIds.some((id) => !jobsById.has(id));
-      if (needsCatalog) {
-        // User saved IDs we don't have in preselected — load full catalog
-        // BEFORE pruning/writing, so we don't erase valid stored IDs.
-        ensureFullCatalog().then(() => {
-          if (catalogLoadError && jobsById.size === 0) {
-            // showCatalogError() already rendered a message into the grid.
-            return;
-          }
-          const jobs = getSelectedJobs();
-          renderComparisonTable(jobs);
-          renderCompanyLinks(jobs);
-        });
-        return;
-      }
-      const jobs = getSelectedJobs();
-      renderComparisonTable(jobs);
-      renderCompanyLinks(jobs);
-    }
-
-    renderSelectedComparison();
-
-    grid.addEventListener('click', (e) => {
-      const btn = e.target instanceof Element ? e.target.closest('.remove-col-btn') : null;
-      if (!btn) return;
-
-      const jobId = Number.parseInt(btn.getAttribute('data-job-id') || '', 10);
-      if (!Number.isFinite(jobId)) return;
-
-      writeCompareIds(readCompareIds().filter((id) => id !== jobId));
-      renderSelectedComparison();
-    });
-
-    window.addEventListener('storage', (event) => {
-      if (event.key === 'compareList') {
-        renderSelectedComparison();
-      }
-    });
-
-    // ====== City + transport filter mode ======
-    // When user picks city/transport, fetch full catalog and render
-    // matching jobs (overrides the localStorage-driven manual mode).
-${filtersSrc}
-  });
-`;
+// Server data handed to the bundled `compareInit` module. Serialized into
+// a `<script type="application/json">` tag below and parsed by the module
+// on `DOMContentLoaded`. We only inline the 4 preselected jobs (the full
+// ~4399-job catalog is fetched lazily from /api/compare-jobs.json) plus the
+// feature-row definitions and total count for the empty-state copy.
+const compareData: CompareData = { compareJobs, features, totalCompareJobs };
 ---
 
 <BaseLayout title={compareTitle} description={compareDescription} schemaGraph={pageSchemaGraph}>
@@ -249,7 +150,27 @@ ${filtersSrc}
   <Footer />
 </BaseLayout>
 
-<script is:inline define:vars={{ compareJobs, features, totalCompareJobs }} set:html={compareScriptBody}></script>
+{/*
+  Server data for the bundled compare module. A `<script type="application/json">`
+  tag is inert (the browser never executes it) and `JSON.stringify` here is the
+  same XSS-safe emission pattern BaseLayout uses for JSON-LD structured data.
+  The bundled module below reads it back via `getElementById(...).textContent`.
+*/}
+<script type="application/json" id="compare-data" set:html={JSON.stringify(compareData)} is:inline></script>
+
+<script>
+  // Bundled + tree-shaken by Astro (no `is:inline`, no `define:vars`), so it
+  // can `import`. Boots the /compare/ page logic from the typed ES module.
+  import { initComparePage } from '../scripts/compare/compareInit';
+  import type { CompareData } from '../scripts/compare/types';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const dataTag = document.getElementById('compare-data');
+    if (!dataTag?.textContent) return;
+    const data = JSON.parse(dataTag.textContent) as CompareData;
+    initComparePage(data);
+  });
+</script>
 
 
 <style>

@@ -1,14 +1,17 @@
 /**
- * Static-source invariants for `src/scripts/compare/filters.js`.
+ * Static-source invariants for `src/scripts/compare/filters.ts`.
  *
- * The fragment is browser-side glue that closes over symbols defined in
- * sibling fragments (`ensureFullCatalog`, `renderComparisonTable`, …) and
- * gets concatenated into the inline DOMContentLoaded body of
- * `src/pages/compare.astro`. Because it has no exports and no module
- * boundary, we can't unit-test the handler behavior in isolation — but we
- * CAN lock down the invariant that every callsite of the async
- * `applyServerFilters` is routed through the `safeApplyFilters` wrapper
- * (audit H7, HIGH).
+ * The compare-page filter logic was converted from a `?raw` JS fragment
+ * (`filters.js`, string-concatenated into an inline `<script>`) into a
+ * proper typed ES module (audit v2 M1). `filters.ts` now exports
+ * `createFilters`, and `compareInit.ts` imports it — so cross-function
+ * references are type-checked at build time.
+ *
+ * The H7 (HIGH) invariant still matters at the SOURCE level, though:
+ * every callsite of the async `applyServerFilters` MUST be routed through
+ * the `safeApplyFilters` wrapper that attaches `.catch`. Passing the raw
+ * async function to `addEventListener` returns a rejected promise the
+ * runtime quietly discards, leaving the filter UI silently stuck.
  *
  * If someone adds another listener that calls `applyServerFilters` directly,
  * this test fails and forces the new callsite through the wrapper too.
@@ -20,10 +23,10 @@ import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
-const FILTERS_PATH = join(ROOT, '..', 'src', 'scripts', 'compare', 'filters.js');
+const FILTERS_PATH = join(ROOT, '..', 'src', 'scripts', 'compare', 'filters.ts');
 const SOURCE = readFileSync(FILTERS_PATH, 'utf8');
 
-describe('compare/filters.js — H7 unhandled rejection guard', () => {
+describe('compare/filters.ts — H7 unhandled rejection guard', () => {
   it('defines safeApplyFilters as a wrapper that attaches .catch', () => {
     // The wrapper function must exist…
     expect(SOURCE).toMatch(/function\s+safeApplyFilters\s*\(\s*\)/);
@@ -68,5 +71,20 @@ describe('compare/filters.js — H7 unhandled rejection guard', () => {
     // Regression guard: a future edit shouldn't add a new listener that
     // bypasses safeApplyFilters. Match `addEventListener(... , applyServerFilters )`.
     expect(SOURCE).not.toMatch(/addEventListener\([^)]*,\s*applyServerFilters\s*\)/);
+  });
+});
+
+describe('compare/filters.ts — M1 module shape', () => {
+  it('is a real ES module that exports createFilters', () => {
+    // The whole point of M1: filters is no longer a `?raw` fragment glued
+    // into an inline script — it's an importable typed module.
+    expect(SOURCE).toMatch(/export\s+function\s+createFilters\s*\(/);
+  });
+
+  it('receives its dependencies as typed arguments, not implicit closure', () => {
+    // catalog loader, renderer, and the manual-mode re-render callback are
+    // passed in — no reliance on sibling-fragment closure scope.
+    expect(SOURCE).toMatch(/import\s+type\s+\{\s*CatalogLoader\s*\}\s+from\s+['"]\.\/catalogLoader['"]/);
+    expect(SOURCE).toMatch(/import\s+type\s+\{\s*CompareRenderer\s*\}\s+from\s+['"]\.\/render['"]/);
   });
 });
