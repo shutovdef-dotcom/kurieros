@@ -186,9 +186,9 @@ const hasVacancies = jobsData.length > 0;
 				</div>
 			)}
 			{/* C2 overflow stash — bottom-nav «Вакансии» reveals in batches.
-			    Lives inside #jobs-grid so the home page's
-			    `grid.innerHTML = newGrid.innerHTML` city-fetch swap copies
-			    it along with the visible cards. */}
+			    Lives inside #jobs-grid so the home page's `swapGridContent`
+			    city-fetch swap clones it along with the visible cards
+			    (it's an explicitly whitelisted node — see JobGrid script). */}
 			{overflowCount > 0 && (
 				<template class="jobs-grid-overflow">
 					{overflowJobs.map((job) => (
@@ -666,7 +666,98 @@ const hasVacancies = jobsData.length > 0;
 		const grid = document.getElementById('jobs-grid');
 		const cityCache = new Map();
 		let activeFetch = 0;
-		const initialGridHTML = grid ? grid.innerHTML : '';
+		// Snapshot the server-rendered grid as a cloned DocumentFragment
+		// (not an innerHTML string). When the user clears the city or a
+		// city fetch fails we re-attach a fresh clone of these nodes —
+		// pure DOM API, no string re-parsing, so the «restore» path
+		// carries the same trust as the original page render.
+		const initialGridNodes = document.createDocumentFragment();
+		if (grid) {
+			for (const child of Array.from(grid.children)) {
+				initialGridNodes.appendChild(child.cloneNode(true));
+			}
+		}
+		// Re-render the grid from the initial server snapshot.
+		function restoreInitialGrid() {
+			if (!grid) return;
+			while (grid.firstChild) grid.removeChild(grid.firstChild);
+			grid.appendChild(initialGridNodes.cloneNode(true));
+		}
+
+		// Audit H10 — XSS hardening for the city-swap hot path.
+		//
+		// `renderJobsForCity` used to do `grid.innerHTML = newGrid.innerHTML`
+		// after `DOMParser.parseFromString(html, 'text/html')`. DOMParser
+		// makes parsed `<script>` inert, but it does NOT remove inline
+		// event-handler attributes (`onerror`, `onload`, SVG `onbegin` /
+		// `onend`, …). A CDN- or build-cache-poisoning attack on the
+		// static city HTML would therefore deliver attacker handlers that
+		// execute in the visitor's origin the moment the node lands in
+		// the live document.
+		//
+		// `stripEventHandlers` removes every `on*` attribute from a node,
+		// its element descendants, and the `.content` fragment of any
+		// `<template>` reached along the way (at any nesting depth, and
+		// including when the passed-in node IS a template — a template's
+		// own `querySelectorAll` does NOT see its content fragment). The
+		// C2 «reveal more» overflow stash is itself a top-level
+		// `<template>`, so missing this leaves overflow cards poisoned.
+		// This is the inline twin of `src/scripts/sanitize.js` — Astro
+		// `is:inline` scripts can't import modules (they need the
+		// `define:vars` constants), so the logic is duplicated here and
+		// pinned by `tests/sanitize.test.ts`. Keep the two in sync.
+		function stripOnAttributes(el) {
+			if (!el || typeof el.getAttributeNames !== 'function') return;
+			for (const name of el.getAttributeNames()) {
+				if (name.length >= 2
+					&& name.charAt(0).toLowerCase() === 'o'
+					&& name.charAt(1).toLowerCase() === 'n') {
+					el.removeAttribute(name);
+				}
+			}
+		}
+		function sanitizeSubtree(node) {
+			if (!node) return;
+			stripOnAttributes(node);
+			// Recurse into a `<template>` content fragment — also covers
+			// the case where `node` itself is the template.
+			if (node.content && node.content.nodeType !== undefined) {
+				sanitizeSubtree(node.content);
+			}
+			if (typeof node.querySelectorAll !== 'function') return;
+			for (const child of node.querySelectorAll('*')) {
+				stripOnAttributes(child);
+				if (child && child.content && child.content.nodeType !== undefined) {
+					sanitizeSubtree(child.content);
+				}
+			}
+		}
+		function stripEventHandlers(root) {
+			sanitizeSubtree(root);
+		}
+
+		// Whitelist-clone the children of a freshly fetched #jobs-grid
+		// into the live grid. Replaces the old `innerHTML` assignment:
+		// we only adopt nodes we recognise (`.job-card`, the C2 overflow
+		// `<template>`, and the server's `.no-results` block), clone them
+		// via the DOM API (parsed-doc scripts stay inert through a
+		// clone), and strip every event-handler attribute before the
+		// node enters the live tree.
+		function swapGridContent(targetGrid, sourceGrid) {
+			while (targetGrid.firstChild) {
+				targetGrid.removeChild(targetGrid.firstChild);
+			}
+			for (const sourceChild of Array.from(sourceGrid.children)) {
+				const isJobCard = sourceChild.classList.contains('job-card');
+				const isOverflowTpl = sourceChild.tagName === 'TEMPLATE'
+					&& sourceChild.classList.contains('jobs-grid-overflow');
+				const isNoResults = sourceChild.classList.contains('no-results');
+				if (!isJobCard && !isOverflowTpl && !isNoResults) continue;
+				const cloned = sourceChild.cloneNode(true);
+				stripEventHandlers(cloned);
+				targetGrid.appendChild(cloned);
+			}
+		}
 
 		// QW7 — Render N skeleton cards while a city page is being fetched.
 		// Count taken from sessionStorage of last-shown card count (or 6
@@ -695,15 +786,16 @@ const hasVacancies = jobsData.length > 0;
 			grid.innerHTML = html;
 		}
 
-		// Fetch the dedicated city page (/rabota-kurerom-{slug}/) and copy
-		// its already-rendered .jobs-grid innerHTML — preserves all
-		// Astro scoped styles (data-astro-cid-*) and JobCard markup
-		// without duplicating the template in JS.
+		// Fetch the dedicated city page (/rabota-kurerom-{slug}/) and
+		// clone its already-rendered .jobs-grid children via the DOM API
+		// (`swapGridContent`) — preserves Astro scoped styles
+		// (data-astro-cid-*) and JobCard markup without duplicating the
+		// template in JS, and without the XSS surface of `innerHTML`.
 		async function renderJobsForCity(citySlug, cityName) {
 			if (!grid) return;
 			if (!citySlug) {
 				// User cleared the city — restore initial server-rendered grid.
-				grid.innerHTML = initialGridHTML;
+				restoreInitialGrid();
 				rebindCompareButtons();
 				filterJobs();
 				return;
@@ -712,7 +804,7 @@ const hasVacancies = jobsData.length > 0;
 			let html = cityCache.get(citySlug);
 			if (!html) {
 				// Show skeleton only when we'll actually hit the network.
-				// In-memory cityCache hit → instant innerHTML swap, skeleton
+				// In-memory cityCache hit → instant grid swap, skeleton
 				// would just flash for a frame and feel like a glitch.
 				const prevCardCount = grid.querySelectorAll('.job-card').length || 6;
 				renderSkeleton(prevCardCount);
@@ -728,7 +820,7 @@ const hasVacancies = jobsData.length > 0;
 				} catch (err) {
 					console.warn('city page fetch failed', err);
 					// Restore previous render so the user isn't stuck on skeleton.
-					grid.innerHTML = initialGridHTML;
+					restoreInitialGrid();
 					return;
 				}
 			}
@@ -759,7 +851,12 @@ const hasVacancies = jobsData.length > 0;
 				grid.setAttribute('data-overflow-count', '0');
 				return;
 			}
-			grid.innerHTML = newGrid.innerHTML;
+			// Audit H10 — DOM-API whitelist clone instead of
+			// `grid.innerHTML = newGrid.innerHTML`. `swapGridContent`
+			// adopts only recognised nodes and strips every event-handler
+			// attribute, so a poisoned `<img onerror=…>` in the fetched
+			// city HTML can't execute in the visitor's origin.
+			swapGridContent(grid, newGrid);
 			// Mirror the fetched city's overflow count + batch size so the
 			// bottom-nav «Вакансии» reveal logic (C2) keeps working after
 			// the home grid is hot-swapped.
@@ -1014,7 +1111,7 @@ const hasVacancies = jobsData.length > 0;
 			setupSentinel();
 		});
 		window.addEventListener('kurieros:city-selected', () => {
-			// City swap replaces .jobs-grid innerHTML — the old sentinel
+			// City swap rebuilds .jobs-grid children — the old sentinel
 			// node is gone. Wait one tick for the swap to land.
 			setTimeout(setupSentinel, 50);
 		});
