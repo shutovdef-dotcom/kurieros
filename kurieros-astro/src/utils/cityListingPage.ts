@@ -58,7 +58,7 @@ export function buildTransportTypes(
 	return Array.from(
 		new Set(
 			filteredJobs.flatMap((job) =>
-				job.tags.filter((tag) => tag in labels).map((tag) => labels[tag]),
+				job.tags.filter((tag) => tag in labels).map((tag) => labels[tag]!),
 			),
 		),
 	);

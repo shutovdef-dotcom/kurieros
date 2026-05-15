@@ -94,7 +94,7 @@ const eaesRequiredDocument =
 const nonEaesRequiredDocument =
   'Для граждан стран вне ЕАЭС дополнительно нужны ВНЖ и патент с чеками.';
 
-export const getRequiredDocumentOverrides = (citizenship: string) => {
+export const getRequiredDocumentOverrides = (citizenship: string): string[] => {
   const hasEaes = citizenship.includes('ЕАЭС');
   const hasNonEaes = citizenship.includes('вне ЕАЭС');
 
