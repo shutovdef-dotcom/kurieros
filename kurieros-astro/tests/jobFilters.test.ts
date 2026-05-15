@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { filterJobsByCriteria, jobMatches } from '../src/utils/jobFilters';
+import {
+	buildJobsByCityMap,
+	filterJobsByCriteria,
+	getCityJobsFromMap,
+	jobMatches,
+	normalizeCityKey,
+} from '../src/utils/jobFilters';
 import type { GeneratedJob } from '../src/data/vacancyTypes';
 
 /**
@@ -10,7 +16,11 @@ import type { GeneratedJob } from '../src/data/vacancyTypes';
  * one of those surfaces will silently disagree with the others.
  *
  * The fixture below intentionally exercises:
- *   - case-insensitive city substring match (Moscow inside "Москва")
+ *   - normalized exact-equality city match (H12: substring `.includes()`
+ *     was replaced because «Дно» pulled every Видное/Медногорск/
+ *     Отрадное row, and 62 more cities had similar collisions)
+ *   - comma-split multi-city locations («Алнаши, Вавож» registers
+ *     under BOTH cities)
  *   - the «Вся Россия» nationwide pass-through
  *   - regular tag membership (`auto`, `16plus`, etc.)
  *   - the `Ежеднев` / `Еженед` payment_freq lookup via SEARCH (NOT via
@@ -18,6 +28,7 @@ import type { GeneratedJob } from '../src/data/vacancyTypes';
  *   - cross-field search (title / company / location / salary /
  *     details.payment_freq)
  *   - AND-combination of all criteria
+ *   - `buildJobsByCityMap` / `getCityJobsFromMap` precompute path (H12)
  */
 
 const makeJob = (overrides: Partial<GeneratedJob> = {}): GeneratedJob => ({
@@ -67,16 +78,44 @@ describe('jobMatches — city criterion', () => {
 		expect(jobMatches(job, { city: 'Москва' })).toBe(true);
 	});
 
-	it('matches via substring (existing .includes() semantics — H12)', () => {
-		// The audit flags `.includes()` as a latent bug; preserve it here
-		// exactly until H12 lands so SSR↔sitemap stay aligned.
-		const job = makeJob({ location: 'Москва (метро Сокол)' });
-		expect(jobMatches(job, { city: 'Москва' })).toBe(true);
+	it('does NOT match a substring of job.location (H12 latent-bug fix)', () => {
+		// Pre-H12 semantics: `.toLowerCase().includes()` matched «Дно»
+		// against «Видное», etc. — 140 conflict pairs across 63
+		// substring-cities in production. New semantics: exact equality.
+		const job = makeJob({ location: 'Видное' });
+		expect(jobMatches(job, { city: 'Дно' })).toBe(false);
+	});
+
+	it('does NOT match when the city query is a superstring', () => {
+		const job = makeJob({ location: 'Москва' });
+		expect(jobMatches(job, { city: 'Москва (метро Сокол)' })).toBe(false);
 	});
 
 	it('is case-insensitive on both sides', () => {
 		const job = makeJob({ location: 'МоСкВа' });
 		expect(jobMatches(job, { city: 'москва' })).toBe(true);
+	});
+
+	it('normalizes ё → е on both sides', () => {
+		// Some upstream sources spell it «Орел», others «Орёл». The
+		// canonical city list folds both to the same key.
+		const job = makeJob({ location: 'Орёл' });
+		expect(jobMatches(job, { city: 'Орел' })).toBe(true);
+		expect(jobMatches(job, { city: 'орёл' })).toBe(true);
+	});
+
+	it('trims whitespace and collapses non-breaking spaces', () => {
+		const job = makeJob({ location: ' Москва ' });
+		expect(jobMatches(job, { city: 'Москва' })).toBe(true);
+	});
+
+	it('matches one half of a comma-separated multi-city location', () => {
+		// Real dataset row: «Алнаши, Вавож». Both city listings must
+		// surface the same job (mirrors `getCitiesFromJobs` which
+		// also comma-splits when counting per-city vacancies).
+		const job = makeJob({ location: 'Алнаши, Вавож' });
+		expect(jobMatches(job, { city: 'Алнаши' })).toBe(true);
+		expect(jobMatches(job, { city: 'Вавож' })).toBe(true);
 	});
 
 	it('does NOT match an unrelated city', () => {
@@ -297,5 +336,158 @@ describe('filterJobsByCriteria', () => {
 		const original = [...jobs];
 		filterJobsByCriteria(jobs, { city: 'Москва' });
 		expect(jobs).toEqual(original);
+	});
+});
+
+// =====================================================================
+// H12: Map-based per-city precompute
+// =====================================================================
+
+describe('normalizeCityKey', () => {
+	it('lowercases', () => {
+		expect(normalizeCityKey('Москва')).toBe('москва');
+	});
+
+	it('folds ё → е', () => {
+		expect(normalizeCityKey('Орёл')).toBe(normalizeCityKey('Орел'));
+	});
+
+	it('trims whitespace', () => {
+		expect(normalizeCityKey('  Казань  ')).toBe('казань');
+	});
+
+	it('collapses runs of internal whitespace', () => {
+		expect(normalizeCityKey('Нижний   Новгород')).toBe('нижний новгород');
+	});
+
+	it('returns empty string for null/undefined/empty input', () => {
+		expect(normalizeCityKey(null)).toBe('');
+		expect(normalizeCityKey(undefined)).toBe('');
+		expect(normalizeCityKey('')).toBe('');
+	});
+});
+
+describe('buildJobsByCityMap', () => {
+	it('returns one bucket per unique normalized city key', () => {
+		const jobs: GeneratedJob[] = [
+			makeJob({ id: 1, location: 'Москва' }),
+			makeJob({ id: 2, location: 'Москва' }),
+			makeJob({ id: 3, location: 'Казань' }),
+		];
+		const map = buildJobsByCityMap(jobs);
+		expect(map.get('москва')?.map((j) => j.id).sort()).toEqual([1, 2]);
+		expect(map.get('казань')?.map((j) => j.id)).toEqual([3]);
+	});
+
+	it('keys are normalized — case + ё-folding + trim collapse', () => {
+		const jobs: GeneratedJob[] = [
+			makeJob({ id: 1, location: 'Орёл' }),
+			makeJob({ id: 2, location: 'Орел' }),
+		];
+		const map = buildJobsByCityMap(jobs);
+		// Both rows merge under the same key.
+		expect(map.get('орел')?.map((j) => j.id).sort()).toEqual([1, 2]);
+	});
+
+	it('comma-separated locations register the job under each city', () => {
+		const jobs: GeneratedJob[] = [
+			makeJob({ id: 7, location: 'Алнаши, Вавож' }),
+		];
+		const map = buildJobsByCityMap(jobs);
+		expect(map.get('алнаши')?.map((j) => j.id)).toEqual([7]);
+		expect(map.get('вавож')?.map((j) => j.id)).toEqual([7]);
+	});
+
+	it('does NOT collide substring-cities (H12 latent-bug fix)', () => {
+		const jobs: GeneratedJob[] = [
+			makeJob({ id: 10, location: 'Видное' }),
+			makeJob({ id: 11, location: 'Дно' }),
+		];
+		const map = buildJobsByCityMap(jobs);
+		// Pre-H12 the «дно» listing pulled the «Видное» row in via
+		// `.toLowerCase().includes()`. With Map-keyed exact-equality
+		// each city gets only its own jobs.
+		expect(map.get('дно')?.map((j) => j.id)).toEqual([11]);
+		expect(map.get('видное')?.map((j) => j.id)).toEqual([10]);
+	});
+
+	it('isolates «Вся Россия» rows in a separate nationwide bucket', () => {
+		const jobs: GeneratedJob[] = [
+			makeJob({ id: 1, location: 'Москва' }),
+			makeJob({ id: 99, location: 'Вся Россия' }),
+		];
+		const map = buildJobsByCityMap(jobs);
+		// The nationwide row lives under «вся россия», NOT under each
+		// city — `getCityJobsFromMap` does the merge.
+		expect(map.get('москва')?.map((j) => j.id)).toEqual([1]);
+		expect(map.get('вся россия')?.map((j) => j.id)).toEqual([99]);
+	});
+
+	it('returns an empty Map for an empty job list', () => {
+		expect(buildJobsByCityMap([]).size).toBe(0);
+	});
+});
+
+describe('getCityJobsFromMap', () => {
+	const jobs: GeneratedJob[] = [
+		makeJob({ id: 1, location: 'Москва' }),
+		makeJob({ id: 2, location: 'Москва' }),
+		makeJob({ id: 3, location: 'Казань' }),
+		makeJob({ id: 99, location: 'Вся Россия' }),
+		makeJob({ id: 7, location: 'Алнаши, Вавож' }),
+	];
+	const map = buildJobsByCityMap(jobs);
+
+	it('returns city jobs PLUS nationwide jobs', () => {
+		const result = getCityJobsFromMap(map, 'Москва');
+		expect(result.map((j) => j.id).sort((a, b) => a - b)).toEqual([1, 2, 99]);
+	});
+
+	it('returns only nationwide jobs for a city with no rows in the Map', () => {
+		const result = getCityJobsFromMap(map, 'Тында');
+		expect(result.map((j) => j.id)).toEqual([99]);
+	});
+
+	it('looks up by un-normalized name (handles ё/case/whitespace)', () => {
+		expect(getCityJobsFromMap(map, '  казань ').map((j) => j.id).sort())
+			.toEqual([3, 99]);
+	});
+
+	it('multi-city locations resolve under each constituent city', () => {
+		expect(getCityJobsFromMap(map, 'Алнаши').map((j) => j.id).sort())
+			.toEqual([7, 99]);
+		expect(getCityJobsFromMap(map, 'Вавож').map((j) => j.id).sort())
+			.toEqual([7, 99]);
+	});
+
+	it('returns a FRESH array — never mutates Map buckets', () => {
+		const result = getCityJobsFromMap(map, 'Москва');
+		const before = map.get('москва')!.length;
+		result.push(makeJob({ id: 9999 }));
+		expect(map.get('москва')!.length).toBe(before);
+	});
+
+	it('returns an empty array (no nationwide rows) when there is no match', () => {
+		const noNationwide = buildJobsByCityMap([
+			makeJob({ id: 1, location: 'Москва' }),
+		]);
+		expect(getCityJobsFromMap(noNationwide, 'Тында')).toEqual([]);
+	});
+
+	it('matches jobMatches output for the city criterion (parity check)', () => {
+		// Whatever `getCityJobsFromMap` returns must equal the set of
+		// jobs `jobMatches` accepts for the same city — otherwise the
+		// SSR page (Map path) and the sitemap emitter (predicate path)
+		// drift out of sync. This is the load-bearing invariant H12
+		// preserves.
+		for (const cityName of ['Москва', 'Казань', 'Алнаши', 'Вавож', 'Тында']) {
+			const viaMap = getCityJobsFromMap(map, cityName)
+				.map((j) => j.id)
+				.sort((a, b) => a - b);
+			const viaPredicate = filterJobsByCriteria(jobs, { city: cityName })
+				.map((j) => j.id)
+				.sort((a, b) => a - b);
+			expect(viaMap).toEqual(viaPredicate);
+		}
 	});
 });
