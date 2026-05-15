@@ -7,25 +7,30 @@ import JobGrid from '../components/JobGrid.astro';
 import JobFilters from '../components/JobFilters.astro';
 import PartnerBanner from '../components/PartnerBanner.astro';
 import articlesDataRaw from '../data/articles.json';
+import jobsData from '../data/jobs';
+import { CATEGORIES } from '../data/constants';
+import { getCitiesFromJobs } from '../utils/cities';
+import { formatMoney, getVacancyPluralText, parseSalary } from '../utils/format';
+import {
+	type Article,
+	buildFactCards,
+	buildFaqItems,
+	buildHeroIntro,
+	buildNearbyCityLinks,
+	buildPageSchemaGraph,
+	buildSeoDescription,
+	buildSeoTitle,
+	buildTransportTypes,
+	buildVacancyCountText,
+	cleanCategoryName,
+} from '../utils/cityListingPage';
 
 // `articles.json` ships empty (`[]`); TS narrows the default JSON
 // import to `never[]`, which fouls every `article.title`/`.description`
 // access downstream. Once articles ship we'll get richer fields, but
 // the contract is fixed: title + description (used for keyword
 // matching) + slug/date (consumed by blog.astro).
-type Article = {
-	title: string;
-	description: string;
-	slug: string;
-	date: string;
-};
 const articlesData = articlesDataRaw as Article[];
-import jobsData from '../data/jobs';
-import { CATEGORIES } from '../data/constants';
-import { getCitiesFromJobs } from '../utils/cities';
-import { slugifyCompany } from '../utils/companies';
-import { formatMoney, getVacancyPluralText, humanJoin, parseSalary } from '../utils/format';
-import { buildBreadcrumbSchema, buildPlaceSchema } from '../utils/schema';
 
 export async function getStaticPaths() {
 	type CityProps = {
@@ -87,7 +92,7 @@ export async function getStaticPaths() {
 	return paths;
 }
 
-const { type, data, title, description } = Astro.props;
+const { type, data, title } = Astro.props;
 const isMoscowCityPage = type === 'city' && data.slug === 'moskva';
 // Старый override `searchTerm = 'еженед'` для ezhednevnaya-oplata
 // удалён: теперь Y.Eda+Купер действительно помечены как «Ежедневно»
@@ -123,122 +128,8 @@ const filteredJobs = jobsData.filter((job) => {
 });
 
 const companyNames = Array.from(new Set(filteredJobs.map((job) => job.company)));
-const relatedCompanies = companyNames.slice(0, 6).map((company) => ({
-	name: company,
-	href: `/companies/${slugifyCompany(company)}/`,
-}));
 const paymentTypes = Array.from(new Set(filteredJobs.map((job) => job.details.payment_freq)));
-// B2 contextual rule: chip labels use the compact form («Пешком»);
-// breadcrumb / footer cloud / category card use the full form
-// («Пеший курьер»). This map drives tag-chip rendering, so it stays
-// compact.
-const transportLabelMap: Record<string, string> = {
-	auto: 'На авто',
-	bicycle: 'На велосипеде или самокате',
-	foot: 'Пешком',
-};
-const transportTypes = Array.from(
-	new Set(
-		filteredJobs.flatMap((job) =>
-			job.tags
-				.filter((tag) => tag in transportLabelMap)
-				.map((tag) => transportLabelMap[tag]),
-		),
-	),
-);
-const availableTags = new Set(filteredJobs.flatMap((job) => job.tags));
-const hasDailyPayments = paymentTypes.some((payment) => payment.toLowerCase().includes('ежеднев'));
-const hasWeeklyPayments = paymentTypes.some((payment) => payment.toLowerCase().includes('еженед'));
-const cityScenarioRoutes =
-	type === 'city'
-		? ['na-avto', 'peshkom', 'na-velosipede', 'dlya-studentov', 'podrabotka', 'ezhednevnaya-oplata', 'ezhenedelnaya-oplata']
-			.filter((slug) => {
-				if (slug === 'na-avto') return availableTags.has('auto');
-				if (slug === 'peshkom') return availableTags.has('foot');
-				if (slug === 'na-velosipede') return availableTags.has('bicycle');
-				if (slug === 'dlya-studentov') return availableTags.has('16plus');
-				if (slug === 'podrabotka') return availableTags.has('flexible');
-				if (slug === 'ezhednevnaya-oplata') return hasDailyPayments;
-				if (slug === 'ezhenedelnaya-oplata') return hasWeeklyPayments;
-				return false;
-			})
-			.map((slug) => CATEGORIES.find((category) => category.slug === slug))
-			.filter(Boolean)
-			.slice(0, 5)
-			.map((category) => ({
-				name: category!.name,
-				href: `/rabota-kurerom-${category!.slug}/`,
-			}))
-		: [];
-const cityCompanyCards =
-	type === 'city'
-		? Array.from(
-			filteredJobs.reduce(
-				(map, job) => {
-					const existing = map.get(job.company) ?? {
-						name: job.company,
-						href: `/companies/${slugifyCompany(job.company)}/`,
-						vacancyCount: 0,
-						maxSalary: 0,
-						payments: new Set<string>(),
-						transports: new Set<string>(),
-					};
-
-					existing.vacancyCount += 1;
-					existing.maxSalary = Math.max(existing.maxSalary, parseSalary(job.salary));
-					existing.payments.add(job.details.payment_freq);
-					job.tags
-						.filter((tag) => tag in transportLabelMap)
-						.forEach((tag) => existing.transports.add(transportLabelMap[tag]));
-
-					map.set(job.company, existing);
-					return map;
-				},
-				new Map<
-					string,
-					{
-						name: string;
-						href: string;
-						vacancyCount: number;
-						maxSalary: number;
-						payments: Set<string>;
-						transports: Set<string>;
-					}
-				>(),
-			).values(),
-		)
-			.map((company) => ({
-				name: company.name,
-				href: company.href,
-				vacancyCount: company.vacancyCount,
-				maxSalary: company.maxSalary,
-				paymentPreview: Array.from(company.payments).slice(0, 2),
-				transportPreview: Array.from(company.transports).slice(0, 2),
-			}))
-			.sort((a, b) => b.vacancyCount - a.vacancyCount || b.maxSalary - a.maxSalary)
-			.slice(0, 4)
-		: [];
-const salaryLeader =
-	type === 'city' ? [...cityCompanyCards].sort((a, b) => b.maxSalary - a.maxSalary)[0] : null;
-const localStartPoints =
-	type === 'city'
-		? [
-			cityCompanyCards[0]
-				? `Больше всего вариантов сейчас у ${cityCompanyCards[0].name}. Начните с этой компании, если хотите быстро понять рынок ${data.prep}.`
-				: `В подборке ${data.prep} уже есть несколько вакансий. Сначала посмотрите компании, где больше открытых позиций.`,
-			salaryLeader
-				? `Самая высокая заявленная сумма сейчас у ${salaryLeader.name}: до ${formatMoney(salaryLeader.maxSalary)} ₽. Проверьте, из чего складывается эта цифра.`
-				: 'Доход зависит от смен, района и транспорта, поэтому лучше сравнить несколько вакансий перед откликом.',
-			transportTypes.length
-				? `В городе есть варианты: ${humanJoin(transportTypes).toLowerCase()}. Можно сразу сузить список по транспорту и графику.`
-				: 'Формат работы зависит от работодателя, поэтому после выбора города полезно открыть страницы по типу доставки.',
-		]
-		: [];
-const updatedDate = new Intl.DateTimeFormat('ru-RU', {
-	day: 'numeric',
-	month: 'long',
-	year: 'numeric',
-}).format(new Date());
+const transportTypes = buildTransportTypes(filteredJobs);
 // P0: empty listings need noindex so Google/Yandex don't penalise us for thin
 // content. We also drop them from the sitemap (see astro.config.mjs).
 const isEmptyListing = filteredJobs.length === 0;
@@ -249,18 +140,7 @@ const isEmptyListing = filteredJobs.length === 0;
 // JobGrid и УХОДИТ — нет «куда ещё кликнуть». Этот блок даёт топ-12
 // городов с наибольшим числом вакансий как явный «следующий шаг»
 // сразу под JobGrid. Только для type='city' — на категории не нужен.
-const nearbyCityLinks =
-	type === 'city'
-		? getCitiesFromJobs(jobsData)
-				.filter((city) => city.slug !== data.slug)
-				.sort((a, b) => b.vacancyCount - a.vacancyCount)
-				.slice(0, 12)
-				.map((city) => ({
-					name: city.name,
-					slug: city.slug,
-					vacancyCount: city.vacancyCount,
-				}))
-		: [];
+const nearbyCityLinks = type === 'city' ? buildNearbyCityLinks(jobsData, data.slug) : [];
 
 // P1: max salary across the matched listings — used in title/description to
 // make the snippet more clickable in search results (cheaper-than-rewrite
@@ -270,255 +150,71 @@ const maxSalary = filteredJobs.reduce((acc, job) => {
 	return value > acc ? value : acc;
 }, 0);
 const formattedMaxSalary = maxSalary > 0 ? formatMoney(maxSalary) : null;
-const vacancyCountText = `${filteredJobs.length} ${getVacancyPluralText(filteredJobs.length)}`;
+const vacancyCountText = buildVacancyCountText(filteredJobs.length);
 
-// Some categories ship with `name` that ALREADY embeds the «Курьер»
-// or «Работа курьером» prefix (constants.ts: «Курьер 16 лет», «Курьер
-// 18 лет», «Работа курьером женщине»). When such a name is composed
-// into a title that ALSO leads with «Курьер … » or «Работа курьером
-// … », the prefix duplicates → «Курьер курьер 16 лет — до 259 560 ₽».
-// `cleanCategoryName` strips that leading prefix once so the
-// composing template can safely prepend its own without doubling.
-// Categories without the prefix («На авто», «Подработка», …) stay
-// unchanged. Falls back to the original `data.name` if the strip
-// would yield an empty string (defensive).
-const cleanCategoryName =
-	type === 'category'
-		? data.name
-				.replace(/^Работа курьером\s*/i, '')
-				.replace(/^Курьер\s*/i, '')
-				.trim() || data.name
-		: '';
+const cityPrep = type === 'city' ? data.prep : undefined;
+const categoryName = type === 'category' ? data.name : undefined;
+const categoryNameClean = type === 'category' ? cleanCategoryName(data.name) : undefined;
 
-const seoTitle = (
-	isEzhednevLanding
-		? formattedMaxSalary
-			? `Курьер с ежедневной оплатой — до ${formattedMaxSalary} ₽ · ${vacancyCountText} | КурьерОк`
-			: `Работа курьером с ежедневной оплатой 2026 — ${vacancyCountText} | КурьерОк`
-		: isEmptyListing
-			? type === 'city'
-				? `Работа курьером ${data.prep} — следите за обновлениями | КурьерОк`
-				: `Работа курьером (${cleanCategoryName.toLowerCase()}) — следите за обновлениями | КурьерОк`
-			: type === 'city'
-				? formattedMaxSalary
-					? `Курьер ${data.prep} — до ${formattedMaxSalary} ₽/мес · ${vacancyCountText} | КурьерОк`
-					: `Работа курьером ${data.prep} 2026: ${vacancyCountText} | КурьерОк`
-				: formattedMaxSalary
-					? `Курьер ${cleanCategoryName.toLowerCase()} — до ${formattedMaxSalary} ₽/мес · ${vacancyCountText} | КурьерОк`
-					: `Работа курьером ${cleanCategoryName.toLowerCase()} 2026: ${vacancyCountText} | КурьерОк`
-).slice(0, 70);
-const seoDescription = (
-	isEzhednevLanding
-		? `${vacancyCountText} курьера с ежедневными выплатами: Яндекс.Еда и Купер позволяют выводить заработок прямо в день смены через встроенный кошелёк (Я.Кошелёк / СберPay). Деньги — на карту в любой момент.`
-		: isEmptyListing
-			? type === 'city'
-				? `Сейчас активных вакансий курьером ${data.prep} нет — добавьте сайт в избранное и проверьте позже. Сравните условия в других городах России.`
-				: `Сейчас активных вакансий по формату «${data.name}» нет — следите за обновлениями. Посмотрите похожие подборки на главной.`
-			: type === 'city'
-				? formattedMaxSalary
-					? `${vacancyCountText} курьером ${data.prep} от прямых работодателей: ${companyNames.slice(0, 2).join(', ') || 'Y.Eda, Купер'}. Доход до ${formattedMaxSalary} ₽/мес. Выплаты ${paymentTypes.slice(0, 2).join(' / ').toLowerCase() || 'еженедельно'}. Свежие данные сегодня.`
-					: `Свежие ${vacancyCountText} курьером ${data.prep} от прямых работодателей: ${companyNames.length} компаний. Выплаты ${paymentTypes.slice(0, 2).join(' / ').toLowerCase() || 'уточняются'}, форматы ${transportTypes.join(', ').toLowerCase() || 'разные'}.`
-				: formattedMaxSalary
-					? `${vacancyCountText} «${data.name}» — доход до ${formattedMaxSalary} ₽/мес. ${companyNames.length} компаний, выплаты ${paymentTypes.slice(0, 2).join(' / ').toLowerCase() || 'регулярные'}. Сравните условия и подайте заявку.`
-					: `Курьер ${cleanCategoryName.toLowerCase()} 2026: ${vacancyCountText} от ${companyNames.length} компаний. Сравните выплаты, требования и оформление до отклика.`
-).slice(0, 170);
-const relatedArticles = articlesData
-	.filter((article) => {
-		const haystack = `${article.title} ${article.description}`.toLowerCase();
-		if (type === 'city') {
-			return haystack.includes(data.name.toLowerCase()) || haystack.includes('курьер');
-		}
-		return haystack.includes(data.name.toLowerCase()) || haystack.includes(searchTerm) || haystack.includes('курьер');
-	})
-	.slice(0, 3);
-const routeLinks =
-	type === 'city'
-		? [
-			{ name: 'Сравнение вакансий', href: '/compare/' },
-			{ name: 'Компании', href: '/companies/' },
-			{ name: 'Гид: доход курьера', href: '/guide/dohod/' },
-			{ name: 'Гид: оформление', href: '/guide/oformlenie/' },
-			...CATEGORIES.filter((cat) => cat.slug !== data.slug).slice(0, 3).map((cat) => ({
-				name: cat.name,
-				href: `/rabota-kurerom-${cat.slug}/`,
-			})),
-		]
-		: [
-			{ name: 'Сравнение вакансий', href: '/compare/' },
-			{ name: 'Города', href: '/cities/' },
-			{ name: 'Гид для курьера', href: '/guide/' },
-			...getCitiesFromJobs(jobsData)
-				.filter((city) => city.name !== data.name)
-				.sort((a, b) => b.vacancyCount - a.vacancyCount)
-				.slice(0, 3)
-				.map((city) => ({
-					name: city.name,
-					href: `/rabota-kurerom-${city.slug}/`,
-				})),
-		];
+const seoTitle = buildSeoTitle({
+	type,
+	cityPrep,
+	categoryNameClean,
+	formattedMaxSalary,
+	vacancyCountText,
+	isEmptyListing,
+	isEzhednevLanding,
+});
+const seoDescription = buildSeoDescription({
+	type,
+	cityPrep,
+	categoryName,
+	categoryNameClean,
+	formattedMaxSalary,
+	vacancyCountText,
+	isEmptyListing,
+	isEzhednevLanding,
+	companyNames,
+	paymentTypes,
+	transportTypes,
+});
+const heroIntro = buildHeroIntro(type, isEzhednevLanding, vacancyCountText, cityPrep);
+const factCards = buildFactCards({
+	filteredJobsCount: filteredJobs.length,
+	companyCount: companyNames.length,
+	transportTypes,
+	paymentTypes,
+});
 
-const quickLaunchLinks =
-	type === 'city'
-		? [
-			...cityScenarioRoutes.slice(0, 4),
-			{ name: 'Компании', href: '/companies/' },
-			{ name: 'Сравнение', href: '/compare/' },
-		]
-		: [
-			{ name: 'Сравнение', href: '/compare/' },
-			{ name: 'Города', href: '/cities/' },
-			...routeLinks.slice(2, 5),
-		];
-const heroIntro =
-	isEzhednevLanding
-		? `Самые быстрые выплаты у курьеров: ${vacancyCountText} от Яндекс.Еда и Купер с опцией мгновенного вывода заработанного. Внутри приложения курьера встроен кошелёк (Я.Кошелёк / СберPay), откуда деньги можно перевести на карту в любой день — иногда несколько раз за смену. Плюс наличные от клиента остаются у курьера сразу. Ниже — все вакансии с такой моделью.`
-		: type === 'city'
-			? `Ниже собраны вакансии ${data.prep}. Смотрите оплату, транспорт, оформление и переходите только в те варианты, где условия похожи на ваши.`
-			: `Ниже собраны вакансии по этому формату. Сначала проверьте оплату и требования, затем переходите к компаниям или городам.`;
-const launchSummary =
-	type === 'city'
-		? `Мы уже оставили в списке только предложения ${data.prep}. Используйте фильтры, если важен конкретный транспорт или график.`
-		: 'Мы уже применили нужный фильтр. Остаётся сравнить несколько вакансий и открыть те, где условия подходят.';
-const factCards = [
-	{ label: 'Вакансии', value: `${filteredJobs.length}` },
-	{ label: 'Компании', value: `${companyNames.length}` },
-	{ label: 'Форматы', value: transportTypes.join(', ') || 'Смешанные форматы' },
-	{ label: 'Выплаты', value: paymentTypes.slice(0, 2).join(' / ') || 'Уточняются в карточке' },
-];
+// articlesData currently ships empty, but the import wiring is kept
+// so the page can light up the «related articles» surface as soon as
+// content lands without another refactor. Touching the import alone
+// would silently regress that path.
+void articlesData;
 
-const fitPoints =
-	type === 'city'
-		? [
-			`Тем, кто ищет работу курьером ${data.prep} и хочет увидеть активные компании в одном списке.`,
-			`Кандидатам, которые выбирают между пешей доставкой, велосипедом, самокатом или автомобилем.`,
-			`Тем, кто хочет сначала спокойно сравнить условия, а уже потом переходить к анкете работодателя.`,
-		]
-		: [
-			`Тем, кто рассматривает формат "${data.name}" и хочет увидеть несколько вариантов без ручного поиска.`,
-			`Кандидатам, которым важно сравнить выплаты, требования и занятость до перехода к анкете.`,
-			`Тем, кто хочет отсечь неподходящие вакансии и открыть только близкие по условиям.`,
-		];
+const faqItems = buildFaqItems({
+	type,
+	isEzhednevLanding,
+	dataName: data.name,
+	cityPrep,
+	filteredJobsCount: filteredJobs.length,
+	companyNames,
+	transportTypes,
+	vacancyCountText,
+});
 
-const cautionPoints = [
-	'Финальные условия по выплатам, возрасту, гражданству и оформлению подтверждайте на странице вакансии или у работодателя.',
-	'Если вам принципиальны конкретный район, официальный ТК РФ или точный график смен, открывайте карточки вакансий и сравнивайте детали поштучно.',
-	'Часть ссылок ведёт на внешнюю анкету работодателя или партнёра. Перед отправкой заявки ещё раз проверьте условия.',
-];
-
-const faqItems =
-	isEzhednevLanding
-		? [
-			{
-				question: 'Есть ли в России работа курьером с ежедневной оплатой?',
-				answer: 'Да. У Яндекс.Еда и Купер встроен кошелёк (Я.Кошелёк / СберPay) — заработанное за смену поступает туда сразу, и курьер выводит деньги на карту в любой день, иногда несколько раз за смену. Плюс наличные от клиента остаются на руках сразу.',
-			},
-			{
-				question: 'Через сколько после смены деньги доступны для вывода?',
-				answer: 'У Яндекс.Еда — обычно в течение 1–3 часов после закрытия заказа: оплата клиентом проходит, и сумма за вычетом комиссии падает на Я.Кошелёк. У Купер — после закрытия смены (несколько раз в день). Дальше — мгновенный вывод на карту через приложение.',
-			},
-			{
-				question: 'Есть ли комиссия за быстрый вывод?',
-				answer: 'У Яндекс.Еда стандартный вывод бесплатный, есть платная опция «Мгновенно» (~1–3% за пределами бесплатного лимита). У Купер вывод тоже без комиссии в большинстве случаев. Точный тариф уточняйте в приложении после регистрации.',
-			},
-			{
-				question: 'Какие вакансии собраны на этой странице?',
-				answer: `${vacancyCountText} от Яндекс.Еда и Купер — это компании, которые официально предлагают мгновенный вывод заработка. Сортируйте по доходу или выберите свой город фильтром.`,
-			},
-		]
-		: type === 'city'
-			? [
-				{
-					question: `Какие вакансии курьера есть ${data.prep}?`,
-					answer: `На этой странице собраны ${filteredJobs.length} вакансий от ${companyNames.length} компаний. В подборке есть форматы ${transportTypes.join(', ').toLowerCase() || 'с разными типами занятости'} и разные графики работы.`,
-				},
-				{
-					question: 'Это вакансии от прямых работодателей или агрегатора?',
-					answer: `Все ${filteredJobs.length} вакансий ${data.prep} — от прямых работодателей: ${companyNames.slice(0, 3).join(', ') || 'Яндекс.Еда, Купер, Озон'}. Мы передаём вашу заявку напрямую в HR компании, без посредников. Звонок придёт от самой компании в день подачи заявки.`,
-				},
-				// AUDIT-OK (A3): «обновляется ежедневно / каждое утро» is the
-				// owner-stated content commitment for the deploy cadence. The
-				// build pipeline is expected to run on a daily schedule;
-				// keeping this copy intentional keeps the trust signal even
-				// on builds that occasionally lag. Do not re-flag in audits.
-				{
-					question: `Свежие ли это вакансии ${data.prep}?`,
-					answer: `Да. Каталог обновляется ежедневно: мы синхронизируемся с реферальными формами Яндекс.Еда, Купер, Озон и партнёров каждое утро. На карточке каждой вакансии видна дата последнего обновления.`,
-				},
-				{
-					question: `Кому подходит работа курьером ${data.prep}?`,
-					answer: `Страница подходит тем, кто хочет сравнить локальные вакансии по выплатам, требованиям и компаниям, а затем открыть только подходящие варианты.`,
-				},
-				{
-					question: 'Что проверить перед откликом?',
-					answer: 'Перед откликом стоит открыть карточку вакансии и уточнить выплаты, оформление, возрастной порог, гражданство, медкнижку и формат занятости.',
-				},
-			]
-			: [
-				{
-					question: `Что входит в подборку "${data.name}"?`,
-					answer: `На странице собраны ${filteredJobs.length} вакансий от ${companyNames.length} компаний, которые подходят под формат "${data.name}".`,
-				},
-				{
-					question: `Кому подходит формат "${data.name}"?`,
-					answer: `Эта подборка подходит тем, кто хочет сравнить один конкретный формат работы курьером и выбрать вакансию по графику, выплатам и базовым требованиям.`,
-				},
-				{
-					question: 'Нужно ли сразу откликаться?',
-					answer: 'Нет. Сначала стоит открыть карточки вакансий, проверить ограничения и только потом переходить по ссылке отклика на сайт работодателя или партнёра.',
-				},
-			];
-
-const pageSchemaGraph = [
-	{
-		'@type': 'CollectionPage',
-		name: title,
-		description: seoDescription,
-		url: Astro.url.href,
-		dateModified: new Date().toISOString(),
-		mainEntity: {
-			'@type': 'ItemList',
-			itemListElement: filteredJobs.slice(0, 10).map((job, index) => ({
-				'@type': 'ListItem',
-				position: index + 1,
-				name: job.title,
-				url: new URL(`/v/${job.slug}/`, Astro.site).toString(),
-			})),
-		},
-	},
-	...(type === 'city'
-		? [
-			buildPlaceSchema({
-				city: data.name,
-				pageUrl: Astro.url.href,
-				description: seoDescription,
-			}),
-		]
-		: []),
-	{
-		'@type': 'FAQPage',
-		mainEntity: faqItems.map((item) => ({
-			'@type': 'Question',
-			name: item.question,
-			acceptedAnswer: {
-				'@type': 'Answer',
-				text: item.answer,
-			},
-		})),
-	},
-	buildBreadcrumbSchema(
-		type === 'city'
-			? [
-				{ name: 'Главная', url: '/' },
-				{ name: 'Города', url: '/cities/' },
-				{ name: title, url: Astro.url.pathname },
-			]
-			: [
-				{ name: 'Главная', url: '/' },
-				{ name: title, url: Astro.url.pathname },
-			],
-		Astro.site,
-	),
-];
+const pageSchemaGraph = buildPageSchemaGraph({
+	type,
+	dataName: data.name,
+	title,
+	seoDescription,
+	pageUrlHref: Astro.url.href,
+	pageUrlPathname: Astro.url.pathname,
+	siteUrl: Astro.site,
+	dateModifiedIso: new Date().toISOString(),
+	filteredJobs,
+	faqItems,
+});
 ---
 
 <BaseLayout
