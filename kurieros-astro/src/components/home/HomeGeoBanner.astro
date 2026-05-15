@@ -1,0 +1,129 @@
+---
+// Geo banner — first-visit city-confirmation modal.
+//
+// The DOM is injected at runtime by the city-detection script in
+// src/pages/index.astro (XSS-safe DOM API, no innerHTML); this
+// component ships only the matching CSS so the modal looks right
+// when it appears. All selectors stay `:global()` because the
+// runtime-injected nodes lack any Astro `data-astro-cid-*` attribute.
+//
+// Extracted from src/pages/index.astro (W6-2 god-file split).
+---
+
+<style>
+	/* HV4 — Geo banner as a centered modal overlay.
+	   Все селекторы `:global()` потому что модалка инжектится через
+	   `document.createElement` (без Astro data-astro-cid-* атрибутов).
+	   В dark-mode используем явные RGB-цвета вместо var()-токенов
+	   которые сливаются с background'ом темной темы. */
+	:global(.geo-banner-modal) {
+		position: fixed;
+		inset: 0;
+		z-index: 9100;
+		display: grid;
+		place-items: center;
+		padding: 1rem;
+	}
+	:global(.geo-banner-backdrop) {
+		position: absolute;
+		inset: 0;
+		background: rgba(15, 23, 42, 0.55);
+		backdrop-filter: blur(4px);
+		-webkit-backdrop-filter: blur(4px);
+	}
+	:global(.geo-banner-card) {
+		position: relative;
+		max-width: 440px;
+		width: 100%;
+		background: #ffffff;
+		border-radius: 18px;
+		padding: 1.6rem 1.5rem 1.4rem;
+		text-align: center;
+		box-shadow: 0 32px 60px rgba(0, 0, 0, 0.28);
+		font-family: var(--font-main, 'Manrope', sans-serif);
+		color: #0f1724;
+	}
+	:global(.geo-banner-icon) {
+		font-size: 2.2rem;
+		line-height: 1;
+		margin-bottom: 0.4rem;
+	}
+	:global(.geo-banner-title) {
+		margin: 0 0 0.4rem;
+		font-family: var(--font-heading, 'Manrope', sans-serif);
+		font-size: 1.25rem;
+		line-height: 1.3;
+		font-weight: 700;
+		color: #0f1724;
+		letter-spacing: -0.01em;
+	}
+	:global(.geo-banner-title strong) {
+		color: var(--brand-700, #117a3a);
+		font-weight: 800;
+	}
+	:global(.geo-banner-body) {
+		margin: 0 0 1.2rem;
+		font-size: 0.95rem;
+		line-height: 1.5;
+		color: #4a5468;
+	}
+	:global(.geo-banner-actions) {
+		display: flex;
+		gap: 10px;
+	}
+	:global(.geo-banner-btn) {
+		flex: 1 1 0;
+		padding: 12px 14px;
+		border-radius: 10px;
+		font-family: inherit;
+		font-size: 0.95rem;
+		font-weight: 700;
+		cursor: pointer;
+		transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+		min-height: 44px;
+	}
+	:global(.geo-banner-btn-primary) {
+		background: var(--brand-700, #117a3a);
+		color: #ffffff;
+		border: 1px solid var(--brand-700, #117a3a);
+	}
+	:global(.geo-banner-btn-primary:hover) {
+		background: var(--brand-800, #0e6730);
+	}
+	:global(.geo-banner-btn-secondary) {
+		background: #ffffff;
+		color: #2a3447;
+		border: 1px solid #d4d9e2;
+	}
+	:global(.geo-banner-btn-secondary:hover) {
+		background: #f4f6fa;
+		border-color: #b8bfca;
+	}
+	:global(body.geo-banner-open) {
+		overflow: hidden;
+	}
+
+	/* Dark mode — explicit non-transparent colors so text doesn't blend. */
+	:global(:where(html, body).dark-mode .geo-banner-card) {
+		background: #1b2533;
+		color: #e7eaf0;
+	}
+	:global(:where(html, body).dark-mode .geo-banner-title) {
+		color: #e7eaf0;
+	}
+	:global(:where(html, body).dark-mode .geo-banner-title strong) {
+		color: #67d086;
+	}
+	:global(:where(html, body).dark-mode .geo-banner-body) {
+		color: rgba(231, 234, 240, 0.78);
+	}
+	:global(:where(html, body).dark-mode .geo-banner-btn-secondary) {
+		background: rgba(231, 234, 240, 0.06);
+		color: #e7eaf0;
+		border-color: rgba(231, 234, 240, 0.22);
+	}
+	:global(:where(html, body).dark-mode .geo-banner-btn-secondary:hover) {
+		background: rgba(231, 234, 240, 0.12);
+		border-color: rgba(231, 234, 240, 0.32);
+	}
+</style>

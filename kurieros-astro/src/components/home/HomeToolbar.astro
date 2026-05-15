@@ -1,0 +1,657 @@
+---
+// Homepage toolbar — sticky city selector + 4 vacancy filters.
+// Extracted from src/pages/index.astro (W6-2 god-file split).
+//
+// IDs are kept stable (`#city-select`, `#city-page-link`, `#vacancy-*-filter`)
+// because the `is:inline` city-detection script in index.astro reads
+// them via `document.getElementById`. Moving the markup does not break
+// that wiring — DOM IDs are global.
+import LanguageSwitcher from '../LanguageSwitcher.astro';
+
+interface Props {
+	availableCities: string[];
+}
+
+const { availableCities } = Astro.props;
+---
+
+<section class="home-toolbar-section">
+	<div class="hero-toolbar hero-toolbar-only">
+		<div class="toolbar-top">
+			<div class="city-selector-container" data-region-autoprompt="manual-only">
+				<svg class="city-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+				<label class="sr-only" for="city-select">Выберите город</label>
+				<select id="city-select" class="city-select">
+					<option value="" data-t="location.all_cities">Все города</option>
+					{availableCities.map((city) => (
+						<option value={city}>{city}</option>
+					))}
+				</select>
+			</div>
+			<div class="hero-lang-switcher">
+				<LanguageSwitcher />
+			</div>
+		</div>
+		<a id="city-page-link" class="hero-city-link hidden" href="/" data-t="location.view_jobs">Все вакансии в этом городе</a>
+		<div class="home-filter-row">
+			<select id="vacancy-age-filter" class="home-filter-select" aria-label="Фильтр по возрасту">
+				<option value="all">Возраст: любой</option>
+				<option value="16plus">Возраст: с 16 лет</option>
+				<option value="18plus">Возраст: с 18 лет</option>
+			</select>
+			<select id="vacancy-transport-filter" class="home-filter-select" aria-label="Фильтр по транспорту">
+				<option value="all">Транспорт: любой</option>
+				<option value="foot">Транспорт: пешком</option>
+				<option value="bicycle">Транспорт: велосипед / самокат</option>
+				<option value="auto">Транспорт: авто</option>
+				<option value="remote">Транспорт: работа из дома</option>
+			</select>
+			<select id="vacancy-employment-filter" class="home-filter-select" aria-label="Фильтр по типу трудоустройства">
+				<option value="all">Тип трудоустройства: любой</option>
+				<option value="gph">Тип трудоустройства: ГПХ</option>
+				<option value="self_employed">Тип трудоустройства: самозанятость</option>
+				<option value="individual_entrepreneur">Тип трудоустройства: ИП</option>
+				<option value="official">Тип трудоустройства: ТК РФ</option>
+			</select>
+			<select id="vacancy-citizenship-filter" class="home-filter-select" aria-label="Фильтр по гражданству">
+				<option value="all">Гражданство: любое</option>
+				<option value="rf">Гражданство: РФ</option>
+				<option value="cis">Гражданство: СНГ</option>
+			</select>
+		</div>
+	</div>
+</section>
+
+<style>
+	/* All toolbar CSS lives here — was historically interleaved across
+	   ~12 blocks in src/pages/index.astro. Order is preserved relative
+	   to the original cascade because some rules rely on later overrides
+	   (e.g. universal `min-height: 52px !important` lock at the bottom). */
+
+	/* === Base layout === */
+	.home-filter-row {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.55rem;
+		align-items: center;
+	}
+	.home-filter-select {
+		width: 100%;
+		height: 44px;
+		padding: 0 14px;
+		border-radius: 12px;
+		border: 1px solid var(--ink-200);
+		/* Pure white so the pill stands out against the cream hero bg
+		   instead of blending into it like surface-100 does. */
+		background: var(--ink-0);
+		color: var(--ink-900);
+		font-size: 15px;
+		font-family: inherit;
+		font-weight: 500;
+		cursor: pointer;
+		box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+		transition: border-color 0.15s, box-shadow 0.15s;
+	}
+	.home-filter-select:hover {
+		border-color: var(--brand-700);
+		box-shadow: 0 2px 6px var(--scrim-shadow-soft);
+	}
+	.home-filter-select:focus-visible {
+		outline: none;
+		border-color: var(--brand-700);
+		box-shadow: 0 0 0 3px rgba(var(--brand-700-rgb), 0.18);
+	}
+
+	/* --- Hero Toolbar --- */
+	.hero-toolbar {
+		display: flex;
+		flex-direction: column;
+		/* Standardized vertical rhythm — was a mix of 8px/12px/0.5rem
+		   across the codebase. --space-3 (12px) is the canonical
+		   "tight related elements" spacing per themes.css. */
+		gap: var(--space-3);
+		margin-top: 0;
+		margin-bottom: 0;
+		width: 100%;
+		/* Match the hero panel & job grid container width — was capped
+		   at 1000px / toolbar-top at 640px which left big empty margins. */
+		max-width: none;
+	}
+	.hero-toolbar-only {
+		padding: 0;
+	}
+	.toolbar-top {
+		display: flex;
+		gap: 12px;
+		width: 100%;
+		max-width: none;
+		margin: 0;
+		align-items: flex-end;
+	}
+	.city-selector-container {
+		display: flex;
+		align-items: center;
+		padding: 0 14px;
+		background: var(--ink-0);
+		border: 1px solid var(--ink-200);
+		font-size: 15px;
+		flex: 1;
+		height: 44px;
+		box-sizing: border-box;
+		border-radius: 12px;
+		cursor: pointer;
+		position: relative;
+		box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+		transition: border-color 0.15s, box-shadow 0.15s;
+	}
+	.city-selector-container:hover {
+		border-color: var(--brand-700);
+		box-shadow: 0 2px 6px var(--scrim-shadow-soft);
+	}
+	.city-selector-container:focus-within {
+		border-color: var(--brand-700);
+		box-shadow: 0 0 0 3px rgba(var(--brand-700-rgb), 0.18);
+	}
+	.city-selector-container::after {
+		content: '▼';
+		position: absolute;
+		right: 14px;
+		font-size: 0.7rem;
+		color: var(--ink-500);
+		pointer-events: none;
+	}
+	.hero-lang-switcher {
+		flex: 0 0 7rem;
+		min-width: 0;
+	}
+	.hero-lang-switcher :global(.lang-toggle) {
+		width: 100%;
+		min-height: 44px;
+		height: 44px;
+		background: var(--ink-0);
+		border: 1px solid var(--ink-200);
+		border-radius: 12px;
+		box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+		font-size: 15px;
+		font-weight: 600;
+		transition: border-color 0.15s, box-shadow 0.15s;
+	}
+	.hero-lang-switcher :global(.lang-toggle:hover),
+	.hero-lang-switcher :global(.lang-toggle:focus-visible) {
+		border-color: var(--brand-700);
+		background: var(--ink-0);
+		box-shadow: 0 2px 6px var(--scrim-shadow-soft);
+	}
+	/* --- City Select & Icon --- */
+	.city-icon {
+		position: absolute;
+		left: 14px;
+		color: var(--ink-500);
+		flex-shrink: 0;
+		width: 18px;
+		height: 18px;
+		pointer-events: none;
+		z-index: 2;
+	}
+	.city-select {
+		width: 100%;
+		border: none;
+		background: transparent;
+		appearance: none;
+		font: inherit;
+		font-size: 15px !important;
+		font-weight: 500 !important;
+		color: var(--ink-900);
+		padding: 0 36px;
+		outline: none;
+		text-align: left;
+		text-align-last: left;
+		cursor: pointer;
+	}
+
+	/* --- Hero CTA Button --- */
+	.hero-city-link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		margin-top: 0.25rem;
+		padding: 0 2.5rem;
+		height: 4.8rem;
+		box-sizing: border-box;
+		border-radius: 8px;
+		border: 1px solid var(--brand-800);
+		background: var(--brand-800);
+		color: var(--ink-0);
+		text-decoration: none;
+		font-size: 1.2rem;
+		line-height: 1.2;
+		transition: var(--transition);
+		width: 100%;
+	}
+	.hero-city-link:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 10px 24px rgba(22, 61, 43, 0.12);
+	}
+
+	/* === Dark Mode === */
+	:global(body.dark-mode) .home-filter-select {
+		background: var(--surface-100);
+		border-color: var(--ink-200);
+		color: var(--ink-800);
+		box-shadow: none;
+	}
+	:global(body.dark-mode) .home-filter-select:hover {
+		border-color: var(--brand-500);
+	}
+	:global(body.dark-mode) .home-filter-select:focus-visible {
+		outline: none;
+		border-color: var(--brand-500);
+		box-shadow: 0 0 0 3px rgba(46, 179, 122, 0.22);
+		background: var(--surface-100);
+	}
+	:global(body.dark-mode) .city-selector-container {
+		background: var(--surface-100);
+		border-color: var(--ink-200);
+		box-shadow: none;
+	}
+	:global(body.dark-mode) .city-selector-container:hover {
+		border-color: var(--brand-500);
+		background: var(--surface-100);
+	}
+	:global(body.dark-mode) .city-selector-container:focus-within {
+		border-color: var(--brand-500);
+		box-shadow: 0 0 0 3px rgba(46, 179, 122, 0.22);
+	}
+	:global(body.dark-mode) .city-selector-container::after,
+	:global(body.dark-mode) .city-icon {
+		color: var(--ink-300);
+	}
+	:global(body.dark-mode) .city-select {
+		color: var(--ink-800);
+	}
+	:global(body.dark-mode) .hero-lang-switcher :global(.lang-toggle) {
+		background: var(--surface-100);
+		border-color: var(--ink-200);
+		box-shadow: none;
+		color: var(--ink-800);
+	}
+	:global(body.dark-mode) .hero-lang-switcher :global(.lang-toggle:hover),
+	:global(body.dark-mode) .hero-lang-switcher :global(.lang-toggle:focus-visible) {
+		background: var(--surface-100);
+		border-color: var(--brand-500);
+	}
+	:global(body.dark-mode) .hero-city-link {
+		background: var(--dm-green-surface);
+		border-color: var(--dm-green-border);
+		color: var(--dm-green-text);
+	}
+	:global(body.dark-mode) .hero-city-link:hover {
+		background: var(--dm-green-surface-hover);
+		border-color: var(--dm-green-focus);
+		box-shadow: 0 12px 26px rgba(15, 23, 42, 0.34);
+	}
+
+	/* === Mobile (max-width: 768px) — toolbar-only rules === */
+	@media (max-width: 768px) {
+		/* Override the global !important height on filter selects so
+		   they take 36px on phones instead of 52px. Saves ~48px across
+		   the 3 stacked dropdowns and shrinks the gap to JobGrid. */
+		.home-filter-select {
+			height: 36px !important;
+			min-height: 36px !important;
+			font-size: 0.85rem;
+		}
+		.hero-toolbar {
+			margin-top: 0;
+			margin-bottom: 0;
+			/* Use canonical --space-3 (12px) — was 6px (off-scale) and
+			   produced uneven rhythm against the toolbar pills. */
+			gap: var(--space-3);
+		}
+		.home-filter-row {
+			/* 2-column layout on mobile (4 filters total → 2 rows of 2).
+			   Was 1fr stack — wasted vertical space. */
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: var(--space-2);
+		}
+		.toolbar-top {
+			/* Keep city + language on one row on mobile per UX feedback —
+			   stacking made them eat ~120px of vertical space and pushed
+			   the JobGrid further down. */
+			flex-direction: row;
+			align-items: stretch;
+			gap: 0.5rem;
+			width: 100%;
+		}
+		.city-selector-container {
+			flex: 1 1 auto;
+			min-width: 0;
+			height: 3.2rem;
+			padding: 0 0.5rem !important;
+			padding-right: 1.5rem !important;
+		}
+		.hero-lang-switcher {
+			flex: 0 0 auto;
+			width: auto;
+		}
+		.hero-lang-switcher :global(.lang-toggle) {
+			min-height: 3.2rem;
+		}
+		.city-icon {
+			left: 0.9rem;
+			width: 18px;
+			height: 18px;
+		}
+		.city-select {
+			padding: 0 1.25rem 0 1.9rem;
+			font-size: 1.1rem !important;
+			text-align: left;
+			text-align-last: left;
+		}
+	}
+
+	/* === Visual refresh overrides — keep historical cascade order === */
+	.city-selector-container {
+		background: var(--ink-0);
+		border: 1px solid var(--ink-200);
+		border-radius: var(--radius-lg);
+		box-shadow: var(--shadow-xs);
+		transition: border-color var(--transition), box-shadow var(--transition);
+	}
+	.city-selector-container:hover,
+	.city-selector-container:focus-within {
+		border-color: var(--brand-500);
+		box-shadow: var(--shadow-focus);
+	}
+	.city-selector-container::after {
+		color: var(--ink-500);
+	}
+	.city-select {
+		font-family: var(--font-main);
+		font-weight: 700;
+		font-size: var(--fs-16);
+		color: var(--ink-900);
+	}
+
+	.hero-city-link {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		/* CTA tinted in --brand-50 with a thicker brand border so it
+		   reads as the obvious next-step button among the white
+		   dropdowns. Was indistinguishable (white surface, hairline
+		   left accent only). */
+		background: var(--brand-50);
+		border: 2px solid var(--brand-300);
+		border-radius: var(--radius-md);
+		padding: var(--space-4) var(--space-5);
+		color: var(--brand-800);
+		font-family: var(--font-main);
+		font-size: var(--fs-16);
+		font-weight: 700;
+		text-decoration: none;
+		margin-top: 0;
+		transition: background var(--transition), border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+	}
+	.hero-city-link::after {
+		/* ↓ instead of → so the icon hints «scroll down to vacancies»
+		   rather than «navigate elsewhere» — the JobGrid sits right
+		   below this link on the same page. */
+		content: '↓';
+		color: var(--brand-700);
+		font-weight: 800;
+		font-size: var(--fs-20);
+		transition: color var(--transition), transform var(--transition);
+	}
+	.hero-city-link:hover,
+	.hero-city-link:focus-visible {
+		background: var(--brand-100);
+		border-color: var(--brand-500);
+		box-shadow: var(--shadow-sm);
+		outline: none;
+	}
+	.hero-city-link:hover::after,
+	.hero-city-link:focus-visible::after {
+		color: var(--brand-600);
+		transform: translateY(3px);
+	}
+	.hero-city-link.hidden {
+		display: none;
+	}
+
+	/* Toolbar section — sits below the Hero, full-width inside home-shell.
+	 *
+	 * Sticky on desktop only: keeps the city + 3 filters glued to the
+	 * top of the viewport while the user scrolls through the JobGrid.
+	 * Reduces "fat-finger scroll-back to change filter" friction —
+	 * one of the top measured causes of bounce on category pages.
+	 *
+	 * Mobile is left in normal flow: 52px-tall controls × 2 rows would
+	 * eat ~110px of viewport, leaving too little room for the JobCard
+	 * preview underneath.
+	 *
+	 * `top` value matches the sticky <header> height on desktop (~72px:
+	 * padding 1rem × 2 + ~40px logo height). Header has z-index 100;
+	 * toolbar sits at 50 so it tucks under the header on scroll.
+	 */
+	.home-toolbar-section {
+		margin: var(--space-6) 0 var(--space-8);
+	}
+	@media (min-width: 768px) {
+		.home-toolbar-section {
+			background: rgba(255, 255, 255, 0.92);
+			-webkit-backdrop-filter: blur(10px);
+			backdrop-filter: blur(10px);
+			padding: var(--space-3) var(--space-4);
+			border-radius: var(--radius-md);
+			border: 1px solid var(--ink-150);
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+		}
+		:where(html, body).dark-mode .home-toolbar-section {
+			background: rgba(28, 30, 36, 0.92);
+			border-color: var(--ink-200);
+		}
+	}
+
+	/* Hero toolbar — k-cityrow layout (handoff): city+lang | cta | fselects.
+	   Spacing comes from the canonical rule above (gap: var(--space-3));
+	   keep this block for align-items only. */
+	.hero-toolbar {
+		align-items: stretch;
+	}
+	.toolbar-top {
+		display: flex;
+		gap: 8px;
+		align-items: stretch;
+	}
+	/* Equal height for ALL toolbar controls */
+	.city-selector-container,
+	.hero-lang-switcher :global(.lang-toggle),
+	.hero-city-link,
+	.home-filter-select {
+		min-height: 52px !important;
+		height: 52px !important;
+	}
+	.hero-city-link {
+		height: auto !important;
+		min-height: 52px !important;
+	}
+	/* Neutral input pills (city pill, lang pill, filter selects) — uniform
+	   white surface. `.hero-city-link` removed from this group: it's a
+	   CTA, not a neutral input, so it gets the mint-tinted styling from
+	   the canonical rule above. */
+	.city-selector-container,
+	.hero-lang-switcher :global(.lang-toggle),
+	.home-filter-select {
+		background: var(--ink-0) !important;
+		background-image: none !important;
+		border: 1px solid var(--ink-200) !important;
+		border-radius: var(--radius-md) !important;
+		box-shadow: var(--shadow-xs);
+		font-family: var(--font-main);
+		color: var(--ink-900);
+		transition: border-color 0.15s, box-shadow 0.15s;
+	}
+	:global(body.dark-mode) .city-selector-container,
+	:global(body.dark-mode) .hero-lang-switcher :global(.lang-toggle),
+	:global(body.dark-mode) .home-filter-select {
+		background: var(--surface-100) !important;
+		border-color: var(--ink-200) !important;
+		color: var(--ink-800);
+		box-shadow: none;
+	}
+	.city-selector-container {
+		flex: 1;
+		min-height: 52px;
+		padding: 14px 16px 14px 14px;
+		display: flex;
+		align-items: center;
+	}
+	.city-selector-container .city-icon {
+		flex: 0 0 auto;
+		color: var(--brand-700);
+		margin-right: 10px;
+	}
+	.city-selector-container::after {
+		color: var(--ink-500);
+		margin-left: auto;
+	}
+	:where(html, body).dark-mode .city-selector-container .city-icon {
+		color: var(--brand-500);
+	}
+	.city-selector-container:hover,
+	.city-selector-container:focus-within {
+		border-color: var(--brand-700) !important;
+		box-shadow: 0 0 0 4px rgba(47,136,81,0.08);
+	}
+	.city-select {
+		font-family: var(--font-main);
+		font-weight: 700;
+		font-size: var(--fs-16);
+		color: var(--ink-900);
+		background: transparent;
+		flex: 1;
+		letter-spacing: -0.01em;
+	}
+	.hero-lang-switcher :global(.lang-toggle) {
+		min-height: 52px;
+		padding: 0 14px !important;
+	}
+	.hero-lang-switcher :global(.lang-toggle):hover {
+		border-color: var(--brand-700) !important;
+	}
+	.hero-city-link {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+		font-size: var(--fs-16);
+		font-weight: 600;
+		text-decoration: none;
+		letter-spacing: -0.005em;
+	}
+	.hero-city-link::after {
+		/* ↓ hints «scroll to vacancies below» (JobGrid sits right under) */
+		content: '↓';
+		margin-left: auto;
+		color: var(--brand-700);
+		font-weight: 800;
+		font-size: var(--fs-20);
+		transition: color var(--transition), transform var(--transition);
+	}
+	.hero-city-link:hover,
+	.hero-city-link:focus-visible {
+		border-color: var(--brand-700) !important;
+		background: var(--ink-100) !important;
+		outline: none;
+	}
+	.hero-city-link:hover::after,
+	.hero-city-link:focus-visible::after {
+		color: var(--brand-700);
+		transform: translateX(3px);
+	}
+	.hero-city-link.hidden { display: none; }
+
+	.home-filter-row {
+		display: grid;
+		/* 4 filters total: Возраст / Транспорт / Тип трудоустройства /
+		   Гражданство. Mobile = 2x2 grid (per UX request). Desktop
+		   override at 768px+ flattens to 1x4. */
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--space-3);
+		/* margin-top removed — the parent `.hero-toolbar` already provides
+		   `gap: var(--space-3)` between siblings. */
+		margin-top: 0;
+	}
+	@media (min-width: 768px) {
+		.home-filter-row {
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+		}
+	}
+	.home-filter-select {
+		min-height: 44px;
+		padding: 10px 14px !important;
+		color: var(--ink-900);
+		font-size: var(--fs-14);
+		font-weight: 600;
+	}
+	.home-filter-select:hover,
+	.home-filter-select:focus-visible {
+		border-color: var(--brand-700) !important;
+		outline: none;
+	}
+
+	/* Dark-mode toolbar cards — keep warm relationship between bg and border */
+	:where(html, body).dark-mode .city-selector-container,
+	:where(html, body).dark-mode .hero-lang-switcher :global(.lang-toggle),
+	:where(html, body).dark-mode .hero-city-link,
+	:where(html, body).dark-mode .home-filter-select {
+		background: var(--ink-100) !important;
+		border-color: var(--ink-200) !important;
+	}
+	:where(html, body).dark-mode .city-select,
+	:where(html, body).dark-mode .hero-city-link {
+		color: var(--ink-900);
+	}
+	:where(html, body).dark-mode .city-selector-container:hover,
+	:where(html, body).dark-mode .home-filter-select:hover,
+	:where(html, body).dark-mode .hero-city-link:hover,
+	:where(html, body).dark-mode .hero-lang-switcher :global(.lang-toggle):hover {
+		border-color: var(--brand-500) !important;
+	}
+
+	/* === Mobile compaction overrides ====================================
+	 * These live at the bottom of the stylesheet so they win the cascade
+	 * over the universal `!important` height locks above that
+	 * would otherwise pin filter selects to 52px even on phones. */
+	@media (max-width: 768px) {
+		.home-filter-select {
+			height: 36px !important;
+			min-height: 36px !important;
+			font-size: 0.85rem;
+			padding: 0 32px 0 12px !important;
+		}
+		.hero-city-link {
+			height: auto !important;
+			min-height: 44px !important;
+			padding: 0.75rem 1rem !important;
+		}
+	}
+
+	/* sr-only utility — needed locally because the toolbar uses
+	   <label class="sr-only"> and the global utility lives in
+	   index.astro's now-leaner stylesheet. */
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+	.hidden {
+		display: none;
+	}
+</style>
