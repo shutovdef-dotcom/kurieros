@@ -1,7 +1,7 @@
-// Compare grid + company-links rendering for the /compare/ page (typed ESM).
+// Compare grid rendering for the /compare/ page (typed ESM).
 //
 // Replaces the former `render.js` `?raw` fragment. Where that fragment
-// closed over `grid` / `companyLinks` / `features` / `hasAvailableJobs` /
+// closed over `grid` / `features` / `hasAvailableJobs` /
 // `applyScopedStyles` / `escapeHtml`, this module receives them as typed
 // constructor dependencies.
 //
@@ -16,16 +16,12 @@ import type { CompareJob, Feature } from './types';
 export interface CompareRenderer {
   /** Render the side-by-side comparison table for `jobs` (empty → empty state). */
   renderComparisonTable: (jobs: CompareJob[]) => void;
-  /** Render the company-chips row for the distinct companies in `jobs`. */
-  renderCompanyLinks: (jobs: CompareJob[]) => void;
 }
 
 /** DOM targets + page config the renderer needs. */
 interface RendererDeps {
   /** Main compare grid container. */
   grid: HTMLElement;
-  /** Chips row for selected companies (absent on some layouts). */
-  companyLinks: HTMLElement | null;
   /** Feature-row definitions (compile-time constant). */
   features: readonly Feature[];
   /** True when the site has at least one active vacancy. */
@@ -47,7 +43,7 @@ interface EmptyStateCopy {
  * config.
  */
 export function createRenderer(deps: RendererDeps): CompareRenderer {
-  const { grid, companyLinks, features, hasAvailableJobs, applyScopedStyles } = deps;
+  const { grid, features, hasAvailableJobs, applyScopedStyles } = deps;
 
   function renderCompanyLogo(job: CompareJob): string {
     const firstLetter = String(job.company ?? '').trim().charAt(0) || '•';
@@ -91,12 +87,6 @@ export function createRenderer(deps: RendererDeps): CompareRenderer {
       </div>
     `;
     applyScopedStyles(grid);
-
-    if (companyLinks) {
-      companyLinks.innerHTML =
-        '<a href="/companies/" class="compare-chip-link">Все компании</a>';
-      applyScopedStyles(companyLinks);
-    }
   }
 
   function renderComparisonTable(jobs: CompareJob[]): void {
@@ -169,28 +159,5 @@ export function createRenderer(deps: RendererDeps): CompareRenderer {
     applyScopedStyles(grid);
   }
 
-  function renderCompanyLinks(jobs: CompareJob[]): void {
-    if (!companyLinks) return;
-
-    const companies = Array.from(
-      new Map(
-        jobs.map((job) => [
-          job.company,
-          { name: job.company, href: job.companyHref },
-        ]),
-      ).values(),
-    );
-
-    companyLinks.innerHTML = companies.length
-      ? companies
-          .map(
-            (company) =>
-              `<a href="${escapeHtml(company.href)}" class="compare-chip-link">${escapeHtml(company.name)}</a>`,
-          )
-          .join('')
-      : '<a href="/companies/" class="compare-chip-link">Все компании</a>';
-    applyScopedStyles(companyLinks);
-  }
-
-  return { renderComparisonTable, renderCompanyLinks };
+  return { renderComparisonTable };
 }

@@ -34,7 +34,7 @@ import type { CompareData } from './types';
  * Wires:
  *   - the lazy catalog loader (`/api/compare-jobs.json`, `force-cache`),
  *   - the localStorage `compareList` read/write store,
- *   - the grid + company-links renderer,
+ *   - the grid renderer,
  *   - the city/transport server-side filter mode,
  * and binds the remove-from-compare click handler + cross-tab `storage`
  * sync listener.
@@ -45,9 +45,6 @@ export function initComparePage(data: CompareData): void {
 
   const { compareJobs, features, totalCompareJobs } = data;
 
-  const companyLinks = document.querySelector<HTMLElement>(
-    '[data-compare-companies]',
-  );
   const hasAvailableJobs = totalCompareJobs > 0;
 
   // Re-stamp Astro's component-scoped `data-astro-cid-*` attribute onto any
@@ -62,7 +59,6 @@ export function initComparePage(data: CompareData): void {
   const compareList = createCompareList(catalog);
   const renderer = createRenderer({
     grid,
-    companyLinks,
     features,
     hasAvailableJobs,
     applyScopedStyles,
@@ -82,15 +78,11 @@ export function initComparePage(data: CompareData): void {
           // showCatalogError() already rendered a message into the grid.
           return;
         }
-        const jobs = compareList.getSelectedJobs();
-        renderer.renderComparisonTable(jobs);
-        renderer.renderCompanyLinks(jobs);
+        renderer.renderComparisonTable(compareList.getSelectedJobs());
       });
       return;
     }
-    const jobs = compareList.getSelectedJobs();
-    renderer.renderComparisonTable(jobs);
-    renderer.renderCompanyLinks(jobs);
+    renderer.renderComparisonTable(compareList.getSelectedJobs());
   }
 
   renderSelectedComparison();

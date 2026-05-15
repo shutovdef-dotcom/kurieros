@@ -2,8 +2,8 @@
 //
 // Replaces the former `filters.js` `?raw` fragment. Where that fragment
 // closed over `ensureFullCatalog` / `renderComparisonTable` /
-// `renderCompanyLinks` / `renderSelectedComparison`, this module receives
-// them as typed constructor dependencies.
+// `renderSelectedComparison`, this module receives them as typed
+// constructor dependencies.
 //
 // DOM-side adapter for the predicate in `src/utils/jobFilters.ts`. This
 // module runs on JSON catalog blobs fetched at runtime (not the build-time
@@ -114,11 +114,9 @@ export function createFilters(deps: FiltersDeps): void {
         `Нет вакансий по фильтру «${city || 'любой город'} / ${transportLabel}»`,
       );
       renderer.renderComparisonTable([]);
-      renderer.renderCompanyLinks([]);
       return;
     }
     renderer.renderComparisonTable(display);
-    renderer.renderCompanyLinks(display);
     setStatus(
       matched.length > display.length
         ? `Показано ${display.length} из ${matched.length} вакансий по фильтру`
