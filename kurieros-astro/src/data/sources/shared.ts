@@ -70,11 +70,18 @@ export const buildPay = (hourly: number): VacancyOffer['pay'] => {
 
 /**
  * Used by per-partner monthly-rate formatters (T-Bank, Efin, Alfa,
- * Burger King). Centralised to keep the "ru-RU" locale and number
- * formatting consistent across partners.
+ * Burger King, Ozon). Centralised to keep the "ru-RU" locale and
+ * number formatting consistent across partners.
+ *
+ * Normalises ICU thousands separators to regular ASCII space:
+ *   - U+00A0 (NO-BREAK SPACE) — emitted by older ICU builds
+ *   - U+202F (NARROW NO-BREAK SPACE) — emitted by V8 / ICU ≥ 2022
+ * Without normalisation the rendered salary contains characters that
+ * many UIs / clipboards / search indexes don't collapse, producing
+ * visible drift between partners depending on the runtime ICU version.
  */
-export const formatRub = (value: number) =>
-  new Intl.NumberFormat('ru-RU').format(value);
+export const formatRub = (value: number): string =>
+  new Intl.NumberFormat('ru-RU').format(value).replace(/[  ]/g, ' ');
 
 /**
  * Required-document overrides for Yandex Eda / Kuper offers based on
