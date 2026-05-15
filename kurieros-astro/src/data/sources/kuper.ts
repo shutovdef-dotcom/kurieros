@@ -12,6 +12,7 @@
  * (e.g. «Москва» → «РФ / ЕАЭС / СНГ») render the same chip; cities
  * Купер ships that Yandex doesn't fall back to `KUPER_DEFAULT_CITIZENSHIP`.
  */
+import { z } from 'zod';
 import kuperPayRatesSource from '../kuper-pay-rates.json';
 import { slugifyCity } from '../../utils/cities';
 import type {
@@ -44,19 +45,32 @@ const KUPER_AUTO_APPLY_LINK = KUPER_AUTO_APPLY;
 const KUPER_DEFAULT_CITIZENSHIP = 'РФ / ЕАЭС / СНГ';
 const KUPER_EMPLOYMENT_FORMATS = ['self_employed'] satisfies EmploymentFormat[];
 
-// === Types ===========================================================
+// === Schema ==========================================================
 
-type KuperPayRates = {
-  sourceUrl: string;
-  exportedAt: string;
-  footAndBikeShiftByCity: Record<string, number>;
-  autoShiftByCity: Record<string, number>;
-  packerShiftByCity: Record<string, number>;
-};
+// Per-city per-12h-shift rate map. Each entry is "City name" → rubles.
+// Must be finite and > 0 to avoid producing NaN hourly pay downstream
+// (see `toHourlyFromShift` below — it divides by 12).
+const cityShiftRateMap = z.record(z.string(), z.number().finite().positive());
+
+/**
+ * Runtime schema for `kuper-pay-rates.json`. The JSON also ships an
+ * informational `counts` field (telemetry from the scraper); we accept
+ * extra unknown keys via `.loose()` so adding more telemetry never
+ * breaks the build.
+ */
+export const KuperPayRatesSchema = z.looseObject({
+  sourceUrl: z.string().url(),
+  exportedAt: z.string().min(1),
+  footAndBikeShiftByCity: cityShiftRateMap,
+  autoShiftByCity: cityShiftRateMap,
+  packerShiftByCity: cityShiftRateMap,
+});
+
+export type KuperPayRates = z.infer<typeof KuperPayRatesSchema>;
 
 type KuperRole = 'foot' | 'bike' | 'auto' | 'packer';
 
-const kuperPayRates = kuperPayRatesSource as KuperPayRates;
+const kuperPayRates: KuperPayRates = KuperPayRatesSchema.parse(kuperPayRatesSource);
 
 const KUPER_PAY_SOURCE_URL = kuperPayRates.sourceUrl;
 const KUPER_UPDATED_AT = kuperPayRates.exportedAt;
@@ -302,7 +316,7 @@ const kuperDefaults: VacancySource['defaults'] = {
   os: 'Android или iOS',
 };
 
-export const kuperFootSource: VacancySource = {
+const kuperFootSource: VacancySource = {
   id: 2,
   slug: 'kuper-foot-courier',
   company: { name: KUPER_COMPANY_NAME, logo: KUPER_COMPANY_LOGO },
@@ -313,7 +327,7 @@ export const kuperFootSource: VacancySource = {
   isHot: true,
 };
 
-export const kuperBikeSource: VacancySource = {
+const kuperBikeSource: VacancySource = {
   id: 3,
   slug: 'kuper-bike-courier',
   company: { name: KUPER_COMPANY_NAME, logo: KUPER_COMPANY_LOGO },
@@ -324,7 +338,7 @@ export const kuperBikeSource: VacancySource = {
   isHot: true,
 };
 
-export const kuperAutoSource: VacancySource = {
+const kuperAutoSource: VacancySource = {
   id: 4,
   slug: 'kuper-auto-courier',
   company: { name: KUPER_COMPANY_NAME, logo: KUPER_COMPANY_LOGO },
@@ -335,7 +349,7 @@ export const kuperAutoSource: VacancySource = {
   isHot: true,
 };
 
-export const kuperPackerSource: VacancySource = {
+const kuperPackerSource: VacancySource = {
   id: 5,
   slug: 'kuper-order-picker',
   company: { name: KUPER_COMPANY_NAME, logo: KUPER_COMPANY_LOGO },

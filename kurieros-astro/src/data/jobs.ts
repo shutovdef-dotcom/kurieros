@@ -13,6 +13,7 @@ import type {
   VacancySource,
 } from './vacancyTypes';
 import { isCityBlocked, slugifyCity } from '../utils/cities';
+import { fnv1a } from '../utils/fnv1a';
 
 // === Per-language translation overrides =============================
 // Loaded from src/data/vacancy-translations-source/<lang>.json.
@@ -206,10 +207,11 @@ const formatUpdatedDate = (date: string, _language: SupportedLanguage) =>
 // CITY_CODES — fixed (frozen) numeric codes used to build vacancy `id` values
 // via getGeneratedId(). MUST NOT be reordered or extended: any change to a
 // city's code rewrites every job ID for that city, breaking external
-// bookmarks and analytics. Cities not listed here fall back to
-// `900 + offer-index + 1` per getGeneratedId() (preserved historical
-// behaviour). The list captures the original order/length of the legacy
-// CITIES array (15 cities) at the moment of its removal — keep it that way.
+// bookmarks and analytics. Cities not listed here are assigned a stable
+// city-part via fnv1a(slug) hashing + deterministic linear probing
+// (NON_TOP15_CITY_PART below). The list captures the original order/length
+// of the legacy CITIES array (15 cities) at the moment of its removal —
+// keep it that way.
 const CITY_CODES: Record<string, number> = {
   'Москва': 1,
   'Санкт-Петербург': 2,
@@ -228,6 +230,79 @@ const CITY_CODES: Record<string, number> = {
   'Волгоград': 15,
 };
 const cityCodes = new Map<string, number>(Object.entries(CITY_CODES));
+
+// === Non-top-15 city-part assignment ================================
+// Historically, cities outside CITY_CODES received `900 + offer-index + 1`
+// in getGeneratedId() — a value that DEPENDED ON THE POST-SORT OFFER INDEX.
+// Adding a priority bump, changing isCityBlocked, or any permutation of
+// `source.offers` rewrote every non-top-15 ID, breaking saved
+// `compareList` localStorage entries and GA4 event continuity (audit H6).
+//
+// We replace it with a deterministic per-city integer in [100, 9999]
+// derived from `fnv1a(citySlug)`. Hash collisions are resolved with
+// linear probing in slug-alphabetical order, which is sort-INDEPENDENT
+// (cities, not offers, are the input domain). With 942 unique non-top-15
+// slugs and 9900 slots, the load factor is ~0.1 and max probe length
+// is small.
+//
+// Stability guarantees:
+//   • Reordering `offers` within a source does NOT change any ID.
+//   • Changing offer `priority` does NOT change any ID.
+//   • Adding or removing offers from EXISTING cities does NOT change IDs.
+//   • Adding a NEW non-top-15 city can shift IDs ONLY for cities whose
+//     fnv1a probe sequence passes through the new city's claimed slot.
+//   • Top-15 city IDs (codes 1..15) are NEVER affected.
+//
+// Resolution-failure policy: if linear probing exhausts the [100, 9999]
+// range without finding a free slot (impossible with current
+// city counts — would require ~10× growth), the build throws at module
+// load. Bookmarks for a non-existent city are not worth a silent collision.
+const NON_TOP15_SLOT_BASE = 100;
+const NON_TOP15_SLOT_COUNT = 9900; // slots 100..9999, distinct from top-15 codes 1..15.
+
+const buildNonTop15CityParts = (sources: readonly VacancySource[]): ReadonlyMap<string, number> => {
+  // Collect every UNIQUE non-top-15 city slug referenced by active,
+  // non-blocked offers across all sources. `isActive`/`isCityBlocked` is
+  // the same filter `buildJobsFromVacancies` applies — slug assignment
+  // tracks the same domain.
+  const slugSet = new Set<string>();
+  for (const source of sources) {
+    for (const offer of source.offers) {
+      if (!offer.isActive || isCityBlocked(offer.city)) continue;
+      if (cityCodes.has(offer.city)) continue;
+      slugSet.add(slugifyCity(offer.city));
+    }
+  }
+
+  // Sort alphabetically so collision resolution is deterministic.
+  const orderedSlugs = [...slugSet].sort((a, b) => a.localeCompare(b));
+
+  const assignment = new Map<string, number>();
+  const used = new Set<number>();
+  for (const slug of orderedSlugs) {
+    const start = fnv1a(slug) % NON_TOP15_SLOT_COUNT;
+    let probe = 0;
+    let resolved = false;
+    while (probe < NON_TOP15_SLOT_COUNT) {
+      const slot = NON_TOP15_SLOT_BASE + ((start + probe) % NON_TOP15_SLOT_COUNT);
+      if (!used.has(slot)) {
+        used.add(slot);
+        assignment.set(slug, slot);
+        resolved = true;
+        break;
+      }
+      probe++;
+    }
+    if (!resolved) {
+      // Should be unreachable given current city volume vs slot count.
+      throw new Error(`getGeneratedId: could not assign cityPart for slug="${slug}" — slot table exhausted (${used.size}/${NON_TOP15_SLOT_COUNT}).`);
+    }
+  }
+
+  return assignment;
+};
+
+const NON_TOP15_CITY_PART = buildNonTop15CityParts(vacancySources);
 const cityPrepositions = new Map(CITY_DATASET.map((city) => [city.name, city.prep]));
 
 const unique = <T>(items: T[]) => Array.from(new Set(items.filter(Boolean)));
@@ -335,10 +410,17 @@ const getCitizenshipLabel = (value: string, language: SupportedLanguage) => {
   return value;
 };
 
-const getGeneratedId = (source: VacancySource, offer: VacancyOffer, index: number) =>
-  source.id * 100000 +
-  ((cityCodes.get(offer.city) ?? 900 + index + 1) * 10) +
-  TRANSPORT_ID_PARTS[offer.transport];
+const getGeneratedId = (source: VacancySource, offer: VacancyOffer) => {
+  const topCode = cityCodes.get(offer.city);
+  const cityPart = topCode ?? NON_TOP15_CITY_PART.get(slugifyCity(offer.city));
+  if (cityPart === undefined) {
+    // NON_TOP15_CITY_PART is built from the same (active + non-blocked)
+    // domain that `buildJobsFromVacancies` iterates, so this should be
+    // unreachable. Fail loud rather than emit a phantom ID.
+    throw new Error(`getGeneratedId: no cityPart for source="${source.slug}" city="${offer.city}".`);
+  }
+  return source.id * 100000 + cityPart * 10 + TRANSPORT_ID_PARTS[offer.transport];
+};
 
 const getSalaryText = (pay: PayModel, language: SupportedLanguage) =>
   pay.monthly?.max
@@ -409,7 +491,11 @@ const buildLabels = (
       medicalBook === 'required' ? COMMON_LABELS.medicalBook : '',
     ]);
 
-const buildJobsFromVacancies = (
+// Exported for tests: lets `tests/jobIds.test.ts` exercise the full
+// job-build pipeline (which is what produces job.id values) without
+// going through the multi-language `buildJobTranslationsBySource`
+// path. Internal callers still treat this as a private helper.
+export const buildJobsFromVacancies = (
   sources: VacancySource[],
   language: SupportedLanguage = 'ru',
 ): GeneratedJob[] =>
@@ -417,7 +503,7 @@ const buildJobsFromVacancies = (
     source.offers
       .filter((offer) => offer.isActive && !isCityBlocked(offer.city))
       .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
-      .map((offer, index) => {
+      .map((offer) => {
       const content = resolveLocalizedContent(source, language);
       const ageFrom = getAgeFrom(source, offer);
       const transport = offer.transport;
@@ -432,7 +518,7 @@ const buildJobsFromVacancies = (
       const requiredDocuments = getOfferRequiredDocuments(content.requiredDocuments ?? [], offer, language);
 
       return {
-        id: getGeneratedId(source, offer, index),
+        id: getGeneratedId(source, offer),
         sourceId: source.id,
         sourceSlug: source.slug,
         slug: `${source.slug}-${citySlug}-${transport}`,

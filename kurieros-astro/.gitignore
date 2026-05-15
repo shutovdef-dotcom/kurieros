@@ -26,3 +26,6 @@ pnpm-debug.log*
 # temp scripts & screenshots
 fix-paths.cjs
 qa_screenshots*
+
+# test scratch dirs
+tests/.tmp-*

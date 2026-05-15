@@ -12,6 +12,7 @@
  * varies a lot between top performers and median; capping with
  * "до Y ₽/мес" would set false expectations.
  */
+import { z } from 'zod';
 import tBankVacanciesSource from '../tbank-vacancies.json';
 import { slugifyCity } from '../../utils/cities';
 import type {
@@ -32,36 +33,46 @@ const T_BANK_APPLY_LINK = T_BANK_APPLY;
 const T_BANK_CITIZENSHIP = 'РФ / ЕАЭС';
 const T_BANK_EMPLOYMENT_FORMATS = ['gph', 'self_employed'] satisfies EmploymentFormat[];
 
-// === Types ===========================================================
+// === Schema ==========================================================
 
-type TBankOfferSource = {
-  city: string;
-  workMode?: string | null;
-  avgIncomeRub?: number | null;
-  incomeMinRub?: number | null;
-  incomeMaxRub?: number | null;
-  hiringActive?: boolean;
-};
+/**
+ * Per-city offer rows. Income fields are kept optional/nullable on the
+ * schema even though production data currently always populates them —
+ * `resolveTBankIncomeRange` below already falls back to a 70 000 ₽
+ * default when every income field is missing or non-positive, so
+ * accepting the looser shape matches the defensive coding downstream.
+ */
+const tBankOfferSchema = z.object({
+  city: z.string().min(1),
+  workMode: z.string().nullish(),
+  avgIncomeRub: z.number().finite().nullish(),
+  incomeMinRub: z.number().finite().nullish(),
+  incomeMaxRub: z.number().finite().nullish(),
+  hiringActive: z.boolean().optional(),
+});
 
-type TBankVacancyData = {
-  title: string;
-  titleTemplate: string;
-  shortDescription: string;
-  description: string;
-  requirements: string[];
-  benefits: string[];
-  requiredDocuments: string[];
-  offers: TBankOfferSource[];
-};
+const tBankVacancySchema = z.object({
+  title: z.string(),
+  titleTemplate: z.string(),
+  shortDescription: z.string(),
+  description: z.string(),
+  requirements: z.array(z.string()),
+  benefits: z.array(z.string()),
+  requiredDocuments: z.array(z.string()),
+  offers: z.array(tBankOfferSchema),
+});
 
-type TBankVacanciesData = {
-  sourceUrl: string;
-  updatedAt: string;
-  operatorB2B: TBankVacancyData;
-  representative: TBankVacancyData;
-};
+export const TBankVacanciesSchema = z.object({
+  sourceUrl: z.string().url(),
+  updatedAt: z.string().min(1),
+  operatorB2B: tBankVacancySchema,
+  representative: tBankVacancySchema,
+});
 
-const tBankVacancies = tBankVacanciesSource as TBankVacanciesData;
+export type TBankVacanciesData = z.infer<typeof TBankVacanciesSchema>;
+type TBankOfferSource = z.infer<typeof tBankOfferSchema>;
+
+const tBankVacancies: TBankVacanciesData = TBankVacanciesSchema.parse(tBankVacanciesSource);
 
 // === Helpers =========================================================
 

@@ -222,13 +222,37 @@ for (const lang of NON_RU_LANGS) {
   let dict: Record<string, string> = {};
   try {
     dict = JSON.parse(await readFile(dictPath, 'utf8')) as Record<string, string>;
-  } catch {
-    // missing file → treat as empty dict; all sources will fall back to RU
+  } catch (err) {
+    const isEnoent =
+      err instanceof Error && (err as NodeJS.ErrnoException).code === 'ENOENT';
+    if (!isEnoent) {
+      // Parse error, permission error, disk corruption — anything that is NOT
+      // a clean "missing file" is a real bug. Silently swallowing these used
+      // to ship empty stubs as if the file were intentionally absent.
+      console.error(
+        `assemble: failed to parse clause dict ${dictPath}:`,
+        err,
+      );
+      if (STRICT_TRANSLATION_COVERAGE) {
+        process.exit(1);
+      }
+    }
+    // else: missing file is intentional → empty dict, sources fall back to RU
   }
 
   const out: Record<string, Partial<VacancyContent>> = {};
   for (const source of vacancySources) {
-    const mapping = sourceToClauses[source.slug]!;
+    const mapping = sourceToClauses[source.slug];
+    if (!mapping) {
+      // A source was added to vacancies.ts without running `npm run i18n:extract`,
+      // so source-to-clauses.json is stale. The round-trip check at the top
+      // already flags this once per slug; here we just log + skip so the
+      // operator gets an actionable message instead of a confusing TypeError.
+      console.error(
+        `assemble: no clause mapping for source ${source.slug} — re-run npm run i18n:extract`,
+      );
+      continue;
+    }
     const allIds = collectClauseIds(mapping);
     const total = allIds.length;
     const translated = allIds.reduce(

@@ -23,6 +23,7 @@ import { slugifyCompany } from '../../utils/companies';
 import { getCityHref } from '../../utils/cities';
 import { fnv1a } from '../../utils/fnv1a';
 import { ozonDataAttrs } from '../../utils/ozonAttrs';
+import { getApplyCta } from '../../utils/applyCta';
 import { buildBreadcrumbSchema, buildJobPostingSchema } from '../../utils/schema';
 import { knowledgeBaseData, type KnowledgeItem } from '../../utils/knowledge';
 
@@ -368,26 +369,11 @@ const pickKbItemsForVacancy = (limit: number): KnowledgeItem[] => {
 
 const selectedKbItems = pickKbItemsForVacancy(6);
 
-// Numeric salary ceiling for the GA4 `apply_click` event payload.
-// Parses the human salary string (e.g. «до 298 800 ₽/мес») best-effort.
-const salaryMaxNumeric = (() => {
-	const raw = (job.salary ?? '').replace(/[  ]/g, ' ');
-	const matches = raw.match(/(\d[\d\s]*)/g);
-	if (!matches) return 0;
-	const numbers = matches
-		.map((m: string) => Number.parseInt(m.replace(/\s+/g, ''), 10))
-		.filter((n: number) => Number.isFinite(n) && n > 0);
-	return numbers.length ? Math.max(...numbers) : 0;
-})();
-// Ceiling-anchored CTA copy: when the parsed monthly max is meaningful
-// (≥10k), the apply button advertises it as «зп до Nк. руб» — concrete
-// payoff in the click decision. Floor to a thousand keeps the number
-// from over-promising (298800 → 298к, not 299к). Hourly/per-shift
-// values fall below the threshold and the button reads plain
-// «Откликнуться» so it never displays «до 0к. руб».
-const applyLabel = salaryMaxNumeric >= 10000
-	? `Откликнуться, зп до ${Math.floor(salaryMaxNumeric / 1000)}к. руб`
-	: 'Откликнуться';
+// Apply CTA — single source of truth in src/utils/applyCta.ts.
+// Drift between this and the JobCard copy of the computation directly
+// hits GA4 `apply_click` value and visible button text, so the helper
+// is the only place this lives. Audit ref: v2 H4.
+const { salaryMaxNumeric, applyLabel } = getApplyCta(job);
 
 // === SEO+AI block helpers (replace removed «Дальше» block) ===
 
@@ -583,13 +569,6 @@ const pageSchemaGraph = [
 		Astro.site,
 	),
 ];
-
-// L9: preload the per-source vacancy-translation fragment so the runtime
-// i18n loader (BaseLayout) doesn't block on a fetch round-trip on language
-// switch. Only emitted on detail pages — listing pages would balloon the
-// head with too many fragment URLs (one per visible JobCard).
-declare const __BUILD_TIMESTAMP__: string;
-const fragmentPreloadUrl = `/vacancy-translations/ru/${job.sourceSlug}.json?v=${__BUILD_TIMESTAMP__}`;
 ---
 
 <BaseLayout
@@ -599,7 +578,6 @@ const fragmentPreloadUrl = `/vacancy-translations/ru/${job.sourceSlug}.json?v=${
 	descriptionKey={`vacancies.${job.id}.page_description`}
 	schemaGraph={pageSchemaGraph}
 >
-	<link rel="preload" as="fetch" href={fragmentPreloadUrl} crossorigin="anonymous" />
 	<Header />
 
 	<main class="vacancy-page" data-vacancy-source-slug={job.sourceSlug}>

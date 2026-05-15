@@ -1,5 +1,12 @@
 // City + transport server-side filter mode (browser-side).
 //
+// DOM-side adapter for the predicate in `src/utils/jobFilters.ts`. This
+// file runs on JSON catalog blobs fetched at runtime (not the build-time
+// `GeneratedJob[]` array), so it can't directly import the TypeScript
+// predicate — but the city-matching semantics MUST stay in sync with
+// `jobFilters.ts` (`job.location.toLowerCase().includes(...)` plus the
+// «Вся Россия» free pass). If you change one, change both.
+//
 // Imported via Vite `?raw` and concatenated into the inline DOMContentLoaded
 // callback in `compare.astro`. When the user picks city or transport, fetch
 // the full catalog and render matching jobs (overrides the localStorage-driven
@@ -34,6 +41,10 @@
       return false;
     }
 
+    // Mirror of the `city` branch in `src/utils/jobFilters.ts#jobMatches`.
+    // Note we compare a lower-cased «вся россия» here because we don't
+    // have access to the original-case `NATIONWIDE_LOCATION` constant
+    // on the client; both checks resolve the same set of rows.
     function jobMatchesCity(job, cityName) {
       if (!cityName) return true;
       const loc = String(job.location || '').toLowerCase();
@@ -72,10 +83,23 @@
         : `Показано ${display.length} вакансий по фильтру`);
     }
 
-    cityFilter?.addEventListener('change', applyServerFilters);
-    transportFilter?.addEventListener('change', applyServerFilters);
+    // Wrap async applyServerFilters() so unhandled rejections (e.g. network
+    // failure inside ensureFullCatalog, or any other throw) surface a
+    // user-visible message instead of leaving the filter UI silently stuck.
+    // Every event listener that triggers a filter run MUST go through this
+    // wrapper — passing `applyServerFilters` directly to addEventListener
+    // returns a rejected promise the runtime quietly discards.
+    function safeApplyFilters() {
+      applyServerFilters().catch((err) => {
+        console.error('[compare] applyServerFilters failed:', err);
+        setStatus('Ошибка загрузки — попробуйте обновить страницу');
+      });
+    }
+
+    cityFilter?.addEventListener('change', safeApplyFilters);
+    transportFilter?.addEventListener('change', safeApplyFilters);
     filterReset?.addEventListener('click', () => {
       if (cityFilter) cityFilter.value = '';
       if (transportFilter) transportFilter.value = '';
-      applyServerFilters();
+      safeApplyFilters();
     });

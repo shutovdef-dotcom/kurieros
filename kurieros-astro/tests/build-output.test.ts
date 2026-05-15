@@ -10,6 +10,8 @@
  *   - Vacancy translation fragments use the post-#129 compact shape.
  *   - Detail pages preload their per-source translation fragment.
  *   - Listing pages do NOT preload a fragment (they aggregate many vacancies).
+ *   - H13: `/api/city-index.json` exists, carries both fields, and the
+ *     homepage no longer inlines the `cityRouteMap` literal.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -51,14 +53,16 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     expect(sample).toHaveProperty('entries');
   });
 
-  it('detail pages have a fragment preload hint', () => {
+  it('detail pages do NOT preload a vacancy-translations fragment (audit H1)', () => {
+    // The hardcoded RU preload was useless: RU visitors short-circuit before
+    // consuming it, non-RU visitors need their own language fragment.
+    // Removed in audit v2 H1 — this test guards against accidental re-add.
     const detailHtml = join(DIST_DIR, 'v', 'yandex-eda-courier-moskva-foot', 'index.html');
     if (!existsSync(detailHtml)) {
       throw new Error(`expected detail page missing: ${detailHtml}`);
     }
     const html = readFileSync(detailHtml, 'utf8');
-    expect(html).toContain('rel="preload"');
-    expect(html).toContain('vacancy-translations/ru/yandex-eda-courier.json');
+    expect(html).not.toMatch(/rel="preload"\s+as="fetch"\s+href="\/vacancy-translations\//);
   });
 
   it('listing pages do NOT preload a vacancy-translations fragment', () => {
@@ -85,5 +89,50 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
       }
     }
     expect(checked, 'at least one fragment file checked').toBeGreaterThan(0);
+  });
+
+  // H13 — lazy-load 49 KB of city data from a static JSON endpoint
+  // instead of inlining it into every render of the homepage.
+  describe('H13: city-index lazy fetch', () => {
+    it('emits dist/api/city-index.json with both lookup tables', () => {
+      const cityIndexPath = join(DIST_DIR, 'api', 'city-index.json');
+      expect(existsSync(cityIndexPath), 'city-index.json exists').toBe(true);
+
+      const raw = readFileSync(cityIndexPath, 'utf8');
+      const data = JSON.parse(raw);
+
+      expect(data).toHaveProperty('availableCities');
+      expect(data).toHaveProperty('cityRouteMap');
+      expect(Array.isArray(data.availableCities)).toBe(true);
+      expect(data.availableCities.length).toBeGreaterThan(500);
+      expect(data.availableCities).toContain('Москва');
+      expect(data.availableCities).toContain('Санкт-Петербург');
+
+      expect(typeof data.cityRouteMap).toBe('object');
+      expect(Object.keys(data.cityRouteMap).length).toBeGreaterThan(500);
+      expect(data.cityRouteMap['Москва']).toBe('/rabota-kurerom-moskva/');
+      expect(data.cityRouteMap['Санкт-Петербург']).toBe('/rabota-kurerom-sankt-peterburg/');
+
+      // Every entry in availableCities must have a corresponding
+      // cityRouteMap entry — that's the invariant the inline script
+      // used to rely on when it had both arrays in lockstep.
+      for (const name of data.availableCities) {
+        expect(
+          data.cityRouteMap[name],
+          `cityRouteMap missing entry for ${name}`,
+        ).toBeTruthy();
+      }
+    });
+
+    it('homepage HTML no longer inlines the city array literal', () => {
+      const indexHtml = readFileSync(join(DIST_DIR, 'index.html'), 'utf8');
+      // The original `define:vars={{ availableCities, cityRouteMap }}`
+      // emitted `const availableCities = [...]` directly into a
+      // <script> tag — that's what H13 eliminates.
+      expect(indexHtml).not.toMatch(/const\s+availableCities\s*=\s*\[/);
+      expect(indexHtml).not.toMatch(/const\s+cityRouteMap\s*=\s*\{/);
+      // And conversely, the lazy-fetch wiring must be present.
+      expect(indexHtml).toContain("fetch('/api/city-index.json'");
+    });
   });
 });

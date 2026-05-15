@@ -25,6 +25,7 @@
 
 import ozonVacanciesData from './ozon-vacancies.json';
 import ozonFreshVacanciesData from './ozon-fresh-vacancies.json';
+import { formatRub } from './sources/shared';
 import type {
   EmploymentFormat,
   OzonLeadFormMeta,
@@ -116,8 +117,10 @@ type OzonRoleTemplate = {
 
 // === Helpers =========================================================
 
-const formatRub = (n: number) =>
-  new Intl.NumberFormat('ru-RU').format(n).replace(/ /g, ' ');
+// `formatRub` lives in `./sources/shared.ts` — it normalises ICU's
+// non-ASCII thousands separators (U+00A0 / U+202F) so Ozon's rendered
+// salary doesn't visibly drift from other partners depending on the
+// runtime ICU version.
 
 const monthlyText = (min: number) => `от ${formatRub(min)} ₽/мес`;
 

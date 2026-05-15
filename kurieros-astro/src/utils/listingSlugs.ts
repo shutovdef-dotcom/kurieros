@@ -18,6 +18,11 @@
 import jobsData from '../data/jobs';
 import { CATEGORIES } from '../data/constants';
 import { getCitiesFromJobs } from './cities';
+import {
+	buildJobsByCityMap,
+	filterJobsByCriteria,
+	getCityJobsFromMap,
+} from './jobFilters';
 
 // Slugs with bespoke content overrides inside src/pages/[slug].astro
 // that always render a non-empty fallback list (e.g. ezhednevnaya-oplata
@@ -31,37 +36,29 @@ const CONTENT_OVERRIDE_CATEGORY_SLUGS = new Set<string>([
 export function getEmptyListingPaths(): Set<string> {
 	const empty = new Set<string>();
 
+	// City-listing emptiness uses the same city predicate as the SSR
+	// page in `[slug].astro`. Sitemap and SSR must agree — see
+	// jobFilters.ts JSDoc for the full rationale. The Map precompute
+	// turns this from O(cities × jobs) (~4.6M ops) into O(jobs +
+	// cities) (audit ref v2 H12).
+	const jobsByCity = buildJobsByCityMap(jobsData);
 	for (const city of getCitiesFromJobs(jobsData)) {
-		const matched = jobsData.filter(
-			(job) =>
-				job.location.toLowerCase().includes(city.name.toLowerCase()) ||
-				job.location === 'Вся Россия',
-		);
+		const matched = getCityJobsFromMap(jobsByCity, city.name);
 		if (matched.length === 0) {
 			empty.add(`/rabota-kurerom-${city.slug}`);
 		}
 	}
 
+	// Category-listing emptiness uses the same tag+search predicate as
+	// the SSR page. The `Ежеднев` / `Еженед` payment_freq lookup flows
+	// naturally through `search` (see jobFilters.ts).
 	for (const category of CATEGORIES) {
 		if (CONTENT_OVERRIDE_CATEGORY_SLUGS.has(category.slug)) {
 			continue;
 		}
-		const searchTerm = (category.query || '').toLowerCase();
-		const tagFilter = category.tag || 'all';
-		const matched = jobsData.filter((job) => {
-			const matchesTag = tagFilter === 'all' || job.tags.includes(tagFilter);
-			const matchesSearch =
-				!searchTerm ||
-				job.title.toLowerCase().includes(searchTerm) ||
-				job.company.toLowerCase().includes(searchTerm) ||
-				job.location.toLowerCase().includes(searchTerm) ||
-				job.salary.toLowerCase().includes(searchTerm) ||
-				// Mirror [slug].astro filter: payment_freq match so a
-				// category with `query: 'Еженед'` populates from
-				// details.payment_freq (the «Еженедельно» word lives
-				// nowhere else in GeneratedJob).
-				job.details.payment_freq.toLowerCase().includes(searchTerm);
-			return matchesTag && matchesSearch;
+		const matched = filterJobsByCriteria(jobsData, {
+			tag: category.tag || 'all',
+			search: category.query || '',
 		});
 		if (matched.length === 0) {
 			empty.add(`/rabota-kurerom-${category.slug}`);
