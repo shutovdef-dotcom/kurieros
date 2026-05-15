@@ -2,10 +2,42 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import CompareFilters from '../components/compare/CompareFilters.astro';
+import CompareGrid from '../components/compare/CompareGrid.astro';
+import CompareHelpGrid from '../components/compare/CompareHelpGrid.astro';
+import CompareHero from '../components/compare/CompareHero.astro';
 import jobsData from '../data/jobs';
 import { getCityNames, sortCityNamesByPopulation } from '../utils/cities';
 import { slugifyCompany } from '../utils/companies';
 import { buildBreadcrumbSchema } from '../utils/schema';
+
+// Compare-page browser-side helpers, split into focused fragments.
+// Each is a JS source string concatenated into the inline DOMContentLoaded
+// callback below. Keeping the script inline (vs. an external bundle) is
+// deliberate: it preserves `define:vars` semantics, avoids an extra HTTP
+// request, and keeps the page first-paint snappy. See per-file headers
+// for the closure variables each fragment expects in scope.
+import compareListRaw from '../scripts/compare/compare-list.js?raw';
+import catalogLoaderRaw from '../scripts/compare/catalog-loader.js?raw';
+import renderRaw from '../scripts/compare/render.js?raw';
+import filtersRaw from '../scripts/compare/filters.js?raw';
+
+/**
+ * Strip the leading `// …` JSDoc header (and the blank line that follows
+ * it) from a `?raw`-imported helper source. The header is for module
+ * authors; shipping it inside the inline `<script>` adds bytes to every
+ * `/compare/` response without giving the browser anything useful.
+ *
+ * Regex: match from start of file, any number of `//`-prefixed lines and
+ * blank lines, up to (but not including) the first non-comment line.
+ */
+const stripHeaderComment = (src: string): string =>
+  src.replace(/^(?:[ \t]*\/\/[^\n]*\n|[ \t]*\n)+/, '');
+
+const compareListSrc = stripHeaderComment(compareListRaw);
+const catalogLoaderSrc = stripHeaderComment(catalogLoaderRaw);
+const renderSrc = stripHeaderComment(renderRaw);
+const filtersSrc = stripHeaderComment(filtersRaw);
 
 const transportLabelMap: Record<string, string> = {
   auto: 'Авто',
@@ -105,182 +137,14 @@ const pageSchemaGraph = [
     Astro.site,
   ),
 ];
----
 
-<BaseLayout title={compareTitle} description={compareDescription} schemaGraph={pageSchemaGraph}>
-  <Header />
-
-  <main class="compare-page">
-    <div class="compare-container">
-      <div class="compare-header">
-        <div class="compare-header-copy">
-          <nav class="compare-breadcrumb" aria-label="Breadcrumb">
-            <a href="/">Главная</a>
-            <span>/</span>
-            <span>Сравнение вакансий</span>
-          </nav>
-          <h1>Сравнение вакансий</h1>
-          <p class="compare-subtitle">Сравните базовые условия, а потом открывайте только те карточки, которые действительно подходят.</p>
-        </div>
-        <div class="compare-header-actions">
-          <a href="#compare-table" class="compare-table-link">К таблице</a>
-          <a href="/" class="back-link">← К вакансиям</a>
-        </div>
-      </div>
-
-      <section class="compare-filters" aria-label="Фильтры сравнения">
-        <p class="compare-filters-hint">
-          Можно сравнить добавленные вакансии вручную, либо выбрать город и транспорт — и страница покажет все подходящие варианты.
-        </p>
-        <div class="compare-filters-row">
-          <label class="compare-filter">
-            <span>Город</span>
-            <select id="compare-city-filter">
-              <option value="">Все города</option>
-              {availableCities.map((city) => (
-                <option value={city}>{city}</option>
-              ))}
-            </select>
-          </label>
-          <label class="compare-filter">
-            <span>Транспорт</span>
-            <select id="compare-transport-filter">
-              <option value="">Любой формат</option>
-              <option value="foot">Пешком</option>
-              <option value="bicycle">Велосипед / самокат</option>
-              <option value="auto">Авто</option>
-              <option value="remote">Удалённо / из дома</option>
-            </select>
-          </label>
-          <button type="button" id="compare-filter-reset" class="compare-filter-reset">Сбросить</button>
-        </div>
-        <p class="compare-filters-status" id="compare-filters-status" aria-live="polite"></p>
-      </section>
-
-      <div class="compare-table-wrapper" id="compare-table">
-        <div class="compare-grid" style={`--cols: ${compareJobs.length};`}>
-          {compareJobs.length > 0 ? (
-            <>
-              <div class="compare-row compare-head">
-                <div class="compare-cell feature-col empty-cell">
-                  Параметры
-                </div>
-                {compareJobs.map((job, index) => (
-                  <div class="compare-cell job-col" data-col={index}>
-                    <div class="job-card-mini">
-                      <button class="remove-col-btn" aria-label="Удалить" title="Удалить из сравнения" data-col-target={index} type="button">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                      </button>
-                      <div class={`company-logo company-logo-${job.companySlug}`}>
-                        {job.companyLogo ? (
-                          <img
-                            src={job.companyLogo}
-                            alt={`${job.company} logo`}
-                            width="56"
-                            height="56"
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        ) : (
-                          <span class="company-logo-letter">
-                            {job.company.charAt(0)}
-                          </span>
-                        )}
-                      </div>
-                      <h3>{job.title}</h3>
-                      <span class="company-name">{job.company}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {features.map((feature) => (
-                <div class="compare-row">
-                  <div class="compare-cell feature-col">
-                    {feature.name}
-                  </div>
-                  {compareJobs.map((job, index) => (
-                    <div class="compare-cell job-col" data-col={index}>
-                      {job[feature.key as keyof typeof job]}
-                    </div>
-                  ))}
-                </div>
-              ))}
-
-              <div class="compare-row compare-actions">
-                <div class="compare-cell feature-col"></div>
-                {compareJobs.map((job, index) => (
-                  <div class="compare-cell job-col" data-col={index}>
-                    <a href={job.link} class="btn-primary">Открыть карточку</a>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <div class="compare-empty-state">
-              <h3>Нет вакансий для сравнения</h3>
-              <p>Список активных вакансий очищен. Новые варианты появятся здесь после публикации карточек.</p>
-              <a href="/" class="btn-primary compare-empty-state-link">Вернуться на главную</a>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <section class="compare-help-grid" aria-label="Частые вопросы перед откликом">
-        <div class="compare-help-heading">
-          <p class="section-eyebrow">Помощь в выборе</p>
-          <h2>Что обычно спрашивают перед откликом</h2>
-        </div>
-        <div class="compare-help-cards">
-          <a class="compare-help-card" href="/guide/dohod/">
-            <span class="compare-help-kicker">Доход</span>
-            <h3>Сколько реально зарабатывает курьер?</h3>
-            <p>Вилки по форматам в Москве, СПб и регионах — пеший, вело, авто, банк-представитель.</p>
-            <span class="compare-help-link">Открыть гид →</span>
-          </a>
-          <a class="compare-help-card" href="/guide/vyplaty/">
-            <span class="compare-help-kicker">Выплаты</span>
-            <h3>Как часто приходят деньги?</h3>
-            <p>
-              Яндекс.Еда, Купер и Самокат — <strong class="payment-freq-highlight">мгновенный вывод через встроенный кошелёк (раз в несколько часов)</strong>; банковская выплата — раз в неделю. Альфа-Банк по ТК РФ — 2 раза в месяц.
-            </p>
-            <span class="compare-help-link">Открыть гид →</span>
-          </a>
-          <a class="compare-help-card" href="/guide/oformlenie/">
-            <span class="compare-help-kicker">Оформление</span>
-            <h3>Где проще трудоустроиться?</h3>
-            <p>Самозанятость, ГПХ, ИП или ТК РФ — какой режим подходит и как зарегистрироваться.</p>
-            <span class="compare-help-link">Открыть гид →</span>
-          </a>
-          <a class="compare-help-card" href="/guide/dokumenty/">
-            <span class="compare-help-kicker">Документы</span>
-            <h3>Какие документы нужны для отклика?</h3>
-            <p>Паспорт, ИНН, СНИЛС — базовый набор. Для авто — права и СТС, для иностранцев — патент.</p>
-            <span class="compare-help-link">Открыть гид →</span>
-          </a>
-          <a class="compare-help-card" href="/guide/vozrast/">
-            <span class="compare-help-kicker">Возраст</span>
-            <h3>Со скольки лет берут курьером?</h3>
-            <p>С 16 лет — пешком и на велосипеде в Yandex Еде и Купере. С 18 — автокурьеры и банк.</p>
-            <span class="compare-help-link">Открыть гид →</span>
-          </a>
-          <a class="compare-help-card" href="/guide/shtrafy/">
-            <span class="compare-help-kicker">Штрафы</span>
-            <h3>За что штрафуют курьеров?</h3>
-            <p>Опоздания, отмены слотов, отсутствие формы — суммы и условия по сервисам.</p>
-            <span class="compare-help-link">Открыть гид →</span>
-          </a>
-        </div>
-        <a class="compare-help-all" href="/guide/">Все гиды для курьера →</a>
-      </section>
-
-    </div>
-  </main>
-
-  <Footer />
-</BaseLayout>
-
-<script is:inline define:vars={{ compareJobs, features, totalCompareJobs }}>
+// Assemble the inline browser script body from per-concern fragments.
+// Order matters: catalog-loader and compare-list reference helpers
+// (`applyScopedStyles`, `escapeHtml`) defined in the orchestration core,
+// and `renderSelectedComparison` (defined in core) is called by both
+// `filters.js` and the storage event handler. Concatenating in this
+// order keeps every reference resolvable without forward declarations.
+const compareScriptBody = `
   document.addEventListener('DOMContentLoaded', () => {
     const grid = document.querySelector('.compare-grid');
     if (!grid) return;
@@ -293,51 +157,7 @@ const pageSchemaGraph = [
     let fullCatalogPromise = null;
     let catalogLoaded = false;
     let catalogLoadError = null;
-
-    function ensureFullCatalog() {
-      if (fullCatalogPromise) return fullCatalogPromise;
-      fullCatalogPromise = fetch('/api/compare-jobs.json', { cache: 'force-cache' })
-        .then((response) => {
-          if (!response.ok) {
-            return Promise.reject(new Error(`HTTP ${response.status}`));
-          }
-          return response.json();
-        })
-        .then((jobs) => {
-          if (Array.isArray(jobs)) {
-            for (const job of jobs) {
-              jobsById.set(job.id, job);
-            }
-          }
-          catalogLoaded = true;
-          catalogLoadError = null;
-          return jobs;
-        })
-        .catch((err) => {
-          console.error('compare: failed to load /api/compare-jobs.json', err);
-          catalogLoadError = err;
-          // Surface a user-visible error if we have nothing to show.
-          showCatalogError();
-          return [];
-        });
-      return fullCatalogPromise;
-    }
-
-    function showCatalogError() {
-      // Only show the error banner if the inline preselected catalog is empty
-      // (i.e. we genuinely have nothing to display) AND the user hasn't already
-      // got a populated table on screen.
-      if (jobsById.size > 0) return;
-      grid.style.setProperty('--cols', '0');
-      grid.innerHTML = `
-        <div class="compare-empty-state" id="compare-error" role="alert">
-          <h3>Не удалось загрузить данные</h3>
-          <p>Попробуйте обновить страницу позже. Если проблема повторяется, напишите нам.</p>
-          <a href="/" class="btn-primary compare-empty-state-link">Вернуться на главную</a>
-        </div>
-      `;
-      applyScopedStyles(grid);
-    }
+${catalogLoaderSrc}
     const scopeAttribute = Array.from(grid.getAttributeNames()).find((name) => name.startsWith('data-astro-cid'));
 
     function applyScopedStyles(root) {
@@ -357,172 +177,10 @@ const pageSchemaGraph = [
     }
 
     function parseSalaryValue(salary) {
-      return Number(String(salary).replace(/[^\d]/g, '')) || 0;
+      return Number(String(salary).replace(/[^\\d]/g, '')) || 0;
     }
-
-    function renderCompanyLogo(job) {
-      const firstLetter = String(job.company ?? '').trim().charAt(0) || '•';
-      if (!job.companyLogo) {
-        return `<span class="company-logo-letter">${escapeHtml(firstLetter)}</span>`;
-      }
-
-      return `
-        <img
-          src="${escapeHtml(job.companyLogo)}"
-          alt="${escapeHtml(job.company)} logo"
-          width="56"
-          height="56"
-          loading="lazy"
-          decoding="async"
-        />
-      `;
-    }
-
-    function readStoredCompareIds() {
-      try {
-        const rawList = JSON.parse(localStorage.getItem('compareList') || '[]');
-        if (!Array.isArray(rawList)) return [];
-
-        return rawList
-          .map((id) => Number.parseInt(String(id), 10))
-          .filter((id, index, ids) => Number.isFinite(id) && ids.indexOf(id) === index)
-          .slice(0, 4);
-      } catch {
-        return [];
-      }
-    }
-
-    function readCompareIds() {
-      // Until the full catalog has loaded, return ALL stored IDs unfiltered.
-      // Filtering against jobsById too early would drop valid IDs that live
-      // outside the inline preselected subset, and a follow-up writeCompareIds
-      // would erase them permanently from localStorage.
-      if (!catalogLoaded) return readStoredCompareIds();
-      return readStoredCompareIds().filter((id) => jobsById.has(id));
-    }
-
-    function writeCompareIds(ids) {
-      try {
-        localStorage.setItem('compareList', JSON.stringify(ids));
-      } catch (err) {
-        // QuotaExceededError or SecurityError (private mode) — keep in-memory state consistent
-        console.warn('compareList write failed', err);
-      }
-      window.dispatchEvent(new CustomEvent('compareUpdate'));
-    }
-
-    function getSelectedJobs() {
-      const storedIds = readStoredCompareIds();
-      const validIds = storedIds.filter((id) => jobsById.has(id));
-
-      // Only persist the pruned list once the full catalog is in memory —
-      // otherwise we'd silently drop IDs that simply weren't inlined yet.
-      if (catalogLoaded && JSON.stringify(storedIds) !== JSON.stringify(validIds)) {
-        writeCompareIds(validIds);
-      }
-
-      return validIds.map((id) => jobsById.get(id)).filter(Boolean);
-    }
-
-    function renderEmptyState() {
-      const emptyCopy = hasAvailableJobs
-        ? {
-          heading: 'Нет вакансий для сравнения',
-          text: 'Добавьте 2-4 вакансии из списка, чтобы увидеть разницу по выплатам, транспорту и оформлению.',
-          href: '/#vacancies',
-          link: 'Вернуться к вакансиям',
-        }
-        : {
-          heading: 'Нет вакансий для сравнения',
-          text: 'Список активных вакансий очищен. Новые варианты появятся здесь после публикации карточек.',
-          href: '/',
-          link: 'Вернуться на главную',
-        };
-
-      grid.style.setProperty('--cols', '0');
-      grid.innerHTML = `
-        <div class="compare-empty-state">
-          <h3>${emptyCopy.heading}</h3>
-          <p>${emptyCopy.text}</p>
-          <a href="${emptyCopy.href}" class="btn-primary compare-empty-state-link">${emptyCopy.link}</a>
-        </div>
-      `;
-      applyScopedStyles(grid);
-
-      if (companyLinks) {
-        companyLinks.innerHTML = '<a href="/companies/" class="compare-chip-link">Все компании</a>';
-        applyScopedStyles(companyLinks);
-      }
-    }
-
-    function renderComparisonTable(jobs) {
-      if (jobs.length === 0) {
-        renderEmptyState();
-        return;
-      }
-
-      grid.style.setProperty('--cols', jobs.length.toString());
-
-      const headerCells = jobs.map((job, index) => `
-        <div class="compare-cell job-col" data-col="${index}">
-          <div class="job-card-mini">
-            <button class="remove-col-btn" aria-label="Удалить" title="Удалить из сравнения" data-job-id="${job.id}" type="button">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
-            <div class="company-logo company-logo-${escapeHtml(job.companySlug)}">
-              ${renderCompanyLogo(job)}
-            </div>
-            <h3>${escapeHtml(job.title)}</h3>
-            <span class="company-name">${escapeHtml(job.company)}</span>
-          </div>
-        </div>
-      `).join('');
-
-      const featureRows = features.map((feature) => `
-        <div class="compare-row">
-          <div class="compare-cell feature-col">${escapeHtml(feature.name)}</div>
-          ${jobs.map((job, index) => `
-            <div class="compare-cell job-col" data-col="${index}">
-              ${escapeHtml(job[feature.key])}
-            </div>
-          `).join('')}
-        </div>
-      `).join('');
-
-      const actionCells = jobs.map((job, index) => `
-        <div class="compare-cell job-col" data-col="${index}">
-          <a href="${escapeHtml(job.link)}" class="btn-primary">Открыть карточку</a>
-        </div>
-      `).join('');
-
-      grid.innerHTML = `
-        <div class="compare-row compare-head">
-          <div class="compare-cell feature-col empty-cell">Параметры</div>
-          ${headerCells}
-        </div>
-        ${featureRows}
-        <div class="compare-row compare-actions">
-          <div class="compare-cell feature-col"></div>
-          ${actionCells}
-        </div>
-      `;
-      applyScopedStyles(grid);
-    }
-
-    function renderCompanyLinks(jobs) {
-      if (!companyLinks) return;
-
-      const companies = Array.from(new Map(jobs.map((job) => [job.company, {
-        name: job.company,
-        href: job.companyHref,
-      }])).values());
-
-      companyLinks.innerHTML = companies.length
-        ? companies.map((company) => `<a href="${escapeHtml(company.href)}" class="compare-chip-link">${escapeHtml(company.name)}</a>`).join('')
-        : '<a href="/companies/" class="compare-chip-link">Все компании</a>';
-      applyScopedStyles(companyLinks);
-    }
-
+${compareListSrc}
+${renderSrc}
     function renderSelectedComparison() {
       const storedIds = readStoredCompareIds();
       const needsCatalog = storedIds.some((id) => !jobsById.has(id));
@@ -567,72 +225,32 @@ const pageSchemaGraph = [
     // ====== City + transport filter mode ======
     // When user picks city/transport, fetch full catalog and render
     // matching jobs (overrides the localStorage-driven manual mode).
-    const cityFilter = document.getElementById('compare-city-filter');
-    const transportFilter = document.getElementById('compare-transport-filter');
-    const filterReset = document.getElementById('compare-filter-reset');
-    const filterStatus = document.getElementById('compare-filters-status');
-
-    const TRANSPORT_LABEL_TO_TAG = {
-      'Авто': 'auto',
-      'Велосипед / самокат': 'bicycle',
-      'Пешком': 'foot',
-      'Удалённо / офис': 'remote',
-    };
-
-    function jobMatchesTransport(job, tagValue) {
-      if (!tagValue) return true;
-      const label = String(job.transport || '');
-      if (TRANSPORT_LABEL_TO_TAG[label] === tagValue) return true;
-      return false;
-    }
-
-    function jobMatchesCity(job, cityName) {
-      if (!cityName) return true;
-      const loc = String(job.location || '').toLowerCase();
-      return loc.includes(cityName.toLowerCase()) || loc === 'вся россия';
-    }
-
-    function setStatus(text) {
-      if (filterStatus) filterStatus.textContent = text || '';
-    }
-
-    async function applyServerFilters() {
-      const city = cityFilter?.value || '';
-      const transport = transportFilter?.value || '';
-      if (!city && !transport) {
-        // No filter — fall back to manual selection from localStorage.
-        renderSelectedComparison();
-        setStatus('');
-        return;
-      }
-      setStatus('Загружаем подходящие вакансии…');
-      const all = await ensureFullCatalog();
-      const list = Array.isArray(all) ? all : [];
-      const matched = list.filter((job) => jobMatchesCity(job, city) && jobMatchesTransport(job, transport));
-      // Cap to 12 columns (UI limit) but show count of total matches.
-      const display = matched.slice(0, 12);
-      if (display.length === 0) {
-        setStatus(`Нет вакансий по фильтру «${city || 'любой город'} / ${transport ? Object.keys(TRANSPORT_LABEL_TO_TAG).find(k => TRANSPORT_LABEL_TO_TAG[k] === transport) : 'любой транспорт'}»`);
-        renderComparisonTable([]);
-        renderCompanyLinks([]);
-        return;
-      }
-      renderComparisonTable(display);
-      renderCompanyLinks(display);
-      setStatus(matched.length > display.length
-        ? `Показано ${display.length} из ${matched.length} вакансий по фильтру`
-        : `Показано ${display.length} вакансий по фильтру`);
-    }
-
-    cityFilter?.addEventListener('change', applyServerFilters);
-    transportFilter?.addEventListener('change', applyServerFilters);
-    filterReset?.addEventListener('click', () => {
-      if (cityFilter) cityFilter.value = '';
-      if (transportFilter) transportFilter.value = '';
-      applyServerFilters();
-    });
+${filtersSrc}
   });
-</script>
+`;
+---
+
+<BaseLayout title={compareTitle} description={compareDescription} schemaGraph={pageSchemaGraph}>
+  <Header />
+
+  <main class="compare-page">
+    <div class="compare-container">
+      <CompareHero />
+
+      <CompareFilters availableCities={availableCities} />
+
+      <CompareGrid compareJobs={compareJobs} features={features} />
+
+      <CompareHelpGrid />
+
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<script is:inline define:vars={{ compareJobs, features, totalCompareJobs }} set:html={compareScriptBody}></script>
+
 
 <style>
   .compare-page {
@@ -648,99 +266,6 @@ const pageSchemaGraph = [
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 2rem;
-    box-shadow: var(--shadow-sm);
-  }
-
-  .compare-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .compare-header-copy {
-    display: grid;
-    gap: 0.35rem;
-  }
-
-  .compare-header h1 {
-    font-size: 2rem;
-    font-weight: 800;
-    margin: 0 0 0.35rem;
-  }
-
-  .compare-subtitle {
-    margin: 0;
-    color: var(--text-muted);
-    line-height: 1.7;
-    max-width: 52ch;
-  }
-
-  .compare-breadcrumb {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    margin-bottom: 0.8rem;
-    color: var(--text-muted);
-    font-size: 0.92rem;
-  }
-
-  .compare-breadcrumb a {
-    color: inherit;
-    text-decoration: none;
-  }
-
-  .compare-breadcrumb a:hover {
-    color: var(--primary-color);
-  }
-
-  .section-eyebrow {
-    margin: 0 0 0.55rem;
-    font-size: 0.74rem;
-    font-weight: 900;
-    letter-spacing: 0;
-    text-transform: uppercase;
-    color: var(--accent-color);
-  }
-
-  .back-link {
-    color: var(--text-muted);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 1.05rem;
-    transition: var(--transition);
-  }
-
-  .back-link:hover {
-    color: var(--primary-color);
-  }
-
-  .compare-header-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    align-items: center;
-    justify-content: flex-end;
-  }
-
-  .compare-table-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 2.8rem;
-    padding: 0.7rem 1rem;
-    border-radius: 8px;
-    background: var(--brand-700);
-    border: 1px solid var(--brand-700);
-    color: var(--ink-0);
-    text-decoration: none;
-    font-weight: 800;
-    transition: var(--transition);
-  }
-
-  .compare-table-link:hover {
-    transform: translateY(-1px);
     box-shadow: var(--shadow-sm);
   }
 
@@ -959,219 +484,6 @@ const pageSchemaGraph = [
     color: var(--accent-color);
     font-weight: 900;
   }
-
-  .compare-table-wrapper {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-color);
-    background: var(--surface-color);
-    margin-bottom: 1.75rem;
-    scroll-snap-type: x proximity;
-  }
-
-  .compare-grid {
-    --cols: 4;
-    --feature-col-width: 180px;
-    --feature-col-min: 130px;
-    --job-col-min: 140px;
-    display: grid;
-    width: 100%;
-    grid-template-columns: minmax(var(--feature-col-min), var(--feature-col-width)) repeat(var(--cols), minmax(var(--job-col-min), 1fr));
-    min-width: 100%;
-    background: var(--border-color);
-    gap: 1px;
-  }
-
-  .compare-row {
-    display: contents;
-  }
-
-  .compare-cell {
-    padding: 1.5rem;
-    background: var(--surface-color);
-    display: flex;
-    align-items: center;
-    color: var(--text-main);
-    min-width: 0;
-    overflow-wrap: anywhere;
-    word-break: break-word;
-    hyphens: auto;
-    scroll-snap-align: start;
-  }
-
-  /* Column dividers between job columns. Light theme = darker line,
-     dark theme = lighter line (per user request). First job column
-     has a divider to its left to separate from sticky feature column. */
-  .compare-cell.job-col {
-    border-left: 1px solid var(--ink-200);
-  }
-  :global(body.dark-mode) .compare-cell.job-col {
-    border-left-color: rgba(231, 234, 240, 0.18);
-  }
-
-  .feature-col {
-    font-weight: 700;
-    color: var(--text-muted);
-    font-size: 0.95rem;
-    background: #fdfdfd;
-    position: sticky;
-    left: 0;
-    z-index: 10;
-    box-shadow: 10px 0 18px var(--scrim-shadow-soft);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .feature-col {
-      background: var(--ink-900);
-    }
-  }
-
-  .compare-head .compare-cell {
-    align-items: flex-start;
-    padding-top: 1.5rem;
-    padding-bottom: 1.5rem;
-  }
-
-  .compare-head .feature-col {
-    z-index: 15;
-  }
-
-  .empty-cell {
-    display: flex;
-    align-items: center;
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    letter-spacing: 0;
-  }
-
-  .job-card-mini {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    width: 100%;
-    position: relative;
-  }
-
-  .remove-col-btn {
-    position: absolute;
-    top: -0.75rem;
-    right: -0.75rem;
-    width: 26px;
-    height: 26px;
-    border-radius: 8px;
-    background: var(--bg-color);
-    border: 1px solid var(--border-color);
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: var(--transition);
-    z-index: 10;
-    box-shadow: var(--shadow-sm);
-  }
-
-  .remove-col-btn:hover {
-    color: var(--color-danger);
-    border-color: var(--color-danger);
-    background: #fef2f2;
-    transform: scale(1.1);
-  }
-
-  .company-logo {
-    background: rgba(var(--brand-700-rgb), 0.12);
-    width: 56px;
-    height: 56px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 0.75rem;
-  }
-
-  .company-logo img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 8px;
-    display: block;
-  }
-
-  .company-logo-yandex-eda {
-    background: rgba(255, 204, 0, 0.14);
-  }
-
-  .company-logo-ozon {
-    background: rgba(0, 91, 255, 0.12);
-  }
-
-  .company-logo-samokat {
-    background: rgba(255, 64, 99, 0.12);
-  }
-
-  .company-logo-cdek {
-    background: rgba(0, 176, 80, 0.12);
-  }
-
-  .company-logo-vkusvill {
-    background: rgba(26, 154, 80, 0.12);
-  }
-
-  .company-logo-vtb {
-    background: rgba(10, 40, 150, 0.12);
-  }
-
-  .company-logo-letter {
-    color: var(--brand-700);
-    font-weight: 800;
-    font-size: 1.25rem;
-  }
-
-  .company-logo-yandex-eda .company-logo-letter {
-    color: #c48a00;
-  }
-
-  .company-logo-ozon .company-logo-letter {
-    color: var(--brand-ozon);
-  }
-
-  .company-logo-samokat .company-logo-letter {
-    color: #ff4063;
-  }
-
-  .company-logo-cdek .company-logo-letter {
-    color: #00b050;
-  }
-
-  .company-logo-vkusvill .company-logo-letter {
-    color: #1a9a50;
-  }
-
-  .company-logo-vtb .company-logo-letter {
-    color: #0a2896;
-  }
-
-  .job-card-mini h3 {
-    font-size: 1.15rem;
-    line-height: 1.3;
-    font-weight: 800;
-    margin: 0;
-    overflow-wrap: anywhere;
-    word-break: break-word;
-  }
-
-  .company-name {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    overflow-wrap: anywhere;
-    word-break: break-word;
-  }
-
-  .compare-actions .compare-cell {
-    padding-bottom: 1.5rem;
-  }
-
   .compare-faq-section {
     margin-bottom: 1.5rem;
   }
@@ -1184,30 +496,6 @@ const pageSchemaGraph = [
     margin: 0 0 0.45rem;
     font-size: 1rem;
   }
-
-  .compare-empty-state {
-    grid-column: 1 / -1;
-    padding: 3rem;
-    text-align: center;
-    background: var(--surface-color);
-  }
-
-  .compare-empty-state h3 {
-    margin-bottom: 1rem;
-  }
-
-  .compare-empty-state p {
-    max-width: 38rem;
-    margin: 0 auto 1.25rem;
-    color: var(--text-muted);
-    line-height: 1.7;
-  }
-
-  .compare-empty-state-link {
-    display: inline-block;
-    width: auto;
-  }
-
   @media (max-width: 960px) {
     .compare-link-grid,
     .compare-route-grid,
@@ -1229,22 +517,12 @@ const pageSchemaGraph = [
       padding: 0.75rem;
     }
 
-    .compare-breadcrumb {
-      display: none;
-    }
-
-    .compare-header,
     .compare-answer-panel,
     .compare-trust-panel {
       grid-template-columns: 1fr;
       flex-direction: column;
       align-items: flex-start;
       gap: 1rem;
-    }
-
-    .compare-header-actions {
-      width: 100%;
-      justify-content: flex-start;
     }
 
     .compare-answer-panel,
@@ -1319,10 +597,6 @@ const pageSchemaGraph = [
       border-radius: 8px;
     }
 
-    .compare-header {
-      margin-bottom: 1rem;
-    }
-
     .compare-answer-panel,
     .compare-trust-panel {
       padding: 1rem;
@@ -1384,186 +658,5 @@ const pageSchemaGraph = [
   .remove-col-btn:hover {
     background: var(--danger-bg);
     color: var(--danger-fg);
-  }
-  .compare-filters {
-    margin: 24px 0 16px;
-    padding: 20px 24px;
-    background: var(--ink-50);
-    border: 1px solid var(--ink-100);
-    border-radius: 16px;
-  }
-  .compare-filters-hint {
-    margin: 0 0 14px;
-    font-size: 14px;
-    color: var(--ink-700);
-  }
-  .compare-filters-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    align-items: flex-end;
-  }
-  .compare-filter {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    flex: 1 1 220px;
-    min-width: 200px;
-  }
-  .compare-filter span {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--ink-500);
-  }
-  .compare-filter select {
-    height: 44px;
-    padding: 0 14px;
-    border-radius: 12px;
-    border: 1px solid var(--ink-100);
-    background: var(--surface-100);
-    font-size: 15px;
-    color: var(--ink-900);
-    cursor: pointer;
-  }
-  .compare-filter-reset {
-    height: 44px;
-    padding: 0 18px;
-    border-radius: 12px;
-    border: 1px solid var(--ink-100);
-    background: var(--surface-100);
-    color: var(--ink-700);
-    font-weight: 600;
-    cursor: pointer;
-    transition: border-color 0.15s, background 0.15s;
-  }
-  .compare-filter-reset:hover {
-    border-color: var(--brand-700);
-    color: var(--brand-700);
-  }
-  .compare-filters-status {
-    margin: 12px 0 0;
-    font-size: 13px;
-    color: var(--brand-700);
-    min-height: 18px;
-  }
-  :global(body.dark-mode) .compare-filters {
-    background: var(--surface-200);
-    border-color: var(--ink-200);
-  }
-  :global(body.dark-mode) .compare-filter select,
-  :global(body.dark-mode) .compare-filter-reset {
-    background: var(--surface-100);
-    color: var(--ink-800);
-    border-color: var(--ink-200);
-  }
-
-  /* ============ Help grid (links to /guide/) ============ */
-  .compare-help-grid {
-    margin: 32px 0 16px;
-    padding: 0;
-  }
-  .compare-help-heading {
-    margin-bottom: 18px;
-  }
-  .compare-help-heading h2 {
-    margin: 0;
-    font-size: clamp(22px, 2.2vw, 28px);
-  }
-  .compare-help-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 14px;
-  }
-  .compare-help-card {
-    display: grid;
-    gap: 8px;
-    padding: 20px 22px;
-    border: 1px solid var(--ink-100);
-    border-radius: 16px;
-    background: var(--surface-100);
-    color: inherit;
-    text-decoration: none;
-    transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
-  }
-  .compare-help-card:hover {
-    border-color: var(--brand-700);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px var(--scrim-shadow-soft);
-  }
-  .compare-help-kicker {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--brand-700);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-  .compare-help-card h3 {
-    margin: 0;
-    font-size: 17px;
-    line-height: 1.3;
-    color: var(--ink-900);
-  }
-  .compare-help-card p {
-    margin: 0;
-    font-size: 14px;
-    line-height: 1.5;
-    color: var(--ink-700);
-  }
-  /* Highlight «мгновенный вывод через кошелёк» — owner-emphasised in
-     the payment-frequency answer (A4). Soft mint underlay to keep the
-     phrase visually distinct from the surrounding copy without leaving
-     the link card's clickable area. */
-  .payment-freq-highlight {
-    background: var(--brand-100);
-    color: var(--brand-800);
-    padding: 1px 6px;
-    border-radius: var(--radius-sm);
-    font-weight: 700;
-  }
-  :global(body.dark-mode) .payment-freq-highlight {
-    background: var(--brand-50);
-    color: var(--brand-700);
-  }
-  .compare-help-link {
-    margin-top: 4px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--brand-700);
-  }
-  .compare-help-all {
-    display: inline-flex;
-    align-items: center;
-    margin-top: 18px;
-    padding: 12px 20px;
-    border-radius: 999px;
-    background: var(--brand-700);
-    color: #fff;
-    font-weight: 700;
-    font-size: 15px;
-    text-decoration: none;
-    transition: background 0.15s, transform 0.15s;
-  }
-  .compare-help-all:hover {
-    background: var(--brand-800);
-    transform: translateY(-1px);
-  }
-  :global(body.dark-mode) .compare-help-card {
-    background: var(--surface-200);
-    border-color: var(--ink-200);
-  }
-  :global(body.dark-mode) .compare-help-card h3 {
-    color: var(--ink-800);
-  }
-  :global(body.dark-mode) .compare-help-card p {
-    color: var(--ink-600);
-  }
-  :global(body.dark-mode) .compare-help-all {
-    background: var(--brand-500);
-    color: var(--ink-0);
-  }
-  :global(body.dark-mode) .compare-help-all:hover {
-    background: var(--brand-400);
   }
 </style>
