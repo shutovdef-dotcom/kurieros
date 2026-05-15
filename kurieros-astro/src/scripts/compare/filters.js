@@ -1,5 +1,12 @@
 // City + transport server-side filter mode (browser-side).
 //
+// DOM-side adapter for the predicate in `src/utils/jobFilters.ts`. This
+// file runs on JSON catalog blobs fetched at runtime (not the build-time
+// `GeneratedJob[]` array), so it can't directly import the TypeScript
+// predicate — but the city-matching semantics MUST stay in sync with
+// `jobFilters.ts` (`job.location.toLowerCase().includes(...)` plus the
+// «Вся Россия» free pass). If you change one, change both.
+//
 // Imported via Vite `?raw` and concatenated into the inline DOMContentLoaded
 // callback in `compare.astro`. When the user picks city or transport, fetch
 // the full catalog and render matching jobs (overrides the localStorage-driven
@@ -34,6 +41,10 @@
       return false;
     }
 
+    // Mirror of the `city` branch in `src/utils/jobFilters.ts#jobMatches`.
+    // Note we compare a lower-cased «вся россия» here because we don't
+    // have access to the original-case `NATIONWIDE_LOCATION` constant
+    // on the client; both checks resolve the same set of rows.
     function jobMatchesCity(job, cityName) {
       if (!cityName) return true;
       const loc = String(job.location || '').toLowerCase();
