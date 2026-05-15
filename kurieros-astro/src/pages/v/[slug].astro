@@ -574,15 +574,23 @@ const pageSchemaGraph = [
 		Astro.site,
 	),
 ];
+
+// L9: preload the per-source vacancy-translation fragment so the runtime
+// i18n loader (BaseLayout) doesn't block on a fetch round-trip on language
+// switch. Only emitted on detail pages — listing pages would balloon the
+// head with too many fragment URLs (one per visible JobCard).
+declare const __BUILD_TIMESTAMP__: string;
+const fragmentPreloadUrl = `/vacancy-translations/ru/${job.sourceSlug}.json?v=${__BUILD_TIMESTAMP__}`;
 ---
 
-<BaseLayout 
+<BaseLayout
 	title={vacancyTitle}
 	titleKey={`vacancies.${job.id}.page_title`}
 	description={vacancyDescription}
 	descriptionKey={`vacancies.${job.id}.page_description`}
 	schemaGraph={pageSchemaGraph}
 >
+	<link rel="preload" as="fetch" href={fragmentPreloadUrl} crossorigin="anonymous" />
 	<Header />
 
 	<main class="vacancy-page" data-vacancy-source-slug={job.sourceSlug}>
