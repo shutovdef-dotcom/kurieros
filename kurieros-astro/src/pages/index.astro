@@ -17,7 +17,11 @@ import { TOPIC_META, knowledgeBaseData } from '../utils/knowledge';
 
 const cities = getCitiesFromJobs(jobsData);
 const availableCities = sortCityNamesByPopulation(getCityNames(jobsData));
-const cityRouteMap = Object.fromEntries(cities.map((city) => [city.name, `/rabota-kurerom-${city.slug}/`]));
+// `cityRouteMap` used to live here as well and be threaded into the
+// inline `define:vars`. After H13 it's served from
+// `/api/city-index.json` (see `src/pages/api/city-index.json.ts`) and
+// fetched lazily by the home script — no need to inline ~38 KB into
+// every render of `dist/index.html`.
 const companies = getCompaniesFromJobs(jobsData);
 const totalVacancies = jobsData.length;
 const topCities = [...cities]
@@ -199,242 +203,290 @@ const pageSchemaGraph = [
 	<Footer />
 </BaseLayout>
 
-<script is:inline define:vars={{ availableCities, cityRouteMap }}>
-	document.addEventListener('DOMContentLoaded', () => {
-		const STORAGE_KEY = 'kurieros-selected-city';
-		const DEFAULT_CITY = 'Москва';
-		// Safari Private Browsing + restricted WKWebViews throw a
-		// SecurityError on any localStorage access. Wrap reads/writes so
-		// the whole DOMContentLoaded callback survives instead of aborting
-		// and silently killing the city-selection UX. Matches the pattern
-		// in BaseLayout.astro:460-462. (audit v2 C1)
-		const safeStorage = {
-			get(key) { try { return localStorage.getItem(key); } catch (_) { return null; } },
-			set(key, value) { try { localStorage.setItem(key, value); } catch (_) { /* ignore */ } },
-			remove(key) { try { localStorage.removeItem(key); } catch (_) { /* ignore */ } },
-		};
-		const citySelect = document.getElementById('city-select');
-		const cityPageLink = document.getElementById('city-page-link');
+<script is:inline>
+	// Homepage city-selector / geo-banner script.
+	//
+	// `availableCities` (972 strings) and `cityRouteMap` (958 entries) used
+	// to be inlined via `define:vars`, costing ~49 KB raw / ~6 KB gzip in
+	// every render of `dist/index.html`. They're now served as a static
+	// JSON fragment under `/api/city-index.json` (see
+	// `src/pages/api/city-index.json.ts`) and fetched lazily with
+	// `force-cache`.
+	//
+	// Strategy B (H13): the fetch is fired immediately on script parse
+	// (well before DOMContentLoaded) so the data is usually already
+	// resolved by the time we need it. Inside the DOMContentLoaded
+	// callback we `await` the promise before touching the city flow.
+	// The toolbar `<select>` is server-rendered with all options, so
+	// manual selection still works even if the fetch is in flight or
+	// fails — only the auto-detect / saved-city / city-page-link
+	// enhancements are gated on the data being available.
+	(function () {
+		let availableCities = [];
+		let cityRouteMap = {};
 
-		function getFallbackCity() {
-			if (availableCities.includes(DEFAULT_CITY)) {
-				return DEFAULT_CITY;
-			}
-			return availableCities[0] || '';
-		}
-
-		function updateCityLink(city) {
-			const href = cityRouteMap[city];
-			if (!city || !href) {
-				cityPageLink.classList.add('hidden');
-				cityPageLink.removeAttribute('href');
-				return;
-			}
-
-			cityPageLink.href = href;
-			cityPageLink.classList.remove('hidden');
-		}
-
-		function applyCity(city, source = 'manual') {
-			const normalizedCity = availableCities.includes(city) ? city : '';
-			citySelect.value = normalizedCity;
-			updateCityLink(normalizedCity);
-
-			if (normalizedCity) {
-				safeStorage.set(STORAGE_KEY, normalizedCity);
-			} else {
-				safeStorage.remove(STORAGE_KEY);
-			}
-
-			window.dispatchEvent(new CustomEvent('kurieros:city-selected', {
-				detail: { city: normalizedCity, source, slug: cityRouteMap[normalizedCity]?.replace(/^\/rabota-kurerom-/, '').replace(/\/$/, '') || '' }
-			}));
-		}
-
-		function normalizeDetectedCity(name) {
-			if (!name) return '';
-			const directMatch = availableCities.find((city) => city.toLowerCase() === name.toLowerCase());
-			if (directMatch) return directMatch;
-			const trimmed = name.replace(/^город\s+/i, '').trim();
-			const normalizedTrimmed = trimmed.toLowerCase();
-
-			if (['moscow', 'moskva'].includes(normalizedTrimmed) && availableCities.includes(DEFAULT_CITY)) {
-				return DEFAULT_CITY;
-			}
-
-			return availableCities.find((city) => city.toLowerCase() === normalizedTrimmed) || '';
-		}
-
-		async function getIpData() {
-			if (['localhost', '127.0.0.1'].includes(window.location.hostname)) {
-				return null;
-			}
-
-			if (window.kurieros_user) {
-				return window.kurieros_user;
-			}
-
-			return new Promise((resolve) => {
-				const timeout = setTimeout(() => resolve(null), 4000);
-				window.addEventListener('kurieros:region-detected', (event) => {
-					clearTimeout(timeout);
-					resolve(event.detail);
-				}, { once: true });
+		const cityIndexReady = fetch('/api/city-index.json', { cache: 'force-cache' })
+			.then((response) => {
+				if (!response.ok) throw new Error('city-index fetch failed: ' + response.status);
+				return response.json();
+			})
+			.then((data) => {
+				if (data && Array.isArray(data.availableCities)) {
+					availableCities = data.availableCities;
+				}
+				if (data && data.cityRouteMap && typeof data.cityRouteMap === 'object') {
+					cityRouteMap = data.cityRouteMap;
+				}
+			})
+			.catch(() => {
+				// Network / fetch failure: degrade gracefully. The SSR
+				// <select> still works for manual selection, but
+				// auto-detect / saved-city / city-page-link enhancements
+				// are no-ops because the lookup tables stay empty.
 			});
-		}
 
-		async function detectCityByGeo() {
-			const ipData = await getIpData();
+		document.addEventListener('DOMContentLoaded', async () => {
+			const STORAGE_KEY = 'kurieros-selected-city';
+			const DEFAULT_CITY = 'Москва';
+			const citySelect = document.getElementById('city-select');
+			const cityPageLink = document.getElementById('city-page-link');
 
-			const detectedCity = normalizeDetectedCity(ipData?.city);
-			if (detectedCity) {
-				applyCity(detectedCity, 'ip');
-				return;
+			function getFallbackCity() {
+				if (availableCities.includes(DEFAULT_CITY)) {
+					return DEFAULT_CITY;
+				}
+				return availableCities[0] || '';
 			}
 
-			const fallbackCity = getFallbackCity();
-			if (fallbackCity) {
-				applyCity(fallbackCity, 'default');
+			function updateCityLink(city) {
+				const href = cityRouteMap[city];
+				if (!city || !href) {
+					cityPageLink.classList.add('hidden');
+					cityPageLink.removeAttribute('href');
+					return;
+				}
+
+				cityPageLink.href = href;
+				cityPageLink.classList.remove('hidden');
 			}
-		}
 
-		// HV4 — Geo banner for first-time visitors.
-		// IANA timezone → primary city of region. VPN typically rewrites IP
-		// but не трогает системную таймзону, поэтому работает даже под VPN.
-		const TZ_TO_CITY = {
-			'Europe/Moscow': 'Москва',
-			'Europe/Kaliningrad': 'Калининград',
-			'Europe/Samara': 'Самара',
-			'Europe/Volgograd': 'Волгоград',
-			'Europe/Saratov': 'Саратов',
-			'Europe/Astrakhan': 'Астрахань',
-			'Europe/Ulyanovsk': 'Ульяновск',
-			'Europe/Kirov': 'Киров',
-			'Asia/Yekaterinburg': 'Екатеринбург',
-			'Asia/Omsk': 'Омск',
-			'Asia/Novosibirsk': 'Новосибирск',
-			'Asia/Krasnoyarsk': 'Красноярск',
-			'Asia/Irkutsk': 'Иркутск',
-			'Asia/Yakutsk': 'Якутск',
-			'Asia/Vladivostok': 'Владивосток',
-			'Asia/Magadan': 'Магадан',
-			'Asia/Kamchatka': 'Петропавловск-Камчатский',
-			'Asia/Anadyr': 'Анадырь',
-			'Asia/Chita': 'Чита'
-		};
-		const GEO_BANNER_DISMISSED_KEY = 'kurieros:geo-banner-dismissed';
+			function applyCity(city, source = 'manual') {
+				const normalizedCity = availableCities.includes(city) ? city : '';
+				citySelect.value = normalizedCity;
+				updateCityLink(normalizedCity);
 
-		function getTzCity() {
-			try {
-				const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-				const city = TZ_TO_CITY[tz];
-				return city && availableCities.includes(city) ? city : '';
-			} catch (_) {
-				return '';
-			}
-		}
-
-		function showGeoBanner(city) {
-			const modal = document.createElement('div');
-			modal.id = 'geo-banner';
-			modal.className = 'geo-banner-modal';
-			modal.setAttribute('role', 'dialog');
-			modal.setAttribute('aria-modal', 'true');
-			modal.setAttribute('aria-labelledby', 'geo-banner-title');
-
-			// Build modal markup with DOM API (city is dynamic, comes from
-			// external geo-IP / window.kurieros_user — never trust as HTML).
-			const backdrop = document.createElement('div');
-			backdrop.className = 'geo-banner-backdrop';
-			backdrop.dataset.action = 'dismiss';
-
-			const card = document.createElement('div');
-			card.className = 'geo-banner-card';
-			card.setAttribute('role', 'document');
-
-			const icon = document.createElement('div');
-			icon.className = 'geo-banner-icon';
-			icon.setAttribute('aria-hidden', 'true');
-			icon.textContent = '📍';
-
-			const title = document.createElement('h2');
-			title.id = 'geo-banner-title';
-			title.className = 'geo-banner-title';
-			const cityStrong = document.createElement('strong');
-			cityStrong.textContent = city; // auto-escaped — XSS-safe
-			title.append('Похоже, ваш город — ', cityStrong);
-
-			const body = document.createElement('p');
-			body.className = 'geo-banner-body';
-			body.textContent = 'Показать только вакансии в этом городе?';
-
-			const actions = document.createElement('div');
-			actions.className = 'geo-banner-actions';
-
-			const applyBtn = document.createElement('button');
-			applyBtn.type = 'button';
-			applyBtn.className = 'geo-banner-btn geo-banner-btn-primary';
-			applyBtn.dataset.action = 'apply';
-			applyBtn.textContent = 'Да, показать';
-
-			const dismissBtn = document.createElement('button');
-			dismissBtn.type = 'button';
-			dismissBtn.className = 'geo-banner-btn geo-banner-btn-secondary';
-			dismissBtn.dataset.action = 'dismiss';
-			dismissBtn.textContent = 'Все города';
-
-			actions.append(applyBtn, dismissBtn);
-			card.append(icon, title, body, actions);
-			modal.append(backdrop, card);
-
-			document.body.appendChild(modal);
-			document.body.classList.add('geo-banner-open');
-
-			const close = (action) => {
-				if (action === 'apply') {
-					applyCity(city, 'geo-banner');
+				if (normalizedCity) {
+					localStorage.setItem(STORAGE_KEY, normalizedCity);
 				} else {
-					// Dismiss → silent legacy fallback (Moscow default).
-					const fallback = getFallbackCity();
-					if (fallback) applyCity(fallback, 'default');
+					localStorage.removeItem(STORAGE_KEY);
 				}
-				safeStorage.set(GEO_BANNER_DISMISSED_KEY, '1');
-				document.body.classList.remove('geo-banner-open');
-				modal.remove();
-				if (typeof window.gtag === 'function') {
-					window.gtag('event', 'geo_banner_action', { action, city });
-				}
-			};
 
-			modal.addEventListener('click', (event) => {
-				const action = event.target && event.target.dataset && event.target.dataset.action;
-				if (action) close(action);
-			});
-			document.addEventListener('keydown', function escHandler(e) {
-				if (e.key === 'Escape') {
-					close('dismiss');
-					document.removeEventListener('keydown', escHandler);
-				}
-			});
-		}
-
-		async function maybeShowGeoBannerOrAutoApply() {
-			// 1. Try IP-geo (existing infrastructure).
-			const ipData = await getIpData();
-			const ipCity = normalizeDetectedCity(ipData && ipData.city);
-			// 2. Fallback to timezone-mapped city.
-			const suggested = ipCity || getTzCity();
-			if (suggested && availableCities.includes(suggested)) {
-				showGeoBanner(suggested);
-				return;
+				window.dispatchEvent(new CustomEvent('kurieros:city-selected', {
+					detail: { city: normalizedCity, source, slug: cityRouteMap[normalizedCity]?.replace(/^\/rabota-kurerom-/, '').replace(/\/$/, '') || '' }
+				}));
 			}
-			// 3. Final fallback — silent default (Moscow).
-			const fallback = getFallbackCity();
-			if (fallback) applyCity(fallback, 'default');
-		}
 
-			const savedCity = safeStorage.get(STORAGE_KEY);
-			const geoBannerDismissed = safeStorage.get(GEO_BANNER_DISMISSED_KEY) === '1';
+			function normalizeDetectedCity(name) {
+				if (!name) return '';
+				const directMatch = availableCities.find((city) => city.toLowerCase() === name.toLowerCase());
+				if (directMatch) return directMatch;
+				const trimmed = name.replace(/^город\s+/i, '').trim();
+				const normalizedTrimmed = trimmed.toLowerCase();
+
+				if (['moscow', 'moskva'].includes(normalizedTrimmed) && availableCities.includes(DEFAULT_CITY)) {
+					return DEFAULT_CITY;
+				}
+
+				return availableCities.find((city) => city.toLowerCase() === normalizedTrimmed) || '';
+			}
+
+			async function getIpData() {
+				if (['localhost', '127.0.0.1'].includes(window.location.hostname)) {
+					return null;
+				}
+
+				if (window.kurieros_user) {
+					return window.kurieros_user;
+				}
+
+				return new Promise((resolve) => {
+					const timeout = setTimeout(() => resolve(null), 4000);
+					window.addEventListener('kurieros:region-detected', (event) => {
+						clearTimeout(timeout);
+						resolve(event.detail);
+					}, { once: true });
+				});
+			}
+
+			async function detectCityByGeo() {
+				const ipData = await getIpData();
+
+				const detectedCity = normalizeDetectedCity(ipData?.city);
+				if (detectedCity) {
+					applyCity(detectedCity, 'ip');
+					return;
+				}
+
+				const fallbackCity = getFallbackCity();
+				if (fallbackCity) {
+					applyCity(fallbackCity, 'default');
+				}
+			}
+
+			// HV4 — Geo banner for first-time visitors.
+			// IANA timezone → primary city of region. VPN typically rewrites IP
+			// but не трогает системную таймзону, поэтому работает даже под VPN.
+			const TZ_TO_CITY = {
+				'Europe/Moscow': 'Москва',
+				'Europe/Kaliningrad': 'Калининград',
+				'Europe/Samara': 'Самара',
+				'Europe/Volgograd': 'Волгоград',
+				'Europe/Saratov': 'Саратов',
+				'Europe/Astrakhan': 'Астрахань',
+				'Europe/Ulyanovsk': 'Ульяновск',
+				'Europe/Kirov': 'Киров',
+				'Asia/Yekaterinburg': 'Екатеринбург',
+				'Asia/Omsk': 'Омск',
+				'Asia/Novosibirsk': 'Новосибирск',
+				'Asia/Krasnoyarsk': 'Красноярск',
+				'Asia/Irkutsk': 'Иркутск',
+				'Asia/Yakutsk': 'Якутск',
+				'Asia/Vladivostok': 'Владивосток',
+				'Asia/Magadan': 'Магадан',
+				'Asia/Kamchatka': 'Петропавловск-Камчатский',
+				'Asia/Anadyr': 'Анадырь',
+				'Asia/Chita': 'Чита'
+			};
+			const GEO_BANNER_DISMISSED_KEY = 'kurieros:geo-banner-dismissed';
+
+			function getTzCity() {
+				try {
+					const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+					const city = TZ_TO_CITY[tz];
+					return city && availableCities.includes(city) ? city : '';
+				} catch (_) {
+					return '';
+				}
+			}
+
+			function showGeoBanner(city) {
+				const modal = document.createElement('div');
+				modal.id = 'geo-banner';
+				modal.className = 'geo-banner-modal';
+				modal.setAttribute('role', 'dialog');
+				modal.setAttribute('aria-modal', 'true');
+				modal.setAttribute('aria-labelledby', 'geo-banner-title');
+
+				// Build modal markup with DOM API (city is dynamic, comes from
+				// external geo-IP / window.kurieros_user — never trust as HTML).
+				const backdrop = document.createElement('div');
+				backdrop.className = 'geo-banner-backdrop';
+				backdrop.dataset.action = 'dismiss';
+
+				const card = document.createElement('div');
+				card.className = 'geo-banner-card';
+				card.setAttribute('role', 'document');
+
+				const icon = document.createElement('div');
+				icon.className = 'geo-banner-icon';
+				icon.setAttribute('aria-hidden', 'true');
+				icon.textContent = '📍';
+
+				const title = document.createElement('h2');
+				title.id = 'geo-banner-title';
+				title.className = 'geo-banner-title';
+				const cityStrong = document.createElement('strong');
+				cityStrong.textContent = city; // auto-escaped — XSS-safe
+				title.append('Похоже, ваш город — ', cityStrong);
+
+				const body = document.createElement('p');
+				body.className = 'geo-banner-body';
+				body.textContent = 'Показать только вакансии в этом городе?';
+
+				const actions = document.createElement('div');
+				actions.className = 'geo-banner-actions';
+
+				const applyBtn = document.createElement('button');
+				applyBtn.type = 'button';
+				applyBtn.className = 'geo-banner-btn geo-banner-btn-primary';
+				applyBtn.dataset.action = 'apply';
+				applyBtn.textContent = 'Да, показать';
+
+				const dismissBtn = document.createElement('button');
+				dismissBtn.type = 'button';
+				dismissBtn.className = 'geo-banner-btn geo-banner-btn-secondary';
+				dismissBtn.dataset.action = 'dismiss';
+				dismissBtn.textContent = 'Все города';
+
+				actions.append(applyBtn, dismissBtn);
+				card.append(icon, title, body, actions);
+				modal.append(backdrop, card);
+
+				document.body.appendChild(modal);
+				document.body.classList.add('geo-banner-open');
+
+				const close = (action) => {
+					if (action === 'apply') {
+						applyCity(city, 'geo-banner');
+					} else {
+						// Dismiss → silent legacy fallback (Moscow default).
+						const fallback = getFallbackCity();
+						if (fallback) applyCity(fallback, 'default');
+					}
+					try { localStorage.setItem(GEO_BANNER_DISMISSED_KEY, '1'); } catch (_) {}
+					document.body.classList.remove('geo-banner-open');
+					modal.remove();
+					if (typeof window.gtag === 'function') {
+						window.gtag('event', 'geo_banner_action', { action, city });
+					}
+				};
+
+				modal.addEventListener('click', (event) => {
+					const action = event.target && event.target.dataset && event.target.dataset.action;
+					if (action) close(action);
+				});
+				document.addEventListener('keydown', function escHandler(e) {
+					if (e.key === 'Escape') {
+						close('dismiss');
+						document.removeEventListener('keydown', escHandler);
+					}
+				});
+			}
+
+			async function maybeShowGeoBannerOrAutoApply() {
+				// 1. Try IP-geo (existing infrastructure).
+				const ipData = await getIpData();
+				const ipCity = normalizeDetectedCity(ipData && ipData.city);
+				// 2. Fallback to timezone-mapped city.
+				const suggested = ipCity || getTzCity();
+				if (suggested && availableCities.includes(suggested)) {
+					showGeoBanner(suggested);
+					return;
+				}
+				// 3. Final fallback — silent default (Moscow).
+				const fallback = getFallbackCity();
+				if (fallback) applyCity(fallback, 'default');
+			}
+
+			// Wire the manual <select> first — works even if the lazy
+			// city-index fetch is still pending. `applyCity` no-ops when
+			// `availableCities` is empty (membership check fails) and
+			// `updateCityLink` no-ops when `cityRouteMap` is empty.
+			citySelect?.addEventListener('change', (event) => {
+				applyCity(event.target.value, 'manual');
+			});
+
+			// Wait for the lazy city-index fetch before running the
+			// saved-city / geo-banner auto-apply flow. Each branch needs
+			// `availableCities.includes(...)` for membership and (for the
+			// saved-city path) `cityRouteMap` for the city-page-link href.
+			// `cityIndexReady` always resolves (catch swallows failures);
+			// after it does, `availableCities` is either populated or
+			// still `[]` — in the latter case the flow naturally no-ops.
+			await cityIndexReady;
+
+			const savedCity = localStorage.getItem(STORAGE_KEY);
+			const geoBannerDismissed = localStorage.getItem(GEO_BANNER_DISMISSED_KEY) === '1';
 			if (savedCity && availableCities.includes(savedCity)) {
 				applyCity(savedCity, 'saved');
 			} else if (geoBannerDismissed) {
@@ -445,12 +497,9 @@ const pageSchemaGraph = [
 				maybeShowGeoBannerOrAutoApply();
 			}
 
-		citySelect?.addEventListener('change', (event) => {
-			applyCity(event.target.value, 'manual');
+			// FAQ uses native <details>/<summary> — no JS needed.
 		});
-
-		// FAQ uses native <details>/<summary> — no JS needed.
-	});
+	})();
 </script>
 
 <style>
