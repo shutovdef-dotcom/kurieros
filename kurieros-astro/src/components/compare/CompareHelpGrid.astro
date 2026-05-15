@@ -1,0 +1,173 @@
+---
+// Static help section for the compare page — six links to /guide/* topics
+// that users typically browse before responding to a vacancy. No props,
+// no client-side state. Extracted from `src/pages/compare.astro` (PR for
+// audit finding H14: god-file decomposition).
+---
+
+<section class="compare-help-grid" aria-label="Частые вопросы перед откликом">
+  <div class="compare-help-heading">
+    <p class="section-eyebrow">Помощь в выборе</p>
+    <h2>Что обычно спрашивают перед откликом</h2>
+  </div>
+  <div class="compare-help-cards">
+    <a class="compare-help-card" href="/guide/dohod/">
+      <span class="compare-help-kicker">Доход</span>
+      <h3>Сколько реально зарабатывает курьер?</h3>
+      <p>Вилки по форматам в Москве, СПб и регионах — пеший, вело, авто, банк-представитель.</p>
+      <span class="compare-help-link">Открыть гид →</span>
+    </a>
+    <a class="compare-help-card" href="/guide/vyplaty/">
+      <span class="compare-help-kicker">Выплаты</span>
+      <h3>Как часто приходят деньги?</h3>
+      <p>
+        Яндекс.Еда, Купер и Самокат — <strong class="payment-freq-highlight">мгновенный вывод через встроенный кошелёк (раз в несколько часов)</strong>; банковская выплата — раз в неделю. Альфа-Банк по ТК РФ — 2 раза в месяц.
+      </p>
+      <span class="compare-help-link">Открыть гид →</span>
+    </a>
+    <a class="compare-help-card" href="/guide/oformlenie/">
+      <span class="compare-help-kicker">Оформление</span>
+      <h3>Где проще трудоустроиться?</h3>
+      <p>Самозанятость, ГПХ, ИП или ТК РФ — какой режим подходит и как зарегистрироваться.</p>
+      <span class="compare-help-link">Открыть гид →</span>
+    </a>
+    <a class="compare-help-card" href="/guide/dokumenty/">
+      <span class="compare-help-kicker">Документы</span>
+      <h3>Какие документы нужны для отклика?</h3>
+      <p>Паспорт, ИНН, СНИЛС — базовый набор. Для авто — права и СТС, для иностранцев — патент.</p>
+      <span class="compare-help-link">Открыть гид →</span>
+    </a>
+    <a class="compare-help-card" href="/guide/vozrast/">
+      <span class="compare-help-kicker">Возраст</span>
+      <h3>Со скольки лет берут курьером?</h3>
+      <p>С 16 лет — пешком и на велосипеде в Yandex Еде и Купере. С 18 — автокурьеры и банк.</p>
+      <span class="compare-help-link">Открыть гид →</span>
+    </a>
+    <a class="compare-help-card" href="/guide/shtrafy/">
+      <span class="compare-help-kicker">Штрафы</span>
+      <h3>За что штрафуют курьеров?</h3>
+      <p>Опоздания, отмены слотов, отсутствие формы — суммы и условия по сервисам.</p>
+      <span class="compare-help-link">Открыть гид →</span>
+    </a>
+  </div>
+  <a class="compare-help-all" href="/guide/">Все гиды для курьера →</a>
+</section>
+
+<style>
+  .section-eyebrow {
+    margin: 0 0 0.55rem;
+    font-size: 0.74rem;
+    font-weight: 900;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    color: var(--accent-color);
+  }
+
+  /* ============ Help grid (links to /guide/) ============ */
+  .compare-help-grid {
+    margin: 32px 0 16px;
+    padding: 0;
+  }
+  .compare-help-heading {
+    margin-bottom: 18px;
+  }
+  .compare-help-heading h2 {
+    margin: 0;
+    font-size: clamp(22px, 2.2vw, 28px);
+  }
+  .compare-help-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+  }
+  .compare-help-card {
+    display: grid;
+    gap: 8px;
+    padding: 20px 22px;
+    border: 1px solid var(--ink-100);
+    border-radius: 16px;
+    background: var(--surface-100);
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  }
+  .compare-help-card:hover {
+    border-color: var(--brand-700);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px var(--scrim-shadow-soft);
+  }
+  .compare-help-kicker {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--brand-700);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .compare-help-card h3 {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.3;
+    color: var(--ink-900);
+  }
+  .compare-help-card p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink-700);
+  }
+  /* Highlight «мгновенный вывод через кошелёк» — owner-emphasised in
+     the payment-frequency answer (A4). Soft mint underlay to keep the
+     phrase visually distinct from the surrounding copy without leaving
+     the link card's clickable area. */
+  .payment-freq-highlight {
+    background: var(--brand-100);
+    color: var(--brand-800);
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+  }
+  :global(body.dark-mode) .payment-freq-highlight {
+    background: var(--brand-50);
+    color: var(--brand-700);
+  }
+  .compare-help-link {
+    margin-top: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--brand-700);
+  }
+  .compare-help-all {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 18px;
+    padding: 12px 20px;
+    border-radius: 999px;
+    background: var(--brand-700);
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .compare-help-all:hover {
+    background: var(--brand-800);
+    transform: translateY(-1px);
+  }
+  :global(body.dark-mode) .compare-help-card {
+    background: var(--surface-200);
+    border-color: var(--ink-200);
+  }
+  :global(body.dark-mode) .compare-help-card h3 {
+    color: var(--ink-800);
+  }
+  :global(body.dark-mode) .compare-help-card p {
+    color: var(--ink-600);
+  }
+  :global(body.dark-mode) .compare-help-all {
+    background: var(--brand-500);
+    color: var(--ink-0);
+  }
+  :global(body.dark-mode) .compare-help-all:hover {
+    background: var(--brand-400);
+  }
+</style>

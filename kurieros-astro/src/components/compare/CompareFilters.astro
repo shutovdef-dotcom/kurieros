@@ -1,0 +1,118 @@
+---
+// Compare-page filters: city + transport selectors and a reset button.
+// The form has no client-side state of its own — change events bubble to
+// the inline script's `applyServerFilters` handler in `compare.astro`,
+// which loads the full catalog and re-renders the grid. Extracted from
+// `src/pages/compare.astro` (audit finding H14: god-file decomposition).
+
+interface Props {
+  availableCities: readonly string[];
+}
+
+const { availableCities } = Astro.props;
+---
+
+<section class="compare-filters" aria-label="Фильтры сравнения">
+  <p class="compare-filters-hint">
+    Можно сравнить добавленные вакансии вручную, либо выбрать город и транспорт — и страница покажет все подходящие варианты.
+  </p>
+  <div class="compare-filters-row">
+    <label class="compare-filter">
+      <span>Город</span>
+      <select id="compare-city-filter">
+        <option value="">Все города</option>
+        {availableCities.map((city) => (
+          <option value={city}>{city}</option>
+        ))}
+      </select>
+    </label>
+    <label class="compare-filter">
+      <span>Транспорт</span>
+      <select id="compare-transport-filter">
+        <option value="">Любой формат</option>
+        <option value="foot">Пешком</option>
+        <option value="bicycle">Велосипед / самокат</option>
+        <option value="auto">Авто</option>
+        <option value="remote">Удалённо / из дома</option>
+      </select>
+    </label>
+    <button type="button" id="compare-filter-reset" class="compare-filter-reset">Сбросить</button>
+  </div>
+  <p class="compare-filters-status" id="compare-filters-status" aria-live="polite"></p>
+</section>
+
+<style>
+  .compare-filters {
+    margin: 24px 0 16px;
+    padding: 20px 24px;
+    background: var(--ink-50);
+    border: 1px solid var(--ink-100);
+    border-radius: 16px;
+  }
+  .compare-filters-hint {
+    margin: 0 0 14px;
+    font-size: 14px;
+    color: var(--ink-700);
+  }
+  .compare-filters-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+  }
+  .compare-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1 1 220px;
+    min-width: 200px;
+  }
+  .compare-filter span {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-500);
+  }
+  .compare-filter select {
+    height: 44px;
+    padding: 0 14px;
+    border-radius: 12px;
+    border: 1px solid var(--ink-100);
+    background: var(--surface-100);
+    font-size: 15px;
+    color: var(--ink-900);
+    cursor: pointer;
+  }
+  .compare-filter-reset {
+    height: 44px;
+    padding: 0 18px;
+    border-radius: 12px;
+    border: 1px solid var(--ink-100);
+    background: var(--surface-100);
+    color: var(--ink-700);
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .compare-filter-reset:hover {
+    border-color: var(--brand-700);
+    color: var(--brand-700);
+  }
+  .compare-filters-status {
+    margin: 12px 0 0;
+    font-size: 13px;
+    color: var(--brand-700);
+    min-height: 18px;
+  }
+  :global(body.dark-mode) .compare-filters {
+    background: var(--surface-200);
+    border-color: var(--ink-200);
+  }
+  :global(body.dark-mode) .compare-filter select,
+  :global(body.dark-mode) .compare-filter-reset {
+    background: var(--surface-100);
+    color: var(--ink-800);
+    border-color: var(--ink-200);
+  }
+</style>

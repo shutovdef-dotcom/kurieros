@@ -1,0 +1,438 @@
+---
+// Compare grid: SSR-rendered side-by-side comparison table for the
+// pre-selected vacancies inlined into the page. Once the browser-side
+// inline script in `compare.astro` boots, it may re-render the grid in
+// place from `localStorage.compareList` or from the city/transport
+// filter. The script reads `data-astro-cid-*` from the `.compare-grid`
+// element and stamps the same scope onto its dynamically-generated
+// children so the CSS rules in this component still apply.
+//
+// Extracted from `src/pages/compare.astro` (audit finding H14).
+
+import type jobsData from '../../data/jobs';
+
+type SourceJob = typeof jobsData[number];
+
+// Shape mirrors the SSR `mapCompareJob` output in compare.astro
+// frontmatter — kept loose because the same component renders
+// pre-selected (compile-time) jobs with all keys populated.
+interface CompareJob {
+  id: SourceJob['id'];
+  slug: string;
+  title: string;
+  company: string;
+  companyLogo: string | null;
+  companySlug: string;
+  companyHref: string;
+  salary: string;
+  location: string;
+  transport: string;
+  transport_provision: string;
+  contract: string;
+  citizenship: string;
+  payout: string;
+  bonus: string;
+  age: string;
+  os: string;
+  link: string;
+}
+
+interface Feature {
+  key: string;
+  name: string;
+}
+
+interface Props {
+  compareJobs: readonly CompareJob[];
+  features: readonly Feature[];
+}
+
+const { compareJobs, features } = Astro.props;
+---
+
+<div class="compare-table-wrapper" id="compare-table">
+  <div class="compare-grid" style={`--cols: ${compareJobs.length};`}>
+    {compareJobs.length > 0 ? (
+      <>
+        <div class="compare-row compare-head">
+          <div class="compare-cell feature-col empty-cell">
+            Параметры
+          </div>
+          {compareJobs.map((job, index) => (
+            <div class="compare-cell job-col" data-col={index}>
+              <div class="job-card-mini">
+                <button class="remove-col-btn" aria-label="Удалить" title="Удалить из сравнения" data-col-target={index} type="button">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+                <div class={`company-logo company-logo-${job.companySlug}`}>
+                  {job.companyLogo ? (
+                    <img
+                      src={job.companyLogo}
+                      alt={`${job.company} logo`}
+                      width="56"
+                      height="56"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : (
+                    <span class="company-logo-letter">
+                      {job.company.charAt(0)}
+                    </span>
+                  )}
+                </div>
+                <h3>{job.title}</h3>
+                <span class="company-name">{job.company}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {features.map((feature) => (
+          <div class="compare-row">
+            <div class="compare-cell feature-col">
+              {feature.name}
+            </div>
+            {compareJobs.map((job, index) => (
+              <div class="compare-cell job-col" data-col={index}>
+                {job[feature.key as keyof typeof job]}
+              </div>
+            ))}
+          </div>
+        ))}
+
+        <div class="compare-row compare-actions">
+          <div class="compare-cell feature-col"></div>
+          {compareJobs.map((job, index) => (
+            <div class="compare-cell job-col" data-col={index}>
+              <a href={job.link} class="btn-primary">Открыть карточку</a>
+            </div>
+          ))}
+        </div>
+      </>
+    ) : (
+      <div class="compare-empty-state">
+        <h3>Нет вакансий для сравнения</h3>
+        <p>Список активных вакансий очищен. Новые варианты появятся здесь после публикации карточек.</p>
+        <a href="/" class="btn-primary compare-empty-state-link">Вернуться на главную</a>
+      </div>
+    )}
+  </div>
+</div>
+
+<style>
+  .compare-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    background: var(--surface-color);
+    margin-bottom: 1.75rem;
+    scroll-snap-type: x proximity;
+  }
+
+  .compare-grid {
+    --cols: 4;
+    --feature-col-width: 180px;
+    --feature-col-min: 130px;
+    --job-col-min: 140px;
+    display: grid;
+    width: 100%;
+    grid-template-columns: minmax(var(--feature-col-min), var(--feature-col-width)) repeat(var(--cols), minmax(var(--job-col-min), 1fr));
+    min-width: 100%;
+    background: var(--border-color);
+    gap: 1px;
+  }
+
+  .compare-row {
+    display: contents;
+  }
+
+  .compare-cell {
+    padding: 1.5rem;
+    background: var(--surface-color);
+    display: flex;
+    align-items: center;
+    color: var(--text-main);
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    hyphens: auto;
+    scroll-snap-align: start;
+  }
+
+  /* Column dividers between job columns. Light theme = darker line,
+     dark theme = lighter line (per user request). First job column
+     has a divider to its left to separate from sticky feature column. */
+  .compare-cell.job-col {
+    border-left: 1px solid var(--ink-200);
+  }
+  :global(body.dark-mode) .compare-cell.job-col {
+    border-left-color: rgba(231, 234, 240, 0.18);
+  }
+
+  .feature-col {
+    font-weight: 700;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    background: #fdfdfd;
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    box-shadow: 10px 0 18px var(--scrim-shadow-soft);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .feature-col {
+      background: var(--ink-900);
+    }
+  }
+
+  .compare-head .compare-cell {
+    align-items: flex-start;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .compare-head .feature-col {
+    z-index: 15;
+  }
+
+  .empty-cell {
+    display: flex;
+    align-items: center;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0;
+  }
+
+  .job-card-mini {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    position: relative;
+  }
+
+  .remove-col-btn {
+    position: absolute;
+    top: -0.75rem;
+    right: -0.75rem;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    z-index: 10;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .remove-col-btn:hover {
+    color: var(--color-danger);
+    border-color: var(--color-danger);
+    background: #fef2f2;
+    transform: scale(1.1);
+  }
+
+  .company-logo {
+    background: rgba(var(--brand-700-rgb), 0.12);
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+  }
+
+  .company-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+    display: block;
+  }
+
+  .company-logo-yandex-eda {
+    background: rgba(255, 204, 0, 0.14);
+  }
+
+  .company-logo-ozon {
+    background: rgba(0, 91, 255, 0.12);
+  }
+
+  .company-logo-samokat {
+    background: rgba(255, 64, 99, 0.12);
+  }
+
+  .company-logo-cdek {
+    background: rgba(0, 176, 80, 0.12);
+  }
+
+  .company-logo-vkusvill {
+    background: rgba(26, 154, 80, 0.12);
+  }
+
+  .company-logo-vtb {
+    background: rgba(10, 40, 150, 0.12);
+  }
+
+  .company-logo-letter {
+    color: var(--brand-700);
+    font-weight: 800;
+    font-size: 1.25rem;
+  }
+
+  .company-logo-yandex-eda .company-logo-letter {
+    color: #c48a00;
+  }
+
+  .company-logo-ozon .company-logo-letter {
+    color: var(--brand-ozon);
+  }
+
+  .company-logo-samokat .company-logo-letter {
+    color: #ff4063;
+  }
+
+  .company-logo-cdek .company-logo-letter {
+    color: #00b050;
+  }
+
+  .company-logo-vkusvill .company-logo-letter {
+    color: #1a9a50;
+  }
+
+  .company-logo-vtb .company-logo-letter {
+    color: #0a2896;
+  }
+
+  .job-card-mini h3 {
+    font-size: 1.15rem;
+    line-height: 1.3;
+    font-weight: 800;
+    margin: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .company-name {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .compare-actions .compare-cell {
+    padding-bottom: 1.5rem;
+  }
+
+  .compare-empty-state {
+    grid-column: 1 / -1;
+    padding: 3rem;
+    text-align: center;
+    background: var(--surface-color);
+  }
+
+  .compare-empty-state h3 {
+    margin-bottom: 1rem;
+  }
+
+  .compare-empty-state p {
+    max-width: 38rem;
+    margin: 0 auto 1.25rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .compare-empty-state-link {
+    display: inline-block;
+    width: auto;
+  }
+
+  @media (max-width: 768px) {
+    .compare-grid {
+      --feature-col-width: 112px;
+      --feature-col-min: 96px;
+      --job-col-min: 96px;
+    }
+
+    .compare-cell {
+      padding: 0.75rem 0.5rem;
+      font-size: 0.82rem;
+      line-height: 1.2;
+    }
+
+    .feature-col {
+      font-size: 0.78rem;
+      padding-inline: 0.5rem;
+    }
+
+    .job-card-mini {
+      gap: 0.35rem;
+    }
+
+    .job-card-mini h3 {
+      font-size: 0.82rem;
+      line-height: 1.15;
+    }
+
+    .company-name {
+      font-size: 0.72rem;
+      line-height: 1.15;
+    }
+
+    .btn-primary {
+      font-size: 0.74rem;
+      padding: 0.65rem 0.35rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .compare-grid {
+      --feature-col-width: 96px;
+      --feature-col-min: 84px;
+      --job-col-min: 88px;
+    }
+
+    .company-logo {
+      width: 36px;
+      height: 36px;
+      margin-bottom: 0.45rem;
+    }
+
+    .remove-col-btn {
+      top: -0.5rem;
+      right: -0.5rem;
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  /* === Visual refresh overrides (compare grid) === */
+  .compare-grid {
+    background: var(--ink-0);
+    border: 1px solid var(--ink-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xs);
+  }
+  .compare-row:nth-child(even) {
+    background: var(--ink-50);
+  }
+  .remove-col-btn {
+    background: var(--ink-100);
+    color: var(--ink-700);
+    border: 1px solid var(--ink-200);
+    border-radius: var(--radius-pill);
+    transition: background var(--transition), color var(--transition);
+  }
+  .remove-col-btn:hover {
+    background: var(--danger-bg);
+    color: var(--danger-fg);
+  }
+</style>
