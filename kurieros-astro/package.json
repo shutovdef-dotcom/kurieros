@@ -8,7 +8,7 @@
   "scripts": {
     "generate": "astro sync",
     "pregenerate": "npm run generate:data",
-    "generate:data": "npm run i18n:extract && npm run i18n:assemble && npm run i18n:test && npm run i18n:validate-keys && concurrently -n trans,reviews,llms 'npm:generate:vacancy-translations' 'npm:generate:reviews' 'npm:generate:llms'",
+    "generate:data": "npm run i18n:extract && npm run i18n:assemble && npm run i18n:test && npm run i18n:validate-keys && concurrently -n trans,reviews,llms 'npm:generate:vacancy-translations' 'npm:generate:reviews' 'npm:generate:llms' && npm run emit:empty-listings",
     "i18n:extract": "tsx scripts/i18n/extract-clauses.ts",
     "i18n:analyze": "tsx scripts/i18n/analyze-tokens.ts",
     "i18n:assemble": "tsx scripts/i18n/assemble-translations.ts",
@@ -17,6 +17,7 @@
     "generate:vacancy-translations": "tsx scripts/generate-vacancy-translations.ts",
     "generate:reviews": "tsx scripts/generate-reviews.ts",
     "generate:llms": "node scripts/generate-llms.mjs",
+    "emit:empty-listings": "tsx scripts/emit-empty-listings.ts",
     "predev": "npm run generate:data",
     "dev": "astro dev",
     "prebuild": "npm run generate:data",
