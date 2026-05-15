@@ -33,7 +33,16 @@ const vacancyTranslationsBase = '/vacancy-translations';
 // the cross-page `force-cache` strategy. The Vite-injected constant gives
 // every page the same compile-time stamp; a redeploy mints a fresh value.
 declare const __BUILD_TIMESTAMP__: string;
-const vacancyTranslationsVersion = __BUILD_TIMESTAMP__;
+// Runtime guard: if `vite.define` was misconfigured or omitted (local
+// hot-reload edge cases, partial dev server start, etc.), the constant
+// may interpolate as the literal string `"undefined"` or be missing
+// entirely. Fall back to a per-process stamp so URLs stay valid; log
+// loudly because a missing build version means cross-page cache
+// invalidation is broken (every page gets a different `?v=`).
+const vacancyTranslationsVersion = (typeof __BUILD_TIMESTAMP__ === 'string'
+	&& __BUILD_TIMESTAMP__ && __BUILD_TIMESTAMP__ !== 'undefined')
+	? __BUILD_TIMESTAMP__
+	: (() => { console.error('[BaseLayout] __BUILD_TIMESTAMP__ not injected'); return String(Date.now()); })();
 
 interface Props {
 	title?: string;
@@ -495,15 +504,28 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 						}
 					}
 
-					// One-time cleanup: drop any sessionStorage entries from prior
-					// build versions so quota usage doesn't bloat across deploys.
+					// One-time per-build cleanup: drop any sessionStorage entries
+					// from prior build versions so quota usage doesn't bloat across
+					// deploys. The IIFE runs on every full-page navigation (SSG +
+					// no SPA shell), but the cleanup loop should only do work once
+					// per build version per tab. A sentinel key records the build
+					// version we already cleaned for; subsequent navigations within
+					// the same build short-circuit the linear scan over every
+					// sessionStorage entry.
+					const CLEANUP_SENTINEL_KEY = SESSION_KEY_PREFIX + '__cleanup_for__';
 					try {
-						const currentSuffix = '/' + VACANCY_TRANSLATIONS_VERSION;
-						for (let i = sessionStorage.length - 1; i >= 0; i--) {
-							const key = sessionStorage.key(i);
-							if (key && key.indexOf(SESSION_KEY_PREFIX) === 0 && !key.endsWith(currentSuffix)) {
-								sessionStorage.removeItem(key);
+						const lastCleanedVersion = sessionStorage.getItem(CLEANUP_SENTINEL_KEY);
+						if (lastCleanedVersion !== VACANCY_TRANSLATIONS_VERSION) {
+							const currentSuffix = '/' + VACANCY_TRANSLATIONS_VERSION;
+							for (let i = sessionStorage.length - 1; i >= 0; i--) {
+								const key = sessionStorage.key(i);
+								if (key && key.indexOf(SESSION_KEY_PREFIX) === 0
+									&& key !== CLEANUP_SENTINEL_KEY
+									&& !key.endsWith(currentSuffix)) {
+									sessionStorage.removeItem(key);
+								}
 							}
+							sessionStorage.setItem(CLEANUP_SENTINEL_KEY, VACANCY_TRANSLATIONS_VERSION);
 						}
 					} catch (_) { /* sessionStorage unavailable — nothing to clean */ }
 
@@ -569,6 +591,16 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 				// runtime merger and downstream `applyTranslations` lookups expect.
 				function expandFragment(fragment) {
 					if (!fragment || typeof fragment !== 'object') return {};
+					// Defensive: if the fragment has neither `entries` nor `defaults`
+					// but does have other keys, it's an unexpected shape (schema
+					// drift, partial deploy, or a stale CDN-cached payload). Warn
+					// so the issue surfaces in console rather than silently
+					// returning an empty object and skipping all translations.
+					if (!('entries' in fragment) && !('defaults' in fragment)
+						&& Object.keys(fragment).length > 0) {
+						console.warn('[i18n] expandFragment: unexpected fragment shape',
+							Object.keys(fragment).slice(0, 3));
+					}
 					const defaults = fragment.defaults || {};
 					const entries = fragment.entries || {};
 					const expanded = {};
@@ -650,7 +682,14 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 					// M2: shell-UI dict is RU-only, so non-RU lang slots start
 					// empty — fall back to the RU shell dict so translated entries
 					// merge atop the same baseline.
-					const langDictionary = translations[lang] || translations[DEFAULT_LANG] || {};
+					// L6: when falling back to RU, deep-clone so nested objects
+					// (e.g. `vacancies.<id>`) are not aliased across `translations.ru`
+					// and `translations[lang]`. Without the clone, a later
+					// `Object.assign(merged, ...)` could mutate RU entries via a
+					// shared reference.
+					const langDictionary = translations[lang]
+						? translations[lang]
+						: structuredClone(translations[DEFAULT_LANG] ?? {});
 					const currentVacancies = langDictionary.vacancies || {};
 					const merged = { ...currentVacancies };
 					for (const fragment of fragments) {

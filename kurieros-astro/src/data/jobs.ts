@@ -410,6 +410,29 @@ const getCitizenshipLabel = (value: string, language: SupportedLanguage) => {
   return value;
 };
 
+/**
+ * Derives a stable numeric Job ID from `(source, offer)`.
+ *
+ * Formula: `source.id × 100000 + cityPart × 10 + transport`
+ *
+ * Expected component ranges:
+ *   - `source.id`              — hardcoded primary key (1..19 currently),
+ *                                contributing strides of 100000.
+ *   - `cityPart` (top-15)      — 1..15 (CITY_CODES table above),
+ *                                producing the 10..150 band when × 10.
+ *   - `cityPart` (non-top-15)  — 100..9999 (fnv1a-derived slot, see
+ *                                NON_TOP15_CITY_PART above), producing
+ *                                the 1000..99990 band when × 10.
+ *   - `transport`              — 1..4 (TRANSPORT_ID_PARTS: foot=1,
+ *                                bicycle=2, auto=3, remote=4).
+ *
+ * All resulting IDs fit comfortably in INT32. Uniqueness, range, and
+ * sort-independence invariants are pinned by `tests/jobIds.test.ts`.
+ *
+ * Stability contract: NEVER change `source.id`, the CITY_CODES table,
+ * or `TRANSPORT_ID_PARTS` once shipped — bookmarks, GA4 events, and
+ * the `compareList` localStorage all reference these IDs forever.
+ */
 const getGeneratedId = (source: VacancySource, offer: VacancyOffer) => {
   const topCode = cityCodes.get(offer.city);
   const cityPart = topCode ?? NON_TOP15_CITY_PART.get(slugifyCity(offer.city));

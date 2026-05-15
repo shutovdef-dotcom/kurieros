@@ -1,18 +1,17 @@
 /**
  * Aggregator entry-point for the partner vacancy catalogue.
  *
- * This file is intentionally thin: per-partner data and helpers live
- * under `./sources/<partner>.ts` (Yandex Eda, Купер, Т-Банк, Efin,
- * Альфа-Банк, Бургер Кинг). Ozon offers come from `./ozonOffers.ts`,
- * which is a separate generator module driven by the live referral
- * form catalogue. The Ozon hourly-rate post-processor lives in
+ * Per-partner data and helpers live under `./sources/<partner>.ts`
+ * (yandex-eda, kuper, tbank, efin, alfa-bank, burger-king). Ozon comes
+ * from `./ozonOffers.ts`. Hourly-rate post-processor lives in
  * `./sources/ozon-hourly-fallback.ts`.
  *
- * Order matters: the index of each source in `initialSources`
- * implicitly seeds per-source ID counters in `jobs.ts`, so any
- * reordering shifts every downstream Job ID. Keep this list in
- * lock-step with the historical order (see PR #149 for the
- * decomposition rationale).
+ * ID stability invariant: each `VacancySource.id` is a hardcoded
+ * numeric primary key (1..19 currently) used by `getGeneratedId`
+ * in `jobs.ts` to derive every Job ID. NEVER reuse, renumber, or
+ * remove an existing `id` — external bookmarks, GA4 events, and
+ * the `compareList` localStorage all reference these IDs forever.
+ * Order of sources in this array has no effect on Job IDs.
  */
 import type { VacancySource } from './vacancyTypes';
 import { yandexEdaSource } from './sources/yandex-eda';

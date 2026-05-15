@@ -17,9 +17,13 @@ import type { TransportMode, VacancyOffer } from '../vacancyTypes';
 export const UPDATED_AT = '2026-04-17';
 
 /**
- * Used by Yandex Eda (offer construction) and indirectly by Kuper
- * (shift-to-hourly fallback). Higher priority transport modes win
- * the foot/bicycle/auto race within a single source.
+ * Per-transport tie-breaker added to each offer's `priority` so that,
+ * within a single source × city, higher-priority transport modes
+ * (auto > bicycle > foot, remote highest) sort first.
+ *
+ * Imported directly by four partner modules — yandex-eda, kuper,
+ * tbank, and efin — each adding `TRANSPORT_PRIORITY[transport]` to its
+ * own `<base> - cityIndex * <step>` priority formula.
  */
 export const TRANSPORT_PRIORITY: Record<TransportMode, number> = {
   foot: 1,

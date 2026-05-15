@@ -23,14 +23,16 @@ const applyExternal = !isLeadFormApply && job.applyLink && job.applyLink !== '#'
 // helper is the only place this lives. Audit ref: v2 H4.
 const { salaryMaxNumeric, applyLabel } = getApplyCta(job);
 const applyEmploymentText = job.details?.employment_type ?? '';
-// QW13 demo — surface a prominent «Без опыта» badge.
-// Trigger combines two signals so it actually fires on real data:
-//   1) Explicit `'Без опыта'` in labels (currently dormant — no
-//      vacancySource sets it, but kept for forward-compat).
-//   2) `'16plus'` in tags — deterministic entry-level marker derived
-//      in jobs.ts:`getAgeTag(ageFrom)` for vacancies that accept
-//      16-year-olds (the truly low-barrier subset).
-// The `data-no-experience` attr lets demo CSS key off only the
+// Surface a prominent «Без опыта» badge on entry-level vacancies.
+// Trigger combines two signals so it fires on real data:
+//   1) Explicit `'Без опыта'` in labels — DORMANT: no vacancySource
+//      currently emits this label. Kept as a forward-compat hook in
+//      case a partner adds it; remove if it stays unused long-term.
+//   2) `'16plus'` in tags — the ACTIVE trigger: a deterministic
+//      entry-level marker derived in jobs.ts:`getAgeTag(ageFrom)` for
+//      vacancies that accept 16-year-olds (the truly low-barrier
+//      subset). This is what actually drives the badge in production.
+// The `data-no-experience` attr lets the CSS below key off only the
 // vacancies that genuinely qualify.
 const hasNoExperience = (Array.isArray(job.labels) && job.labels.includes('Без опыта'))
 	|| (Array.isArray(job.tags) && job.tags.includes('16plus'));
@@ -174,9 +176,9 @@ const hasNoExperience = (Array.isArray(job.labels) && job.labels.includes('Бе�
 		box-shadow: var(--shadow-sm);
 	}
 
-	/* QW13 — «Без опыта» green pill rendered inline inside the «Опыт»
-	   column instead of a separate row, so entry-level vacancies don't
-	   stretch the card vertically vs. the «См. вакансию» fallback. */
+	/* «Без опыта» green pill rendered inline inside the «Опыт» column
+	   instead of a separate row, so entry-level vacancies don't stretch
+	   the card vertically vs. the «См. вакансию» fallback. */
 	.job-column-noexp {
 		display: inline-flex;
 		align-items: center;

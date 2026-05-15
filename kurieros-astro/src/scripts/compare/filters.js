@@ -16,7 +16,8 @@
 //   - `ensureFullCatalog` (fn)             — defined in catalog-loader.js
 //   - `renderComparisonTable` (fn)         — defined in render.js
 //   - `renderCompanyLinks` (fn)            — defined in render.js
-//   - `renderSelectedComparison` (fn)      — defined in init.js
+//   - `renderSelectedComparison` (fn)      — defined inline in
+//     compare.astro (DOMContentLoaded body)
 //
 // UI cap: 12 columns. We slice matched results to 12 for the visible grid
 // but display the full match count in the status line so users know whether
