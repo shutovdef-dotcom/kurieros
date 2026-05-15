@@ -53,14 +53,16 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     expect(sample).toHaveProperty('entries');
   });
 
-  it('detail pages have a fragment preload hint', () => {
+  it('detail pages do NOT preload a vacancy-translations fragment (audit H1)', () => {
+    // The hardcoded RU preload was useless: RU visitors short-circuit before
+    // consuming it, non-RU visitors need their own language fragment.
+    // Removed in audit v2 H1 — this test guards against accidental re-add.
     const detailHtml = join(DIST_DIR, 'v', 'yandex-eda-courier-moskva-foot', 'index.html');
     if (!existsSync(detailHtml)) {
       throw new Error(`expected detail page missing: ${detailHtml}`);
     }
     const html = readFileSync(detailHtml, 'utf8');
-    expect(html).toContain('rel="preload"');
-    expect(html).toContain('vacancy-translations/ru/yandex-eda-courier.json');
+    expect(html).not.toMatch(/rel="preload"\s+as="fetch"\s+href="\/vacancy-translations\//);
   });
 
   it('listing pages do NOT preload a vacancy-translations fragment', () => {
