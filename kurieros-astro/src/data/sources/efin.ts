@@ -4,6 +4,7 @@
  * Bilateral pay model: monthly minimum guarantee + per-meeting fee.
  * Both numbers come from `efin-vacancies.json` per city.
  */
+import { z } from 'zod';
 import efinVacanciesSource from '../efin-vacancies.json';
 import { slugifyCity } from '../../utils/cities';
 import type {
@@ -23,27 +24,41 @@ const EFIN_APPLY_LINK = EFIN_APPLY;
 const EFIN_CITIZENSHIP = 'РФ';
 const EFIN_EMPLOYMENT_FORMATS = ['self_employed'] satisfies EmploymentFormat[];
 
-// === Types ===========================================================
+// === Schema ==========================================================
 
-type EfinOfferSource = {
-  city: string;
-  transport: 'foot' | 'auto';
-  monthlyFromRub: number;
-  meetingFeeRub: number;
-  schedule?: string;
-  workTime?: string;
-  statusUpdatedAt?: string;
-  region?: string;
-  area?: string;
-};
+/**
+ * Per-city offer rows. `schedule`, `workTime`, `statusUpdatedAt`,
+ * `region`, `area` are kept optional even though production data
+ * currently always populates them — `buildEfinSchedule` already
+ * handles missing values, and keeping them optional matches the
+ * defensive coding downstream (no false-positive build breaks if
+ * the scraper omits one of the trailing columns).
+ *
+ * `monthlyFromRub` / `meetingFeeRub` accept zero (will fall back to
+ * defaults in `buildEfinPay`) but must be finite, never NaN.
+ */
+const efinOfferSchema = z.object({
+  city: z.string().min(1),
+  transport: z.enum(['foot', 'auto']),
+  monthlyFromRub: z.number().finite(),
+  meetingFeeRub: z.number().finite(),
+  schedule: z.string().optional(),
+  workTime: z.string().optional(),
+  statusUpdatedAt: z.string().optional(),
+  region: z.string().optional(),
+  area: z.string().optional(),
+});
 
-type EfinVacanciesData = {
-  sourceUrl: string;
-  updatedAt: string;
-  offers: EfinOfferSource[];
-};
+export const EfinVacanciesSchema = z.object({
+  sourceUrl: z.string().url(),
+  updatedAt: z.string().min(1),
+  offers: z.array(efinOfferSchema),
+});
 
-const efinVacancies = efinVacanciesSource as EfinVacanciesData;
+export type EfinVacanciesData = z.infer<typeof EfinVacanciesSchema>;
+type EfinOfferSource = z.infer<typeof efinOfferSchema>;
+
+const efinVacancies: EfinVacanciesData = EfinVacanciesSchema.parse(efinVacanciesSource);
 
 // === Helpers =========================================================
 
