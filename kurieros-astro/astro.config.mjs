@@ -1,6 +1,8 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
-import { getEmptyListingUrls } from './src/utils/listingSlugs';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
 
 const site = process.env.SITE_URL || 'https://kurerok.ru';
 const base = process.env.SITE_BASE || '/';
@@ -15,12 +17,33 @@ const base = process.env.SITE_BASE || '/';
 // reuse the same cached fragments. See PR #134 + follow-up fix.
 const buildTimestamp = String(Date.now());
 
-// Pre-compute the set of `/rabota-kurerom-{slug}/` URLs that resolve
-// to ZERO active vacancies. We exclude them from the sitemap (they
-// also get `<meta name="robots" content="noindex, follow">` at the
-// page level — see src/pages/[slug].astro). Avoids thin-content
-// penalties from Google for Jobs and Yandex.
-const emptyListingUrls = getEmptyListingUrls(site);
+// Load the pre-computed list of `/rabota-kurerom-{slug}/` URLs that resolve
+// to ZERO active vacancies. We exclude them from the sitemap (they also get
+// `<meta name="robots" content="noindex, follow">` at the page level — see
+// src/pages/[slug].astro). Avoids thin-content penalties from Google for
+// Jobs and Yandex.
+//
+// PRIOR ART (M10): we used to import `getEmptyListingUrls` from
+// `./src/utils/listingSlugs.ts`, which transitively pulled `src/data/jobs.ts`
+// and the 11 generated `vacancy-translations-source/<lang>.json` files. That
+// made `astro build` and `astro dev` hard-fail with cryptic ENOENT errors
+// when those JSONs weren't present. Now `npm run generate:data` writes
+// `public/empty-listings.json` (see scripts/emit-empty-listings.ts) and we
+// just read it here — sync, no data-layer imports, fast cold start.
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const emptyListingsPath = resolve(__dirname, 'public/empty-listings.json');
+
+let emptyListings = [];
+try {
+  emptyListings = JSON.parse(readFileSync(emptyListingsPath, 'utf8'));
+} catch (err) {
+  console.error(
+    `\n⚠️  Failed to read ${emptyListingsPath}.\n` +
+    `   Hint: Run 'npm run generate:data' before 'astro build' or 'astro dev'.\n` +
+    `   Continuing with empty exclusion list (sitemap may include URLs that should be excluded).\n`
+  );
+}
+const emptyListingUrls = new Set(emptyListings);
 
 export default defineConfig({
   site,
