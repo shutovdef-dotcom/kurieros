@@ -74,7 +74,7 @@ export type OzonLeadFormMeta = {
   /** UUID of the hire location (Ozon's hireObjectUUID). */
   hireObjectUUID: string;
   /** Human-readable address — used only for display, not submission. */
-  hireObjectLabel?: string;
+  hireObjectLabel: string;
 };
 
 export type VacancyOffer = {

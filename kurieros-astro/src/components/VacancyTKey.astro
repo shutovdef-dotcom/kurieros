@@ -1,0 +1,21 @@
+---
+// Typed wrapper for emitting data-t="vacancies.<jobId>.<field>" attributes.
+// Using this component documents the contract that any vacancy-translation
+// key must be co-emitted with a data-vacancy-source-slug ancestor (see
+// JobCard.astro and BaseLayout's i18n manager).
+interface Props {
+  jobId: number;
+  field:
+    | 'title' | 'company' | 'salary' | 'location' | 'shortDescription' | 'description'
+    | 'page_title' | 'page_description' | 'updated_date'
+    | 'details_schedule' | 'details_education' | 'details_payment_freq'
+    | 'details_age' | 'details_citizenship' | 'details_rate'
+    | 'details_employment_type' | 'details_transport_provision';
+  fallback: string;
+  as?: string;
+  class?: string;
+}
+const { jobId, field, fallback, as = 'span', class: className } = Astro.props;
+const Tag = as as any;
+---
+<Tag data-t={`vacancies.${jobId}.${field}`} class={className}>{fallback}</Tag>
