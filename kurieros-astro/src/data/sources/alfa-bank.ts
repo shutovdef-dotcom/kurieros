@@ -8,11 +8,11 @@
  * boilerplate ones (auto/no-auto / office / remote tags) so they
  * don't leak into requirements/benefits overrides as duplicate noise.
  */
+import { z } from 'zod';
 import alfaBankVacanciesSource from '../alfa-bank-vacancies.json';
 import { slugifyCity } from '../../utils/cities';
 import type {
   EmploymentFormat,
-  TransportMode,
   VacancyContent,
   VacancyOffer,
   VacancySource,
@@ -28,33 +28,53 @@ const ALFA_BANK_APPLY_LINK = ALFA_BANK_APPLY;
 const ALFA_BANK_CITIZENSHIP = 'РФ / Беларусь / Казахстан';
 const ALFA_BANK_EMPLOYMENT_FORMATS = ['official'] satisfies EmploymentFormat[];
 
-// === Types ===========================================================
+// === Schema ==========================================================
 
-type AlfaBankOfferSource = {
-  city: string;
-  transport: TransportMode;
-  monthlyFromRub: number;
-  sourceSheets?: string[];
-  hasZeroDemandRows?: boolean;
-  maxDemand?: number;
-  schedule?: string;
-  requirement?: string;
-  extraInfo?: string;
-  updatedAt?: string;
-};
+/**
+ * Per-city offer rows. The JSON's `transport` discriminator only ever
+ * takes `foot`, `bicycle`, or `auto` for Alfa-Bank (no remote role),
+ * so the schema narrows the wider `TransportMode` union accordingly.
+ *
+ * `schedule`, `requirement`, `extraInfo` are genuinely optional — the
+ * scraper omits the column for rows that don't have a value (observed:
+ * ~9% rows missing `requirement`, ~6% missing `extraInfo`, ~1% missing
+ * `schedule`). The downstream `buildAlfaBankSchedule` /
+ * `buildAlfaBank{Requirements,Benefits}Override` helpers all handle
+ * the absent case explicitly.
+ */
+const alfaBankOfferSchema = z.object({
+  city: z.string().min(1),
+  transport: z.enum(['foot', 'bicycle', 'auto']),
+  monthlyFromRub: z.number().finite(),
+  sourceSheets: z.array(z.string()).optional(),
+  hasZeroDemandRows: z.boolean().optional(),
+  maxDemand: z.number().finite().optional(),
+  schedule: z.string().optional(),
+  requirement: z.string().optional(),
+  extraInfo: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
 
-type AlfaBankVacanciesData = {
-  sourceUrl: string;
-  descriptionSourceUrl: string;
-  updatedAt: string;
-  salaryMonthlyFromRub: number;
-  cityCount: number;
-  offerCount: number;
-  transportRule: string;
-  offers: AlfaBankOfferSource[];
-};
+/**
+ * The JSON also ships informational top-level fields (`auditRule`,
+ * `cities`) and may grow more — we accept extra unknown keys via
+ * `.loose()` so adding diagnostics never breaks the build.
+ */
+export const AlfaBankVacanciesSchema = z.looseObject({
+  sourceUrl: z.string().url(),
+  descriptionSourceUrl: z.string().url(),
+  updatedAt: z.string().min(1),
+  salaryMonthlyFromRub: z.number().finite().positive(),
+  cityCount: z.number().int().nonnegative(),
+  offerCount: z.number().int().nonnegative(),
+  transportRule: z.string(),
+  offers: z.array(alfaBankOfferSchema),
+});
 
-const alfaBankVacancies = alfaBankVacanciesSource as AlfaBankVacanciesData;
+export type AlfaBankVacanciesData = z.infer<typeof AlfaBankVacanciesSchema>;
+type AlfaBankOfferSource = z.infer<typeof alfaBankOfferSchema>;
+
+const alfaBankVacancies: AlfaBankVacanciesData = AlfaBankVacanciesSchema.parse(alfaBankVacanciesSource);
 
 // === Helpers =========================================================
 

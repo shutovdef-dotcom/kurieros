@@ -13,6 +13,7 @@
  * other partners on this site which are uniformly always-active) —
  * it preserves the inactive-city carry-over from the partner sheet.
  */
+import { z } from 'zod';
 import burgerKingVacanciesSource from '../burger-king-vacancies.json';
 import { slugifyCity } from '../../utils/cities';
 import type {
@@ -32,27 +33,44 @@ const BURGER_KING_APPLY_LINK = BURGER_KING_APPLY;
 const BURGER_KING_CITIZENSHIP = 'РФ / ЕАЭС';
 const BURGER_KING_EMPLOYMENT_FORMATS = ['official'] satisfies EmploymentFormat[];
 
-// === Types ===========================================================
+// === Schema ==========================================================
 
-type BurgerKingOfferSource = {
-  city: string;
-  monthlyMin: number;
-  monthlyMax: number;
-  isActive: boolean;
-  hiringNeed: number;
-  cityDistricts?: string[];
-};
+/**
+ * Per-city offer rows. `monthlyMin` / `monthlyMax` may legitimately be
+ * zero (the salary scraper writes 0 when no figure is published for a
+ * standby city); `buildBurgerKingPay` falls back to "от 40 000 ₽/мес"
+ * in that case. Must be finite — NaN/Infinity would silently break the
+ * downstream `Math.round` and corrupt thousands of pages.
+ *
+ * `cityDistricts` is currently populated only for Москва (folding the
+ * Бутово / Внуковское / Мосрентген micro-districts back into Москва).
+ */
+const burgerKingOfferSchema = z.object({
+  city: z.string().min(1),
+  monthlyMin: z.number().finite(),
+  monthlyMax: z.number().finite(),
+  isActive: z.boolean(),
+  hiringNeed: z.number().finite().nonnegative(),
+  cityDistricts: z.array(z.string()).optional(),
+});
 
-type BurgerKingVacanciesData = {
-  sourceUrl: string;
-  salarySourceUrl: string;
-  citiesSourceUrl: string;
-  updatedAt: string;
-  notes: string;
-  offers: BurgerKingOfferSource[];
-};
+export const BurgerKingVacanciesSchema = z.object({
+  sourceUrl: z.string().url(),
+  // `salarySourceUrl` is a free-form annotated string in the JSON
+  // (e.g. "https://…/edit (tab «ЗП повара-кассиры»)") — validate as
+  // non-empty rather than URL to match production reality.
+  salarySourceUrl: z.string().min(1),
+  citiesSourceUrl: z.string().url(),
+  updatedAt: z.string().min(1),
+  notes: z.string(),
+  offers: z.array(burgerKingOfferSchema),
+});
 
-const burgerKingVacancies = burgerKingVacanciesSource as BurgerKingVacanciesData;
+export type BurgerKingVacanciesData = z.infer<typeof BurgerKingVacanciesSchema>;
+type BurgerKingOfferSource = z.infer<typeof burgerKingOfferSchema>;
+
+const burgerKingVacancies: BurgerKingVacanciesData =
+  BurgerKingVacanciesSchema.parse(burgerKingVacanciesSource);
 
 // === Helpers =========================================================
 
