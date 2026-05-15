@@ -4,8 +4,9 @@ import { slugifyCompany } from '../../utils/companies';
 
 // Slim JSON endpoint for /compare/ page client-side lookups.
 // Replaces inline `define:vars={{ allCompareJobs }}` (~3.9 MB HTML)
-// with a separately-cached fetch (~1.5 MB gzipped JSON, fetched only
-// when user has saved compareList in localStorage).
+// with a separately-cached fetch (~147 KB gzipped (3.7 MB uncompressed),
+// fetched only when user interacts with city/transport filter on the
+// compare page).
 
 const TRANSPORT_LABELS: Record<string, string> = {
 	auto: 'Авто',
