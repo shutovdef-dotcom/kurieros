@@ -83,10 +83,23 @@
         : `Показано ${display.length} вакансий по фильтру`);
     }
 
-    cityFilter?.addEventListener('change', applyServerFilters);
-    transportFilter?.addEventListener('change', applyServerFilters);
+    // Wrap async applyServerFilters() so unhandled rejections (e.g. network
+    // failure inside ensureFullCatalog, or any other throw) surface a
+    // user-visible message instead of leaving the filter UI silently stuck.
+    // Every event listener that triggers a filter run MUST go through this
+    // wrapper — passing `applyServerFilters` directly to addEventListener
+    // returns a rejected promise the runtime quietly discards.
+    function safeApplyFilters() {
+      applyServerFilters().catch((err) => {
+        console.error('[compare] applyServerFilters failed:', err);
+        setStatus('Ошибка загрузки — попробуйте обновить страницу');
+      });
+    }
+
+    cityFilter?.addEventListener('change', safeApplyFilters);
+    transportFilter?.addEventListener('change', safeApplyFilters);
     filterReset?.addEventListener('click', () => {
       if (cityFilter) cityFilter.value = '';
       if (transportFilter) transportFilter.value = '';
-      applyServerFilters();
+      safeApplyFilters();
     });
