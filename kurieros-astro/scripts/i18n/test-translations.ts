@@ -78,9 +78,33 @@ const ALLOWED_CYRILLIC_RUNS = new Set<string>([
   'Купер', 'Яндекс', 'Еда', 'Про',
 ]);
 
-const ruClauses = JSON.parse(
-  await readFile(resolve(i18nDir, 'ru-clauses.json'), 'utf8'),
-) as Record<string, string>;
+/**
+ * Read+parse a JSON file with a clear, actionable error message on failure.
+ * Without this, ENOENT bubbles up as a raw stack trace with no hint about
+ * which prerequisite step the operator forgot to run.
+ */
+async function loadJsonOrThrow<T>(path: string, hint: string): Promise<T> {
+  try {
+    const content = await readFile(path, 'utf8');
+    return JSON.parse(content) as T;
+  } catch (err) {
+    const isENoEnt =
+      err instanceof Error &&
+      'code' in err &&
+      (err as NodeJS.ErrnoException).code === 'ENOENT';
+    const detail = err instanceof Error ? err.message : String(err);
+    throw new Error(
+      `Failed to read ${path}.\n` +
+        (isENoEnt ? `Hint: ${hint}\n` : '') +
+        `Underlying error: ${detail}`,
+    );
+  }
+}
+
+const ruClauses = await loadJsonOrThrow<Record<string, string>>(
+  resolve(i18nDir, 'ru-clauses.json'),
+  "Run 'npm run i18n:extract' first to generate ru-clauses.json from src/data/vacancies.ts.",
+);
 
 const langDicts: Partial<Record<SupportedLanguage, Record<string, string>>> = {};
 for (const lang of SUPPORTED_LANGUAGES) {
