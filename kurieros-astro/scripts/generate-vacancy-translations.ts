@@ -1,7 +1,8 @@
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildJobTranslationsBySource, vacancySources } from '../src/data/jobs';
+import { buildJobTranslationsBySource } from '../src/data/jobs';
+import { vacancySources } from '../src/data/vacancies';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../src/data/translations';
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');

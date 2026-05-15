@@ -555,5 +555,4 @@ export const buildJobTranslationsBySource = (
 
 const jobsData = buildJobsFromVacancies(vacancySources);
 
-export { vacancySources };
 export default jobsData;

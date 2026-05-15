@@ -3,19 +3,28 @@
 // Using this component documents the contract that any vacancy-translation
 // key must be co-emitted with a data-vacancy-source-slug ancestor (see
 // JobCard.astro and BaseLayout's i18n manager).
+//
+// `field` accepts the canonical static-name union plus indexed variants
+// (`label_${n}`, `req_${n}`, `doc_${n}`, `ben_${n}`) used for repeated
+// list items where the index is the array position.
+type StaticField =
+  | 'title' | 'company' | 'salary' | 'location' | 'shortDescription' | 'description'
+  | 'page_title' | 'page_description' | 'updated_date'
+  | 'details_schedule' | 'details_education' | 'details_payment_freq'
+  | 'details_age' | 'details_citizenship' | 'details_rate'
+  | 'details_employment_type' | 'details_transport_provision'
+  | 'details_medical_book';
+type IndexedField =
+  | `label_${number}` | `req_${number}` | `doc_${number}` | `ben_${number}`;
 interface Props {
   jobId: number;
-  field:
-    | 'title' | 'company' | 'salary' | 'location' | 'shortDescription' | 'description'
-    | 'page_title' | 'page_description' | 'updated_date'
-    | 'details_schedule' | 'details_education' | 'details_payment_freq'
-    | 'details_age' | 'details_citizenship' | 'details_rate'
-    | 'details_employment_type' | 'details_transport_provision';
+  field: StaticField | IndexedField;
   fallback: string;
   as?: string;
   class?: string;
+  href?: string;
 }
-const { jobId, field, fallback, as = 'span', class: className } = Astro.props;
+const { jobId, field, fallback, as = 'span', class: className, href } = Astro.props;
 const Tag = as as any;
 ---
-<Tag data-t={`vacancies.${jobId}.${field}`} class={className}>{fallback}</Tag>
+<Tag data-t={`vacancies.${jobId}.${field}`} class={className} href={href}>{fallback}</Tag>
