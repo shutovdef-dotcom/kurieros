@@ -248,6 +248,15 @@ const pageSchemaGraph = [
 		document.addEventListener('DOMContentLoaded', async () => {
 			const STORAGE_KEY = 'kurieros-selected-city';
 			const DEFAULT_CITY = 'Москва';
+			// Safari Private Browsing + restricted WKWebViews throw a SecurityError
+			// on any localStorage access. Wrap reads/writes so the whole
+			// DOMContentLoaded callback survives instead of aborting. Pattern
+			// matches BaseLayout.astro:460-462 (audit v2 C1).
+			const safeStorage = {
+				get(key) { try { return localStorage.getItem(key); } catch (_) { return null; } },
+				set(key, value) { try { localStorage.setItem(key, value); } catch (_) { /* ignore */ } },
+				remove(key) { try { localStorage.removeItem(key); } catch (_) { /* ignore */ } },
+			};
 			const citySelect = document.getElementById('city-select');
 			const cityPageLink = document.getElementById('city-page-link');
 
@@ -276,9 +285,9 @@ const pageSchemaGraph = [
 				updateCityLink(normalizedCity);
 
 				if (normalizedCity) {
-					localStorage.setItem(STORAGE_KEY, normalizedCity);
+					safeStorage.set(STORAGE_KEY, normalizedCity);
 				} else {
-					localStorage.removeItem(STORAGE_KEY);
+					safeStorage.remove(STORAGE_KEY);
 				}
 
 				window.dispatchEvent(new CustomEvent('kurieros:city-selected', {
@@ -433,7 +442,7 @@ const pageSchemaGraph = [
 						const fallback = getFallbackCity();
 						if (fallback) applyCity(fallback, 'default');
 					}
-					try { localStorage.setItem(GEO_BANNER_DISMISSED_KEY, '1'); } catch (_) {}
+					safeStorage.set(GEO_BANNER_DISMISSED_KEY, '1');
 					document.body.classList.remove('geo-banner-open');
 					modal.remove();
 					if (typeof window.gtag === 'function') {
@@ -485,8 +494,8 @@ const pageSchemaGraph = [
 			// still `[]` — in the latter case the flow naturally no-ops.
 			await cityIndexReady;
 
-			const savedCity = localStorage.getItem(STORAGE_KEY);
-			const geoBannerDismissed = localStorage.getItem(GEO_BANNER_DISMISSED_KEY) === '1';
+			const savedCity = safeStorage.get(STORAGE_KEY);
+			const geoBannerDismissed = safeStorage.get(GEO_BANNER_DISMISSED_KEY) === '1';
 			if (savedCity && availableCities.includes(savedCity)) {
 				applyCity(savedCity, 'saved');
 			} else if (geoBannerDismissed) {
