@@ -25,6 +25,9 @@
     "preview": "astro preview",
     "astro": "astro",
     "typecheck": "astro check",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "local:build": "./scripts/build-local.sh",
     "local:preview": "./scripts/preview-local.sh",
     "local:dev": "./scripts/dev-local.sh"
@@ -35,8 +38,10 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
+    "@vitest/coverage-v8": "^4.1.6",
     "concurrently": "^9.2.1",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.6"
   }
 }
