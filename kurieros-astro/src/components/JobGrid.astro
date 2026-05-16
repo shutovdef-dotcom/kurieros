@@ -786,11 +786,18 @@ const hasVacancies = jobsData.length > 0;
 			grid.innerHTML = html;
 		}
 
-		// Fetch the dedicated city page (/rabota-kurerom-{slug}/) and
-		// clone its already-rendered .jobs-grid children via the DOM API
+		// Fetch the dedicated city-grid fragment endpoint
+		// (/api/grid/{slug}/ — audit v2 M14) and clone its
+		// already-rendered .jobs-grid children via the DOM API
 		// (`swapGridContent`) — preserves Astro scoped styles
 		// (data-astro-cid-*) and JobCard markup without duplicating the
 		// template in JS, and without the XSS surface of `innerHTML`.
+		//
+		// The fragment endpoint emits ONLY the `#jobs-grid` element
+		// (server-rendered with the same <JobCard> component), so the
+		// city switch downloads ~7 KB gzip instead of the ~67 KB full
+		// `/rabota-kurerom-{slug}/` page — ~60 KB of nav/hero/footer/
+		// CSS/scripts that the old DOMParser path parsed and discarded.
 		async function renderJobsForCity(citySlug, cityName) {
 			if (!grid) return;
 			if (!citySlug) {
@@ -813,7 +820,11 @@ const hasVacancies = jobsData.length > 0;
 					// uses HTTP cache via conditional GET (If-None-Match /
 					// If-Modified-Since → 304 fast path), but doesn't serve
 					// stale content after a site re-deploy.
-					const res = await fetch(`/rabota-kurerom-${citySlug}/`, { cache: 'no-cache' });
+					//
+					// M14: hits `/api/grid/{slug}/` — the dedicated fragment
+					// endpoint (just the `#jobs-grid` markup, ~7 KB gzip),
+					// not the full `/rabota-kurerom-{slug}/` page (~67 KB).
+					const res = await fetch(`/api/grid/${citySlug}/`, { cache: 'no-cache' });
 					if (!res.ok) throw new Error('HTTP ' + res.status);
 					html = await res.text();
 					cityCache.set(citySlug, html);
@@ -1191,16 +1202,19 @@ const hasVacancies = jobsData.length > 0;
 
 		function prefetchOnIdle() {
 			if (!shouldPrefetch()) return;
-			const targets = getTargets().slice(0, 3); // максимум 3 × ~400KB = ~1.2MB
+			const targets = getTargets().slice(0, 3); // максимум 3 × ~7KB gzip ≈ 21KB
 
 			const idle = window.requestIdleCallback || function (cb) { return setTimeout(cb, 1500); };
 			idle(function () {
 				targets.forEach(function (slug) {
+					// M14: прогреваем `/api/grid/{slug}/` — тот же лёгкий
+					// fragment-эндпоинт, что и `renderJobsForCity` фетчит при
+					// выборе города (раньше качали полную ~67 KB страницу).
 					// `cache: 'no-cache'` — браузер ставит response в кэш с
 					// валидацией. Когда пользователь выберет город,
 					// renderJobsForCity тоже использует 'no-cache' →
 					// условный GET → 304 → instant подмена грида.
-					fetch('/rabota-kurerom-' + slug + '/', {
+					fetch('/api/grid/' + slug + '/', {
 						cache: 'no-cache',
 						credentials: 'same-origin'
 					}).catch(function () { /* 404 на неизвестный slug — ОК */ });

@@ -1,0 +1,102 @@
+---
+import JobCard from '../../../components/JobCard.astro';
+import jobsData from '../../../data/jobs';
+import { getCitiesFromJobs } from '../../../utils/cities';
+import { buildJobsByCityMap, getCityJobsFromMap } from '../../../utils/jobFilters';
+
+// === City-grid fragment endpoint (audit v2 M14) ======================
+//
+// Prerendered HTML fragment that emits ONLY the `#jobs-grid` markup for
+// a single city — no BaseLayout, no nav/hero/footer, no inlined CSS,
+// no page scripts.
+//
+// WHY THIS EXISTS
+// `JobGrid.astro`'s `renderJobsForCity()` used to hot-swap the listing
+// on city change by fetching the WHOLE `/rabota-kurerom-<city>/` page
+// (~67 KB gzip) and `DOMParser`-extracting its `#jobs-grid` node. Of
+// that 67 KB only ~7 KB is the job-card markup it actually keeps — the
+// other ~60 KB (BaseLayout chrome + ~12 KB inlined CSS + ~43 KB inline
+// scripts) is downloaded and discarded on every switch. This endpoint
+// serves just the ~7 KB fragment.
+//
+// SINGLE SOURCE OF TRUTH
+// The fragment is server-rendered with the SAME `<JobCard>` component
+// the full listing page uses, so the (complex, ~566-LOC) card markup
+// is never duplicated in client JS. The slicing below mirrors
+// `JobGrid.astro` in its `limit=24, revealable` mode exactly:
+//   • first 24 matched jobs → visible `.job-card`s
+//   • the remainder         → `<template class="jobs-grid-overflow">`
+//   • zero matches          → `.no-results` block
+//   • `#jobs-grid` carries `data-overflow-count` + `data-batch-size`
+// so the client's `swapGridContent` whitelist-clone (PR #174) and the
+// C2 «reveal more» logic keep working unchanged after a hot-swap.
+//
+// CONSUMER: `src/components/JobGrid.astro` → `renderJobsForCity()`.
+// It fetches `/api/grid/<citySlug>/`, parses the fragment, and feeds
+// the `#jobs-grid` element through `swapGridContent` — the same
+// whitelist-clone + event-handler strip used for the old full-page
+// fetch, so the security posture is unchanged.
+
+export const prerender = true;
+
+// One static path per city slug — identical slug set to
+// `/rabota-kurerom-<slug>/` (both derive from `getCitiesFromJobs`),
+// and the same slug set the existing `api/jobs-by-city/[slug]` JSON
+// endpoint already emits.
+export function getStaticPaths() {
+	return getCitiesFromJobs(jobsData).map((city) => ({
+		params: { citySlug: city.slug },
+		props: { cityName: city.name },
+	}));
+}
+
+// Must match `JobGrid.astro`'s `limit={24}` on city listing pages.
+const VISIBLE_LIMIT = 24;
+
+const { cityName } = Astro.props as { cityName: string };
+
+// Reuse the shared city/tag/search predicate via the precomputed
+// per-city Map — same data path `[slug].astro` uses for the full
+// listing page, so this fragment contains exactly the jobs the
+// destination city page would render.
+const jobsByCity = buildJobsByCityMap(jobsData);
+const matchedJobs = getCityJobsFromMap(jobsByCity, cityName);
+
+const visibleJobs = matchedJobs.slice(0, VISIBLE_LIMIT);
+const overflowJobs = matchedJobs.slice(VISIBLE_LIMIT);
+const overflowCount = overflowJobs.length;
+
+// `swapGridContent` (JobGrid.astro) reads these two attributes off the
+// fetched `#jobs-grid` to keep the bottom-nav «Вакансии» reveal-more
+// flow working after a city hot-swap. `batchSize` mirrors
+// `JobGrid.astro`: `limitActive ? limit! : 24` → always 24 here.
+const batchSize = VISIBLE_LIMIT;
+---
+{/*
+  Emit ONLY the `#jobs-grid` element — same id, class and data-* attrs
+  the live grid on a city page carries. `swapGridContent` clones this
+  element's children (whitelisting `.job-card`, the overflow
+  `<template>`, and `.no-results`) into the live grid. No surrounding
+  layout, no <html>/<head> — Astro outputs exactly this markup.
+*/}
+<div
+	class="jobs-grid"
+	id="jobs-grid"
+	data-overflow-count={overflowCount}
+	data-batch-size={batchSize}
+>
+	{visibleJobs.length > 0 ? (
+		visibleJobs.map((job) => <JobCard job={job} />)
+	) : (
+		<div class="no-results">
+			<h3 data-t="jobgrid.empty_title">Ничего не найдено</h3>
+			<p data-t="jobgrid.empty_desc">Попробуйте сбросить фильтры или изменить поиск.</p>
+			<a class="btn-secondary" href="/" data-t="jobgrid.reset">Сбросить всё</a>
+		</div>
+	)}
+	{overflowCount > 0 && (
+		<template class="jobs-grid-overflow">
+			{overflowJobs.map((job) => <JobCard job={job} />)}
+		</template>
+	)}
+</div>
