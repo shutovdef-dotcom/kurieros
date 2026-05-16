@@ -1,14 +1,22 @@
 // Pure helpers for the home-page city selector and geo banner.
 //
-// Extracted from src/pages/index.astro so the city-resolution logic
-// can be unit-tested (audit M13). The DOM wiring still lives inline
-// in the page because the script body needs Astro's `define:vars`
-// for `availableCities` and `cityRouteMap`.
+// CANONICAL, TEST-COVERED TWIN of the city-resolution logic. The home
+// page (src/pages/index.astro) does NOT import this module — it carries
+// an independent, hand-maintained inline copy of the same logic
+// (`safeStorage`, `getFallbackCity`, `normalizeDetectedCity`,
+// `getTzCity`, `TZ_TO_CITY`, and the storage-key literals). The page's
+// `<script>` is `is:inline` (Wave 16 confirmed it cannot be converted
+// to an importing module), so the copy is unavoidable.
+//
+// The two copies MUST be kept in sync. `tests/homeCityParity.test.ts`
+// is a static-source drift-guard: it reads both files as text and
+// fails CI if the shared invariants (TZ map, storage keys, Moscow
+// aliases, default city) diverge. Edit one copy → mirror the other.
 //
 // Safari Private Browsing throws a SecurityError on any localStorage
 // access. The `createSafeStorage` factory wraps reads/writes so the
-// DOMContentLoaded callback survives. Matches the pattern used by
-// BaseLayout.astro:460-462 for the i18n shell.
+// DOMContentLoaded callback survives. Matches the `safeStorage` pattern
+// used by `BaseLayout.astro` for the i18n shell.
 
 const DEFAULT_CITY = 'Москва';
 

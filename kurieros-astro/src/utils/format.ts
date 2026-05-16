@@ -1,10 +1,13 @@
-export const parseSalary = (salary: string) => Number(salary.replace(/[^\d]/g, '')) || 0;
+export const parseSalary = (salary: string): number => Number(salary.replace(/[^\d]/g, '')) || 0;
 
-export const formatMoney = (value: number) => new Intl.NumberFormat('ru-RU').format(value);
+export const formatMoney = (value: number): string => new Intl.NumberFormat('ru-RU').format(value);
 
-export const humanJoin = (items: string[]) => {
+export const humanJoin = (items: string[]): string => {
 	if (items.length === 0) return '';
-	if (items.length === 1) return items[0];
+	// The `.length` guards make these index accesses safe; the non-null
+	// assertions keep the explicit `: string` return type honest even
+	// under a future `noUncheckedIndexedAccess` tightening.
+	if (items.length === 1) return items[0]!;
 	if (items.length === 2) return `${items[0]} и ${items[1]}`;
 	return `${items.slice(0, -1).join(', ')} и ${items.at(-1)}`;
 };
@@ -37,5 +40,5 @@ export const formatRussianPlural = (
 
 // Back-compat — existing callers keep working. Implemented in terms of
 // the generic helper so vacancy plurals stay in sync with the rest.
-export const getVacancyPluralText = (count: number) =>
+export const getVacancyPluralText = (count: number): string =>
 	formatRussianPlural(count, ['вакансия', 'вакансии', 'вакансий']);

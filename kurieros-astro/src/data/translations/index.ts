@@ -7,9 +7,16 @@
 //
 // This module builds a single Russian shell dict from the per-feature
 // files, then projects it into every `SupportedLanguage` slot of the
-// exported `translations` map. Each slot is an independent deep clone
-// so the runtime vacancy-merge step (BaseLayout) can mutate one
-// language's `.vacancies` without leaking into another.
+// exported `translations` map.
+//
+// The 12-slot map is consumed at SSG / validation time, not by
+// BaseLayout's runtime vacancy-merge: post-v2-M2 BaseLayout ships only
+// the RU slot to the browser (`const translations = { ru:
+// allTranslations.ru }`) and builds non-RU slots fresh via its own
+// `structuredClone`. The only live importer of the multi-slot value is
+// `scripts/validate-translation-keys.ts`, which just *reads*
+// `translations.ru`. So the per-language deep clone below no longer has
+// a mutating consumer — it is now defensive/legacy.
 
 import { base } from './base';
 import { navMainTranslations } from './nav-main';
@@ -45,9 +52,10 @@ const composedBase = {
 
 type ShellDict = typeof composedBase;
 
-// Project the single shell dict into every language slot. Deep clone
-// per language so runtime per-language vacancy merges (BaseLayout) stay
-// isolated. The data is ~3 KB, paid once at boot.
+// Project the single shell dict into every language slot. The
+// per-language deep clone is now defensive/legacy — no live consumer
+// mutates a slot (see the header note); kept so any future per-language
+// write cannot alias another slot. The data is ~3 KB, paid once at boot.
 export const translations: Record<SupportedLanguage, ShellDict> = Object.fromEntries(
   SUPPORTED_LANGUAGES.map((language) => [
     language,

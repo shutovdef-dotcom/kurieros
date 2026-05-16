@@ -2,63 +2,15 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
-import { CATEGORIES } from '../../data/constants';
 import jobsData from '../../data/jobs';
 import reviewsData from '../../data/reviews.json';
 import { getCompaniesFromJobs } from '../../utils/companies';
-import { getCitiesFromJobs } from '../../utils/cities';
 import { formatRussianPlural } from '../../utils/format';
 import { buildBreadcrumbSchema } from '../../utils/schema';
 
 const companies = getCompaniesFromJobs(jobsData, reviewsData)
   .sort((a, b) => b.vacancyCount - a.vacancyCount || (b.rating || 0) - (a.rating || 0));
-const cities = getCitiesFromJobs(jobsData)
-  .sort((a, b) => b.vacancyCount - a.vacancyCount)
-  .slice(0, 6)
-  .map((city) => ({
-    name: city.name,
-    href: `/rabota-kurerom-${city.slug}/`,
-    vacancyCount: city.vacancyCount,
-  }));
-const brandFormats = ['na-avto', 'peshkom', 'dlya-studentov', 'podrabotka', 'samokat', 'kuper']
-  .map((slug) => CATEGORIES.find((category) => category.slug === slug))
-  .filter(Boolean)
-  .map((category) => ({
-    name: category!.name,
-    href: `/rabota-kurerom-${category!.slug}/`,
-  }));
-const updatedDate = new Intl.DateTimeFormat('ru-RU', {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-}).format(new Date());
-const topBrands = companies.slice(0, 6).map((company) => company.name);
 const totalVacancies = companies.reduce((sum, company) => sum + company.vacancyCount, 0);
-const topRatedCompany = companies
-  .filter((company) => company.rating)
-  .sort((a, b) => (b.rating || 0) - (a.rating || 0))[0];
-const routeCards = [
-  {
-    title: 'Хочу сначала выбрать бренд',
-    text: 'Сначала посмотреть крупные компании, отзывы и контекст, а потом открывать вакансии.',
-    href: '/companies/',
-  },
-  {
-    title: 'Сначала сравнить условия',
-    text: 'Если важнее не бренд, а выплаты и оформление, лучше начать со сравнения вакансий.',
-    href: '/compare/',
-  },
-  {
-    title: 'Нужна подработка',
-    text: 'Открыть гибкие варианты и посмотреть, какие бренды чаще встречаются в подработке.',
-    href: '/rabota-kurerom-podrabotka/',
-  },
-  {
-    title: 'Есть авто',
-    text: 'Перейти в автоформат и уже там сравнить компании с высоким доходным потолком.',
-    href: '/rabota-kurerom-na-avto/',
-  },
-];
 const companiesTitle = 'Работа курьером по компаниям: бренды и вакансии | КурьерОк';
 const companiesDescription = `Компании с вакансиями курьеров: ${companies.length} брендов и ${totalVacancies} вакансий. Выберите работодателя, сравните бренды и переходите в подходящие карточки.`.slice(0, 170);
 const faqItems = [

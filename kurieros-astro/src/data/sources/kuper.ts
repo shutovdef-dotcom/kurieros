@@ -49,8 +49,10 @@ const KUPER_EMPLOYMENT_FORMATS = ['self_employed'] satisfies EmploymentFormat[];
 
 // Per-city per-12h-shift rate map. Each entry is "City name" → rubles.
 // Must be finite and > 0 to avoid producing NaN hourly pay downstream
-// (see `toHourlyFromShift` below — it divides by 12).
-const cityShiftRateMap = z.record(z.string(), z.number().finite().positive());
+// (see `toHourlyFromShift` below — it divides by 12). Zod v4's
+// `z.number()` already rejects NaN/Infinity, so `.positive()` alone
+// covers the contract.
+const cityShiftRateMap = z.record(z.string(), z.number().positive());
 
 /**
  * Runtime schema for `kuper-pay-rates.json`. The JSON also ships an
@@ -59,7 +61,7 @@ const cityShiftRateMap = z.record(z.string(), z.number().finite().positive());
  * breaks the build.
  */
 export const KuperPayRatesSchema = z.looseObject({
-  sourceUrl: z.string().url(),
+  sourceUrl: z.url(),
   exportedAt: z.string().min(1),
   footAndBikeShiftByCity: cityShiftRateMap,
   autoShiftByCity: cityShiftRateMap,

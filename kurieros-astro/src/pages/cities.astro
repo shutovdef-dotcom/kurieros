@@ -3,9 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import jobsData from '../data/jobs';
-import { CATEGORIES } from '../data/constants';
 import { getCitiesFromJobs } from '../utils/cities';
-import { getCompaniesFromJobs } from '../utils/companies';
 import { formatRussianPlural } from '../utils/format';
 import { buildBreadcrumbSchema } from '../utils/schema';
 
@@ -26,43 +24,16 @@ const cities = getCitiesFromJobs(jobsData)
 	);
 
 const totalVacancies = cities.reduce((sum, city) => sum + city.vacancyCount, 0);
-const topCities = [...cities].sort((a, b) => b.vacancyCount - a.vacancyCount).slice(0, 4);
-const topCompanies = getCompaniesFromJobs(jobsData)
-	.sort((a, b) => b.vacancyCount - a.vacancyCount || b.maxSalary - a.maxSalary)
-	.slice(0, 5);
-const featuredCategories = CATEGORIES.filter((category) =>
-	['na-avto', 'peshkom', 'dlya-studentov', 'podrabotka', 'samokat', 'eda'].includes(category.slug),
-).map((category) => ({
-	name: category.name,
-	href: `/rabota-kurerom-${category.slug}/`,
-}));
-const citySnapshots = topCities.map((city) => {
-	const localJobs = jobsData.filter(
-		(job) => job.location.toLowerCase().includes(city.name.toLowerCase()) || job.location === 'Вся Россия',
-	);
-	const localCompanies = Array.from(new Set(localJobs.map((job) => job.company)));
-	const localFormats = Array.from(
-		new Set(
-			localJobs.flatMap((job) =>
-				job.tags
-					.filter((tag) => ['auto', 'foot', 'bicycle', 'flexible', '16plus'].includes(tag))
-					.map((tag) => {
-						if (tag === 'auto') return 'На авто';
-						if (tag === 'foot') return 'Пешком';
-						if (tag === 'bicycle') return 'Вело / самокат';
-						if (tag === '16plus') return 'С 16 лет';
-						return 'Подработка';
-					}),
-			),
-		),
-	);
 
-	return {
-		...city,
-		companyCount: localCompanies.length,
-		formats: localFormats.slice(0, 3),
-	};
-});
+// JSON-LD ItemList cap (audit v3 M21). A 958-entry ItemList was ~118 KB
+// of inline JSON-LD that merely duplicated the 958 crawlable `<a
+// class="city-tile">` links already in the markup — near-zero
+// rich-result benefit. Cap the structured-data list to the top cities
+// by vacancy count; the full set stays discoverable via the tile grid.
+const SCHEMA_ITEM_LIST_LIMIT = 30;
+const schemaItemListCities = [...cities]
+	.sort((a, b) => b.vacancyCount - a.vacancyCount || a.name.localeCompare(b.name, 'ru'))
+	.slice(0, SCHEMA_ITEM_LIST_LIMIT);
 
 // Both helpers now delegate to the shared `formatRussianPlural` from
 // src/utils/format.ts. The vacancy variant additionally returns an
@@ -76,9 +47,6 @@ const getVacancyPlural = (count: number) => {
 		: 'cities.vacancies_5';
 	return { text, key };
 };
-
-const getCompanyPlural = (count: number) =>
-	formatRussianPlural(count, ['компания', 'компании', 'компаний']);
 
 const getCityPlural = (count: number) =>
 	formatRussianPlural(count, ['город', 'города', 'городов']);
@@ -106,7 +74,7 @@ const pageSchemaGraph = [
 		dateModified: new Date().toISOString(),
 		mainEntity: {
 			'@type': 'ItemList',
-			itemListElement: cities.map((city, index) => ({
+			itemListElement: schemaItemListCities.map((city, index) => ({
 				'@type': 'ListItem',
 				position: index + 1,
 				name: city.name,
@@ -169,6 +137,12 @@ const pageSchemaGraph = [
 </BaseLayout>
 
 <style>
+	/*
+		cities.astro markup uses 6 classes only: cities-page, cities-hero,
+		section-eyebrow, cities-grid, city-tile, count-num. The old
+		spotlight/answer-panel/route-grid GEO families were removed as dead
+		scoped CSS (audit v3 H8).
+	*/
 	.cities-page {
 		max-width: 1240px;
 		margin: 0 auto;
@@ -192,150 +166,20 @@ const pageSchemaGraph = [
 		margin-bottom: 0.45rem;
 	}
 	.cities-hero p,
-	.cities-answer-panel p,
-	.faq-card p,
 	.city-tile span {
 		color: var(--text-muted);
 	}
-	.cities-answer-panel,
-	.fact-card,
-	.city-tile,
-	.faq-card {
+	.city-tile {
 		border: 1px solid var(--scrim-border-mid);
 		border-radius: 8px;
 		background: var(--scrim-light-soft);
 		box-shadow: var(--shadow-sm);
-	}
-	.cities-answer-panel {
-		display: grid;
-		grid-template-columns: minmax(220px, 0.34fr) minmax(0, 1fr);
-		gap: 1.5rem;
-		align-items: start;
-		margin-bottom: 1rem;
-		padding: 1.5rem;
-	}
-	.cities-answer-panel h2,
-	.cities-answer-panel p,
-	.faq-card h3,
-	.faq-card p {
-		margin: 0;
-	}
-	.cities-answer-panel p,
-	.faq-card p {
-		line-height: 1.8;
-	}
-	.cities-facts,
-	.cities-faq-grid,
-	.cities-route-grid,
-	.cities-surfaces {
-		display: grid;
-		grid-template-columns: repeat(4, minmax(0, 1fr));
-		gap: 1rem;
-		margin-bottom: 1rem;
-	}
-	.cities-route-grid,
-	.cities-surfaces {
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-		margin-bottom: 1.5rem;
-	}
-	.fact-card {
-		display: grid;
-		gap: 0.35rem;
-		min-height: 7rem;
-		padding: 1rem;
-	}
-	.fact-card span {
-		font-size: 0.72rem;
-		font-weight: 900;
-		letter-spacing: 0;
-		text-transform: uppercase;
-		color: var(--text-muted);
-	}
-	.fact-card strong {
-		align-self: end;
-		font-size: 0.98rem;
-		line-height: 1.35;
-	}
-	.cities-link-strip {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.75rem;
-		margin-bottom: 1rem;
-	}
-	.quick-link {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		min-height: 2.5rem;
-		padding: 0.65rem 1rem;
-		border-radius: 8px;
-		border: 1px solid rgba(var(--brand-700-rgb), 0.16);
-		background: rgba(var(--brand-700-rgb), 0.08);
-		color: var(--text-main);
-		text-decoration: none;
-		font-weight: 800;
 	}
 	.cities-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 		gap: 0.8rem;
 		margin-bottom: 1.5rem;
-	}
-	.route-card,
-	.surface-card,
-	.spotlight-card {
-		display: grid;
-		gap: 0.55rem;
-		padding: 1.25rem;
-		border: 1px solid var(--scrim-border-mid);
-		border-radius: 8px;
-		background: var(--scrim-light-soft);
-		box-shadow: var(--shadow-sm);
-	}
-	.route-card h2,
-	.surface-card h2,
-	.cities-section-head h2 {
-		margin: 0;
-		font-size: 1.45rem;
-	}
-	.route-card p:last-child,
-	.surface-card p:last-child,
-	.spotlight-card span,
-	.spotlight-card small {
-		color: var(--text-muted);
-		line-height: 1.7;
-	}
-	.cities-spotlight {
-		margin-bottom: 1.5rem;
-	}
-	.cities-section-head {
-		margin-bottom: 0.9rem;
-	}
-	.cities-spotlight-grid {
-		display: grid;
-		grid-template-columns: repeat(4, minmax(0, 1fr));
-		gap: 1rem;
-	}
-	.spotlight-card {
-		color: var(--text-main);
-		text-decoration: none;
-		transition: var(--transition);
-	}
-	.spotlight-card:hover {
-		transform: translateY(-2px);
-		border-color: var(--text-main);
-		box-shadow: var(--shadow-md);
-	}
-	.spotlight-card strong {
-		font-size: 1.05rem;
-	}
-	.surface-card {
-		grid-column: span 1;
-	}
-	.surface-chip-row {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.75rem;
 	}
 	.city-tile {
 		display: grid;
@@ -353,78 +197,26 @@ const pageSchemaGraph = [
 	.city-tile strong {
 		font-size: 1rem;
 	}
-	.cities-faq-section {
-		margin-top: 1.5rem;
-	}
-	.faq-card {
-		padding: 1.25rem;
-	}
-	.faq-card h3 {
-		margin-bottom: 0.45rem;
-		font-size: 1rem;
-	}
-	@media (max-width: 960px) {
-		.cities-answer-panel,
-		.cities-facts,
-		.cities-faq-grid,
-		.cities-route-grid,
-		.cities-spotlight-grid,
-		.cities-surfaces {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-		}
-	}
-	@media (max-width: 768px) {
-		.cities-answer-panel {
-			grid-template-columns: 1fr;
-		}
-	}
 	@media (max-width: 560px) {
 		.cities-hero h1 {
 			font-size: 2.2rem;
 		}
-		.route-card h2,
-		.surface-card h2,
-		.cities-section-head h2 {
-			font-size: 1.25rem;
-		}
-		.cities-facts,
-		.cities-faq-grid,
-		.cities-grid,
-		.cities-route-grid,
-		.cities-spotlight-grid,
-		.cities-surfaces {
+		.cities-grid {
 			grid-template-columns: 1fr;
 		}
 	}
 
 	/* === Visual refresh overrides (Cities page) === */
-	.cities-grid > a,
-	.city-card,
-	.cities-route-grid > *,
-	.cities-spotlight-grid > * {
+	.cities-grid > a {
 		background: var(--ink-0);
 		border: 1px solid var(--ink-200);
 		border-radius: var(--radius-md);
 		transition: border-color var(--transition), box-shadow var(--transition);
 	}
 	.cities-grid > a:hover,
-	.cities-grid > a:focus-visible,
-	.city-card:hover {
+	.cities-grid > a:focus-visible {
 		border-color: var(--brand-500);
 		box-shadow: var(--shadow-sm);
 		outline: none;
-	}
-	.cities-spotlight,
-	.cities-faq-section {
-		background: var(--ink-0);
-		border: 1px solid var(--ink-200);
-		border-radius: var(--radius-lg);
-	}
-	.cities-spotlight h2,
-	.cities-faq-section h2,
-	.cities-faq-section h3 {
-		font-family: var(--font-heading);
-		color: var(--ink-900);
-		letter-spacing: -0.01em;
 	}
 </style>

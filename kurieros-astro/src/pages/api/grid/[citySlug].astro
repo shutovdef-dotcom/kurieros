@@ -2,7 +2,8 @@
 import JobCard from '../../../components/JobCard.astro';
 import jobsData from '../../../data/jobs';
 import { getCitiesFromJobs } from '../../../utils/cities';
-import { buildJobsByCityMap, getCityJobsFromMap } from '../../../utils/jobFilters';
+import { getCityJobsFromMap } from '../../../utils/jobFilters';
+import { jobsByCity } from '../../../utils/jobsByCityIndex';
 
 // === City-grid fragment endpoint (audit v2 M14) ======================
 //
@@ -40,9 +41,7 @@ import { buildJobsByCityMap, getCityJobsFromMap } from '../../../utils/jobFilter
 export const prerender = true;
 
 // One static path per city slug — identical slug set to
-// `/rabota-kurerom-<slug>/` (both derive from `getCitiesFromJobs`),
-// and the same slug set the existing `api/jobs-by-city/[slug]` JSON
-// endpoint already emits.
+// `/rabota-kurerom-<slug>/` (both derive from `getCitiesFromJobs`).
 export function getStaticPaths() {
 	return getCitiesFromJobs(jobsData).map((city) => ({
 		params: { citySlug: city.slug },
@@ -55,11 +54,10 @@ const VISIBLE_LIMIT = 24;
 
 const { cityName } = Astro.props as { cityName: string };
 
-// Reuse the shared city/tag/search predicate via the precomputed
-// per-city Map — same data path `[slug].astro` uses for the full
-// listing page, so this fragment contains exactly the jobs the
-// destination city page would render.
-const jobsByCity = buildJobsByCityMap(jobsData);
+// Reuse the shared per-city Map (`jobsByCityIndex.ts` — built ONCE at
+// module load, not per page) — same data path `[slug].astro` uses for
+// the full listing page, so this fragment contains exactly the jobs
+// the destination city page would render.
 const matchedJobs = getCityJobsFromMap(jobsByCity, cityName);
 
 const visibleJobs = matchedJobs.slice(0, VISIBLE_LIMIT);

@@ -22,16 +22,15 @@ import {
 	cleanCategoryName,
 } from '../utils/cityListingPage';
 import {
-	buildJobsByCityMap,
 	filterJobsByCriteria,
 	getCityJobsFromMap,
 } from '../utils/jobFilters';
-
-// Precompute the per-city job buckets ONCE per build (module load),
-// shared across every static path this file emits. Without this, each
-// of the ~970 city pages re-scanned the full ~4.8k job list — ~4.7M
-// filter ops per build for this file alone (audit ref v2 H12).
-const jobsByCity = buildJobsByCityMap(jobsData);
+// `jobsByCity` is built ONCE at module load inside jobsByCityIndex.ts
+// (imports are module-cached). It is NOT rebuilt per page — a local
+// `const jobsByCity = buildJobsByCityMap(jobsData)` in this frontmatter
+// would re-run once per generated page (~1,964× per build, audit ref
+// v3 NEW-2); the shared module binding avoids that. (audit ref v2 H12)
+import { jobsByCity } from '../utils/jobsByCityIndex';
 
 export async function getStaticPaths() {
 	type CityProps = {
@@ -262,6 +261,7 @@ const pageSchemaGraph = buildPageSchemaGraph({
 			initialCity={type === 'city' ? data.name : undefined}
 			initialTag={type === 'category' ? data.tag : undefined}
 			initialSearch={type === 'category' ? data.query : undefined}
+			jobs={filteredJobs}
 			limit={24}
 			revealable
 		/>

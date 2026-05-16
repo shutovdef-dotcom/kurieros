@@ -68,6 +68,7 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 						autocomplete="given-name"
 						enterkeyhint="next"
 						minlength="2"
+						maxlength="200"
 					/>
 				</label>
 				<label class="ozon-lead-field">
@@ -299,7 +300,16 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 
 			setBusy(true);
 			try {
-				await submitToWorker({ name, phone: phoneRaw, transport }, ctx);
+				const result = await submitToWorker({ name, phone: phoneRaw, transport }, ctx);
+				// Only a genuine `{ sent: true }` earns the success screen.
+				// A `{ skipped: true }` result means PUBLIC_OZON_LEAD_API
+				// is unset (misconfigured build) — the lead went nowhere,
+				// so showing "заявка отправлена" would silently drop it
+				// with false feedback. Surface a soft error instead.
+				if (!result || result.sent !== true) {
+					showError('Форма временно недоступна, попробуйте позже.');
+					return;
+				}
 				if (typeof window.gtag === 'function') {
 					window.gtag('event', 'ozon_lead_submit', {
 						transport: transportKey,

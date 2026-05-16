@@ -23,7 +23,7 @@
  * pages/v/[slug].astro) safe from observing a half-applied state if
  * they happen to import the module before the postprocess runs.
  */
-import { fnv1a } from '../../utils/fnv1a';
+import { applyHourlyJitter } from '../../utils/fnv1a';
 import type { VacancySource } from '../vacancyTypes';
 import { buildPay } from './shared';
 
@@ -66,10 +66,11 @@ export const applyOzonHourlyFallback = (initialSources: VacancySource[]): Vacanc
       if (offer.pay.hourly) return offer;
       const best = cityBestHourly.get(offer.city);
       if (!best) return offer;
+      // Build-side jitter key — slug + city + transport so two Ozon
+      // offers in the same city land on different rates. Formula owned
+      // by `applyHourlyJitter` (audit ref v3 M4).
       const jitterKey = `${source.slug}-${offer.city}-${offer.transport}`;
-      const jitter = fnv1a(jitterKey) % 100;            // 0..99
-      const ratio = 0.88 + jitter / 1000;               // 0.880..0.979
-      const fallbackHourly = Math.round(best * ratio);
+      const fallbackHourly = applyHourlyJitter(best, jitterKey);
       return { ...offer, pay: buildPay(fallbackHourly) };
     });
     return { ...source, offers: updatedOffers };

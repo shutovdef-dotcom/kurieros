@@ -67,6 +67,13 @@ for (const mapping of Object.values(sourceToClauses)) {
 }
 
 const uniqueCount = Object.keys(ruClauses).length;
+// Guard against an empty clause corpus: `1 - uniqueCount / 0` is NaN,
+// and `NaN < DEDUP_THRESHOLD` is false — so the dedup gate would
+// silently "pass" on degenerate input. Fail loudly instead.
+if (total === 0) {
+  console.error('analyze-tokens: no clause references — run npm run i18n:extract first');
+  process.exit(1);
+}
 const dedupRatio = 1 - uniqueCount / total;
 
 console.log('=== Clause-level dedup analysis ===');

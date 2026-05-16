@@ -47,20 +47,21 @@ const BURGER_KING_EMPLOYMENT_FORMATS = ['official'] satisfies EmploymentFormat[]
  */
 const burgerKingOfferSchema = z.object({
   city: z.string().min(1),
-  monthlyMin: z.number().finite(),
-  monthlyMax: z.number().finite(),
+  // Zod v4 `z.number()` already rejects NaN/Infinity — `.finite()` dropped.
+  monthlyMin: z.number(),
+  monthlyMax: z.number(),
   isActive: z.boolean(),
-  hiringNeed: z.number().finite().nonnegative(),
+  hiringNeed: z.number().nonnegative(),
   cityDistricts: z.array(z.string()).optional(),
 });
 
 export const BurgerKingVacanciesSchema = z.object({
-  sourceUrl: z.string().url(),
+  sourceUrl: z.url(),
   // `salarySourceUrl` is a free-form annotated string in the JSON
   // (e.g. "https://…/edit (tab «ЗП повара-кассиры»)") — validate as
   // non-empty rather than URL to match production reality.
   salarySourceUrl: z.string().min(1),
-  citiesSourceUrl: z.string().url(),
+  citiesSourceUrl: z.url(),
   updatedAt: z.string().min(1),
   notes: z.string(),
   offers: z.array(burgerKingOfferSchema),

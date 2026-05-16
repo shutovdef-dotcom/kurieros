@@ -3,6 +3,7 @@
 import JobCard from './JobCard.astro';
 import jobsData from '../data/jobs';
 import { filterJobsByCriteria } from '../utils/jobFilters';
+import type { GeneratedJob } from '../data/vacancyTypes';
 
 interface Props {
 	initialCity?: string;
@@ -22,6 +23,16 @@ interface Props {
 	 *     light while keeping all city jobs reachable on the same page.
 	 */
 	revealable?: boolean;
+	/**
+	 * Pre-filtered job set (audit ref v3 NEW-3). When the caller has
+	 * already computed the matched jobs — `[slug].astro` and
+	 * `api/grid/[citySlug].astro` do, via the O(1) `getCityJobsFromMap`
+	 * lookup — it passes them here and this component skips its own
+	 * O(n) `filterJobsByCriteria` self-scan. When omitted (the home
+	 * page, which legitimately filters from scratch by city/tag/search)
+	 * the component self-filters as before.
+	 */
+	jobs?: GeneratedJob[];
 }
 
 const {
@@ -32,6 +43,7 @@ const {
 	moreHref = '/cities/',
 	moreLabel = 'Открыть все города',
 	revealable = false,
+	jobs,
 } = Astro.props;
 const availableJobIds = jobsData.map((job) => job.id);
 
@@ -40,7 +52,12 @@ const availableJobIds = jobsData.map((job) => job.id);
 // emitter so SSR + sitemap inclusion can't drift). The client-side
 // DOM filter lower in this same file (search for `function filterJobs`)
 // is a separate DOM-dataset adapter; semantics are kept in sync by hand.
-const matchedJobs = filterJobsByCriteria(jobsData, {
+//
+// NEW-3: when the caller passes a pre-filtered `jobs` set (it already
+// ran the O(1) `getCityJobsFromMap` lookup — see [slug].astro /
+// api/grid/[citySlug].astro), use it directly and skip the redundant
+// O(n) self-scan. Only the home page omits `jobs` → it self-filters.
+const matchedJobs = jobs ?? filterJobsByCriteria(jobsData, {
 	city: initialCity,
 	tag: initialTag,
 	search: initialSearch,
@@ -149,8 +166,6 @@ const hasVacancies = jobsData.length > 0;
 ---
 
 <div class="job-grid-container">
-	<div class="compare-inline-alert hidden" id="compare-limit-message" aria-live="polite"></div>
-
 	<!-- Surfaces when the filter dropdowns hide every card on the page.
 	     filterJobs() shows the notice AND restores all cards so the user
 	     never lands on an empty list. -->
@@ -223,21 +238,6 @@ const hasVacancies = jobsData.length > 0;
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-4);
-	}
-
-	.compare-inline-alert {
-		margin-bottom: 0;
-		padding: 12px 16px;
-		border-radius: var(--radius-md);
-		border: 1px solid var(--danger-fg);
-		background: var(--danger-bg);
-		color: var(--danger-fg);
-		font-size: var(--fs-14);
-		font-weight: 600;
-		line-height: var(--lh-14);
-	}
-	.compare-inline-alert.hidden {
-		display: none;
 	}
 
 	.jobs-grid {
@@ -528,7 +528,6 @@ const hasVacancies = jobsData.length > 0;
 	const availableJobIdSet = new Set(availableJobIds);
 	let selectedCity = initialCity || '';
 	const normalizedInitialSearch = initialSearch.toLowerCase();
-	let compareNoticeTimeout = null;
 
 	function parseStoredCompareList() {
 		try {
@@ -571,22 +570,6 @@ const hasVacancies = jobsData.length > 0;
 		return key.split('.').reduce((prev, curr) => prev && prev[curr], dict) || defaultText;
 	}
 
-	function showCompareNotice(message) {
-		const compareNotice = document.getElementById('compare-limit-message');
-		if (!compareNotice) return;
-
-		compareNotice.textContent = message;
-		compareNotice.classList.remove('hidden');
-
-		if (compareNoticeTimeout) {
-			window.clearTimeout(compareNoticeTimeout);
-		}
-
-		compareNoticeTimeout = window.setTimeout(() => {
-			compareNotice.classList.add('hidden');
-		}, 3200);
-	}
-
 	function getCompareButtonLabel(isActive) {
 		return isActive
 			? `<span data-t="job.in_compare">${getTranslation('job.in_compare', 'В сравнении')}</span> ✓`
@@ -623,6 +606,30 @@ const hasVacancies = jobsData.length > 0;
 			.filter(Boolean);
 
 		return tags.includes(tag.toLowerCase());
+	}
+
+	// City-key helpers — the inline twin of `normalizeCityKey` /
+	// `splitLocationKeys` in `src/utils/jobFilters.ts`. This `is:inline`
+	// script can't `import` (it needs `define:vars`), so the logic is
+	// ported verbatim. The two MUST behave identically: lowercase +
+	// ё→е + NBSP/narrow-NBSP/figure-space repair + em-dash→hyphen +
+	// whitespace collapse + dash trimming, then a comma-split into the
+	// set of cities a `job.location` covers (rare «Алнаши, Вавож» rows).
+	function normalizeCityKey(value) {
+		return String(value || '')
+			.replace(/[   ]/g, ' ')
+			.replace(/[‐-―]/g, '-')
+			.replace(/\s+/g, ' ')
+			.replace(/\s*-\s*/g, '-')
+			.trim()
+			.toLowerCase()
+			.replace(/ё/g, 'е');
+	}
+	function splitLocationCityKeys(location) {
+		return String(location || '')
+			.split(',')
+			.map((part) => normalizeCityKey(part))
+			.filter((key) => key.length > 0);
 	}
 
 	function toggleCompare(id) {
@@ -677,35 +684,56 @@ const hasVacancies = jobsData.length > 0;
 				initialGridNodes.appendChild(child.cloneNode(true));
 			}
 		}
-		// Re-render the grid from the initial server snapshot.
+		// Also snapshot the grid element's own reveal-more state attrs
+		// (S5 / audit v3 M12). A city switch overwrites `data-overflow-
+		// count` / `data-batch-size` with the fetched city's values; on
+		// restore we must put the INITIAL values back, otherwise the
+		// bottom-nav «Вакансии» reveal logic keeps reading the failed
+		// city's stale counts against the restored home grid.
+		const initialOverflowCount = grid?.getAttribute('data-overflow-count') || '0';
+		const initialBatchSize = grid?.getAttribute('data-batch-size') || '24';
+		// Re-render the grid from the initial server snapshot — both the
+		// child nodes AND the reveal-more state attributes.
 		function restoreInitialGrid() {
 			if (!grid) return;
 			while (grid.firstChild) grid.removeChild(grid.firstChild);
 			grid.appendChild(initialGridNodes.cloneNode(true));
+			grid.setAttribute('data-overflow-count', initialOverflowCount);
+			grid.setAttribute('data-batch-size', initialBatchSize);
 		}
 
-		// Audit H10 — XSS hardening for the city-swap hot path.
+		// Audit H10 / v3 M15 — XSS hardening for the city-swap hot path.
 		//
 		// `renderJobsForCity` used to do `grid.innerHTML = newGrid.innerHTML`
 		// after `DOMParser.parseFromString(html, 'text/html')`. DOMParser
 		// makes parsed `<script>` inert, but it does NOT remove inline
 		// event-handler attributes (`onerror`, `onload`, SVG `onbegin` /
-		// `onend`, …). A CDN- or build-cache-poisoning attack on the
-		// static city HTML would therefore deliver attacker handlers that
-		// execute in the visitor's origin the moment the node lands in
-		// the live document.
+		// `onend`, …), it keeps `javascript:` / `data:` URLs in `href` /
+		// `src`, and it keeps `<style>` / `<iframe>` / `<object>` etc.
+		// A CDN- or build-cache-poisoning attack on the static city HTML
+		// would therefore deliver attacker content that runs in the
+		// visitor's origin the moment the node lands in the live document.
 		//
-		// `stripEventHandlers` removes every `on*` attribute from a node,
-		// its element descendants, and the `.content` fragment of any
-		// `<template>` reached along the way (at any nesting depth, and
-		// including when the passed-in node IS a template — a template's
-		// own `querySelectorAll` does NOT see its content fragment). The
-		// C2 «reveal more» overflow stash is itself a top-level
-		// `<template>`, so missing this leaves overflow cards poisoned.
+		// `stripEventHandlers` runs three passes over a node and its
+		// descendants (incl. the `.content` fragment of any `<template>`,
+		// at any nesting depth — a template's own `querySelectorAll` does
+		// NOT see its content fragment; the C2 «reveal more» overflow
+		// stash is itself a top-level `<template>`):
+		//   1. removes every `on*` attribute;
+		//   2. strips `javascript:` / `data:` / `vbscript:` URLs out of
+		//      href / src / xlink:href / formaction (subsumes v3 L13);
+		//   3. removes script/style/iframe/object/embed/link/meta nodes
+		//      outright + a remote-URL href/xlink:href on SVG `<use>`.
 		// This is the inline twin of `src/scripts/sanitize.js` — Astro
 		// `is:inline` scripts can't import modules (they need the
 		// `define:vars` constants), so the logic is duplicated here and
 		// pinned by `tests/sanitize.test.ts`. Keep the two in sync.
+		const DANGEROUS_TAGS = new Set([
+			'SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED', 'LINK', 'META',
+		]);
+		const URL_ATTRIBUTES = ['href', 'src', 'xlink:href', 'formaction'];
+		const DANGEROUS_URI_SCHEME = /^\s*(javascript|data|vbscript):/i;
+		const REMOTE_URL = /^\s*(https?:)?\/\//i;
 		function stripOnAttributes(el) {
 			if (!el || typeof el.getAttributeNames !== 'function') return;
 			for (const name of el.getAttributeNames()) {
@@ -716,9 +744,53 @@ const hasVacancies = jobsData.length > 0;
 				}
 			}
 		}
+		function stripDangerousUrls(el) {
+			if (!el
+				|| typeof el.getAttributeNames !== 'function'
+				|| typeof el.getAttribute !== 'function') {
+				return;
+			}
+			const isUseElement = typeof el.tagName === 'string'
+				&& el.tagName.toUpperCase() === 'USE';
+			for (const name of el.getAttributeNames()) {
+				const lower = name.toLowerCase();
+				if (!URL_ATTRIBUTES.includes(lower)) continue;
+				const value = el.getAttribute(name);
+				if (typeof value !== 'string') continue;
+				if (DANGEROUS_URI_SCHEME.test(value)) {
+					el.removeAttribute(name);
+					continue;
+				}
+				if (isUseElement
+					&& (lower === 'href' || lower === 'xlink:href')
+					&& REMOTE_URL.test(value)) {
+					el.removeAttribute(name);
+				}
+			}
+		}
+		function sanitizeElement(el) {
+			stripOnAttributes(el);
+			stripDangerousUrls(el);
+		}
+		function isDangerousElement(el) {
+			if (!el || typeof el.tagName !== 'string') return false;
+			return DANGEROUS_TAGS.has(el.tagName.toUpperCase());
+		}
+		function removeElement(el) {
+			if (!el) return;
+			if (typeof el.remove === 'function') {
+				el.remove();
+				return;
+			}
+			if (el.parentNode && typeof el.parentNode.removeChild === 'function') {
+				el.parentNode.removeChild(el);
+			}
+		}
 		function sanitizeSubtree(node) {
 			if (!node) return;
-			stripOnAttributes(node);
+			// Sanitize the node itself; the root is never removed even if
+			// it is a dangerous tag (callers hand in a whitelisted child).
+			sanitizeElement(node);
 			// Recurse into a `<template>` content fragment — also covers
 			// the case where `node` itself is the template.
 			if (node.content && node.content.nodeType !== undefined) {
@@ -726,7 +798,11 @@ const hasVacancies = jobsData.length > 0;
 			}
 			if (typeof node.querySelectorAll !== 'function') return;
 			for (const child of node.querySelectorAll('*')) {
-				stripOnAttributes(child);
+				if (isDangerousElement(child)) {
+					removeElement(child);
+					continue;
+				}
+				sanitizeElement(child);
 				if (child && child.content && child.content.nodeType !== undefined) {
 					sanitizeSubtree(child.content);
 				}
@@ -786,6 +862,36 @@ const hasVacancies = jobsData.length > 0;
 			grid.innerHTML = html;
 		}
 
+		// S5 / audit v3 M12 — minimal inline notice when a city-grid
+		// fetch fails. Without it the failure is silent: the grid
+		// quietly falls back to the initial city with no signal to
+		// the user. Built with `textContent` (no user input, but
+		// XSS-proof by construction) and auto-removed.
+		const CITY_FETCH_ERROR_TTL_MS = 6000;
+		let cityFetchErrorTimeout = null;
+		function showCityFetchError() {
+			if (!grid || !grid.parentNode) return;
+			let notice = document.getElementById('city-fetch-error');
+			if (!notice) {
+				notice = document.createElement('div');
+				notice.id = 'city-fetch-error';
+				notice.className = 'no-filter-match';
+				notice.setAttribute('role', 'status');
+				notice.setAttribute('aria-live', 'polite');
+				grid.parentNode.insertBefore(notice, grid);
+			}
+			notice.textContent = 'Не удалось загрузить вакансии для города — показаны все вакансии.';
+			notice.classList.remove('hidden');
+			if (cityFetchErrorTimeout) clearTimeout(cityFetchErrorTimeout);
+			cityFetchErrorTimeout = window.setTimeout(() => {
+				notice?.classList.add('hidden');
+			}, CITY_FETCH_ERROR_TTL_MS);
+		}
+		function hideCityFetchError() {
+			if (cityFetchErrorTimeout) clearTimeout(cityFetchErrorTimeout);
+			document.getElementById('city-fetch-error')?.classList.add('hidden');
+		}
+
 		// Fetch the dedicated city-grid fragment endpoint
 		// (/api/grid/{slug}/ — audit v2 M14) and clone its
 		// already-rendered .jobs-grid children via the DOM API
@@ -800,6 +906,8 @@ const hasVacancies = jobsData.length > 0;
 		// CSS/scripts that the old DOMParser path parsed and discarded.
 		async function renderJobsForCity(citySlug, cityName) {
 			if (!grid) return;
+			// Any new city action clears a prior city-fetch-error notice.
+			hideCityFetchError();
 			if (!citySlug) {
 				// User cleared the city — restore initial server-rendered grid.
 				restoreInitialGrid();
@@ -830,8 +938,28 @@ const hasVacancies = jobsData.length > 0;
 					cityCache.set(citySlug, html);
 				} catch (err) {
 					console.warn('city page fetch failed', err);
-					// Restore previous render so the user isn't stuck on skeleton.
+					// S5 / audit v3 M12 — restore the INITIAL server grid so
+					// the user isn't stuck on the skeleton. `restoreInitialGrid`
+					// also puts the initial `data-overflow-count` / `data-batch-
+					// size` back, so the bottom-nav reveal logic no longer reads
+					// the failed city's stale counts.
 					restoreInitialGrid();
+					// `restoreInitialGrid` shows the INITIAL grid, not the city
+					// the user picked — so re-sync the city <select> and the
+					// module-level `selectedCity` back to that initial city,
+					// otherwise the selector claims one city while the grid
+					// shows another (a silent selector/grid desync).
+					selectedCity = initialCity || '';
+					const citySelect = document.getElementById('city-select');
+					if (citySelect && citySelect.value !== selectedCity) {
+						citySelect.value = selectedCity;
+					}
+					// Re-wire the restored grid (compare buttons + dropdown
+					// filters) — the success path does this too.
+					rebindCompareButtons();
+					filterJobs();
+					// Minimal inline notice so the failure isn't silent.
+					showCityFetchError();
 					return;
 				}
 			}
@@ -922,7 +1050,10 @@ const hasVacancies = jobsData.length > 0;
 		// see src/utils/jobFilters.ts for the source-of-truth predicate;
 		// this is the DOM-side adapter (reads card.dataset.*, layers
 		// in age/transport/employment/citizenship dropdown filters on
-		// top). Keep the city/search semantics in sync with jobFilters.
+		// top). The city match uses the same exact, comma-split,
+		// normalized semantics as `jobFilters.ts#jobMatches` — ported
+		// inline above as `normalizeCityKey` / `splitLocationCityKeys`
+		// because an `is:inline` script can't import the module (H12).
 		function filterJobs() {
 			const term = normalizedInitialSearch;
 			const selectedAgeTag = mapAgeFilterToTag(ageFilterSelect?.value || 'all');
@@ -939,9 +1070,17 @@ const hasVacancies = jobsData.length > 0;
 			//      «no filter match» notice (per UX spec — user must
 			//      never land on an empty grid).
 			const cards = Array.from(document.querySelectorAll('.job-card'));
+			const selectedCityKey = normalizeCityKey(selectedCity);
 			const matches = cards.filter((card) => {
-				const location = (card.dataset.location || '').toLowerCase();
-				const matchesCity = !selectedCity || location.includes(selectedCity.toLowerCase()) || location === 'вся россия';
+				// City match — exact, comma-split, normalized (H12), the
+				// inline twin of `jobFilters.ts#jobMatches`. The legacy
+				// substring `location.includes(city)` over-matched «Дно»
+				// into «Видное»/«Медногорск»; this splits the card's
+				// `data-location` into its city keys and requires an
+				// exact match. «Вся Россия» rows free-pass any city.
+				const cityKeys = splitLocationCityKeys(card.dataset.location);
+				const isNationwide = cityKeys.length === 1 && cityKeys[0] === 'вся россия';
+				const matchesCity = !selectedCityKey || isNationwide || cityKeys.includes(selectedCityKey);
 				const matchesSearchTerm = matchesSearch(card, term);
 				const matchesAge = hasTag(card, selectedAgeTag);
 				const matchesTransport = hasTag(card, selectedTransportTag);

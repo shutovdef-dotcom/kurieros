@@ -8,8 +8,8 @@ import CompareHelpGrid from '../components/compare/CompareHelpGrid.astro';
 import CompareHero from '../components/compare/CompareHero.astro';
 import jobsData from '../data/jobs';
 import { getCityNames, sortCityNamesByPopulation } from '../utils/cities';
-import { slugifyCompany } from '../utils/companies';
 import { buildBreadcrumbSchema } from '../utils/schema';
+import { mapCompareJob } from '../utils/compareJob';
 import type { CompareData, Feature } from '../scripts/compare/types';
 
 // Compare-page browser-side logic lives in a single typed ES module
@@ -21,55 +21,11 @@ import type { CompareData, Feature } from '../scripts/compare/types';
 // `<script type="application/json">` tag (see the markup below) instead of
 // `define:vars`, which would force `is:inline` and block `import`.
 
-const transportLabelMap: Record<string, string> = {
-  auto: 'Авто',
-  bicycle: 'Велосипед / самокат',
-  foot: 'Пешком',
-  remote: 'Удалённо / офис',
-};
-
-const getTransportLabel = (tags: string[]) =>
-  tags.find((tag) => tag in transportLabelMap)
-    ? transportLabelMap[tags.find((tag) => tag in transportLabelMap) as string]
-    : 'Смешанный формат';
-
-const getTransportProvisionLabel = (provision: 'own' | 'company' | 'not_required') => {
-  if (provision === 'company') return 'Компания выдает транспортное средство';
-  if (provision === 'not_required') return 'Транспорт не требуется';
-  return 'Нужно своё транспортное средство';
-};
-
-const normalizeOsRequirement = (value?: string) => {
-  const normalized = String(value ?? '').trim().toLowerCase();
-  const hasAndroid = /android|андроид/.test(normalized);
-  const hasIos = /(?:^|[^a-z])ios(?:[^a-z]|$)|iphone|ipad|айос|айфон/.test(normalized);
-
-  if (hasAndroid && hasIos) return 'Android или iOS';
-  if (hasIos) return 'iOS';
-  if (hasAndroid) return 'Android';
-  return 'Android или iOS';
-};
-
-const mapCompareJob = (job: typeof jobsData[number]) => ({
-  id: job.id,
-  slug: job.slug,
-  title: job.title,
-  company: job.company,
-  companyLogo: job.companyLogo,
-  companySlug: slugifyCompany(job.company),
-  companyHref: `/companies/${slugifyCompany(job.company)}/`,
-  salary: job.salary,
-  location: job.location,
-  transport: getTransportLabel(job.tags),
-  transport_provision: getTransportProvisionLabel(job.transportProvision),
-  contract: job.details.employment_type,
-  citizenship: job.details.citizenship,
-  payout: job.details.payment_freq,
-  bonus: job.benefits[0] || 'Условия уточняются при отклике',
-  age: job.details.age,
-  os: normalizeOsRequirement(job.details.os),
-  link: `/v/${job.slug}/`,
-});
+// The slim job → `CompareJob` projection (`mapCompareJob`) and its 3
+// label helpers live in `src/utils/compareJob.ts` — the SAME module the
+// `/api/compare-jobs.json` endpoint imports, so the 4 preselected jobs
+// rendered here and the full catalogue the client lazy-loads can never
+// drift in shape (audit v3 M19).
 
 // Only render preselected 4 jobs in HTML (was: all 4399 → 3.9 MB page).
 // Full job catalog is served from /api/compare-jobs.json and fetched
@@ -156,7 +112,7 @@ const compareData: CompareData = { compareJobs, features, totalCompareJobs };
   same XSS-safe emission pattern BaseLayout uses for JSON-LD structured data.
   The bundled module below reads it back via `getElementById(...).textContent`.
 */}
-<script type="application/json" id="compare-data" set:html={JSON.stringify(compareData)} is:inline></script>
+<script type="application/json" id="compare-data" set:html={JSON.stringify(compareData).replace(/</g, '\\u003c')} is:inline></script>
 
 <script>
   // Bundled + tree-shaken by Astro (no `is:inline`, no `define:vars`), so it
@@ -167,13 +123,34 @@ const compareData: CompareData = { compareJobs, features, totalCompareJobs };
   document.addEventListener('DOMContentLoaded', () => {
     const dataTag = document.getElementById('compare-data');
     if (!dataTag?.textContent) return;
-    const data = JSON.parse(dataTag.textContent) as CompareData;
+
+    // Guard the embedded-JSON parse: a malformed payload (serialization
+    // edge, CDN mangle, stale half-written HTML) would otherwise throw a
+    // SyntaxError, abort this handler, and silently kill the entire
+    // /compare/ client layer while the SSR grid still renders (v3 H5).
+    let data: CompareData;
+    try {
+      data = JSON.parse(dataTag.textContent) as CompareData;
+    } catch (err) {
+      console.error('[compare] failed to parse compare-data', err);
+      return;
+    }
+    if (!data || !Array.isArray(data.compareJobs) || !Array.isArray(data.features)) {
+      console.error('[compare] compare-data has unexpected shape');
+      return;
+    }
     initComparePage(data);
   });
 </script>
 
 
 <style>
+  /*
+    compare.astro renders only 4 self-styled sub-components inside
+    `<main class="compare-page"><div class="compare-container">`, so its
+    scoped <style> needs rules for exactly those two classes. The old
+    GEO/answer-panel/route-grid families were removed as dead (audit v3 H7).
+  */
   .compare-page {
     padding: 2.5rem 1.5rem;
     max-width: 1560px;
@@ -190,245 +167,6 @@ const compareData: CompareData = { compareJobs, features, totalCompareJobs };
     box-shadow: var(--shadow-sm);
   }
 
-  .compare-answer-panel,
-  .compare-trust-panel {
-    display: grid;
-    grid-template-columns: minmax(220px, 0.32fr) minmax(0, 1fr);
-    gap: 1.5rem;
-    align-items: start;
-    margin-bottom: 1rem;
-    padding: 1.5rem;
-    border: 1px solid var(--scrim-border-mid);
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.74);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .compare-answer-panel h2,
-  .compare-answer-panel p,
-  .compare-trust-panel h2,
-  .compare-trust-panel p {
-    margin: 0;
-  }
-
-  .compare-answer-panel p,
-  .compare-trust-panel p {
-    color: var(--text-muted);
-    line-height: 1.8;
-  }
-
-  .compare-answer-copy {
-    display: grid;
-    gap: 1rem;
-  }
-
-  .compare-geo-grid,
-  .compare-link-grid,
-  .compare-route-grid,
-  .compare-faq-grid {
-    display: grid;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .compare-geo-card,
-  .compare-link-card,
-  .compare-faq-item {
-    padding: 1.25rem;
-    border-radius: 8px;
-    background: var(--scrim-light-soft);
-    border: 1px solid var(--scrim-border-mid);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .compare-geo-card h2,
-  .compare-link-card h2,
-  .compare-faq-section h2 {
-    margin: 0 0 0.7rem;
-  }
-
-  .compare-faq-item p {
-    margin: 0;
-    color: var(--text-muted);
-    line-height: 1.7;
-  }
-
-  .compare-geo-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .compare-link-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .compare-route-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .compare-geo-card {
-    border: 1px solid rgba(var(--brand-700-rgb), 0.12);
-    background: linear-gradient(180deg, var(--scrim-light-strong), rgba(246, 250, 248, 0.96));
-  }
-
-  .compare-geo-card-caution {
-    border-color: rgba(249, 115, 22, 0.16);
-  }
-
-  .compare-link-card {
-    border-color: rgba(var(--brand-700-rgb), 0.12);
-    background: linear-gradient(180deg, var(--scrim-light-strong), rgba(246, 250, 248, 0.96));
-  }
-
-  .compare-route-card {
-    padding: 1.25rem;
-    border-radius: 8px;
-    border: 1px solid rgba(var(--brand-700-rgb), 0.14);
-    background: linear-gradient(180deg, var(--scrim-light-strong), rgba(246, 250, 248, 0.96));
-    box-shadow: var(--shadow-sm);
-  }
-
-  .compare-route-card-wide {
-    grid-column: 1 / -1;
-  }
-
-  .compare-route-card span {
-    display: inline-block;
-    margin-bottom: 0.6rem;
-    font-size: 0.72rem;
-    font-weight: 900;
-    letter-spacing: 0;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-
-  .compare-route-card h2 {
-    margin: 0 0 0.7rem;
-    font-size: 1.12rem;
-  }
-
-  .compare-route-card p {
-    margin: 0 0 1rem;
-    color: var(--text-muted);
-    line-height: 1.7;
-  }
-
-  .compare-route-link {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2.5rem;
-    padding: 0.6rem 0.95rem;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 800;
-    color: var(--text-main);
-    border: 1px solid rgba(var(--brand-700-rgb), 0.16);
-    background: rgba(var(--brand-700-rgb), 0.08);
-    transition: var(--transition);
-  }
-
-  .compare-route-link:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-sm);
-    color: var(--primary-color);
-  }
-
-  .compare-chip-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.65rem;
-  }
-
-  .compare-answer-chip-row {
-    gap: 0.55rem;
-  }
-
-  .compare-chip-link {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2.25rem;
-    padding: 0.45rem 0.85rem;
-    border-radius: 8px;
-    background: rgba(var(--brand-700-rgb), 0.08);
-    border: 1px solid rgba(var(--brand-700-rgb), 0.14);
-    color: var(--text-main);
-    text-decoration: none;
-    font-weight: 700;
-    transition: var(--transition);
-  }
-
-  .compare-chip-link:hover,
-  .compare-article-link:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-sm);
-    color: var(--primary-color);
-  }
-
-  .compare-chip-static {
-    cursor: default;
-  }
-
-  .compare-chip-static:hover {
-    transform: none;
-    box-shadow: none;
-    color: var(--text-main);
-  }
-
-  .compare-article-stack {
-    display: grid;
-    gap: 0.7rem;
-  }
-
-  .compare-article-link {
-    display: block;
-    padding: 0.85rem 1rem;
-    border-radius: 8px;
-    text-decoration: none;
-    color: var(--text-main);
-    background: rgba(255, 255, 255, 0.78);
-    border: 1px solid rgba(148, 163, 184, 0.18);
-    font-weight: 700;
-    line-height: 1.5;
-    transition: var(--transition);
-  }
-
-  .compare-list {
-    margin: 0;
-    padding-left: 1.35rem;
-  }
-
-  .compare-list li {
-    margin-bottom: 0.7rem;
-    line-height: 1.7;
-  }
-
-  .numbered-list li::marker {
-    color: var(--accent-color);
-    font-weight: 900;
-  }
-  .compare-faq-section {
-    margin-bottom: 1.5rem;
-  }
-
-  .compare-faq-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .compare-faq-item h3 {
-    margin: 0 0 0.45rem;
-    font-size: 1rem;
-  }
-  @media (max-width: 960px) {
-    .compare-link-grid,
-    .compare-route-grid,
-    .compare-faq-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .compare-geo-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
   @media (max-width: 768px) {
     .compare-page {
       padding: 1rem 0.5rem;
@@ -436,75 +174,6 @@ const compareData: CompareData = { compareJobs, features, totalCompareJobs };
 
     .compare-container {
       padding: 0.75rem;
-    }
-
-    .compare-answer-panel,
-    .compare-trust-panel {
-      grid-template-columns: 1fr;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1rem;
-    }
-
-    .compare-answer-panel,
-    .compare-trust-panel {
-      padding: 1.15rem;
-    }
-
-    .compare-answer-panel p,
-    .compare-trust-panel p {
-      font-size: 0.97rem;
-      line-height: 1.65;
-    }
-
-    .compare-chip-link {
-      min-height: 2.05rem;
-      padding: 0.38rem 0.72rem;
-      font-size: 0.94rem;
-    }
-
-    .compare-grid {
-      --feature-col-width: 112px;
-      --feature-col-min: 96px;
-      --job-col-min: 96px;
-    }
-
-    .compare-cell {
-      padding: 0.75rem 0.5rem;
-      font-size: 0.82rem;
-      line-height: 1.2;
-    }
-
-    .feature-col {
-      font-size: 0.78rem;
-      padding-inline: 0.5rem;
-    }
-
-    .job-card-mini {
-      gap: 0.35rem;
-    }
-
-    .job-card-mini h3 {
-      font-size: 0.82rem;
-      line-height: 1.15;
-    }
-
-    .company-name {
-      font-size: 0.72rem;
-      line-height: 1.15;
-    }
-
-    .btn-primary {
-      font-size: 0.74rem;
-      padding: 0.65rem 0.35rem;
-    }
-  }
-
-  @media (max-width: 560px) {
-    .compare-link-grid,
-    .compare-route-grid,
-    .compare-faq-grid {
-      grid-template-columns: 1fr;
     }
   }
 
@@ -517,67 +186,13 @@ const compareData: CompareData = { compareJobs, features, totalCompareJobs };
       padding: 0.5rem;
       border-radius: 8px;
     }
-
-    .compare-answer-panel,
-    .compare-trust-panel {
-      padding: 1rem;
-      border-radius: 8px;
-    }
-
-    .compare-grid {
-      --feature-col-width: 96px;
-      --feature-col-min: 84px;
-      --job-col-min: 88px;
-    }
-
-    .company-logo {
-      width: 36px;
-      height: 36px;
-      margin-bottom: 0.45rem;
-    }
-
-    .remove-col-btn {
-      top: -0.5rem;
-      right: -0.5rem;
-      width: 22px;
-      height: 22px;
-    }
   }
 
   /* === Visual refresh overrides (Compare page) === */
-  .compare-table,
-  .compare-page,
-  .compare-grid {
+  .compare-page {
     background: var(--ink-0);
     border: 1px solid var(--ink-200);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-xs);
-  }
-  .compare-th,
-  .compare-cell-label {
-    background: var(--ink-50);
-    color: var(--ink-700);
-    font-family: var(--font-heading);
-    font-weight: 700;
-  }
-  .compare-row:nth-child(even) {
-    background: var(--ink-50);
-  }
-  .compare-empty {
-    background: var(--ink-50);
-    border: 1px dashed var(--ink-200);
-    border-radius: var(--radius-lg);
-    color: var(--ink-600);
-  }
-  .remove-col-btn {
-    background: var(--ink-100);
-    color: var(--ink-700);
-    border: 1px solid var(--ink-200);
-    border-radius: var(--radius-pill);
-    transition: background var(--transition), color var(--transition);
-  }
-  .remove-col-btn:hover {
-    background: var(--danger-bg);
-    color: var(--danger-fg);
   }
 </style>

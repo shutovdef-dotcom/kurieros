@@ -21,9 +21,12 @@ const ratesByTransport: Record<TransportKey, Map<string, number>> = {
 };
 
 for (const offer of yandexOffers) {
-    const transport = offer.transport as TransportKey | string;
-    if (!TRANSPORT_KEYS.includes(transport as TransportKey)) continue;
-    const map = ratesByTransport[transport as TransportKey];
+    // `offer.transport` is already `TransportMode`. Excluding the one
+    // non-rate member narrows it to `'foot' | 'auto' | 'bicycle'`,
+    // which IS `TransportKey` — so no cast is needed below.
+    const transport = offer.transport;
+    if (transport === 'remote') continue;
+    const map = ratesByTransport[transport];
 
     const hourlyCandidates = [offer.pay.hourly?.max, offer.pay.hourly?.min];
     const hourlyRate = hourlyCandidates.find((value) => Number.isFinite(value));
@@ -151,8 +154,13 @@ const fallbackRateJson = JSON.stringify(fallbackByTransport);
 <script is:inline define:vars={{ ratesJson, fallbackRateJson }}>
     // 2D map: rates[transport][city] = hourly rub. Per A7 the user
     // picks both city AND transport (auto / bicycle / foot).
-    const rates = JSON.parse(ratesJson);
-    const fallbackRate = JSON.parse(fallbackRateJson);
+    // Guard both parses: a malformed blob degrades to the flat
+    // fallback (calculate() tolerates an empty `rates`) instead of
+    // throwing and freezing the whole calculator silently (v3 M10).
+    let rates = {};
+    try { rates = JSON.parse(ratesJson); } catch (e) { console.error('[calc] bad ratesJson', e); }
+    let fallbackRate = {};
+    try { fallbackRate = JSON.parse(fallbackRateJson); } catch (e) { console.error('[calc] bad fallbackRateJson', e); }
 
     const daysRange = document.getElementById('days-range');
     const hoursRange = document.getElementById('hours-range');

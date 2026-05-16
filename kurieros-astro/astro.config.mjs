@@ -33,13 +33,30 @@ const buildTimestamp = String(Date.now());
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const emptyListingsPath = resolve(__dirname, 'public/empty-listings.json');
 
+// Read failure handling (audit v3 M11): a *missing* file (ENOENT) is an
+// acceptable degradation in local `astro dev` — warn and continue with an
+// empty exclusion list. But a parse error (corrupt JSON) is a real bug,
+// and so is ANY failure in a production/CI build — silently shipping
+// thin-content `/rabota-kurerom-*/` pages into the sitemap is worse than
+// a hard failure. In those cases re-throw so the build fails loudly.
 let emptyListings = [];
 try {
   emptyListings = JSON.parse(readFileSync(emptyListingsPath, 'utf8'));
 } catch (err) {
-  console.error(
-    `\n⚠️  Failed to read ${emptyListingsPath}.\n` +
-    `   Hint: Run 'npm run generate:data' before 'astro build' or 'astro dev'.\n` +
+  const isMissingFile = err && err.code === 'ENOENT';
+  const isProductionBuild = Boolean(process.env.CI) || import.meta.env.PROD;
+  if (!isMissingFile || isProductionBuild) {
+    console.error(
+      `\n✗ Failed to read ${emptyListingsPath}.\n` +
+      `   ${isMissingFile ? 'File is missing' : 'File is unreadable or corrupt'} ` +
+      `and this is a ${isProductionBuild ? 'production/CI' : 'parse-error'} build.\n` +
+      `   Hint: Run 'npm run generate:data' before 'astro build'.\n`
+    );
+    throw err;
+  }
+  console.warn(
+    `\n⚠️  ${emptyListingsPath} not found.\n` +
+    `   Hint: Run 'npm run generate:data' before 'astro dev'.\n` +
     `   Continuing with empty exclusion list (sitemap may include URLs that should be excluded).\n`
   );
 }

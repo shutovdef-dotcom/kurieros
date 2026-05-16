@@ -33,7 +33,7 @@ const CONTENT_OVERRIDE_CATEGORY_SLUGS = new Set<string>([
 	'ezhednevnaya-oplata',
 ]);
 
-export function getEmptyListingPaths(): Set<string> {
+function getEmptyListingPaths(): Set<string> {
 	const empty = new Set<string>();
 
 	// City-listing emptiness uses the same city predicate as the SSR

@@ -14,6 +14,7 @@ import type {
 } from './vacancyTypes';
 import { isCityBlocked, slugifyCity } from '../utils/cities';
 import { fnv1a } from '../utils/fnv1a';
+import { z } from 'zod';
 
 // === Per-language translation overrides =============================
 // Loaded from src/data/vacancy-translations-source/<lang>.json.
@@ -43,18 +44,40 @@ type TranslatableField =
 
 type LangOverrides = Record<string, Partial<Pick<VacancyContent, TranslatableField>>>;
 
+// Runtime schema for a per-language override file. Each file maps a
+// source slug → an object carrying only the 5 translatable fields (all
+// optional — a file may translate just a subset). Mirrors `LangOverrides`
+// exactly. Per the v2 H5 boundary, the 11 override JSON imports below are
+// validated through `loadOverrides()` rather than `as`-cast: a malformed
+// file (wrong nesting, a number where a string list is expected) now
+// fails the build with a field-level path instead of feeding bad data
+// straight into rendered vacancy content via `resolveLocalizedContent`.
+const langOverridesSchema: z.ZodType<LangOverrides> = z.record(
+  z.string(),
+  z.object({
+    shortDescription: z.string().optional(),
+    description: z.string().optional(),
+    requirements: z.array(z.string()).optional(),
+    benefits: z.array(z.string()).optional(),
+    requiredDocuments: z.array(z.string()).optional(),
+  }),
+);
+
+/** Parse one raw translation-override JSON import into a validated `LangOverrides`. */
+const loadOverrides = (raw: unknown): LangOverrides => langOverridesSchema.parse(raw);
+
 const TRANSLATION_OVERRIDES: Partial<Record<SupportedLanguage, LangOverrides>> = {
-  uz: uzOverrides as LangOverrides,
-  tg: tgOverrides as LangOverrides,
-  ky: kyOverrides as LangOverrides,
-  hy: hyOverrides as LangOverrides,
-  kk: kkOverrides as LangOverrides,
-  az: azOverrides as LangOverrides,
-  uk: ukOverrides as LangOverrides,
-  be: beOverrides as LangOverrides,
-  hi: hiOverrides as LangOverrides,
-  vi: viOverrides as LangOverrides,
-  zh: zhOverrides as LangOverrides,
+  uz: loadOverrides(uzOverrides),
+  tg: loadOverrides(tgOverrides),
+  ky: loadOverrides(kyOverrides),
+  hy: loadOverrides(hyOverrides),
+  kk: loadOverrides(kkOverrides),
+  az: loadOverrides(azOverrides),
+  uk: loadOverrides(ukOverrides),
+  be: loadOverrides(beOverrides),
+  hi: loadOverrides(hiOverrides),
+  vi: loadOverrides(viOverrides),
+  zh: loadOverrides(zhOverrides),
 };
 
 const TRANSPORT_TAGS: Record<TransportMode, string> = {
@@ -493,9 +516,6 @@ const getOfferRequiredDocuments = (
 ) => [...contentRequiredDocuments, ...resolveList(offer.requiredDocumentsOverride, language)];
 
 const getAgeTag = (ageFrom: number) => (ageFrom <= 16 ? '16plus' : '18+');
-
-const getSelfEmployedLabel = (formats: EmploymentFormat[]) =>
-  formats.includes('self_employed') ? 'Да' : 'Не требуется';
 
 const buildLabels = (
   labels: string[] | undefined,

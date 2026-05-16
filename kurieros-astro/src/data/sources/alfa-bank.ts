@@ -45,10 +45,11 @@ const ALFA_BANK_EMPLOYMENT_FORMATS = ['official'] satisfies EmploymentFormat[];
 const alfaBankOfferSchema = z.object({
   city: z.string().min(1),
   transport: z.enum(['foot', 'bicycle', 'auto']),
-  monthlyFromRub: z.number().finite(),
+  // Zod v4 `z.number()` already rejects NaN/Infinity — `.finite()` dropped.
+  monthlyFromRub: z.number(),
   sourceSheets: z.array(z.string()).optional(),
   hasZeroDemandRows: z.boolean().optional(),
-  maxDemand: z.number().finite().optional(),
+  maxDemand: z.number().optional(),
   schedule: z.string().optional(),
   requirement: z.string().optional(),
   extraInfo: z.string().optional(),
@@ -61,10 +62,10 @@ const alfaBankOfferSchema = z.object({
  * `.loose()` so adding diagnostics never breaks the build.
  */
 export const AlfaBankVacanciesSchema = z.looseObject({
-  sourceUrl: z.string().url(),
-  descriptionSourceUrl: z.string().url(),
+  sourceUrl: z.url(),
+  descriptionSourceUrl: z.url(),
   updatedAt: z.string().min(1),
-  salaryMonthlyFromRub: z.number().finite().positive(),
+  salaryMonthlyFromRub: z.number().positive(),
   cityCount: z.number().int().nonnegative(),
   offerCount: z.number().int().nonnegative(),
   transportRule: z.string(),

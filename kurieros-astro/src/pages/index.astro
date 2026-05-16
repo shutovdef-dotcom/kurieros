@@ -24,55 +24,6 @@ const availableCities = sortCityNamesByPopulation(getCityNames(jobsData));
 // every render of `dist/index.html`.
 const companies = getCompaniesFromJobs(jobsData);
 const totalVacancies = jobsData.length;
-const topCities = [...cities]
-	.sort((a, b) => b.vacancyCount - a.vacancyCount)
-	.slice(0, 6)
-	.map((city) => ({
-		name: city.name,
-		vacancyCount: city.vacancyCount,
-		href: `/rabota-kurerom-${city.slug}/`,
-	}));
-const featuredCompanies = [...companies]
-	.sort((a, b) => b.vacancyCount - a.vacancyCount)
-	.slice(0, 6)
-	.map((company) => ({
-		name: company.name,
-		href: company.href,
-	}));
-const featuredFormats = [
-	{ name: 'Авто', href: '/rabota-kurerom-na-avto/' },
-	{ name: 'Вело', href: '/rabota-kurerom-na-velosipede/' },
-	{ name: 'Пешком', href: '/rabota-kurerom-peshkom/' },
-	{ name: 'Подработка', href: '/rabota-kurerom-podrabotka/' },
-];
-const routeCards = [
-	{
-		title: 'Подработка после дел',
-		text: 'Вечерние смены, выходные и варианты без полного графика.',
-		href: '/rabota-kurerom-podrabotka/',
-	},
-	{
-		title: 'Можно с 16 лет',
-		text: 'Пешие и вело-варианты, где не нужен автомобиль.',
-		href: '/rabota-kurerom-16-let/',
-	},
-	{
-		title: 'Есть автомобиль',
-		text: 'Посмотреть, где машина правда помогает заработать больше.',
-		href: '/rabota-kurerom-na-avto/',
-	},
-	{
-		title: 'Хочу выбрать компанию',
-		text: 'Сравнить сервисы по выплатам, требованиям и городам.',
-		href: '/companies/',
-	},
-];
-const heroFacts = [
-	{ label: 'Вакансии', value: `${totalVacancies}` },
-	{ label: 'Компании', value: `${companies.length}` },
-	{ label: 'Города', value: `${cities.length}` },
-	{ label: 'Форматы', value: 'Авто, вело, пешком, подработка' },
-];
 const FEATURED_KB_IDS = [
 	'age-min-courier',
 	'income-foot-courier-msk',
@@ -122,18 +73,6 @@ const hubLinks = [
 		text: 'Возраст, медкнижка, доход, выплаты, штрафы — структурированно.',
 	},
 	// /blog/ discovery card hidden until first article ships.
-];
-const discoveryCards = [
-	...routeCards.map((card) => ({
-		...card,
-		kicker: 'Частый запрос',
-		variant: 'route',
-	})),
-	...hubLinks.map((card) => ({
-		...card,
-		kicker: 'Раздел сайта',
-		variant: 'hub',
-	})),
 ];
 const homepageTitle = `Работа курьером 2026: ${totalVacancies} вакансий, ${companies.length} компаний | КурьерОк`.slice(0, 70);
 const homepageDescription = `Работа курьером в России 2026: ${totalVacancies} активных вакансий, ${companies.length} компаний, ${cities.length} городов. Доход, выплаты, оформление — всё в одном месте.`.slice(0, 170);
@@ -206,6 +145,16 @@ const pageSchemaGraph = [
 <script is:inline>
 	// Homepage city-selector / geo-banner script.
 	//
+	// TWIN NOTICE: the city-resolution helpers below (`safeStorage`,
+	// `getFallbackCity`, `normalizeDetectedCity`, `getTzCity`,
+	// `TZ_TO_CITY`, the `STORAGE_KEY` / `GEO_BANNER_DISMISSED_KEY`
+	// literals) are a hand-maintained inline copy of the canonical,
+	// test-covered module `src/scripts/homeCity.js`. This `<script>` is
+	// `is:inline` and cannot `import`, so the copy is unavoidable. Any
+	// edit here MUST be mirrored into `homeCity.js` (and vice versa) —
+	// `tests/homeCityParity.test.ts` is the static-source drift-guard
+	// that fails CI when the two diverge.
+	//
 	// `availableCities` (972 strings) and `cityRouteMap` (958 entries) used
 	// to be inlined via `define:vars`, costing ~49 KB raw / ~6 KB gzip in
 	// every render of `dist/index.html`. They're now served as a static
@@ -251,7 +200,7 @@ const pageSchemaGraph = [
 			// Safari Private Browsing + restricted WKWebViews throw a SecurityError
 			// on any localStorage access. Wrap reads/writes so the whole
 			// DOMContentLoaded callback survives instead of aborting. Pattern
-			// matches BaseLayout.astro:460-462 (audit v2 C1).
+			// matches the `safeStorage` object in `BaseLayout.astro` (audit v2 C1).
 			const safeStorage = {
 				get(key) { try { return localStorage.getItem(key); } catch (_) { return null; } },
 				set(key, value) { try { localStorage.setItem(key, value); } catch (_) { /* ignore */ } },
