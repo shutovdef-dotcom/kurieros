@@ -166,8 +166,6 @@ const hasVacancies = jobsData.length > 0;
 ---
 
 <div class="job-grid-container">
-	<div class="compare-inline-alert hidden" id="compare-limit-message" aria-live="polite"></div>
-
 	<!-- Surfaces when the filter dropdowns hide every card on the page.
 	     filterJobs() shows the notice AND restores all cards so the user
 	     never lands on an empty list. -->
@@ -240,21 +238,6 @@ const hasVacancies = jobsData.length > 0;
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-4);
-	}
-
-	.compare-inline-alert {
-		margin-bottom: 0;
-		padding: 12px 16px;
-		border-radius: var(--radius-md);
-		border: 1px solid var(--danger-fg);
-		background: var(--danger-bg);
-		color: var(--danger-fg);
-		font-size: var(--fs-14);
-		font-weight: 600;
-		line-height: var(--lh-14);
-	}
-	.compare-inline-alert.hidden {
-		display: none;
 	}
 
 	.jobs-grid {
@@ -545,7 +528,6 @@ const hasVacancies = jobsData.length > 0;
 	const availableJobIdSet = new Set(availableJobIds);
 	let selectedCity = initialCity || '';
 	const normalizedInitialSearch = initialSearch.toLowerCase();
-	let compareNoticeTimeout = null;
 
 	function parseStoredCompareList() {
 		try {
@@ -586,22 +568,6 @@ const hasVacancies = jobsData.length > 0;
 		const dict = window.translations ? (window.translations[lang] || window.translations['ru']) : null;
 		if (!dict) return defaultText;
 		return key.split('.').reduce((prev, curr) => prev && prev[curr], dict) || defaultText;
-	}
-
-	function showCompareNotice(message) {
-		const compareNotice = document.getElementById('compare-limit-message');
-		if (!compareNotice) return;
-
-		compareNotice.textContent = message;
-		compareNotice.classList.remove('hidden');
-
-		if (compareNoticeTimeout) {
-			window.clearTimeout(compareNoticeTimeout);
-		}
-
-		compareNoticeTimeout = window.setTimeout(() => {
-			compareNotice.classList.add('hidden');
-		}, 3200);
 	}
 
 	function getCompareButtonLabel(isActive) {

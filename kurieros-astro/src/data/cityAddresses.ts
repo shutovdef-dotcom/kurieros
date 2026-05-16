@@ -196,5 +196,3 @@ export const getCityPostalAddress = (city: string): CityPostalAddress => {
 		addressRegion: city,
 	};
 };
-
-export { CITY_ADDRESSES };

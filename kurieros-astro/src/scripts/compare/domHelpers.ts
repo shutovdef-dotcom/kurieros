@@ -1,7 +1,7 @@
 // Shared browser-side DOM helpers for the /compare/ page modules.
 //
 // Previously these lived in the hand-written orchestration closure inside
-// `compare.astro` (`applyScopedStyles`, `escapeHtml`, `parseSalaryValue`).
+// `compare.astro` (`applyScopedStyles`, `escapeHtml`).
 // Extracted into a typed module so the catalog loader, renderer, and
 // filters can import them with compile-time-checked signatures instead of
 // relying on implicit closure scope.
@@ -52,13 +52,4 @@ export function escapeHtml(value: unknown): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
-}
-
-/**
- * Parse a free-text salary string ("от 80 000 ₽") down to its leading
- * numeric value. Non-digit characters are stripped; an unparseable string
- * yields `0`.
- */
-export function parseSalaryValue(salary: unknown): number {
-  return Number(String(salary).replace(/[^\d]/g, '')) || 0;
 }

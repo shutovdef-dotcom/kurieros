@@ -6,10 +6,9 @@ import { seededShuffle } from '../utils/seededShuffle';
 
 export interface Props {
   jobId?: number; // Optional: If provided, filter by job. If not, show stable 3
-  compact?: boolean; // Optional: If true, show smaller block for homepage
 }
 
-const { jobId, compact = false } = Astro.props;
+const { jobId } = Astro.props;
 
 // `reviews.json` is a real, generated production dataset
 // (`scripts/generate-reviews.ts`) that is also appended to by
@@ -471,19 +470,6 @@ const renderStars = (rating: number) => {
         // Form stores rating as a string ("5"); be liberal in accepting both.
         (typeof r.rating === 'string' || typeof r.rating === 'number')
       );
-    }
-
-    // Escaping basic HTML to prevent XSS
-    const HTML_ESCAPES: Record<string, string> = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      "'": '&#39;',
-      '"': '&quot;',
-    };
-    function escapeHTML(str: string | null | undefined): string {
-      if (!str) return '';
-      return str.replace(/[&<>'"]/g, (tag: string) => HTML_ESCAPES[tag] || tag);
     }
 
     function renderStars(ratingStr: string | number): string {

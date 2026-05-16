@@ -22,7 +22,6 @@ import type { VacancyOffer } from '../../data/vacancyTypes';
 import { slugifyCompany } from '../../utils/companies';
 import { getCityHref } from '../../utils/cities';
 import { fnv1a } from '../../utils/fnv1a';
-import { ozonDataAttrs } from '../../utils/ozonAttrs';
 import { getApplyCta } from '../../utils/applyCta';
 import { buildBreadcrumbSchema, buildJobPostingSchema } from '../../utils/schema';
 import { knowledgeBaseData, type KnowledgeItem } from '../../utils/knowledge';
@@ -130,7 +129,6 @@ const cityLinks = jobCities.map((city) => ({
 	name: city,
 	href: getCityHref(city),
 }));
-const primaryTransportTag = job.tags.find((tag: string) => ['auto', 'bicycle', 'foot'].includes(tag));
 const currentCitySet = new Set(jobCities);
 // HV20 — «Похожие на эту вакансию» с трёхуровневой сортировкой:
 //   Tier 1 (top): другая компания + тот же транспорт + тот же город

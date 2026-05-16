@@ -66,37 +66,16 @@ const pageSchemaGraph = [
 			</div>
 		</section>
 
-		{posts.length > 0 ? (
-			<section class="blog-section">
-				<div class="section-heading">
-					<h2>Материалы</h2>
-				</div>
-				<div class="blog-grid">
-					{posts.map((post: any) => (
-						<article class="blog-card">
-							<a href={`/blog/${post.slug}/`} class="blog-card-link">
-								<img src={post.image} alt={post.title} class="blog-image" />
-								<div class="blog-content">
-									<div class="blog-meta">
-										<time datetime={post.date}>{post.formattedDate}</time>
-										<span aria-hidden="true">•</span>
-										<span>{post.readTime}</span>
-									</div>
-									<h3 class="blog-title">{post.title}</h3>
-									<p class="blog-excerpt">{post.excerpt}</p>
-									<span class="btn-text">Читать статью</span>
-								</div>
-							</a>
-						</article>
-					))}
-				</div>
-			</section>
-		) : (
-			<section class="blog-empty">
-				<h2>Скоро здесь будут материалы</h2>
-				<p>Команда готовит новые статьи о работе курьером — про доход, форматы доставки и реальные условия. Загляните позже.</p>
-			</section>
-		)}
+		{/*
+			Empty-state placeholder. `articles.json` is intentionally `[]`, so
+			`posts` is always empty and the old `posts.length > 0` listing
+			branch was permanently unreachable — it was removed (audit v3 M5).
+			The `/blog/` feature stays shelved pending a product decision.
+		*/}
+		<section class="blog-empty">
+			<h2>Скоро здесь будут материалы</h2>
+			<p>Команда готовит новые статьи о работе курьером — про доход, форматы доставки и реальные условия. Загляните позже.</p>
+		</section>
 
 		<section class="newsletter">
 			<div class="newsletter-content">
@@ -111,6 +90,13 @@ const pageSchemaGraph = [
 </BaseLayout>
 
 <style>
+	/*
+		blog.astro is an empty-state placeholder (articles.json is []). Its
+		reachable markup uses only the hero, blog-empty and newsletter blocks;
+		the topic-grid / featured-story / blog-card families styled the
+		removed `posts.length > 0` listing branch and were deleted as dead
+		scoped CSS (audit v3 M5).
+	*/
 	.blog-hero {
 		max-width: 1360px;
 		margin: 0 auto 2rem;
@@ -127,13 +113,8 @@ const pageSchemaGraph = [
 		max-width: 10ch;
 		margin-bottom: 1rem;
 	}
-	.blog-hero-copy p,
-	.blog-answer-panel p,
-	.section-heading p,
-	.blog-excerpt {
-		color: var(--text-muted);
-	}
 	.blog-hero-copy p {
+		color: var(--text-muted);
 		max-width: 60ch;
 		font-size: 1.05rem;
 		line-height: 1.8;
@@ -153,240 +134,10 @@ const pageSchemaGraph = [
 		color: var(--text-muted);
 		font-size: 0.95rem;
 	}
-	.blog-answer-panel {
-		max-width: 1360px;
-		margin: 0 auto 1rem;
-		padding: 0 1rem;
-		display: grid;
-		grid-template-columns: minmax(220px, 0.32fr) minmax(0, 1fr);
-		gap: 1.5rem;
-		align-items: start;
-	}
-	.blog-answer-panel h2,
-	.blog-answer-panel p {
-		margin: 0;
-	}
-	.blog-answer-panel p {
-		line-height: 1.8;
-	}
-	.blog-link-strip {
-		max-width: 1360px;
-		margin: 0 auto 1rem;
-		padding: 0 1rem;
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.75rem;
-	}
-	.hub-link {
-		display: inline-flex;
-		align-items: center;
-		min-height: 2.5rem;
-		padding: 0.65rem 1rem;
-		border-radius: 8px;
-		border: 1px solid rgba(var(--brand-700-rgb), 0.16);
-		background: rgba(var(--brand-700-rgb), 0.08);
-		color: var(--text-main);
-		text-decoration: none;
-		font-weight: 800;
-	}
-	.blog-topic-section {
-		max-width: 1360px;
-		margin: 0 auto 1.5rem;
-		padding: 0 1rem;
-	}
-	.blog-topic-grid {
-		display: grid;
-		grid-template-columns: repeat(4, minmax(0, 1fr));
-		gap: 1rem;
-	}
-	.blog-topic-card {
-		display: grid;
-		gap: 0.85rem;
-		padding: 1.25rem;
-		border-radius: 8px;
-		border: 1px solid var(--scrim-border-mid);
-		background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(248,250,252,0.96));
-		box-shadow: 0 18px 48px rgba(15, 23, 42, 0.07);
-	}
-	.blog-topic-head {
-		display: flex;
-		justify-content: space-between;
-		gap: 0.75rem;
-		align-items: center;
-	}
-	.blog-topic-count {
-		font-size: 0.74rem;
-		font-weight: 900;
-		letter-spacing: 0;
-		text-transform: uppercase;
-		color: var(--text-muted);
-	}
-	.blog-topic-link {
-		color: var(--primary-color);
-		text-decoration: none;
-		font-weight: 800;
-		font-size: 0.9rem;
-	}
-	.blog-topic-card h3,
-	.blog-topic-card p {
-		margin: 0;
-	}
-	.blog-topic-card p {
-		color: var(--text-muted);
-		line-height: 1.7;
-	}
-	.blog-topic-stack {
-		display: grid;
-		gap: 0.65rem;
-	}
-	.blog-topic-article {
-		padding: 0.75rem 0.9rem;
-		border-radius: 8px;
-		background: rgba(255,255,255,0.78);
-		border: 1px solid var(--scrim-border-mid);
-		text-decoration: none;
-		font-weight: 700;
-		line-height: 1.5;
-		color: var(--text-main);
-	}
-	.featured-story {
-		max-width: 1360px;
-		margin: 0 auto 4rem;
-		padding: 1rem;
-		display: grid;
-		grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
-		gap: 1.5rem;
-		align-items: stretch;
-		text-decoration: none;
-		color: inherit;
-	}
-	.featured-story-copy {
-		background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(248,250,252,0.96));
-		border: 1px solid rgba(148, 163, 184, 0.18);
-		border-radius: 8px;
-		box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
-		padding: 2rem;
-		display: grid;
-		align-content: end;
-		gap: 1rem;
-	}
-	.featured-story-copy h2 {
-		font-size: 3rem;
-		line-height: 1.02;
-		letter-spacing: 0;
-		max-width: 11ch;
-	}
-	.featured-story-copy p {
-		max-width: 54ch;
-		color: var(--text-muted);
-		font-size: 1.02rem;
-		line-height: 1.8;
-	}
-	.featured-link {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
-		font-weight: 700;
-		color: var(--primary-color);
-	}
-	.featured-story-image {
-		width: 100%;
-		height: 100%;
-		min-height: 440px;
-		object-fit: cover;
-		border-radius: 8px;
-		box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
-	}
-	.blog-section,
-	.blog-faq {
-		max-width: 1360px;
-		margin: 0 auto 4rem;
-		padding: 0 1rem;
-	}
-	.section-heading {
-		display: flex;
-		justify-content: space-between;
-		gap: 1rem;
-		align-items: end;
-		margin-bottom: 1.75rem;
-	}
-	.section-heading h2 {
-		font-size: 2rem;
-		letter-spacing: 0;
-	}
-	.section-heading p {
-		max-width: 44ch;
-		line-height: 1.7;
-	}
-	.blog-grid {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 1.5rem;
-	}
-	.faq-grid {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-	}
 	.newsletter-link {
 		max-width: 300px;
 		margin: 0 auto;
 		display: block;
-	}
-	.blog-card {
-		background: rgba(255, 255, 255, 0.86);
-		border-radius: 8px;
-		overflow: hidden;
-		box-shadow: 0 18px 50px rgba(15, 23, 42, 0.07);
-		transition: transform 0.25s ease, box-shadow 0.25s ease;
-		border: 1px solid var(--scrim-border-mid);
-	}
-	.blog-card:hover {
-		transform: translateY(-4px);
-		box-shadow: 0 24px 60px rgba(15, 23, 42, 0.09);
-	}
-	.blog-card-link {
-		display: grid;
-		grid-template-columns: 220px minmax(0, 1fr);
-		min-height: 100%;
-		text-decoration: none;
-		color: inherit;
-	}
-	.blog-image {
-		width: 100%;
-		height: 100%;
-		min-height: 220px;
-		object-fit: cover;
-	}
-	.blog-content {
-		padding: 1.5rem 1.5rem 1.6rem;
-		display: grid;
-		align-content: start;
-	}
-	.blog-meta {
-		display: flex;
-		align-items: center;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-		font-size: 0.875rem;
-		color: var(--text-muted);
-		margin-bottom: 0.75rem;
-		line-height: 1.4;
-	}
-	.blog-title {
-		font-size: 1.55rem;
-		margin-bottom: 0.9rem;
-		line-height: 1.12;
-		letter-spacing: 0;
-	}
-	.blog-excerpt {
-		font-size: 0.98rem;
-		margin-bottom: 1.4rem;
-		line-height: 1.7;
-	}
-	.btn-text {
-		color: var(--primary-color);
-		text-decoration: none;
-		font-weight: 700;
-		font-size: 0.92rem;
 	}
 	.newsletter {
 		max-width: 1360px;
@@ -400,58 +151,17 @@ const pageSchemaGraph = [
 	.newsletter h2 { color: white; margin-bottom: 1rem; }
 	.newsletter p { color: rgba(255,255,255,0.9); margin-bottom: 2rem; }
 	@media (max-width: 960px) {
-		.blog-hero,
-		.featured-story,
-		.section-heading,
-		.blog-answer-panel {
+		.blog-hero {
 			grid-template-columns: 1fr;
 		}
 		.blog-hero-note {
 			justify-items: start;
-		}
-		.blog-topic-grid {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-		}
-		.blog-grid,
-		.faq-grid {
-			grid-template-columns: 1fr;
 		}
 	}
 	@media (max-width: 720px) {
 		.blog-hero-copy h1 {
 			font-size: 2.8rem;
 			max-width: 12ch;
-		}
-		.featured-story {
-			padding: 0 1rem;
-		}
-		.featured-story-copy h2 {
-			font-size: 2.15rem;
-			max-width: 14ch;
-		}
-		.section-heading h2 {
-			font-size: 1.65rem;
-		}
-		.featured-story-copy {
-			order: 2;
-			padding: 1.5rem;
-			border-radius: 8px;
-		}
-		.featured-story-image {
-			min-height: 280px;
-			border-radius: 8px;
-		}
-		.blog-card-link {
-			grid-template-columns: 1fr;
-		}
-		.blog-image {
-			min-height: 200px;
-		}
-		.blog-title {
-			font-size: 1.35rem;
-		}
-		.blog-topic-grid {
-			grid-template-columns: 1fr;
 		}
 		.newsletter {
 			margin-left: 1rem;
@@ -462,33 +172,6 @@ const pageSchemaGraph = [
 	}
 
 	/* === Visual refresh overrides (Blog listing) === */
-	.blog-card,
-	.article-card {
-		background: var(--ink-0);
-		border: 1px solid var(--ink-200);
-		border-radius: var(--radius-lg);
-		box-shadow: var(--shadow-xs);
-		transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
-	}
-	.blog-card:hover,
-	.article-card:hover {
-		transform: translateY(-1px);
-		border-color: var(--brand-400);
-		box-shadow: var(--shadow-md);
-	}
-	.blog-card-title,
-	.article-card-title,
-	.article-title {
-		font-family: var(--font-heading);
-		color: var(--ink-900);
-		letter-spacing: -0.01em;
-		font-weight: 700;
-	}
-	.blog-meta,
-	.article-meta {
-		color: var(--ink-500);
-		font-size: var(--fs-13);
-	}
 	.newsletter {
 		background: var(--brand-50);
 		border: 1px solid var(--brand-200);

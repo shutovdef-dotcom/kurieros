@@ -517,9 +517,6 @@ const getOfferRequiredDocuments = (
 
 const getAgeTag = (ageFrom: number) => (ageFrom <= 16 ? '16plus' : '18+');
 
-const getSelfEmployedLabel = (formats: EmploymentFormat[]) =>
-  formats.includes('self_employed') ? 'Да' : 'Не требуется';
-
 const buildLabels = (
   labels: string[] | undefined,
   transport: TransportMode[],
