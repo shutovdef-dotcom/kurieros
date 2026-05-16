@@ -99,9 +99,15 @@ export const normalizeCityKey = (value: string | null | undefined): string =>
  * frontmatter (which still goes through `filterJobsByCriteria` with
  * a `city` criterion) would normalize each job's location once per
  * city page — slow enough to eat the gains H12 buys elsewhere.
+ *
+ * EXPORTED so the /compare/ page DOM adapter
+ * (`src/scripts/compare/filters.ts`) can run the exact same
+ * comma-split + normalized city match — both are shape-agnostic
+ * `string → string[]` transforms, so sharing them keeps the H12
+ * exact-match semantics in one place (audit ref v3 M1).
  */
 const splitLocationKeysCache = new Map<string, readonly string[]>();
-const splitLocationKeys = (location: string): readonly string[] => {
+export const splitLocationKeys = (location: string): readonly string[] => {
 	const cached = splitLocationKeysCache.get(location);
 	if (cached) return cached;
 	const keys = location

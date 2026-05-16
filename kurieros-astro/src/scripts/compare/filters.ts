@@ -6,11 +6,13 @@
 // constructor dependencies.
 //
 // DOM-side adapter for the predicate in `src/utils/jobFilters.ts`. This
-// module runs on JSON catalog blobs fetched at runtime (not the build-time
-// `GeneratedJob[]` array), so it can't directly import the TypeScript
-// predicate — but the city-matching semantics MUST stay in sync with
-// `jobFilters.ts` (`job.location.toLowerCase().includes(...)` plus the
-// «Вся Россия» free pass). If you change one, change both.
+// module runs on JSON catalog blobs fetched at runtime (`CompareJob`
+// objects), not the build-time `GeneratedJob[]` array — but the
+// `string → string[]` city-key helpers are shape-agnostic, so we import
+// `splitLocationKeys` + `normalizeCityKey` straight from `jobFilters.ts`
+// and reuse the EXACT same comma-split, normalized, exact-match city
+// semantics (H12 — «Дно» must not pull in «Видное»/«Медногорск»). One
+// source of truth: there is no copy to keep in sync (audit ref v3 M1).
 //
 // When the user picks city or transport, fetch the full catalog and render
 // matching jobs (overrides the localStorage-driven manual selection mode).
@@ -19,13 +21,17 @@
 // but display the full match count in the status line so users know whether
 // to narrow further.
 
+import { normalizeCityKey, splitLocationKeys } from '../../utils/jobFilters';
 import type { CatalogLoader } from './catalogLoader';
 import type { CompareRenderer } from './render';
 import type { CompareJob } from './types';
 
 /** Max columns the comparison grid renders at once. */
 const MAX_FILTER_COLUMNS = 12;
-const NATIONWIDE_LOCATION = 'вся россия';
+// Normalized key for the special «Вся Россия» row that's rendered on
+// every city listing — pre-normalized via the shared helper so the
+// comparison below is byte-identical to `jobFilters.ts#isNationwide`.
+const NATIONWIDE_KEY = normalizeCityKey('Вся Россия');
 
 /** Russian transport-mode labels mapped to their `<select>` tag values. */
 const TRANSPORT_LABEL_TO_TAG: Record<string, string> = {
@@ -52,14 +58,20 @@ function jobMatchesTransport(job: CompareJob, tagValue: string): boolean {
   return TRANSPORT_LABEL_TO_TAG[label] === tagValue;
 }
 
-// Mirror of the `city` branch in `src/utils/jobFilters.ts#jobMatches`.
-// Note we compare a lower-cased «вся россия» here because we don't have
-// access to the original-case `NATIONWIDE_LOCATION` constant on the client;
-// both checks resolve the same set of rows.
+// The `city` branch of `src/utils/jobFilters.ts#jobMatches`, reused
+// verbatim via the shared `normalizeCityKey` / `splitLocationKeys`
+// helpers: split `job.location` on commas, normalize each part, and
+// require an EXACT key match against the normalized selected city
+// (H12). The legacy `loc.includes(city)` substring match is gone —
+// it over-matched «Дно» into «Видное»/«Медногорск» and 60+ similar
+// substring-collision city pairs. «Вся Россия» rows free-pass for
+// any city query, exactly as `jobMatches`/`isNationwide` do.
 function jobMatchesCity(job: CompareJob, cityName: string): boolean {
-  if (!cityName) return true;
-  const loc = String(job.location || '').toLowerCase();
-  return loc.includes(cityName.toLowerCase()) || loc === NATIONWIDE_LOCATION;
+  const cityKey = normalizeCityKey(cityName);
+  if (!cityKey) return true;
+  const keys = splitLocationKeys(String(job.location || ''));
+  const isNationwide = keys.length === 1 && keys[0] === NATIONWIDE_KEY;
+  return isNationwide || keys.includes(cityKey);
 }
 
 /** Reverse-lookup a transport tag value back to its Russian label. */
