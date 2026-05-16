@@ -8,11 +8,13 @@
 // DOM-side adapter for the predicate in `src/utils/jobFilters.ts`. This
 // module runs on JSON catalog blobs fetched at runtime (`CompareJob`
 // objects), not the build-time `GeneratedJob[]` array — but the
-// `string → string[]` city-key helpers are shape-agnostic, so we import
-// `splitLocationKeys` + `normalizeCityKey` straight from `jobFilters.ts`
-// and reuse the EXACT same comma-split, normalized, exact-match city
-// semantics (H12 — «Дно» must not pull in «Видное»/«Медногорск»). One
-// source of truth: there is no copy to keep in sync (audit ref v3 M1).
+// `string → string[]` city-key helpers are shape-agnostic, so we reuse
+// them directly: `splitLocationKeys` from `jobFilters.ts` (it's
+// job-filtering-specific) and the `normalizeCityKey` primitive from its
+// single owner `src/utils/cities.ts` (audit ref v3 M3). Same exact
+// comma-split, normalized, exact-match city semantics as `jobMatches`
+// (H12 — «Дно» must not pull in «Видное»/«Медногорск»). One source of
+// truth: there is no copy to keep in sync (audit ref v3 M1 + M3).
 //
 // When the user picks city or transport, fetch the full catalog and render
 // matching jobs (overrides the localStorage-driven manual selection mode).
@@ -21,7 +23,8 @@
 // but display the full match count in the status line so users know whether
 // to narrow further.
 
-import { normalizeCityKey, splitLocationKeys } from '../../utils/jobFilters';
+import { normalizeCityKey } from '../../utils/cities';
+import { splitLocationKeys } from '../../utils/jobFilters';
 import type { CatalogLoader } from './catalogLoader';
 import type { CompareRenderer } from './render';
 import type { CompareJob } from './types';

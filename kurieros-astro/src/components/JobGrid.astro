@@ -702,28 +702,38 @@ const hasVacancies = jobsData.length > 0;
 			grid.setAttribute('data-batch-size', initialBatchSize);
 		}
 
-		// Audit H10 — XSS hardening for the city-swap hot path.
+		// Audit H10 / v3 M15 — XSS hardening for the city-swap hot path.
 		//
 		// `renderJobsForCity` used to do `grid.innerHTML = newGrid.innerHTML`
 		// after `DOMParser.parseFromString(html, 'text/html')`. DOMParser
 		// makes parsed `<script>` inert, but it does NOT remove inline
 		// event-handler attributes (`onerror`, `onload`, SVG `onbegin` /
-		// `onend`, …). A CDN- or build-cache-poisoning attack on the
-		// static city HTML would therefore deliver attacker handlers that
-		// execute in the visitor's origin the moment the node lands in
-		// the live document.
+		// `onend`, …), it keeps `javascript:` / `data:` URLs in `href` /
+		// `src`, and it keeps `<style>` / `<iframe>` / `<object>` etc.
+		// A CDN- or build-cache-poisoning attack on the static city HTML
+		// would therefore deliver attacker content that runs in the
+		// visitor's origin the moment the node lands in the live document.
 		//
-		// `stripEventHandlers` removes every `on*` attribute from a node,
-		// its element descendants, and the `.content` fragment of any
-		// `<template>` reached along the way (at any nesting depth, and
-		// including when the passed-in node IS a template — a template's
-		// own `querySelectorAll` does NOT see its content fragment). The
-		// C2 «reveal more» overflow stash is itself a top-level
-		// `<template>`, so missing this leaves overflow cards poisoned.
+		// `stripEventHandlers` runs three passes over a node and its
+		// descendants (incl. the `.content` fragment of any `<template>`,
+		// at any nesting depth — a template's own `querySelectorAll` does
+		// NOT see its content fragment; the C2 «reveal more» overflow
+		// stash is itself a top-level `<template>`):
+		//   1. removes every `on*` attribute;
+		//   2. strips `javascript:` / `data:` / `vbscript:` URLs out of
+		//      href / src / xlink:href / formaction (subsumes v3 L13);
+		//   3. removes script/style/iframe/object/embed/link/meta nodes
+		//      outright + a remote-URL href/xlink:href on SVG `<use>`.
 		// This is the inline twin of `src/scripts/sanitize.js` — Astro
 		// `is:inline` scripts can't import modules (they need the
 		// `define:vars` constants), so the logic is duplicated here and
 		// pinned by `tests/sanitize.test.ts`. Keep the two in sync.
+		const DANGEROUS_TAGS = new Set([
+			'SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED', 'LINK', 'META',
+		]);
+		const URL_ATTRIBUTES = ['href', 'src', 'xlink:href', 'formaction'];
+		const DANGEROUS_URI_SCHEME = /^\s*(javascript|data|vbscript):/i;
+		const REMOTE_URL = /^\s*(https?:)?\/\//i;
 		function stripOnAttributes(el) {
 			if (!el || typeof el.getAttributeNames !== 'function') return;
 			for (const name of el.getAttributeNames()) {
@@ -734,9 +744,53 @@ const hasVacancies = jobsData.length > 0;
 				}
 			}
 		}
+		function stripDangerousUrls(el) {
+			if (!el
+				|| typeof el.getAttributeNames !== 'function'
+				|| typeof el.getAttribute !== 'function') {
+				return;
+			}
+			const isUseElement = typeof el.tagName === 'string'
+				&& el.tagName.toUpperCase() === 'USE';
+			for (const name of el.getAttributeNames()) {
+				const lower = name.toLowerCase();
+				if (!URL_ATTRIBUTES.includes(lower)) continue;
+				const value = el.getAttribute(name);
+				if (typeof value !== 'string') continue;
+				if (DANGEROUS_URI_SCHEME.test(value)) {
+					el.removeAttribute(name);
+					continue;
+				}
+				if (isUseElement
+					&& (lower === 'href' || lower === 'xlink:href')
+					&& REMOTE_URL.test(value)) {
+					el.removeAttribute(name);
+				}
+			}
+		}
+		function sanitizeElement(el) {
+			stripOnAttributes(el);
+			stripDangerousUrls(el);
+		}
+		function isDangerousElement(el) {
+			if (!el || typeof el.tagName !== 'string') return false;
+			return DANGEROUS_TAGS.has(el.tagName.toUpperCase());
+		}
+		function removeElement(el) {
+			if (!el) return;
+			if (typeof el.remove === 'function') {
+				el.remove();
+				return;
+			}
+			if (el.parentNode && typeof el.parentNode.removeChild === 'function') {
+				el.parentNode.removeChild(el);
+			}
+		}
 		function sanitizeSubtree(node) {
 			if (!node) return;
-			stripOnAttributes(node);
+			// Sanitize the node itself; the root is never removed even if
+			// it is a dangerous tag (callers hand in a whitelisted child).
+			sanitizeElement(node);
 			// Recurse into a `<template>` content fragment — also covers
 			// the case where `node` itself is the template.
 			if (node.content && node.content.nodeType !== undefined) {
@@ -744,7 +798,11 @@ const hasVacancies = jobsData.length > 0;
 			}
 			if (typeof node.querySelectorAll !== 'function') return;
 			for (const child of node.querySelectorAll('*')) {
-				stripOnAttributes(child);
+				if (isDangerousElement(child)) {
+					removeElement(child);
+					continue;
+				}
+				sanitizeElement(child);
 				if (child && child.content && child.content.nodeType !== undefined) {
 					sanitizeSubtree(child.content);
 				}

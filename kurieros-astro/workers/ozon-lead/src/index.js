@@ -126,8 +126,11 @@ async function notifyTelegram(env, { name, phone, transport, vacancy, cityID, hi
 				disable_web_page_preview: true,
 			}),
 		});
-	} catch (_) {
+	} catch (err) {
 		// Best-effort — Telegram failure must not break the lead flow.
+		// Log it so a missing/invalid bot token or a Telegram outage is
+		// observable in the Cloudflare Worker logs (audit ref v3 L14).
+		console.warn('[ozon-lead] Telegram notification failed', err);
 	}
 }
 
@@ -214,9 +217,13 @@ export default {
 				if (!success) {
 					return jsonResponse({ ok: false, error: 'rate_limited' }, { status: 429, headers: cors });
 				}
-			} catch (_) {
+			} catch (err) {
 				// Best-effort: if the rate-limiter binding misbehaves, do
 				// NOT block the lead — fall through to the normal flow.
+				// Log it so a binding misconfiguration is visible in the
+				// Cloudflare Worker logs instead of failing silently
+				// (audit ref v3 L14).
+				console.warn('[ozon-lead] rate limiter unavailable', err);
 			}
 		}
 
@@ -237,6 +244,13 @@ export default {
 
 		if (name.length < 2) {
 			return jsonResponse({ ok: false, error: 'name_too_short' }, { status: 400, headers: cors });
+		}
+		// Upper bound (audit ref v3 M17 / L14) — cap the name so a
+		// malformed or hostile body can't push an oversized string into
+		// the Ozon payload or the Telegram alert. The modal mirrors this
+		// with `maxlength="200"` on the name input.
+		if (name.length > 200) {
+			return jsonResponse({ ok: false, error: 'name_too_long' }, { status: 400, headers: cors });
 		}
 		const phone = formatPhone(phoneRaw);
 		if (!phone) {

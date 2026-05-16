@@ -28,12 +28,20 @@ interface MockFragment {
 interface MockElement {
 	attributes: Record<string, string>;
 	children: MockElement[];
+	// Upper-cased tag name, mirroring `Element.tagName` for HTML
+	// elements. `''` for the generic mocks that don't care about it.
+	tagName: string;
+	// Set when the element is attached under a parent — lets `remove()`
+	// splice the node out, mirroring `Element.remove()`.
+	parentNode?: MockElement | MockFragment;
 	// Present only on mocked <template> elements — mirrors the real
 	// HTMLTemplateElement.content DocumentFragment.
 	content?: MockFragment;
 	getAttributeNames(): string[];
+	getAttribute(name: string): string | null;
 	hasAttribute(name: string): boolean;
 	removeAttribute(name: string): void;
+	remove(): void;
 	querySelectorAll(selector: string): MockElement[];
 }
 
@@ -54,18 +62,36 @@ function descendantsOf(nodes: MockElement[]): MockElement[] {
 	return out;
 }
 
-function mockElement(attributes: Record<string, string> = {}, children: MockElement[] = []): MockElement {
+function mockElement(
+	attributes: Record<string, string> = {},
+	children: MockElement[] = [],
+	tagName = '',
+): MockElement {
 	const el: MockElement = {
 		attributes: { ...attributes },
 		children,
+		tagName: tagName.toUpperCase(),
 		getAttributeNames() {
 			return Object.keys(this.attributes);
+		},
+		getAttribute(name) {
+			return Object.prototype.hasOwnProperty.call(this.attributes, name)
+				? this.attributes[name]
+				: null;
 		},
 		hasAttribute(name) {
 			return Object.prototype.hasOwnProperty.call(this.attributes, name);
 		},
 		removeAttribute(name) {
 			delete this.attributes[name];
+		},
+		remove() {
+			// Splice self out of the parent's children, mirroring
+			// `Element.remove()`. No-op when detached.
+			const parent = this.parentNode;
+			if (!parent) return;
+			const idx = parent.children.indexOf(this);
+			if (idx !== -1) parent.children.splice(idx, 1);
 		},
 		querySelectorAll(_selector) {
 			// The helper always passes '*' — return the full descendant
@@ -74,6 +100,8 @@ function mockElement(attributes: Record<string, string> = {}, children: MockElem
 			return descendantsOf(this.children);
 		},
 	};
+	// Wire up parentNode on direct children so `remove()` works.
+	for (const child of children) child.parentNode = el;
 	return el;
 }
 
@@ -83,14 +111,18 @@ function mockElement(attributes: Record<string, string> = {}, children: MockElem
 // `querySelectorAll` cannot reach. The template element itself has no
 // light-DOM `children` (empty array), faithful to the real DOM.
 function mockTemplate(contentChildren: MockElement[]): MockElement {
-	const tpl = mockElement({ class: 'jobs-grid-overflow' });
-	tpl.content = {
+	const tpl = mockElement({ class: 'jobs-grid-overflow' }, [], 'template');
+	const fragment: MockFragment = {
 		nodeType: DOCUMENT_FRAGMENT_NODE,
 		children: contentChildren,
 		querySelectorAll(_selector) {
 			return descendantsOf(this.children);
 		},
 	};
+	tpl.content = fragment;
+	// Wire parentNode on the fragment's children so `remove()` (used by
+	// the dangerous-element strip) can splice a node out of the fragment.
+	for (const child of contentChildren) child.parentNode = fragment;
 	return tpl;
 }
 
@@ -196,15 +228,19 @@ describe('stripEventHandlers — audit H10 XSS hardening', () => {
 		// Defensive path — exotic nodes (e.g. CDATASection) that lack
 		// the standard attribute surface must not crash the sanitizer.
 		// Mirrors the real `Node.children` contract (always a defined
-		// HTMLCollection) but omits `getAttributeNames` to trigger the
-		// internal `typeof === 'function'` guard.
+		// HTMLCollection) but omits `getAttributeNames` / `tagName` to
+		// trigger the internal `typeof === 'function'` / `'string'`
+		// guards in both the attribute strip and the dangerous-tag check.
 		const exoticChild: MockElement = {
 			attributes: {},
 			children: [],
-			// getAttributeNames intentionally omitted
+			// getAttributeNames / tagName intentionally absent.
+			tagName: undefined as unknown as string,
 			getAttributeNames: undefined as unknown as () => string[],
+			getAttribute: undefined as unknown as (name: string) => string | null,
 			hasAttribute: () => false,
 			removeAttribute: () => undefined,
+			remove: () => undefined,
 			querySelectorAll: () => [],
 		};
 		const root = mockElement({ onclick: "x()" }, [exoticChild]);
@@ -291,5 +327,264 @@ describe('stripEventHandlers — audit H10 XSS hardening', () => {
 
 		const remaining = el.getAttributeNames();
 		expect(remaining).toEqual(['title']);
+	});
+});
+
+// =====================================================================
+// Audit v3 M15 — sanitizer extended beyond on* handlers.
+//
+// `stripEventHandlers` now also (1) strips dangerous-scheme URIs out of
+// href / src / xlink:href / formaction (subsumes L13 — `render.ts`'s
+// `escapeHtml` does not reject `javascript:`), (2) removes active-
+// content elements (script/style/iframe/object/embed/link/meta), and
+// (3) neutralizes a remote-URL href/xlink:href on an SVG `<use>`. The
+// inline twin inside JobGrid.astro must keep the same behaviour.
+// =====================================================================
+describe('stripEventHandlers — audit v3 M15: dangerous URIs', () => {
+	it('strips a javascript: URI from an href', () => {
+		const link = mockElement({ href: "javascript:alert(document.cookie)" }, [], 'a');
+
+		stripEventHandlers(link as unknown as Element);
+
+		expect(link.hasAttribute('href')).toBe(false);
+	});
+
+	it('strips a javascript: URI regardless of leading whitespace / case', () => {
+		// HTML tolerates leading whitespace and mixed case in a URL
+		// attribute — the scheme regex is anchored with `^\s*` + `i`.
+		const link = mockElement({ href: "  JaVaScRiPt:evil()" }, [], 'a');
+
+		stripEventHandlers(link as unknown as Element);
+
+		expect(link.hasAttribute('href')).toBe(false);
+	});
+
+	it('strips a data: URI from a src attribute', () => {
+		// `data:text/html` in a src runs in the embedding origin.
+		const img = mockElement(
+			{ src: "data:text/html,<script>alert(1)</script>" },
+			[],
+			'img',
+		);
+
+		stripEventHandlers(img as unknown as Element);
+
+		expect(img.hasAttribute('src')).toBe(false);
+	});
+
+	it('strips a vbscript: URI from a formaction attribute', () => {
+		const button = mockElement({ formaction: "vbscript:Evil" }, [], 'button');
+
+		stripEventHandlers(button as unknown as Element);
+
+		expect(button.hasAttribute('formaction')).toBe(false);
+	});
+
+	it('keeps a safe relative / absolute https href untouched', () => {
+		const safe = mockElement({ href: '/rabota-kurerom-moskva/' }, [], 'a');
+		const safeAbsolute = mockElement(
+			{ href: 'https://kurerok.ru/v/ozon-courier-1/' },
+			[],
+			'a',
+		);
+
+		stripEventHandlers(safe as unknown as Element);
+		stripEventHandlers(safeAbsolute as unknown as Element);
+
+		expect(safe.attributes.href).toBe('/rabota-kurerom-moskva/');
+		expect(safeAbsolute.attributes.href).toBe('https://kurerok.ru/v/ozon-courier-1/');
+	});
+
+	it('strips a dangerous URI from a descendant, not just the root', () => {
+		const evilLink = mockElement({ href: "javascript:steal()" }, [], 'a');
+		const card = mockElement({ class: 'job-card' }, [evilLink]);
+
+		stripEventHandlers(card as unknown as Element);
+
+		expect(evilLink.hasAttribute('href')).toBe(false);
+	});
+
+	it('strips a dangerous xlink:href value', () => {
+		// SVG-namespaced href — must be matched case-insensitively by
+		// attribute name and scheme.
+		const node = mockElement(
+			{ 'xlink:href': 'javascript:alert(1)' },
+			[],
+			'a',
+		);
+
+		stripEventHandlers(node as unknown as Element);
+
+		expect(node.hasAttribute('xlink:href')).toBe(false);
+	});
+});
+
+describe('stripEventHandlers — audit v3 M15: active-content elements', () => {
+	it('removes an <iframe> from the adopted subtree', () => {
+		const iframe = mockElement({ src: 'https://evil.example/' }, [], 'iframe');
+		const card = mockElement({ class: 'job-card' }, [iframe]);
+
+		stripEventHandlers(card as unknown as Element);
+
+		expect(card.children).not.toContain(iframe);
+		expect(card.querySelectorAll('*')).toEqual([]);
+	});
+
+	it('removes an <object> from the adopted subtree', () => {
+		const obj = mockElement({ data: 'evil.swf' }, [], 'object');
+		const card = mockElement({ class: 'job-card' }, [obj]);
+
+		stripEventHandlers(card as unknown as Element);
+
+		expect(card.children).not.toContain(obj);
+	});
+
+	it('removes a <style> element from the adopted subtree', () => {
+		const style = mockElement({}, [], 'style');
+		const card = mockElement({ class: 'job-card' }, [style]);
+
+		stripEventHandlers(card as unknown as Element);
+
+		expect(card.children).not.toContain(style);
+	});
+
+	it('removes <script>, <embed>, <link> and <meta> elements', () => {
+		const script = mockElement({}, [], 'script');
+		const embed = mockElement({}, [], 'embed');
+		const link = mockElement({ rel: 'stylesheet' }, [], 'link');
+		const meta = mockElement({ 'http-equiv': 'refresh' }, [], 'meta');
+		const safeCard = mockElement({ class: 'job-card' });
+		const grid = mockElement({ id: 'jobs-grid' }, [
+			script,
+			embed,
+			link,
+			meta,
+			safeCard,
+		]);
+
+		stripEventHandlers(grid as unknown as Element);
+
+		// All four active-content elements are gone…
+		expect(grid.children).toEqual([safeCard]);
+		// …and the benign job-card survives untouched.
+		expect(safeCard.attributes.class).toBe('job-card');
+	});
+
+	it('matches dangerous tags case-insensitively', () => {
+		// DOMParser upper-cases HTML tagName, but be defensive — the
+		// helper upper-cases before the Set lookup.
+		const lowerCaseTag = mockElement({}, [], 'iframe');
+		lowerCaseTag.tagName = 'iframe'; // force lower-case, not normalized
+		const card = mockElement({ class: 'job-card' }, [lowerCaseTag]);
+
+		stripEventHandlers(card as unknown as Element);
+
+		expect(card.children).not.toContain(lowerCaseTag);
+	});
+
+	it('removes a dangerous element nested deep inside the tree', () => {
+		const script = mockElement({}, [], 'script');
+		const inner = mockElement({ class: 'job-card-body' }, [script]);
+		const card = mockElement({ class: 'job-card' }, [inner]);
+
+		stripEventHandlers(card as unknown as Element);
+
+		expect(inner.children).not.toContain(script);
+		expect(card.children).toContain(inner);
+	});
+
+	it('removes a dangerous element hidden inside a <template> fragment', () => {
+		// The C2 «reveal more» overflow stash is a <template>; a poisoned
+		// <script> inside its content fragment must still be removed.
+		const script = mockElement({}, [], 'script');
+		const hiddenCard = mockElement({ class: 'job-card' });
+		const template = mockTemplate([script, hiddenCard]);
+		const grid = mockElement({ id: 'jobs-grid' }, [template]);
+
+		stripEventHandlers(grid as unknown as Element);
+
+		expect(template.content?.children).toEqual([hiddenCard]);
+	});
+
+	it('keeps a benign job-card subtree fully intact', () => {
+		// No dangerous content — nothing should be removed or altered.
+		const logo = mockElement({ src: '/logo.svg', alt: 'Ozon' }, [], 'img');
+		const title = mockElement({ class: 'job-title' }, []);
+		const card = mockElement({ class: 'job-card' }, [logo, title]);
+
+		stripEventHandlers(card as unknown as Element);
+
+		expect(card.children).toEqual([logo, title]);
+		expect(logo.attributes.src).toBe('/logo.svg');
+		expect(logo.attributes.alt).toBe('Ozon');
+	});
+});
+
+describe('stripEventHandlers — audit v3 M15: SVG <use> references', () => {
+	it('strips a remote href on an SVG <use> element', () => {
+		// A `<use>` pointing at an external document can pull in
+		// attacker-controlled markup.
+		const use = mockElement(
+			{ href: 'https://evil.example/sprite.svg#icon' },
+			[],
+			'use',
+		);
+
+		stripEventHandlers(use as unknown as Element);
+
+		expect(use.hasAttribute('href')).toBe(false);
+	});
+
+	it('strips a remote xlink:href on an SVG <use> element', () => {
+		const use = mockElement(
+			{ 'xlink:href': 'https://evil.example/sprite.svg#icon' },
+			[],
+			'use',
+		);
+
+		stripEventHandlers(use as unknown as Element);
+
+		expect(use.hasAttribute('xlink:href')).toBe(false);
+	});
+
+	it('strips a protocol-relative remote <use> href', () => {
+		const use = mockElement({ href: '//evil.example/s.svg#i' }, [], 'use');
+
+		stripEventHandlers(use as unknown as Element);
+
+		expect(use.hasAttribute('href')).toBe(false);
+	});
+
+	it('keeps a local #fragment <use> href (the normal icon-sprite case)', () => {
+		// In-document sprite references are how the site renders icons —
+		// they must NOT be stripped.
+		const use = mockElement({ href: '#icon-arrow' }, [], 'use');
+		const useXlink = mockElement({ 'xlink:href': '#icon-star' }, [], 'use');
+
+		stripEventHandlers(use as unknown as Element);
+		stripEventHandlers(useXlink as unknown as Element);
+
+		expect(use.attributes.href).toBe('#icon-arrow');
+		expect(useXlink.attributes['xlink:href']).toBe('#icon-star');
+	});
+
+	it('still strips a javascript: <use> href even though it is not remote', () => {
+		// The dangerous-scheme check fires before the remote-URL check,
+		// so a `javascript:` <use> href is removed regardless.
+		const use = mockElement({ href: 'javascript:evil()' }, [], 'use');
+
+		stripEventHandlers(use as unknown as Element);
+
+		expect(use.hasAttribute('href')).toBe(false);
+	});
+
+	it('does not strip a remote href on a non-<use> element', () => {
+		// The remote-URL strip is scoped to `<use>` only — a normal
+		// anchor to an external https page is legitimate.
+		const link = mockElement({ href: 'https://kurerok.ru/' }, [], 'a');
+
+		stripEventHandlers(link as unknown as Element);
+
+		expect(link.attributes.href).toBe('https://kurerok.ru/');
 	});
 });

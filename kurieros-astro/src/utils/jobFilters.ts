@@ -40,7 +40,15 @@
  * check. All three checks are AND-combined.
  */
 
+import { normalizeCityKey } from './cities';
 import type { GeneratedJob } from '../data/vacancyTypes';
+
+// `normalizeCityKey` is owned by `src/utils/cities.ts` (audit ref v3
+// M3 — there used to be a hand-synced byte-equivalent copy here). It's
+// re-exported so existing importers of this module (`[slug].astro`,
+// `listingSlugs.ts`, the test suite) keep a stable path, while
+// `splitLocationKeys` below builds on the single shared primitive.
+export { normalizeCityKey };
 
 export interface JobFilterCriteria {
 	/**
@@ -68,24 +76,6 @@ const NATIONWIDE_LOCATION = 'Вся Россия';
 
 const normalize = (value: string | null | undefined): string =>
 	(value ?? '').toLowerCase();
-
-/**
- * Normalize a city name to its lookup key. Mirrors the normalization
- * `src/utils/cities.ts` uses internally (lowercase + ё→е + whitespace
- * collapse / non-breaking-space repair / em-dash → hyphen) so the keys
- * the `getCitiesFromJobs()` consumer emits match the keys we index by
- * here. EXPORTED so callers in `[slug].astro` and `listingSlugs.ts`
- * can normalize a `city.name` to the same key the Map was built with.
- */
-export const normalizeCityKey = (value: string | null | undefined): string =>
-	(value ?? '')
-		.replace(/[   ]/g, ' ')
-		.replace(/[‐-―]/g, '-')
-		.replace(/\s+/g, ' ')
-		.replace(/\s*-\s*/g, '-')
-		.trim()
-		.toLowerCase()
-		.replace(/ё/g, 'е');
 
 /**
  * Split a raw `job.location` string into the normalized city keys it

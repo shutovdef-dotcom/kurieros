@@ -21,7 +21,7 @@ import { vacancySources } from '../../data/vacancies';
 import type { VacancyOffer } from '../../data/vacancyTypes';
 import { slugifyCompany } from '../../utils/companies';
 import { getCityHref } from '../../utils/cities';
-import { fnv1a } from '../../utils/fnv1a';
+import { applyHourlyJitter } from '../../utils/fnv1a';
 import { getApplyCta } from '../../utils/applyCta';
 import { buildBreadcrumbSchema, buildJobPostingSchema } from '../../utils/schema';
 import { knowledgeBaseData, type KnowledgeItem } from '../../utils/knowledge';
@@ -108,9 +108,9 @@ const computeFallbackHourlyRate = (city: string, slug: string): number | null =>
 		}
 	}
 	if (best <= 0) return null;
-	const jitter = fnv1a(slug) % 100;          // 0..99, deterministic per slug
-	const ratio = 0.88 + jitter / 1000;        // 0.880..0.979 (88-97.9% of best)
-	return Math.round(best * ratio);
+	// Render-side jitter key — bare slug (one rate per vacancy page).
+	// Formula owned by `applyHourlyJitter` (audit ref v3 M4).
+	return applyHourlyJitter(best, slug);
 };
 
 const directHourlyRate = resolveHourlyRate(matchingOffer) ?? parseHourlyRateFromRateText(job.details.rate);

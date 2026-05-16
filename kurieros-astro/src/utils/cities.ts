@@ -13,8 +13,23 @@ const normalizeCityDisplayName = (name: string) =>
 		.replace(/\s*-\s*/g, '-')
 		.trim();
 
-const normalizeCityKey = (name: string) =>
-	normalizeCityDisplayName(name)
+/**
+ * Normalize a city name to its canonical lookup key: NBSP / narrow-NBSP /
+ * figure-space repair, em-dash → hyphen, whitespace collapse and dash
+ * trimming (via `normalizeCityDisplayName`), then lowercase + ё→е.
+ *
+ * This is the SINGLE owner of the city-key primitive (audit ref v3 M3).
+ * `src/utils/jobFilters.ts` imports it — its `splitLocationKeys` builds
+ * on top — and `src/scripts/compare/filters.ts` imports it for the
+ * DOM-side filter, so every surface keys by byte-identical strings.
+ * The only remaining copy is the inline twin inside `JobGrid.astro`'s
+ * `is:inline` block, which can't import a module — keep it in sync.
+ *
+ * Accepts `null` / `undefined` (→ `''`) so callers normalizing an
+ * optional `city` criterion don't need their own guard.
+ */
+export const normalizeCityKey = (name: string | null | undefined): string =>
+	normalizeCityDisplayName(name ?? '')
 		.toLowerCase()
 		.replace(/ё/g, 'е');
 
