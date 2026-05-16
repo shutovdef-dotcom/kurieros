@@ -46,7 +46,6 @@ export const GET: APIRoute = () => {
 			company: job.company,
 			companyLogo: job.companyLogo,
 			companySlug,
-			companyHref: `/companies/${companySlug}/`,
 			salary: job.salary,
 			location: job.location,
 			transport: transportLabel(job.tags),
