@@ -88,6 +88,10 @@ const normalizedSchemaGraph = Array.isArray(schemaGraph)
 	? schemaGraph
 	: [schemaGraph];
 
+// `.replace(/</g, …)` escapes `<` so a string containing
+// `</script>` (e.g. a job title) cannot break out of the inline
+// `<script type="application/ld+json">` block — `JSON.stringify`
+// alone does not escape it (audit v3 M16).
 const structuredData = JSON.stringify(
 	{
 		"@context": "https://schema.org",
@@ -95,7 +99,7 @@ const structuredData = JSON.stringify(
 	},
 	null,
 	2,
-);
+).replace(/</g, '\\u003c');
 
 const isProduction = import.meta.env.PROD;
 const ga4MeasurementId = String(import.meta.env.PUBLIC_GA4_MEASUREMENT_ID ?? '').trim();

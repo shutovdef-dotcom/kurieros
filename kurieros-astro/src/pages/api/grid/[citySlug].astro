@@ -40,9 +40,7 @@ import { buildJobsByCityMap, getCityJobsFromMap } from '../../../utils/jobFilter
 export const prerender = true;
 
 // One static path per city slug — identical slug set to
-// `/rabota-kurerom-<slug>/` (both derive from `getCitiesFromJobs`),
-// and the same slug set the existing `api/jobs-by-city/[slug]` JSON
-// endpoint already emits.
+// `/rabota-kurerom-<slug>/` (both derive from `getCitiesFromJobs`).
 export function getStaticPaths() {
 	return getCitiesFromJobs(jobsData).map((city) => ({
 		params: { citySlug: city.slug },

@@ -156,7 +156,7 @@ const compareData: CompareData = { compareJobs, features, totalCompareJobs };
   same XSS-safe emission pattern BaseLayout uses for JSON-LD structured data.
   The bundled module below reads it back via `getElementById(...).textContent`.
 */}
-<script type="application/json" id="compare-data" set:html={JSON.stringify(compareData)} is:inline></script>
+<script type="application/json" id="compare-data" set:html={JSON.stringify(compareData).replace(/</g, '\\u003c')} is:inline></script>
 
 <script>
   // Bundled + tree-shaken by Astro (no `is:inline`, no `define:vars`), so it
@@ -167,7 +167,22 @@ const compareData: CompareData = { compareJobs, features, totalCompareJobs };
   document.addEventListener('DOMContentLoaded', () => {
     const dataTag = document.getElementById('compare-data');
     if (!dataTag?.textContent) return;
-    const data = JSON.parse(dataTag.textContent) as CompareData;
+
+    // Guard the embedded-JSON parse: a malformed payload (serialization
+    // edge, CDN mangle, stale half-written HTML) would otherwise throw a
+    // SyntaxError, abort this handler, and silently kill the entire
+    // /compare/ client layer while the SSR grid still renders (v3 H5).
+    let data: CompareData;
+    try {
+      data = JSON.parse(dataTag.textContent) as CompareData;
+    } catch (err) {
+      console.error('[compare] failed to parse compare-data', err);
+      return;
+    }
+    if (!data || !Array.isArray(data.compareJobs) || !Array.isArray(data.features)) {
+      console.error('[compare] compare-data has unexpected shape');
+      return;
+    }
     initComparePage(data);
   });
 </script>
