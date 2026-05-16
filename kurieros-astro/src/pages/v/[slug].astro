@@ -155,16 +155,52 @@ function getSimilarityTier(item: typeof job): SimilarTier {
 	if (isSameCity) return 2;
 	return 3;
 }
-const similarJobs = jobsData
-	.filter((item) => item.slug !== job.slug)
-	.map((item) => ({
-		item,
-		tier: getSimilarityTier(item),
-		salaryValue: parseSalaryValue(item.salary),
-	}))
-	.sort((a, b) => a.tier - b.tier || b.salaryValue - a.salaryValue)
-	.slice(0, 6)
-	.map(({ item }) => item);
+// Bounded top-N selection (audit ref v3 H2 / NEW-1). The previous
+// implementation sorted the ENTIRE ~4,800-job list — allocating a
+// ~4,785-element wrapper array and running an O(n log n) sort — on
+// every one of the 4,786 `/v/` pages, just to keep the leading 6.
+//
+// `selectTopN` does a single O(n) pass keeping only the `n` best.
+// `project` is run ONCE per item (it computes the sort key — here a
+// `{ tier, salaryValue }` pair; `getSimilarityTier` does string
+// splitting, so it must not re-run inside the comparator), and the
+// raw item + its key are kept together. `compare` orders by the key.
+//
+// It reproduces `items.map(...).sort(compare).slice(0, n)` EXACTLY,
+// including the stable tie-break: a candidate is inserted at the first
+// position where it is *strictly* better than the element already
+// there, so items equal under `compare` keep their original input
+// order (`Array.prototype.sort` is stable). Output is byte-identical
+// to the old full-sort — but at most `n` wrapper objects ever exist,
+// not ~4,785, and there is no array-wide sort.
+function selectTopN<T, K>(
+	items: readonly T[],
+	n: number,
+	project: (item: T) => K,
+	compare: (a: K, b: K) => number,
+): T[] {
+	if (n <= 0) return [];
+	const kept: Array<{ item: T; key: K }> = [];
+	for (const item of items) {
+		const key = project(item);
+		let index = 0;
+		while (index < kept.length && compare(key, kept[index].key) >= 0) {
+			index++;
+		}
+		if (index >= n) continue; // not better than any of the n kept
+		kept.splice(index, 0, { item, key });
+		if (kept.length > n) kept.length = n;
+	}
+	return kept.map((entry) => entry.item);
+}
+
+const SIMILAR_JOBS_LIMIT = 6;
+const similarJobs = selectTopN(
+	jobsData.filter((item) => item.slug !== job.slug),
+	SIMILAR_JOBS_LIMIT,
+	(item) => ({ tier: getSimilarityTier(item), salaryValue: parseSalaryValue(item.salary) }),
+	(a, b) => a.tier - b.tier || b.salaryValue - a.salaryValue,
+);
 // Build a tight «benefit tail» — up to 2 hooks NOT redundant with the
 // leading «salary • schedule • payment_freq» line. Used to boost CTR
 // on long-tail SERP queries like «работа курьером без опыта», «без

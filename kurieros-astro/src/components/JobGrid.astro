@@ -3,6 +3,7 @@
 import JobCard from './JobCard.astro';
 import jobsData from '../data/jobs';
 import { filterJobsByCriteria } from '../utils/jobFilters';
+import type { GeneratedJob } from '../data/vacancyTypes';
 
 interface Props {
 	initialCity?: string;
@@ -22,6 +23,16 @@ interface Props {
 	 *     light while keeping all city jobs reachable on the same page.
 	 */
 	revealable?: boolean;
+	/**
+	 * Pre-filtered job set (audit ref v3 NEW-3). When the caller has
+	 * already computed the matched jobs — `[slug].astro` and
+	 * `api/grid/[citySlug].astro` do, via the O(1) `getCityJobsFromMap`
+	 * lookup — it passes them here and this component skips its own
+	 * O(n) `filterJobsByCriteria` self-scan. When omitted (the home
+	 * page, which legitimately filters from scratch by city/tag/search)
+	 * the component self-filters as before.
+	 */
+	jobs?: GeneratedJob[];
 }
 
 const {
@@ -32,6 +43,7 @@ const {
 	moreHref = '/cities/',
 	moreLabel = 'Открыть все города',
 	revealable = false,
+	jobs,
 } = Astro.props;
 const availableJobIds = jobsData.map((job) => job.id);
 
@@ -40,7 +52,12 @@ const availableJobIds = jobsData.map((job) => job.id);
 // emitter so SSR + sitemap inclusion can't drift). The client-side
 // DOM filter lower in this same file (search for `function filterJobs`)
 // is a separate DOM-dataset adapter; semantics are kept in sync by hand.
-const matchedJobs = filterJobsByCriteria(jobsData, {
+//
+// NEW-3: when the caller passes a pre-filtered `jobs` set (it already
+// ran the O(1) `getCityJobsFromMap` lookup — see [slug].astro /
+// api/grid/[citySlug].astro), use it directly and skip the redundant
+// O(n) self-scan. Only the home page omits `jobs` → it self-filters.
+const matchedJobs = jobs ?? filterJobsByCriteria(jobsData, {
 	city: initialCity,
 	tag: initialTag,
 	search: initialSearch,
