@@ -34,12 +34,14 @@ export async function getStaticPaths() {
 }
 
 const { job } = Astro.props;
-// `applyLink: 'lead-form:<provider>'` (set in src/data/vacancies.ts)
-// is a magic marker that swaps the external apply CTA for an in-page
-// modal. The page emits a `<button data-lead-form-type=…>` instead of
-// an external `<a>`, and the JSON-LD schema marks the post as having
-// no direct apply URL (the apply happens off-site in the partner's
-// app after we capture the lead via the form).
+// `applyLink: 'lead-form:<provider>'` (the constant `OZON_LEAD_APPLY`
+// defined in src/data/partnerLinks.ts, wired onto offers in
+// src/data/ozonOffers.ts) is a magic marker that swaps the external
+// apply CTA for an in-page modal. The page emits a `<button
+// data-lead-form-type=…>` instead of an external `<a>`, and the JSON-LD
+// schema marks the post as having no direct apply URL (the apply
+// happens off-site in the partner's app after we capture the lead via
+// the form).
 const isLeadFormApply = typeof job.applyLink === 'string' && job.applyLink.startsWith('lead-form:');
 const leadFormType = isLeadFormApply ? job.applyLink.slice('lead-form:'.length) : null;
 const hasApplyLink = !isLeadFormApply && Boolean(job.applyLink && job.applyLink !== '#');

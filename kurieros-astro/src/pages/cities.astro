@@ -25,6 +25,16 @@ const cities = getCitiesFromJobs(jobsData)
 
 const totalVacancies = cities.reduce((sum, city) => sum + city.vacancyCount, 0);
 
+// JSON-LD ItemList cap (audit v3 M21). A 958-entry ItemList was ~118 KB
+// of inline JSON-LD that merely duplicated the 958 crawlable `<a
+// class="city-tile">` links already in the markup — near-zero
+// rich-result benefit. Cap the structured-data list to the top cities
+// by vacancy count; the full set stays discoverable via the tile grid.
+const SCHEMA_ITEM_LIST_LIMIT = 30;
+const schemaItemListCities = [...cities]
+	.sort((a, b) => b.vacancyCount - a.vacancyCount || a.name.localeCompare(b.name, 'ru'))
+	.slice(0, SCHEMA_ITEM_LIST_LIMIT);
+
 // Both helpers now delegate to the shared `formatRussianPlural` from
 // src/utils/format.ts. The vacancy variant additionally returns an
 // i18n key so the city-tile template can data-t the count for non-RU
@@ -64,7 +74,7 @@ const pageSchemaGraph = [
 		dateModified: new Date().toISOString(),
 		mainEntity: {
 			'@type': 'ItemList',
-			itemListElement: cities.map((city, index) => ({
+			itemListElement: schemaItemListCities.map((city, index) => ({
 				'@type': 'ListItem',
 				position: index + 1,
 				name: city.name,

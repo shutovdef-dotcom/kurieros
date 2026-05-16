@@ -5,9 +5,10 @@ import VacancyTKey from './VacancyTKey.astro';
 
 const { job, isInCompare = false } = Astro.props;
 
-// `applyLink: 'lead-form:<provider>'` is a magic marker (set in
-// src/data/vacancies.ts) that swaps the external `<a>` CTA for an
-// in-page modal opener. The `<provider>` segment is forwarded to
+// `applyLink: 'lead-form:<provider>'` is a magic marker (the constant
+// `OZON_LEAD_APPLY` defined in src/data/partnerLinks.ts, wired onto
+// offers in src/data/ozonOffers.ts) that swaps the external `<a>` CTA
+// for an in-page modal opener. The `<provider>` segment is forwarded to
 // `data-lead-form-type` and consumed by the matching modal component.
 const isLeadFormApply = typeof job.applyLink === 'string' && job.applyLink.startsWith('lead-form:');
 const leadFormType = isLeadFormApply ? job.applyLink.slice('lead-form:'.length) : null;

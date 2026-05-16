@@ -3,7 +3,11 @@
 // so the same input always maps to the same output across builds.
 //
 // Not cryptographic — DO NOT use for anything security-sensitive.
-// Range: returns a non-negative 32-bit integer in [0, 2^31 - 1].
+// Range: returns a non-negative integer in [0, 2^31]. The upper bound
+// is 2^31 (not 2^31 - 1): `hash | 0` can be INT32_MIN, and
+// `Math.abs(INT32_MIN)` is 2^31 — one past the signed-int32 max. This
+// is a documented quirk, not a bug; the implementation is intentionally
+// frozen (changing it would re-baseline every derived job ID).
 //
 // Reference: http://www.isthe.com/chongo/tech/comp/fnv/
 

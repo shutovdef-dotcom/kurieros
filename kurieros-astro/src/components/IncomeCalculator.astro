@@ -21,9 +21,12 @@ const ratesByTransport: Record<TransportKey, Map<string, number>> = {
 };
 
 for (const offer of yandexOffers) {
-    const transport = offer.transport as TransportKey | string;
-    if (!TRANSPORT_KEYS.includes(transport as TransportKey)) continue;
-    const map = ratesByTransport[transport as TransportKey];
+    // `offer.transport` is already `TransportMode`. Excluding the one
+    // non-rate member narrows it to `'foot' | 'auto' | 'bicycle'`,
+    // which IS `TransportKey` — so no cast is needed below.
+    const transport = offer.transport;
+    if (transport === 'remote') continue;
+    const map = ratesByTransport[transport];
 
     const hourlyCandidates = [offer.pay.hourly?.max, offer.pay.hourly?.min];
     const hourlyRate = hourlyCandidates.find((value) => Number.isFinite(value));

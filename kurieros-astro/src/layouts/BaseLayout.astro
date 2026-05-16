@@ -668,10 +668,13 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 					}
 				}
 
-				// Renamed from `ensureVacancyTranslations` to clarify per-fragment
-				// loading semantics. External callers use the same i18n manager API
-				// (`window.kurieros_i18n.ensureVacancyTranslations`) which we keep
-				// as a back-compatible alias below.
+				// Loads every per-source vacancy-translation fragment visible on
+				// the current page for `lang`, falls back to the RU shell dict
+				// for non-RU slots, expands the compact `{ defaults, entries }`
+				// fragment shape, and merges the result into
+				// `translations[lang].vacancies`. No-op for RU and for pages
+				// with no vacancy keys. Exposed verbatim on the i18n manager as
+				// `window.kurieros_i18n.ensureVacancyTranslations` below.
 				async function ensureVacancyTranslations(lang) {
 					if (lang === DEFAULT_LANG || !pageHasVacancyTranslationKeys()) {
 						return;

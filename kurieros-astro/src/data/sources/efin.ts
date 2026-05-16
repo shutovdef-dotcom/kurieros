@@ -40,8 +40,9 @@ const EFIN_EMPLOYMENT_FORMATS = ['self_employed'] satisfies EmploymentFormat[];
 const efinOfferSchema = z.object({
   city: z.string().min(1),
   transport: z.enum(['foot', 'auto']),
-  monthlyFromRub: z.number().finite(),
-  meetingFeeRub: z.number().finite(),
+  // Zod v4 `z.number()` already rejects NaN/Infinity — `.finite()` dropped.
+  monthlyFromRub: z.number(),
+  meetingFeeRub: z.number(),
   schedule: z.string().optional(),
   workTime: z.string().optional(),
   statusUpdatedAt: z.string().optional(),
@@ -50,7 +51,7 @@ const efinOfferSchema = z.object({
 });
 
 export const EfinVacanciesSchema = z.object({
-  sourceUrl: z.string().url(),
+  sourceUrl: z.url(),
   updatedAt: z.string().min(1),
   offers: z.array(efinOfferSchema),
 });

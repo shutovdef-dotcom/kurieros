@@ -145,6 +145,16 @@ const pageSchemaGraph = [
 <script is:inline>
 	// Homepage city-selector / geo-banner script.
 	//
+	// TWIN NOTICE: the city-resolution helpers below (`safeStorage`,
+	// `getFallbackCity`, `normalizeDetectedCity`, `getTzCity`,
+	// `TZ_TO_CITY`, the `STORAGE_KEY` / `GEO_BANNER_DISMISSED_KEY`
+	// literals) are a hand-maintained inline copy of the canonical,
+	// test-covered module `src/scripts/homeCity.js`. This `<script>` is
+	// `is:inline` and cannot `import`, so the copy is unavoidable. Any
+	// edit here MUST be mirrored into `homeCity.js` (and vice versa) —
+	// `tests/homeCityParity.test.ts` is the static-source drift-guard
+	// that fails CI when the two diverge.
+	//
 	// `availableCities` (972 strings) and `cityRouteMap` (958 entries) used
 	// to be inlined via `define:vars`, costing ~49 KB raw / ~6 KB gzip in
 	// every render of `dist/index.html`. They're now served as a static
@@ -190,7 +200,7 @@ const pageSchemaGraph = [
 			// Safari Private Browsing + restricted WKWebViews throw a SecurityError
 			// on any localStorage access. Wrap reads/writes so the whole
 			// DOMContentLoaded callback survives instead of aborting. Pattern
-			// matches BaseLayout.astro:460-462 (audit v2 C1).
+			// matches the `safeStorage` object in `BaseLayout.astro` (audit v2 C1).
 			const safeStorage = {
 				get(key) { try { return localStorage.getItem(key); } catch (_) { return null; } },
 				set(key, value) { try { localStorage.setItem(key, value); } catch (_) { /* ignore */ } },

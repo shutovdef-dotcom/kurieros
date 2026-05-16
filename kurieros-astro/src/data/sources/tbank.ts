@@ -45,9 +45,10 @@ const T_BANK_EMPLOYMENT_FORMATS = ['gph', 'self_employed'] satisfies EmploymentF
 const tBankOfferSchema = z.object({
   city: z.string().min(1),
   workMode: z.string().nullish(),
-  avgIncomeRub: z.number().finite().nullish(),
-  incomeMinRub: z.number().finite().nullish(),
-  incomeMaxRub: z.number().finite().nullish(),
+  // Zod v4 `z.number()` already rejects NaN/Infinity — `.finite()` dropped.
+  avgIncomeRub: z.number().nullish(),
+  incomeMinRub: z.number().nullish(),
+  incomeMaxRub: z.number().nullish(),
   hiringActive: z.boolean().optional(),
 });
 
@@ -63,7 +64,7 @@ const tBankVacancySchema = z.object({
 });
 
 export const TBankVacanciesSchema = z.object({
-  sourceUrl: z.string().url(),
+  sourceUrl: z.url(),
   updatedAt: z.string().min(1),
   operatorB2B: tBankVacancySchema,
   representative: tBankVacancySchema,

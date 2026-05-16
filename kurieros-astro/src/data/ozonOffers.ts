@@ -1,14 +1,22 @@
 /**
- * Ozon vacancy generator — turns the live form catalogue
- * (`./ozon-vacancies.json`, refreshed via
- * `node tools/fetch-ozon-vacancies.mjs`) into 5 ready-to-use
- * `VacancySource` entries (one per backend `combineCustomerVacancy`
- * slug), each with N offers (one per supported city).
+ * Ozon vacancy generator — turns the live form catalogues into 9
+ * ready-to-use `VacancySource` entries (`sourceId` 10–18), each with N
+ * offers (one per supported city).
+ *
+ * Two source catalogues feed it, each refreshed by its own tool:
+ *   • `./ozon-vacancies.json` (sklad roles) — `node
+ *     tools/fetch-ozon-vacancies.mjs`. Keyed per backend
+ *     `combineCustomerVacancy` slug.
+ *   • `./ozon-fresh-vacancies.json` (Ozon Fresh roles) — `node
+ *     tools/fetch-ozon-fresh-vacancies.mjs`. Keyed by
+ *     `${customer}:${vacancy}`.
+ * Refresh BOTH when updating the Ozon dataset — running only the sklad
+ * tool leaves the entire Fresh half silently stale.
  *
  * Why this shape:
- *   • The Ozon form maps 7 dropdown labels onto 5 backend slugs
- *     (rocket:courier covers «Курьер на личном легковом авто»,
- *     «Курьер на личном грузовом авто», и «Курьер на автомобиле
+ *   • The Ozon form maps multiple dropdown labels onto fewer backend
+ *     slugs (e.g. rocket:courier covers «Курьер на личном легковом
+ *     авто», «Курьер на личном грузовом авто», и «Курьер на автомобиле
  *     компании» — the form differentiates only client-side).
  *   • For SEO/UI we still want one vacancy *page* per (role × city)
  *     pair so each route has unique title/description/keywords.
@@ -18,7 +26,7 @@
  *     `kurerok-ozon-lead.shutovdef.workers.dev/lead`.
  *
  * Re-run `node tools/build-worker-whitelist.mjs` after editing this
- * file or refreshing `ozon-vacancies.json` so the Worker's
+ * file or refreshing either JSON catalogue so the Worker's
  * `src/whitelist.js` stays in sync (otherwise legitimate leads will
  * 400 with `invalid_vacancy_city_combination`).
  */
