@@ -21,12 +21,15 @@ import tBankVacanciesSource from '../src/data/tbank-vacancies.json';
 import efinVacanciesSource from '../src/data/efin-vacancies.json';
 import alfaBankVacanciesSource from '../src/data/alfa-bank-vacancies.json';
 import burgerKingVacanciesSource from '../src/data/burger-king-vacancies.json';
+import ozonVacanciesSource from '../src/data/ozon-vacancies.json';
+import ozonFreshVacanciesSource from '../src/data/ozon-fresh-vacancies.json';
 
 import { KuperPayRatesSchema } from '../src/data/sources/kuper';
 import { TBankVacanciesSchema } from '../src/data/sources/tbank';
 import { EfinVacanciesSchema } from '../src/data/sources/efin';
 import { AlfaBankVacanciesSchema } from '../src/data/sources/alfa-bank';
 import { BurgerKingVacanciesSchema } from '../src/data/sources/burger-king';
+import { OzonSkladVacanciesSchema, OzonFreshVacanciesSchema } from '../src/data/ozonOffers';
 
 // =====================================================================
 // Helpers
@@ -293,5 +296,103 @@ describe('BurgerKingVacanciesSchema', () => {
     const noDistricts = sample.offers.find((o) => !('cityDistricts' in o));
     expect(noDistricts).toBeDefined();
     expect(() => BurgerKingVacanciesSchema.parse(sample)).not.toThrow();
+  });
+});
+
+// =====================================================================
+// Ozon sklad (ozon-vacancies.json)
+// =====================================================================
+
+describe('OzonSkladVacanciesSchema', () => {
+  it('parses the production JSON without throwing', () => {
+    expect(() => OzonSkladVacanciesSchema.parse(ozonVacanciesSource)).not.toThrow();
+  });
+
+  it('infers a non-empty catalogue with slug/label/cities per entry', () => {
+    const parsed = OzonSkladVacanciesSchema.parse(ozonVacanciesSource);
+    expect(parsed.length).toBeGreaterThan(0);
+    for (const entry of parsed) {
+      expect(entry.slug).toBeTruthy();
+      expect(entry.label).toBeTruthy();
+      expect(Array.isArray(entry.cities)).toBe(true);
+    }
+  });
+
+  it('rejects an entry missing `slug`', () => {
+    const malformed = clone(ozonVacanciesSource);
+    delete (malformed[0] as Partial<(typeof malformed)[number]>).slug;
+    try {
+      OzonSkladVacanciesSchema.parse(malformed);
+      throw new Error('parse should have thrown for missing slug');
+    } catch (error) {
+      expectIssueAtPath(error, [0, 'slug']);
+    }
+  });
+
+  it('rejects a city whose `hireObjects` is not an array', () => {
+    const malformed = clone(ozonVacanciesSource);
+    (malformed[0].cities[0] as unknown as { hireObjects: unknown }).hireObjects =
+      'not-an-array' as unknown;
+    try {
+      OzonSkladVacanciesSchema.parse(malformed);
+      throw new Error('parse should have thrown for non-array hireObjects');
+    } catch (error) {
+      expectIssueAtPath(error, [0, 'cities', 0, 'hireObjects']);
+    }
+  });
+
+  it('rejects a hire object missing its `uuid`', () => {
+    const malformed = clone(ozonVacanciesSource);
+    delete (malformed[0].cities[0].hireObjects[0] as Partial<
+      (typeof malformed)[number]['cities'][number]['hireObjects'][number]
+    >).uuid;
+    try {
+      OzonSkladVacanciesSchema.parse(malformed);
+      throw new Error('parse should have thrown for missing hire-object uuid');
+    } catch (error) {
+      expectIssueAtPath(error, [0, 'cities', 0, 'hireObjects', 0, 'uuid']);
+    }
+  });
+});
+
+// =====================================================================
+// Ozon Fresh (ozon-fresh-vacancies.json)
+// =====================================================================
+
+describe('OzonFreshVacanciesSchema', () => {
+  it('parses the production JSON without throwing', () => {
+    expect(() => OzonFreshVacanciesSchema.parse(ozonFreshVacanciesSource)).not.toThrow();
+  });
+
+  it('infers a non-empty catalogue with customer/vacancy/label/cities per entry', () => {
+    const parsed = OzonFreshVacanciesSchema.parse(ozonFreshVacanciesSource);
+    expect(parsed.length).toBeGreaterThan(0);
+    for (const entry of parsed) {
+      expect(entry.customer).toBeTruthy();
+      expect(entry.vacancy).toBeTruthy();
+      expect(Array.isArray(entry.cities)).toBe(true);
+    }
+  });
+
+  it('rejects an entry missing the `customer` discriminator', () => {
+    const malformed = clone(ozonFreshVacanciesSource);
+    delete (malformed[0] as Partial<(typeof malformed)[number]>).customer;
+    try {
+      OzonFreshVacanciesSchema.parse(malformed);
+      throw new Error('parse should have thrown for missing customer');
+    } catch (error) {
+      expectIssueAtPath(error, [0, 'customer']);
+    }
+  });
+
+  it('rejects a numeric `cityID` (must be a string UUID)', () => {
+    const malformed = clone(ozonFreshVacanciesSource);
+    (malformed[0].cities[0] as unknown as { cityID: unknown }).cityID = 42 as unknown;
+    try {
+      OzonFreshVacanciesSchema.parse(malformed);
+      throw new Error('parse should have thrown for numeric cityID');
+    } catch (error) {
+      expectIssueAtPath(error, [0, 'cities', 0, 'cityID']);
+    }
   });
 });

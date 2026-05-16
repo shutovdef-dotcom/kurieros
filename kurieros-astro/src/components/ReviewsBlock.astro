@@ -1,5 +1,6 @@
 ---
-import reviewsData from '../data/reviews.json';
+import { z } from 'zod';
+import reviewsRaw from '../data/reviews.json';
 import ReviewModal from './ReviewModal.astro';
 import { seededShuffle } from '../utils/seededShuffle';
 
@@ -10,21 +11,44 @@ export interface Props {
 
 const { jobId, compact = false } = Astro.props;
 
+// `reviews.json` is a real, generated production dataset
+// (`scripts/generate-reviews.ts`) that is also appended to by
+// user-submitted reviews. Per the v2 H5 boundary it is validated with a
+// Zod schema at build time rather than rendered through `any[]` — a
+// renamed/missing field would otherwise reach the render loop as
+// `undefined` with zero compile-time signal (and `renderStars(rating)`
+// would silently `parseFloat(undefined) → NaN`).
+const reviewSchema = z.object({
+  id: z.number(),
+  jobId: z.number(),
+  company: z.string(),
+  jobTitle: z.string(),
+  name: z.string(),
+  city: z.string(),
+  pros: z.string(),
+  cons: z.string(),
+  comment: z.string(),
+  rating: z.number(),
+  date: z.string(),
+});
+type Review = z.infer<typeof reviewSchema>;
+const reviewsData: Review[] = z.array(reviewSchema).parse(reviewsRaw);
+
 // Filter and prepare display data
 //
 // Per D3: reviews must be STABLE across builds — no `Math.random()`
 // in render. Vacancy pages are deterministic via the jobId filter;
 // the home-page case uses `seededShuffle` with a fixed seed so the
 // same 3 reviews appear on every rebuild.
-let displayReviews: any[] = [];
+let displayReviews: Review[] = [];
 let overallRating = 0;
 let totalReviewsCount = 0;
 
 if (jobId) {
-  displayReviews = reviewsData.filter((r: any) => r.jobId === jobId);
+  displayReviews = reviewsData.filter((r) => r.jobId === jobId);
   totalReviewsCount = displayReviews.length;
   if (totalReviewsCount > 0) {
-    const sum = displayReviews.reduce((acc: number, r: any) => acc + r.rating, 0);
+    const sum = displayReviews.reduce((acc, r) => acc + r.rating, 0);
     overallRating = Number((sum / totalReviewsCount).toFixed(1));
   }
 } else {
@@ -65,7 +89,7 @@ const renderStars = (rating: number) => {
     </div>
   ) : (
     <div class="reviews-grid" id={`reviews-container-${jobId || 'main'}`}>
-      {displayReviews.map((review: any) => (
+      {displayReviews.map((review) => (
         <div class="review-card" data-review-id={review.id}>
           <div class="review-header">
             <div class="review-avatar">{review.name.charAt(0)}</div>

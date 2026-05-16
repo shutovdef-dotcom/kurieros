@@ -9,38 +9,12 @@
 //
 // Extracted from `src/pages/compare.astro` (audit finding H14).
 
-import type jobsData from '../../data/jobs';
-
-type SourceJob = typeof jobsData[number];
-
-// Shape mirrors the SSR `mapCompareJob` output in compare.astro
-// frontmatter — kept loose because the same component renders
-// pre-selected (compile-time) jobs with all keys populated.
-interface CompareJob {
-  id: SourceJob['id'];
-  slug: string;
-  title: string;
-  company: string;
-  companyLogo: string | null;
-  companySlug: string;
-  companyHref: string;
-  salary: string;
-  location: string;
-  transport: string;
-  transport_provision: string;
-  contract: string;
-  citizenship: string;
-  payout: string;
-  bonus: string;
-  age: string;
-  os: string;
-  link: string;
-}
-
-interface Feature {
-  key: string;
-  name: string;
-}
+// `CompareJob` / `Feature` are owned by `src/scripts/compare/types.ts` —
+// the SAME types the client compare modules and the `mapCompareJob`
+// projection use. This component imports them rather than re-declaring a
+// local "kept loose" copy, so a field rename in `types.ts` is a compile
+// error here too (audit v3 M20).
+import type { CompareJob, Feature } from '../../scripts/compare/types';
 
 interface Props {
   compareJobs: readonly CompareJob[];

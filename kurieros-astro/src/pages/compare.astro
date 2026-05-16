@@ -8,8 +8,8 @@ import CompareHelpGrid from '../components/compare/CompareHelpGrid.astro';
 import CompareHero from '../components/compare/CompareHero.astro';
 import jobsData from '../data/jobs';
 import { getCityNames, sortCityNamesByPopulation } from '../utils/cities';
-import { slugifyCompany } from '../utils/companies';
 import { buildBreadcrumbSchema } from '../utils/schema';
+import { mapCompareJob } from '../utils/compareJob';
 import type { CompareData, Feature } from '../scripts/compare/types';
 
 // Compare-page browser-side logic lives in a single typed ES module
@@ -21,55 +21,11 @@ import type { CompareData, Feature } from '../scripts/compare/types';
 // `<script type="application/json">` tag (see the markup below) instead of
 // `define:vars`, which would force `is:inline` and block `import`.
 
-const transportLabelMap: Record<string, string> = {
-  auto: 'Авто',
-  bicycle: 'Велосипед / самокат',
-  foot: 'Пешком',
-  remote: 'Удалённо / офис',
-};
-
-const getTransportLabel = (tags: string[]) =>
-  tags.find((tag) => tag in transportLabelMap)
-    ? transportLabelMap[tags.find((tag) => tag in transportLabelMap) as string]
-    : 'Смешанный формат';
-
-const getTransportProvisionLabel = (provision: 'own' | 'company' | 'not_required') => {
-  if (provision === 'company') return 'Компания выдает транспортное средство';
-  if (provision === 'not_required') return 'Транспорт не требуется';
-  return 'Нужно своё транспортное средство';
-};
-
-const normalizeOsRequirement = (value?: string) => {
-  const normalized = String(value ?? '').trim().toLowerCase();
-  const hasAndroid = /android|андроид/.test(normalized);
-  const hasIos = /(?:^|[^a-z])ios(?:[^a-z]|$)|iphone|ipad|айос|айфон/.test(normalized);
-
-  if (hasAndroid && hasIos) return 'Android или iOS';
-  if (hasIos) return 'iOS';
-  if (hasAndroid) return 'Android';
-  return 'Android или iOS';
-};
-
-const mapCompareJob = (job: typeof jobsData[number]) => ({
-  id: job.id,
-  slug: job.slug,
-  title: job.title,
-  company: job.company,
-  companyLogo: job.companyLogo,
-  companySlug: slugifyCompany(job.company),
-  companyHref: `/companies/${slugifyCompany(job.company)}/`,
-  salary: job.salary,
-  location: job.location,
-  transport: getTransportLabel(job.tags),
-  transport_provision: getTransportProvisionLabel(job.transportProvision),
-  contract: job.details.employment_type,
-  citizenship: job.details.citizenship,
-  payout: job.details.payment_freq,
-  bonus: job.benefits[0] || 'Условия уточняются при отклике',
-  age: job.details.age,
-  os: normalizeOsRequirement(job.details.os),
-  link: `/v/${job.slug}/`,
-});
+// The slim job → `CompareJob` projection (`mapCompareJob`) and its 3
+// label helpers live in `src/utils/compareJob.ts` — the SAME module the
+// `/api/compare-jobs.json` endpoint imports, so the 4 preselected jobs
+// rendered here and the full catalogue the client lazy-loads can never
+// drift in shape (audit v3 M19).
 
 // Only render preselected 4 jobs in HTML (was: all 4399 → 3.9 MB page).
 // Full job catalog is served from /api/compare-jobs.json and fetched
