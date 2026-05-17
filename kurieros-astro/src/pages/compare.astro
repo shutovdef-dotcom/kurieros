@@ -7,7 +7,10 @@ import CompareGrid from '../components/compare/CompareGrid.astro';
 import CompareHelpGrid from '../components/compare/CompareHelpGrid.astro';
 import CompareHero from '../components/compare/CompareHero.astro';
 import jobsData from '../data/jobs';
-import { getCityNames, sortCityNamesByPopulation } from '../utils/cities';
+import { sortCityNamesByPopulation } from '../utils/cities';
+// City names are module-cached in `citiesIndex.ts` (H3 rationale)
+// instead of re-derived per render (audit ref v4 MEDIUM-1).
+import { cityNamesFromJobs } from '../utils/citiesIndex';
 import { buildBreadcrumbSchema } from '../utils/schema';
 import { mapCompareJob } from '../utils/compareJob';
 import type { CompareData, Feature } from '../scripts/compare/types';
@@ -32,7 +35,7 @@ import type { CompareData, Feature } from '../scripts/compare/types';
 // lazily by the client only if user has saved compareList in localStorage.
 const compareJobs = jobsData.slice(0, 4).map(mapCompareJob);
 const totalCompareJobs = jobsData.length;
-const availableCities = sortCityNamesByPopulation(getCityNames(jobsData));
+const availableCities = sortCityNamesByPopulation(cityNamesFromJobs);
 
 // Typed as `Feature[]` so each `key` is checked against `CompareFeatureKey`
 // (the string-valued keys of `CompareJob`) — a typo here is now a compile

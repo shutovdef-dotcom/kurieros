@@ -12,11 +12,14 @@ import HomeGeoBanner from '../components/home/HomeGeoBanner.astro';
 import HomeToolbar from '../components/home/HomeToolbar.astro';
 import jobsData from '../data/jobs';
 import { getCompaniesFromJobs } from '../utils/companies';
-import { getCitiesFromJobs, getCityNames, sortCityNamesByPopulation } from '../utils/cities';
+import { sortCityNamesByPopulation } from '../utils/cities';
+// City catalogue + names are module-cached in `citiesIndex.ts` (H3
+// rationale) instead of re-derived per render (audit ref v4 MEDIUM-1).
+import { citiesFromJobs, cityNamesFromJobs } from '../utils/citiesIndex';
 import { TOPIC_META, knowledgeBaseData } from '../utils/knowledge';
 
-const cities = getCitiesFromJobs(jobsData);
-const availableCities = sortCityNamesByPopulation(getCityNames(jobsData));
+const cities = citiesFromJobs;
+const availableCities = sortCityNamesByPopulation(cityNamesFromJobs);
 // `cityRouteMap` used to live here as well and be threaded into the
 // inline `define:vars`. After H13 it's served from
 // `/api/city-index.json` (see `src/pages/api/city-index.json.ts`) and

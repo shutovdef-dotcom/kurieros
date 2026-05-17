@@ -28,9 +28,13 @@ import {
 // `jobsByCity` is built ONCE at module load inside jobsByCityIndex.ts
 // (imports are module-cached). It is NOT rebuilt per page — a local
 // `const jobsByCity = buildJobsByCityMap(jobsData)` in this frontmatter
-// would re-run once per generated page (~1,964× per build, audit ref
-// v3 NEW-2); the shared module binding avoids that. (audit ref v2 H12)
+// would re-run once per generated city/category listing page (audit
+// ref v3 NEW-2); the shared module binding avoids that. (audit ref v2
+// H12)
 import { jobsByCity } from '../utils/jobsByCityIndex';
+// `citiesFromJobs` is the module-cached city catalogue — same H3
+// rationale as `jobsByCity` above (audit ref v4 MEDIUM-1).
+import { citiesFromJobs } from '../utils/citiesIndex';
 
 export async function getStaticPaths() {
 	type CityProps = {
@@ -51,7 +55,7 @@ export async function getStaticPaths() {
 	};
 	const paths: StaticPath[] = [];
 
-	getCitiesFromJobs(jobsData).forEach((city) => {
+	citiesFromJobs.forEach((city) => {
 		paths.push({
 			params: { slug: `rabota-kurerom-${city.slug}` },
 			props: {
@@ -142,7 +146,7 @@ const isEmptyListing = filteredJobs.length === 0;
 // JobGrid и УХОДИТ — нет «куда ещё кликнуть». Этот блок даёт топ-12
 // городов с наибольшим числом вакансий как явный «следующий шаг»
 // сразу под JobGrid. Только для type='city' — на категории не нужен.
-const nearbyCityLinks = type === 'city' ? buildNearbyCityLinks(jobsData, data.slug) : [];
+const nearbyCityLinks = type === 'city' ? buildNearbyCityLinks(data.slug) : [];
 
 // P1: max salary across the matched listings — used in title/description to
 // make the snippet more clickable in search results (cheaper-than-rewrite
