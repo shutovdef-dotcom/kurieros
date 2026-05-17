@@ -1,8 +1,9 @@
 ---
-/* eslint-disable max-lines -- TODO(H14): decompose JobGrid.astro (~996 LOC after skip-blank/comments) into focused per-concern components, then remove this disable. */
+/* eslint-disable max-lines -- TODO(H14): JobGrid.astro is ~998 LOC (eslint count). Wave 21d (audit v5 M8) already extracted the two define:vars-free script blocks (scroll/back-to-top -> src/scripts/jobGridScroll.ts, geo-prefetch -> src/scripts/jobGridGeoPrefetch.ts) and the home-grid selection algorithm (distributeAcrossCities/cityRank -> src/utils/distributeJobs.ts). The remaining bulk is IIFE #1 (compare-list + city hot-swap + the inline stripEventHandlers twin + dropdown filtering + reveal-more) which is `is:inline` because it needs the define:vars constants and so cannot be moved to a bundled module. Next step to remove this disable: split IIFE #1's concerns into per-concern sub-components/handlers. */
 import JobCard from './JobCard.astro';
 import jobsData from '../data/jobs';
 import { filterJobsByCriteria } from '../utils/jobFilters';
+import { distributeAcrossCities } from '../utils/distributeJobs';
 import type { GeneratedJob } from '../data/vacancyTypes';
 
 interface Props {
@@ -63,86 +64,11 @@ const matchedJobs = jobs ?? filterJobsByCriteria(jobsData, {
 	search: initialSearch,
 });
 
-// When `limit` is used (home page), distribute selection across companies
-// AND priority cities so each brand gets fair representation in top-24.
-// Old city-only round-robin let Yandex Eda (priority 2000+, alphabetic
-// first city) take the leading slot of every priority-city bucket — Ozon
-// (last in vacancySources, priority ≤1700) was pushed past the cut-off,
-// and many of the 24 grid slots ended up with two consecutive Y.Eda
-// cards. New algorithm rotates the COMPANY pointer first and dedupes by
-// city per pass — no two jobs of the same company appear in a row, and
-// every represented company surfaces before any second pick.
-const CITY_PRIORITY = [
-	'Москва', 'Санкт-Петербург', 'Екатеринбург', 'Новосибирск', 'Казань',
-	'Нижний Новгород', 'Краснодар', 'Самара', 'Уфа', 'Челябинск',
-	'Ростов-на-Дону', 'Воронеж',
-];
-const cityRank = (loc: string): number => {
-	const lower = loc.toLowerCase();
-	for (let i = 0; i < CITY_PRIORITY.length; i++) {
-		if (lower.includes(CITY_PRIORITY[i].toLowerCase())) return i;
-	}
-	return CITY_PRIORITY.length;
-};
-
-type JobItem = (typeof matchedJobs)[number];
-const distributeAcrossCities = (jobs: JobItem[], max: number): JobItem[] => {
-	// Bucket jobs by company; sort each bucket so priority-cities come
-	// first within the company (so Yandex Eda's first contribution is
-	// «Москва», not «Альметьевск»).
-	const byCompany = new Map<string, JobItem[]>();
-	for (const job of jobs) {
-		if (!byCompany.has(job.company)) byCompany.set(job.company, []);
-		byCompany.get(job.company)!.push(job);
-	}
-	for (const list of byCompany.values()) {
-		list.sort((a, b) => cityRank(a.location) - cityRank(b.location));
-	}
-
-	const out: JobItem[] = [];
-	const usedCities = new Set<string>();
-
-	// Pass 1: round-robin one job per company, picking each company's
-	// HIGHEST-priority-city job that we haven't already shown. Strict
-	// no-consecutive-same-company guarantee follows from one-per-company
-	// per loop iteration. Map iteration order is insertion order, which
-	// matches `vacancySources` order and gives a stable mix.
-	let added = true;
-	while (out.length < max && added) {
-		added = false;
-		for (const list of byCompany.values()) {
-			if (out.length >= max) break;
-			const idx = list.findIndex((j) => !usedCities.has(j.location));
-			if (idx >= 0) {
-				const job = list.splice(idx, 1)[0];
-				out.push(job);
-				usedCities.add(job.location);
-				added = true;
-			}
-		}
-	}
-
-	// Pass 2 (rare fallback): if we still have fewer than `max` rows
-	// because some company ran out of unique-city jobs, fill the
-	// remainder with another non-deduped company round-robin so the
-	// grid never short-renders. The no-consecutive-same-company rule
-	// holds because we still rotate company per iteration.
-	let fallbackAdded = true;
-	while (out.length < max && fallbackAdded) {
-		fallbackAdded = false;
-		for (const list of byCompany.values()) {
-			if (out.length >= max) break;
-			const job = list.shift();
-			if (job) {
-				out.push(job);
-				fallbackAdded = true;
-			}
-		}
-	}
-
-	return out;
-};
-
+// When `limit` is used (home page), `distributeAcrossCities` (now
+// `src/utils/distributeJobs.ts` — Wave 21d / audit v5 M8) picks a curated
+// top-N distributed across companies AND priority cities so no two cards
+// of the same company appear in a row and every brand is represented
+// before any second pick.
 const limitActive = typeof limit === 'number' && limit > 0;
 // `limitActive && !revealable` is the legacy curated-home mode: pick a
 // distributed top-N and link to /cities/ for "more". `limitActive &&
@@ -1153,218 +1079,22 @@ const hasVacancies = jobsData.length > 0;
 	});
 </script>
 
-<script is:inline>
+<script>
 	// QW6 + QW14 — scroll restore on back-nav, back-to-top button.
-	// Lives in a separate IIFE so it can't be derailed by the larger
-	// compare/filter handler above (which is wrapped in DOMContentLoaded
-	// + define:vars).
-	(function () {
-		const SCROLL_KEY = 'kurieros:jobs-scroll:' + window.location.pathname;
-
-		// --- QW6: scroll restore ---
-		// Save scrollY when the user clicks any link inside the grid
-		// (job title, company name, "сравнить", "откликнуться"). On the
-		// next load of THIS pathname, jump back to that position. Clear
-		// the entry after restore so a fresh top-level visit always
-		// starts at the top.
-		document.addEventListener('click', (event) => {
-			const target = event.target;
-			if (!(target instanceof Element)) return;
-			const link = target.closest('.job-card a');
-			if (!link || !(link instanceof HTMLAnchorElement)) return;
-			if (link.target === '_blank') return; // external apply opens new tab
-			try {
-				const dest = new URL(link.href, window.location.origin);
-				if (dest.origin !== window.location.origin) return;
-			} catch (_) {
-				return;
-			}
-			try {
-				sessionStorage.setItem(SCROLL_KEY, String(window.scrollY | 0));
-			} catch (_) {
-				/* private mode / quota — silently skip */
-			}
-		}, true);
-
-		const restoreScroll = () => {
-			let stored = null;
-			try { stored = sessionStorage.getItem(SCROLL_KEY); } catch (_) { stored = null; }
-			if (stored === null) return;
-			const y = Number.parseInt(stored, 10);
-			if (!Number.isFinite(y) || y <= 0) {
-				try { sessionStorage.removeItem(SCROLL_KEY); } catch (_) {}
-				return;
-			}
-			// Two rAFs: first lets layout settle after Astro hydration,
-			// second performs the jump. `behavior: 'auto'` (instant) —
-			// smooth-scroll on revisit feels nervous.
-			requestAnimationFrame(() => {
-				requestAnimationFrame(() => {
-					window.scrollTo({ top: y, behavior: 'auto' });
-					try { sessionStorage.removeItem(SCROLL_KEY); } catch (_) {}
-				});
-			});
-		};
-
-		if (document.readyState === 'loading') {
-			document.addEventListener('DOMContentLoaded', restoreScroll, { once: true });
-		} else {
-			restoreScroll();
-		}
-
-		// --- QW14: back-to-top ---
-		const btn = document.getElementById('back-to-top');
-		const grid = document.getElementById('jobs-grid');
-		if (!btn || !grid) return;
-
-		const SHOW_AFTER_INDEX = 7; // 0-based — i.e., after 8th card
-
-		let onScroll = null;
-		const teardown = () => {
-			if (onScroll) {
-				window.removeEventListener('scroll', onScroll);
-				onScroll = null;
-			}
-		};
-
-		const setupSentinel = () => {
-			teardown();
-			const cards = grid.querySelectorAll('.job-card');
-			if (cards.length <= SHOW_AFTER_INDEX) {
-				btn.classList.add('hidden');
-				return;
-			}
-			const sentinel = cards[SHOW_AFTER_INDEX];
-			onScroll = () => {
-				const rect = sentinel.getBoundingClientRect();
-				const passed = rect.bottom < 0;
-				btn.classList.toggle('hidden', !passed);
-			};
-			window.addEventListener('scroll', onScroll, { passive: true });
-			onScroll();
-		};
-
-		btn.addEventListener('click', () => {
-			window.scrollTo({ top: 0, behavior: 'smooth' });
-		});
-
-		// Initial setup + re-setup when grid mutates (city swap, reveal-more).
-		if (document.readyState === 'loading') {
-			document.addEventListener('DOMContentLoaded', setupSentinel, { once: true });
-		} else {
-			setupSentinel();
-		}
-		window.addEventListener('kurieros:reveal-more-jobs', () => {
-			// reveal-more appends cards but the 8th-card sentinel doesn't
-			// change identity unless the list was shorter than 8 before.
-			// Cheap to re-attach defensively.
-			setupSentinel();
-		});
-		window.addEventListener('kurieros:city-selected', () => {
-			// City swap rebuilds .jobs-grid children — the old sentinel
-			// node is gone. Wait one tick for the swap to land.
-			setTimeout(setupSentinel, 50);
-		});
-	})();
+	// Extracted to a typed ES module (Wave 21d, audit v5 M8 / TODO H14):
+	// it uses no `define:vars` constants, so it is bundled + tree-shaken
+	// by Astro instead of being `is:inline` — the same mechanism
+	// `compare.astro` uses for `compareInit.ts`.
+	import '../scripts/jobGridScroll';
 </script>
 
-<script is:inline>
+<script>
 	// Bug2 fix — Geo-aware city prefetch on idle.
-	//
-	// Подгревает HTTP-кэш браузера для города, в котором, скорее всего,
-	// находится пользователь — по IANA-таймзоне (`Intl.DateTimeFormat`).
-	// Не делает сетевых запросов к geo-сервисам, не просит permission,
-	// работает даже офлайн (timezone берётся из ОС).
-	//
-	// Эвристика «VPN или нет»: системная таймзона остаётся настройкой ОС.
-	// VPN меняет IP, но обычно НЕ трогает Date()/Intl. Поэтому пользователь
-	// под VPN из-под российской ОС всё равно увидит Europe/Moscow.
-	//
-	// Гарды:
-	//  • prefetch только с home page (на city pages пользователь уже
-	//    смотрит свой регион, прогрев бесполезен);
-	//  • respect `Save-Data` header preference (Data Saver mode);
-	//  • не качать на slow-2g/2g/3g — экономим трафик;
-	//  • запуск через `requestIdleCallback` после window.load —
-	//    не конкурирует с основной отрисовкой;
-	//  • `.catch(() => {})` чтобы 404 на неизвестный slug не падал в консоль.
-	(function () {
-		if (location.pathname !== '/' && location.pathname !== '/index.html') return;
-
-		// Карта IANA timezone → top-3 город этого региона по populated/демографии.
-		// Slug'и проверены против Astro-роутов (404'ятся на неизвестных — guard через .catch).
-		const TZ_TO_CITIES = {
-			'Europe/Moscow':       ['moskva', 'sankt-peterburg', 'nizhniy-novgorod'],
-			'Europe/Kaliningrad':  ['kaliningrad'],
-			'Europe/Samara':       ['samara', 'ulyanovsk'],
-			'Europe/Volgograd':    ['volgograd'],
-			'Europe/Saratov':      ['saratov'],
-			'Europe/Astrakhan':    ['astrahan'],
-			'Europe/Ulyanovsk':    ['ulyanovsk'],
-			'Europe/Kirov':        ['kirov'],
-			'Asia/Yekaterinburg':  ['ekaterinburg', 'chelyabinsk', 'ufa'],
-			'Asia/Omsk':           ['omsk'],
-			'Asia/Novosibirsk':    ['novosibirsk', 'tomsk'],
-			'Asia/Novokuznetsk':   ['novokuznetsk'],
-			'Asia/Krasnoyarsk':    ['krasnoyarsk'],
-			'Asia/Irkutsk':        ['irkutsk'],
-			'Asia/Yakutsk':        ['yakutsk'],
-			'Asia/Vladivostok':    ['vladivostok'],
-			'Asia/Sakhalin':       ['yuzhno-sahalinsk'],
-			'Asia/Magadan':        ['magadan'],
-			'Asia/Kamchatka':      ['petropavlovsk-kamchatskiy'],
-			'Asia/Anadyr':         ['anadyr'],
-			'Asia/Chita':          ['chita']
-		};
-		// Fallback для не-российских таймзон (туристы / диаспора) —
-		// топ-3 русских города. Без него пользователь из Тбилиси
-		// (Asia/Tbilisi) увидит cold-cache на любой клик.
-		const DEFAULT_TARGETS = ['moskva', 'sankt-peterburg', 'nizhniy-novgorod'];
-
-		function getTargets() {
-			try {
-				const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-				if (TZ_TO_CITIES[tz]) return TZ_TO_CITIES[tz];
-			} catch (_) {
-				/* Intl недоступен — древние браузеры */
-			}
-			return DEFAULT_TARGETS;
-		}
-
-		function shouldPrefetch() {
-			const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-			if (!conn) return true; // не знаем — пробуем
-			if (conn.saveData) return false; // Data Saver включён
-			if (conn.effectiveType && /(slow-2g|2g|3g)/.test(conn.effectiveType)) return false;
-			return true;
-		}
-
-		function prefetchOnIdle() {
-			if (!shouldPrefetch()) return;
-			const targets = getTargets().slice(0, 3); // максимум 3 × ~7KB gzip ≈ 21KB
-
-			const idle = window.requestIdleCallback || function (cb) { return setTimeout(cb, 1500); };
-			idle(function () {
-				targets.forEach(function (slug) {
-					// M14: прогреваем `/api/grid/{slug}/` — тот же лёгкий
-					// fragment-эндпоинт, что и `renderJobsForCity` фетчит при
-					// выборе города (раньше качали полную ~67 KB страницу).
-					// `cache: 'no-cache'` — браузер ставит response в кэш с
-					// валидацией. Когда пользователь выберет город,
-					// renderJobsForCity тоже использует 'no-cache' →
-					// условный GET → 304 → instant подмена грида.
-					fetch('/api/grid/' + slug + '/', {
-						cache: 'no-cache',
-						credentials: 'same-origin'
-					}).catch(function () { /* 404 на неизвестный slug — ОК */ });
-				});
-			}, { timeout: 3000 });
-		}
-
-		if (document.readyState === 'complete') {
-			prefetchOnIdle();
-		} else {
-			window.addEventListener('load', prefetchOnIdle, { once: true });
-		}
-	})();
+	// Extracted to a typed ES module (Wave 21d, audit v5 M8 / TODO H14):
+	// it uses no `define:vars` constants, so it is bundled + tree-shaken
+	// by Astro instead of being `is:inline`. The module keeps its own
+	// `location.pathname === '/'` self-gate, so even though Astro may
+	// load it on every listing page it no-ops everywhere but the home
+	// page.
+	import '../scripts/jobGridGeoPrefetch';
 </script>
