@@ -397,6 +397,11 @@ const renderStars = (rating: number) => {
     color: var(--ink-800);
   }
 
+  :global(body.dark-mode) .r-cons .r-icon {
+    background: rgba(239, 68, 68, 0.18);
+    color: var(--color-danger);
+  }
+
   :global(body.dark-mode) .no-reviews-box {
     background: rgba(67, 77, 90, 0.58);
     border-color: rgba(195, 204, 216, 0.28);

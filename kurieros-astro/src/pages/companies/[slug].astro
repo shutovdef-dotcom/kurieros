@@ -762,4 +762,24 @@ const pageSchemaGraph = [
       grid-template-columns: 1fr;
     }
   }
+
+  :global(:where(html, body).dark-mode) .company-page {
+    background: linear-gradient(180deg, var(--ink-50) 0%, var(--ink-0) 100%);
+  }
+
+  :global(:where(html, body).dark-mode) .company-header {
+    background: var(--ink-100);
+    border-color: var(--ink-200);
+  }
+
+  :global(:where(html, body).dark-mode) .company-logo-wrap {
+    background: var(--ink-100);
+  }
+
+  :global(:where(html, body).dark-mode) .meta-pill,
+  :global(:where(html, body).dark-mode) .job-city {
+    background: var(--ink-150);
+    border-color: var(--ink-200);
+    color: var(--ink-600);
+  }
 </style>
