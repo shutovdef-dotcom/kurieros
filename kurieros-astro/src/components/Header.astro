@@ -107,6 +107,13 @@ import Logo from './Logo.astro';
             document.body.classList.toggle('dark-mode', resolvedMode === 'dark');
             document.body.dataset.colorMode = resolvedMode;
         }
+        // Keep the `dark-mode` class on <html> in sync with <body>. The
+        // anti-FOUC <head> script in BaseLayout.astro sets it on <html> at
+        // first paint, and ~125 stylesheet rules use the unprefixed
+        // `.dark-mode .X` selector (matched via the <html> ancestor) — so a
+        // live toggle that updated only <body> left the theme half-applied
+        // until the next reload.
+        document.documentElement.classList.toggle('dark-mode', resolvedMode === 'dark');
         document.documentElement.style.colorScheme = resolvedMode;
         updateThemeToggleButton(resolvedMode);
 
