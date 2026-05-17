@@ -62,7 +62,6 @@ export const mapCompareJob = (job: GeneratedJob): CompareJob => {
     company: job.company,
     companyLogo: job.companyLogo,
     companySlug,
-    companyHref: `/companies/${companySlug}/`,
     salary: job.salary,
     location: job.location,
     transport: getTransportLabel(job.tags),
