@@ -197,7 +197,7 @@ Used in `.bottom-nav` (Header.astro) and the sticky filter toolbar. Don't reach 
 | `--dm-green-focus`          | `var(--brand-500)` |
 | `--dm-green-text`           | `var(--ink-800)` |
 
-Use these instead of inline `body.dark-mode .x { background: ... }` rules. Currently still mixed — cleanup in PR #5 of the design-tokens migration.
+Use these instead of inline `:where(html, body).dark-mode .x { background: ... }` rules. The dark-mode selectors are converged on the `:where(html, body).dark-mode` form (Wave 21e M7); the remaining cleanup is to route every surface through these auto-flipping tokens.
 
 ---
 
@@ -226,7 +226,7 @@ This file lands first. Then, in order:
 1. **PR `cleanup/inline-hex-colors`** — replace hardcoded `#xxxxxx` and `#fff` with the matching tokens above. ~150 occurrences.
 2. **PR `cleanup/page-backgrounds`** — introduce a small set of `--surface-translucent-*` tokens (currently missing) and replace 60+ `rgba(255,255,255,0.82)`-style declarations. Fixes the visible mismatch between home and `/v/[slug]/` backgrounds.
 3. **PR `refactor/buttons-canonical`** — collapse `.apply-btn` definitions across 9 files into a single canonical block in `index.css` with modifier variants.
-4. **PR `refactor/dark-mode-tokens`** — eliminate stray `body.dark-mode .x { … }` overrides (currently 75+ across 8 files) by ensuring every surface uses tokens that already auto-flip in `themes.css`.
+4. **PR `refactor/dark-mode-tokens`** — reduce the explicit `:where(html, body).dark-mode .x { … }` overrides (the selector form was converged in Wave 21e M7) by ensuring every surface uses tokens that already auto-flip in `themes.css`.
 5. **PR `cleanup/rgba-tokens`** — translucent overlays (`rgba(148,163,184,0.16)` × 20, etc.) → `--scrim-*` tokens.
 
 After all five, every page on kurerok.ru renders from a consistent token set, and a future colour-scheme tweak is a one-file edit in `themes.css`.

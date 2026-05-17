@@ -547,10 +547,12 @@ const hasVacancies = jobsData.length > 0;
 		return tags.includes(tag.toLowerCase());
 	}
 
-	// City-key helpers — the inline twin of `normalizeCityKey` /
-	// `splitLocationKeys` in `src/utils/jobFilters.ts`. This `is:inline`
-	// script can't `import` (it needs `define:vars`), so the logic is
-	// ported verbatim. The two MUST behave identically: lowercase +
+	// City-key helpers — the inline twin of `normalizeCityKey` (owned by
+	// `src/utils/cities.ts`) and `splitLocationKeys` (owned by
+	// `src/utils/jobFilters.ts`, which builds on the re-exported
+	// `normalizeCityKey`). This `is:inline` script can't `import` (it needs
+	// `define:vars`), so the logic is ported verbatim. The two MUST behave
+	// identically: lowercase +
 	// ё→е + NBSP/narrow-NBSP/figure-space repair + em-dash→hyphen +
 	// whitespace collapse + dash trimming, then a comma-split into the
 	// set of cities a `job.location` covers (rare «Алнаши, Вавож» rows).
@@ -669,8 +671,11 @@ const hasVacancies = jobsData.length > 0;
 		//      outright + a remote-URL href/xlink:href on SVG `<use>`.
 		// This is the inline twin of `src/scripts/sanitize.js` — Astro
 		// `is:inline` scripts can't import modules (they need the
-		// `define:vars` constants), so the logic is duplicated here and
-		// pinned by `tests/sanitize.test.ts`. Keep the two in sync.
+		// `define:vars` constants), so the logic is duplicated here.
+		// `tests/sanitize.test.ts` exercises the module's behaviour;
+		// `tests/sanitizeParity.test.ts` (Wave 21e) is the drift-guard
+		// that pins THIS twin byte-for-byte against the module, so the
+		// two cannot silently diverge. Keep the two in sync.
 		const DANGEROUS_TAGS = new Set([
 			'SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED', 'LINK', 'META',
 		]);

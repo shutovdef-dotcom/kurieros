@@ -754,7 +754,8 @@ footer {
 }
 
 /* .city-selector-container dark-mode is owned by scoped rules in
-   src/pages/index.astro (neutral surface-100 to match /compare/). */
+   src/components/home/HomeToolbar.astro (neutral surface-100 to match
+   /compare/). */
 
 :where(html, body).dark-mode .btn-primary {
   background: var(--dm-green-surface-strong);

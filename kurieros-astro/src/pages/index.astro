@@ -194,11 +194,14 @@ const pageSchemaGraph = [
 					cityRouteMap = data.cityRouteMap;
 				}
 			})
-			.catch(() => {
+			.catch((err) => {
 				// Network / fetch failure: degrade gracefully. The SSR
 				// <select> still works for manual selection, but
 				// auto-detect / saved-city / city-page-link enhancements
-				// are no-ops because the lookup tables stay empty.
+				// are no-ops because the lookup tables stay empty. Log it
+				// so the failure is observable — every sibling network
+				// handler logs (matches the house pattern).
+				console.warn('home: failed to load /api/city-index.json', err);
 			});
 
 		document.addEventListener('DOMContentLoaded', async () => {

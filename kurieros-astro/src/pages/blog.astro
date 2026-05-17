@@ -5,6 +5,17 @@ import Footer from '../components/Footer.astro';
 import articlesData from '../data/articles.json';
 import { buildBreadcrumbSchema } from '../utils/schema';
 
+// Shape of a `src/data/articles.json` entry. The file is intentionally
+// `[]` today (the /blog/ feature is shelved — see the empty-state note
+// below), so this interface documents the contract a future entry must
+// satisfy and lets `posts` infer instead of leaking `: any`.
+interface Article {
+	slug: string;
+	title: string;
+	description: string;
+	date: string;
+}
+
 const formatDate = (value: string) =>
 	new Intl.DateTimeFormat('ru-RU', {
 		day: 'numeric',
@@ -12,7 +23,7 @@ const formatDate = (value: string) =>
 		year: 'numeric',
 	}).format(new Date(value));
 
-const posts = articlesData.map((article: any) => ({
+const posts = (articlesData as Article[]).map((article) => ({
 	...article,
 	excerpt: article.description,
 	formattedDate: formatDate(article.date),
@@ -29,7 +40,7 @@ const pageSchemaGraph = [
 		url: Astro.url.href,
 		mainEntity: {
 			'@type': 'ItemList',
-			itemListElement: posts.map((post: any, index: number) => ({
+			itemListElement: posts.map((post, index) => ({
 				'@type': 'ListItem',
 				position: index + 1,
 				name: post.title,

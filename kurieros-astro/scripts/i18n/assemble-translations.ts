@@ -227,15 +227,15 @@ for (const lang of NON_RU_LANGS) {
       err instanceof Error && (err as NodeJS.ErrnoException).code === 'ENOENT';
     if (!isEnoent) {
       // Parse error, permission error, disk corruption — anything that is NOT
-      // a clean "missing file" is a real bug. Silently swallowing these used
-      // to ship empty stubs as if the file were intentionally absent.
+      // a clean "missing file" is a real bug, never an intentional absence.
+      // Fail the build unconditionally (regardless of STRICT_TRANSLATION_COVERAGE)
+      // — silently swallowing these used to ship empty stubs as if the file
+      // were intentionally absent. Mirrors the sibling test-translations.ts.
       console.error(
         `assemble: failed to parse clause dict ${dictPath}:`,
         err,
       );
-      if (STRICT_TRANSLATION_COVERAGE) {
-        process.exit(1);
-      }
+      process.exit(1);
     }
     // else: missing file is intentional → empty dict, sources fall back to RU
   }

@@ -180,14 +180,14 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 					// Mirror the class to <body> as soon as it parses. Dark-mode
 					// rules are converged on `:where(html, body).dark-mode .X`
 					// (Wave 21e M7), which matches via EITHER ancestor — so the
-					// <html> class set above already covers them before <body>
-					// parses. The body sync is kept regardless so the bare
-					// `.dark-mode .X` rules (which only match a class-bearing
-					// ancestor) and any future body-scoped logic stay race-free:
-					// without it those rules would only attach after Header.astro's
-					// DOMContentLoaded handler runs, flashing light defaults on a
-					// dark hero. MutationObserver fires synchronously the moment the
-					// parser inserts <body>, attaching them in the same frame.
+					// <html> class set above already styles every rule before
+					// <body> parses; no rule needs the <body> class to apply.
+					// The <body> mirror is kept anyway so the two ancestors stay
+					// consistent within the anti-FOUC frame and any future
+					// body-scoped logic (Header.astro reads body.dataset, JS that
+					// keys off the <body> class) sees the right state without a
+					// reload. MutationObserver fires synchronously the moment the
+					// parser inserts <body>, so the mirror lands in the same frame.
 					(function syncBodyDarkClass() {
 						var isDark = colorMode === 'dark';
 						if (document.body) {
