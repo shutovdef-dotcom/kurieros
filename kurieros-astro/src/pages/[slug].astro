@@ -512,6 +512,16 @@ const pageSchemaGraph = buildPageSchemaGraph({
 		color: var(--ink-700);
 		box-shadow: var(--shadow-xs);
 	}
+	/* Primary CTA keeps `background: var(--brand-800)` + `color: var(--ink-0)`.
+	   In dark mode --brand-800 has no override (stays dark green) while
+	   --ink-0 flips to near-black → ~1.6:1 contrast. Re-pair with the
+	   dark-mode green-surface tokens, same treatment as IncomeCalculator's
+	   .calc-cta-btn. */
+	:global(:where(html, body).dark-mode) .listing-primary-link {
+		background: var(--dm-green-surface-strong);
+		border-color: var(--dm-green-border);
+		color: var(--dm-green-text);
+	}
 	:global(:where(html, body).dark-mode) .listing-hero-panel h1,
 	:global(:where(html, body).dark-mode) .listing-fact-card strong {
 		color: var(--ink-900);
