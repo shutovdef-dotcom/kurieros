@@ -503,21 +503,21 @@ const pageSchemaGraph = buildPageSchemaGraph({
 	}
 
 	/* Dark-mode overrides for hardcoded light backgrounds in legacy rules */
-	:where(html, body).dark-mode .listing-hero-panel,
-	:where(html, body).dark-mode .listing-fact-card,
-	:where(html, body).dark-mode .listing-secondary-link {
+	:global(:where(html, body).dark-mode) .listing-hero-panel,
+	:global(:where(html, body).dark-mode) .listing-fact-card,
+	:global(:where(html, body).dark-mode) .listing-secondary-link {
 		background-color: var(--ink-100);
 		background-image: none;
 		border-color: var(--ink-200);
 		color: var(--ink-700);
 		box-shadow: var(--shadow-xs);
 	}
-	:where(html, body).dark-mode .listing-hero-panel h1,
-	:where(html, body).dark-mode .listing-fact-card strong {
+	:global(:where(html, body).dark-mode) .listing-hero-panel h1,
+	:global(:where(html, body).dark-mode) .listing-fact-card strong {
 		color: var(--ink-900);
 	}
-	:where(html, body).dark-mode .listing-hero-panel > p:not(.section-eyebrow),
-	:where(html, body).dark-mode .listing-fact-card span {
+	:global(:where(html, body).dark-mode) .listing-hero-panel > p:not(.section-eyebrow),
+	:global(:where(html, body).dark-mode) .listing-fact-card span {
 		color: var(--ink-600);
 	}
 
@@ -611,25 +611,25 @@ const pageSchemaGraph = buildPageSchemaGraph({
 		outline: none;
 	}
 
-	:where(html, body).dark-mode .nearby-cities {
+	:global(:where(html, body).dark-mode) .nearby-cities {
 		background: var(--ink-100);
 		border-color: var(--ink-200);
 	}
-	:where(html, body).dark-mode .nearby-cities-link {
+	:global(:where(html, body).dark-mode) .nearby-cities-link {
 		background: rgba(20, 32, 48, 0.65);
 		border-color: rgba(195, 204, 216, 0.18);
 		color: var(--ink-900);
 	}
-	:where(html, body).dark-mode .nearby-cities-link:hover,
-	:where(html, body).dark-mode .nearby-cities-link:focus-visible {
+	:global(:where(html, body).dark-mode) .nearby-cities-link:hover,
+	:global(:where(html, body).dark-mode) .nearby-cities-link:focus-visible {
 		background: rgba(20, 32, 48, 0.85);
 		border-color: rgba(76, 175, 128, 0.6);
 	}
-	:where(html, body).dark-mode .nearby-cities-lead {
+	:global(:where(html, body).dark-mode) .nearby-cities-lead {
 		color: rgba(231, 234, 240, 0.7);
 	}
-	:where(html, body).dark-mode .nearby-cities-count,
-	:where(html, body).dark-mode .nearby-cities-all-link {
+	:global(:where(html, body).dark-mode) .nearby-cities-count,
+	:global(:where(html, body).dark-mode) .nearby-cities-all-link {
 		color: #4caf80;
 	}
 </style>
