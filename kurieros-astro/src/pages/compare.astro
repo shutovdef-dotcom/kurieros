@@ -30,10 +30,17 @@ import type { CompareData, Feature } from '../scripts/compare/types';
 // rendered here and the full catalogue the client lazy-loads can never
 // drift in shape (audit v3 M19).
 
-// Only render preselected 4 jobs in HTML (was: all ~4.8k → 3.9 MB page).
+// Only render preselected jobs in HTML (was: all ~4.8k → 3.9 MB page).
 // Full job catalog is served from /api/compare-jobs.json and fetched
 // lazily by the client only if user has saved compareList in localStorage.
-const compareJobs = jobsData.slice(0, 4).map(mapCompareJob);
+// The preselect count is `MAX_COMPARE_IDS` — the compare-list cap defined
+// in src/scripts/compare/compareList.ts (a user can compare at most that
+// many jobs, so we inline exactly that many). This frontmatter runs at
+// build time but compareList.ts exports the value only as a module-private
+// const, so the literal is mirrored here and pinned by
+// tests/compareListParity.test.ts.
+const MAX_COMPARE_IDS = 4;
+const compareJobs = jobsData.slice(0, MAX_COMPARE_IDS).map(mapCompareJob);
 const totalCompareJobs = jobsData.length;
 const availableCities = sortCityNamesByPopulation(cityNamesFromJobs);
 

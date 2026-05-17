@@ -699,7 +699,7 @@ const pageSchemaGraph = [
 	.vacancy-page {
 		/* All --vacancy-* tokens route through global design tokens
 		   (themes.css). Dark-mode values are overridden below in
-		   :global(body.dark-mode) .vacancy-page. */
+		   :global(:where(html, body).dark-mode) .vacancy-page. */
 		--vacancy-ink: var(--ink-800);
 		--vacancy-muted: var(--ink-500);
 		--vacancy-eyebrow: var(--ink-500);
@@ -736,7 +736,7 @@ const pageSchemaGraph = [
 			grid-template-columns: 1fr;
 		}
 	}
-	:global(body.dark-mode) .vacancy-page {
+	:global(:where(html, body).dark-mode) .vacancy-page {
 		/* All values derived from global --ink-* and --brand-* tokens
 		   so /v/[slug] dark mode stays in lock-step with the rest of
 		   the site (warm coal palette, not cool slate). */

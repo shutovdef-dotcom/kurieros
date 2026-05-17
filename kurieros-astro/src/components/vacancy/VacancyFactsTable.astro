@@ -69,7 +69,7 @@ const { factCards } = Astro.props;
 	   inherited rule from @media (max-width: 768px) above sets
 	   grid-template-columns: repeat(2, minmax(0, 1fr)) and we no
 	   longer override it down to a single column at 520px. */
-	:global(body.dark-mode) .fact-card {
+	:global(:where(html, body).dark-mode) .fact-card {
 		background: rgba(67, 77, 90, 0.86);
 	}
 </style>

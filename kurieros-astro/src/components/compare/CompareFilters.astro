@@ -105,12 +105,12 @@ const { availableCities } = Astro.props;
     color: var(--brand-700);
     min-height: 18px;
   }
-  :global(body.dark-mode) .compare-filters {
+  :global(:where(html, body).dark-mode) .compare-filters {
     background: var(--surface-200);
     border-color: var(--ink-200);
   }
-  :global(body.dark-mode) .compare-filter select,
-  :global(body.dark-mode) .compare-filter-reset {
+  :global(:where(html, body).dark-mode) .compare-filter select,
+  :global(:where(html, body).dark-mode) .compare-filter-reset {
     background: var(--surface-100);
     color: var(--ink-800);
     border-color: var(--ink-200);

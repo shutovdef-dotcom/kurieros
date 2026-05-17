@@ -201,7 +201,7 @@ const hasNoExperience = (Array.isArray(job.labels) && job.labels.includes('Бе�
 		flex-shrink: 0;
 		display: block;
 	}
-	:global(body.dark-mode) .job-column-noexp {
+	:global(:where(html, body).dark-mode) .job-column-noexp {
 		background: rgba(46, 160, 67, 0.18);
 		color: #67d086;
 		border-color: rgba(46, 160, 67, 0.45);
@@ -445,7 +445,7 @@ const hasNoExperience = (Array.isArray(job.labels) && job.labels.includes('Бе�
 		color: var(--ink-500);
 		letter-spacing: 0.01em;
 	}
-	:global(body.dark-mode) .job-card.viewed .company-name::after {
+	:global(:where(html, body).dark-mode) .job-card.viewed .company-name::after {
 		color: var(--ink-400, rgba(231, 234, 240, 0.55));
 	}
 

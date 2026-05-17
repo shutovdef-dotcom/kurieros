@@ -29,14 +29,14 @@ const { job, companyUrl } = Astro.props;
 	   (~#1d3a26) which is almost identical to the body background
 	   (~#1a1714), making breadcrumb links invisible. Use a brighter green
 	   that holds contrast against the dark warm-coal background. */
-	:global(body.dark-mode) .breadcrumb {
+	:global(:where(html, body).dark-mode) .breadcrumb {
 		color: rgba(231, 234, 240, 0.72);
 	}
-	:global(body.dark-mode) .breadcrumb a {
+	:global(:where(html, body).dark-mode) .breadcrumb a {
 		color: var(--brand-500, #6fd093);
 	}
-	:global(body.dark-mode) .breadcrumb a:hover,
-	:global(body.dark-mode) .breadcrumb a:focus-visible {
+	:global(:where(html, body).dark-mode) .breadcrumb a:hover,
+	:global(:where(html, body).dark-mode) .breadcrumb a:focus-visible {
 		color: var(--brand-600, #8adfa9);
 	}
 </style>

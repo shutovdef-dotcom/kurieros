@@ -155,11 +155,12 @@ const pageSchemaGraph = [
 	// test-covered module `src/scripts/homeCity.js`. This `<script>` is
 	// `is:inline` and cannot `import`, so the copy is unavoidable. Any
 	// edit here MUST be mirrored into `homeCity.js` (and vice versa).
-	// `tests/homeCityParity.test.ts` is only a PARTIAL drift-guard: it
-	// fails CI when the load-bearing constants (TZ map, the two storage
-	// keys, Moscow aliases, default city) diverge, but it does NOT
-	// compare the resolution-function bodies — mirror behavioural edits
-	// to the logic by hand.
+	// `tests/homeCityParity.test.ts` is the drift-guard: it fails CI when
+	// the load-bearing constants (TZ map, the two storage keys, Moscow
+	// aliases, default city) diverge AND when the resolution-function
+	// bodies drift — it pins the load-bearing algorithmic substrings of
+	// each twin (audit v5 M11). Still mirror behavioural edits by hand;
+	// the guard catches a forgotten mirror, it does not perform one.
 	//
 	// `availableCities` (972 strings) and `cityRouteMap` (958 entries) used
 	// to be inlined via `define:vars`, costing ~49 KB raw / ~6 KB gzip in
@@ -499,14 +500,14 @@ const pageSchemaGraph = [
 	/* --- Dark Mode --- */
 	/* Old dark-mode .home-hero-* rules removed; .hero-v2 dark-mode lives in ./components/home/HomeHero.astro (W6-2). */
 	/* Toolbar dark-mode rules moved to ./components/home/HomeToolbar.astro (W6-2). */
-	:global(body.dark-mode .review-card),
-	:global(body.dark-mode .faq-item) {
+	:global(:where(html, body).dark-mode .review-card),
+	:global(:where(html, body).dark-mode .faq-item) {
 		background: rgba(67, 77, 90, 0.86) !important;
 		border-color: rgba(195, 204, 216, 0.28) !important;
 		box-shadow: 0 12px 28px rgba(15, 23, 42, 0.3) !important;
 	}
-	:global(body.dark-mode .faq-question),
-	:global(body.dark-mode .faq-answer) {
+	:global(:where(html, body).dark-mode .faq-question),
+	:global(:where(html, body).dark-mode .faq-answer) {
 		color: var(--text-main);
 	}
 

@@ -212,7 +212,7 @@ const hasVacancies = jobsData.length > 0;
 		font-weight: 700;
 		margin-bottom: 2px;
 	}
-	:global(body.dark-mode) .no-filter-match {
+	:global(:where(html, body).dark-mode) .no-filter-match {
 		background: var(--brand-50);
 		border-color: var(--brand-200);
 		color: var(--brand-700);
@@ -283,11 +283,11 @@ const hasVacancies = jobsData.length > 0;
 		background: var(--brand-800);
 		transform: translateY(-1px);
 	}
-	:global(body.dark-mode) .jobs-grid-more-btn {
+	:global(:where(html, body).dark-mode) .jobs-grid-more-btn {
 		background: var(--brand-500);
 		color: var(--ink-0);
 	}
-	:global(body.dark-mode) .jobs-grid-more-btn:hover {
+	:global(:where(html, body).dark-mode) .jobs-grid-more-btn:hover {
 		background: var(--brand-400);
 	}
 
@@ -330,7 +330,7 @@ const hasVacancies = jobsData.length > 0;
 	@media (min-width: 768px) {
 		.back-to-top { bottom: 24px; }
 	}
-	:global(body.dark-mode) .back-to-top {
+	:global(:where(html, body).dark-mode) .back-to-top {
 		background: rgba(15, 23, 36, 0.85);
 		border-color: rgba(195, 204, 216, 0.2);
 		color: var(--ink-200);
@@ -397,14 +397,14 @@ const hasVacancies = jobsData.length > 0;
 		from { background-position: 200% 0; }
 		to { background-position: -200% 0; }
 	}
-	:global(body.dark-mode .job-card-skeleton) {
+	:global(:where(html, body).dark-mode .job-card-skeleton) {
 		background: rgba(28, 36, 52, 0.95);
 		border-color: rgba(195, 204, 216, 0.18);
 	}
-	:global(body.dark-mode .job-card-skeleton-row) {
+	:global(:where(html, body).dark-mode .job-card-skeleton-row) {
 		background: rgba(195, 204, 216, 0.14);
 	}
-	:global(body.dark-mode .job-card-skeleton)::before {
+	:global(:where(html, body).dark-mode .job-card-skeleton)::before {
 		background: linear-gradient(
 			100deg,
 			transparent 20%,
@@ -442,7 +442,7 @@ const hasVacancies = jobsData.length > 0;
 	@keyframes jobgrid-spin {
 		to { transform: rotate(360deg); }
 	}
-	:global(body.dark-mode .job-grid-loading) {
+	:global(:where(html, body).dark-mode .job-grid-loading) {
 		background: rgba(94, 191, 156, 0.18);
 		color: var(--brand-300);
 		border-color: rgba(94, 191, 156, 0.4);
@@ -450,6 +450,12 @@ const hasVacancies = jobsData.length > 0;
 </style>
 
 <script is:inline define:vars={{ initialCity, initialTag, initialSearch, availableJobIds }}>
+	// Source of truth: `MAX_COMPARE_IDS` in src/scripts/compare/compareList.ts.
+	// This `is:inline` script needs `define:vars`, which forces inlining and
+	// blocks `import` — so the cap is duplicated as a local literal. Keep this
+	// value in sync with compareList.ts (tests/compareListParity.test.ts pins
+	// the two together).
+	const MAX_COMPARE_IDS = 4;
 	let compareList = [];
 	const availableJobIdSet = new Set(availableJobIds);
 	let selectedCity = initialCity || '';
@@ -469,9 +475,16 @@ const hasVacancies = jobsData.length > 0;
 	}
 
 	function normalizeCompareList(ids) {
+		// `.slice(0, MAX_COMPARE_IDS)` here is a DEFENSIVE cap on whatever is
+		// already in localStorage (corrupt / hand-edited / pre-cap legacy
+		// data) — it is NOT the add-overflow path. A fresh "add to compare"
+		// that overflows is handled by toggleCompare, which drops the OLDEST
+		// id. On already-capped storage this slice is a no-op; on tampered
+		// storage there is no "newest" to honour, so a head-truncation is
+		// the correct, predictable behaviour.
 		return ids
 			.filter((id, index, list) => availableJobIdSet.has(id) && list.indexOf(id) === index)
-			.slice(0, 4);
+			.slice(0, MAX_COMPARE_IDS);
 	}
 
 	function syncCompareList({ emitEvent = true } = {}) {
@@ -562,7 +575,11 @@ const hasVacancies = jobsData.length > 0;
 		syncCompareList({ emitEvent: false });
 		const index = compareList.indexOf(id);
 		if (index === -1) {
-			if (compareList.length >= 4) {
+			if (compareList.length >= MAX_COMPARE_IDS) {
+				// Overflow on a fresh add: drop the OLDEST id (`slice(1)`) and
+				// append the just-added one. This keeps the job the user just
+				// picked — the intuitive behaviour. All compare-list eviction
+				// converges on drop-oldest here (audit v5 M10).
 				compareList = [...compareList.slice(1), id];
 			} else {
 				compareList = [...compareList, id];

@@ -371,43 +371,43 @@ const renderStars = (rating: number) => {
     color: var(--text-muted);
   }
 
-  :global(body.dark-mode) .company-rating {
+  :global(:where(html, body).dark-mode) .company-rating {
     background: rgba(79, 91, 105, 0.72);
     border-color: rgba(195, 204, 216, 0.28);
   }
 
-  :global(body.dark-mode) .review-card {
+  :global(:where(html, body).dark-mode) .review-card {
     background: rgba(67, 77, 90, 0.86);
     border-color: rgba(195, 204, 216, 0.26);
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.3);
   }
 
-  :global(body.dark-mode) .review-card:hover {
+  :global(:where(html, body).dark-mode) .review-card:hover {
     box-shadow: 0 14px 30px rgba(15, 23, 42, 0.34);
   }
 
-  :global(body.dark-mode) .r-city {
+  :global(:where(html, body).dark-mode) .r-city {
     background: rgba(195, 204, 216, 0.14);
     border-color: rgba(195, 204, 216, 0.24);
     color: var(--ink-800);
   }
 
-  :global(body.dark-mode) .r-comment .r-icon {
+  :global(:where(html, body).dark-mode) .r-comment .r-icon {
     background: rgba(195, 204, 216, 0.18);
     color: var(--ink-800);
   }
 
-  :global(body.dark-mode) .r-cons .r-icon {
+  :global(:where(html, body).dark-mode) .r-cons .r-icon {
     background: rgba(239, 68, 68, 0.18);
     color: var(--color-danger);
   }
 
-  :global(body.dark-mode) .no-reviews-box {
+  :global(:where(html, body).dark-mode) .no-reviews-box {
     background: rgba(67, 77, 90, 0.58);
     border-color: rgba(195, 204, 216, 0.28);
   }
 
-  :global(body.dark-mode) .open-review-modal.btn-primary {
+  :global(:where(html, body).dark-mode) .open-review-modal.btn-primary {
     background: var(--dm-green-surface-strong);
     border-color: var(--dm-green-border);
     color: var(--dm-green-text);

@@ -128,14 +128,14 @@ header {
   color: var(--brand-700);
 }
 
-body.dark-mode .logo {
+:where(html, body).dark-mode .logo {
   background: var(--dm-green-surface-hover);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-body.dark-mode .logo svg {
+:where(html, body).dark-mode .logo svg {
   color: var(--dm-green-surface-hover);
 }
 
@@ -738,17 +738,17 @@ footer {
     color: white;
 }
 
-body.dark-mode .btn-secondary,
-body.dark-mode .btn-compare,
-body.dark-mode .salary-tag,
-body.dark-mode .tag {
+:where(html, body).dark-mode .btn-secondary,
+:where(html, body).dark-mode .btn-compare,
+:where(html, body).dark-mode .salary-tag,
+:where(html, body).dark-mode .tag {
   background: var(--dm-green-surface);
   border-color: var(--dm-green-border);
   color: var(--dm-green-text);
 }
 
-body.dark-mode .btn-secondary:hover,
-body.dark-mode .btn-compare:hover {
+:where(html, body).dark-mode .btn-secondary:hover,
+:where(html, body).dark-mode .btn-compare:hover {
   background: var(--dm-green-surface-hover);
   border-color: var(--dm-green-focus);
 }
@@ -756,19 +756,19 @@ body.dark-mode .btn-compare:hover {
 /* .city-selector-container dark-mode is owned by scoped rules in
    src/pages/index.astro (neutral surface-100 to match /compare/). */
 
-body.dark-mode .btn-primary {
+:where(html, body).dark-mode .btn-primary {
   background: var(--dm-green-surface-strong);
   border-color: var(--dm-green-border);
   color: var(--dm-green-text);
 }
 
-body.dark-mode .btn-primary:hover {
+:where(html, body).dark-mode .btn-primary:hover {
   background: var(--dm-green-surface-hover);
   border-color: var(--dm-green-focus);
   color: var(--dm-green-text);
 }
 
-body.dark-mode .btn-compare.active {
+:where(html, body).dark-mode .btn-compare.active {
   background: var(--dm-green-surface-hover);
   border-color: var(--dm-green-focus);
   color: var(--dm-green-text);
@@ -780,43 +780,43 @@ body.dark-mode .btn-compare.active {
    read as a single green blob (user feedback). Background uses --ink-200
    (lighter coal) because --ink-100 matches the header background, which
    would make the toggle invisible. */
-body.dark-mode .theme-toggle {
+:where(html, body).dark-mode .theme-toggle {
   background: var(--ink-200);
   border: 1px solid var(--ink-300);
   color: var(--ink-800);
 }
 
-body.dark-mode .theme-toggle:hover,
-body.dark-mode .theme-toggle:focus-visible {
+:where(html, body).dark-mode .theme-toggle:hover,
+:where(html, body).dark-mode .theme-toggle:focus-visible {
   background: var(--ink-300);
   border-color: var(--ink-400);
   color: var(--ink-900);
 }
 
-body.dark-mode .main-nav a:hover,
-body.dark-mode .main-nav a:focus-visible {
+:where(html, body).dark-mode .main-nav a:hover,
+:where(html, body).dark-mode .main-nav a:focus-visible {
   color: var(--dm-green-surface-hover);
 }
 
-body.dark-mode .city-select {
+:where(html, body).dark-mode .city-select {
   color: var(--dm-green-text);
 }
 
-body.dark-mode .city-selector-container::after {
+:where(html, body).dark-mode .city-selector-container::after {
   color: #a7d8c5;
 }
 
-body.dark-mode select {
+:where(html, body).dark-mode select {
   border-color: var(--dm-green-border);
   color: var(--dm-green-text);
 }
 
-body.dark-mode select:focus-visible {
+:where(html, body).dark-mode select:focus-visible {
   outline-color: var(--dm-green-focus);
   border-color: var(--dm-green-focus);
 }
 
-body.dark-mode .footer-cloud span {
+:where(html, body).dark-mode .footer-cloud span {
   background: rgba(148, 163, 184, 0.12);
 }
 

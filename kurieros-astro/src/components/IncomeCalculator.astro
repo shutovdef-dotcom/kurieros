@@ -402,28 +402,28 @@ const fallbackRateJson = JSON.stringify(fallbackByTransport);
         line-height: 1.4;
     }
 
-    :global(body.dark-mode) .calc-card {
+    :global(:where(html, body).dark-mode) .calc-card {
         background: rgba(67, 77, 90, 0.76);
         border-color: rgba(195, 204, 216, 0.28);
         box-shadow: 0 14px 30px rgba(15, 23, 42, 0.28);
     }
 
-    :global(body.dark-mode) .value-badge {
+    :global(:where(html, body).dark-mode) .value-badge {
         background: var(--dm-green-surface);
         border-color: var(--dm-green-border);
         color: var(--dm-green-text);
     }
 
-    :global(body.dark-mode) input[type="range"] {
+    :global(:where(html, body).dark-mode) input[type="range"] {
         background: rgba(195, 204, 216, 0.22);
     }
 
-    :global(body.dark-mode) input[type="range"]::-webkit-slider-thumb {
+    :global(:where(html, body).dark-mode) input[type="range"]::-webkit-slider-thumb {
         background: var(--dm-green-border);
         border-color: rgba(67, 77, 90, 0.96);
     }
 
-    :global(body.dark-mode) .calc-select {
+    :global(:where(html, body).dark-mode) .calc-select {
         background-color: var(--dm-green-surface);
         border-color: var(--dm-green-border);
         color: var(--dm-green-text);
@@ -432,17 +432,17 @@ const fallbackRateJson = JSON.stringify(fallbackByTransport);
         background-position: right 1.25rem center;
     }
 
-    :global(body.dark-mode) .calc-divider {
+    :global(:where(html, body).dark-mode) .calc-divider {
         background: rgba(195, 204, 216, 0.28);
     }
 
-    :global(body.dark-mode) .calc-cta-btn {
+    :global(:where(html, body).dark-mode) .calc-cta-btn {
         background: var(--dm-green-surface-strong);
         border: 1px solid var(--dm-green-border);
         color: var(--dm-green-text);
     }
 
-    :global(body.dark-mode) .calc-cta-btn:hover {
+    :global(:where(html, body).dark-mode) .calc-cta-btn:hover {
         background: var(--dm-green-surface-hover);
         border-color: var(--dm-green-focus);
         box-shadow: 0 10px 24px rgba(15, 23, 42, 0.34);
