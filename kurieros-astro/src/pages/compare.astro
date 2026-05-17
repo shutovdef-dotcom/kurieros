@@ -30,7 +30,7 @@ import type { CompareData, Feature } from '../scripts/compare/types';
 // rendered here and the full catalogue the client lazy-loads can never
 // drift in shape (audit v3 M19).
 
-// Only render preselected 4 jobs in HTML (was: all 4399 → 3.9 MB page).
+// Only render preselected 4 jobs in HTML (was: all ~4.8k → 3.9 MB page).
 // Full job catalog is served from /api/compare-jobs.json and fetched
 // lazily by the client only if user has saved compareList in localStorage.
 const compareJobs = jobsData.slice(0, 4).map(mapCompareJob);
@@ -85,7 +85,7 @@ const pageSchemaGraph = [
 // Server data handed to the bundled `compareInit` module. Serialized into
 // a `<script type="application/json">` tag below and parsed by the module
 // on `DOMContentLoaded`. We only inline the 4 preselected jobs (the full
-// ~4399-job catalog is fetched lazily from /api/compare-jobs.json) plus the
+// ~4.8k-job catalog is fetched lazily from /api/compare-jobs.json) plus the
 // feature-row definitions and total count for the empty-state copy.
 const compareData: CompareData = { compareJobs, features, totalCompareJobs };
 ---

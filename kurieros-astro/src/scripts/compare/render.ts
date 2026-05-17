@@ -100,9 +100,9 @@ export function createRenderer(deps: RendererDeps): CompareRenderer {
     const headerCells = jobs
       .map(
         (job, index) => `
-        <div class="compare-cell job-col" data-col="${index}">
+        <div class="compare-cell job-col" data-col="${escapeHtml(index)}">
           <div class="job-card-mini">
-            <button class="remove-col-btn" aria-label="Удалить" title="Удалить из сравнения" data-job-id="${job.id}" type="button">
+            <button class="remove-col-btn" aria-label="Удалить" title="Удалить из сравнения" data-job-id="${escapeHtml(job.id)}" type="button">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
             <div class="company-logo company-logo-${escapeHtml(job.companySlug)}">
@@ -124,7 +124,7 @@ export function createRenderer(deps: RendererDeps): CompareRenderer {
           ${jobs
             .map(
               (job, index) => `
-            <div class="compare-cell job-col" data-col="${index}">
+            <div class="compare-cell job-col" data-col="${escapeHtml(index)}">
               ${escapeHtml(job[feature.key])}
             </div>
           `,
@@ -138,7 +138,7 @@ export function createRenderer(deps: RendererDeps): CompareRenderer {
     const actionCells = jobs
       .map(
         (job, index) => `
-        <div class="compare-cell job-col" data-col="${index}">
+        <div class="compare-cell job-col" data-col="${escapeHtml(index)}">
           <a href="${escapeHtml(job.link)}" class="btn-primary">Открыть карточку</a>
         </div>
       `,

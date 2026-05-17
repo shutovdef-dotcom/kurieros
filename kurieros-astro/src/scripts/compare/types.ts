@@ -7,10 +7,13 @@
 //     `compare.astro`), and
 //   - the full catalog fetched lazily from `/api/compare-jobs.json`.
 //
-// `CompareJob` MUST stay in sync with the slim job shape emitted by
-// `src/pages/api/compare-jobs.json.ts#GET` and the `mapCompareJob`
-// projection in `compare.astro` frontmatter — all three describe the
-// same record.
+// `CompareJob` is the single slim-job shape produced by the `mapCompareJob`
+// projection in `src/utils/compareJob.ts` (audit fix M19 — it used to be a
+// hand-synced copy in `compare.astro` frontmatter). That one projection
+// feeds `src/pages/api/compare-jobs.json.ts#GET`, the SSR `CompareGrid.astro`,
+// and these client modules — all consume the same record. `mapCompareJob`'s
+// return type is annotated `CompareJob`, so any drift from this interface is
+// a compile error.
 
 /** A single comparable vacancy, projected down to the fields the grid shows. */
 export interface CompareJob {

@@ -73,13 +73,22 @@ export function initComparePage(data: CompareData): void {
     const storedIds = compareList.readStoredCompareIds();
     const needsCatalog = storedIds.some((id) => !catalog.hasJob(id));
     if (needsCatalog) {
-      catalog.ensureFullCatalog().then(() => {
-        if (catalog.getState().error && catalog.jobCount() === 0) {
-          // showCatalogError() already rendered a message into the grid.
-          return;
-        }
-        renderer.renderComparisonTable(compareList.getSelectedJobs());
-      });
+      // The `.then` callback mutates `grid.innerHTML` (via the renderer) and
+      // can throw — without a `.catch` that becomes an unhandled rejection
+      // the runtime quietly discards. Same `safe*` discipline as
+      // `filters.ts#safeApplyFilters`: every async chain logs its own failure.
+      catalog
+        .ensureFullCatalog()
+        .then(() => {
+          if (catalog.getState().error && catalog.jobCount() === 0) {
+            // showCatalogError() already rendered a message into the grid.
+            return;
+          }
+          renderer.renderComparisonTable(compareList.getSelectedJobs());
+        })
+        .catch((err: unknown) => {
+          console.error('[compare] renderSelectedComparison failed:', err);
+        });
       return;
     }
     renderer.renderComparisonTable(compareList.getSelectedJobs());
