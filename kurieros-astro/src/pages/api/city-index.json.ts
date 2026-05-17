@@ -1,6 +1,9 @@
 import type { APIRoute } from 'astro';
-import jobsData from '../../data/jobs';
-import { getCitiesFromJobs, getCityNames, sortCityNamesByPopulation } from '../../utils/cities';
+import { sortCityNamesByPopulation } from '../../utils/cities';
+// City catalogue + names are module-cached in `citiesIndex.ts` (H3
+// rationale) instead of re-derived on endpoint render (audit ref v4
+// MEDIUM-1).
+import { citiesFromJobs, cityNamesFromJobs } from '../../utils/citiesIndex';
 
 // Lazy-load endpoint for the homepage city-selector / geo-banner script.
 //
@@ -22,8 +25,8 @@ import { getCitiesFromJobs, getCityNames, sortCityNamesByPopulation } from '../.
 export const prerender = true;
 
 export const GET: APIRoute = () => {
-	const cities = getCitiesFromJobs(jobsData);
-	const availableCities = sortCityNamesByPopulation(getCityNames(jobsData));
+	const cities = citiesFromJobs;
+	const availableCities = sortCityNamesByPopulation(cityNamesFromJobs);
 	const cityRouteMap = Object.fromEntries(
 		cities.map((city) => [city.name, `/rabota-kurerom-${city.slug}/`]),
 	);

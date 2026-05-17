@@ -2,17 +2,18 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import jobsData from '../data/jobs';
-import { getCitiesFromJobs } from '../utils/cities';
 import { formatRussianPlural } from '../utils/format';
 import { buildBreadcrumbSchema } from '../utils/schema';
+// City catalogue is module-cached in `citiesIndex.ts` (H3 rationale)
+// instead of re-derived per render (audit ref v4 MEDIUM-1).
+import { citiesFromJobs } from '../utils/citiesIndex';
 
 // Match the city-selector dropdown ordering (utils/cities.ts:
 // `sortCityNamesByPopulation`) — Moscow / Petersburg / large cities
 // first, alphabetical only as a tiebreak. The previous default
 // alphabetical order from `getCitiesFromJobs()` buried major cities
 // behind small ones (Абаза, Абакан, Агидель…).
-const cities = getCitiesFromJobs(jobsData)
+const cities = citiesFromJobs
 	.map((city) => ({
 		...city,
 		href: `/rabota-kurerom-${city.slug}/`,

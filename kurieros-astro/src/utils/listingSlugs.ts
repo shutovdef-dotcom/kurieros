@@ -6,8 +6,11 @@
  * astro.config.mjs).
  *
  * The selection logic mirrors the filter inside [slug].astro:
- *   - `city` listings: vacancies whose `location` includes the city
- *     name OR equals «Вся Россия»
+ *   - `city` listings: vacancies whose `location` (comma-split into
+ *     individual cities) exact-matches the listing's city on a
+ *     normalized key (lowercase + ё→е + whitespace-collapsed), OR
+ *     equals «Вся Россия». NOT a substring match — H12 killed that
+ *     because «Дно» over-matched «Видное» (audit ref v2 H12).
  *   - `category` listings: vacancies that match the category's optional
  *     tag and/or its full-text query
  *
@@ -17,12 +20,12 @@
 
 import jobsData from '../data/jobs';
 import { CATEGORIES } from '../data/constants';
-import { getCitiesFromJobs } from './cities';
-import {
-	buildJobsByCityMap,
-	filterJobsByCriteria,
-	getCityJobsFromMap,
-} from './jobFilters';
+import { citiesFromJobs } from './citiesIndex';
+import { filterJobsByCriteria, getCityJobsFromMap } from './jobFilters';
+// Shared per-city job buckets, built ONCE at module load (audit ref
+// v3 H3) — see jobsByCityIndex.ts. Reused here instead of rebuilding
+// the Map locally (audit ref v4 L11).
+import { jobsByCity } from './jobsByCityIndex';
 
 // Slugs with bespoke content overrides inside src/pages/[slug].astro
 // that always render a non-empty fallback list (e.g. ezhednevnaya-oplata
@@ -40,9 +43,9 @@ function getEmptyListingPaths(): Set<string> {
 	// page in `[slug].astro`. Sitemap and SSR must agree — see
 	// jobFilters.ts JSDoc for the full rationale. The Map precompute
 	// turns this from O(cities × jobs) (~4.6M ops) into O(jobs +
-	// cities) (audit ref v2 H12).
-	const jobsByCity = buildJobsByCityMap(jobsData);
-	for (const city of getCitiesFromJobs(jobsData)) {
+	// cities) (audit ref v2 H12). Both `jobsByCity` and `citiesFromJobs`
+	// are shared module-cached bindings (audit ref v3 H3 / v4 L11).
+	for (const city of citiesFromJobs) {
 		const matched = getCityJobsFromMap(jobsByCity, city.name);
 		if (matched.length === 0) {
 			empty.add(`/rabota-kurerom-${city.slug}`);

@@ -9,9 +9,12 @@
 // to an importing module), so the copy is unavoidable.
 //
 // The two copies MUST be kept in sync. `tests/homeCityParity.test.ts`
-// is a static-source drift-guard: it reads both files as text and
-// fails CI if the shared invariants (TZ map, storage keys, Moscow
-// aliases, default city) diverge. Edit one copy → mirror the other.
+// is a partial drift-guard: it reads both files as text and fails CI
+// only if the load-bearing CONSTANTS (TZ map, the two storage keys,
+// Moscow aliases, default city) diverge. It does NOT compare the
+// resolution-function bodies (`safeStorage`, `getFallbackCity`,
+// `normalizeDetectedCity`, `getTzCity`) — a behavioural edit to one
+// copy's logic will NOT be caught. Mirror logic changes by hand.
 //
 // Safari Private Browsing throws a SecurityError on any localStorage
 // access. The `createSafeStorage` factory wraps reads/writes so the

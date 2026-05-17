@@ -12,11 +12,14 @@ import HomeGeoBanner from '../components/home/HomeGeoBanner.astro';
 import HomeToolbar from '../components/home/HomeToolbar.astro';
 import jobsData from '../data/jobs';
 import { getCompaniesFromJobs } from '../utils/companies';
-import { getCitiesFromJobs, getCityNames, sortCityNamesByPopulation } from '../utils/cities';
+import { sortCityNamesByPopulation } from '../utils/cities';
+// City catalogue + names are module-cached in `citiesIndex.ts` (H3
+// rationale) instead of re-derived per render (audit ref v4 MEDIUM-1).
+import { citiesFromJobs, cityNamesFromJobs } from '../utils/citiesIndex';
 import { TOPIC_META, knowledgeBaseData } from '../utils/knowledge';
 
-const cities = getCitiesFromJobs(jobsData);
-const availableCities = sortCityNamesByPopulation(getCityNames(jobsData));
+const cities = citiesFromJobs;
+const availableCities = sortCityNamesByPopulation(cityNamesFromJobs);
 // `cityRouteMap` used to live here as well and be threaded into the
 // inline `define:vars`. After H13 it's served from
 // `/api/city-index.json` (see `src/pages/api/city-index.json.ts`) and
@@ -151,9 +154,12 @@ const pageSchemaGraph = [
 	// literals) are a hand-maintained inline copy of the canonical,
 	// test-covered module `src/scripts/homeCity.js`. This `<script>` is
 	// `is:inline` and cannot `import`, so the copy is unavoidable. Any
-	// edit here MUST be mirrored into `homeCity.js` (and vice versa) —
-	// `tests/homeCityParity.test.ts` is the static-source drift-guard
-	// that fails CI when the two diverge.
+	// edit here MUST be mirrored into `homeCity.js` (and vice versa).
+	// `tests/homeCityParity.test.ts` is only a PARTIAL drift-guard: it
+	// fails CI when the load-bearing constants (TZ map, the two storage
+	// keys, Moscow aliases, default city) diverge, but it does NOT
+	// compare the resolution-function bodies — mirror behavioural edits
+	// to the logic by hand.
 	//
 	// `availableCities` (972 strings) and `cityRouteMap` (958 entries) used
 	// to be inlined via `define:vars`, costing ~49 KB raw / ~6 KB gzip in
@@ -483,15 +489,7 @@ const pageSchemaGraph = [
 		border-radius: 8px;
 		box-shadow: 0 8px 24px rgba(24, 45, 34, 0.04);
 	}
-	.home-vacancy-launch {
-		margin: 0 auto 0.65rem;
-		padding: 0.75rem 1rem;
-	}
 	/* Toolbar (city select + 4 filters) styles moved to ./components/home/HomeToolbar.astro (W6-2). */
-	.home-discovery-section {
-		display: grid;
-		gap: 1.5rem;
-	}
 
 	/* --- Content Sections --- */
 	.section-heading {
@@ -518,87 +516,6 @@ const pageSchemaGraph = [
 		border-radius: 8px !important;
 		box-shadow: 0 4px 12px rgba(24, 45, 34, 0.03) !important;
 	}
-	.home-navigation-grid {
-		display: grid;
-		grid-template-columns: repeat(4, minmax(0, 1fr));
-		gap: 1rem;
-	}
-	.home-navigation-card {
-		display: grid;
-		gap: 0.55rem;
-		padding: 1.25rem;
-		border-radius: 8px;
-		border: 1px solid var(--ink-200);
-		background: linear-gradient(180deg, var(--ink-0) 0%, var(--ink-50) 100%);
-		box-shadow: 0 6px 18px rgba(24, 45, 34, 0.04);
-		text-decoration: none;
-		color: var(--ink-800);
-		transition: var(--transition);
-	}
-	.home-navigation-card-route {
-		background: linear-gradient(180deg, var(--ink-0) 0%, var(--ink-50) 100%);
-	}
-	.home-navigation-card:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 10px 24px rgba(24, 45, 34, 0.08);
-	}
-	.home-navigation-card span,
-	.home-navigation-card h3,
-	.home-navigation-card p {
-		margin: 0;
-	}
-	.home-navigation-card span {
-		font-size: 0.72rem;
-		font-weight: 900;
-		letter-spacing: 0;
-		text-transform: uppercase;
-		color: var(--ink-600);
-	}
-	.home-navigation-card h3 {
-		font-size: 1rem;
-	}
-	.home-navigation-card p {
-		color: var(--ink-600);
-		line-height: 1.6;
-	}
-	.home-surface-grid {
-		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-		gap: 1rem;
-	}
-	.home-surface-card {
-		padding: 1.35rem;
-		border-radius: 8px;
-		border: 1px solid var(--ink-200);
-		background: linear-gradient(180deg, var(--ink-0) 0%, var(--ink-50) 100%);
-		box-shadow: 0 6px 18px rgba(24, 45, 34, 0.04);
-	}
-	.home-surface-card h3 {
-		margin: 0 0 0.8rem;
-		font-size: 1rem;
-	}
-	.home-chip-row {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.7rem;
-	}
-	.home-chip-link {
-		display: inline-flex;
-		align-items: center;
-		min-height: 2.35rem;
-		padding: 0.55rem 0.85rem;
-		border-radius: 8px;
-		border: 1px solid #c9dccf;
-		background: var(--ink-0);
-		color: var(--ink-800);
-		font-weight: 700;
-		text-decoration: none;
-		transition: var(--transition);
-	}
-	.home-chip-link:hover {
-		transform: translateY(-1px);
-		box-shadow: 0 8px 18px rgba(24, 45, 34, 0.07);
-	}
 
 	/* --- Dark Mode --- */
 	/* Old dark-mode .home-hero-* rules removed; .hero-v2 dark-mode lives in ./components/home/HomeHero.astro (W6-2). */
@@ -608,30 +525,8 @@ const pageSchemaGraph = [
 		box-shadow: 0 18px 38px rgba(15, 23, 42, 0.28);
 	}
 	/* Toolbar dark-mode rules moved to ./components/home/HomeToolbar.astro (W6-2). */
-	:global(body.dark-mode) .home-navigation-card,
-	:global(body.dark-mode) .home-navigation-card-route,
-	:global(body.dark-mode) .home-surface-card {
-		background: linear-gradient(180deg, rgba(68, 79, 94, 0.74) 0%, rgba(57, 67, 79, 0.72) 100%);
-		border-color: rgba(195, 204, 216, 0.24);
-		box-shadow: 0 12px 28px rgba(15, 23, 42, 0.24);
-		color: var(--text-main);
-	}
-	:global(body.dark-mode) .home-navigation-card span {
-		color: var(--ink-400);
-	}
-	:global(body.dark-mode) .home-navigation-card p,
 	:global(body.dark-mode) .section-heading p {
 		color: var(--text-muted);
-	}
-	:global(body.dark-mode) .home-chip-link {
-		background: rgba(67, 77, 90, 0.78);
-		border-color: rgba(195, 204, 216, 0.28);
-		color: var(--text-main);
-	}
-	:global(body.dark-mode) .home-chip-link:hover {
-		background: rgba(79, 91, 105, 0.94);
-		border-color: rgba(52, 211, 153, 0.5);
-		box-shadow: 0 10px 24px rgba(15, 23, 42, 0.3);
 	}
 	:global(body.dark-mode .review-card),
 	:global(body.dark-mode .faq-item) {
@@ -661,20 +556,6 @@ const pageSchemaGraph = [
 		.home-section {
 			padding: 1.2rem;
 			border-radius: 8px;
-		}
-		.home-vacancy-launch {
-			margin: 0 auto 0.5rem;
-			padding: 0.65rem 0.85rem;
-		}
-		.home-navigation-grid,
-		.home-surface-grid {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-		}
-	}
-	@media (max-width: 600px) {
-		.home-navigation-grid,
-		.home-surface-grid {
-			grid-template-columns: 1fr;
 		}
 	}
 

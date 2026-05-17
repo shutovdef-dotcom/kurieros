@@ -8,6 +8,7 @@
 
 import type { GeneratedJob } from '../data/vacancyTypes';
 import { getCitiesFromJobs } from './cities';
+import { citiesFromJobs } from './citiesIndex';
 import { getVacancyPluralText } from './format';
 import { buildBreadcrumbSchema, buildPlaceSchema } from './schema';
 
@@ -65,10 +66,12 @@ export function buildTransportTypes(
 }
 
 export function buildNearbyCityLinks(
-	allJobs: GeneratedJob[],
 	currentCitySlug: string,
 ): NearbyCityLink[] {
-	return getCitiesFromJobs(allJobs)
+	// Reads the module-cached city catalogue (`citiesIndex.ts`) instead
+	// of re-deriving it per page — `getCitiesFromJobs` ran once for each
+	// of the ~958 city pages (audit ref v4 HIGH-1).
+	return citiesFromJobs
 		.filter((city) => city.slug !== currentCitySlug)
 		.sort((a, b) => b.vacancyCount - a.vacancyCount)
 		.slice(0, 12)

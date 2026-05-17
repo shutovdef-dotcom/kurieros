@@ -11,7 +11,7 @@
  * sitemap still includes them (or vice versa). Keeping the predicate
  * in one place is what makes that invariant cheap to enforce.
  *
- * There is also a DOM-side adapter at `src/scripts/compare/filters.js`
+ * There is also a DOM-side adapter at `src/scripts/compare/filters.ts`
  * which mirrors the same semantics over `card.dataset.*` instead of
  * `GeneratedJob` objects — see the sync-comment there.
  *

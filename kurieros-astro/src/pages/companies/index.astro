@@ -148,106 +148,6 @@ const pageSchemaGraph = [
     color: var(--primary-color);
   }
 
-  .section-eyebrow {
-    margin: 0 0 0.55rem;
-    font-size: 0.74rem;
-    font-weight: 900;
-    letter-spacing: 0;
-    text-transform: uppercase;
-    color: var(--accent-color);
-  }
-
-  .companies-answer-panel,
-  .companies-trust-panel {
-    max-width: 1180px;
-    margin: 0 auto 1rem;
-    display: grid;
-    grid-template-columns: minmax(220px, 0.32fr) minmax(0, 1fr);
-    gap: 1.5rem;
-    align-items: start;
-    padding: 1.5rem;
-    border: 1px solid var(--scrim-border-mid);
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.74);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .companies-answer-panel h2,
-  .companies-answer-panel p,
-  .companies-trust-panel h2,
-  .companies-trust-panel p {
-    margin: 0;
-  }
-
-  .companies-answer-panel p,
-  .companies-trust-panel p {
-    color: var(--text-muted);
-    line-height: 1.8;
-  }
-
-  .companies-route-grid,
-  .companies-surface-grid {
-    max-width: 1180px;
-    margin: 0 auto 1.5rem;
-    display: grid;
-    gap: 1rem;
-    padding: 0 1rem;
-  }
-
-  .companies-route-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .companies-route-card,
-  .companies-surface-card {
-    padding: 1.25rem;
-    border-radius: 8px;
-    border: 1px solid var(--scrim-border-mid);
-    background: var(--scrim-light-soft);
-    box-shadow: var(--shadow-sm);
-    text-decoration: none;
-    color: inherit;
-  }
-
-  .companies-route-card {
-    border-color: rgba(var(--brand-700-rgb), 0.14);
-    background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(246,250,248,0.96));
-  }
-
-  .companies-route-card h2,
-  .companies-surface-card h2 {
-    margin: 0 0 0.7rem;
-    font-size: 1.1rem;
-  }
-
-  .companies-route-card p {
-    margin: 0;
-    color: var(--text-muted);
-    line-height: 1.7;
-  }
-
-  .companies-chip-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.7rem;
-  }
-
-  .companies-chip-link {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2.35rem;
-    padding: 0.55rem 0.85rem;
-    border-radius: 8px;
-    border: 1px solid rgba(var(--brand-700-rgb), 0.14);
-    background: rgba(var(--brand-700-rgb), 0.08);
-    color: var(--text-main);
-    text-decoration: none;
-    font-weight: 700;
-  }
-
-  .companies-fact-grid,
-  .companies-geo-grid,
-  .companies-faq-grid,
   .companies-grid {
     max-width: 1180px;
     margin: 0 auto 1.5rem;
@@ -256,103 +156,11 @@ const pageSchemaGraph = [
     padding: 0 1rem;
   }
 
-  .companies-link-strip {
-    max-width: 1180px;
-    margin: 0 auto 1.5rem;
-    padding: 0 1rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    justify-content: center;
-  }
-
-  .companies-link-pill {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2.5rem;
-    padding: 0.55rem 1rem;
-    border-radius: 8px;
-    background: rgba(var(--brand-700-rgb), 0.08);
-    border: 1px solid rgba(var(--brand-700-rgb), 0.14);
-    color: var(--text-main);
-    font-weight: 700;
-    text-decoration: none;
-    transition: var(--transition);
-  }
-
-  .companies-link-pill:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-sm);
-    color: var(--primary-color);
-  }
-
-  .companies-fact-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .companies-fact-card,
-  .companies-geo-card,
-  .companies-faq-item,
   .company-listing-card {
     border: 1px solid var(--scrim-border-mid);
     border-radius: 8px;
     background: var(--scrim-light-soft);
     box-shadow: var(--shadow-sm);
-  }
-
-  .companies-fact-card {
-    display: grid;
-    gap: 0.45rem;
-    min-height: 7rem;
-    padding: 1rem;
-  }
-
-  .companies-fact-card span {
-    font-size: 0.72rem;
-    font-weight: 900;
-    letter-spacing: 0;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-
-  .companies-fact-card strong {
-    align-self: end;
-    font-size: 1rem;
-    line-height: 1.4;
-  }
-
-  .companies-geo-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .companies-geo-card {
-    padding: 1.5rem;
-    border: 1px solid rgba(var(--brand-700-rgb), 0.12);
-    background: linear-gradient(180deg, var(--scrim-light-strong), rgba(246, 250, 248, 0.96));
-  }
-
-  .companies-geo-card-caution {
-    border-color: rgba(249, 115, 22, 0.16);
-  }
-
-  .companies-geo-card h2,
-  .companies-faq-section h2 {
-    margin: 0 0 1rem;
-  }
-
-  .companies-list {
-    margin: 0;
-    padding-left: 1.35rem;
-  }
-
-  .companies-list li {
-    margin-bottom: 0.7rem;
-    line-height: 1.7;
-  }
-
-  .numbered-list li::marker {
-    color: var(--accent-color);
-    font-weight: 900;
   }
 
   .companies-grid {
@@ -429,52 +237,10 @@ const pageSchemaGraph = [
     line-height: 1.7;
   }
 
-  .company-chip-row {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .company-chip {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2rem;
-    padding: 0.4rem 0.75rem;
-    border-radius: 8px;
-    background: rgba(var(--brand-700-rgb), 0.08);
-    border: 1px solid rgba(var(--brand-700-rgb), 0.12);
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--text-main);
-  }
-
-  .companies-faq-section,
   .partner-section {
     max-width: 1180px;
     margin: 0 auto 1.5rem;
     padding: 0 1rem;
-  }
-
-  .companies-faq-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    padding: 0;
-  }
-
-  .companies-faq-item {
-    padding: 1.25rem;
-  }
-
-  .companies-faq-item h3 {
-    margin: 0 0 0.45rem;
-    font-size: 1rem;
-  }
-
-  .companies-faq-item p {
-    margin: 0;
-    color: var(--text-muted);
-    line-height: 1.7;
   }
 
   .partner-card {
@@ -494,25 +260,7 @@ const pageSchemaGraph = [
   .partner-card h2 { margin-bottom: 1rem; }
   .partner-card p { color: var(--text-muted); margin-bottom: 2rem; }
 
-  @media (max-width: 960px) {
-    .companies-route-grid,
-    .companies-fact-grid,
-    .companies-faq-grid,
-    .companies-surface-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .companies-geo-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
   @media (max-width: 768px) {
-    .companies-answer-panel,
-    .companies-trust-panel {
-      grid-template-columns: 1fr;
-    }
-
     .companies-grid {
       grid-template-columns: repeat(2, 1fr);
       gap: 0.75rem;
@@ -539,20 +287,10 @@ const pageSchemaGraph = [
     .company-snippet {
       font-size: 0.75rem;
     }
-
-    .company-listing-card .btn-primary {
-      padding: 0.5rem 0.5rem;
-      font-size: 0.8rem;
-      border-radius: 8px;
-    }
   }
 
   @media (max-width: 560px) {
-    .companies-route-grid,
-    .companies-fact-grid,
-    .companies-faq-grid,
-    .companies-grid,
-    .companies-surface-grid {
+    .companies-grid {
       grid-template-columns: 1fr;
     }
   }

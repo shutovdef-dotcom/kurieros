@@ -27,13 +27,13 @@ const TRANSPORT_LABELS: Record<string, string> = {
 };
 
 /** Human-readable transport label from a job's tag list (first match wins). */
-export const getTransportLabel = (tags: string[]): string => {
+const getTransportLabel = (tags: string[]): string => {
   const tag = tags.find((t) => t in TRANSPORT_LABELS);
   return tag ? TRANSPORT_LABELS[tag] : 'Смешанный формат';
 };
 
 /** Human-readable label for who provides the transport. */
-export const getTransportProvisionLabel = (
+const getTransportProvisionLabel = (
   provision: 'own' | 'company' | 'not_required',
 ): string => {
   if (provision === 'company') return 'Компания выдает транспортное средство';
@@ -42,7 +42,7 @@ export const getTransportProvisionLabel = (
 };
 
 /** Normalize a free-form OS requirement string to one of the 3 displayed values. */
-export const normalizeOsRequirement = (value?: string): string => {
+const normalizeOsRequirement = (value?: string): string => {
   const normalized = String(value ?? '').trim().toLowerCase();
   const hasAndroid = /android|андроид/.test(normalized);
   const hasIos = /(?:^|[^a-z])ios(?:[^a-z]|$)|iphone|ipad|айос|айфон/.test(normalized);

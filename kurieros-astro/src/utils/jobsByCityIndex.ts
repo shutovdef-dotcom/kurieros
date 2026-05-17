@@ -5,8 +5,9 @@
  * dataset). Astro compiles every non-`import` frontmatter statement
  * into the per-page render function, so `const jobsByCity =
  * buildJobsByCityMap(jobsData)` written inside a `.astro` frontmatter
- * re-runs once per generated page (~1,964× across the build — audit
- * ref v3 NEW-2). Only `import` statements are genuinely module-scoped.
+ * re-runs once per generated city/category listing page across the
+ * build (audit ref v3 NEW-2). Only `import` statements are genuinely
+ * module-scoped.
  *
  * This module performs the build at module scope; the result is
  * module-cached and shared across every page that imports it

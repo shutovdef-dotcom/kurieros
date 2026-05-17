@@ -53,6 +53,26 @@ interface CatalogLoaderDeps {
 const CATALOG_ENDPOINT = '/api/compare-jobs.json';
 
 /**
+ * Lightweight runtime shape check for one fetched catalogue element.
+ *
+ * `/api/compare-jobs.json` is same-origin and build-generated, but the
+ * response is still untrusted `unknown` at the boundary. Rather than a
+ * blind `as CompareJob[]`, every element is filtered through this guard so
+ * a malformed entry is dropped instead of poisoning `jobsById`. Only the
+ * load-bearing identity fields are checked (`id` keys the map, `slug` /
+ * `title` are always rendered) — no Zod, no extra dependency.
+ */
+function isCompareJob(x: unknown): x is CompareJob {
+  if (typeof x !== 'object' || x === null) return false;
+  const job = x as Record<string, unknown>;
+  return (
+    typeof job.id === 'number' &&
+    typeof job.slug === 'string' &&
+    typeof job.title === 'string'
+  );
+}
+
+/**
  * Create a catalog loader seeded with the preselected jobs already inlined
  * into the page. The loader owns the `jobsById` map and the catalog
  * load/error flags.
@@ -99,7 +119,7 @@ export function createCatalogLoader(
         return response.json();
       })
       .then((jobs): CompareJob[] => {
-        const list = Array.isArray(jobs) ? (jobs as CompareJob[]) : [];
+        const list = Array.isArray(jobs) ? jobs.filter(isCompareJob) : [];
         for (const job of list) {
           jobsById.set(job.id, job);
         }
