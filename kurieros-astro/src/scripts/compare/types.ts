@@ -20,7 +20,6 @@ export interface CompareJob {
   company: string;
   companyLogo: string | null;
   companySlug: string;
-  companyHref: string;
   salary: string;
   location: string;
   transport: string;
