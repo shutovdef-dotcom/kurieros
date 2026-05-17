@@ -176,7 +176,6 @@ body.dark-mode .logo svg {
   header {
     padding-right: 8.25rem;
   }
-  .lang-switcher-li { display: none !important; }
 }
 
 @media (max-width: 420px) {
@@ -1096,12 +1095,8 @@ body.dark-mode .footer-cloud span {
 .faq-answer {
   padding: 0 1.5rem 1.5rem 1.5rem;
   color: var(--text-muted);
-  display: none;
   font-size: 1rem;
   line-height: 1.6;
-}
-.faq-item.active .faq-answer {
-  display: block;
 }
 
 .hot-badge {
@@ -1137,36 +1132,13 @@ body.dark-mode .footer-cloud span {
 :where(html, body).dark-mode .listing-hero-panel,
 :where(html, body).dark-mode .listing-fact-card,
 :where(html, body).dark-mode .listing-secondary-link,
-:where(html, body).dark-mode .blog-card,
-:where(html, body).dark-mode .featured-story-copy,
-:where(html, body).dark-mode .related-card,
 :where(html, body).dark-mode .info-card,
-:where(html, body).dark-mode .city-card,
 :where(html, body).dark-mode .city-tile,
 :where(html, body).dark-mode .cities-grid > a,
-:where(html, body).dark-mode .cities-route-grid > *,
-:where(html, body).dark-mode .cities-spotlight,
-:where(html, body).dark-mode .cities-spotlight-grid > *,
-:where(html, body).dark-mode .cities-faq-section,
-:where(html, body).dark-mode .cities-answer-panel,
-:where(html, body).dark-mode .spotlight-card,
-:where(html, body).dark-mode .route-card,
-:where(html, body).dark-mode .surface-card,
-:where(html, body).dark-mode .faq-card,
 :where(html, body).dark-mode .compare-table,
 :where(html, body).dark-mode .compare-page,
 :where(html, body).dark-mode .compare-grid,
 :where(html, body).dark-mode .compare-empty,
-:where(html, body).dark-mode .compare-faq-item,
-:where(html, body).dark-mode .compare-article-link,
-:where(html, body).dark-mode .compare-geo-card,
-:where(html, body).dark-mode .compare-link-card,
-:where(html, body).dark-mode .compare-route-card,
-:where(html, body).dark-mode .compare-route-grid,
-:where(html, body).dark-mode .compare-answer-panel,
-:where(html, body).dark-mode .compare-summary-card,
-:where(html, body).dark-mode .compare-summary-panel,
-:where(html, body).dark-mode .compare-trust-panel,
 :where(html, body).dark-mode .contact-success,
 :where(html, body).dark-mode .faq-item,
 :where(html, body).dark-mode .fact-card,
@@ -1182,27 +1154,12 @@ body.dark-mode .footer-cloud span {
 :where(html, body).dark-mode .listing-hero-panel h2,
 :where(html, body).dark-mode .listing-fact-card strong,
 :where(html, body).dark-mode .info-card h3,
-:where(html, body).dark-mode .city-card h3,
-:where(html, body).dark-mode .cities-spotlight h2,
-:where(html, body).dark-mode .cities-faq-section h2,
-:where(html, body).dark-mode .cities-faq-section h3,
-:where(html, body).dark-mode .compare-th,
-:where(html, body).dark-mode .compare-cell-label,
-:where(html, body).dark-mode .compare-answer-panel h2,
-:where(html, body).dark-mode .compare-answer-panel h3,
-:where(html, body).dark-mode .compare-summary-card h2,
-:where(html, body).dark-mode .compare-summary-panel h2,
-:where(html, body).dark-mode .compare-trust-panel h2,
 :where(html, body).dark-mode .faq-item h2,
 :where(html, body).dark-mode .faq-item h3 {
   color: var(--ink-900);
 }
 :where(html, body).dark-mode .listing-hero-panel > p:not(.section-eyebrow),
 :where(html, body).dark-mode .listing-fact-card span,
-:where(html, body).dark-mode .blog-card p,
-:where(html, body).dark-mode .blog-meta,
-:where(html, body).dark-mode .info-card p,
-:where(html, body).dark-mode .city-card p,
 :where(html, body).dark-mode .compare-row,
 :where(html, body).dark-mode .compare-row td,
 :where(html, body).dark-mode .faq-item p {

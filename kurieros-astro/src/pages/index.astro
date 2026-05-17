@@ -479,30 +479,9 @@ const pageSchemaGraph = [
 	}
 	/* Hero v2 styles moved to ./components/home/HomeHero.astro (W6-2). */
 
-	.home-section {
-		padding: 2.25rem;
-		margin: 1.5rem auto;
-		max-width: 1560px;
-		width: 100%;
-		background: var(--ink-0);
-		border: 1px solid var(--ink-200);
-		border-radius: 8px;
-		box-shadow: 0 8px 24px rgba(24, 45, 34, 0.04);
-	}
 	/* Toolbar (city select + 4 filters) styles moved to ./components/home/HomeToolbar.astro (W6-2). */
 
 	/* --- Content Sections --- */
-	.section-heading {
-		margin-bottom: 1.1rem;
-	}
-	.section-heading h2 {
-		margin-bottom: 0.35rem;
-		letter-spacing: 0;
-	}
-	.section-heading p {
-		color: var(--ink-600);
-	}
-	:global(.reviews-section),
 	:global(.faq-section) {
 		border: none !important;
 		background: transparent !important;
@@ -519,15 +498,7 @@ const pageSchemaGraph = [
 
 	/* --- Dark Mode --- */
 	/* Old dark-mode .home-hero-* rules removed; .hero-v2 dark-mode lives in ./components/home/HomeHero.astro (W6-2). */
-	:global(body.dark-mode) .home-section {
-		background: rgba(58, 68, 81, 0.66);
-		border-color: rgba(195, 204, 216, 0.24);
-		box-shadow: 0 18px 38px rgba(15, 23, 42, 0.28);
-	}
 	/* Toolbar dark-mode rules moved to ./components/home/HomeToolbar.astro (W6-2). */
-	:global(body.dark-mode) .section-heading p {
-		color: var(--text-muted);
-	}
 	:global(body.dark-mode .review-card),
 	:global(body.dark-mode .faq-item) {
 		background: rgba(67, 77, 90, 0.86) !important;
@@ -553,10 +524,6 @@ const pageSchemaGraph = [
 		}
 		/* Hero-v2 + toolbar mobile rules moved to their respective components in ./components/home/ (W6-2). */
 		/* Old mobile .home-hero-* rules removed. */
-		.home-section {
-			padding: 1.2rem;
-			border-radius: 8px;
-		}
 	}
 
 	/* Toolbar visual-refresh overrides moved to ./components/home/HomeToolbar.astro (W6-2). */

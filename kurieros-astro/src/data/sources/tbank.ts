@@ -225,7 +225,7 @@ const tBankRepresentativeOffers = tBankVacancies.representative.offers.map((offe
 
 // === Sources =========================================================
 
-export const tBankOperatorSource: VacancySource = {
+const tBankOperatorSource: VacancySource = {
   id: 6,
   slug: 'tbank-outbound-b2b-operator',
   company: { name: T_BANK_COMPANY_NAME, logo: T_BANK_COMPANY_LOGO },
@@ -245,7 +245,7 @@ export const tBankOperatorSource: VacancySource = {
   isHot: true,
 };
 
-export const tBankRepresentativeSource: VacancySource = {
+const tBankRepresentativeSource: VacancySource = {
   id: 7,
   slug: 'tbank-representative',
   company: { name: T_BANK_COMPANY_NAME, logo: T_BANK_COMPANY_LOGO },

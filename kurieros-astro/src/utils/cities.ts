@@ -86,9 +86,6 @@ export const getCitiesFromJobs = (jobs: JobLike[]) => {
 		.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
 };
 
-export const getCityNames = (jobs: JobLike[]) =>
-	getCitiesFromJobs(jobs).map((city) => city.name);
-
 export const getCityHref = (name: string) => {
 	const known = CITY_BY_KEY.get(normalizeCityKey(name));
 	const slug = known?.slug ?? slugifyCity(name);
