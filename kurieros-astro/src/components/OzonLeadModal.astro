@@ -666,58 +666,6 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		text-decoration: none;
 		font-weight: 700;
 	}
-	.ozon-lead-refbox {
-		display: flex;
-		align-items: center;
-		gap: 0.55rem;
-		margin-top: 0.55rem;
-		padding: 0.55rem 0.7rem;
-		background: var(--ink-0);
-		border: 1px dashed var(--ink-300);
-		border-radius: 10px;
-	}
-	.ozon-lead-refbox code {
-		flex: 1;
-		font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-		font-size: 0.95rem;
-		font-weight: 700;
-		color: var(--ink-900);
-		letter-spacing: 0.02em;
-	}
-	.ozon-lead-refcopy {
-		flex: 0 0 auto;
-		padding: 0.4rem 0.7rem;
-		border-radius: 8px;
-		border: 1px solid var(--ink-200);
-		background: var(--ink-0);
-		color: var(--brand-ozon);
-		font-family: inherit;
-		font-weight: 700;
-		font-size: 0.8rem;
-		cursor: pointer;
-		transition: background 0.15s ease, border-color 0.15s ease;
-	}
-	.ozon-lead-refcopy:hover:not(:disabled) {
-		background: rgba(0, 91, 255, 0.08);
-		border-color: var(--brand-ozon);
-	}
-	.ozon-lead-refcopy:disabled {
-		opacity: 0.55;
-		cursor: not-allowed;
-	}
-	.ozon-lead-refcopy-default,
-	.ozon-lead-refcopy-done {
-		display: inline-block;
-	}
-	.ozon-lead-refcopy-done {
-		display: none;
-	}
-	.ozon-lead-refcopy.copied .ozon-lead-refcopy-default {
-		display: none;
-	}
-	.ozon-lead-refcopy.copied .ozon-lead-refcopy-done {
-		display: inline-block;
-	}
 	.ozon-lead-finish {
 		min-height: 44px;
 		padding: 0 1.2rem;
@@ -788,18 +736,6 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 	}
 	:global(:where(html, body).dark-mode) .ozon-lead-steps li strong {
 		color: var(--ink-800);
-	}
-	:global(:where(html, body).dark-mode) .ozon-lead-refbox {
-		background: rgba(15, 23, 36, 0.85);
-		border-color: rgba(195, 204, 216, 0.25);
-	}
-	:global(:where(html, body).dark-mode) .ozon-lead-refbox code {
-		color: var(--ink-800);
-	}
-	:global(:where(html, body).dark-mode) .ozon-lead-refcopy {
-		background: rgba(15, 23, 36, 0.7);
-		border-color: rgba(195, 204, 216, 0.2);
-		color: var(--brand-ozon);
 	}
 	:global(:where(html, body).dark-mode) .ozon-lead-finish {
 		background: rgba(15, 23, 36, 0.7);
