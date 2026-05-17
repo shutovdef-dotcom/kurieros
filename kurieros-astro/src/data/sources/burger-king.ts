@@ -68,7 +68,6 @@ export const BurgerKingVacanciesSchema = z.object({
 });
 
 export type BurgerKingVacanciesData = z.infer<typeof BurgerKingVacanciesSchema>;
-type BurgerKingOfferSource = z.infer<typeof burgerKingOfferSchema>;
 
 const burgerKingVacancies: BurgerKingVacanciesData =
   BurgerKingVacanciesSchema.parse(burgerKingVacanciesSource);

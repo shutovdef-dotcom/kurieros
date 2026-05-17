@@ -154,9 +154,12 @@ const pageSchemaGraph = [
 	// literals) are a hand-maintained inline copy of the canonical,
 	// test-covered module `src/scripts/homeCity.js`. This `<script>` is
 	// `is:inline` and cannot `import`, so the copy is unavoidable. Any
-	// edit here MUST be mirrored into `homeCity.js` (and vice versa) —
-	// `tests/homeCityParity.test.ts` is the static-source drift-guard
-	// that fails CI when the two diverge.
+	// edit here MUST be mirrored into `homeCity.js` (and vice versa).
+	// `tests/homeCityParity.test.ts` is only a PARTIAL drift-guard: it
+	// fails CI when the load-bearing constants (TZ map, the two storage
+	// keys, Moscow aliases, default city) diverge, but it does NOT
+	// compare the resolution-function bodies — mirror behavioural edits
+	// to the logic by hand.
 	//
 	// `availableCities` (972 strings) and `cityRouteMap` (958 entries) used
 	// to be inlined via `define:vars`, costing ~49 KB raw / ~6 KB gzip in

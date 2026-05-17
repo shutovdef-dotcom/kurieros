@@ -8,15 +8,17 @@
  *
  * Because the page never imports the module, a fix made in one copy
  * does NOT reach the other, yet `tests/homeCity.test.ts` (which pins
- * the module) stays green. This file closes that gap: it reads BOTH
- * sources as text and asserts the load-bearing invariants are
- * byte-identical across the two copies. A future edit to one copy that
- * isn't mirrored to the other fails CI here.
+ * the module) stays green. This file narrows that gap: it reads BOTH
+ * sources as text and asserts the load-bearing CONSTANTS are identical
+ * across the two copies.
  *
- * Pragmatic by design — it pins the constants that silently strand
- * users on the wrong city if they diverge (the TZ→city map, the
- * localStorage key literals, the Moscow alias list, the default city),
- * not every line of the two implementations.
+ * Scope — IMPORTANT: this guard pins only the constants that silently
+ * strand users on the wrong city if they diverge (the TZ→city map, the
+ * two localStorage key literals, the Moscow-alias array, the default
+ * city). It does NOT compare the resolution-function bodies
+ * (`getFallbackCity`, `normalizeDetectedCity`, `getTzCity`,
+ * `safeStorage`) — a behavioural edit to one copy's logic will NOT
+ * fail CI here. Mirror logic changes between the two copies by hand.
  */
 
 import { describe, it, expect } from 'vitest';

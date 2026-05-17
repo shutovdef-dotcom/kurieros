@@ -236,7 +236,11 @@ export default {
 
 		const name = String(body?.name || '').trim();
 		const phoneRaw = String(body?.phone || '').trim();
-		const transport = String(body?.transport || '').trim();
+		// `transport` is caller-controlled free-form text forwarded into the
+		// Telegram alert. Truncate rather than reject — it's an info-only
+		// field (Ozon ignores it), so failing a real lead over an oversized
+		// cosmetic value would be worse (audit ref v4 L9).
+		const transport = String(body?.transport || '').trim().slice(0, 100);
 		const reqVacancy = String(body?.vacancy || '').trim();
 		const reqCityID = String(body?.cityID || '').trim();
 		const reqHireObjectUUID = String(body?.hireObjectUUID || '').trim();

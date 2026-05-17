@@ -410,21 +410,21 @@ const getTransportProvision = (offer: VacancyOffer): TransportProvision => {
   return 'own';
 };
 
-const getSchedule = (source: VacancySource, offer: VacancyOffer, language: SupportedLanguage) => {
+const getSchedule = (source: VacancySource, offer: VacancyOffer) => {
   const schedule = offer.schedule ?? source.defaults.schedule;
 
   return schedule === SCHEDULE_LABEL ? SCHEDULE_LABEL : schedule;
 };
 
-const getEducation = (source: VacancySource, language: SupportedLanguage) =>
+const getEducation = (source: VacancySource) =>
   source.defaults.education === COMMON_LABELS.noEducation || !source.defaults.education
     ? COMMON_LABELS.noEducation
     : source.defaults.education;
 
-const getPaymentFrequency = (value: string, language: SupportedLanguage) =>
+const getPaymentFrequency = (value: string) =>
   value === COMMON_LABELS.weekly ? COMMON_LABELS.weekly : value;
 
-const getCitizenshipLabel = (value: string, language: SupportedLanguage) => {
+const getCitizenshipLabel = (value: string) => {
   if (value.includes('вне ЕАЭС')) return CITIZENSHIP_LABELS.all;
   if (value.includes('ЕАЭС')) return CITIZENSHIP_LABELS.rfEaes;
   if (value === 'РФ') return CITIZENSHIP_LABELS.rf;
@@ -468,7 +468,7 @@ const getGeneratedId = (source: VacancySource, offer: VacancyOffer) => {
   return source.id * 100000 + cityPart * 10 + TRANSPORT_ID_PARTS[offer.transport];
 };
 
-const getSalaryText = (pay: PayModel, language: SupportedLanguage) =>
+const getSalaryText = (pay: PayModel) =>
   pay.monthly?.max
     ? monthlySalaryText(formatAmount(pay.monthly.max))
     : pay.monthly?.text ??
@@ -478,7 +478,7 @@ const getSalaryText = (pay: PayModel, language: SupportedLanguage) =>
       pay.perOrder?.text ??
       'Доход уточняется';
 
-const getRateText = (pay: PayModel, language: SupportedLanguage) => {
+const getRateText = (pay: PayModel) => {
   if (pay.hourly?.max && pay.perShift?.max && pay.monthly?.max) {
     return rateText(
       formatAmount(pay.hourly.max),
@@ -494,7 +494,7 @@ const getRateText = (pay: PayModel, language: SupportedLanguage) => {
     pay.guaranteed?.text,
   ].filter(Boolean).join(' + ');
 
-  return pay.rate ?? (rateFallback || getSalaryText(pay, language));
+  return pay.rate ?? (rateFallback || getSalaryText(pay));
 };
 
 const getOfferRequirements = (
@@ -523,7 +523,6 @@ const buildLabels = (
   ageFrom: number,
   formats: EmploymentFormat[],
   medicalBook: MedicalBookRequirement,
-  language: SupportedLanguage,
 ) =>
   labels?.length
     ? labels
@@ -553,7 +552,7 @@ export const buildJobsFromVacancies = (
       const formats = getEmploymentFormats(source, offer);
       const transportProvision = getTransportProvision(offer);
       const medicalBook = getMedicalBook(source, offer);
-      const salary = getSalaryText(offer.pay, language);
+      const salary = getSalaryText(offer.pay);
       const applyLink = offer.applyLink ?? '#';
       const citySlug = slugifyCity(offer.city);
       const requirements = getOfferRequirements(content.requirements, offer, language);
@@ -577,19 +576,19 @@ export const buildJobsFromVacancies = (
           ...getCitizenshipTags(getCitizenship(source, offer)),
           ...(source.extraTags ?? []),
         ]),
-        labels: buildLabels(content.labels, [transport], ageFrom, formats, medicalBook, language),
+        labels: buildLabels(content.labels, [transport], ageFrom, formats, medicalBook),
         applyLink,
         description: interpolate(content.description, offer, language),
         requirements: requirements.map((item) => interpolate(item, offer, language)),
         benefits: benefits.map((item) => interpolate(item, offer, language)),
         requiredDocuments: requiredDocuments.map((item) => interpolate(item, offer, language)),
         details: {
-          rate: getRateText(offer.pay, language),
-          schedule: getSchedule(source, offer, language),
-          education: getEducation(source, language),
+          rate: getRateText(offer.pay),
+          schedule: getSchedule(source, offer),
+          education: getEducation(source),
           age: `от ${ageFrom} лет`,
-          payment_freq: getPaymentFrequency(offer.pay.paymentFrequency, language),
-          citizenship: getCitizenshipLabel(getCitizenship(source, offer), language),
+          payment_freq: getPaymentFrequency(offer.pay.paymentFrequency),
+          citizenship: getCitizenshipLabel(getCitizenship(source, offer)),
           medical_book: MEDICAL_BOOK_LABELS[medicalBook],
           self_employed: formats.includes('self_employed') ? COMMON_LABELS.yes : COMMON_LABELS.notRequired,
           employment_type: formats.map((format) => EMPLOYMENT_LABELS[format]).join(' / '),

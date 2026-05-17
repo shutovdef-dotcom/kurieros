@@ -109,11 +109,23 @@ const ruClauses = await loadJsonOrThrow<Record<string, string>>(
 const langDicts: Partial<Record<SupportedLanguage, Record<string, string>>> = {};
 for (const lang of SUPPORTED_LANGUAGES) {
   if (lang === 'ru') continue;
+  const dictPath = resolve(clausesDir, `${lang}.json`);
   try {
     langDicts[lang] = JSON.parse(
-      await readFile(resolve(clausesDir, `${lang}.json`), 'utf8'),
+      await readFile(dictPath, 'utf8'),
     ) as Record<string, string>;
-  } catch {
+  } catch (err) {
+    const isEnoent =
+      err instanceof Error && (err as NodeJS.ErrnoException).code === 'ENOENT';
+    if (!isEnoent) {
+      // Parse error, permission error, disk corruption — anything that is NOT
+      // a clean "missing file" is a real bug. Silently coercing these to {}
+      // used to let a corrupt translation file pass this quality gate.
+      const detail = err instanceof Error ? err.message : String(err);
+      console.error(`test-translations: failed to parse clause dict ${dictPath}: ${detail}`);
+      process.exit(1);
+    }
+    // else: missing file is intentional (language not yet translated) → {}
     langDicts[lang] = {};
   }
 }

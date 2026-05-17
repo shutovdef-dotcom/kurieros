@@ -6,8 +6,11 @@
  * astro.config.mjs).
  *
  * The selection logic mirrors the filter inside [slug].astro:
- *   - `city` listings: vacancies whose `location` includes the city
- *     name OR equals «Вся Россия»
+ *   - `city` listings: vacancies whose `location` (comma-split into
+ *     individual cities) exact-matches the listing's city on a
+ *     normalized key (lowercase + ё→е + whitespace-collapsed), OR
+ *     equals «Вся Россия». NOT a substring match — H12 killed that
+ *     because «Дно» over-matched «Видное» (audit ref v2 H12).
  *   - `category` listings: vacancies that match the category's optional
  *     tag and/or its full-text query
  *

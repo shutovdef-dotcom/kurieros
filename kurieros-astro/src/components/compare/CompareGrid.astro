@@ -69,7 +69,7 @@ const { compareJobs, features } = Astro.props;
             </div>
             {compareJobs.map((job, index) => (
               <div class="compare-cell job-col" data-col={index}>
-                {job[feature.key as keyof typeof job]}
+                {job[feature.key]}
               </div>
             ))}
           </div>
