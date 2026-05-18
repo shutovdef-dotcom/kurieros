@@ -19,9 +19,7 @@
  *    That preserves all existing flow: external nav for default cards,
  *    OzonLeadModal for Ozon cards, GA4 `apply_click` event via the
  *    BaseLayout delegate (which listens for any `[data-apply-cta]` click).
- *  - Skipped when there's no `.apply-btn-hero` on the page (disabled
- *    vacancies render `.apply-btn-disabled` — those need a contact-form,
- *    not an apply tap).
+ *  - Skipped when there's no `.apply-btn-hero` on the page.
  *
  * Z-index: 91, one above the existing mobile-fixed rule (90), so if
  * that rule does fire on some devices the new bar still wins
@@ -100,9 +98,9 @@
 		if (!bar) return;
 		const labelEl = bar.querySelector('.vacancy-sticky-apply-label');
 		const heroBtn = document.querySelector('.apply-btn-hero');
-		// Disabled vacancies render .apply-btn-disabled instead — no
-		// applyLink to forward. Skip silently rather than show a fake bar.
-		if (!heroBtn || heroBtn.classList.contains('apply-btn-disabled')) return;
+		// No hero CTA on the page — nothing to forward. Skip silently
+		// rather than show a bar that taps into nothing.
+		if (!heroBtn) return;
 
 		document.body.classList.add('has-vacancy-sticky-apply');
 

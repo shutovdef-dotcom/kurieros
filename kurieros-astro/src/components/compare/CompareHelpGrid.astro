@@ -126,7 +126,7 @@
     border-radius: var(--radius-sm);
     font-weight: 700;
   }
-  :global(body.dark-mode) .payment-freq-highlight {
+  :global(:where(html, body).dark-mode) .payment-freq-highlight {
     background: var(--brand-50);
     color: var(--brand-700);
   }
@@ -153,21 +153,21 @@
     background: var(--brand-800);
     transform: translateY(-1px);
   }
-  :global(body.dark-mode) .compare-help-card {
+  :global(:where(html, body).dark-mode) .compare-help-card {
     background: var(--surface-200);
     border-color: var(--ink-200);
   }
-  :global(body.dark-mode) .compare-help-card h3 {
+  :global(:where(html, body).dark-mode) .compare-help-card h3 {
     color: var(--ink-800);
   }
-  :global(body.dark-mode) .compare-help-card p {
+  :global(:where(html, body).dark-mode) .compare-help-card p {
     color: var(--ink-600);
   }
-  :global(body.dark-mode) .compare-help-all {
+  :global(:where(html, body).dark-mode) .compare-help-all {
     background: var(--brand-500);
     color: var(--ink-0);
   }
-  :global(body.dark-mode) .compare-help-all:hover {
+  :global(:where(html, body).dark-mode) .compare-help-all:hover {
     background: var(--brand-400);
   }
 </style>

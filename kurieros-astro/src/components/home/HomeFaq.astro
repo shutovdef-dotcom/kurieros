@@ -92,11 +92,11 @@ const { items } = Astro.props;
 		background: var(--brand-800);
 		transform: translateY(-1px);
 	}
-	:global(body.dark-mode) .kb-cta-link {
+	:global(:where(html, body).dark-mode) .kb-cta-link {
 		background: var(--brand-500);
 		color: var(--ink-900);
 	}
-	:global(body.dark-mode) .kb-cta-link:hover {
+	:global(:where(html, body).dark-mode) .kb-cta-link:hover {
 		background: var(--brand-400);
 	}
 </style>

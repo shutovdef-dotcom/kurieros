@@ -109,10 +109,12 @@ import Logo from './Logo.astro';
         }
         // Keep the `dark-mode` class on <html> in sync with <body>. The
         // anti-FOUC <head> script in BaseLayout.astro sets it on <html> at
-        // first paint, and ~125 stylesheet rules use the unprefixed
-        // `.dark-mode .X` selector (matched via the <html> ancestor) — so a
-        // live toggle that updated only <body> left the theme half-applied
-        // until the next reload.
+        // first paint, and the dark-mode stylesheet rules are converged on
+        // `:where(html, body).dark-mode .X` (Wave 21e M7), which matches via
+        // EITHER ancestor. Toggling only <body> would still work for those
+        // rules, but the <head> script set the class on <html>, so a live
+        // toggle must update <html> too — otherwise the theme stays
+        // half-applied (stale <html> class) until the next reload.
         document.documentElement.classList.toggle('dark-mode', resolvedMode === 'dark');
         document.documentElement.style.colorScheme = resolvedMode;
         updateThemeToggleButton(resolvedMode);
@@ -153,15 +155,24 @@ import Logo from './Logo.astro';
         }
     }
 
+    // Source of truth: `MAX_COMPARE_IDS` in src/scripts/compare/compareList.ts.
+    // This `is:inline` Header script cannot `import`, so the cap is duplicated
+    // as a local literal — kept in sync with compareList.ts by
+    // tests/compareListParity.test.ts.
+    const MAX_COMPARE_IDS = 4;
+
     function readCompareList() {
         try {
             const rawList = JSON.parse(localStorage.getItem('compareList') || '[]');
             if (!Array.isArray(rawList)) return [];
 
+            // `.slice(0, MAX_COMPARE_IDS)` is a DEFENSIVE cap on stored data;
+            // the Header only reads the list for the badge count and never
+            // adds, so no add-overflow eviction happens here.
             const normalizedList = rawList
                 .map((id) => Number.parseInt(String(id), 10))
                 .filter((id, index, list) => Number.isFinite(id) && list.indexOf(id) === index)
-                .slice(0, 4);
+                .slice(0, MAX_COMPARE_IDS);
 
             if (JSON.stringify(rawList) !== JSON.stringify(normalizedList)) {
                 localStorage.setItem('compareList', JSON.stringify(normalizedList));
@@ -360,12 +371,10 @@ import Logo from './Logo.astro';
     .theme-toggle .icon-moon {
         display: block;
     }
-    :global(html.dark-mode) .theme-toggle .icon-sun,
-    :global(body.dark-mode) .theme-toggle .icon-sun {
+    :global(:where(html, body).dark-mode) .theme-toggle .icon-sun {
         display: block;
     }
-    :global(html.dark-mode) .theme-toggle .icon-moon,
-    :global(body.dark-mode) .theme-toggle .icon-moon {
+    :global(:where(html, body).dark-mode) .theme-toggle .icon-moon {
         display: none;
     }
 

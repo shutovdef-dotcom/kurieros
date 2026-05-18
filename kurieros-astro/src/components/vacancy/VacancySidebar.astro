@@ -319,10 +319,10 @@ const {
 		box-shadow: var(--shadow-xs);
 	}
 
-	:global(body.dark-mode) .vacancy-income-output {
+	:global(:where(html, body).dark-mode) .vacancy-income-output {
 		background: rgba(67, 77, 90, 0.86);
 	}
-	:global(body.dark-mode) .vacancy-income-range {
+	:global(:where(html, body).dark-mode) .vacancy-income-range {
 		background: rgba(148, 163, 184, 0.34);
 	}
 </style>

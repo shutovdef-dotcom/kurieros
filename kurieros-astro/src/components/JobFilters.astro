@@ -83,7 +83,7 @@
 		border-color: var(--brand-500);
 		box-shadow: var(--shadow-focus);
 	}
-	:global(body.dark-mode) .job-filter-select {
+	:global(:where(html, body).dark-mode) .job-filter-select {
 		background-color: var(--ink-100);
 		color: var(--ink-800);
 		border-color: var(--ink-200);

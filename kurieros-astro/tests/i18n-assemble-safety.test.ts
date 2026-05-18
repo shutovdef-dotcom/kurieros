@@ -7,8 +7,10 @@
  *   H8 — a bare `catch {}` on `JSON.parse(clauses/<lang>.json)` previously
  *        swallowed parse errors, disk corruption, and permission errors
  *        identically to ENOENT. Build exited 0 with empty stub output.
- *        Now: ENOENT stays silent, anything else logs and (under
- *        STRICT_TRANSLATION_COVERAGE=1) exits non-zero.
+ *        Now: ENOENT stays silent (missing file is intentional), anything
+ *        else logs the failing path and exits non-zero unconditionally —
+ *        a corrupt dict is never an intentional absence (audit v5 M14;
+ *        mirrors test-translations.ts).
  *
  *   H9 — a `!` non-null assertion on `sourceToClauses[source.slug]` crashed
  *        with `TypeError: Cannot read properties of undefined` when a new
@@ -105,7 +107,7 @@ describe.skipIf(!RUN)('assemble-translations safety (H8 + H9)', () => {
   });
 
   it(
-    'H8: corrupted clause file logs the failing path AND exits 0 in normal mode',
+    'H8: corrupted clause file logs the failing path AND exits 1 in normal mode',
     () => {
       writeFileSync(VICTIM_PATH, '{ this is not valid json\n', 'utf8');
       const result = runScript();
@@ -113,9 +115,10 @@ describe.skipIf(!RUN)('assemble-translations safety (H8 + H9)', () => {
       // The fix logs `assemble: failed to parse clause dict <abs path>:`
       expect(result.stderr).toContain('failed to parse clause dict');
       expect(result.stderr).toContain(VICTIM_PATH);
-      // Normal mode: best-effort, exit 0 so unrelated languages still
-      // build. The corrupted lang's sources fall back to stubs.
-      expect(result.status).toBe(0);
+      // A corrupt dict is never an intentional absence — the build fails
+      // unconditionally (audit v5 M14), even without STRICT_TRANSLATION_COVERAGE,
+      // so a parse error can't silently ship empty stubs.
+      expect(result.status).toBe(1);
 
       // Restore so the next test starts clean (afterAll is the safety net).
       cpSync(BACKUP_PATH, VICTIM_PATH);
@@ -124,7 +127,7 @@ describe.skipIf(!RUN)('assemble-translations safety (H8 + H9)', () => {
   );
 
   it(
-    'H8: corrupted clause file exits 1 under STRICT_TRANSLATION_COVERAGE=1',
+    'H8: corrupted clause file also exits 1 under STRICT_TRANSLATION_COVERAGE=1',
     () => {
       writeFileSync(VICTIM_PATH, '{ also not json\n', 'utf8');
       const result = runScript({ STRICT_TRANSLATION_COVERAGE: '1' });

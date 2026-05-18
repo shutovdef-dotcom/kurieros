@@ -50,18 +50,24 @@ export const slugifyCity = (name: string) =>
 		.replace(/[^a-z0-9]+/g, '-')
 		.replace(/^-+|-+$/g, '');
 
+// Single pass over jobs (and an inner pass over the comma-split
+// location parts) folding straight into the `counts` Map. The previous
+// `flatMap(...).map(...).filter(...).forEach(...)` chain allocated 3
+// intermediate ~5-6k-element arrays per call — audit ref v5 M6. The
+// per-part logic, drop predicate and counting order are unchanged, so
+// the resulting Map is byte-identical to the chained version.
 const getCityCounts = (jobs: JobLike[]) => {
 	const counts = new Map<string, number>();
 
-	jobs
-		.flatMap((job) => (job.location || '').split(','))
-		.map((city) => {
-			const normalizedName = normalizeCityDisplayName(city);
+	for (const job of jobs) {
+		for (const part of (job.location || '').split(',')) {
+			const normalizedName = normalizeCityDisplayName(part);
 			const cityKey = normalizeCityKey(normalizedName);
-			return CITY_BY_KEY.get(cityKey)?.name ?? normalizedName;
-		})
-		.filter((city) => city && normalizeCityKey(city) !== ALL_RUSSIA_KEY)
-		.forEach((city) => counts.set(city, (counts.get(city) ?? 0) + 1));
+			const city = CITY_BY_KEY.get(cityKey)?.name ?? normalizedName;
+			if (!city || normalizeCityKey(city) === ALL_RUSSIA_KEY) continue;
+			counts.set(city, (counts.get(city) ?? 0) + 1);
+		}
+	}
 
 	return counts;
 };
@@ -79,9 +85,6 @@ export const getCitiesFromJobs = (jobs: JobLike[]) => {
 		})
 		.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
 };
-
-export const getCityNames = (jobs: JobLike[]) =>
-	getCitiesFromJobs(jobs).map((city) => city.name);
 
 export const getCityHref = (name: string) => {
 	const known = CITY_BY_KEY.get(normalizeCityKey(name));

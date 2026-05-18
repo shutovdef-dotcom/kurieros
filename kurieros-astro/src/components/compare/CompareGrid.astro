@@ -141,7 +141,7 @@ const { compareJobs, features } = Astro.props;
   .compare-cell.job-col {
     border-left: 1px solid var(--ink-200);
   }
-  :global(body.dark-mode) .compare-cell.job-col {
+  :global(:where(html, body).dark-mode) .compare-cell.job-col {
     border-left-color: rgba(231, 234, 240, 0.18);
   }
 

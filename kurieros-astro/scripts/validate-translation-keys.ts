@@ -2,18 +2,27 @@
 /**
  * validate-translation-keys.ts
  *
- * Build-time guard that every static `data-t="key"` referenced in any
- * `.astro` template resolves to a real entry in `translations.ru` (the
- * shell-UI dictionary). Catches typos that would otherwise silently fall
- * back to the inline RU text in the template — invisible until somebody
- * actually flips a language switcher and notices the missing key.
+ * Build-time guard that every `data-t` key referenced in any `.astro`
+ * template resolves to a real entry in `translations.ru` (the shell-UI
+ * dictionary). Catches typos that would otherwise silently fall back to
+ * the inline RU text in the template — invisible until somebody actually
+ * flips a language switcher and notices the missing key.
  *
- * Skipped categories (intentionally not validated):
+ * Two extraction passes (audit v5 M9):
+ *   1. STATIC `data-t="key"` — a plain double-quoted attribute.
+ *   2. DYNAMIC `data-t={...}` — an expression attribute. Every plain
+ *      string literal (`'…'` / `"…"`) found inside the braces is pulled
+ *      out and validated, so a key emitted via
+ *      `data-t={cond ? 'jobgrid.empty_title' : undefined}` is checked
+ *      too. Pass 2 deliberately ignores backtick template literals
+ *      (`data-t={`vacancies.${id}.title`}`) and bare identifiers
+ *      (`data-t={fact.labelKey}`): those are computed per render and
+ *      cannot be resolved to a single static key.
+ *
+ * Skipped category (intentionally not validated):
  *   - `vacancies.*` keys: runtime fragments hydrated from
  *     /vacancy-translations/<lang>/<slug>.json by BaseLayout, not part
  *     of the shell-UI dict.
- *   - Dynamic `data-t={...}` (template literal) attrs: not matched by
- *     this scanner because keys are computed per render.
  *
  * Wired into `npm run generate:data` after `i18n:test`. Exits non-zero
  * with a list of missing keys so the build fails fast.
@@ -27,7 +36,37 @@ import { translations } from '../src/data/translations';
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const srcGlob = 'src/**/*.astro';
 
-const DATA_T_REGEX = /data-t="([^"${}]+)"/g;
+/** Pass 1 — static `data-t="key"` attributes. */
+const DATA_T_STATIC_REGEX = /data-t="([^"${}]+)"/g;
+
+/** Pass 2 — dynamic `data-t={ … }` expression attributes. */
+const DATA_T_DYNAMIC_REGEX = /data-t=\{([^}]*)\}/g;
+
+/**
+ * Plain string literals — single- or double-quoted — inside an
+ * expression. Backtick template literals are intentionally NOT matched:
+ * they interpolate per render and cannot be resolved to a static key.
+ */
+const STRING_LITERAL_REGEX = /'([^'\n]*)'|"([^"\n]*)"/g;
+
+/**
+ * Extract every plain string-literal key from a dynamic `data-t={...}`
+ * expression body. `data-t={cond ? 'a.b' : 'c.d'}` yields `['a.b','c.d']`;
+ * `data-t={fact.labelKey}` (a bare identifier) yields `[]`.
+ */
+const extractDynamicKeys = (expression: string): string[] => {
+  const keys: string[] = [];
+  for (const match of expression.matchAll(STRING_LITERAL_REGEX)) {
+    const literal = match[1] ?? match[2];
+    // A real translation key is a dotted path of word chars; skip empty
+    // strings and anything that is plainly not a key (e.g. a CSS class
+    // accidentally sitting in the expression).
+    if (literal && /^[\w.-]+$/.test(literal)) {
+      keys.push(literal);
+    }
+  }
+  return keys;
+};
 
 const resolveKey = (obj: unknown, path: string): unknown =>
   path
@@ -43,14 +82,27 @@ const resolveKey = (obj: unknown, path: string): unknown =>
 const main = async () => {
   const collected = new Map<string, Set<string>>();
 
+  const record = (key: string, file: string): void => {
+    const where = collected.get(key) ?? new Set<string>();
+    where.add(file);
+    collected.set(key, where);
+  };
+
   for await (const file of glob(srcGlob, { cwd: rootDir })) {
     const absolutePath = resolve(rootDir, file);
     const content = await readFile(absolutePath, 'utf8');
-    for (const match of content.matchAll(DATA_T_REGEX)) {
-      const key = match[1];
-      const where = collected.get(key) ?? new Set<string>();
-      where.add(file);
-      collected.set(key, where);
+
+    // Pass 1 — static `data-t="key"`.
+    for (const match of content.matchAll(DATA_T_STATIC_REGEX)) {
+      record(match[1], file);
+    }
+
+    // Pass 2 — dynamic `data-t={...}`: validate every plain string
+    // literal inside the expression (audit v5 M9).
+    for (const match of content.matchAll(DATA_T_DYNAMIC_REGEX)) {
+      for (const key of extractDynamicKeys(match[1])) {
+        record(key, file);
+      }
     }
   }
 
@@ -78,7 +130,8 @@ const main = async () => {
   }
 
   console.log(
-    `[i18n:validate-keys] OK — all ${collected.size} static data-t keys resolve in translations.ru.`,
+    `[i18n:validate-keys] OK — all ${collected.size} data-t keys ` +
+      `(static + dynamic) resolve in translations.ru.`,
   );
 };
 

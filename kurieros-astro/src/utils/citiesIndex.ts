@@ -14,7 +14,7 @@
  * mirrors `./jobsByCityIndex` (audit ref v3 H3) for the city-catalogue
  * projection instead of the per-city job buckets.
  *
- * See `getCitiesFromJobs` / `getCityNames` in `./cities` for the
+ * See `getCitiesFromJobs` in `./cities` for the
  * underlying projection semantics.
  *
  * Audit ref v4: HIGH-1 / MEDIUM-1.

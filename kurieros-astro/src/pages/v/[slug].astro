@@ -527,10 +527,17 @@ const quickFactSummary = (() => {
 // 4-12 кнопок «та же вакансия, другие города», отсортированных по
 // зарплате. sourceId — стабильный ключ роли (общий для всех city/transport
 // вариантов одного `VacancySource`), см. `src/data/vacancyTypes.ts:142`.
-const sameRoleOtherCities = jobsData
-	.filter((item) => item.sourceId === job.sourceId && item.slug !== job.slug)
-	.sort((a, b) => parseSalaryValue(b.salary) - parseSalaryValue(a.salary))
-	.slice(0, 12);
+// `selectTopN` keeps only the leading 12 in a single O(n) pass and
+// runs `parseSalaryValue` ONCE per item (via `project`) instead of
+// twice per comparison — same full-`.sort()` anti-pattern that
+// `selectTopN` already eliminated for `similarJobs`. Audit ref v5 M5.
+const SAME_ROLE_OTHER_CITIES_LIMIT = 12;
+const sameRoleOtherCities = selectTopN(
+	jobsData.filter((item) => item.sourceId === job.sourceId && item.slug !== job.slug),
+	SAME_ROLE_OTHER_CITIES_LIMIT,
+	(item) => parseSalaryValue(item.salary),
+	(a, b) => b - a,
+);
 
 const pageSchemaGraph = [
 	{
@@ -692,7 +699,7 @@ const pageSchemaGraph = [
 	.vacancy-page {
 		/* All --vacancy-* tokens route through global design tokens
 		   (themes.css). Dark-mode values are overridden below in
-		   :global(body.dark-mode) .vacancy-page. */
+		   :global(:where(html, body).dark-mode) .vacancy-page. */
 		--vacancy-ink: var(--ink-800);
 		--vacancy-muted: var(--ink-500);
 		--vacancy-eyebrow: var(--ink-500);
@@ -729,7 +736,7 @@ const pageSchemaGraph = [
 			grid-template-columns: 1fr;
 		}
 	}
-	:global(body.dark-mode) .vacancy-page {
+	:global(:where(html, body).dark-mode) .vacancy-page {
 		/* All values derived from global --ink-* and --brand-* tokens
 		   so /v/[slug] dark mode stays in lock-step with the rest of
 		   the site (warm coal palette, not cool slate). */

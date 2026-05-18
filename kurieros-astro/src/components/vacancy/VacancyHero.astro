@@ -559,8 +559,8 @@ const {
 		}
 	}
 
-	:global(body.dark-mode) .vacancy-logo,
-	:global(body.dark-mode) .meta-pill {
+	:global(:where(html, body).dark-mode) .vacancy-logo,
+	:global(:where(html, body).dark-mode) .meta-pill {
 		background: rgba(67, 77, 90, 0.86);
 	}
 </style>

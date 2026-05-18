@@ -3,7 +3,7 @@ import '../styles/index.css';
 import '../styles/themes.css';
 import VPNModal from '../components/VPNModal.astro';
 import OzonLeadModal from '../components/OzonLeadModal.astro';
-import { SUPPORTED_LANGUAGES, translations as allTranslations, type SupportedLanguage } from '../data/translations';
+import { SUPPORTED_LANGUAGES, translations as allTranslations } from '../data/translations';
 
 const supportedLanguages = SUPPORTED_LANGUAGES;
 // M2: shell-UI dictionary is Russian-only (post PR #131), so the 11 non-RU
@@ -177,15 +177,17 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 					document.documentElement.style.colorScheme = colorMode;
 					// Apply dark-mode class to <html> before first paint to avoid FOUC.
 					document.documentElement.classList.toggle('dark-mode', colorMode === 'dark');
-					// Mirror the class to <body> as soon as it parses. ~50 stylesheets
-					// in the codebase use `body.dark-mode .X` selectors (vs ~125 using
-					// the unprefixed `.dark-mode .X`). Without this sync those rules
-					// only attach after Header.astro's DOMContentLoaded handler runs,
-					// causing a several-second flash where filters / dropdowns /
-					// search-input render with light defaults on a dark hero.
-					// MutationObserver fires synchronously the moment the parser
-					// inserts <body>, so the body-prefixed rules attach in the same
-					// frame as the html-prefixed ones — eliminating the race entirely.
+					// Mirror the class to <body> as soon as it parses. Dark-mode
+					// rules are converged on `:where(html, body).dark-mode .X`
+					// (Wave 21e M7), which matches via EITHER ancestor — so the
+					// <html> class set above already styles every rule before
+					// <body> parses; no rule needs the <body> class to apply.
+					// The <body> mirror is kept anyway so the two ancestors stay
+					// consistent within the anti-FOUC frame and any future
+					// body-scoped logic (Header.astro reads body.dataset, JS that
+					// keys off the <body> class) sees the right state without a
+					// reload. MutationObserver fires synchronously the moment the
+					// parser inserts <body>, so the mirror lands in the same frame.
 					(function syncBodyDarkClass() {
 						var isDark = colorMode === 'dark';
 						if (document.body) {

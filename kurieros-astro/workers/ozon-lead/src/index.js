@@ -49,6 +49,11 @@ import { ALLOWED_TUPLES, ALLOWED_VACANCIES } from './whitelist.js';
 const OZON_API = 'https://sigma-bff-api.ozon.ru/v1/actions';
 const OZON_REFERER = 'https://recruitment.ozon.ru/ref-courier-sklad';
 
+// Canonical UUID shape (8-4-4-4-12 hex, 36 chars). cityID / hireObjectUUID
+// are operational-location UUIDs; anything non-empty that isn't this shape
+// is a malformed body and gets a 400 before the whitelist lookup.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 // Legacy defaults (Москва, rocket:courier, личный легковой авто).
 // Used only when the request omits per-vacancy fields. Kept as a
 // safety net — once the redeployed bundle ships, every request
@@ -149,6 +154,13 @@ async function submitToOzon(env, { name, phone, customer, vacancy, cityID, hireO
 	}
 
 	const isFresh = customer === 'express';
+	// OZON_CITIZENSHIP_ID is operator-set in wrangler.toml [vars]. A typo
+	// ("7x") makes Number() return NaN, which JSON.stringify serializes as
+	// null into the Ozon payload — silently failing every lead. Guard it:
+	// fall back to 7 (РФ) on anything that isn't a positive integer
+	// (audit ref v5 sec-LOW-2).
+	const cit = Number(env.OZON_CITIZENSHIP_ID);
+	const citizenshipID = Number.isInteger(cit) && cit > 0 ? cit : 7;
 	const inner = {
 		referrerFirstName: referrerName,
 		referrerPhone,
@@ -157,7 +169,7 @@ async function submitToOzon(env, { name, phone, customer, vacancy, cityID, hireO
 		...(isFresh
 			? { customer, vacancy }
 			: { combineCustomerVacancy: vacancy }),
-		citizenshipID: Number(env.OZON_CITIZENSHIP_ID || 7),
+		citizenshipID,
 		cityID,
 		hireObjectUUID,
 		utm_source: 'referral_campaign',
@@ -241,10 +253,26 @@ export default {
 		// field (Ozon ignores it), so failing a real lead over an oversized
 		// cosmetic value would be worse (audit ref v4 L9).
 		const transport = String(body?.transport || '').trim().slice(0, 100);
-		const reqVacancy = String(body?.vacancy || '').trim();
+		// `vacancy` / `customer` are whitelist-slug identifiers — every real
+		// value is a short delimiter-free token. Cap rather than reject so a
+		// trailing-junk body still fails cleanly on the whitelist lookup, not
+		// on an oversized-string allocation (audit ref v5 M13).
+		const reqVacancy = String(body?.vacancy || '').trim().slice(0, 64);
 		const reqCityID = String(body?.cityID || '').trim();
 		const reqHireObjectUUID = String(body?.hireObjectUUID || '').trim();
-		const reqCustomer = String(body?.customer || '').trim();
+		const reqCustomer = String(body?.customer || '').trim().slice(0, 64);
+
+		// cityID / hireObjectUUID feed the whitelist tupleKey. Reject a
+		// non-empty malformed value with 400 before the lookup so a hostile
+		// body can't push a multi-megabyte string into the Set key. Empty
+		// stays allowed — the legacy-default fallback below depends on it
+		// (audit ref v5 M12).
+		if (reqCityID && !UUID_RE.test(reqCityID)) {
+			return jsonResponse({ ok: false, error: 'invalid_city' }, { status: 400, headers: cors });
+		}
+		if (reqHireObjectUUID && !UUID_RE.test(reqHireObjectUUID)) {
+			return jsonResponse({ ok: false, error: 'invalid_hire_object' }, { status: 400, headers: cors });
+		}
 
 		if (name.length < 2) {
 			return jsonResponse({ ok: false, error: 'name_too_short' }, { status: 400, headers: cors });

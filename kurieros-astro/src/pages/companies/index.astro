@@ -2,13 +2,14 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
-import jobsData from '../../data/jobs';
-import reviewsData from '../../data/reviews.json';
-import { getCompaniesFromJobs } from '../../utils/companies';
+// `companiesFromJobs` is `getCompaniesFromJobs(jobsData, reviewsData)`
+// derived ONCE at module load in `companiesIndex.ts`, so this page no
+// longer rescans ~4.8k jobs + 19,144 reviews per build — audit v5 M4.
+import { companiesFromJobs } from '../../utils/companiesIndex';
 import { formatRussianPlural } from '../../utils/format';
 import { buildBreadcrumbSchema } from '../../utils/schema';
 
-const companies = getCompaniesFromJobs(jobsData, reviewsData)
+const companies = [...companiesFromJobs]
   .sort((a, b) => b.vacancyCount - a.vacancyCount || (b.rating || 0) - (a.rating || 0));
 const totalVacancies = companies.reduce((sum, company) => sum + company.vacancyCount, 0);
 const companiesTitle = 'Работа курьером по компаниям: бренды и вакансии | КурьерОк';
@@ -293,5 +294,9 @@ const pageSchemaGraph = [
     .companies-grid {
       grid-template-columns: 1fr;
     }
+  }
+
+  :global(:where(html, body).dark-mode) .company-logo-large {
+    background: var(--ink-100);
   }
 </style>

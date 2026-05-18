@@ -2,15 +2,17 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
-import jobsData from '../../data/jobs';
-import reviewsData from '../../data/reviews.json';
-import { getCompaniesFromJobs } from '../../utils/companies';
+// `companiesFromJobs` is `getCompaniesFromJobs(jobsData, reviewsData)`
+// derived ONCE at module load in `companiesIndex.ts`. This page used to
+// re-derive it twice (in `getStaticPaths` and again in the per-page
+// body), each pass scanning ~4.8k jobs + 19,144 reviews — audit v5 M4.
+import { companiesFromJobs } from '../../utils/companiesIndex';
 import { getCityHref } from '../../utils/cities';
 import { formatRussianPlural } from '../../utils/format';
 import { buildBreadcrumbSchema } from '../../utils/schema';
 
 export async function getStaticPaths() {
-  return getCompaniesFromJobs(jobsData, reviewsData).map((company) => ({
+  return companiesFromJobs.map((company) => ({
     params: { slug: company.slug },
     props: { company },
   }));
@@ -57,7 +59,7 @@ const methodologyPoints = [
   'Страница бренда помогает быстро понять общий контекст работодателя, но не заменяет проверку конкретной вакансии перед откликом.',
   'Если условия на стороне работодателя отличаются от карточки, ориентируйтесь на финальные условия в анкете или в прямом канале бренда.',
 ];
-const relatedCompanies = getCompaniesFromJobs(jobsData, reviewsData)
+const relatedCompanies = companiesFromJobs
   .filter((item) => item.slug !== company.slug)
   .map((item) => {
     const sharedCities = item.cities.filter((city) => company.cities.includes(city)).length;
@@ -759,5 +761,25 @@ const pageSchemaGraph = [
     .faq-grid {
       grid-template-columns: 1fr;
     }
+  }
+
+  :global(:where(html, body).dark-mode) .company-page {
+    background: linear-gradient(180deg, var(--ink-50) 0%, var(--ink-0) 100%);
+  }
+
+  :global(:where(html, body).dark-mode) .company-header {
+    background: var(--ink-100);
+    border-color: var(--ink-200);
+  }
+
+  :global(:where(html, body).dark-mode) .company-logo-wrap {
+    background: var(--ink-100);
+  }
+
+  :global(:where(html, body).dark-mode) .meta-pill,
+  :global(:where(html, body).dark-mode) .job-city {
+    background: var(--ink-150);
+    border-color: var(--ink-200);
+    color: var(--ink-600);
   }
 </style>

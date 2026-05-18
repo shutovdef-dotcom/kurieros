@@ -5,6 +5,17 @@ import Footer from '../components/Footer.astro';
 import articlesData from '../data/articles.json';
 import { buildBreadcrumbSchema } from '../utils/schema';
 
+// Shape of a `src/data/articles.json` entry. The file is intentionally
+// `[]` today (the /blog/ feature is shelved — see the empty-state note
+// below), so this interface documents the contract a future entry must
+// satisfy and lets `posts` infer instead of leaking `: any`.
+interface Article {
+	slug: string;
+	title: string;
+	description: string;
+	date: string;
+}
+
 const formatDate = (value: string) =>
 	new Intl.DateTimeFormat('ru-RU', {
 		day: 'numeric',
@@ -12,7 +23,7 @@ const formatDate = (value: string) =>
 		year: 'numeric',
 	}).format(new Date(value));
 
-const posts = articlesData.map((article: any) => ({
+const posts = (articlesData as Article[]).map((article) => ({
 	...article,
 	excerpt: article.description,
 	formattedDate: formatDate(article.date),
@@ -29,7 +40,7 @@ const pageSchemaGraph = [
 		url: Astro.url.href,
 		mainEntity: {
 			'@type': 'ItemList',
-			itemListElement: posts.map((post: any, index: number) => ({
+			itemListElement: posts.map((post, index) => ({
 				'@type': 'ListItem',
 				position: index + 1,
 				name: post.title,
@@ -143,13 +154,12 @@ const pageSchemaGraph = [
 		max-width: 1360px;
 		margin: 0 auto 4rem;
 		background: linear-gradient(135deg, var(--brand-800), var(--brand-700));
-		color: white;
 		padding: 4rem 2rem;
 		border-radius: 8px;
 		text-align: center;
 	}
-	.newsletter h2 { color: white; margin-bottom: 1rem; }
-	.newsletter p { color: rgba(255,255,255,0.9); margin-bottom: 2rem; }
+	.newsletter h2 { color: var(--ink-900); margin-bottom: 1rem; }
+	.newsletter p { color: var(--ink-700); margin-bottom: 2rem; }
 	@media (max-width: 960px) {
 		.blog-hero {
 			grid-template-columns: 1fr;
@@ -177,4 +187,7 @@ const pageSchemaGraph = [
 		border: 1px solid var(--brand-200);
 		border-radius: var(--radius-xl);
 	}
+
+	:global(:where(html, body).dark-mode) .newsletter h2 { color: var(--ink-900); }
+	:global(:where(html, body).dark-mode) .newsletter p { color: var(--ink-700); }
 </style>

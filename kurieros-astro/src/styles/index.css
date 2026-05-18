@@ -128,14 +128,14 @@ header {
   color: var(--brand-700);
 }
 
-body.dark-mode .logo {
+:where(html, body).dark-mode .logo {
   background: var(--dm-green-surface-hover);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-body.dark-mode .logo svg {
+:where(html, body).dark-mode .logo svg {
   color: var(--dm-green-surface-hover);
 }
 
@@ -176,7 +176,6 @@ body.dark-mode .logo svg {
   header {
     padding-right: 8.25rem;
   }
-  .lang-switcher-li { display: none !important; }
 }
 
 @media (max-width: 420px) {
@@ -739,37 +738,38 @@ footer {
     color: white;
 }
 
-body.dark-mode .btn-secondary,
-body.dark-mode .btn-compare,
-body.dark-mode .salary-tag,
-body.dark-mode .tag {
+:where(html, body).dark-mode .btn-secondary,
+:where(html, body).dark-mode .btn-compare,
+:where(html, body).dark-mode .salary-tag,
+:where(html, body).dark-mode .tag {
   background: var(--dm-green-surface);
   border-color: var(--dm-green-border);
   color: var(--dm-green-text);
 }
 
-body.dark-mode .btn-secondary:hover,
-body.dark-mode .btn-compare:hover {
+:where(html, body).dark-mode .btn-secondary:hover,
+:where(html, body).dark-mode .btn-compare:hover {
   background: var(--dm-green-surface-hover);
   border-color: var(--dm-green-focus);
 }
 
 /* .city-selector-container dark-mode is owned by scoped rules in
-   src/pages/index.astro (neutral surface-100 to match /compare/). */
+   src/components/home/HomeToolbar.astro (neutral surface-100 to match
+   /compare/). */
 
-body.dark-mode .btn-primary {
+:where(html, body).dark-mode .btn-primary {
   background: var(--dm-green-surface-strong);
   border-color: var(--dm-green-border);
   color: var(--dm-green-text);
 }
 
-body.dark-mode .btn-primary:hover {
+:where(html, body).dark-mode .btn-primary:hover {
   background: var(--dm-green-surface-hover);
   border-color: var(--dm-green-focus);
   color: var(--dm-green-text);
 }
 
-body.dark-mode .btn-compare.active {
+:where(html, body).dark-mode .btn-compare.active {
   background: var(--dm-green-surface-hover);
   border-color: var(--dm-green-focus);
   color: var(--dm-green-text);
@@ -781,43 +781,43 @@ body.dark-mode .btn-compare.active {
    read as a single green blob (user feedback). Background uses --ink-200
    (lighter coal) because --ink-100 matches the header background, which
    would make the toggle invisible. */
-body.dark-mode .theme-toggle {
+:where(html, body).dark-mode .theme-toggle {
   background: var(--ink-200);
   border: 1px solid var(--ink-300);
   color: var(--ink-800);
 }
 
-body.dark-mode .theme-toggle:hover,
-body.dark-mode .theme-toggle:focus-visible {
+:where(html, body).dark-mode .theme-toggle:hover,
+:where(html, body).dark-mode .theme-toggle:focus-visible {
   background: var(--ink-300);
   border-color: var(--ink-400);
   color: var(--ink-900);
 }
 
-body.dark-mode .main-nav a:hover,
-body.dark-mode .main-nav a:focus-visible {
+:where(html, body).dark-mode .main-nav a:hover,
+:where(html, body).dark-mode .main-nav a:focus-visible {
   color: var(--dm-green-surface-hover);
 }
 
-body.dark-mode .city-select {
+:where(html, body).dark-mode .city-select {
   color: var(--dm-green-text);
 }
 
-body.dark-mode .city-selector-container::after {
+:where(html, body).dark-mode .city-selector-container::after {
   color: #a7d8c5;
 }
 
-body.dark-mode select {
+:where(html, body).dark-mode select {
   border-color: var(--dm-green-border);
   color: var(--dm-green-text);
 }
 
-body.dark-mode select:focus-visible {
+:where(html, body).dark-mode select:focus-visible {
   outline-color: var(--dm-green-focus);
   border-color: var(--dm-green-focus);
 }
 
-body.dark-mode .footer-cloud span {
+:where(html, body).dark-mode .footer-cloud span {
   background: rgba(148, 163, 184, 0.12);
 }
 
@@ -1096,12 +1096,8 @@ body.dark-mode .footer-cloud span {
 .faq-answer {
   padding: 0 1.5rem 1.5rem 1.5rem;
   color: var(--text-muted);
-  display: none;
   font-size: 1rem;
   line-height: 1.6;
-}
-.faq-item.active .faq-answer {
-  display: block;
 }
 
 .hot-badge {
@@ -1137,36 +1133,13 @@ body.dark-mode .footer-cloud span {
 :where(html, body).dark-mode .listing-hero-panel,
 :where(html, body).dark-mode .listing-fact-card,
 :where(html, body).dark-mode .listing-secondary-link,
-:where(html, body).dark-mode .blog-card,
-:where(html, body).dark-mode .featured-story-copy,
-:where(html, body).dark-mode .related-card,
 :where(html, body).dark-mode .info-card,
-:where(html, body).dark-mode .city-card,
 :where(html, body).dark-mode .city-tile,
 :where(html, body).dark-mode .cities-grid > a,
-:where(html, body).dark-mode .cities-route-grid > *,
-:where(html, body).dark-mode .cities-spotlight,
-:where(html, body).dark-mode .cities-spotlight-grid > *,
-:where(html, body).dark-mode .cities-faq-section,
-:where(html, body).dark-mode .cities-answer-panel,
-:where(html, body).dark-mode .spotlight-card,
-:where(html, body).dark-mode .route-card,
-:where(html, body).dark-mode .surface-card,
-:where(html, body).dark-mode .faq-card,
 :where(html, body).dark-mode .compare-table,
 :where(html, body).dark-mode .compare-page,
 :where(html, body).dark-mode .compare-grid,
 :where(html, body).dark-mode .compare-empty,
-:where(html, body).dark-mode .compare-faq-item,
-:where(html, body).dark-mode .compare-article-link,
-:where(html, body).dark-mode .compare-geo-card,
-:where(html, body).dark-mode .compare-link-card,
-:where(html, body).dark-mode .compare-route-card,
-:where(html, body).dark-mode .compare-route-grid,
-:where(html, body).dark-mode .compare-answer-panel,
-:where(html, body).dark-mode .compare-summary-card,
-:where(html, body).dark-mode .compare-summary-panel,
-:where(html, body).dark-mode .compare-trust-panel,
 :where(html, body).dark-mode .contact-success,
 :where(html, body).dark-mode .faq-item,
 :where(html, body).dark-mode .fact-card,
@@ -1182,27 +1155,12 @@ body.dark-mode .footer-cloud span {
 :where(html, body).dark-mode .listing-hero-panel h2,
 :where(html, body).dark-mode .listing-fact-card strong,
 :where(html, body).dark-mode .info-card h3,
-:where(html, body).dark-mode .city-card h3,
-:where(html, body).dark-mode .cities-spotlight h2,
-:where(html, body).dark-mode .cities-faq-section h2,
-:where(html, body).dark-mode .cities-faq-section h3,
-:where(html, body).dark-mode .compare-th,
-:where(html, body).dark-mode .compare-cell-label,
-:where(html, body).dark-mode .compare-answer-panel h2,
-:where(html, body).dark-mode .compare-answer-panel h3,
-:where(html, body).dark-mode .compare-summary-card h2,
-:where(html, body).dark-mode .compare-summary-panel h2,
-:where(html, body).dark-mode .compare-trust-panel h2,
 :where(html, body).dark-mode .faq-item h2,
 :where(html, body).dark-mode .faq-item h3 {
   color: var(--ink-900);
 }
 :where(html, body).dark-mode .listing-hero-panel > p:not(.section-eyebrow),
 :where(html, body).dark-mode .listing-fact-card span,
-:where(html, body).dark-mode .blog-card p,
-:where(html, body).dark-mode .blog-meta,
-:where(html, body).dark-mode .info-card p,
-:where(html, body).dark-mode .city-card p,
 :where(html, body).dark-mode .compare-row,
 :where(html, body).dark-mode .compare-row td,
 :where(html, body).dark-mode .faq-item p {
