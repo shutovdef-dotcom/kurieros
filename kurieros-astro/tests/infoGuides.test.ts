@@ -110,6 +110,39 @@ describe('INFO_GUIDES', () => {
     }
   });
 
+  it('income entry has howTo=undefined', () => {
+    // Arrange / Act
+    const { howTo } = INFO_GUIDES.income;
+    // Assert
+    expect(howTo).toBeUndefined();
+  });
+
+  it('work-conditions entry has showCalculator falsy', () => {
+    // Arrange / Act
+    const { showCalculator } = INFO_GUIDES['work-conditions'];
+    // Assert
+    expect(showCalculator).toBeFalsy();
+  });
+
+  it('how-to-become entry has >=3 howTo steps with non-empty name and text', () => {
+    // Arrange
+    const { howTo } = INFO_GUIDES['how-to-become'];
+    // Act / Assert
+    expect(howTo).toBeDefined();
+    expect(howTo!.steps.length).toBeGreaterThanOrEqual(3);
+    for (const step of howTo!.steps) {
+      expect(step.name.trim().length).toBeGreaterThan(0);
+      expect(step.text.trim().length).toBeGreaterThan(0);
+    }
+  });
+
+  it('income and work-conditions entries have faqItems.length >= 2', () => {
+    // Arrange / Act / Assert
+    expect(INFO_GUIDES.income.faqItems.length).toBeGreaterThanOrEqual(2);
+    expect(INFO_GUIDES['work-conditions'].faqItems.length).toBeGreaterThanOrEqual(2);
+    expect(INFO_GUIDES['how-to-become'].faqItems.length).toBeGreaterThanOrEqual(2);
+  });
+
   it('relatedGuideSlugs reference only known slugs', () => {
     // Arrange / Act / Assert
     for (const [key, config] of Object.entries(INFO_GUIDES)) {
@@ -122,12 +155,58 @@ describe('INFO_GUIDES', () => {
     }
   });
 
-  // Anti-thin-content assertions — blocked on OQ#2 editorial content.
-  // These stubs must remain present; do NOT delete them.
-  // They will be un-skipped in beads B8/B9/B10 when prose is authored.
-  it.todo('each entry has >=2 sections with non-empty heading and body // TODO(OQ2)');
-  it.todo('each entry faqItems is non-empty // TODO(OQ2)');
-  it.todo('total body word count across sections is >=300 per guide // TODO(OQ2)');
+  // Anti-thin-content assertions — un-skipped in B8/B9/B10 (OQ#2 resolved).
+  it('each entry has >=2 sections with non-empty heading and body', () => {
+    // Arrange / Act / Assert
+    for (const [key, config] of Object.entries(INFO_GUIDES)) {
+      expect(
+        config.sections.length,
+        `INFO_GUIDES['${key}'].sections must have >=2 entries`,
+      ).toBeGreaterThanOrEqual(2);
+      for (const section of config.sections) {
+        expect(
+          section.heading.trim().length,
+          `INFO_GUIDES['${key}'] has a section with empty heading`,
+        ).toBeGreaterThan(0);
+        expect(
+          section.body.trim().length,
+          `INFO_GUIDES['${key}'] has a section with empty body`,
+        ).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('each entry faqItems is non-empty', () => {
+    // Arrange / Act / Assert
+    for (const [key, config] of Object.entries(INFO_GUIDES)) {
+      expect(
+        config.faqItems.length,
+        `INFO_GUIDES['${key}'].faqItems must have >=1 item`,
+      ).toBeGreaterThan(0);
+      for (const item of config.faqItems) {
+        expect(
+          item.question.trim().length,
+          `INFO_GUIDES['${key}'] has a faqItem with empty question`,
+        ).toBeGreaterThan(0);
+        expect(
+          item.answer.trim().length,
+          `INFO_GUIDES['${key}'] has a faqItem with empty answer`,
+        ).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('total body word count across sections is >=300 per guide', () => {
+    // Arrange / Act / Assert
+    for (const [key, config] of Object.entries(INFO_GUIDES)) {
+      const totalText = config.sections.map((s) => s.body).join(' ');
+      const wordCount = totalText.trim().split(/\s+/).filter(Boolean).length;
+      expect(
+        wordCount,
+        `INFO_GUIDES['${key}'] total word count is ${wordCount} — must be >=300`,
+      ).toBeGreaterThanOrEqual(300);
+    }
+  });
 });
 
 // ---------------------------------------------------------------------------

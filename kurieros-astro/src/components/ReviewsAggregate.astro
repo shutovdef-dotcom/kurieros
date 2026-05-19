@@ -1,0 +1,657 @@
+---
+/**
+ * ReviewsAggregate.astro
+ *
+ * Brand-grouped reviews body for /otzyvy/.
+ *
+ * Design decisions (plan.md §3.4 Decision C, bead B11):
+ * - No page-level AggregateRating — averaging across different employers
+ *   is misleading structured data. All rating markup is per-brand only.
+ * - Per-brand sections show: name, star summary, review count,
+ *   rating-distribution bar, up to 6 .review-card elements, CTA to
+ *   /companies/{slug}/ when companyHref is set.
+ * - Honest-content disclaimer: reviews are not independently verified.
+ * - Only BrandReviewSummary data (pre-aggregated by reviewsAggregate.ts)
+ *   reaches this component — the 10 MB reviews.json never arrives here.
+ * - All review text flows through {expression} slots (auto-escaped by Astro).
+ *   Never use set:html with review-derived content.
+ */
+
+import type { BrandReviewSummary } from '../utils/reviewsAggregate';
+
+interface Props {
+  summaries: BrandReviewSummary[];
+  totalCount: number;
+}
+
+const { summaries, totalCount } = Astro.props;
+
+/** Render a star string from a numeric rating (same pattern as ReviewsBlock). */
+const renderStars = (rating: number): string => {
+  const full = Math.floor(rating);
+  const half = rating % 1 >= 0.5 ? 1 : 0;
+  const empty = 5 - full - half;
+  return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
+};
+
+/** Format a date string as a short RU date, e.g. "10 янв. 2025". */
+const formatDate = (dateStr: string): string => {
+  try {
+    return new Date(dateStr).toLocaleDateString('ru-RU', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  } catch {
+    return dateStr;
+  }
+};
+
+/**
+ * Maximum percentage width for the widest bar in a brand's distribution.
+ * Each bar width is proportional within the brand's own max bucket.
+ */
+const MAX_BAR_PCT = 100;
+---
+
+<div class="reviews-aggregate">
+
+  <!-- ── Hero ── -->
+  <section class="ra-hero">
+    <p class="ra-hero-eyebrow">Отзывы курьеров</p>
+    <h2 class="ra-hero-count">
+      {totalCount > 0
+        ? `${totalCount.toLocaleString('ru-RU')} отзывов от реальных курьеров`
+        : 'Отзывы появятся позже'}
+    </h2>
+    <p class="ra-hero-lead">
+      Читайте отзывы курьеров о работодателях, сравнивайте условия
+      и находите лучшие вакансии.
+    </p>
+  </section>
+
+  <!-- ── Honest-content disclaimer ── -->
+  <aside class="ra-disclaimer" role="note">
+    <p>
+      <strong>Важно:</strong> отзывы собраны от участников платформы и не прошли
+      независимую проверку. Оценки отражают субъективный опыт авторов.
+    </p>
+  </aside>
+
+  <!-- ── Empty state ── -->
+  {totalCount === 0 && (
+    <div class="ra-empty">
+      <p>Отзывы появятся позже. Загляните снова через некоторое время.</p>
+    </div>
+  )}
+
+  <!-- ── Brand sections ── -->
+  {summaries.map((summary) => {
+    const maxBucketCount = Math.max(
+      1,
+      ...Object.values(summary.ratingDistribution),
+    );
+    const brandId = summary.slug || summary.brand.replace(/\s+/g, '-').toLowerCase();
+
+    return (
+      <section
+        class="ra-brand"
+        aria-labelledby={`brand-${brandId}`}
+      >
+        <!-- Brand header -->
+        <div class="ra-brand-header">
+          <div class="ra-brand-title-row">
+            <h2
+              class="ra-brand-name"
+              id={`brand-${brandId}`}
+            >
+              {summary.brand}
+            </h2>
+            {summary.companyHref && (
+              <a
+                class="ra-brand-cta"
+                href={summary.companyHref}
+              >
+                Вакансии {summary.brand} →
+              </a>
+            )}
+          </div>
+
+          <!-- Rating summary row -->
+          <div class="ra-brand-rating">
+            <span class="ra-rating-number">{summary.averageRating}</span>
+            <span class="ra-rating-stars" title={`Рейтинг: ${summary.averageRating} из 5`}>
+              {renderStars(summary.averageRating)}
+            </span>
+            <span class="ra-rating-count">
+              {summary.reviewCount.toLocaleString('ru-RU')} отзывов
+            </span>
+          </div>
+
+          <!-- Rating distribution bars -->
+          <div class="ra-distribution" aria-label="Распределение оценок">
+            {([5, 4, 3, 2, 1] as const).map((star) => {
+              const count = summary.ratingDistribution[star] ?? 0;
+              const pct = Math.round((count / maxBucketCount) * MAX_BAR_PCT);
+              return (
+                <div class="ra-dist-row">
+                  <span class="ra-dist-label">{star}★</span>
+                  <div class="ra-dist-track" role="meter" aria-label={`${star} звезды: ${count}`}>
+                    <div
+                      class="ra-dist-bar"
+                      style={`width: ${pct}%`}
+                    />
+                  </div>
+                  <span class="ra-dist-count">{count}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <!-- Review cards (≤6) -->
+        {summary.sampleReviews.length > 0 && (
+          <div class="reviews-grid ra-reviews-grid">
+            {summary.sampleReviews.map((review) => (
+              <div class="review-card">
+                <div class="review-header">
+                  <div class="review-avatar">{review.name.charAt(0)}</div>
+                  <div class="review-meta-info">
+                    <div class="r-name-city">
+                      <strong>{review.name}</strong>
+                      <span class="r-city">{review.city}</span>
+                    </div>
+                    <div class="r-job-info">
+                      <span class="r-rating" title={`Оценка: ${review.rating}`}>
+                        {renderStars(review.rating)}
+                      </span>
+                      <span class="ra-review-date">{formatDate(review.date)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="review-content">
+                  {review.pros && (
+                    <div class="r-block r-pros">
+                      <span class="r-icon">+</span>
+                      <p>{review.pros}</p>
+                    </div>
+                  )}
+                  {review.cons && (
+                    <div class="r-block r-cons">
+                      <span class="r-icon">-</span>
+                      <p>{review.cons}</p>
+                    </div>
+                  )}
+                  {review.comment && (
+                    <div class="r-block r-comment">
+                      <span class="r-icon">💬</span>
+                      <p>"{review.comment}"</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {summary.sampleReviews.length === 0 && (
+          <p class="ra-no-samples">Нет примеров отзывов для этого бренда.</p>
+        )}
+
+        <!-- Company-page CTA -->
+        {summary.companyHref && (
+          <div class="ra-brand-footer">
+            <a class="btn-brand-cta" href={summary.companyHref}>
+              Смотреть вакансии {summary.brand}
+            </a>
+          </div>
+        )}
+      </section>
+    );
+  })}
+
+  <!-- ── Hub exit-ramp CTAs ── -->
+  <section class="ra-exit-ramp">
+    <h2 class="ra-exit-heading">Ищете работу курьером?</h2>
+    <p class="ra-exit-lead">
+      Выберите формат доставки и найдите подходящие вакансии прямо сейчас.
+    </p>
+    <div class="ra-exit-links">
+      <a class="ra-exit-link" href="/rabota-peshim-kurerom/">Пешие курьеры</a>
+      <a class="ra-exit-link" href="/rabota-avtokurerom/">Автокурьеры</a>
+      <a class="ra-exit-link" href="/rabota-velokurerom/">Велокурьеры</a>
+      <a class="ra-exit-link" href="/podrabotka-kurerom/">Подработка</a>
+      <a class="ra-exit-link" href="/companies/">Все компании</a>
+    </div>
+  </section>
+
+</div>
+
+<style>
+  /* ── Layout ── */
+  .reviews-aggregate {
+    display: grid;
+    gap: 48px;
+    padding-bottom: 40px;
+  }
+
+  /* ── Hero ── */
+  .ra-hero {
+    padding: 28px 0 8px;
+  }
+  .ra-hero-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--brand-700);
+    margin: 0 0 8px;
+  }
+  .ra-hero-count {
+    font-size: clamp(22px, 3vw, 32px);
+    line-height: 1.2;
+    margin: 0 0 10px;
+  }
+  .ra-hero-lead {
+    font-size: 16px;
+    color: var(--ink-700);
+    margin: 0;
+    max-width: 680px;
+  }
+
+  /* ── Disclaimer ── */
+  .ra-disclaimer {
+    padding: 14px 20px;
+    border: 1px solid var(--ink-100);
+    border-left: 4px solid var(--brand-700);
+    border-radius: 8px;
+    background: var(--surface-100);
+    font-size: 14px;
+    color: var(--ink-700);
+  }
+  .ra-disclaimer p {
+    margin: 0;
+    line-height: 1.55;
+  }
+
+  /* ── Empty state ── */
+  .ra-empty {
+    text-align: center;
+    padding: 48px 24px;
+    border: 1px dashed var(--ink-100);
+    border-radius: 12px;
+    color: var(--ink-500);
+    font-size: 16px;
+  }
+  .ra-empty p {
+    margin: 0;
+  }
+
+  /* ── Brand section ── */
+  .ra-brand {
+    display: grid;
+    gap: 24px;
+    padding: 28px 0;
+    border-top: 1px solid var(--ink-100);
+  }
+
+  .ra-brand-header {
+    display: grid;
+    gap: 14px;
+  }
+
+  .ra-brand-title-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 12px;
+    justify-content: space-between;
+  }
+
+  .ra-brand-name {
+    font-size: clamp(20px, 2.4vw, 26px);
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .ra-brand-cta {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--brand-700);
+    text-decoration: none;
+    border-bottom: 1px dashed currentColor;
+    white-space: nowrap;
+  }
+  .ra-brand-cta:hover {
+    color: var(--ink-900);
+    border-bottom-style: solid;
+  }
+
+  /* Rating summary */
+  .ra-brand-rating {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .ra-rating-number {
+    font-size: 28px;
+    font-weight: 900;
+    color: #eab308;
+    line-height: 1;
+  }
+  .ra-rating-stars {
+    color: var(--color-warning, #eab308);
+    font-size: 1.15rem;
+    letter-spacing: 0;
+  }
+  .ra-rating-count {
+    font-size: 14px;
+    color: var(--ink-500);
+  }
+
+  /* Distribution bars */
+  .ra-distribution {
+    display: grid;
+    gap: 6px;
+    max-width: 360px;
+  }
+  .ra-dist-row {
+    display: grid;
+    grid-template-columns: 28px 1fr 36px;
+    gap: 8px;
+    align-items: center;
+  }
+  .ra-dist-label {
+    font-size: 12px;
+    color: var(--ink-500);
+    text-align: right;
+  }
+  .ra-dist-track {
+    background: var(--ink-100);
+    border-radius: 4px;
+    height: 8px;
+    overflow: hidden;
+  }
+  .ra-dist-bar {
+    height: 100%;
+    background: var(--brand-700);
+    border-radius: 4px;
+    min-width: 2px;
+    transition: width 0.2s ease;
+  }
+  .ra-dist-count {
+    font-size: 12px;
+    color: var(--ink-500);
+    text-align: left;
+  }
+
+  /* Reviews grid */
+  .ra-reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  /* review-card styles (scoped copy of ReviewsBlock.astro's card rules) */
+  .review-card {
+    background: var(--surface-color, var(--surface-100));
+    border: 1px solid var(--border-color, var(--ink-100));
+    border-radius: 8px;
+    padding: 1.25rem;
+    box-shadow: 0 4px 12px rgba(60, 41, 20, 0.03);
+    transition: box-shadow 0.15s, transform 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    position: relative;
+  }
+  .review-card:hover {
+    box-shadow: 0 8px 24px rgba(60, 41, 20, 0.08);
+    transform: translateY(-2px);
+  }
+  .review-header {
+    display: flex;
+    gap: 0.9rem;
+    align-items: center;
+  }
+  .review-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--text-main, var(--ink-900));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  .review-meta-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    width: 100%;
+    min-width: 0;
+  }
+  .r-name-city {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 8px;
+  }
+  .r-name-city strong {
+    font-size: 1rem;
+    color: var(--text-main, var(--ink-900));
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .r-city {
+    font-size: 0.78rem;
+    color: var(--text-muted, var(--ink-500));
+    background: var(--bg-color, var(--surface-50));
+    padding: 0.1rem 0.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color, var(--ink-100));
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .r-job-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .r-rating {
+    color: var(--color-warning, #eab308);
+    font-size: 0.88rem;
+    letter-spacing: 0;
+  }
+  .ra-review-date {
+    font-size: 0.78rem;
+    color: var(--ink-500);
+  }
+  .review-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .r-block {
+    display: flex;
+    gap: 0.7rem;
+    align-items: flex-start;
+  }
+  .r-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+  .r-pros .r-icon {
+    background: var(--brand-50);
+    color: var(--brand-600);
+  }
+  .r-cons .r-icon {
+    background: #fee2e2;
+    color: var(--color-danger, #dc2626);
+  }
+  .r-comment .r-icon {
+    background: var(--ink-50);
+    color: var(--ink-500);
+    font-size: 0.7rem;
+  }
+  .r-block p {
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--text-main, var(--ink-900));
+    margin: 0;
+    padding-top: 0.12rem;
+  }
+  .r-comment p {
+    font-style: italic;
+    color: var(--text-muted, var(--ink-500));
+  }
+
+  /* No-samples note */
+  .ra-no-samples {
+    font-size: 14px;
+    color: var(--ink-500);
+    margin: 0;
+  }
+
+  /* Brand-footer CTA button */
+  .ra-brand-footer {
+    display: flex;
+    justify-content: flex-start;
+  }
+  .btn-brand-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    background: var(--brand-700);
+    color: #fff;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .btn-brand-cta:hover {
+    background: var(--brand-800, color-mix(in srgb, var(--brand-700) 80%, #000));
+    transform: translateY(-1px);
+  }
+
+  /* ── Exit-ramp section ── */
+  .ra-exit-ramp {
+    padding: 28px 0 8px;
+    border-top: 1px solid var(--ink-100);
+  }
+  .ra-exit-heading {
+    font-size: clamp(20px, 2.4vw, 26px);
+    margin: 0 0 8px;
+  }
+  .ra-exit-lead {
+    font-size: 15px;
+    color: var(--ink-700);
+    margin: 0 0 18px;
+  }
+  .ra-exit-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .ra-exit-link {
+    padding: 8px 18px;
+    border: 1px solid var(--brand-700);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--brand-700);
+    text-decoration: none;
+    transition: background 0.12s, color 0.12s;
+  }
+  .ra-exit-link:hover {
+    background: var(--brand-700);
+    color: #fff;
+  }
+
+  /* ── Dark mode ── */
+  :global(:where(html, body).dark-mode) .ra-disclaimer {
+    background: var(--surface-200);
+    border-color: var(--ink-200);
+    border-left-color: var(--brand-500);
+  }
+  :global(:where(html, body).dark-mode) .ra-brand {
+    border-top-color: var(--ink-200);
+  }
+  :global(:where(html, body).dark-mode) .ra-dist-track {
+    background: var(--ink-200);
+  }
+  :global(:where(html, body).dark-mode) .ra-dist-bar {
+    background: var(--brand-500);
+  }
+  :global(:where(html, body).dark-mode) .ra-exit-ramp {
+    border-top-color: var(--ink-200);
+  }
+  :global(:where(html, body).dark-mode) .ra-exit-link {
+    border-color: var(--brand-500);
+    color: var(--brand-500);
+  }
+  :global(:where(html, body).dark-mode) .ra-exit-link:hover {
+    background: var(--brand-500);
+    color: #fff;
+  }
+  :global(:where(html, body).dark-mode) .review-card {
+    background: rgba(67, 77, 90, 0.86);
+    border-color: rgba(195, 204, 216, 0.26);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.3);
+  }
+  :global(:where(html, body).dark-mode) .review-card:hover {
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.34);
+  }
+  :global(:where(html, body).dark-mode) .r-city {
+    background: rgba(195, 204, 216, 0.14);
+    border-color: rgba(195, 204, 216, 0.24);
+    color: var(--ink-800);
+  }
+  :global(:where(html, body).dark-mode) .r-comment .r-icon {
+    background: rgba(195, 204, 216, 0.18);
+    color: var(--ink-800);
+  }
+  :global(:where(html, body).dark-mode) .r-cons .r-icon {
+    background: rgba(239, 68, 68, 0.18);
+    color: var(--color-danger, #dc2626);
+  }
+  :global(:where(html, body).dark-mode) .ra-empty {
+    border-color: var(--ink-200);
+    color: var(--ink-400);
+  }
+  :global(:where(html, body).dark-mode) .btn-brand-cta {
+    background: var(--dm-green-surface-strong, var(--brand-500));
+    border-color: var(--dm-green-border, transparent);
+    color: var(--dm-green-text, #fff);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 640px) {
+    .ra-brand-title-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .ra-reviews-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

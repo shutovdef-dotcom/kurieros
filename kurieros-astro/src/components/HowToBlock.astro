@@ -22,9 +22,16 @@ import type { HowToConfig } from '../utils/infoGuides';
 
 interface Props {
   howTo: HowToConfig;
+  /**
+   * When false, suppresses the inline <script type="application/ld+json">
+   * for the HowTo node — use this when the HowTo node is already included
+   * in the page's @graph (e.g. via buildGuideSchemaGraph + InfoGuideLayout).
+   * Defaults to true for backwards compatibility.
+   */
+  emitJsonLd?: boolean;
 }
 
-const { howTo } = Astro.props;
+const { howTo, emitJsonLd = true } = Astro.props;
 
 const hasSteps = howTo.steps.length > 0;
 
@@ -53,7 +60,7 @@ const howToJsonLd = hasSteps
         </li>
       ))}
     </ol>
-    <script type="application/ld+json" set:html={howToJsonLd} />
+    {emitJsonLd && <script type="application/ld+json" set:html={howToJsonLd} />}
   </section>
 )}
 

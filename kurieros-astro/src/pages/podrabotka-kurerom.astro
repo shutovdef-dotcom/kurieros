@@ -1,0 +1,77 @@
+---
+/**
+ * /podrabotka-kurerom/ — flexible/part-time courier hub page.
+ * Demand: ~18 396 searches/mo.
+ *
+ * Thin wrapper: picks the 'flexible' entry from HUB_CONFIGS, filters jobs,
+ * builds schema, and renders BaseLayout + TransportHub.
+ * All template logic lives in TransportHub.astro (bead B5).
+ *
+ * Open Question #3 pre-flight: if the 'flexible' tag yields zero jobs,
+ * the page is noindex and a build-time warning is emitted so the build
+ * log signals it clearly.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import TransportHub from '../components/TransportHub.astro';
+import jobsData from '../data/jobs';
+import {
+	HUB_CONFIGS,
+	buildHubTitle,
+	buildHubDescription,
+	buildHubFaqItems,
+	buildHubSchemaGraph,
+} from '../utils/transportHubs';
+import { filterJobsByCriteria } from '../utils/jobFilters';
+import { parseSalary } from '../utils/format';
+
+const cfg = HUB_CONFIGS['flexible'];
+
+const filteredJobs = filterJobsByCriteria(jobsData, cfg.filter);
+const isEmpty = filteredJobs.length === 0;
+
+if (isEmpty) {
+	console.warn('[podrabotka-kurerom] No flexible-tag jobs — page is noindex');
+}
+
+const companyNames = Array.from(new Set(filteredJobs.map((j) => j.company))).slice(0, 5);
+const maxSalary = filteredJobs.reduce((acc, j) => {
+	const v = parseSalary(j.salary);
+	return v > acc ? v : acc;
+}, 0);
+
+const dateModifiedIso = new Date().toISOString();
+const title = buildHubTitle(cfg, filteredJobs.length, maxSalary, isEmpty);
+const description = buildHubDescription(cfg, filteredJobs.length, companyNames, isEmpty);
+const faqItems = buildHubFaqItems(cfg, filteredJobs.length, companyNames);
+const schemaGraph = buildHubSchemaGraph({
+	cfg,
+	jobs: filteredJobs,
+	faqItems,
+	title,
+	description,
+	pageUrlHref: new URL(Astro.url.pathname, Astro.site).toString(),
+	pageUrlPathname: Astro.url.pathname,
+	siteUrl: Astro.site,
+	dateModifiedIso,
+});
+---
+
+<BaseLayout
+	title={title}
+	description={description}
+	schemaGraph={schemaGraph}
+	robots={isEmpty ? 'noindex, follow' : undefined}
+>
+	<Header />
+	<TransportHub
+		config={cfg}
+		filteredJobs={filteredJobs}
+		isEmpty={isEmpty}
+		faqItems={faqItems}
+		companyNames={companyNames}
+		maxSalary={maxSalary}
+	/>
+	<Footer />
+</BaseLayout>

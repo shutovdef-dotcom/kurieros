@@ -43,6 +43,8 @@ interface Props {
   lead: string;
   /** "Обновлено: {updatedDate}" line — omitted when not provided */
   updatedDate?: string;
+  /** JSON-LD @graph nodes — forwarded to BaseLayout's schemaGraph prop */
+  schemaGraph?: Record<string, unknown>[];
 }
 
 const {
@@ -58,6 +60,7 @@ const {
   h1,
   lead,
   updatedDate,
+  schemaGraph,
 } = Astro.props;
 ---
 
@@ -70,6 +73,7 @@ const {
   articleModifiedTime={articleModifiedTime}
   canonicalURL={canonicalURL}
   robots={robots}
+  schemaGraph={schemaGraph}
 >
   <Header />
 

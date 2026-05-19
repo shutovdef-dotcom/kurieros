@@ -1,0 +1,438 @@
+---
+/**
+ * TransportHub.astro — presentational body for all 4 transport-hub pages.
+ *
+ * Consumed by:
+ *   src/pages/rabota-peshim-kurerom.astro  (foot)
+ *   src/pages/rabota-avtokurerom.astro     (auto)
+ *   src/pages/rabota-velokurerom.astro     (bicycle)
+ *   src/pages/podrabotka-kurerom.astro     (flexible)
+ *
+ * Page files own: data fetching, schema building, BaseLayout wrapper,
+ * robots meta propagation. This component owns the full body HTML.
+ */
+
+import JobFilters from './JobFilters.astro';
+import JobGrid from './JobGrid.astro';
+import HubCrossLinks from './HubCrossLinks.astro';
+import PartnerBanner from './PartnerBanner.astro';
+import type { HubConfig } from '../utils/transportHubs';
+import type { FaqItem } from '../utils/cityListingPage';
+import { buildFactCards, buildTransportTypes } from '../utils/cityListingPage';
+import type { GeneratedJob } from '../data/vacancyTypes';
+
+interface Props {
+	config: HubConfig;
+	filteredJobs: GeneratedJob[];
+	isEmpty: boolean;
+	faqItems: FaqItem[];
+	companyNames: string[];
+	maxSalary: number;
+}
+
+const { config, filteredJobs, isEmpty, faqItems, companyNames, maxSalary } = Astro.props;
+
+const transportTypes = buildTransportTypes(filteredJobs);
+const paymentTypes = Array.from(new Set(filteredJobs.map((job) => job.details.payment_freq)));
+
+const factCards = buildFactCards({
+	filteredJobsCount: filteredJobs.length,
+	companyCount: companyNames.length,
+	transportTypes,
+	paymentTypes,
+});
+---
+
+<main class="hub-page">
+	<div class="hub-container">
+
+		<!-- Breadcrumb: Главная → Форматы → {h1} -->
+		<nav class="listing-breadcrumb" aria-label="Хлебные крошки">
+			<a href="/">Главная</a>
+			<span>&gt;</span>
+			<a href="/cities/">Форматы</a>
+			<span>&gt;</span>
+			<span>{config.h1}</span>
+		</nav>
+
+		<!-- Hero -->
+		<section class="hero listing-hero" aria-label="Заголовок раздела">
+			<div class="listing-hero-panel">
+				<p class="listing-eyebrow">{config.eyebrow}</p>
+				<h1>{config.h1}</h1>
+				<p class="hub-intro">{config.incomeBlurb}</p>
+				<div class="listing-hero-actions">
+					<a href="#vacancies" class="listing-primary-link">Смотреть вакансии</a>
+					<a href="/compare/" class="listing-secondary-link">Сравнить форматы</a>
+				</div>
+				<div class="listing-fact-grid listing-fact-grid-hero">
+					{factCards.map((fact) => (
+						<article class="listing-fact-card">
+							<span>{fact.label}</span>
+							<strong>{fact.value}</strong>
+						</article>
+					))}
+				</div>
+			</div>
+		</section>
+
+		<!-- Filters -->
+		<section class="listing-filters" aria-label="Фильтры вакансий">
+			<JobFilters />
+		</section>
+
+		<!-- Vacancies — exactly one id="vacancies" anchor: JobGrid emits its
+		     own <section id="vacancies"> when populated; the empty notice
+		     carries the id otherwise, so the hero "#vacancies" CTA always
+		     resolves and the DOM never has a duplicate id. -->
+		<section aria-label="Список вакансий">
+			{isEmpty ? (
+				<div id="vacancies" class="hub-empty-notice">
+					<p>Вакансии скоро появятся — проверьте позже.</p>
+				</div>
+			) : (
+				<JobGrid initialTag={config.filter.tag} limit={24} revealable={true} jobs={filteredJobs} />
+			)}
+		</section>
+
+		<!-- Income block — /skolko-zarabatyvaet-kurer/ funnel link required by B13 -->
+		<section class="hub-section hub-income" aria-labelledby="hub-income-heading">
+			<h2 id="hub-income-heading">Доход</h2>
+			<p>{config.incomeBlurb}</p>
+			<p>
+				<a href="/skolko-zarabatyvaet-kurer/" class="hub-link">
+					Подробнее о заработке курьера →
+				</a>
+			</p>
+		</section>
+
+		<!-- Requirements block — /kak-stat-kurerom/ funnel link required by B13 -->
+		{config.requirementsBullets.length > 0 && (
+			<section class="hub-section hub-requirements" aria-labelledby="hub-requirements-heading">
+				<h2 id="hub-requirements-heading">Требования</h2>
+				<ul class="hub-requirements-list">
+					{config.requirementsBullets.map((bullet) => (
+						<li>{bullet}</li>
+					))}
+				</ul>
+				<p>
+					<a href="/kak-stat-kurerom/" class="hub-link">
+						Как стать курьером — пошаговый гид →
+					</a>
+				</p>
+			</section>
+		)}
+
+		<!-- FAQ -->
+		{faqItems.length > 0 && (
+			<section class="hub-section hub-faq" aria-labelledby="hub-faq-heading">
+				<h2 id="hub-faq-heading">Частые вопросы</h2>
+				<dl class="hub-faq-list">
+					{faqItems.map((item) => (
+						<>
+							<dt class="hub-faq-question">{item.question}</dt>
+							<dd class="hub-faq-answer">{item.answer}</dd>
+						</>
+					))}
+				</dl>
+			</section>
+		)}
+
+		<!-- Cross-links to other hubs + guides -->
+		<HubCrossLinks current={config.key} />
+
+		<!-- Partner banner -->
+		<PartnerBanner />
+
+	</div>
+</main>
+
+<style>
+	/* Styles copied from [slug].astro — hub listing variant. See plan §4.2. */
+
+	.hub-page {
+		padding: 0 0 4rem;
+	}
+
+	.hub-container {
+		max-width: 1180px;
+		margin-inline: auto;
+		padding: 0 1rem;
+	}
+
+	/* === Breadcrumb === */
+	.listing-breadcrumb {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.45rem;
+		align-items: center;
+		margin: 1rem 0 0.85rem;
+		font-size: 0.9rem;
+		color: var(--text-muted);
+	}
+	.listing-breadcrumb a {
+		color: var(--accent-color);
+		text-decoration: none;
+	}
+	@media (max-width: 768px) {
+		.listing-breadcrumb { display: none; }
+	}
+
+	/* === Hero === */
+	.listing-hero,
+	.listing-fact-grid,
+	.listing-filters {
+		max-width: 1180px;
+		margin-inline: auto;
+	}
+	.listing-filters {
+		padding: 0 1rem;
+		margin-bottom: var(--space-3);
+	}
+	.listing-hero {
+		padding: 1.25rem 1rem 0.5rem;
+		margin-bottom: 1rem;
+		background: var(--ink-50);
+		border: 1px solid var(--ink-200);
+		border-radius: var(--radius-xl);
+		box-shadow: var(--shadow-xs);
+	}
+	.listing-hero-panel {
+		padding: 1.65rem;
+		text-align: left;
+		border: 1px solid var(--ink-200);
+		border-radius: 8px;
+		background: linear-gradient(135deg, rgba(245, 249, 242, 0.96) 0%, rgba(255, 255, 255, 0.98) 58%, rgba(242, 250, 253, 0.96) 100%);
+		box-shadow: 0 14px 36px rgba(24, 45, 34, 0.07);
+	}
+	.listing-eyebrow {
+		margin: 0 0 0.55rem;
+		font-size: 0.74rem;
+		font-weight: 900;
+		letter-spacing: 0;
+		text-transform: uppercase;
+		color: var(--accent-color);
+	}
+	.listing-hero h1 {
+		max-width: 14ch;
+		margin: 0 0 0.7rem;
+		font-family: var(--font-heading);
+		font-size: 3.8rem;
+		font-weight: 800;
+		line-height: 1.15;
+		letter-spacing: -0.02em;
+		text-wrap: balance;
+		color: var(--ink-900);
+	}
+	.hub-intro {
+		max-width: 720px;
+		margin: 0;
+		font-size: 1.08rem;
+		line-height: 1.6;
+		color: var(--ink-600);
+	}
+	.listing-hero-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.8rem;
+		align-items: center;
+		margin-top: 1rem;
+	}
+	.listing-primary-link,
+	.listing-secondary-link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 3rem;
+		padding: 0.8rem 1.15rem;
+		border-radius: 8px;
+		text-decoration: none;
+		font-weight: 800;
+		transition: var(--transition);
+	}
+	.listing-primary-link {
+		background: var(--brand-800);
+		border: 1px solid var(--brand-800);
+		color: var(--ink-0);
+	}
+	.listing-secondary-link {
+		background: rgba(255, 255, 255, 0.86);
+		border: 1px solid #a8c8b5;
+		color: var(--brand-800);
+	}
+	.listing-primary-link:hover,
+	.listing-secondary-link:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 10px 24px rgba(22, 61, 43, 0.12);
+	}
+
+	/* === Fact cards === */
+	.listing-fact-grid {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 0.75rem;
+		margin: 1rem 0 0;
+	}
+	.listing-fact-card {
+		display: grid;
+		gap: 0.25rem;
+		min-height: auto;
+		padding: 0.8rem 0.9rem;
+		border: 1px solid var(--ink-200);
+		border-radius: 8px;
+		background: var(--scrim-light-soft);
+		box-shadow: var(--shadow-sm);
+	}
+	.listing-fact-card span {
+		font-size: 0.72rem;
+		font-weight: 900;
+		letter-spacing: 0;
+		text-transform: uppercase;
+		color: var(--ink-500);
+	}
+	.listing-fact-card strong {
+		align-self: start;
+		font-size: 1rem;
+		line-height: 1.32;
+		color: var(--ink-700);
+	}
+	@media (min-width: 768px) {
+		.listing-hero { padding: 2rem 1rem 0.75rem; }
+	}
+	@media (max-width: 960px) {
+		.listing-fact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	}
+	@media (max-width: 640px) {
+		.listing-hero-panel { padding: 1rem; border-radius: 8px; }
+		.listing-fact-grid { display: none; }
+		.listing-hero h1 { font-size: 2.4rem; }
+		.listing-hero { padding-inline: 1rem; }
+	}
+
+	/* === Empty notice === */
+	.hub-empty-notice {
+		padding: 2.5rem 1.5rem;
+		text-align: center;
+		background: var(--ink-50);
+		border: 1px dashed var(--ink-200);
+		border-radius: var(--radius-lg);
+		color: var(--ink-600);
+		font-size: 1.05rem;
+	}
+
+	/* === Content sections (income / requirements / FAQ) === */
+	.hub-section {
+		max-width: 1180px;
+		margin: 2.5rem auto 0;
+		padding: 1.75rem 1.85rem;
+		background: var(--surface-color, #fff);
+		border: 1px solid var(--ink-200);
+		border-radius: 16px;
+		box-shadow: var(--shadow-sm);
+	}
+	.hub-section h2 {
+		margin: 0 0 1rem;
+		font-family: var(--font-heading, 'Manrope', sans-serif);
+		font-size: clamp(1.3rem, 2vw, 1.6rem);
+		line-height: 1.2;
+		color: var(--ink-900);
+	}
+	.hub-section p {
+		margin: 0 0 0.85rem;
+		color: var(--ink-600);
+		line-height: 1.6;
+	}
+	.hub-section p:last-child { margin-bottom: 0; }
+
+	/* === Funnel links === */
+	.hub-link {
+		color: var(--brand-700);
+		font-weight: 700;
+		text-decoration: none;
+	}
+	.hub-link:hover,
+	.hub-link:focus-visible {
+		text-decoration: underline;
+		outline: none;
+	}
+
+	/* === Requirements list === */
+	.hub-requirements-list {
+		margin: 0 0 1rem;
+		padding-left: 1.25rem;
+		color: var(--ink-700);
+		line-height: 1.7;
+	}
+
+	/* === FAQ === */
+	.hub-faq-list {
+		display: grid;
+		gap: 0;
+		margin: 0;
+	}
+	.hub-faq-question {
+		margin: 0;
+		padding: 0.9rem 0 0.35rem;
+		font-size: 1rem;
+		font-weight: 700;
+		color: var(--ink-900);
+		border-top: 1px solid var(--ink-200);
+	}
+	.hub-faq-list dt:first-of-type { border-top: none; }
+	.hub-faq-answer {
+		margin: 0 0 0.65rem;
+		padding: 0;
+		color: var(--ink-600);
+		line-height: 1.6;
+	}
+
+	/* === Dark-mode overrides === */
+	:global(:where(html, body).dark-mode) .listing-hero-panel,
+	:global(:where(html, body).dark-mode) .listing-fact-card,
+	:global(:where(html, body).dark-mode) .listing-secondary-link {
+		background-color: var(--ink-100);
+		background-image: none;
+		border-color: var(--ink-200);
+		color: var(--ink-700);
+		box-shadow: var(--shadow-xs);
+	}
+	:global(:where(html, body).dark-mode) .listing-primary-link {
+		background: var(--dm-green-surface-strong);
+		border-color: var(--dm-green-border);
+		color: var(--dm-green-text);
+	}
+	:global(:where(html, body).dark-mode) .listing-hero-panel h1,
+	:global(:where(html, body).dark-mode) .listing-fact-card strong {
+		color: var(--ink-900);
+	}
+	:global(:where(html, body).dark-mode) .hub-intro,
+	:global(:where(html, body).dark-mode) .listing-fact-card span {
+		color: var(--ink-600);
+	}
+	:global(:where(html, body).dark-mode) .hub-section {
+		background: var(--ink-100);
+		border-color: var(--ink-200);
+	}
+	:global(:where(html, body).dark-mode) .hub-section h2 {
+		color: var(--ink-900);
+	}
+	:global(:where(html, body).dark-mode) .hub-section p,
+	:global(:where(html, body).dark-mode) .hub-faq-answer {
+		color: rgba(231, 234, 240, 0.7);
+	}
+	:global(:where(html, body).dark-mode) .hub-faq-question {
+		color: var(--ink-900);
+		border-top-color: var(--ink-200);
+	}
+	:global(:where(html, body).dark-mode) .hub-link {
+		color: #4caf80;
+	}
+	:global(:where(html, body).dark-mode) .hub-requirements-list {
+		color: rgba(231, 234, 240, 0.85);
+	}
+	:global(:where(html, body).dark-mode) .hub-empty-notice {
+		background: var(--ink-100);
+		border-color: var(--ink-200);
+		color: rgba(231, 234, 240, 0.7);
+	}
+</style>

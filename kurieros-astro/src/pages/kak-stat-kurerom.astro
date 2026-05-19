@@ -1,0 +1,74 @@
+---
+/**
+ * /kak-stat-kurerom/ — how-to guide page
+ *
+ * Standalone top-level page (Decision B: keyword-exact URL).
+ * Data and schema: src/utils/infoGuides.ts
+ * Chrome: InfoGuideLayout.astro
+ * HowTo: HowToBlock (emitJsonLd=false — HowTo is in the @graph from buildGuideSchemaGraph)
+ */
+
+import InfoGuideLayout from '../components/InfoGuideLayout.astro';
+import HowToBlock from '../components/HowToBlock.astro';
+import { INFO_GUIDES, buildGuideSchemaGraph } from '../utils/infoGuides';
+
+const cfg = INFO_GUIDES['how-to-become'];
+const SITE_URL = 'https://kurerok.ru';
+const pageUrl = `${SITE_URL}/${cfg.slug}/`;
+const schemaResult = buildGuideSchemaGraph(cfg, pageUrl, SITE_URL);
+---
+
+<InfoGuideLayout
+  title={cfg.seoTitle}
+  description={cfg.metaDescription}
+  ogType="article"
+  articlePublishedTime={cfg.publishedDate}
+  articleModifiedTime={cfg.modifiedDate}
+  kicker={cfg.kicker}
+  h1={cfg.h1}
+  lead={cfg.lead}
+  updatedDate={cfg.modifiedDate}
+  schemaGraph={schemaResult['@graph']}
+>
+  {cfg.howTo && <HowToBlock howTo={cfg.howTo} emitJsonLd={false} />}
+
+  {cfg.sections.map((section) => (
+    <section class="guide-section">
+      <h2>{section.heading}</h2>
+      <div class="guide-section-body" set:html={section.body.replace(/\n/g, '<br />')} />
+    </section>
+  ))}
+
+  {cfg.faqItems.length > 0 && (
+    <section class="guide-faq">
+      <h2>Частые вопросы</h2>
+      {cfg.faqItems.map((item) => (
+        <div class="guide-card">
+          <h3 class="guide-card-question">{item.question}</h3>
+          <p class="guide-card-answer">{item.answer}</p>
+        </div>
+      ))}
+    </section>
+  )}
+
+  <div class="guide-cta-block">
+    <p class="guide-cta-text">Готовы стать курьером? Смотрите актуальные вакансии:</p>
+    <a href="/rabota-peshim-kurerom/" class="guide-cta-btn">Смотреть вакансии</a>
+  </div>
+</InfoGuideLayout>
+
+<style>
+  .guide-section { margin-bottom: 40px; }
+  .guide-section h2 { font-size: clamp(20px, 2vw, 26px); margin: 0 0 14px; }
+  .guide-section-body { color: var(--ink-700); line-height: 1.7; }
+  .guide-faq { margin-bottom: 40px; }
+  .guide-faq h2 { font-size: clamp(20px, 2vw, 26px); margin: 0 0 16px; }
+  .guide-card { background: var(--surface-100); border: 1px solid var(--ink-100); border-radius: 14px; padding: 20px 24px; margin-bottom: 14px; }
+  .guide-card-question { font-size: clamp(16px, 1.6vw, 19px); margin: 0 0 8px; }
+  .guide-card-answer { margin: 0; color: var(--ink-700); line-height: 1.6; }
+  .guide-cta-block { margin: 32px 0 40px; text-align: center; }
+  .guide-cta-text { color: var(--ink-600); margin: 0 0 12px; }
+  .guide-cta-btn { display: inline-block; background: var(--brand-700); color: var(--ink-0); padding: 14px 32px; border-radius: 10px; font-weight: 700; font-size: 16px; text-decoration: none; transition: background 0.2s; }
+  .guide-cta-btn:hover { background: var(--brand-800); }
+  :global(.dark-mode) .guide-card { background: var(--surface-200); border-color: var(--ink-200); }
+</style>
