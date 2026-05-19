@@ -99,6 +99,34 @@ export default defineConfig({
       entryLimit: 1000,
       serialize(item) {
         const url = item.url;
+        const siteBase = site.replace(/\/$/, '');
+
+        // Decision A: explicit priority overrides for the 8 new flywheel URLs.
+        // Closed Set — no substring matching — so only these exact URLs are
+        // matched; existing pages' priorities are never altered accidentally.
+        const HUB_URLS = new Set([
+          `${siteBase}/rabota-peshim-kurerom/`,
+          `${siteBase}/rabota-avtokurerom/`,
+          `${siteBase}/rabota-velokurerom/`,
+          `${siteBase}/podrabotka-kurerom/`,
+        ]);
+        const GUIDE_URLS = new Set([
+          `${siteBase}/skolko-zarabatyvaet-kurer/`,
+          `${siteBase}/kak-stat-kurerom/`,
+          `${siteBase}/usloviya-raboty-kurerom/`,
+        ]);
+        const OTZYVY_URL = `${siteBase}/otzyvy/`;
+
+        if (HUB_URLS.has(url)) {
+          return { ...item, priority: 0.8, changefreq: 'daily' };
+        }
+        if (GUIDE_URLS.has(url)) {
+          return { ...item, priority: 0.7, changefreq: 'weekly' };
+        }
+        if (url === OTZYVY_URL) {
+          return { ...item, priority: 0.6, changefreq: 'weekly' };
+        }
+
         if (url === 'https://kurerok.ru/' || url.endsWith('://kurerok.ru/')) {
           return { ...item, priority: 1.0, changefreq: 'daily' };
         }

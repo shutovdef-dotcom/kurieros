@@ -13,6 +13,7 @@ import HomeToolbar from '../components/home/HomeToolbar.astro';
 import jobsData from '../data/jobs';
 import { getCompaniesFromJobs } from '../utils/companies';
 import { sortCityNamesByPopulation } from '../utils/cities';
+import { isHubEmpty, HUB_CONFIGS } from '../utils/transportHubs';
 // City catalogue + names are module-cached in `citiesIndex.ts` (H3
 // rationale) instead of re-derived per render (audit ref v4 MEDIUM-1).
 import { citiesFromJobs, cityNamesFromJobs } from '../utils/citiesIndex';
@@ -75,10 +76,37 @@ const hubLinks = [
 		title: 'Гид для курьера',
 		text: 'Возраст, медкнижка, доход, выплаты, штрафы — структурированно.',
 	},
+	{
+		href: '/skolko-zarabatyvaet-kurer/',
+		title: 'Сколько зарабатывает курьер',
+		text: 'Реальные ставки, формула дохода и калькулятор заработка.',
+	},
 	// /blog/ discovery card hidden until first article ships.
 ];
-const homepageTitle = `Работа курьером 2026: ${totalVacancies} вакансий, ${companies.length} компаний | КурьерОк`.slice(0, 70);
-const homepageDescription = `Работа курьером в России 2026: ${totalVacancies} активных вакансий, ${companies.length} компаний, ${cities.length} городов. Доход, выплаты, оформление — всё в одном месте.`.slice(0, 170);
+const transportFormatLinks = [
+	{
+		href: isHubEmpty(jobsData, HUB_CONFIGS.foot) ? '/rabota-kurerom-peshkom/' : '/rabota-peshim-kurerom/',
+		title: 'Работа пешим курьером',
+		text: 'Вакансии без транспорта — доставка пешком в своём районе.',
+	},
+	{
+		href: isHubEmpty(jobsData, HUB_CONFIGS.auto) ? '/rabota-kurerom-na-avto/' : '/rabota-avtokurerom/',
+		title: 'Работа курьером на авто',
+		text: 'Вакансии для курьеров с личным автомобилем.',
+	},
+	{
+		href: isHubEmpty(jobsData, HUB_CONFIGS.bicycle) ? '/rabota-kurerom-na-velosipede/' : '/rabota-velokurerom/',
+		title: 'Работа велокурьером',
+		text: 'Вакансии для курьеров на велосипеде или самокате.',
+	},
+	{
+		href: isHubEmpty(jobsData, HUB_CONFIGS.flexible) ? '/rabota-kurerom-podrabotka/' : '/podrabotka-kurerom/',
+		title: 'Подработка курьером',
+		text: 'Гибкий график, неполная занятость — работайте когда удобно.',
+	},
+];
+const homepageTitle = `Работа курьером: ${totalVacancies} вакансий курьера 2026 | КурьерОк`.slice(0, 70);
+const homepageDescription = `Вакансии курьеров в России 2026: ${totalVacancies} активных вакансий от ${companies.length} компаний в ${cities.length} городах. Прозрачный доход, быстрое оформление.`.slice(0, 170);
 const pageSchemaGraph = [
 	{
 		'@type': 'CollectionPage',
@@ -130,6 +158,19 @@ const pageSchemaGraph = [
 			<HomeToolbar availableCities={availableCities} />
 
 			<JobGrid limit={24} moreHref="/cities/" moreLabel="Открыть все города" />
+
+			<nav class="transport-format-nav" aria-label="Форматы работы курьером">
+				<ul class="transport-format-list">
+					{transportFormatLinks.map((link) => (
+						<li>
+							<a href={link.href} class="transport-format-link">
+								<strong class="transport-format-title">{link.title}</strong>
+								<span class="transport-format-text">{link.text}</span>
+							</a>
+						</li>
+					))}
+				</ul>
+			</nav>
 
 			<IncomeCalculator />
 
@@ -484,6 +525,48 @@ const pageSchemaGraph = [
 	/* Hero v2 styles moved to ./components/home/HomeHero.astro (W6-2). */
 
 	/* Toolbar (city select + 4 filters) styles moved to ./components/home/HomeToolbar.astro (W6-2). */
+
+	/* --- Transport format nav --- */
+	.transport-format-nav {
+		margin: 0 0 var(--space-6, 1.5rem);
+	}
+	.transport-format-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 0.75rem;
+	}
+	.transport-format-link {
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
+		padding: 0.9rem 1.1rem;
+		background: var(--surface-color);
+		border: 1px solid var(--border-color);
+		border-radius: var(--radius-md, 12px);
+		text-decoration: none;
+		transition: border-color 0.18s ease, box-shadow 0.18s ease;
+	}
+	.transport-format-link:hover,
+	.transport-format-link:focus-visible {
+		border-color: var(--brand-500);
+		box-shadow: 0 4px 12px rgba(24, 45, 34, 0.08);
+		outline: none;
+	}
+	.transport-format-title {
+		font-family: var(--font-heading);
+		font-size: 0.95rem;
+		font-weight: 700;
+		color: var(--ink-900);
+	}
+	.transport-format-text {
+		font-family: var(--font-main);
+		font-size: 0.82rem;
+		color: var(--ink-500);
+		line-height: 1.35;
+	}
 
 	/* --- Content Sections --- */
 	:global(.faq-section) {

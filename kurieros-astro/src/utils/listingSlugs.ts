@@ -26,6 +26,7 @@ import { filterJobsByCriteria, getCityJobsFromMap } from './jobFilters';
 // v3 H3) — see jobsByCityIndex.ts. Reused here instead of rebuilding
 // the Map locally (audit ref v4 L11).
 import { jobsByCity } from './jobsByCityIndex';
+import { HUB_CONFIGS, isHubEmpty } from './transportHubs';
 
 // Slugs with bespoke content overrides inside src/pages/[slug].astro
 // that always render a non-empty fallback list (e.g. ezhednevnaya-oplata
@@ -36,7 +37,7 @@ const CONTENT_OVERRIDE_CATEGORY_SLUGS = new Set<string>([
 	'ezhednevnaya-oplata',
 ]);
 
-function getEmptyListingPaths(): Set<string> {
+export function getEmptyListingPaths(): Set<string> {
 	const empty = new Set<string>();
 
 	// City-listing emptiness uses the same city predicate as the SSR
@@ -65,6 +66,17 @@ function getEmptyListingPaths(): Set<string> {
 		});
 		if (matched.length === 0) {
 			empty.add(`/rabota-kurerom-${category.slug}`);
+		}
+	}
+
+	// Decision A: hub pages that have zero matching jobs must also be excluded
+	// from the sitemap and marked noindex (same thin-content rationale as
+	// category/city listings). Bare paths — no trailing slash — matching the
+	// convention of city/category entries above (getEmptyListingUrls appends
+	// the trailing slash before comparing against sitemap URLs).
+	for (const cfg of Object.values(HUB_CONFIGS)) {
+		if (isHubEmpty(jobsData, cfg)) {
+			empty.add(`/${cfg.slug}`);
 		}
 	}
 
