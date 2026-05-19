@@ -1,0 +1,150 @@
+---
+/**
+ * HubCrossLinks.astro
+ *
+ * Interlink block: links to all 4 transport hubs, 3 info-guide pages,
+ * /cities/, and /companies/. Used by hub pages, /otzyvy/, and optionally
+ * the homepage.
+ *
+ * Hub link data is intentionally inlined as a static array (not imported
+ * from transportHubs.ts) because this component has no dependency on B1.
+ * These 4 entries are compile-time constants that change only if a hub
+ * is renamed — flagged by a build error at that point.
+ *
+ * Every href ends with '/' per trailingSlash:'always' in astro.config.mjs.
+ */
+
+type HubEntry = {
+  key: string;
+  href: string;
+  label: string;
+};
+
+interface Props {
+  /**
+   * Key of the current page's hub — that hub's link is omitted.
+   * Pass 'home' to render all 4 hub links (homepage / non-hub pages).
+   */
+  current: 'foot' | 'auto' | 'bicycle' | 'flexible' | 'home';
+}
+
+const { current } = Astro.props;
+
+const HUB_LINKS: HubEntry[] = [
+  { key: 'foot',     href: '/rabota-peshim-kurerom/', label: 'Пеший курьер' },
+  { key: 'auto',     href: '/rabota-avtokurerom/',    label: 'Автокурьер' },
+  { key: 'bicycle',  href: '/rabota-velokurerom/',    label: 'Велокурьер' },
+  { key: 'flexible', href: '/podrabotka-kurerom/',    label: 'Подработка' },
+];
+
+const visibleHubs = HUB_LINKS.filter((hub) => hub.key !== current);
+---
+
+<nav class="hub-crosslinks" aria-label="Разделы сайта">
+  <h2 class="hub-crosslinks-heading">Ещё по теме</h2>
+
+  {visibleHubs.length > 0 && (
+    <div class="hub-crosslinks-group">
+      <p class="hub-crosslinks-group-label">Работа курьером</p>
+      <ul class="hub-crosslinks-list">
+        {visibleHubs.map((hub) => (
+          <li>
+            <a href={hub.href} class="hub-crosslinks-link">{hub.label}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
+
+  <div class="hub-crosslinks-group">
+    <p class="hub-crosslinks-group-label">Полезные статьи</p>
+    <ul class="hub-crosslinks-list">
+      <li>
+        <a href="/skolko-zarabatyvaet-kurer/" class="hub-crosslinks-link">Сколько зарабатывает курьер</a>
+      </li>
+      <li>
+        <a href="/kak-stat-kurerom/" class="hub-crosslinks-link">Как стать курьером</a>
+      </li>
+      <li>
+        <a href="/usloviya-raboty-kurerom/" class="hub-crosslinks-link">Условия работы</a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="hub-crosslinks-group">
+    <p class="hub-crosslinks-group-label">Поиск</p>
+    <ul class="hub-crosslinks-list">
+      <li>
+        <a href="/cities/" class="hub-crosslinks-link">Вакансии по городам</a>
+      </li>
+      <li>
+        <a href="/companies/" class="hub-crosslinks-link">Работодатели</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<style>
+  .hub-crosslinks {
+    margin: 40px 0 24px;
+    padding: 24px;
+    background: var(--surface-100);
+    border: 1px solid var(--ink-100);
+    border-radius: 16px;
+  }
+  .hub-crosslinks-heading {
+    font-size: 18px;
+    margin: 0 0 16px;
+    color: var(--ink-900);
+  }
+  .hub-crosslinks-group {
+    margin-bottom: 16px;
+  }
+  .hub-crosslinks-group:last-child {
+    margin-bottom: 0;
+  }
+  .hub-crosslinks-group-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-500);
+    margin: 0 0 8px;
+  }
+  .hub-crosslinks-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .hub-crosslinks-link {
+    display: inline-block;
+    padding: 6px 14px;
+    border: 1px solid var(--ink-200);
+    border-radius: 20px;
+    font-size: 14px;
+    color: var(--ink-700);
+    text-decoration: none;
+    background: var(--surface-0, #fff);
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .hub-crosslinks-link:hover {
+    border-color: var(--brand-700);
+    color: var(--brand-700);
+  }
+  :global(.dark-mode) .hub-crosslinks {
+    background: var(--surface-200);
+    border-color: var(--ink-200);
+  }
+  :global(.dark-mode) .hub-crosslinks-link {
+    background: var(--surface-300, var(--surface-200));
+    border-color: var(--ink-300, var(--ink-200));
+    color: var(--ink-600, var(--ink-700));
+  }
+  :global(.dark-mode) .hub-crosslinks-link:hover {
+    border-color: var(--brand-500);
+    color: var(--brand-500);
+  }
+</style>
