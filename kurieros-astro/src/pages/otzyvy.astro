@@ -47,16 +47,12 @@ const totalCount = reviews.length;
 const SITE_URL = 'https://kurerok.ru';
 const PAGE_URL = `${SITE_URL}/otzyvy/`;
 
-// Build JSON-LD graph (no page-level AggregateRating per Decision C).
+// Build the JSON-LD @graph (no page-level AggregateRating per Decision C).
+// Passed to InfoGuideLayout → BaseLayout, which owns the @context wrapping,
+// serialisation and the </script>-safe escaping — the same path the
+// info-guide pages use. Emitting our own <script> after </InfoGuideLayout>
+// would place it after </html> (malformed); the prop keeps it in <head>.
 const schemaGraph = buildReviewsSchemaGraph(summaries, PAGE_URL, SITE_URL);
-
-// Serialise JSON-LD safely: JSON.stringify + escape < so "</script>" in any
-// review text cannot break out of the inline script block.
-const structuredData = JSON.stringify(
-  { '@context': 'https://schema.org', '@graph': schemaGraph },
-  null,
-  0,
-).replace(/</g, '\\u003c');
 
 // robots: noindex when there are zero reviews (honest-content guard).
 const robotsMeta =
@@ -77,6 +73,7 @@ const PAGE_DESCRIPTION =
   lead="Сравнивайте условия работы в ведущих компаниях. Реальный опыт курьеров — плюсы, минусы и рейтинги."
   robots={robotsMeta}
   canonicalURL={PAGE_URL}
+  schemaGraph={schemaGraph}
 >
   <!--
     ReviewsAggregate renders the brand-grouped body:
@@ -89,17 +86,3 @@ const PAGE_DESCRIPTION =
     totalCount={totalCount}
   />
 </InfoGuideLayout>
-
-<!--
-  JSON-LD injection.
-
-  InfoGuideLayout does not expose a schemaGraph prop, so we emit the script
-  tag after the layout element. Astro places it at the end of the rendered
-  output, which is valid (search engines parse <script type="application/ld+json">
-  anywhere in the document).
-
-  Safety: `structuredData` was produced by JSON.stringify + .replace(/</g, '\\u003c')
-  in the frontmatter above. The set:html directive is permitted ONLY for this
-  pre-serialised, already-escaped JSON-LD string — not for any review-derived text.
--->
-<script type="application/ld+json" set:html={structuredData}></script>
