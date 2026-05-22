@@ -244,8 +244,11 @@ const real      = z.array(reviewSchema).parse(reviewsRealRaw);
 export const reviewsData = [...real, ...synthetic];   // real-first, globally
 ```
 
-Per-job and per-brand buckets are built from this merged array. Within a
-bucket, ordering rule:
+A per-brand bucket (`reviewsByCompany`) is built from this merged array — a
+review belongs to a brand, so `/v/` vacancy pages, `/companies/[slug]/` and
+`/otzyvy/` all read the same per-brand set (Decision F, plan §12.1). A
+submitted review keeps `jobId` as provenance (where it was left) but is only
+ever *selected* by `company`. Within a bucket, ordering rule:
 
 1. `source: 'real'` before `source: 'synthetic'` (primary key).
 2. Within the same `source`, newest `date` first (secondary key).
@@ -269,13 +272,14 @@ if realCount >= THRESHOLD:
     return bucket.filter(r => r.source === 'real')   // drop all synthetic
 else:
     keep all real + enough synthetic to reach a sensible display floor
-    (e.g. min 4 visible total, matching today's REVIEWS_PER_JOB density)
+    (e.g. min 4 visible total)
 ```
 
 Properties:
-- **Per scope.** Applied per `jobId` bucket for `/v/` pages and per `company`
-  bucket for `/companies/` and `/otzyvy/`. A brand with many real reviews
-  loses its synthetic ones; a quiet brand keeps them.
+- **Per scope.** Applied per `company` (brand) bucket — `/v/` vacancy pages,
+  `/companies/` and `/otzyvy/` all surface the same per-brand set (Decision F,
+  plan §12.1). A brand with many real reviews loses its synthetic ones; a
+  quiet brand keeps them.
 - **Monotonic & gradual.** As real reviews accrue, synthetic ones are
   *displaced*, not deleted from the repo. Synthetic data stays in
   `reviews.json` (regenerated anyway) until the owner decides to retire the

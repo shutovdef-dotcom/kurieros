@@ -639,3 +639,59 @@ already indexed — their new canonical is picked up on the next crawl, no submi
   claim (it builds `llms-full.txt` from the KB only — it does not enumerate page routes).
   **Refinement converged — stopped at 3 rounds:** architecture debates closed, round 3
   found only prior-round cleanup, no new gaps.
+
+---
+
+## 12. Wave δ′ — post-launch-review scope addition
+
+> Added 2026-05-20 after the owner reviewed PR #185 on the local preview. Two gaps
+> surfaced that are squarely in scope for "не сломать + доработать SEO/GEO(AI)" and small
+> enough to land in the same un-merged PR. Formalised here as Decisions F/G/H + beads
+> B15/B16. No new routes — the build page-count band is unchanged.
+
+### 12.1 Decision F — Reviews belong to a brand, not a vacancy
+
+**Context.** `scripts/generate-reviews.ts` generated `REVIEWS_PER_JOB = 4` reviews for
+every vacancy in `jobsData`. With thousands of synthetic vacancies per brand this yields
+19 144 reviews (Купер 6 104, Альфа-Банк 4 532, …) — counts that read as a mature review
+platform the site is not, and `/otzyvy/` showed a uniform ~4.3 average for every brand.
+
+**Decision.** A review logically belongs to a **brand**. The generator loops over brands,
+not vacancies. `jobId`/`jobTitle`/`city` become optional *provenance* fields (where the
+review was left, what role) — kept for the review-card UI, not for accounting.
+`buildReviewAggregate` already groups by `company`; the aggregator itself does not change.
+
+**Forward-looking (OQ#4 real reviews).** A real user review submitted from `/v/{slug}/`
+is stored with `jobId`/`jobTitle` filled (provenance); selection for `/otzyvy/` and
+`/companies/{slug}/` filters by brand only. `review-feature-design.md` is updated to match.
+
+### 12.2 Decision G — No aggregate-rating threshold
+
+`/otzyvy/` shows whatever real numbers exist. A brand with 12 reviews shows "12 отзывов"
+and the real average; a brand with 0 shows an `Organization` with no `aggregateRating`.
+No `MIN_REVIEWS_FOR_AGGREGATE` gate and no "we're just starting" placeholder — the owner
+judged a placeholder dishonest-by-omission. The existing `MIN_REVIEWS_PER_BRAND` (=3,
+drop-the-section-below-this) guard from Decision C stays.
+
+### 12.3 Decision H — Hub city filter via URL hash
+
+The 4 transport hubs gain a client-side city `<select>` above the `JobGrid`. Selecting a
+city filters the rendered job cards by a `data-city` attribute. State-resolution priority:
+**URL hash (`#city=<slug>`) > `localStorage` (the homepage's shared city key) > "Все
+города"**. A hash — not a query string — is used deliberately: engines never read the
+fragment, so this adds **zero SEO surface** (no crawl-budget leak, no GA4 noise) while
+still being shareable and bookmarkable. The hub canonical stays the bare hub URL.
+Per-(format×city) landing pages are explicitly **not** in this run — that is a future
+Wave 2.
+
+### 12.4 New beads
+
+| Bead | Title | Files | Deps |
+|------|-------|-------|------|
+| B15 | Hub city filter (Decision H) | `transportHubs.ts`, `TransportHub.astro`, `JobCard.astro`, 4 hub pages, tests | B6 |
+| B16 | Honest per-brand reviews (Decisions F/G) | `generate-reviews.ts`, `reviews.json`, `companies.ts`, review tests, `review-feature-design.md` | B2, B11 |
+
+Both land in PR #185 before merge. Generator parameters (owner-confirmed 2026-05-20):
+10–20 reviews per brand (uniform random, seeded), names unique within a brand, ~60/40
+clean/typo split, natural rating spread (no per-brand skew). Verification gate is
+unchanged (§8.3).
