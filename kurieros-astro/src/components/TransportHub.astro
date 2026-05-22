@@ -16,7 +16,7 @@ import JobFilters from './JobFilters.astro';
 import JobGrid from './JobGrid.astro';
 import HubCrossLinks from './HubCrossLinks.astro';
 import PartnerBanner from './PartnerBanner.astro';
-import type { HubConfig } from '../utils/transportHubs';
+import type { HubConfig, HubCity } from '../utils/transportHubs';
 import type { FaqItem } from '../utils/cityListingPage';
 import { buildFactCards, buildTransportTypes } from '../utils/cityListingPage';
 import type { GeneratedJob } from '../data/vacancyTypes';
@@ -28,9 +28,10 @@ interface Props {
 	faqItems: FaqItem[];
 	companyNames: string[];
 	maxSalary: number;
+	cities: HubCity[];
 }
 
-const { config, filteredJobs, isEmpty, faqItems, companyNames, maxSalary } = Astro.props;
+const { config, filteredJobs, isEmpty, faqItems, companyNames, maxSalary, cities } = Astro.props;
 
 const transportTypes = buildTransportTypes(filteredJobs);
 const paymentTypes = Array.from(new Set(filteredJobs.map((job) => job.details.payment_freq)));
@@ -80,6 +81,22 @@ const factCards = buildFactCards({
 		<section class="listing-filters" aria-label="Фильтры вакансий">
 			<JobFilters />
 		</section>
+
+		<!-- City filter (bead B15 / Decision H) — client-side; omitted when the
+		     hub is empty. JobGrid's grid script listens for `kurieros:hub-city-filter`. -->
+		{!isEmpty && cities.length > 0 && (
+			<section class="hub-city-filter" aria-label="Фильтр вакансий по городу">
+				<label for="hub-city-filter">Город:</label>
+				<select id="hub-city-filter" aria-label="Показать вакансии в выбранном городе">
+					<option value="">Все города</option>
+					{cities.map((city) => (
+						<option value={city.slug} data-name={city.name}>
+							{city.name} — {city.count}
+						</option>
+					))}
+				</select>
+			</section>
+		)}
 
 		<!-- Vacancies — exactly one id="vacancies" anchor: JobGrid emits its
 		     own <section id="vacancies"> when populated; the empty notice
@@ -188,6 +205,47 @@ const factCards = buildFactCards({
 	.listing-filters {
 		padding: 0 1rem;
 		margin-bottom: var(--space-3);
+	}
+
+	/* === City filter (bead B15 / Decision H) === */
+	.hub-city-filter {
+		max-width: 1180px;
+		margin: 0 auto var(--space-3);
+		padding: 0 1rem;
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		flex-wrap: wrap;
+	}
+	.hub-city-filter label {
+		font-size: 0.92rem;
+		font-weight: 700;
+		color: var(--ink-700);
+	}
+	.hub-city-filter select {
+		min-height: 2.6rem;
+		padding: 0.4rem 0.8rem;
+		border: 1px solid var(--ink-200);
+		border-radius: 8px;
+		background: var(--ink-0);
+		color: var(--ink-800);
+		font-family: var(--font-main);
+		font-size: 0.95rem;
+		font-weight: 600;
+		cursor: pointer;
+		max-width: 100%;
+	}
+	.hub-city-filter select:focus-visible {
+		outline: 2px solid var(--brand-600);
+		outline-offset: 1px;
+	}
+	:global(:where(html, body).dark-mode) .hub-city-filter label {
+		color: rgba(231, 234, 240, 0.7);
+	}
+	:global(:where(html, body).dark-mode) .hub-city-filter select {
+		background: var(--ink-100);
+		border-color: var(--ink-200);
+		color: var(--ink-900);
 	}
 	.listing-hero {
 		padding: 1.25rem 1rem 0.5rem;
@@ -436,3 +494,85 @@ const factCards = buildFactCards({
 		color: rgba(231, 234, 240, 0.7);
 	}
 </style>
+
+<script>
+	// Hub city filter — bead B15 / Decision H.
+	// Resolves the city from (priority) URL hash > localStorage > none and
+	// dispatches `kurieros:hub-city-filter`, which JobGrid's grid script
+	// listens for. A hash (not a query string) keeps zero SEO surface — the
+	// hub canonical stays the bare URL.
+	const CITY_STORAGE_KEY = 'kurieros-selected-city'; // shared with the homepage
+	const select = document.getElementById('hub-city-filter');
+
+	if (select instanceof HTMLSelectElement) {
+		const optionBySlug = new Map<string, HTMLOptionElement>();
+		const optionByName = new Map<string, HTMLOptionElement>();
+		for (const option of Array.from(select.options)) {
+			if (!option.value) continue;
+			optionBySlug.set(option.value, option);
+			const name = option.dataset.name;
+			if (name) optionByName.set(name, option);
+		}
+
+		const readStore = (key: string): string | null => {
+			try {
+				return localStorage.getItem(key);
+			} catch {
+				return null; // Safari private mode
+			}
+		};
+		const writeStore = (key: string, value: string): void => {
+			try {
+				localStorage.setItem(key, value);
+			} catch {
+				/* Safari private mode / quota — ignore */
+			}
+		};
+		const removeStore = (key: string): void => {
+			try {
+				localStorage.removeItem(key);
+			} catch {
+				/* Safari private mode — ignore */
+			}
+		};
+
+		const selectedCityName = (): string =>
+			select.selectedOptions[0]?.dataset.name ?? '';
+
+		const fireFilter = (): void => {
+			window.dispatchEvent(
+				new CustomEvent('kurieros:hub-city-filter', {
+					detail: { city: selectedCityName() },
+				}),
+			);
+		};
+
+		// Initial selection: URL hash > localStorage > "Все города".
+		let initial: HTMLOptionElement | undefined;
+		const hashSlug = window.location.hash.match(/^#city=([a-z0-9-]+)$/)?.[1];
+		if (hashSlug) initial = optionBySlug.get(hashSlug);
+		if (!initial) {
+			const stored = readStore(CITY_STORAGE_KEY);
+			if (stored) initial = optionByName.get(stored);
+		}
+
+		if (initial) {
+			select.value = initial.value;
+			// Dispatch after JobGrid has registered its listener (next macrotask).
+			window.setTimeout(fireFilter, 0);
+		}
+
+		select.addEventListener('change', () => {
+			const slug = select.value;
+			const base = window.location.pathname + window.location.search;
+			window.history.replaceState(null, '', slug ? `${base}#city=${slug}` : base);
+			const name = selectedCityName();
+			if (name) {
+				writeStore(CITY_STORAGE_KEY, name);
+			} else {
+				removeStore(CITY_STORAGE_KEY);
+			}
+			fireFilter();
+		});
+	}
+</script>

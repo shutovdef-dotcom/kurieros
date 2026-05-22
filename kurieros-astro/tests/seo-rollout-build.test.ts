@@ -228,6 +228,25 @@ describe.skipIf(skipIfNoDist)('SEO rollout build output', () => {
         // Act + Assert: the hub has live vacancies so job-card must appear
         expect(html, `${slug}: no job-card elements found`).toContain('class="job-card"');
       });
+
+      it(`${slug} renders the hub city <select> with options (bead B15)`, () => {
+        // Arrange
+        const html = readPage(slug);
+        // Act: isolate the hub city <select> block (attribute order agnostic)
+        const idPos = html.indexOf('id="hub-city-filter"');
+        const end = idPos === -1 ? -1 : html.indexOf('</select>', idPos);
+        const block = idPos !== -1 && end !== -1 ? html.slice(idPos, end) : '';
+        const optionCount = (block.match(/<option/g) ?? []).length;
+        // Assert: non-empty hub → city <select> with "Все города" + ≥1 city
+        expect(
+          idPos,
+          `${slug}: missing the hub city <select> (id="hub-city-filter")`,
+        ).toBeGreaterThan(-1);
+        expect(
+          optionCount,
+          `${slug}: hub city <select> should have ≥2 options`,
+        ).toBeGreaterThanOrEqual(2);
+      });
     }
   });
 

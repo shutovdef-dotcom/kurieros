@@ -970,6 +970,32 @@ const hasVacancies = jobsData.length > 0;
 			renderJobsForCity(slug, selectedCity);
 		});
 
+		// Hub city filter — bead B15 / Decision H. The hub page's <select>
+		// dispatches `kurieros:hub-city-filter` with the chosen city name
+		// (or '' for "Все города"). Unlike `kurieros:city-selected` it does
+		// NOT fetch a city fragment: the hub already has all its
+		// (transport-filtered) jobs on the page, so the overflow <template>
+		// is materialised once and the existing client-side `filterJobs()`
+		// city pass is re-run. Initial page load stays light (limit=24);
+		// the one-time materialise happens only on an explicit user action.
+		let hubOverflowMaterialised = false;
+		window.addEventListener('kurieros:hub-city-filter', (event) => {
+			selectedCity = event.detail?.city || '';
+			if (!hubOverflowMaterialised && grid) {
+				const tpl = grid.querySelector('template.jobs-grid-overflow');
+				if (tpl && 'content' in tpl) {
+					// Moving a <template>'s content fragment relocates every
+					// stashed card into the live grid in one operation.
+					grid.insertBefore(tpl.content, tpl);
+					tpl.remove();
+					grid.setAttribute('data-overflow-count', '0');
+					rebindCompareButtons();
+				}
+				hubOverflowMaterialised = true;
+			}
+			filterJobs();
+		});
+
 		window.addEventListener('storage', (event) => {
 			if (event.key !== 'compareList') return;
 			syncCompareList({ emitEvent: false });

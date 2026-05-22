@@ -18,6 +18,7 @@ import type { GeneratedJob } from '../data/vacancyTypes';
 import type { FaqItem } from './cityListingPage';
 import { filterJobsByCriteria } from './jobFilters';
 import { buildBreadcrumbSchema } from './schema';
+import { cyrillicToLatin } from './transliterate';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -421,4 +422,52 @@ export function isHubEmpty(
   cfg: HubConfig,
 ): boolean {
   return filterJobsByCriteria(jobsData, cfg.filter).length === 0;
+}
+
+// ---------------------------------------------------------------------------
+// Hub city filter (bead B15 / Decision H)
+// ---------------------------------------------------------------------------
+
+/** A city option for the hub city `<select>`. */
+export type HubCity = {
+  /** Display name, e.g. "Москва". */
+  name: string;
+  /** URL-hash-safe latin slug, e.g. "moskva". */
+  slug: string;
+  /** Number of the hub's jobs in this city. */
+  count: number;
+};
+
+/** Location tokens that are not real cities and must not become options. */
+const NON_CITY_LOCATIONS = new Set(['вся россия', 'крупные города рф']);
+
+/**
+ * Unique cities across a hub's already-filtered jobs, for the city
+ * `<select>` (bead B15 / Decision H). Splits comma-joined `location`,
+ * drops the nationwide markers, sorts by job count desc then name.
+ * Pure total function — empty input returns [].
+ */
+export function extractHubCities(jobs: readonly GeneratedJob[]): HubCity[] {
+  const counts = new Map<string, number>();
+
+  for (const job of jobs) {
+    for (const part of job.location.split(',')) {
+      const name = part.trim();
+      if (!name || NON_CITY_LOCATIONS.has(name.toLowerCase())) continue;
+      counts.set(name, (counts.get(name) ?? 0) + 1);
+    }
+  }
+
+  const cities: HubCity[] = [];
+  for (const [name, count] of counts) {
+    const slug = cyrillicToLatin(name)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    // Skip a city whose name yields no usable slug (cannot round-trip a hash).
+    if (slug) cities.push({ name, slug, count });
+  }
+
+  cities.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'ru'));
+  return cities;
 }

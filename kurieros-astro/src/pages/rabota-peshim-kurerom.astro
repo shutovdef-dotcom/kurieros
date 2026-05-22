@@ -18,6 +18,7 @@ import {
 	buildHubDescription,
 	buildHubFaqItems,
 	buildHubSchemaGraph,
+	extractHubCities,
 } from '../utils/transportHubs';
 import { filterJobsByCriteria } from '../utils/jobFilters';
 import { parseSalary } from '../utils/format';
@@ -64,6 +65,7 @@ const schemaGraph = buildHubSchemaGraph({
 		faqItems={faqItems}
 		companyNames={companyNames}
 		maxSalary={maxSalary}
+		cities={extractHubCities(filteredJobs)}
 	/>
 	<Footer />
 </BaseLayout>

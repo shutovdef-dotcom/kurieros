@@ -11,6 +11,7 @@ import {
   buildHubFaqItems,
   buildHubSchemaGraph,
   isHubEmpty,
+  extractHubCities,
   type TransportHubKey,
   type HubConfig,
 } from '../src/utils/transportHubs';
@@ -626,5 +627,93 @@ describe('isHubEmpty', () => {
 
     // Act + Assert
     expect(isHubEmpty(jobsData, cfg)).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// extractHubCities (bead B15 / Decision H)
+// ---------------------------------------------------------------------------
+
+describe('extractHubCities', () => {
+  it('returns [] for empty input', () => {
+    // Arrange + Act + Assert
+    expect(extractHubCities([])).toEqual([]);
+  });
+
+  it('dedups cities and counts the hub jobs in each', () => {
+    // Arrange
+    const jobs = [
+      makeJob({ location: 'Москва' }),
+      makeJob({ location: 'Москва' }),
+      makeJob({ location: 'Москва' }),
+      makeJob({ location: 'Казань' }),
+    ];
+
+    // Act
+    const result = extractHubCities(jobs);
+
+    // Assert
+    expect(result.find((c) => c.name === 'Москва')?.count).toBe(3);
+    expect(result.find((c) => c.name === 'Казань')?.count).toBe(1);
+  });
+
+  it('sorts cities by job count descending', () => {
+    // Arrange
+    const jobs = [
+      makeJob({ location: 'Казань' }),
+      makeJob({ location: 'Москва' }),
+      makeJob({ location: 'Москва' }),
+    ];
+
+    // Act
+    const result = extractHubCities(jobs);
+
+    // Assert
+    expect(result[0].name).toBe('Москва');
+    expect(result[1].name).toBe('Казань');
+  });
+
+  it('drops the "Вся Россия" nationwide marker', () => {
+    // Arrange
+    const jobs = [
+      makeJob({ location: 'Вся Россия' }),
+      makeJob({ location: 'Москва' }),
+    ];
+
+    // Act
+    const result = extractHubCities(jobs);
+
+    // Assert
+    expect(result.map((c) => c.name)).toEqual(['Москва']);
+  });
+
+  it('splits comma-joined locations into separate cities', () => {
+    // Arrange
+    const jobs = [makeJob({ location: 'Москва, Казань' })];
+
+    // Act
+    const result = extractHubCities(jobs);
+
+    // Assert
+    expect(result.map((c) => c.name).sort()).toEqual(['Казань', 'Москва']);
+  });
+
+  it('produces a non-empty, URL-hash-safe latin slug for every city', () => {
+    // Arrange
+    const jobs = [
+      makeJob({ location: 'Москва' }),
+      makeJob({ location: 'Санкт-Петербург' }),
+      makeJob({ location: 'Нижний Новгород' }),
+    ];
+
+    // Act
+    const result = extractHubCities(jobs);
+
+    // Assert
+    expect(result.length).toBe(3);
+    for (const city of result) {
+      expect(city.slug.length).toBeGreaterThan(0);
+      expect(city.slug).toMatch(/^[a-z0-9-]+$/);
+    }
   });
 });
