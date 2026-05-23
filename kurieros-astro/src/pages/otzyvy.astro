@@ -1,0 +1,88 @@
+---
+/**
+ * otzyvy.astro — /otzyvy/ reviews aggregate page.
+ *
+ * Design decisions (plan.md §3.4 Decision C, bead B11):
+ * - reviews.json is imported at build time ONLY. At most 6 reviews per brand
+ *   reach the HTML (≤48 .review-card elements total). The 10 MB JSON never
+ *   ships to the client.
+ * - JSON-LD: CollectionPage + ItemList top node + per-brand Organization /
+ *   aggregateRating only for brands with a /companies/{slug}/ page AND
+ *   reviewCount ≥ MIN_REVIEWS_PER_BRAND (enforced by buildReviewsSchemaGraph).
+ * - No page-level AggregateRating (Decision C — misleading for a multi-employer
+ *   aggregate).
+ * - robots="noindex, follow" when total review count is 0.
+ * - ogType="website" — a reviews index is not an Article.
+ * - JSON-LD safety: structuredData is serialised by JSON.stringify() then
+ *   .replace(/</g, '\\u003c') so "</script>" in any review body cannot break
+ *   out of the inline <script> block (same technique as BaseLayout, M16).
+ * - Review text in the HTML body flows through {expression} slots — Astro
+ *   auto-escapes all expressions (never set:html on review-derived content).
+ */
+
+import reviewsRaw from '../data/reviews.json';
+import {
+  buildReviewAggregate,
+  buildReviewsSchemaGraph,
+  type ReviewLike,
+} from '../utils/reviewsAggregate';
+import InfoGuideLayout from '../components/InfoGuideLayout.astro';
+import ReviewsAggregate from '../components/ReviewsAggregate.astro';
+
+// Cast the raw import to ReviewLike[]. The data shape is stable (bead B2).
+// reviewsIndex.ts uses a cached Zod parse for the ReviewsBlock perf path;
+// here we use a direct cast because this build-time-only page processes the
+// data once, and BaseLayout's JSON.stringify + < escape makes the JSON-LD
+// output safe regardless of individual field content.
+const reviews = reviewsRaw as unknown as ReviewLike[];
+
+// Brand-grouped summaries: each summary has ≤6 sampleReviews.
+const summaries = buildReviewAggregate(reviews);
+
+// Total count: use raw array length for the hero headline (all reviews),
+// even though summaries may exclude brands below MIN_REVIEWS_PER_BRAND.
+const totalCount = reviews.length;
+
+// Site root — must match astro.config.mjs `site`.
+const SITE_URL = 'https://kurerok.ru';
+const PAGE_URL = `${SITE_URL}/otzyvy/`;
+
+// Build the JSON-LD @graph (no page-level AggregateRating per Decision C).
+// Passed to InfoGuideLayout → BaseLayout, which owns the @context wrapping,
+// serialisation and the </script>-safe escaping — the same path the
+// info-guide pages use. Emitting our own <script> after </InfoGuideLayout>
+// would place it after </html> (malformed); the prop keeps it in <head>.
+const schemaGraph = buildReviewsSchemaGraph(summaries, PAGE_URL, SITE_URL);
+
+// robots: noindex when there are zero reviews (honest-content guard).
+const robotsMeta =
+  totalCount === 0 ? 'noindex, follow' : undefined;
+
+const PAGE_TITLE =
+  'Отзывы курьеров о работодателях — Купер, Яндекс Еда, Ozon и другие | КурьерОк';
+const PAGE_DESCRIPTION =
+  'Читайте отзывы курьеров о работодателях: Купер, Яндекс Еда, Ozon, Т-Банк, Альфа-Банк и др. Рейтинги, плюсы и минусы условий работы.';
+---
+
+<InfoGuideLayout
+  title={PAGE_TITLE}
+  description={PAGE_DESCRIPTION}
+  ogType="website"
+  kicker="Отзывы"
+  h1="Отзывы курьеров о работодателях"
+  lead="Сравнивайте условия работы в ведущих компаниях. Реальный опыт курьеров — плюсы, минусы и рейтинги."
+  robots={robotsMeta}
+  canonicalURL={PAGE_URL}
+  schemaGraph={schemaGraph}
+>
+  <!--
+    ReviewsAggregate renders the brand-grouped body:
+    hero → disclaimer → brand sections (stars / distribution / ≤6 review-cards / CTA) → exit-ramp.
+    Only summaries (pre-aggregated, ≤6 reviews per brand) flow here.
+    The 10 MB reviews.json does not reach this component.
+  -->
+  <ReviewsAggregate
+    summaries={summaries}
+    totalCount={totalCount}
+  />
+</InfoGuideLayout>

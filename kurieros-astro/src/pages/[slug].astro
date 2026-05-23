@@ -25,6 +25,8 @@ import {
 	filterJobsByCriteria,
 	getCityJobsFromMap,
 } from '../utils/jobFilters';
+import { HUB_CONFIGS, isHubEmpty } from '../utils/transportHubs';
+import { CATEGORY_CANONICAL_HUB } from '../utils/categoryCanonicalHub';
 // `jobsByCity` is built ONCE at module load inside jobsByCityIndex.ts
 // (imports are module-cached). It is NOT rebuilt per page — a local
 // `const jobsByCity = buildJobsByCityMap(jobsData)` in this frontmatter
@@ -35,6 +37,11 @@ import { jobsByCity } from '../utils/jobsByCityIndex';
 // `citiesFromJobs` is the module-cached city catalogue — same H3
 // rationale as `jobsByCity` above (audit ref v4 MEDIUM-1).
 import { citiesFromJobs } from '../utils/citiesIndex';
+
+// Build a lookup from hub path → HubConfig for the isHubEmpty guard.
+const _hubPathToConfig = Object.fromEntries(
+	Object.values(HUB_CONFIGS).map((cfg) => [`/${cfg.slug}/`, cfg]),
+);
 
 export async function getStaticPaths() {
 	type CityProps = {
@@ -140,6 +147,17 @@ const transportTypes = buildTransportTypes(filteredJobs);
 // content. We also drop them from the sitemap (see astro.config.mjs).
 const isEmptyListing = filteredJobs.length === 0;
 
+// Decision A: emit cross-canonical to hub page for the 4 canonicaled category
+// facets — but only when the hub itself is non-empty (a noindexed hub as
+// canonical target would be an indexing bug). All other pages → undefined
+// (BaseLayout falls back to self-canonical via Astro.url.pathname).
+const _hubPath = type === 'category' ? CATEGORY_CANONICAL_HUB[data.slug] : undefined;
+const _hubCfg = _hubPath !== undefined ? _hubPathToConfig[_hubPath] : undefined;
+const canonicalURL =
+	_hubPath !== undefined && _hubCfg !== undefined && !isHubEmpty(jobsData, _hubCfg)
+		? _hubPath
+		: undefined;
+
 // «Соседние города» — exit-ramp для search-визитёров. GSC report
 // (2026-05-03) показал: page_depth Метрики 2.49 → 1.62, avg session
 // 5:04 → 2:32. Юзер приходит на small-city из long-tail, видит
@@ -222,6 +240,7 @@ const pageSchemaGraph = buildPageSchemaGraph({
 	description={seoDescription}
 	schemaGraph={pageSchemaGraph}
 	robots={isEmptyListing ? 'noindex, follow' : undefined}
+	canonicalURL={canonicalURL}
 >
 	<Header />
 

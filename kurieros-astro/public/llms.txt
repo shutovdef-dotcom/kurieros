@@ -44,14 +44,24 @@
 
 ## Форматы работы
 
-- [Курьер на авто](https://kurerok.ru/rabota-kurerom-na-avto/)
-- [Курьер на велосипеде](https://kurerok.ru/rabota-kurerom-na-velosipede/)
+- [Пеший курьер](https://kurerok.ru/rabota-peshim-kurerom/)
+- [Курьер на авто](https://kurerok.ru/rabota-avtokurerom/)
+- [Курьер на велосипеде](https://kurerok.ru/rabota-velokurerom/)
+- [Подработка курьером](https://kurerok.ru/podrabotka-kurerom/)
 - [Курьер на самокате](https://kurerok.ru/rabota-kurerom-na-samokate/)
-- [Пеший курьер](https://kurerok.ru/rabota-kurerom-peshkom/)
-- [Подработка курьером](https://kurerok.ru/rabota-kurerom-podrabotka/)
 - [Курьер с 16 лет](https://kurerok.ru/rabota-kurerom-16-let/)
 - [Работа курьером для студентов](https://kurerok.ru/rabota-kurerom-dlya-studentov/)
 - [Ежедневная оплата](https://kurerok.ru/rabota-kurerom-ezhednevnaya-oplata/)
+
+## Гиды для курьеров
+
+- [Сколько зарабатывает курьер](https://kurerok.ru/skolko-zarabatyvaet-kurer/): доход по форматам (пешком, велик, авто) и городам, калькулятор заработка
+- [Как стать курьером](https://kurerok.ru/kak-stat-kurerom/): пошаговая инструкция, документы, выбор формата оформления
+- [Условия работы курьером](https://kurerok.ru/usloviya-raboty-kurerom/): графики, выплаты, экипировка и поддержка курьера
+
+## Отзывы
+
+- [Отзывы курьеров о работодателях](https://kurerok.ru/otzyvy/): рейтинги и отзывы курьеров по 8 брендам (Купер, Яндекс Еда, Ozon, Ozon Fresh, Т-Банк, Альфа-Банк, Бургер Кинг, Efin) с распределением оценок
 
 ## Инструменты
 

@@ -2,37 +2,40 @@
 import ReviewModal from './ReviewModal.astro';
 import { seededShuffle } from '../utils/seededShuffle';
 // `reviewsData` is validated (Zod) ONCE at module load in
-// `reviewsIndex.ts`, and `reviewsByJobId` is the per-job bucket Map
+// `reviewsIndex.ts`, and `reviewsByCompany` is the per-brand bucket Map
 // built there. Astro inlines frontmatter into the per-render function,
-// so parsing the 9.5 MB / 19,144-row `reviews.json` here would re-run
-// on every `<ReviewsBlock>` render (~4,787× per build) — audit v5 P-H1.
-import { reviewsData, reviewsByJobId, type Review } from '../utils/reviewsIndex';
+// so parsing `reviews.json` here would re-run on every `<ReviewsBlock>`
+// render (~4,787× per build) — audit v5 P-H1.
+import { reviewsData, reviewsByCompany, type Review } from '../utils/reviewsIndex';
 
 export interface Props {
-  jobId?: number; // Optional: If provided, filter by job. If not, show stable 3
+  jobId?: number; // Provenance only — forwarded to the submit button's data-job-id.
+  company?: string; // When set: show this brand's reviews (Decision F).
 }
 
-const { jobId } = Astro.props;
+const { jobId, company } = Astro.props;
 
 // Filter and prepare display data
 //
 // Per D3: reviews must be STABLE across builds — no `Math.random()`
-// in render. Vacancy pages are deterministic via the jobId filter;
-// the home-page case uses `seededShuffle` with a fixed seed so the
-// same 3 reviews appear on every rebuild.
+// in render. Decision F: a review belongs to a brand, so a vacancy page
+// shows its employer's (brand's) reviews via the `company` prop. Both the
+// brand sample and the home-page case use `seededShuffle` with a fixed
+// seed so the same reviews appear on every rebuild.
 let displayReviews: Review[] = [];
 let overallRating = 0;
 let totalReviewsCount = 0;
 
-if (jobId) {
-  // O(1) Map lookup into the module-cached per-job buckets, replacing
-  // a per-page O(19k) `.filter()` over the full review dataset.
-  displayReviews = reviewsByJobId.get(jobId) ?? [];
-  totalReviewsCount = displayReviews.length;
+if (company) {
+  // O(1) Map lookup into the module-cached per-brand buckets.
+  const brandReviews = reviewsByCompany.get(company) ?? [];
+  totalReviewsCount = brandReviews.length;
   if (totalReviewsCount > 0) {
-    const sum = displayReviews.reduce((acc, r) => acc + r.rating, 0);
+    const sum = brandReviews.reduce((acc, r) => acc + r.rating, 0);
     overallRating = Number((sum / totalReviewsCount).toFixed(1));
   }
+  // Stable ≤6 sample, seeded by brand so it is identical on every rebuild.
+  displayReviews = seededShuffle(brandReviews, `reviews-${company}`).slice(0, 6);
 } else {
   // Homepage logic: 3 deterministic picks (stable across builds).
   displayReviews = seededShuffle(reviewsData, 'reviews-home').slice(0, 3);
@@ -51,8 +54,8 @@ const renderStars = (rating: number) => {
 <section class="dyn-reviews-section">
   <div class="reviews-header-wrap">
     <div class="section-heading">
-      <h2>{jobId ? 'Отзывы о вакансии' : 'Отзывы курьеров'}</h2>
-      {jobId ? (
+      <h2>{company ? 'Отзывы о работодателе' : 'Отзывы курьеров'}</h2>
+      {company ? (
         <div class="company-rating">
           <span class="rating-number">{overallRating > 0 ? overallRating : '-'}</span>
           <span class="rating-stars">{overallRating > 0 ? renderStars(overallRating) : '☆☆☆☆☆'}</span>
@@ -81,7 +84,7 @@ const renderStars = (rating: number) => {
                 <span class="r-city">{review.city}</span>
               </div>
               <div class="r-job-info">
-                {!jobId && <span class="r-company">{review.company}</span>}
+                {!company && <span class="r-company">{review.company}</span>}
                 <span class="r-rating" title={`Оценка: ${review.rating}`}>
                   {renderStars(review.rating)}
                 </span>

@@ -1,0 +1,358 @@
+---
+/**
+ * InfoGuideLayout.astro
+ *
+ * Guide chrome for info-guide pages (/skolko-zarabatyvaet-kurer/, etc.)
+ * and /otzyvy/. Copied (not refactored) from guide/[topic].astro so the
+ * live file is untouched (additive-only invariant). Refactoring the live
+ * file to consume this layout is Open Question #8, deferred.
+ *
+ * Usage:
+ *   <InfoGuideLayout title="..." description="..." kicker="..." h1="..." lead="...">
+ *     <!-- bespoke guide body goes here -->
+ *   </InfoGuideLayout>
+ */
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from './Header.astro';
+import Footer from './Footer.astro';
+import PartnerBanner from './PartnerBanner.astro';
+
+interface Props {
+  /** Page <title> and og:title */
+  title: string;
+  /** meta description and og:description */
+  description: string;
+  /** og:type — default 'article'; pass 'website' for /otzyvy/ */
+  ogType?: string;
+  /** article:section OG tag (only emitted when ogType='article') */
+  articleSection?: string;
+  /** article:published_time OG tag */
+  articlePublishedTime?: string;
+  /** article:modified_time OG tag */
+  articleModifiedTime?: string;
+  /** Explicit canonical URL — omit to let BaseLayout self-canonical */
+  canonicalURL?: string;
+  /** robots meta content — omit for default 'index, follow, …' */
+  robots?: string;
+  /** Small uppercase label above the H1 */
+  kicker: string;
+  /** Page H1 */
+  h1: string;
+  /** Lead paragraph below the H1 */
+  lead: string;
+  /** "Обновлено: {updatedDate}" line — omitted when not provided */
+  updatedDate?: string;
+  /** JSON-LD @graph nodes — forwarded to BaseLayout's schemaGraph prop */
+  schemaGraph?: Record<string, unknown>[];
+}
+
+const {
+  title,
+  description,
+  ogType = 'article',
+  articleSection,
+  articlePublishedTime,
+  articleModifiedTime,
+  canonicalURL,
+  robots,
+  kicker,
+  h1,
+  lead,
+  updatedDate,
+  schemaGraph,
+} = Astro.props;
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  ogType={ogType}
+  articleSection={articleSection}
+  articlePublishedTime={articlePublishedTime}
+  articleModifiedTime={articleModifiedTime}
+  canonicalURL={canonicalURL}
+  robots={robots}
+  schemaGraph={schemaGraph}
+>
+  <Header />
+
+  <main class="guide-page">
+    <div class="container container-narrow">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Главная</a> &gt; <a href="/guide/">Статьи</a> &gt; <span>{h1}</span>
+      </nav>
+
+      <header class="guide-hero">
+        <p class="guide-kicker">{kicker}</p>
+        <h1>{h1}</h1>
+        <p class="guide-lead">{lead}</p>
+        {updatedDate && (
+          <div class="guide-meta">
+            <span>Обновлено: {updatedDate}</span>
+          </div>
+        )}
+      </header>
+
+      <slot />
+
+      <PartnerBanner />
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  /* Styles copied from guide/[topic].astro — see Open Question #8 for de-dup. */
+  .guide-page {
+    padding: clamp(20px, 4vw, 40px) 0 60px;
+  }
+  .breadcrumb {
+    font-size: 14px;
+    color: var(--ink-500);
+    margin-bottom: 16px;
+  }
+  .breadcrumb a {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px dashed currentColor;
+  }
+  .breadcrumb a:hover {
+    color: var(--brand-700);
+  }
+  .guide-hero {
+    margin-bottom: 32px;
+  }
+  .guide-kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--brand-700);
+    margin-bottom: 8px;
+  }
+  .guide-hero h1 {
+    font-size: clamp(28px, 4vw, 40px);
+    line-height: 1.15;
+    margin: 0 0 12px;
+  }
+  .guide-lead {
+    font-size: clamp(16px, 1.4vw, 18px);
+    color: var(--ink-700);
+    margin: 0 0 16px;
+    max-width: 720px;
+  }
+  .guide-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--ink-500);
+  }
+  .guide-howto {
+    margin: 0 0 40px;
+    padding: 28px;
+    border: 1px solid var(--brand-700);
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(var(--brand-700-rgb), 0.06), rgba(var(--brand-700-rgb), 0.02));
+  }
+  .guide-howto h2 {
+    margin: 0 0 8px;
+    font-size: clamp(22px, 2.4vw, 28px);
+  }
+  .guide-howto-lead {
+    margin: 0 0 16px;
+    color: var(--ink-700);
+  }
+  .guide-howto-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin: 0 0 20px;
+    padding: 12px 16px;
+    background: var(--surface-100);
+    border-radius: 12px;
+  }
+  .guide-howto-meta div {
+    display: grid;
+    gap: 2px;
+  }
+  .guide-howto-meta dt {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-500);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .guide-howto-meta dd {
+    margin: 0;
+    font-size: 14px;
+    color: var(--ink-900);
+  }
+  .guide-howto-steps {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding-left: 24px;
+    counter-reset: howto;
+  }
+  .guide-howto-steps li {
+    padding: 12px 16px;
+    background: var(--surface-100);
+    border-radius: 10px;
+  }
+  .guide-howto-steps li strong {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+  .guide-howto-steps li p {
+    margin: 0 0 6px;
+    font-size: 14px;
+    color: var(--ink-700);
+  }
+  .guide-howto-link {
+    font-size: 13px;
+    color: var(--brand-700);
+    text-decoration: none;
+  }
+  .guide-howto-link:hover {
+    text-decoration: underline;
+  }
+  :global(.dark-mode) .guide-howto {
+    border-color: var(--brand-500);
+    background: linear-gradient(180deg, rgba(46, 179, 122, 0.12), rgba(46, 179, 122, 0.04));
+  }
+  :global(.dark-mode) .guide-howto-meta,
+  :global(.dark-mode) .guide-howto-steps li {
+    background: var(--surface-200);
+  }
+  .guide-faq {
+    display: grid;
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+  .guide-card {
+    background: var(--surface-100);
+    border: 1px solid var(--ink-100);
+    border-radius: 16px;
+    padding: 24px;
+  }
+  .guide-card h2 {
+    font-size: clamp(20px, 2vw, 24px);
+    margin: 0 0 12px;
+  }
+  .guide-anchor {
+    color: inherit;
+    text-decoration: none;
+  }
+  .guide-anchor:hover {
+    color: var(--brand-700);
+  }
+  .guide-card[id]:target {
+    outline: 2px solid var(--brand-700);
+    outline-offset: 4px;
+  }
+  .guide-card-short {
+    margin: 0 0 12px;
+  }
+  .guide-card-long {
+    margin: 0 0 12px;
+    color: var(--ink-700);
+  }
+  .guide-facts {
+    margin-top: 8px;
+    font-size: 14px;
+  }
+  .guide-facts summary {
+    cursor: pointer;
+    color: var(--brand-700);
+    font-weight: 600;
+  }
+  .guide-facts ul {
+    margin: 12px 0 0;
+    padding-left: 20px;
+  }
+  .guide-facts li {
+    margin-bottom: 6px;
+  }
+  .guide-facts a {
+    color: var(--brand-700);
+  }
+  .guide-card-links {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--ink-100);
+    font-size: 14px;
+  }
+  .guide-card-links-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: baseline;
+  }
+  .guide-card-links-label {
+    color: var(--ink-500);
+    font-weight: 600;
+  }
+  .guide-card-links ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+  }
+  .guide-card-links a {
+    color: var(--brand-700);
+    text-decoration: none;
+    border-bottom: 1px dashed currentColor;
+  }
+  .guide-card-links a:hover {
+    color: var(--ink-900);
+  }
+  .guide-card-links span {
+    color: var(--ink-700);
+  }
+  .guide-related {
+    margin: 40px 0 24px;
+  }
+  .guide-related h2 {
+    font-size: 22px;
+    margin: 0 0 16px;
+  }
+  .guide-related-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+  }
+  .guide-related-card {
+    display: grid;
+    gap: 4px;
+    padding: 16px 20px;
+    border: 1px solid var(--ink-100);
+    border-radius: 12px;
+    background: var(--surface-100);
+    text-decoration: none;
+    color: inherit;
+  }
+  .guide-related-card:hover {
+    border-color: var(--brand-700);
+  }
+  .guide-related-card strong {
+    font-size: 16px;
+    color: var(--ink-900);
+  }
+  .guide-related-card span {
+    font-size: 14px;
+    color: var(--ink-500);
+  }
+  :global(.dark-mode) .guide-card,
+  :global(.dark-mode) .guide-related-card {
+    background: var(--surface-200);
+    border-color: var(--ink-200);
+  }
+</style>

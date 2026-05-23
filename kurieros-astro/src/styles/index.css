@@ -47,6 +47,26 @@ header {
   align-items: center;
 }
 
+/* Reset for <header> elements that are NOT the site nav.
+ * The bare `header { ... }` rule above leaks to every <header> tag
+ * (HTML5 allows multiple <header> — for article/section/etc.). The
+ * class selector here (specificity 0,1,0) overrides the bare `header`
+ * (0,0,1), so <header class="guide-hero"> renders as a normal block.
+ * Spot-fix; see docs/backlog.md → CSS-1 for the root-cause plan. */
+.guide-hero {
+  position: static;
+  top: auto;
+  z-index: auto;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: none;
+  padding: 0;
+  display: block;
+  justify-content: initial;
+  align-items: initial;
+}
+
 .header-lang {
   position: static;
   transform: none;

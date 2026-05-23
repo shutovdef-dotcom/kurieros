@@ -41,13 +41,23 @@ const countHtml = (dir: string): number => {
 };
 
 describe.skipIf(skipIfNoDist)('Build output', () => {
-  it('has expected page count (~6750)', () => {
-    // ~5790 content pages + ~958 `/api/grid/<slug>/` city-grid fragment
-    // endpoints (one per city, added by M14). Band widened from the
-    // pre-M14 ~5790 accordingly.
+  it('has expected page count (~6759)', () => {
+    // Reference build 2026-05-19: 6759 HTML files.
+    // ~5790 content pages + ~958 /api/grid/<slug>/ city-grid fragments (M14)
+    // + 8 SEO-rollout routes (Flywheel Phase D B5-B12):
+    //   4 transport hubs + 3 info guides + /otzyvy/.
+    // Band: 6754-6764 (+-5 from reference count).
+    //
+    // NOTE FOR CONTRIBUTORS: always re-derive both bounds from an actual build
+    // after adding new routes -- do NOT blindly add N to the upper bound.
+    // Run: node -e "const fs=require('fs'),p=require('path');
+    //   function c(d){let n=0;for(const e of fs.readdirSync(d,{withFileTypes:true}))
+    //   {const f=p.join(d,e.name);if(e.isDirectory())n+=c(f);
+    //   else if(e.isFile()&&e.name.endsWith('.html'))n++;}return n;}
+    //   console.log(c('dist'));"
     const count = countHtml(DIST_DIR);
-    expect(count).toBeGreaterThanOrEqual(6730);
-    expect(count).toBeLessThanOrEqual(6770);
+    expect(count).toBeGreaterThanOrEqual(6754);
+    expect(count).toBeLessThanOrEqual(6764);
   });
 
   it('vacancy fragments use the compact format (post-#129)', () => {

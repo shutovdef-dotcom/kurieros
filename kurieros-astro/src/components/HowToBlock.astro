@@ -1,0 +1,108 @@
+---
+/**
+ * HowToBlock.astro
+ *
+ * Renders an ordered step list for a HowToConfig and emits the
+ * corresponding HowTo JSON-LD <script> node inline.
+ *
+ * The HowTo JSON-LD is co-located here (not inside buildGuideSchemaGraph)
+ * because the node is tightly coupled to the DOM step list — mirrors the
+ * inline pattern used in guide/[topic].astro.
+ *
+ * JSON-LD is built with JSON.stringify (no raw string concatenation) and
+ * '<' is replaced with '<' so a step text containing '</script>'
+ * cannot break out of the inline script block — same escape that
+ * BaseLayout applies to its schemaGraph JSON.
+ *
+ * Empty-steps guard: if howTo.steps is empty, the component renders
+ * nothing — never emits an invalid empty HowTo node.
+ */
+
+import type { HowToConfig } from '../utils/infoGuides';
+
+interface Props {
+  howTo: HowToConfig;
+  /**
+   * When false, suppresses the inline <script type="application/ld+json">
+   * for the HowTo node — use this when the HowTo node is already included
+   * in the page's @graph (e.g. via buildGuideSchemaGraph + InfoGuideLayout).
+   * Defaults to true for backwards compatibility.
+   */
+  emitJsonLd?: boolean;
+}
+
+const { howTo, emitJsonLd = true } = Astro.props;
+
+const hasSteps = howTo.steps.length > 0;
+
+const howToJsonLd = hasSteps
+  ? JSON.stringify({
+      '@type': 'HowTo',
+      name: howTo.name,
+      step: howTo.steps.map((step, index) => ({
+        '@type': 'HowToStep',
+        position: index + 1,
+        name: step.name,
+        text: step.text,
+      })),
+    }).replace(/</g, '\\u003c')
+  : null;
+---
+
+{hasSteps && (
+  <section class="howto-block" aria-labelledby="howto-heading">
+    <h2 id="howto-heading" class="howto-heading">{howTo.name}</h2>
+    <ol class="howto-steps">
+      {howTo.steps.map((step) => (
+        <li class="howto-step">
+          <strong class="howto-step-name">{step.name}</strong>
+          <p class="howto-step-text">{step.text}</p>
+        </li>
+      ))}
+    </ol>
+    {emitJsonLd && <script type="application/ld+json" set:html={howToJsonLd} />}
+  </section>
+)}
+
+<style>
+  .howto-block {
+    margin: 0 0 40px;
+    padding: 28px;
+    border: 1px solid var(--brand-700);
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(var(--brand-700-rgb), 0.06), rgba(var(--brand-700-rgb), 0.02));
+  }
+  .howto-heading {
+    margin: 0 0 16px;
+    font-size: clamp(22px, 2.4vw, 28px);
+  }
+  .howto-steps {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding-left: 24px;
+    counter-reset: howto;
+  }
+  .howto-step {
+    padding: 12px 16px;
+    background: var(--surface-100);
+    border-radius: 10px;
+  }
+  .howto-step-name {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+  .howto-step-text {
+    margin: 0;
+    font-size: 14px;
+    color: var(--ink-700);
+  }
+  :global(.dark-mode) .howto-block {
+    border-color: var(--brand-500);
+    background: linear-gradient(180deg, rgba(46, 179, 122, 0.12), rgba(46, 179, 122, 0.04));
+  }
+  :global(.dark-mode) .howto-step {
+    background: var(--surface-200);
+  }
+</style>
