@@ -319,6 +319,9 @@ export const yandexEdaSource: VacancySource = {
   offers: yandexEdaCityRates.flatMap((cityRate, cityIndex) =>
     TRANSPORT_MODES.map((transport) => createOffer(cityRate, transport, cityIndex)),
   ),
-  extraTags: ['flexible', 'food_delivery', 'yandex_eda', 'source:google-sheet'],
+  // `flexible` is no longer hardcoded here — it is derived from `schedule`
+  // in jobs.ts (src/utils/flexibleSchedule.ts). Yandex Eda's "Свободный
+  // график от 2 часов" matches that rule, so all 399 jobs still get it.
+  extraTags: ['food_delivery', 'yandex_eda', 'source:google-sheet'],
   isHot: true,
 };

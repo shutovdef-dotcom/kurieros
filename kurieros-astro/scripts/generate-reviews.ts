@@ -38,6 +38,8 @@ type ReviewRecord = {
 
 // Owner-confirmed 2026-05-20: 10–20 reviews per brand, uniform random.
 const MIN_REVIEWS_PER_BRAND = 10;
+/** Floor for per-brand average rating (post-clamp). */
+const MIN_BRAND_AVG = 3.8;
 const MAX_REVIEWS_PER_BRAND = 20;
 
 // Bump this string to deliberately reshuffle the whole dataset.
@@ -157,10 +159,14 @@ const COMMENTS_ERRORS_DB = [
   'За месяц втянулся, тепер норм.',
 ];
 
-// Integer 1–5 ratings, weighted so the mean ≈ 4.0. Per-brand averages drawn
-// from ~15 picks land naturally apart (not a uniform ~4.3 for every brand).
+// Integer 1–5 ratings, weighted so the mean ≈ 4.4. Per-brand averages drawn
+// from ~10–20 picks cluster naturally in [4.0, 5.0]; an unlucky brand can dip
+// below 3.8, so a post-generation floor clamp (MIN_BRAND_AVG, applied inside
+// the brand loop) bumps the lowest rating by 1 until the average reaches 3.8.
+// Net guarantee: per-brand spread fits in [3.8, 5.0]. 1★ and 2★ stay in the
+// pool so distribution bars remain visually rich for the occasional brand.
 // Integers (not floats) keep `ratingDistribution` in reviewsAggregate.ts correct.
-const RATING_POOL = [5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 2, 1];
+const RATING_POOL = [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 3, 2, 1];
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 // Fixed window — reviews span the ~12 months before this date. Hard-coded so
@@ -261,6 +267,8 @@ for (const brand of brands) {
   // Unique reviewer names within this brand.
   const brandNames = shuffle(NAMES, random).slice(0, count);
 
+  const brandStartIdx = reviews.length;
+
   for (let index = 0; index < count; index += 1) {
     const job = brandJobs[pickIndex(brandJobs.length, random)];
     const isTypo = random() < TYPO_SHARE;
@@ -283,6 +291,22 @@ for (const brand of brands) {
       date: new Date(REVIEW_WINDOW_END - dateOffsetDays * DAY_MS).toISOString(),
     });
     nextId += 1;
+  }
+
+  // Floor clamp: per-brand average must be >= MIN_BRAND_AVG. If unlucky
+  // sampling produced too many low ratings, bump the lowest one by 1 until
+  // the constraint holds. Deterministic — always picks the lowest-then-
+  // earliest review, so the same SEED yields the same output.
+  const brandSlice = reviews.slice(brandStartIdx);
+  let brandSum = brandSlice.reduce((acc, r) => acc + r.rating, 0);
+  while (brandSum / brandSlice.length < MIN_BRAND_AVG) {
+    let minIdx = 0;
+    for (let i = 1; i < brandSlice.length; i += 1) {
+      if (brandSlice[i].rating < brandSlice[minIdx].rating) minIdx = i;
+    }
+    if (brandSlice[minIdx].rating >= 5) break;
+    brandSlice[minIdx].rating += 1;
+    brandSum += 1;
   }
 }
 

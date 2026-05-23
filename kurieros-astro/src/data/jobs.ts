@@ -14,6 +14,7 @@ import type {
 } from './vacancyTypes';
 import { isCityBlocked, slugifyCity } from '../utils/cities';
 import { fnv1a } from '../utils/fnv1a';
+import { isFlexibleSchedule } from '../utils/flexibleSchedule';
 import { z } from 'zod';
 
 // === Per-language translation overrides =============================
@@ -552,6 +553,7 @@ export const buildJobsFromVacancies = (
       const formats = getEmploymentFormats(source, offer);
       const transportProvision = getTransportProvision(offer);
       const medicalBook = getMedicalBook(source, offer);
+      const schedule = getSchedule(source, offer);
       const salary = getSalaryText(offer.pay);
       const applyLink = offer.applyLink ?? '#';
       const citySlug = slugifyCity(offer.city);
@@ -575,6 +577,9 @@ export const buildJobsFromVacancies = (
           ...formats.map((format) => EMPLOYMENT_TAGS[format]),
           ...getCitizenshipTags(getCitizenship(source, offer)),
           ...(source.extraTags ?? []),
+          // `flexible` is derived from the schedule (utils/flexibleSchedule.ts),
+          // not hardcoded per source — powers /podrabotka-kurerom/ + schedule facets.
+          ...(isFlexibleSchedule(schedule) ? ['flexible'] : []),
         ]),
         labels: buildLabels(content.labels, [transport], ageFrom, formats, medicalBook),
         applyLink,
@@ -584,7 +589,7 @@ export const buildJobsFromVacancies = (
         requiredDocuments: requiredDocuments.map((item) => interpolate(item, offer, language)),
         details: {
           rate: getRateText(offer.pay),
-          schedule: getSchedule(source, offer),
+          schedule,
           education: getEducation(source),
           age: `от ${ageFrom} лет`,
           payment_freq: getPaymentFrequency(offer.pay.paymentFrequency),
