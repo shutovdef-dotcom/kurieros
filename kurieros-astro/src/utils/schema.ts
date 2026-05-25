@@ -41,7 +41,13 @@ export const buildBreadcrumbSchema = (
 
 const EMPLOYMENT_KEYWORDS: ReadonlyArray<readonly [RegExp, string]> = [
   [/самозан|\bип\b|гпх|гражданско.правов|подряд|contractor/i, 'CONTRACTOR'],
-  [/полн|официал|штат|трудов\w* догов|full[\s-]?time/i, 'FULL_TIME'],
+  // Fix F regression-guard (2026-05-25) — exclude «полностью» (means
+  // «entirely» / «fully», as in «полностью удалённый формат»). Without
+  // the negative lookahead, T-Bank operator B2B's «Гибкий график,
+  // полностью удалённый формат» incorrectly tagged the role as
+  // FULL_TIME. The other targeted stems («полная смена», «полная
+  // занятость», «полный рабочий день», «полная ставка») still match.
+  [/полн(?!остью)|официал|штат|трудов\w* догов|full[\s-]?time/i, 'FULL_TIME'],
   [/частичн|подработк|неполн|part[\s-]?time/i, 'PART_TIME'],
   [/времен|temporary/i, 'TEMPORARY'],
   [/стажировк|intern/i, 'INTERN'],
@@ -215,71 +221,180 @@ export type JobPostingInput = {
   benefits?: string;
   hasApplyLink: boolean;
   applyLink?: string;
-  baseSalaryMonthly?: number;
-  hourlyRate?: number | null;
+  /**
+   * Fix C (2026-05-25) — replace the previous flat `baseSalaryMonthly`
+   * (a single number, with `minValue` synthesised as 60% of max — a
+   * heuristic that discarded the actual `pay.monthly.min` already
+   * present in the structured data). Now the caller passes both bounds
+   * directly. If only one is known, the other is used as fallback to
+   * emit a single-point salary (no fake range).
+   */
+  baseSalaryMonthlyMin?: number;
+  baseSalaryMonthlyMax?: number;
+  /**
+   * Fix C — same split for hourly: pass min and max when both are
+   * known; fall back to a single point otherwise. Currency defaults
+   * to RUB.
+   */
+  hourlyRateMin?: number | null;
+  hourlyRateMax?: number | null;
   currency?: string;
   datePosted: string;
   validThrough?: string;
   industry?: string;
+  /**
+   * Fix B (2026-05-25) — flag a fully-remote role. When set:
+   *   • `jobLocationType: 'TELECOMMUTE'` is emitted (Google for Jobs
+   *     requirement so the role surfaces for «удалённая работа» queries).
+   *   • `jobLocation` is collapsed to a country-only Place (no synthetic
+   *     street address), since the role has no physical workplace.
+   *
+   * Source: `GeneratedJob.transport === 'remote'` (see vacancyTypes.ts).
+   */
+  isRemote?: boolean;
+  /**
+   * Fix G (2026-05-25) — official employer homepage. Emitted as
+   * `hiringOrganization.url` (distinct from `sameAs`, which still
+   * points to our internal company page). Resolved via
+   * `getCompanyHomepage()` in `src/data/companyHomepages.ts`.
+   * Omitted from JSON-LD when undefined.
+   */
+  hiringOrganizationUrl?: string;
+  /**
+   * Fix F (2026-05-25) — free-text schedule blob (e.g. «гибкий
+   * график: подработка или полная смена»). Combined with
+   * `employmentTypeLabel` for `mapEmploymentTypeToSchema`, so mixed
+   * graphics surface both `FULL_TIME` and `PART_TIME`. Without this,
+   * Burger King-style «подработка или полная» roles only emitted
+   * `[FULL_TIME]`, missing matching for «подработка» queries.
+   */
+  scheduleText?: string;
+  /**
+   * Fix E (2026-05-25) — BLS SOC code per source-slug
+   * (e.g. `35-3023 Fast Food and Counter Workers` for Burger King
+   * cook, `41-9041 Telemarketers` for T-Bank operator B2B). Resolved
+   * via `getSourceOccupation()` in `src/data/sourceOccupation.ts`.
+   * Falls back to default `53-3031 Driver/Sales Workers` when
+   * undefined — preserves backward behaviour for un-mapped sources.
+   */
+  occupationalCategory?: string;
 };
 
 export const buildJobPostingSchema = (input: JobPostingInput) => {
   const cities = input.cities.length ? input.cities : ['Россия'];
-  const jobLocation = cities.map((city) => {
-    // For per-city aggregator pages we don't have a real street
-    // address; we fall back to a synthetic city-centre landmark from
-    // the curated `CITY_ADDRESSES` map (or a generic «Центр города»
-    // for cities not in the map). This satisfies Google for Jobs'
-    // requirement of a complete `PostalAddress` with streetAddress +
-    // postalCode + addressRegion alongside addressLocality.
-    if (city === 'Россия') {
-      return {
-        '@type': 'Place',
-        address: {
-          '@type': 'PostalAddress',
-          addressCountry: 'RU',
+  // Fix B (2026-05-25) — for fully-remote roles, collapse jobLocation
+  // to a country-only Place. Emitting a synthetic city street address
+  // for a role that has no physical workplace contradicts the
+  // description and risks anti-spam penalties from Google for Jobs.
+  // The matching `jobLocationType: 'TELECOMMUTE'` is added below.
+  const jobLocation = input.isRemote
+    ? [
+        {
+          '@type': 'Place',
+          address: {
+            '@type': 'PostalAddress',
+            addressCountry: 'RU',
+          },
         },
-      };
-    }
-    const postal = getCityPostalAddress(city);
-    return {
-      '@type': 'Place',
-      address: {
-        '@type': 'PostalAddress',
-        streetAddress: postal.streetAddress,
-        addressLocality: city,
-        addressRegion: postal.addressRegion,
-        ...(postal.postalCode ? { postalCode: postal.postalCode } : {}),
-        addressCountry: 'RU',
-      },
-    };
-  });
+      ]
+    : cities.map((city) => {
+        // For per-city aggregator pages we don't have a real street
+        // address; we fall back to a synthetic city-centre landmark from
+        // the curated `CITY_ADDRESSES` map (or a generic «Центр города»
+        // for cities not in the map). This satisfies Google for Jobs'
+        // requirement of a complete `PostalAddress` with streetAddress +
+        // postalCode + addressRegion alongside addressLocality.
+        if (city === 'Россия') {
+          return {
+            '@type': 'Place',
+            address: {
+              '@type': 'PostalAddress',
+              addressCountry: 'RU',
+            },
+          };
+        }
+        const postal = getCityPostalAddress(city);
+        return {
+          '@type': 'Place',
+          address: {
+            '@type': 'PostalAddress',
+            streetAddress: postal.streetAddress,
+            addressLocality: city,
+            addressRegion: postal.addressRegion,
+            ...(postal.postalCode ? { postalCode: postal.postalCode } : {}),
+            addressCountry: 'RU',
+          },
+        };
+      });
 
-  const employmentType = mapEmploymentTypeToSchema(input.employmentTypeLabel);
+  // Fix F (2026-05-25) — combine `employmentTypeLabel` and `scheduleText`
+  // so mixed-graphic roles (e.g. Burger King «гибкий график: подработка
+  // или полная смена») surface BOTH `FULL_TIME` and `PART_TIME`. The
+  // employment_type field alone is usually just «Официальное
+  // трудоустройство» / «Самозанятость» — the «подработка» marker lives
+  // in the schedule blob.
+  const combinedEmploymentLabel = [
+    input.employmentTypeLabel,
+    input.scheduleText,
+  ]
+    .filter(Boolean)
+    .join(' ');
+  const employmentType = mapEmploymentTypeToSchema(
+    combinedEmploymentLabel || undefined,
+  );
 
+  // Fix C (2026-05-25) — emit baseSalary range from REAL min/max in
+  // structured `pay.monthly` / `pay.hourly` data, instead of the prior
+  // `minValue = max × 0.6` heuristic that under-reported real income on
+  // every vacancy page. Single-point fallback when only one bound is
+  // known (no synthetic range).
   const baseSalary: MonetaryAmountSchema | undefined = (() => {
-    if (input.baseSalaryMonthly && input.baseSalaryMonthly > 0) {
+    const monthlyMax =
+      input.baseSalaryMonthlyMax && input.baseSalaryMonthlyMax > 0
+        ? input.baseSalaryMonthlyMax
+        : null;
+    const monthlyMin =
+      input.baseSalaryMonthlyMin && input.baseSalaryMonthlyMin > 0
+        ? input.baseSalaryMonthlyMin
+        : null;
+    if (monthlyMax || monthlyMin) {
+      const max = monthlyMax ?? monthlyMin!;
+      const min = monthlyMin ?? max;
       return {
         '@type': 'MonetaryAmount',
         currency: input.currency || 'RUB',
         value: {
           '@type': 'QuantitativeValue',
-          value: input.baseSalaryMonthly,
-          maxValue: input.baseSalaryMonthly,
-          minValue: Math.round(input.baseSalaryMonthly * 0.6),
+          value: max,
+          maxValue: max,
+          minValue: min,
           unitText: 'MONTH',
         },
       };
     }
-    if (input.hourlyRate && input.hourlyRate > 0) {
+    const hourlyMax =
+      input.hourlyRateMax && input.hourlyRateMax > 0 ? input.hourlyRateMax : null;
+    const hourlyMin =
+      input.hourlyRateMin && input.hourlyRateMin > 0 ? input.hourlyRateMin : null;
+    if (hourlyMax || hourlyMin) {
+      const max = hourlyMax ?? hourlyMin!;
+      const min = hourlyMin ?? max;
+      // Hourly: only emit `min/max` keys when the bracket is non-degenerate
+      // (Google rejects redundant single-point ranges with a warning).
+      const value =
+        min === max
+          ? { '@type': 'QuantitativeValue' as const, value: max, unitText: 'HOUR' }
+          : {
+              '@type': 'QuantitativeValue' as const,
+              value: max,
+              maxValue: max,
+              minValue: min,
+              unitText: 'HOUR',
+            };
       return {
         '@type': 'MonetaryAmount',
         currency: input.currency || 'RUB',
-        value: {
-          '@type': 'QuantitativeValue',
-          value: input.hourlyRate,
-          unitText: 'HOUR',
-        },
+        value,
       };
     }
     return undefined;
@@ -301,10 +416,15 @@ export const buildJobPostingSchema = (input: JobPostingInput) => {
     hiringOrganization: {
       '@type': 'Organization',
       name: input.company,
+      // Fix G (2026-05-25) — official employer homepage when known
+      // (e.g. https://burgerking.ru/). Distinct from `sameAs`, which
+      // still back-links to our internal `/companies/{slug}/` page.
+      ...(input.hiringOrganizationUrl ? { url: input.hiringOrganizationUrl } : {}),
       sameAs: input.companyUrl,
       ...(input.companyLogo ? { logo: input.companyLogo } : {}),
     },
     jobLocation,
+    ...(input.isRemote ? { jobLocationType: 'TELECOMMUTE' } : {}),
     applicantLocationRequirements: {
       '@type': 'Country',
       name: 'Russia',
@@ -316,7 +436,8 @@ export const buildJobPostingSchema = (input: JobPostingInput) => {
     ...(input.benefits ? { jobBenefits: input.benefits } : {}),
     ...(input.qualifications ? { qualifications: input.qualifications } : {}),
     industry: input.industry || 'Курьерская доставка',
-    occupationalCategory: '53-3031 Driver/Sales Workers',
+    occupationalCategory:
+      input.occupationalCategory || '53-3031 Driver/Sales Workers',
     // Google for Jobs requires `experienceRequirements` to be an
     // `OccupationalExperienceRequirements` object with a *positive*
     // numeric `monthsOfExperience`. For «без опыта» roles we omit the
