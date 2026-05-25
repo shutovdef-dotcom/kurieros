@@ -49,7 +49,7 @@
 2. **Fix B** — `jobLocationType: TELECOMMUTE` + опустить `jobLocation` для удалёнки (или `applicantLocationRequirements` only)
 3. **Fix C** — `baseSalary.{minValue, maxValue}` из реальных `pay.monthly.{min, max}`, без 60% эвристики
 4. **Fix D** — `industry` параметризовать; жёсткая мапа per-company (Бургер Кинг → «Общественное питание», T-Bank/Alfa → «Финансовые услуги», Яндекс Еда/Купер → «Курьерская доставка»)
-5. **Fix E** — `occupationalCategory` параметризовать; мапа per-source-slug (cook → 35-3023, operator → 43-2011, representative → 41-2031, courier → 53-3031)
+5. **Fix E** — `occupationalCategory` параметризовать; мапа per-source-slug (cook → 35-3023, operator → 41-9041, bank representative → 41-3031 Financial Services Sales Agents, courier → 53-3031)
 6. **Fix F** — расширить `mapEmploymentTypeToSchema` чтобы детектить «гибкий» / «можно подработка» / «5/2 или 2/2» как `[FULL_TIME, PART_TIME]`
 7. **Fix G** — добавить `hiringOrganization.url` → homepage работодателя; новая мапа `COMPANY_HOMEPAGES`
 
@@ -88,7 +88,7 @@
 - 🔴 **`hiringOrganization.logo: "/logos/alfa-bank.svg"`** — relative URL, для Googlebot нерезолвится
 - `employmentType: ["FULL_TIME"]` — ⚠️ schedule «5/2, 2/2, 4/2 или 3/2» — есть part-time варианты
 - `industry: "Курьерская доставка"` — ⚠️ для банка должно быть «Финансовые услуги»
-- `occupationalCategory: "53-3031"` — ⚠️ для представителя банка 41-2031 «Retail Salespersons»
+- `occupationalCategory: "53-3031"` — ⚠️ для представителя банка 41-3031 «Securities, Commodities, and Financial Services Sales Agents» (банковский полевой рекс продаёт фин. услуги, а не retail-merchandise)
 - `baseSalary.minValue: 72000` — ⚠️ 60% от max (120000)
 
 ### 5. Яндекс Еда пеший Москва
@@ -117,7 +117,7 @@
 | tbank-outbound-b2b-operator-barnaul-remote | E | `53-3031` → `41-9041 Telemarketers` ✅ |
 | alfa-bank-representative-moskva-foot | A | `/logos/alfa-bank.svg` (relative) → `https://kurerok.ru/logos/alfa-bank.svg` (absolute) ✅ |
 | alfa-bank-representative-moskva-foot | D | `Курьерская доставка` → `Финансовые услуги` ✅ |
-| alfa-bank-representative-moskva-foot | E | `53-3031` → `41-2031 Retail Salespersons` ✅ |
+| alfa-bank-representative-moskva-foot | E | `53-3031` → `41-3031 Securities, Commodities, and Financial Services Sales Agents` ✅ (поправлено после code-review: Retail Salespersons предполагает магазинную розницу, а банковский представитель продаёт фин. услуги) |
 | yandex-eda-courier-moskva-foot | A | `/logos/yandex-eda.svg` (relative) → `https://kurerok.ru/logos/yandex-eda.svg` (absolute) ✅ |
 | yandex-eda-courier-moskva-foot | G | (нет url) → `url: "https://eda.yandex.ru/"` ✅ |
 

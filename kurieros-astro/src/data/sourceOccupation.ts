@@ -27,10 +27,17 @@ export const SOURCE_OCCUPATION: Readonly<Record<string, string>> = {
   'rocket:courier': '53-3031 Driver/Sales Workers',
   'express:courier': '53-3031 Driver/Sales Workers',
 
-  // Bank / sales representatives — door-to-door / field sales
-  'alfa-bank-representative': '41-2031 Retail Salespersons',
-  'tbank-representative': '41-2031 Retail Salespersons',
-  'efin-bank-representative': '41-2031 Retail Salespersons',
+  // Bank field representatives — actually sell financial services (cards,
+  // accounts, loans) to businesses and individuals, not retail merchandise.
+  // 41-3031 is the BLS code dedicated to financial-services sales agents;
+  // 41-2031 (Retail Salespersons) covers in-store retail of physical goods
+  // and is a weaker fit for door-to-door bank reps.
+  'alfa-bank-representative':
+    '41-3031 Securities, Commodities, and Financial Services Sales Agents',
+  'tbank-representative':
+    '41-3031 Securities, Commodities, and Financial Services Sales Agents',
+  'efin-bank-representative':
+    '41-3031 Securities, Commodities, and Financial Services Sales Agents',
 
   // Call-centre / outbound sales operators
   'tbank-outbound-b2b-operator': '41-9041 Telemarketers',
