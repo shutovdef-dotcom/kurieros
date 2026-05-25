@@ -592,8 +592,11 @@ const pageSchemaGraph = [
 		// подработка или полная смена») produce both FULL_TIME and
 		// PART_TIME, not just FULL_TIME from «Официальное трудоустройство».
 		scheduleText: job.details.schedule,
-		qualifications: [...job.requirements, ...job.requiredDocuments].join('; '),
-		benefits: job.benefits.join('; '),
+		// Fix I (2026-05-25) — pass as arrays (one item per requirement /
+		// benefit line). `buildJobPostingSchema` emits them as JSON-LD
+		// arrays, preserving semantic structure for LLM / AI consumers.
+		qualifications: [...job.requirements, ...job.requiredDocuments],
+		benefits: job.benefits,
 		hasApplyLink,
 		applyLink: job.applyLink,
 		// Fix C (2026-05-25) — pass REAL min/max from structured pay

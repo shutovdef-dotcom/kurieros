@@ -1,4 +1,4 @@
-import { getCityPostalAddress } from '../data/cityAddresses';
+import { getCityRegion } from '../data/cityRegions';
 
 type BreadcrumbItem = {
   name: string;
@@ -217,8 +217,20 @@ export type JobPostingInput = {
   companyLogo?: string;
   cities: string[];
   employmentTypeLabel?: string;
-  qualifications?: string;
-  benefits?: string;
+  /**
+   * Fix I (2026-05-25) — qualifications as an array of atomic items
+   * (one per requirement line). Previously joined into a single
+   * semicolon-separated string by the caller, which lost the structure
+   * for downstream consumers (LLMs, AI parsers, JSON-LD aggregators).
+   * Schema.org allows either form; the array variant preserves
+   * semantics. Empty / undefined → field omitted from JSON-LD.
+   */
+  qualifications?: string[];
+  /**
+   * Fix I (2026-05-25) — same array treatment as `qualifications`.
+   * Emitted as `jobBenefits` in the JSON-LD output.
+   */
+  benefits?: string[];
   hasApplyLink: boolean;
   applyLink?: string;
   /**
@@ -298,12 +310,17 @@ export const buildJobPostingSchema = (input: JobPostingInput) => {
         },
       ]
     : cities.map((city) => {
-        // For per-city aggregator pages we don't have a real street
-        // address; we fall back to a synthetic city-centre landmark from
-        // the curated `CITY_ADDRESSES` map (or a generic «Центр города»
-        // for cities not in the map). This satisfies Google for Jobs'
-        // requirement of a complete `PostalAddress` with streetAddress +
-        // postalCode + addressRegion alongside addressLocality.
+        // Fix H1 (2026-05-25) — emit a minimal PostalAddress with only
+        // the fields we can verify (addressLocality + addressRegion when
+        // known + addressCountry). The previous version filled
+        // `streetAddress` with synthetic city-centre landmarks (e.g.
+        // «Красная площадь, 1» for Москва, «Невский проспект, 1» for
+        // Санкт-Петербург) and central `postalCode` (e.g. 109012, the
+        // Kremlin postal code), which made every Moscow vacancy claim
+        // the Kremlin's address — a long-term anti-spam quality signal.
+        // `streetAddress` / `postalCode` are RECOMMENDED but not
+        // REQUIRED per Google for Jobs spec; we drop them rather than
+        // mislead.
         if (city === 'Россия') {
           return {
             '@type': 'Place',
@@ -313,15 +330,13 @@ export const buildJobPostingSchema = (input: JobPostingInput) => {
             },
           };
         }
-        const postal = getCityPostalAddress(city);
+        const region = getCityRegion(city);
         return {
           '@type': 'Place',
           address: {
             '@type': 'PostalAddress',
-            streetAddress: postal.streetAddress,
             addressLocality: city,
-            addressRegion: postal.addressRegion,
-            ...(postal.postalCode ? { postalCode: postal.postalCode } : {}),
+            ...(region ? { addressRegion: region } : {}),
             addressCountry: 'RU',
           },
         };
@@ -433,8 +448,14 @@ export const buildJobPostingSchema = (input: JobPostingInput) => {
     ...(input.hasApplyLink && input.applyLink && input.applyLink !== '#'
       ? { url: input.applyLink }
       : {}),
-    ...(input.benefits ? { jobBenefits: input.benefits } : {}),
-    ...(input.qualifications ? { qualifications: input.qualifications } : {}),
+    // Fix I (2026-05-25) — emit as array (semantic structure preserved),
+    // not joined string. Omit field entirely on empty array.
+    ...(input.benefits && input.benefits.length > 0
+      ? { jobBenefits: input.benefits }
+      : {}),
+    ...(input.qualifications && input.qualifications.length > 0
+      ? { qualifications: input.qualifications }
+      : {}),
     industry: input.industry || 'Курьерская доставка',
     occupationalCategory:
       input.occupationalCategory || '53-3031 Driver/Sales Workers',
@@ -466,9 +487,14 @@ export const buildJobPostingSchema = (input: JobPostingInput) => {
  * «лет» refers to age, not experience. Anything else returns
  * `undefined`.
  */
-const buildExperienceRequirements = (qualifications: string | undefined) => {
-  if (!qualifications) return undefined;
-  const text = qualifications.toLowerCase();
+const buildExperienceRequirements = (qualifications: string[] | undefined) => {
+  if (!qualifications || qualifications.length === 0) return undefined;
+  // Fix I (2026-05-25) — `qualifications` is now `string[]`. Join with
+  // a separator that preserves the boundary so cross-item regex matches
+  // (e.g. «опыт» on one line + «от 2 лет» on the next) don't bleed.
+  // The «; » separator matches the pre-Fix-I behaviour where the caller
+  // joined the same way.
+  const text = qualifications.join('; ').toLowerCase();
   if (/без\s+опыта|no\s+experience/.test(text)) return undefined;
   // Experience-context keyword + duration «от N год/лет/месяц(ев)».
   const match = text.match(
