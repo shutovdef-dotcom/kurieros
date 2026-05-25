@@ -24,6 +24,9 @@ import { getCityHref } from '../../utils/cities';
 import { applyHourlyJitter } from '../../utils/fnv1a';
 import { getApplyCta } from '../../utils/applyCta';
 import { buildBreadcrumbSchema, buildJobPostingSchema } from '../../utils/schema';
+import { getCompanyHomepage } from '../../data/companyHomepages';
+import { getCompanyIndustry } from '../../data/companyIndustry';
+import { getSourceOccupation } from '../../data/sourceOccupation';
 import { knowledgeBaseData, type KnowledgeItem } from '../../utils/knowledge';
 
 export async function getStaticPaths() {
@@ -575,18 +578,57 @@ const pageSchemaGraph = [
 		slug: job.slug,
 		company: job.company,
 		companyUrl: new URL(companyUrl, Astro.site).toString(),
-		companyLogo: job.companyLogo,
+		// Fix A — absolute logo URL. Some sources (e.g. Альфа-Банк,
+		// Yandex Eda) carry a relative `companyLogo` (`/logos/foo.svg`),
+		// which Google Rich Results test rejects: schema.org `Organization.logo`
+		// requires an absolute URL the Googlebot can fetch directly.
+		companyLogo: job.companyLogo
+			? new URL(job.companyLogo, Astro.site).toString()
+			: undefined,
 		cities: jobCities,
 		employmentTypeLabel: job.details.employment_type,
+		// Fix F (2026-05-25) — combine schedule with employment label
+		// so mixed-graphic roles (Бургер Кинг: «гибкий график:
+		// подработка или полная смена») produce both FULL_TIME and
+		// PART_TIME, not just FULL_TIME from «Официальное трудоустройство».
+		scheduleText: job.details.schedule,
 		qualifications: [...job.requirements, ...job.requiredDocuments].join('; '),
 		benefits: job.benefits.join('; '),
 		hasApplyLink,
 		applyLink: job.applyLink,
-		baseSalaryMonthly: salaryValue,
-		hourlyRate,
+		// Fix C (2026-05-25) — pass REAL min/max from structured pay
+		// data instead of a single point + 60% heuristic. `matchingOffer`
+		// holds the original `VacancyOffer` for this slug; falls back to
+		// `salaryValue` (the legacy parsed display string) when the
+		// vacancy has no structured `pay.monthly`.
+		baseSalaryMonthlyMin: matchingOffer?.pay.monthly?.min,
+		baseSalaryMonthlyMax:
+			matchingOffer?.pay.monthly?.max ??
+			(salaryValue > 0 ? salaryValue : undefined),
+		hourlyRateMin: matchingOffer?.pay.hourly?.min,
+		hourlyRateMax: matchingOffer?.pay.hourly?.max ?? hourlyRate,
 		currency: job.currency || 'RUB',
 		datePosted,
 		validThrough,
+		// Fix B (2026-05-25) — Google for Jobs requires TELECOMMUTE for
+		// fully-remote roles (e.g. T-Bank operator B2B). Derived from
+		// the strongly-typed transport mode in vacancyTypes.ts.
+		isRemote: job.transport === 'remote',
+		// Fix G (2026-05-25) — official employer homepage (e.g.
+		// https://burgerking.ru/). Distinct from our `companyUrl`
+		// (internal /companies/{slug}/ page, kept in `sameAs`).
+		hiringOrganizationUrl: getCompanyHomepage(job.company),
+		// Fix D (2026-05-25) — per-company industry. The old hardcoded
+		// «Курьерская доставка» mislabelled Burger King (food service),
+		// T-Bank operator B2B (financial services), and Alfa-Bank
+		// representative (financial services). Undefined falls back to
+		// schema.ts default for any unmapped brand.
+		industry: getCompanyIndustry(job.company),
+		// Fix E (2026-05-25) — BLS SOC code per source-slug. Burger
+		// King cook → 35-3023, T-Bank operator B2B → 41-9041, bank
+		// reps → 41-2031, warehouse picker → 53-7064. Undefined falls
+		// back to 53-3031 (courier default).
+		occupationalCategory: getSourceOccupation(job.sourceSlug),
 	}),
 	{
 		'@type': 'FAQPage',
