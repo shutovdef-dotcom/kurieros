@@ -100,13 +100,61 @@ describe('Fix B (2026-05-25) — isRemote → TELECOMMUTE + country-only jobLoca
     expect(out.jobLocation[0].address).not.toHaveProperty('addressLocality');
   });
 
-  it('keeps full PostalAddress per city when isRemote=false', () => {
+  it('emits minimal PostalAddress per city when isRemote=false (Fix H1)', () => {
+    // Fix H1 (2026-05-25) — synthetic streetAddress («Красная площадь, 1»)
+    // and postalCode (Kremlin's 109012) are no longer emitted; we emit
+    // only addressLocality + addressRegion (when known) + addressCountry.
     const out = buildJobPostingSchema({ ...baseInput, cities: ['Москва'] });
 
-    expect(out.jobLocation[0].address).toHaveProperty('streetAddress');
-    expect(out.jobLocation[0].address).toHaveProperty('addressLocality', 'Москва');
-    expect(out.jobLocation[0].address).toHaveProperty('addressRegion', 'Москва');
-    expect(out.jobLocation[0].address).toHaveProperty('addressCountry', 'RU');
+    expect(out.jobLocation[0].address).toEqual({
+      '@type': 'PostalAddress',
+      addressLocality: 'Москва',
+      addressRegion: 'Москва',
+      addressCountry: 'RU',
+    });
+    expect(out.jobLocation[0].address).not.toHaveProperty('streetAddress');
+    expect(out.jobLocation[0].address).not.toHaveProperty('postalCode');
+  });
+});
+
+describe('Fix H1 (2026-05-25) — minimal PostalAddress (no synthetic landmarks)', () => {
+  it('emits addressRegion for cities in our curated map (Барнаул → «Алтайский край»)', () => {
+    const out = buildJobPostingSchema({ ...baseInput, cities: ['Барнаул'] });
+
+    expect(out.jobLocation[0].address).toEqual({
+      '@type': 'PostalAddress',
+      addressLocality: 'Барнаул',
+      addressRegion: 'Алтайский край',
+      addressCountry: 'RU',
+    });
+  });
+
+  it('omits addressRegion for small unknown cities (e.g. Апрелевка)', () => {
+    const out = buildJobPostingSchema({ ...baseInput, cities: ['Апрелевка'] });
+
+    // Smaller cities not in CITY_REGIONS map: we honestly omit the
+    // addressRegion field rather than fall back to the city name or
+    // «Россия». Google for Jobs validator accepts locality+country.
+    expect(out.jobLocation[0].address).toEqual({
+      '@type': 'PostalAddress',
+      addressLocality: 'Апрелевка',
+      addressCountry: 'RU',
+    });
+    expect(out.jobLocation[0].address).not.toHaveProperty('addressRegion');
+    expect(out.jobLocation[0].address).not.toHaveProperty('streetAddress');
+  });
+
+  it('emits country-only Place for the «Россия» pseudo-city (no locality)', () => {
+    const out = buildJobPostingSchema({ ...baseInput, cities: [] });
+
+    // Empty cities list defaults to ['Россия'], which produces just a
+    // country-level Place (no locality / region / street).
+    expect(out.jobLocation).toEqual([
+      {
+        '@type': 'Place',
+        address: { '@type': 'PostalAddress', addressCountry: 'RU' },
+      },
+    ]);
   });
 });
 
@@ -234,6 +282,87 @@ describe('Fix G (2026-05-25) — hiringOrganization.url (official employer homep
       url: 'https://burgerking.ru/',                                 // employer homepage
       sameAs: 'https://kurerok.ru/companies/test-company/',          // our page
     });
+  });
+});
+
+describe('Fix I (2026-05-25) — jobBenefits / qualifications as arrays', () => {
+  it('emits jobBenefits as array when benefits[] provided', () => {
+    const out = buildJobPostingSchema({
+      ...baseInput,
+      benefits: ['Бесплатное питание.', 'Гибкий график.', 'Униформа выдаётся.'],
+    });
+
+    expect(out.jobBenefits).toEqual([
+      'Бесплатное питание.',
+      'Гибкий график.',
+      'Униформа выдаётся.',
+    ]);
+    expect(Array.isArray(out.jobBenefits)).toBe(true);
+  });
+
+  it('emits qualifications as array when qualifications[] provided', () => {
+    const out = buildJobPostingSchema({
+      ...baseInput,
+      qualifications: ['Возраст 18+.', 'Паспорт.', 'СНИЛС.'],
+    });
+
+    expect(out.qualifications).toEqual(['Возраст 18+.', 'Паспорт.', 'СНИЛС.']);
+  });
+
+  it('omits jobBenefits / qualifications fields when array is empty', () => {
+    const out = buildJobPostingSchema({
+      ...baseInput,
+      benefits: [],
+      qualifications: [],
+    });
+
+    expect('jobBenefits' in out).toBe(false);
+    expect('qualifications' in out).toBe(false);
+  });
+
+  it('omits jobBenefits / qualifications fields when undefined', () => {
+    const out = buildJobPostingSchema(baseInput);
+
+    expect('jobBenefits' in out).toBe(false);
+    expect('qualifications' in out).toBe(false);
+  });
+
+  it('experienceRequirements parser handles array input (no regression)', () => {
+    // Multi-item qualifications array — parser joins with «; » before
+    // matching, so cross-item «опыт ... от N лет» still detected.
+    const out = buildJobPostingSchema({
+      ...baseInput,
+      qualifications: [
+        'Возраст от 18 лет.',
+        'Опыт работы от 1 года в продажах.',
+        'Паспорт.',
+      ],
+    });
+
+    expect(out.experienceRequirements).toEqual({
+      '@type': 'OccupationalExperienceRequirements',
+      monthsOfExperience: 12,
+    });
+  });
+
+  it('experienceRequirements parser still omits for «без опыта» (array form)', () => {
+    const out = buildJobPostingSchema({
+      ...baseInput,
+      qualifications: ['Опыт работы не требуется.', 'Паспорт.'],
+    });
+
+    expect('experienceRequirements' in out).toBe(false);
+  });
+
+  it('experienceRequirements parser does not misfire on «возраст от 18 лет» alone', () => {
+    // The «лет» here refers to age, not experience — must not produce
+    // monthsOfExperience just because the duration phrase exists.
+    const out = buildJobPostingSchema({
+      ...baseInput,
+      qualifications: ['Возраст от 18 лет.', 'Паспорт.'],
+    });
+
+    expect('experienceRequirements' in out).toBe(false);
   });
 });
 
