@@ -1,0 +1,221 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { buildBreadcrumbSchema } from '../utils/schema';
+
+// /about/ is a static informational page describing the project and
+// publishing the owner's requisites (required for E-E-A-T / Yandex
+// trust signals on an NPD-status site). Content is Russian-only, no
+// data-t coverage — the shell-UI dictionary stays Russian-only per
+// PR #131 policy and the body text is a single-language editorial
+// asset, not translatable shell strings.
+const aboutTitle = 'О проекте КурьерОк — независимый агрегатор вакансий курьеров';
+const aboutDescription =
+	'КурьерОк — информационный агрегатор вакансий курьеров в России. Кто стоит за проектом, как он работает и где найти юридические реквизиты.';
+
+const pageSchemaGraph = [
+	{
+		'@type': 'AboutPage',
+		name: 'О проекте КурьерОк',
+		description: aboutDescription,
+		url: Astro.url.href,
+	},
+	buildBreadcrumbSchema(
+		[
+			{ name: 'Главная', url: '/' },
+			{ name: 'О проекте', url: '/about/' },
+		],
+		Astro.site,
+	),
+];
+---
+
+<BaseLayout
+	title={aboutTitle}
+	description={aboutDescription}
+	schemaGraph={pageSchemaGraph}
+>
+	<Header />
+
+	<main>
+		<section class="about-hero">
+			<span class="eyebrow">О проекте</span>
+			<h1>КурьерОк — независимый агрегатор вакансий курьеров</h1>
+			<p>Мы собираем открытые вакансии курьеров от крупных компаний и сервисов доставки в одном месте, чтобы соискателю было проще сравнить условия и выбрать подходящий формат работы.</p>
+		</section>
+
+		<section class="about-section">
+			<h2>Что мы делаем</h2>
+			<p>КурьерОк публикует и систематизирует открытые вакансии курьеров от Яндекс.Еды, Самоката, Ozon, СДЭК, Купера, Burger King, банков и других работодателей по всей России.</p>
+			<p>На каждой странице вакансии видны зарплата, график, требования, формат работы (пешком, на велосипеде, на авто, удалённо). Это позволяет сравнить условия за несколько минут вместо обхода десятков карьерных сайтов.</p>
+		</section>
+
+		<section class="about-section">
+			<h2>Как мы работаем</h2>
+			<ol class="about-flow">
+				<li><strong>Собираем</strong> данные о вакансиях из открытых источников: карьерных сайтов работодателей, партнёрских платформ и пресс-релизов.</li>
+				<li><strong>Структурируем</strong> информацию в единый формат: должность, город, транспорт, зарплата, требования.</li>
+				<li><strong>Размещаем</strong> на сайте с прямыми ссылками на форму отклика работодателя.</li>
+			</ol>
+			<p class="about-note">КурьерОк не является работодателем и не оказывает услуги по трудоустройству. Все отклики подаются напрямую на сайтах работодателей.</p>
+		</section>
+
+		<section class="about-section">
+			<h2>Реквизиты</h2>
+			<div class="about-requisites">
+				<dl>
+					<dt>Владелец проекта</dt>
+					<dd>Шутов И. Н.</dd>
+
+					<dt>Статус</dt>
+					<dd>Плательщик налога на профессиональный доход (самозанятый)</dd>
+
+					<dt>ИНН</dt>
+					<dd>220504877952</dd>
+
+					<dt>Email</dt>
+					<dd><a href="mailto:contact@kurerok.ru">contact@kurerok.ru</a></dd>
+				</dl>
+				<p class="about-legal-note">Документ, регулирующий обработку обезличенных данных посетителей сайта, — <a href="/privacy/">Политика конфиденциальности</a>.</p>
+			</div>
+		</section>
+
+		<section class="about-section">
+			<h2>Связаться</h2>
+			<p>Если вы представляете компанию и хотите разместить вакансии или предложить сотрудничество, напишите на <a href="mailto:contact@kurerok.ru">contact@kurerok.ru</a> или используйте <a href="/contacts/">форму на странице контактов</a>.</p>
+		</section>
+	</main>
+
+	<Footer />
+</BaseLayout>
+
+<style>
+	main {
+		max-width: 960px;
+		margin: 0 auto;
+		padding: var(--space-12) var(--space-4) var(--space-16);
+	}
+
+	.about-hero {
+		margin-bottom: var(--space-10);
+	}
+	.about-hero h1 {
+		font-size: var(--fs-36);
+		line-height: var(--lh-36);
+		margin: var(--space-3) 0 var(--space-5);
+		color: var(--ink-900);
+		max-width: 22ch;
+	}
+	.about-hero p {
+		color: var(--text-muted);
+		max-width: 60ch;
+		font-size: var(--fs-18);
+		line-height: var(--lh-18);
+		margin: 0;
+	}
+	.eyebrow {
+		display: inline-flex;
+		font-size: var(--fs-12);
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--text-muted);
+	}
+
+	.about-section {
+		margin: var(--space-10) 0;
+	}
+	.about-section h2 {
+		font-family: var(--font-heading);
+		font-size: var(--fs-24);
+		line-height: var(--lh-24);
+		margin: 0 0 var(--space-4);
+		color: var(--ink-900);
+	}
+	.about-section p {
+		line-height: var(--lh-16);
+		color: var(--text-main);
+		margin: 0 0 var(--space-4);
+	}
+	.about-section a {
+		color: var(--brand-600);
+		text-decoration: none;
+		font-weight: 600;
+	}
+	.about-section a:hover,
+	.about-section a:focus-visible {
+		color: var(--brand-700);
+		text-decoration: underline;
+		outline: none;
+	}
+
+	.about-flow {
+		padding-left: var(--space-5);
+		margin: 0 0 var(--space-4);
+	}
+	.about-flow li {
+		margin: var(--space-2) 0;
+		line-height: var(--lh-16);
+		color: var(--text-main);
+	}
+
+	.about-note {
+		background: var(--brand-50);
+		border-left: 3px solid var(--brand-600);
+		padding: var(--space-4) var(--space-5);
+		border-radius: var(--radius-md);
+		color: var(--text-main);
+		margin: var(--space-5) 0 0;
+	}
+
+	.about-requisites {
+		background: var(--ink-50);
+		border: 1px solid var(--ink-200);
+		border-radius: var(--radius-lg);
+		padding: var(--space-6);
+	}
+	.about-requisites dl {
+		display: grid;
+		grid-template-columns: max-content 1fr;
+		gap: var(--space-3) var(--space-6);
+		margin: 0 0 var(--space-4);
+	}
+	.about-requisites dt {
+		font-weight: 700;
+		color: var(--ink-800);
+		font-size: var(--fs-14);
+		line-height: var(--lh-14);
+	}
+	.about-requisites dd {
+		margin: 0;
+		color: var(--text-main);
+		font-size: var(--fs-14);
+		line-height: var(--lh-14);
+	}
+	.about-legal-note {
+		margin: 0;
+		font-size: var(--fs-14);
+		line-height: var(--lh-14);
+		color: var(--text-muted);
+	}
+
+	@media (max-width: 768px) {
+		main {
+			padding: var(--space-8) var(--space-4) var(--space-12);
+		}
+		.about-hero h1 {
+			font-size: var(--fs-30);
+			line-height: var(--lh-30);
+		}
+		.about-requisites dl {
+			grid-template-columns: 1fr;
+			gap: var(--space-1);
+		}
+		.about-requisites dt {
+			margin-top: var(--space-3);
+		}
+		.about-requisites dt:first-child {
+			margin-top: 0;
+		}
+	}
+</style>
