@@ -20,7 +20,8 @@ export const base = {
     calculator: "Калькулятор",
     post_job: "Разместить вакансию",
     design: "Витрина Дизайнов",
-    guide: "Гид для курьера"
+    guide: "Гид для курьера",
+    about: "О проекте"
   },
   hero: {
     title: "Работа курьером рядом",
@@ -139,6 +140,11 @@ export const base = {
   footer: {
     desc: "Ваш надежный справочник для легкого трудоустройства. Соединяем соискателей с миллионными брендами по всей России без посредников.",
     nav_title: "Навигация",
-    social_title: "Мы в соцсетях"
+    social_title: "Мы в соцсетях",
+    // Legal-block strings (added with /about/ + /privacy/ pages —
+    // see PR #188). `legal_status` describes the operator's tax
+    // status; `privacy_link` is the visible label in `.footer-bottom`.
+    legal_status: "Плательщик НПД",
+    privacy_link: "Политика конфиденциальности"
   }
 };
