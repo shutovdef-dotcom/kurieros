@@ -133,9 +133,10 @@ const filteredJobs =
 const companyNames = Array.from(new Set(filteredJobs.map((job) => job.company)));
 const paymentTypes = Array.from(new Set(filteredJobs.map((job) => job.details.payment_freq)));
 const transportTypes = buildTransportTypes(filteredJobs);
-// P0: empty listings need noindex so Google/Yandex don't penalise us for thin
-// content. We also drop them from the sitemap (see astro.config.mjs).
-const isEmptyListing = filteredJobs.length === 0;
+// P0: thin listings (0 or 1 vacancy) need noindex so Google/Yandex don't
+// penalise us for thin content. We also drop them from the sitemap (see
+// astro.config.mjs). Threshold mirrors getEmptyListingPaths() in listingSlugs.ts.
+const isEmptyListing = filteredJobs.length <= 1;
 
 // «Соседние города» — exit-ramp для search-визитёров. GSC report
 // (2026-05-03) показал: page_depth Метрики 2.49 → 1.62, avg session

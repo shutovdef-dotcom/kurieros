@@ -1,6 +1,6 @@
 /**
  * Compute the set of `rabota-kurerom-{slug}/` listing URLs that match
- * ZERO active vacancies. Such pages cause Google/Yandex to flag the
+ * 0 or 1 active vacancies. Such pages cause Google/Yandex to flag the
  * site for thin content; we noindex them at the page level (see
  * src/pages/[slug].astro) and exclude them from the sitemap (see
  * astro.config.mjs).
@@ -44,7 +44,7 @@ export function getEmptyListingPaths(): Set<string> {
 	const jobsByCity = buildJobsByCityMap(jobsData);
 	for (const city of getCitiesFromJobs(jobsData)) {
 		const matched = getCityJobsFromMap(jobsByCity, city.name);
-		if (matched.length === 0) {
+		if (matched.length <= 1) {
 			empty.add(`/rabota-kurerom-${city.slug}`);
 		}
 	}
@@ -60,7 +60,7 @@ export function getEmptyListingPaths(): Set<string> {
 			tag: category.tag || 'all',
 			search: category.query || '',
 		});
-		if (matched.length === 0) {
+		if (matched.length <= 1) {
 			empty.add(`/rabota-kurerom-${category.slug}`);
 		}
 	}
