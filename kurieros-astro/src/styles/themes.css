@@ -89,6 +89,13 @@
   --radius-xl: 20px;
   --radius-pill: 999px;
 
+  /* ── Layout widths — single source of truth ──────────────── */
+  /* Components reference these tokens; a literal px width is allowed
+     ONLY as a deliberate, commented exception (e.g. narrow modals). */
+  --page-max-width: 1680px;      /* outer page frame (only on very wide screens) */
+  --content-max-width: 1560px;   /* main content column: hero, grids, sections */
+  --prose-max-width: 720px;      /* reading/text columns: guides, contacts, descriptions */
+
   /* ── Shadows (warm tint, not pure black) ─────────────────── */
   --shadow-xs: 0 1px 2px rgba(38,29,18,0.05);
   --shadow-sm: 0 1px 2px rgba(38,29,18,0.06), 0 1px 3px rgba(38,29,18,0.04);

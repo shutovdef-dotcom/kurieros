@@ -5,15 +5,15 @@ import Footer from '../components/Footer.astro';
 import JobGrid from '../components/JobGrid.astro';
 import JobFilters from '../components/JobFilters.astro';
 import PartnerBanner from '../components/PartnerBanner.astro';
+import CityInsights from '../components/CityInsights.astro';
 import jobsData from '../data/jobs';
 import { CATEGORIES } from '../data/constants';
 import { getCitiesFromJobs } from '../utils/cities';
-import { formatMoney, getVacancyPluralText, parseSalary } from '../utils/format';
+import { formatMoney, parseSalary } from '../utils/format';
 import {
 	buildFactCards,
 	buildFaqItems,
 	buildHeroIntro,
-	buildNearbyCityLinks,
 	buildPageSchemaGraph,
 	buildSeoDescription,
 	buildSeoTitle,
@@ -37,6 +37,10 @@ import { jobsByCity } from '../utils/jobsByCityIndex';
 // `citiesFromJobs` is the module-cached city catalogue — same H3
 // rationale as `jobsByCity` above (audit ref v4 MEDIUM-1).
 import { citiesFromJobs } from '../utils/citiesIndex';
+// Z1.1 — unique per-city insights (Kuper shift rates + region + live counts).
+import { buildCitySalaryRows, buildCitySummary } from '../utils/cityInsights';
+import { getCityShiftRates, NATIONAL_AVG_SHIFT, KUPER_RATES_UPDATED_AT } from '../utils/kuperCityRates';
+import { getCityGeo, getNearbyCities } from '../utils/cityGeoIndex';
 
 // Build a lookup from hub path → HubConfig for the isHubEmpty guard.
 const _hubPathToConfig = Object.fromEntries(
@@ -159,13 +163,12 @@ const canonicalURL =
 		? _hubPath
 		: undefined;
 
-// «Соседние города» — exit-ramp для search-визитёров. GSC report
-// (2026-05-03) показал: page_depth Метрики 2.49 → 1.62, avg session
-// 5:04 → 2:32. Юзер приходит на small-city из long-tail, видит
-// JobGrid и УХОДИТ — нет «куда ещё кликнуть». Этот блок даёт топ-12
-// городов с наибольшим числом вакансий как явный «следующий шаг»
-// сразу под JobGrid. Только для type='city' — на категории не нужен.
-const nearbyCityLinks = type === 'city' ? buildNearbyCityLinks(data.slug) : [];
+// «Соседние города» — exit-ramp для search-визитёров (GSC 2026-05-03:
+// page_depth 2.49 → 1.62 без «куда ещё кликнуть»). Z1.1: вместо топ-12
+// по числу вакансий (одинаковый на всех страницах) — географически
+// ближайшие города с вакансиями, уникальный набор на каждый город.
+const cityGeo = type === 'city' ? getCityGeo(data.slug) : null;
+const cityNeighbours = type === 'city' ? getNearbyCities(data.slug) : [];
 
 // P1: max salary across the matched listings — used in title/description to
 // make the snippet more clickable in search results (cheaper-than-rewrite
@@ -176,6 +179,25 @@ const maxSalary = filteredJobs.reduce((acc, job) => {
 }, 0);
 const formattedMaxSalary = maxSalary > 0 ? formatMoney(maxSalary) : null;
 const vacancyCountText = buildVacancyCountText(filteredJobs.length);
+
+// Z1.1 — unique per-city content block (city pages only, rendered below
+// the JobGrid). Kuper ships shift rates for ~412/958 cities; the summary
+// degrades gracefully (vacancy-derived salary, no rate table) otherwise.
+const cityRates = type === 'city' ? getCityShiftRates(data.name) : null;
+const citySalaryRows = buildCitySalaryRows(cityRates, maxSalary);
+const citySummary =
+	type === 'city' && filteredJobs.length > 0
+		? buildCitySummary({
+			prep: data.prep,
+			population: data.population,
+			region: cityGeo?.region,
+			district: cityGeo?.district,
+			vacancyCount: filteredJobs.length,
+			companyNames,
+			rates: cityRates,
+			nationalAutoAvg: NATIONAL_AVG_SHIFT.auto,
+		})
+		: '';
 
 const cityPrep = type === 'city' ? data.prep : undefined;
 const categoryName = type === 'category' ? data.name : undefined;
@@ -261,7 +283,7 @@ const pageSchemaGraph = buildPageSchemaGraph({
 				</nav>
 				<p class="section-eyebrow">{type === 'city' ? 'Вакансии в городе' : 'Готовый фильтр'}</p>
 				<h1>{title}</h1>
-				<p>{heroIntro}</p>
+				<p>{type === 'city' && citySummary ? citySummary : heroIntro}</p>
 				<div class="listing-hero-actions">
 					<a href="#vacancies" class="listing-primary-link">Смотреть вакансии</a>
 					<a href="/compare/" class="listing-secondary-link">Сравнить</a>
@@ -290,26 +312,15 @@ const pageSchemaGraph = buildPageSchemaGraph({
 			revealable
 		/>
 
-		{nearbyCityLinks.length > 0 && (
-			<section class="nearby-cities" aria-labelledby="nearby-cities-title">
-				<h2 id="nearby-cities-title" class="nearby-cities-title">Не нашли подходящее? Соседние города</h2>
-				<p class="nearby-cities-lead">
-					Те же компании (Яндекс.Еда, Купер, Озон, Самокат) работают в&nbsp;{nearbyCityLinks.length} крупнейших городах России. Перейдите в&nbsp;любой и&nbsp;посмотрите тарифы, выплаты и&nbsp;условия — вакансии одинаково «свежие, от&nbsp;прямых работодателей».
-				</p>
-				<ul class="nearby-cities-list">
-					{nearbyCityLinks.map((city) => (
-						<li class="nearby-cities-item">
-							<a class="nearby-cities-link" href={`/rabota-kurerom-${city.slug}/`}>
-								<span class="nearby-cities-name">{city.name}</span>
-								<span class="nearby-cities-count">{city.vacancyCount}&nbsp;{getVacancyPluralText(city.vacancyCount)}</span>
-							</a>
-						</li>
-					))}
-				</ul>
-				<p class="nearby-cities-footer">
-					<a href="/cities/" class="nearby-cities-all-link">Все&nbsp;города&nbsp;→</a>
-				</p>
-			</section>
+		{type === 'city' && citySummary && (
+			<CityInsights
+				prep={data.prep}
+				salaryRows={citySalaryRows}
+				maxSalary={maxSalary}
+				updatedAt={KUPER_RATES_UPDATED_AT}
+				salaryFromVacancies={cityRates === null}
+				neighbours={cityNeighbours}
+			/>
 		)}
 
 		{isMoscowCityPage && <PartnerBanner />}
@@ -322,7 +333,7 @@ const pageSchemaGraph = buildPageSchemaGraph({
 	.listing-hero,
 	.listing-fact-grid,
 	.listing-filters {
-		max-width: 1180px;
+		max-width: var(--content-max-width);
 		margin-inline: auto;
 	}
 	.listing-filters {
@@ -336,12 +347,31 @@ const pageSchemaGraph = buildPageSchemaGraph({
 	}
 
 	.listing-hero-panel {
-		padding: 1.65rem;
+		position: relative;
+		overflow: hidden;
+		padding: clamp(1.6rem, 3.5vw, 3rem) clamp(1.25rem, 3vw, 2.25rem);
 		text-align: left;
 		border: 1px solid var(--ink-200);
-		border-radius: 8px;
-		background: linear-gradient(135deg, rgba(245, 249, 242, 0.96) 0%, rgba(255, 255, 255, 0.98) 58%, rgba(242, 250, 253, 0.96) 100%);
-		box-shadow: 0 14px 36px rgba(24, 45, 34, 0.07);
+		border-radius: var(--radius-xl, 20px);
+		background: linear-gradient(135deg,
+			rgba(232, 246, 230, 0.78) 0%,
+			rgba(255, 255, 255, 0.95) 48%,
+			rgba(232, 240, 246, 0.7) 100%);
+		box-shadow: 0 14px 40px rgba(24, 45, 34, 0.06);
+	}
+	.listing-hero-panel::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		z-index: 0;
+		pointer-events: none;
+		background:
+			radial-gradient(circle at 88% 14%, rgba(46, 139, 87, 0.1) 0%, transparent 55%),
+			radial-gradient(circle at 4% 92%, rgba(70, 130, 180, 0.08) 0%, transparent 50%);
+	}
+	.listing-hero-panel > * {
+		position: relative;
+		z-index: 1;
 	}
 
 	.listing-breadcrumb {
@@ -360,28 +390,40 @@ const pageSchemaGraph = buildPageSchemaGraph({
 	}
 
 	.listing-hero h1 {
-		max-width: 14ch;
-		margin: 0 0 0.7rem;
-		font-size: 3.8rem;
-		line-height: 0.97;
-		letter-spacing: 0;
+		max-width: 18ch;
+		margin: 0 0 0.5rem;
+		font-family: var(--font-heading);
+		font-weight: 800;
+		font-size: clamp(1.55rem, 5vw, 3.5rem);
+		line-height: 1.1;
+		letter-spacing: -0.02em;
+		color: var(--ink-900);
 		text-wrap: balance;
 	}
 
 	.listing-hero-panel > p:not(.section-eyebrow) {
-		max-width: 720px;
+		max-width: 60ch;
 		margin: 0;
-		font-size: 1.08rem;
-		line-height: 1.6;
+		font-family: var(--font-main);
+		font-size: clamp(0.98rem, 1.3vw, 1.12rem);
+		line-height: 1.55;
+		color: var(--ink-700);
 	}
 
 	.section-eyebrow {
-		margin: 0 0 0.55rem;
-		font-size: 0.74rem;
-		font-weight: 900;
-		letter-spacing: 0;
+		display: inline-flex;
+		align-items: center;
+		width: fit-content;
+		margin: 0 0 0.2rem;
+		padding: 0.35rem 0.85rem;
+		background: rgba(255, 255, 255, 0.85);
+		border: 1px solid var(--ink-200);
+		border-radius: 999px;
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.04em;
 		text-transform: uppercase;
-		color: var(--accent-color);
+		color: var(--ink-700);
 	}
 
 	.listing-hero-actions {
@@ -397,30 +439,41 @@ const pageSchemaGraph = buildPageSchemaGraph({
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		min-height: 3rem;
-		padding: 0.8rem 1.15rem;
-		border-radius: 8px;
+		min-height: 52px;
+		padding: 0 1.6rem;
+		border-radius: 12px;
 		text-decoration: none;
-		font-weight: 800;
-		transition: var(--transition);
+		font-weight: 700;
+		font-size: 1rem;
+		transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
 	}
 
 	.listing-primary-link {
-		background: var(--brand-800);
-		border: 1px solid var(--brand-800);
+		background: var(--brand-700);
+		border: 1px solid var(--brand-700);
 		color: var(--ink-0);
+		box-shadow: 0 8px 20px rgba(var(--brand-700-rgb), 0.22);
 	}
 
 	.listing-secondary-link {
-		background: rgba(255, 255, 255, 0.86);
-		border: 1px solid #a8c8b5;
-		color: var(--brand-800);
+		background: rgba(255, 255, 255, 0.9);
+		border: 1px solid var(--ink-200);
+		color: var(--ink-900);
 	}
 
 	.listing-primary-link:hover,
-	.listing-secondary-link:hover {
+	.listing-primary-link:focus-visible {
+		background: var(--brand-600);
 		transform: translateY(-1px);
-		box-shadow: 0 10px 24px rgba(22, 61, 43, 0.12);
+		box-shadow: 0 12px 26px rgba(var(--brand-700-rgb), 0.32);
+		outline: none;
+	}
+
+	.listing-secondary-link:hover,
+	.listing-secondary-link:focus-visible {
+		border-color: var(--brand-500);
+		transform: translateY(-1px);
+		outline: none;
 	}
 
 	.listing-fact-grid {
@@ -432,33 +485,59 @@ const pageSchemaGraph = buildPageSchemaGraph({
 
 	.listing-fact-card {
 		display: grid;
-		gap: 0.25rem;
+		gap: 0.15rem;
 		min-height: auto;
-		padding: 0.8rem 0.9rem;
+		padding: 0.85rem 1rem;
 		border: 1px solid var(--ink-200);
-		border-radius: 8px;
-		background: var(--scrim-light-soft);
-		box-shadow: var(--shadow-sm);
+		border-radius: var(--radius-md, 12px);
+		background: rgba(255, 255, 255, 0.88);
+		transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+	}
+
+	.listing-fact-card:hover {
+		border-color: var(--brand-500);
+		transform: translateY(-2px);
+		box-shadow: 0 10px 22px rgba(24, 45, 34, 0.07);
 	}
 
 	.listing-fact-card span {
 		font-size: 0.72rem;
-		font-weight: 900;
-		letter-spacing: 0;
+		font-weight: 700;
+		letter-spacing: 0.02em;
 		text-transform: uppercase;
-		color: var(--text-muted);
+		color: var(--ink-500);
 	}
 
 	.listing-fact-card strong {
 		align-self: start;
-		font-size: 1rem;
+		font-family: var(--font-heading);
+		font-size: 0.95rem;
+		font-weight: 700;
 		line-height: 1.32;
+		color: var(--ink-900);
 	}
 
 	@media (min-width: 768px) {
 		.listing-hero {
 			padding: 2rem 1rem 0.75rem;
 			margin-bottom: 1rem;
+		}
+		.listing-hero-panel {
+			padding: clamp(1rem, 2vw, 1.6rem) clamp(1.1rem, 2.4vw, 1.85rem);
+		}
+		.listing-hero h1 {
+			font-size: clamp(1.65rem, 3.4vw, 2.4rem);
+			line-height: 1.08;
+		}
+		.listing-hero-panel > p:not(.section-eyebrow) {
+			font-size: clamp(0.92rem, 1.1vw, 1.02rem);
+			line-height: 1.45;
+		}
+		.listing-primary-link,
+		.listing-secondary-link {
+			min-height: 44px;
+			padding: 0 1.25rem;
+			font-size: 0.95rem;
 		}
 	}
 
@@ -476,16 +555,11 @@ const pageSchemaGraph = buildPageSchemaGraph({
 
 	@media (max-width: 640px) {
 		.listing-hero-panel {
-			padding: 1rem;
-			border-radius: 8px;
+			padding: 1.1rem;
 		}
 
 		.listing-fact-grid {
 			display: none;
-		}
-
-		.listing-hero h1 {
-			font-size: 2.4rem;
 		}
 
 		.listing-hero {
@@ -493,173 +567,55 @@ const pageSchemaGraph = buildPageSchemaGraph({
 		}
 	}
 
-	/* === Visual refresh overrides (City/Category listing pages) === */
-	.listing-hero {
-		background: var(--ink-50);
-		border: 1px solid var(--ink-200);
-		border-radius: var(--radius-xl);
-		box-shadow: var(--shadow-xs);
-	}
-	.listing-hero h1 {
-		font-family: var(--font-heading);
-		color: var(--ink-900);
-		letter-spacing: -0.02em;
-		font-weight: 800;
-		line-height: 1.15;
-	}
-	.listing-hero p {
-		color: var(--ink-600);
-	}
-
-	/* Color contrast fixes — make headings/text readable in light theme */
-	.listing-hero-panel h1 {
-		color: var(--ink-900);
-	}
-	.listing-fact-card strong {
-		color: var(--ink-700);
-	}
-	.listing-fact-card span {
-		color: var(--ink-500);
-	}
-
-	/* Dark-mode overrides for hardcoded light backgrounds in legacy rules */
-	:global(:where(html, body).dark-mode) .listing-hero-panel,
-	:global(:where(html, body).dark-mode) .listing-fact-card,
-	:global(:where(html, body).dark-mode) .listing-secondary-link {
-		background-color: var(--ink-100);
-		background-image: none;
-		border-color: var(--ink-200);
-		color: var(--ink-700);
-		box-shadow: var(--shadow-xs);
-	}
-	/* Primary CTA keeps `background: var(--brand-800)` + `color: var(--ink-0)`.
-	   In dark mode --brand-800 has no override (stays dark green) while
-	   --ink-0 flips to near-black → ~1.6:1 contrast. Re-pair with the
-	   dark-mode green-surface tokens, same treatment as IncomeCalculator's
-	   .calc-cta-btn. */
-	:global(:where(html, body).dark-mode) .listing-primary-link {
-		background: var(--dm-green-surface-strong);
-		border-color: var(--dm-green-border);
-		color: var(--dm-green-text);
-	}
-	:global(:where(html, body).dark-mode) .listing-hero-panel h1,
-	:global(:where(html, body).dark-mode) .listing-fact-card strong {
-		color: var(--ink-900);
-	}
-	:global(:where(html, body).dark-mode) .listing-hero-panel > p:not(.section-eyebrow),
-	:global(:where(html, body).dark-mode) .listing-fact-card span {
-		color: var(--ink-600);
-	}
-
-	/* === Nearby cities — exit-ramp ===================================
-	 * P2 fix (analytics report 2026-05-03): page_depth dropped 2.49 →
-	 * 1.62 because search visitors landed on city pages and bounced.
-	 * This block — rendered ONLY for type='city' below the JobGrid —
-	 * gives a clear «next step» to other large cities. Visual style
-	 * matches the existing «alternatives» block on /v/<slug>/ pages
-	 * for consistency.
-	 */
-	.nearby-cities {
-		max-width: 1180px;
-		margin: 2rem auto 1.5rem;
-		padding: 1.75rem 1.85rem;
-		background: var(--surface-color);
-		border: 1px solid var(--ink-200);
-		border-radius: 16px;
-		box-shadow: var(--shadow-sm);
-		display: grid;
-		gap: 0.85rem;
-	}
-	.nearby-cities-title {
-		margin: 0;
-		font-family: var(--font-heading, 'Manrope', sans-serif);
-		font-size: clamp(1.4rem, 2.2vw, 1.75rem);
-		line-height: 1.18;
-		letter-spacing: -0.01em;
-		color: var(--ink-900);
-	}
-	.nearby-cities-lead {
-		margin: 0;
-		max-width: 70ch;
-		color: var(--ink-600);
-		font-size: 0.95rem;
-		line-height: 1.55;
-	}
-	.nearby-cities-list {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-		gap: 0.45rem;
-	}
-	.nearby-cities-item {
-		margin: 0;
-	}
-	.nearby-cities-link {
-		display: flex;
-		justify-content: space-between;
-		align-items: baseline;
-		gap: 0.6rem;
-		padding: 0.7rem 0.95rem;
-		border-radius: 10px;
-		background: rgba(232, 246, 230, 0.55);
-		border: 1px solid rgba(var(--brand-700-rgb), 0.16);
-		text-decoration: none;
-		color: var(--ink-900);
-		font-size: 0.92rem;
-		transition: border-color 0.18s ease, transform 0.18s ease, background 0.18s ease;
-	}
-	.nearby-cities-link:hover,
-	.nearby-cities-link:focus-visible {
-		border-color: var(--brand-700);
-		background: rgba(232, 246, 230, 0.9);
-		transform: translateX(2px);
-		outline: none;
-	}
-	.nearby-cities-name {
-		font-weight: 600;
-	}
-	.nearby-cities-count {
-		color: var(--brand-700);
-		font-weight: 700;
-		white-space: nowrap;
-		font-size: 0.85rem;
-	}
-	.nearby-cities-footer {
-		margin: 0.5rem 0 0;
-	}
-	.nearby-cities-all-link {
-		color: var(--brand-700);
-		font-weight: 700;
-		text-decoration: none;
-		font-size: 0.92rem;
-	}
-	.nearby-cities-all-link:hover,
-	.nearby-cities-all-link:focus-visible {
-		text-decoration: underline;
-		outline: none;
-	}
-
-	:global(:where(html, body).dark-mode) .nearby-cities {
-		background: var(--ink-100);
-		border-color: var(--ink-200);
-	}
-	:global(:where(html, body).dark-mode) .nearby-cities-link {
-		background: rgba(20, 32, 48, 0.65);
+	/* Dark mode — mirror hero-v2 (HomeHero.astro). */
+	:global(:where(html, body).dark-mode) .listing-hero-panel {
+		background: linear-gradient(135deg,
+			rgba(20, 32, 48, 0.85) 0%,
+			rgba(12, 22, 36, 0.95) 50%,
+			rgba(18, 28, 44, 0.8) 100%);
 		border-color: rgba(195, 204, 216, 0.18);
-		color: var(--ink-900);
+		box-shadow: 0 18px 42px rgba(0, 0, 0, 0.32);
 	}
-	:global(:where(html, body).dark-mode) .nearby-cities-link:hover,
-	:global(:where(html, body).dark-mode) .nearby-cities-link:focus-visible {
-		background: rgba(20, 32, 48, 0.85);
+	:global(:where(html, body).dark-mode) .listing-hero-panel::before {
+		background:
+			radial-gradient(circle at 88% 14%, rgba(76, 175, 128, 0.1) 0%, transparent 55%),
+			radial-gradient(circle at 4% 92%, rgba(96, 165, 250, 0.08) 0%, transparent 50%);
+	}
+	:global(:where(html, body).dark-mode) .section-eyebrow {
+		background: rgba(20, 32, 48, 0.6);
+		border-color: rgba(195, 204, 216, 0.18);
+		color: rgba(231, 234, 240, 0.85);
+	}
+	:global(:where(html, body).dark-mode) .listing-hero-panel h1 {
+		color: var(--ink-800);
+	}
+	:global(:where(html, body).dark-mode) .listing-hero-panel > p:not(.section-eyebrow) {
+		color: rgba(231, 234, 240, 0.78);
+	}
+	:global(:where(html, body).dark-mode) .listing-fact-card {
+		background: rgba(20, 32, 48, 0.7);
+		border-color: rgba(195, 204, 216, 0.18);
+	}
+	:global(:where(html, body).dark-mode) .listing-fact-card strong {
+		color: var(--ink-800);
+	}
+	:global(:where(html, body).dark-mode) .listing-fact-card span {
+		color: rgba(231, 234, 240, 0.6);
+	}
+	:global(:where(html, body).dark-mode) .listing-secondary-link {
+		background: rgba(20, 32, 48, 0.7);
+		color: var(--ink-800);
+		border-color: rgba(195, 204, 216, 0.18);
+	}
+	:global(:where(html, body).dark-mode) .listing-secondary-link:hover,
+	:global(:where(html, body).dark-mode) .listing-secondary-link:focus-visible {
+		background: rgba(20, 32, 48, 0.9);
 		border-color: rgba(76, 175, 128, 0.6);
 	}
-	:global(:where(html, body).dark-mode) .nearby-cities-lead {
-		color: rgba(231, 234, 240, 0.7);
+	:global(:where(html, body).dark-mode) .listing-primary-link {
+		background: var(--brand-600);
+		border-color: var(--brand-600);
+		color: var(--ink-0);
 	}
-	:global(:where(html, body).dark-mode) .nearby-cities-count,
-	:global(:where(html, body).dark-mode) .nearby-cities-all-link {
-		color: #4caf80;
-	}
+
 </style>

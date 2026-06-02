@@ -488,7 +488,7 @@ main {
   grid-template-columns: 1fr;
   gap: 0.9rem;
   width: 100%;
-  max-width: 1560px;
+  max-width: var(--content-max-width);
   margin: 0 auto;
 }
 
@@ -904,7 +904,7 @@ footer {
 
 
   main {
-    max-width: 1360px;
+    max-width: var(--content-max-width);
     margin: 0 auto;
     padding: 2rem;
   }
@@ -961,13 +961,13 @@ footer {
 
   footer { padding: 4rem 2rem 2rem 2rem; }
   .footer-content {
-    max-width: 1360px;
+    max-width: var(--content-max-width);
     margin: 0 auto;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
 
   .footer-bottom {
-    max-width: 1360px;
+    max-width: var(--content-max-width);
     margin: 2rem auto 0 auto;
   }
 }
