@@ -1,0 +1,246 @@
+---
+/**
+ * Z1.1 — per-city "рынок и заработок" block. Renders the unique,
+ * data-driven summary paragraph + the Kuper shift-rate table so each of
+ * the ~958 city pages carries distinct prose and numbers (anti-duplicate
+ * for Yandex). Presentational only — the page (`[slug].astro`) does the
+ * data lookups and passes the result in.
+ */
+import { formatMoney, getVacancyPluralText } from '../utils/format';
+import type { SalaryRow } from '../utils/cityInsights';
+
+interface Props {
+	/** Prepositional-case city name for the heading, e.g. «в Казани». */
+	prep: string;
+	/** Kuper shift-rate rows; empty → no table rendered. */
+	salaryRows: SalaryRow[];
+	/** Max monthly salary across active vacancies; 0 → vacancy line omitted. */
+	maxSalary: number;
+	/** Kuper rates export date (YYYY-MM-DD). */
+	updatedAt: string;
+	/** True when salaryRows are derived from the city's own vacancies (no Kuper rates). */
+	salaryFromVacancies: boolean;
+	/** Nearest cities (that have pages) for internal linking; empty → block hidden. */
+	neighbours: { slug: string; name: string; vacancyCount: number }[];
+}
+
+const { prep, salaryRows, maxSalary, updatedAt, salaryFromVacancies, neighbours } = Astro.props;
+---
+
+<section class="city-insights" aria-labelledby="city-insights-title">
+	<h2 id="city-insights-title" class="city-insights-title">
+		Работа курьером {prep}: сколько платят и где искать
+	</h2>
+
+	{salaryRows.length > 0 && salaryFromVacancies && (
+		<div class="city-insights-vac">
+			<p class="city-insights-vac-figures">
+				За&nbsp;смену ≈&nbsp;{formatMoney(salaryRows[0].perShift)}&nbsp;₽
+				<span class="city-insights-vac-sep"> · </span>
+				За&nbsp;месяц до&nbsp;{formatMoney(salaryRows[0].perMonth)}&nbsp;₽
+			</p>
+			<p class="city-insights-note">
+				По&nbsp;активным вакансиям города; смена — оценка при&nbsp;22&nbsp;сменах.
+			</p>
+		</div>
+	)}
+
+	{salaryRows.length > 0 && !salaryFromVacancies && (
+		<>
+			<div class="city-insights-table-wrap">
+				<table class="city-insights-rates">
+					<thead>
+						<tr>
+							<th scope="col">Формат</th>
+							<th scope="col">За смену</th>
+							<th scope="col">≈ в месяц</th>
+						</tr>
+					</thead>
+					<tbody>
+						{salaryRows.map((row) => (
+							<tr>
+								<td>{row.label}</td>
+								<td>{formatMoney(row.perShift)}&nbsp;₽</td>
+								<td>≈&nbsp;{formatMoney(row.perMonth)}&nbsp;₽</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</div>
+			<p class="city-insights-note">
+				Ставки Купер за смену (до&nbsp;12&nbsp;ч); месяц — оценка при&nbsp;22&nbsp;сменах.
+				{maxSalary > 0 && (
+					<> Максимум по активным вакансиям — до&nbsp;{formatMoney(maxSalary)}&nbsp;₽/мес.</>
+				)}
+				{' '}Данные обновлены: {updatedAt}.
+			</p>
+		</>
+	)}
+
+	{neighbours.length > 0 && (
+		<nav class="city-insights-neighbours" aria-label="Соседние города">
+			<h3 class="city-insights-neighbours-title">Работа курьером в соседних городах</h3>
+			<ul class="city-insights-neighbours-list">
+				{neighbours.map((city) => (
+					<li>
+						<a href={`/rabota-kurerom-${city.slug}/`}>
+							<span class="ci-nb-name">{city.name}</span>
+							<span class="ci-nb-count">{city.vacancyCount}&nbsp;{getVacancyPluralText(city.vacancyCount)}</span>
+						</a>
+					</li>
+				))}
+			</ul>
+		</nav>
+	)}
+</section>
+
+<style>
+	.city-insights {
+		max-width: var(--content-max-width);
+		margin: 2rem auto 1.5rem;
+		padding: 1.75rem 1.85rem;
+		background: var(--surface-color);
+		border: 1px solid var(--ink-200);
+		border-radius: 16px;
+		box-shadow: var(--shadow-sm);
+		display: grid;
+		gap: 0.85rem;
+	}
+	.city-insights-title {
+		margin: 0;
+		font-family: var(--font-heading, 'Manrope', sans-serif);
+		font-size: clamp(1.4rem, 2.2vw, 1.75rem);
+		line-height: 1.18;
+		letter-spacing: -0.01em;
+		color: var(--ink-900);
+	}
+	.city-insights-table-wrap {
+		overflow-x: auto;
+	}
+	.city-insights-rates {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 0.95rem;
+	}
+	.city-insights-rates th,
+	.city-insights-rates td {
+		padding: 0.6rem 0.75rem;
+		text-align: left;
+		border-bottom: 1px solid var(--ink-200);
+	}
+	.city-insights-rates th {
+		font-size: 0.74rem;
+		font-weight: 900;
+		letter-spacing: 0;
+		text-transform: uppercase;
+		color: var(--ink-500);
+	}
+	.city-insights-rates td:nth-child(2),
+	.city-insights-rates td:nth-child(3),
+	.city-insights-rates th:nth-child(2),
+	.city-insights-rates th:nth-child(3) {
+		text-align: right;
+		white-space: nowrap;
+		font-variant-numeric: tabular-nums;
+	}
+	.city-insights-rates td:first-child {
+		font-weight: 600;
+		color: var(--ink-900);
+	}
+	.city-insights-rates tr:last-child td {
+		border-bottom: none;
+	}
+	.city-insights-note {
+		margin: 0;
+		color: var(--ink-500);
+		font-size: 0.82rem;
+		line-height: 1.5;
+	}
+	.city-insights-vac {
+		display: grid;
+		gap: 0.3rem;
+	}
+	.city-insights-vac-figures {
+		margin: 0;
+		font-size: 1.05rem;
+		font-weight: 700;
+		color: var(--ink-900);
+		font-variant-numeric: tabular-nums;
+	}
+	.city-insights-vac-sep {
+		color: var(--ink-300);
+	}
+
+	:global(:where(html, body).dark-mode) .city-insights {
+		background: var(--ink-100);
+		border-color: var(--ink-200);
+	}
+	:global(:where(html, body).dark-mode) .city-insights-rates th,
+	:global(:where(html, body).dark-mode) .city-insights-note {
+		color: var(--ink-500);
+	}
+	:global(:where(html, body).dark-mode) .city-insights-rates td:first-child {
+		color: var(--ink-900);
+	}
+	:global(:where(html, body).dark-mode) .city-insights-vac-figures {
+		color: var(--ink-900);
+	}
+
+	.city-insights-neighbours {
+		display: grid;
+		gap: 0.6rem;
+		margin-top: 0.4rem;
+	}
+	.city-insights-neighbours-title {
+		margin: 0;
+		font-size: 1rem;
+		font-weight: 800;
+		color: var(--ink-900);
+	}
+	.city-insights-neighbours-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+		gap: 0.45rem;
+	}
+	.city-insights-neighbours-list a {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 0.5rem;
+		padding: 0.6rem 0.85rem;
+		border-radius: 10px;
+		background: rgba(232, 246, 230, 0.55);
+		border: 1px solid rgba(var(--brand-700-rgb), 0.16);
+		text-decoration: none;
+		color: var(--ink-900);
+		font-size: 0.9rem;
+		transition: border-color 0.18s ease, transform 0.18s ease, background 0.18s ease;
+	}
+	.city-insights-neighbours-list a:hover,
+	.city-insights-neighbours-list a:focus-visible {
+		border-color: var(--brand-700);
+		background: rgba(232, 246, 230, 0.9);
+		transform: translateX(2px);
+		outline: none;
+	}
+	.ci-nb-name {
+		font-weight: 600;
+	}
+	.ci-nb-count {
+		color: var(--brand-700);
+		font-weight: 700;
+		white-space: nowrap;
+		font-size: 0.82rem;
+	}
+	:global(:where(html, body).dark-mode) .city-insights-neighbours-list a {
+		background: rgba(20, 32, 48, 0.65);
+		border-color: rgba(195, 204, 216, 0.18);
+		color: var(--ink-900);
+	}
+	:global(:where(html, body).dark-mode) .ci-nb-count {
+		color: #4caf80;
+	}
+</style>
