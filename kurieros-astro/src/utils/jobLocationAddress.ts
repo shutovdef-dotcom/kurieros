@@ -16,7 +16,8 @@
  *  • `postalCode` is a REAL central code only for curated major cities; for
  *    the long tail it is omitted — we never fabricate postal codes.
  */
-import { getCityRegion } from '../data/cityRegions';
+import { cityKey, getCityRegion } from '../data/cityRegions';
+import cityPostal from '../data/cityPostal.json';
 
 /**
  * Street names that genuinely exist in the overwhelming majority of Russian
@@ -65,46 +66,20 @@ export const buildSyntheticStreet = (seed: string): string => {
 };
 
 /**
- * Real central postal codes for the highest-traffic cities. The long tail is
- * intentionally omitted — `getCityPostalCode` returns `undefined` and the
- * caller drops `postalCode` rather than inventing a code.
+ * Real central postal code per city, vendored from GeoNames and
+ * region-disambiguated (see `scripts/generate-city-postal.ts`). ~909/937
+ * cities covered; cities GeoNames can't resolve are simply absent, so
+ * `getCityPostalCode` returns `undefined` and the caller drops `postalCode`
+ * rather than fabricating one.
  */
-const CITY_POSTAL_CODE: Readonly<Record<string, string>> = {
-  Москва: '101000',
-  'Санкт-Петербург': '191186',
-  Новосибирск: '630007',
-  Екатеринбург: '620014',
-  Казань: '420111',
-  'Нижний Новгород': '603082',
-  Челябинск: '454091',
-  Самара: '443010',
-  Уфа: '450077',
-  'Ростов-на-Дону': '344002',
-  Краснодар: '350000',
-  Воронеж: '394018',
-  Пермь: '614000',
-  Волгоград: '400131',
-  Красноярск: '660049',
-  Саратов: '410012',
-  Тюмень: '625000',
-  Омск: '644099',
-  Тольятти: '445020',
-  Ижевск: '426000',
-  Барнаул: '656049',
-  Ульяновск: '432063',
-  Иркутск: '664025',
-  Хабаровск: '680000',
-  Владивосток: '690091',
-  Махачкала: '367000',
-  Ярославль: '150000',
-  Кемерово: '650000',
-  Томск: '634050',
-  Сочи: '354000',
-  Калининград: '236000',
-};
+const postalByKey = new Map(
+  Object.entries(cityPostal as Record<string, string>).map(
+    ([name, code]): [string, string] => [cityKey(name), code],
+  ),
+);
 
 export const getCityPostalCode = (city: string): string | undefined =>
-  CITY_POSTAL_CODE[city];
+  postalByKey.get(cityKey(city));
 
 export type JobPostalAddress = {
   '@type': 'PostalAddress';
