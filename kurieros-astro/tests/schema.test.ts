@@ -100,48 +100,66 @@ describe('Fix B (2026-05-25) — isRemote → TELECOMMUTE + country-only jobLoca
     expect(out.jobLocation[0].address).not.toHaveProperty('addressLocality');
   });
 
-  it('emits minimal PostalAddress per city when isRemote=false (Fix H1)', () => {
-    // Fix H1 (2026-05-25) — synthetic streetAddress («Красная площадь, 1»)
-    // and postalCode (Kremlin's 109012) are no longer emitted; we emit
-    // only addressLocality + addressRegion (when known) + addressCountry.
+  it('emits a complete, varied PostalAddress per city when isRemote=false (P0)', () => {
+    // P0 (2026-06-04) — streetAddress is back, but VARIED per vacancy from a
+    // pool of ubiquitous streets (no single shared landmark). addressRegion is
+    // the real region; postalCode is a real central code for major cities.
     const out = buildJobPostingSchema({ ...baseInput, cities: ['Москва'] });
+    const address = out.jobLocation[0].address as Record<string, unknown>;
 
-    expect(out.jobLocation[0].address).toEqual({
+    expect(address).toMatchObject({
       '@type': 'PostalAddress',
       addressLocality: 'Москва',
       addressRegion: 'Москва',
+      postalCode: '101000',
       addressCountry: 'RU',
     });
-    expect(out.jobLocation[0].address).not.toHaveProperty('streetAddress');
-    expect(out.jobLocation[0].address).not.toHaveProperty('postalCode');
+    // streetAddress is seeded by «slug|city» — assert shape, not exact value.
+    expect(address.streetAddress).toMatch(/, \d+$/);
   });
 });
 
-describe('Fix H1 (2026-05-25) — minimal PostalAddress (no synthetic landmarks)', () => {
-  it('emits addressRegion for cities in our curated map (Барнаул → «Алтайский край»)', () => {
+describe('P0 (2026-06-04) — full addressRegion coverage + varied street', () => {
+  it('emits region + real postalCode for a curated major city (Барнаул)', () => {
     const out = buildJobPostingSchema({ ...baseInput, cities: ['Барнаул'] });
+    const address = out.jobLocation[0].address as Record<string, unknown>;
 
-    expect(out.jobLocation[0].address).toEqual({
+    expect(address).toMatchObject({
       '@type': 'PostalAddress',
       addressLocality: 'Барнаул',
       addressRegion: 'Алтайский край',
+      postalCode: '656049',
       addressCountry: 'RU',
     });
+    expect(address.streetAddress).toMatch(/, \d+$/);
   });
 
-  it('omits addressRegion for small unknown cities (e.g. Апрелевка)', () => {
+  it('resolves region for previously-uncovered cities via cityGeo (Апрелевка → Московская область)', () => {
     const out = buildJobPostingSchema({ ...baseInput, cities: ['Апрелевка'] });
+    const address = out.jobLocation[0].address as Record<string, unknown>;
 
-    // Smaller cities not in CITY_REGIONS map: we honestly omit the
-    // addressRegion field rather than fall back to the city name or
-    // «Россия». Google for Jobs validator accepts locality+country.
-    expect(out.jobLocation[0].address).toEqual({
+    expect(address).toMatchObject({
       '@type': 'PostalAddress',
       addressLocality: 'Апрелевка',
+      addressRegion: 'Московская область',
       addressCountry: 'RU',
     });
-    expect(out.jobLocation[0].address).not.toHaveProperty('addressRegion');
-    expect(out.jobLocation[0].address).not.toHaveProperty('streetAddress');
+    expect(address.streetAddress).toMatch(/, \d+$/);
+    // Long-tail city: no verified postal code → omitted, never fabricated.
+    expect(address).not.toHaveProperty('postalCode');
+  });
+
+  it('omits addressRegion only when the city is in neither cityGeo nor the curated map', () => {
+    const out = buildJobPostingSchema({ ...baseInput, cities: ['Несуществоград'] });
+    const address = out.jobLocation[0].address as Record<string, unknown>;
+
+    expect(address).toMatchObject({
+      '@type': 'PostalAddress',
+      addressLocality: 'Несуществоград',
+      addressCountry: 'RU',
+    });
+    expect(address).not.toHaveProperty('addressRegion');
+    expect(address).not.toHaveProperty('postalCode');
   });
 
   it('emits country-only Place for the «Россия» pseudo-city (no locality)', () => {

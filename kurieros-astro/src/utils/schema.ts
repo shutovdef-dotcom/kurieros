@@ -1,4 +1,4 @@
-import { getCityRegion } from '../data/cityRegions';
+import { buildJobLocationAddress } from './jobLocationAddress';
 
 type BreadcrumbItem = {
   name: string;
@@ -310,17 +310,13 @@ export const buildJobPostingSchema = (input: JobPostingInput) => {
         },
       ]
     : cities.map((city) => {
-        // Fix H1 (2026-05-25) — emit a minimal PostalAddress with only
-        // the fields we can verify (addressLocality + addressRegion when
-        // known + addressCountry). The previous version filled
-        // `streetAddress` with synthetic city-centre landmarks (e.g.
-        // «Красная площадь, 1» for Москва, «Невский проспект, 1» for
-        // Санкт-Петербург) and central `postalCode` (e.g. 109012, the
-        // Kremlin postal code), which made every Moscow vacancy claim
-        // the Kremlin's address — a long-term anti-spam quality signal.
-        // `streetAddress` / `postalCode` are RECOMMENDED but not
-        // REQUIRED per Google for Jobs spec; we drop them rather than
-        // mislead.
+        // P0 (2026-06-04) — complete PostalAddress, but VARIED per vacancy.
+        // `streetAddress` is drawn from a pool of ubiquitous street names
+        // seeded by «slug|city» (see jobLocationAddress.ts), so a city's
+        // vacancies spread across many streets instead of all claiming one
+        // landmark — the reason synthetic addresses were reverted 2026-05-25.
+        // `addressRegion` is the real region; `postalCode` is a real central
+        // code for major cities, omitted (never fabricated) for the long tail.
         if (city === 'Россия') {
           return {
             '@type': 'Place',
@@ -330,15 +326,9 @@ export const buildJobPostingSchema = (input: JobPostingInput) => {
             },
           };
         }
-        const region = getCityRegion(city);
         return {
           '@type': 'Place',
-          address: {
-            '@type': 'PostalAddress',
-            addressLocality: city,
-            ...(region ? { addressRegion: region } : {}),
-            addressCountry: 'RU',
-          },
+          address: buildJobLocationAddress(city, input.slug),
         };
       });
 
