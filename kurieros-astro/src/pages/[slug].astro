@@ -40,6 +40,7 @@ import { citiesFromJobs } from '../utils/citiesIndex';
 // Z1.1 — unique per-city insights (Kuper shift rates + region + live counts).
 import { buildCitySalaryRows, buildCitySummary } from '../utils/cityInsights';
 import { getCityShiftRates, NATIONAL_AVG_SHIFT, KUPER_RATES_UPDATED_AT } from '../utils/kuperCityRates';
+import { getYandexCityShiftRates, YANDEX_RATES_UPDATED_AT } from '../utils/yandexCityRates';
 import { getCityGeo, getNearbyCities } from '../utils/cityGeoIndex';
 
 // Build a lookup from hub path → HubConfig for the isHubEmpty guard.
@@ -183,8 +184,25 @@ const vacancyCountText = buildVacancyCountText(filteredJobs.length);
 // Z1.1 — unique per-city content block (city pages only, rendered below
 // the JobGrid). Kuper ships shift rates for ~412/958 cities; the summary
 // degrades gracefully (vacancy-derived salary, no rate table) otherwise.
-const cityRates = type === 'city' ? getCityShiftRates(data.name) : null;
+// Salary-rate source precedence for the city-insights block (Z1.1):
+// Купер (per-12h-shift, ~414 cities) → Yandex Eda (per-hour projected to a
+// 12h shift, fills the few cities Купер omits) → vacancy-derived single row.
+const kuperRates = type === 'city' ? getCityShiftRates(data.name) : null;
+const yandexRates =
+	type === 'city' && kuperRates === null ? getYandexCityShiftRates(data.name) : null;
+const cityRates = kuperRates ?? yandexRates;
+const rateSource: 'kuper' | 'yandex' | 'vacancies' = kuperRates
+	? 'kuper'
+	: yandexRates
+		? 'yandex'
+		: 'vacancies';
+const rateUpdatedAt = kuperRates ? KUPER_RATES_UPDATED_AT : YANDEX_RATES_UPDATED_AT;
 const citySalaryRows = buildCitySalaryRows(cityRates, maxSalary);
+const cityAutoShift = cityRates?.auto;
+const cityComparisonPct =
+	cityAutoShift !== undefined && NATIONAL_AVG_SHIFT.auto > 0
+		? Math.round(((cityAutoShift - NATIONAL_AVG_SHIFT.auto) / NATIONAL_AVG_SHIFT.auto) * 100)
+		: null;
 const citySummary =
 	type === 'city' && filteredJobs.length > 0
 		? buildCitySummary({
@@ -284,18 +302,39 @@ const pageSchemaGraph = buildPageSchemaGraph({
 				<p class="section-eyebrow">{type === 'city' ? 'Вакансии в городе' : 'Готовый фильтр'}</p>
 				<h1>{title}</h1>
 				<p>{type === 'city' && citySummary ? citySummary : heroIntro}</p>
-				<div class="listing-hero-actions">
-					<a href="#vacancies" class="listing-primary-link">Смотреть вакансии</a>
-					<a href="/compare/" class="listing-secondary-link">Сравнить</a>
-				</div>
-				<div class="listing-fact-grid listing-fact-grid-hero">
-					{factCards.map((fact) => (
-						<article class="listing-fact-card">
-							<span>{fact.label}</span>
-							<strong>{fact.value}</strong>
-						</article>
-					))}
-				</div>
+				{type === 'city' && citySummary ? (
+					<CityInsights
+						population={data.population}
+						vacancyCount={filteredJobs.length}
+						companyCount={companyNames.length}
+						maxSalary={maxSalary}
+						comparisonPct={cityComparisonPct}
+						salaryRows={citySalaryRows}
+						rateSource={rateSource}
+						updatedAt={rateUpdatedAt}
+						neighbours={cityNeighbours}
+					>
+						<div class="listing-hero-actions">
+							<a href="#vacancies" class="listing-primary-link">Смотреть вакансии</a>
+							<a href="/compare/" class="listing-secondary-link">Сравнить</a>
+						</div>
+					</CityInsights>
+				) : (
+					<>
+						<div class="listing-hero-actions">
+							<a href="#vacancies" class="listing-primary-link">Смотреть вакансии</a>
+							<a href="/compare/" class="listing-secondary-link">Сравнить</a>
+						</div>
+						<div class="listing-fact-grid listing-fact-grid-hero">
+							{factCards.map((fact) => (
+								<article class="listing-fact-card">
+									<span>{fact.label}</span>
+									<strong>{fact.value}</strong>
+								</article>
+							))}
+						</div>
+					</>
+				)}
 			</div>
 		</section>
 
@@ -312,16 +351,8 @@ const pageSchemaGraph = buildPageSchemaGraph({
 			revealable
 		/>
 
-		{type === 'city' && citySummary && (
-			<CityInsights
-				prep={data.prep}
-				salaryRows={citySalaryRows}
-				maxSalary={maxSalary}
-				updatedAt={KUPER_RATES_UPDATED_AT}
-				salaryFromVacancies={cityRates === null}
-				neighbours={cityNeighbours}
-			/>
-		)}
+		{/* City-insights (stats + rate table + neighbours) is merged into the
+		    hero panel above — Z1.1 full merge, no separate section here. */}
 
 		{isMoscowCityPage && <PartnerBanner />}
 	</main>
