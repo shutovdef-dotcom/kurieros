@@ -22,9 +22,17 @@ import cityGeoRaw from './cityGeo.json';
 
 type CityGeoEntry = { name: string; region: string };
 
-const cityGeoRegionByName = new Map<string, string>(
+/**
+ * Lookup key — case- and ё/е-insensitive. Vacancy data spells some cities
+ * without ё («Орел», «Королев», «Щелково») while our datasets use «Орёл» etc.;
+ * normalising both sides lets the lookup match. Shared with
+ * `jobLocationAddress.ts` for the same reason on `postalCode`.
+ */
+export const cityKey = (name: string): string => name.toLowerCase().replace(/ё/g, 'е');
+
+const cityGeoRegionByKey = new Map<string, string>(
   Object.values(cityGeoRaw as Record<string, CityGeoEntry>).map(
-    (entry): [string, string] => [entry.name, entry.region],
+    (entry): [string, string] => [cityKey(entry.name), entry.region],
   ),
 );
 
@@ -99,6 +107,39 @@ const CITY_REGIONS: Readonly<Record<string, string>> = {
   Томск: 'Томская область',
   Сочи: 'Краснодарский край',
   Калининград: 'Калининградская область',
+  // P0 — micro-localities (resort districts / suburbs) absent from cityGeo.
+  Адлер: 'Краснодарский край',
+  Лазаревское: 'Краснодарский край',
+  Джубга: 'Краснодарский край',
+  'Новая Адыгея': 'Республика Адыгея',
+  Парголово: 'Санкт-Петербург',
+  Шушары: 'Санкт-Петербург',
+  Малаховка: 'Московская область',
+  Селятино: 'Московская область',
+  Немчиновка: 'Московская область',
+  Марфино: 'Московская область',
+  Радумля: 'Московская область',
+  Островцы: 'Московская область',
+  Лопатино: 'Московская область',
+  Борисовичи: 'Псковская область',
+  Железнодорожный: 'Московская область',
+  'Ликино-Дулёво': 'Московская область',
+  Путилково: 'Московская область',
+  Быково: 'Московская область',
+  Хоругвино: 'Московская область',
+  Внуковское: 'Москва',
+  Федино: 'Московская область',
+  'пгт. Боброво': 'Московская область',
+  Порошкино: 'Ленинградская область',
+  Свердловское: 'Ленинградская область',
+  'сп Бугровское': 'Ленинградская область',
+  Алнаши: 'Удмуртская Республика',
+  // Prefixed spellings that also appear in vacancy data.
+  'посёлок Джубга': 'Краснодарский край',
+  'аул Новая Адыгея': 'Республика Адыгея',
+  'деревня Марфино': 'Московская область',
+  'деревня Радумля': 'Московская область',
+  'деревня Борисовичи': 'Псковская область',
 };
 
 /**
@@ -109,9 +150,14 @@ const CITY_REGIONS: Readonly<Record<string, string>> = {
  * inventing a fallback — Google for Jobs accepts a PostalAddress with
  * only `addressLocality` + `addressCountry` when the region is unknown.
  */
+const curatedRegionByKey = new Map(
+  Object.entries(CITY_REGIONS).map(([name, region]): [string, string] => [cityKey(name), region]),
+);
+
 export const getCityRegion = (city: string): string | undefined => {
-  const curated = CITY_REGIONS[city];
+  const key = cityKey(city);
+  const curated = curatedRegionByKey.get(key);
   if (curated) return curated;
-  const geo = cityGeoRegionByName.get(city);
+  const geo = cityGeoRegionByKey.get(key);
   return geo ? toOfficialRegion(geo) : undefined;
 };
