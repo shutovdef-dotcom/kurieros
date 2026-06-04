@@ -39,12 +39,13 @@ describe('buildSyntheticStreet', () => {
 });
 
 describe('getCityPostalCode', () => {
-	it('returns a real 6-digit code for a curated major city', () => {
+	it('returns a real 6-digit code for cities in the vendored dataset', () => {
 		expect(getCityPostalCode('Казань')).toMatch(/^\d{6}$/);
+		expect(getCityPostalCode('Орёл')).toMatch(/^\d{6}$/);
 	});
 
-	it('returns undefined for an uncurated city (never fabricated)', () => {
-		expect(getCityPostalCode('Воркута')).toBeUndefined();
+	it('returns undefined for a city absent from the dataset (never fabricated)', () => {
+		expect(getCityPostalCode('Несуществоград')).toBeUndefined();
 	});
 });
 
@@ -61,12 +62,21 @@ describe('buildJobLocationAddress', () => {
 		expect(addr.postalCode).toMatch(/^\d{6}$/);
 	});
 
-	it('keeps street + real region but omits postalCode for a long-tail city', () => {
+	it('keeps street + real region + real postal for a covered long-tail city (Тула)', () => {
 		const addr = buildJobLocationAddress('Тула', 'vac-tula');
 		expect(addr.streetAddress).toMatch(/, \d+$/);
 		expect(addr.addressRegion).toBe('Тульская область');
-		expect(addr.postalCode).toBeUndefined();
+		expect(addr.postalCode).toMatch(/^\d{6}$/);
 		expect(addr.addressCountry).toBe('RU');
+	});
+
+	it('omits postalCode + addressRegion for a city absent from all data (never fabricated)', () => {
+		const addr = buildJobLocationAddress('Несуществоград', 'vac-x');
+		expect(addr.streetAddress).toMatch(/, \d+$/);
+		expect(addr.addressLocality).toBe('Несуществоград');
+		expect(addr.addressCountry).toBe('RU');
+		expect(addr.postalCode).toBeUndefined();
+		expect(addr.addressRegion).toBeUndefined();
 	});
 
 	it('normalizes short republic names to official forms', () => {

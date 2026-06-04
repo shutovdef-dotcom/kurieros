@@ -128,13 +128,13 @@ describe('P0 (2026-06-04) — full addressRegion coverage + varied street', () =
       '@type': 'PostalAddress',
       addressLocality: 'Барнаул',
       addressRegion: 'Алтайский край',
-      postalCode: '656049',
       addressCountry: 'RU',
     });
     expect(address.streetAddress).toMatch(/, \d+$/);
+    expect(address.postalCode).toMatch(/^\d{6}$/);
   });
 
-  it('resolves region for previously-uncovered cities via cityGeo (Апрелевка → Московская область)', () => {
+  it('resolves region + real postalCode for previously-uncovered cities (Апрелевка → Московская область)', () => {
     const out = buildJobPostingSchema({ ...baseInput, cities: ['Апрелевка'] });
     const address = out.jobLocation[0].address as Record<string, unknown>;
 
@@ -145,8 +145,8 @@ describe('P0 (2026-06-04) — full addressRegion coverage + varied street', () =
       addressCountry: 'RU',
     });
     expect(address.streetAddress).toMatch(/, \d+$/);
-    // Long-tail city: no verified postal code → omitted, never fabricated.
-    expect(address).not.toHaveProperty('postalCode');
+    // postalCode is now vendored from GeoNames for this city too.
+    expect(address.postalCode).toMatch(/^\d{6}$/);
   });
 
   it('omits addressRegion only when the city is in neither cityGeo nor the curated map', () => {
