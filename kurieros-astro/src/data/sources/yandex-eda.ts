@@ -212,6 +212,16 @@ export const yandexCitizenshipByCity = new Map(
   yandexEdaCityRates.map((cityRate) => [cityRate.city, cityRate.citizenship]),
 );
 
+/**
+ * City → per-hour transport rates (foot / bicycle / auto), consumed by
+ * `utils/yandexCityRates.ts` as the Купер-less fallback rate source for
+ * the city-insights block (Z1.1). Keyed by the exact Russian city name
+ * used across the vacancy data (matches `getCityShiftRates`).
+ */
+export const yandexEdaRatesByCity = new Map(
+  yandexEdaCityRates.map((cityRate) => [cityRate.city, cityRate.rates]),
+);
+
 // === Content =========================================================
 
 const requirements = [
