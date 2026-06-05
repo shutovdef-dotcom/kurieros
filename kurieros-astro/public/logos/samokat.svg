@@ -1,6 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 168 40" role="img" aria-label="Самокат">
-  <rect width="168" height="40" rx="9" fill="#ffffff"/>
-  <text x="50%" y="52%" dominant-baseline="central" text-anchor="middle"
-        font-family="-apple-system, 'Segoe UI', Roboto, Arial, sans-serif"
-        font-size="21" font-weight="800" letter-spacing="-0.3" fill="#ff1e56">Самокат</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Самокат">
+  <rect width="64" height="64" rx="14" fill="#FF2052"/>
+  <g fill="none" stroke="#ffffff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="18" cy="46" r="6"/>
+    <circle cx="46" cy="46" r="6"/>
+    <path d="M15 40H46M46 40V14M39 14H52"/>
+  </g>
 </svg>
