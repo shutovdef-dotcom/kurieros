@@ -27,6 +27,7 @@ export const COMPANY_HOMEPAGES: Readonly<Record<string, string>> = {
   Ozon: 'https://www.ozon.ru/',
   'Ozon fresh': 'https://www.ozon.ru/',
   Efin: 'https://efin.online/',
+  Самокат: 'https://samokat.ru/',
 };
 
 /**

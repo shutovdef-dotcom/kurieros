@@ -20,6 +20,7 @@ import { tBankSources } from './sources/tbank';
 import { efinSource } from './sources/efin';
 import { alfaBankSource } from './sources/alfa-bank';
 import { burgerKingSource } from './sources/burger-king';
+import { samokatSource } from './sources/samokat';
 import { ozonVacancySources } from './ozonOffers';
 import { applyOzonHourlyFallback } from './sources/ozon-hourly-fallback';
 
@@ -30,6 +31,7 @@ const initialSources: VacancySource[] = [
   efinSource,
   alfaBankSource,
   burgerKingSource,
+  samokatSource,
   ...ozonVacancySources,
 ];
 

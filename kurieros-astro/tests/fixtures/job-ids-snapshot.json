@@ -19142,5 +19142,197 @@
   {
     "id": 1999671,
     "slug": "burger-king-cook-cashier-kolpino-foot"
+  },
+  {
+    "id": 2000012,
+    "slug": "samokat-courier-moskva-bicycle"
+  },
+  {
+    "id": 2000022,
+    "slug": "samokat-courier-sankt-peterburg-bicycle"
+  },
+  {
+    "id": 2000032,
+    "slug": "samokat-courier-ekaterinburg-bicycle"
+  },
+  {
+    "id": 2000042,
+    "slug": "samokat-courier-novosibirsk-bicycle"
+  },
+  {
+    "id": 2000052,
+    "slug": "samokat-courier-kazan-bicycle"
+  },
+  {
+    "id": 2000062,
+    "slug": "samokat-courier-nizhniy-novgorod-bicycle"
+  },
+  {
+    "id": 2000072,
+    "slug": "samokat-courier-chelyabinsk-bicycle"
+  },
+  {
+    "id": 2000082,
+    "slug": "samokat-courier-samara-bicycle"
+  },
+  {
+    "id": 2000102,
+    "slug": "samokat-courier-rostov-na-donu-bicycle"
+  },
+  {
+    "id": 2000112,
+    "slug": "samokat-courier-ufa-bicycle"
+  },
+  {
+    "id": 2000122,
+    "slug": "samokat-courier-krasnoyarsk-bicycle"
+  },
+  {
+    "id": 2000132,
+    "slug": "samokat-courier-voronezh-bicycle"
+  },
+  {
+    "id": 2000142,
+    "slug": "samokat-courier-perm-bicycle"
+  },
+  {
+    "id": 2004862,
+    "slug": "samokat-courier-cheboksary-bicycle"
+  },
+  {
+    "id": 2006672,
+    "slug": "samokat-courier-izhevsk-bicycle"
+  },
+  {
+    "id": 2007532,
+    "slug": "samokat-courier-penza-bicycle"
+  },
+  {
+    "id": 2011702,
+    "slug": "samokat-courier-krasnodar-bicycle"
+  },
+  {
+    "id": 2012672,
+    "slug": "samokat-courier-bryansk-bicycle"
+  },
+  {
+    "id": 2019302,
+    "slug": "samokat-courier-kaluga-bicycle"
+  },
+  {
+    "id": 2019412,
+    "slug": "samokat-courier-tambov-bicycle"
+  },
+  {
+    "id": 2026842,
+    "slug": "samokat-courier-kirov-bicycle"
+  },
+  {
+    "id": 2029582,
+    "slug": "samokat-courier-naberezhnye-chelny-bicycle"
+  },
+  {
+    "id": 2032282,
+    "slug": "samokat-courier-pskov-bicycle"
+  },
+  {
+    "id": 2032322,
+    "slug": "samokat-courier-tver-bicycle"
+  },
+  {
+    "id": 2033932,
+    "slug": "samokat-courier-smolensk-bicycle"
+  },
+  {
+    "id": 2037762,
+    "slug": "samokat-courier-kolomna-bicycle"
+  },
+  {
+    "id": 2039372,
+    "slug": "samokat-courier-tula-bicycle"
+  },
+  {
+    "id": 2039692,
+    "slug": "samokat-courier-almetevsk-bicycle"
+  },
+  {
+    "id": 2040852,
+    "slug": "samokat-courier-petrozavodsk-bicycle"
+  },
+  {
+    "id": 2042492,
+    "slug": "samokat-courier-vologda-bicycle"
+  },
+  {
+    "id": 2050342,
+    "slug": "samokat-courier-balakovo-bicycle"
+  },
+  {
+    "id": 2051832,
+    "slug": "samokat-courier-cherepovets-bicycle"
+  },
+  {
+    "id": 2053242,
+    "slug": "samokat-courier-novorossiysk-bicycle"
+  },
+  {
+    "id": 2056632,
+    "slug": "samokat-courier-velikiy-novgorod-bicycle"
+  },
+  {
+    "id": 2063332,
+    "slug": "samokat-courier-kostroma-bicycle"
+  },
+  {
+    "id": 2066492,
+    "slug": "samokat-courier-kemerovo-bicycle"
+  },
+  {
+    "id": 2068952,
+    "slug": "samokat-courier-tolyatti-bicycle"
+  },
+  {
+    "id": 2073412,
+    "slug": "samokat-courier-engels-bicycle"
+  },
+  {
+    "id": 2074812,
+    "slug": "samokat-courier-lipetsk-bicycle"
+  },
+  {
+    "id": 2074982,
+    "slug": "samokat-courier-ivanovo-bicycle"
+  },
+  {
+    "id": 2079892,
+    "slug": "samokat-courier-obninsk-bicycle"
+  },
+  {
+    "id": 2083872,
+    "slug": "samokat-courier-saratov-bicycle"
+  },
+  {
+    "id": 2085562,
+    "slug": "samokat-courier-yaroslavl-bicycle"
+  },
+  {
+    "id": 2085832,
+    "slug": "samokat-courier-orel-bicycle"
+  },
+  {
+    "id": 2089402,
+    "slug": "samokat-courier-taganrog-bicycle"
+  },
+  {
+    "id": 2095472,
+    "slug": "samokat-courier-vladimir-bicycle"
+  },
+  {
+    "id": 2095912,
+    "slug": "samokat-courier-belgorod-bicycle"
+  },
+  {
+    "id": 2099332,
+    "slug": "samokat-courier-ulyanovsk-bicycle"
   }
 ]

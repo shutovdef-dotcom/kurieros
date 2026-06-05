@@ -1,0 +1,671 @@
+{
+  "company": "Самокат",
+  "sourceUrl": "https://docs.google.com/spreadsheets/d/1pq7lPgzaipVA1kNjo3brk1eZiADLfsh_siBrC9Px5tU/edit?gid=1564426040",
+  "salarySourceUrl": "https://docs.google.com/spreadsheets/d/1hCBYoVcQdfzI8IpWLGerjuym5G0B5A1MFZi3_hmIRJU/edit?gid=2013337120",
+  "updatedAt": "2026-06-05",
+  "offerCount": 88,
+  "offers": [
+    {
+      "city": "Барнаул",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116000
+    },
+    {
+      "city": "Брянск",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 260,
+      "monthlyMaxRub": 130880
+    },
+    {
+      "city": "Владимир",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 310,
+      "monthlyMaxRub": 155680
+    },
+    {
+      "city": "Волгоград",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ",
+      "hourlyRub": 250,
+      "monthlyMaxRub": 126560
+    },
+    {
+      "city": "Вологда",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116000
+    },
+    {
+      "city": "Череповец",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 250,
+      "monthlyMaxRub": 125920
+    },
+    {
+      "city": "Воронеж",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 310,
+      "monthlyMaxRub": 155680
+    },
+    {
+      "city": "Иваново",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 270,
+      "monthlyMaxRub": 135840
+    },
+    {
+      "city": "Киров",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116000
+    },
+    {
+      "city": "Геленджик",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ",
+      "hourlyRub": 280,
+      "monthlyMaxRub": 140800
+    },
+    {
+      "city": "Краснодар",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 255,
+      "monthlyMaxRub": 129040
+    },
+    {
+      "city": "Красноярск",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 250,
+      "monthlyMaxRub": 125920
+    },
+    {
+      "city": "Курск",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ",
+      "hourlyRub": 260,
+      "monthlyMaxRub": 130880
+    },
+    {
+      "city": "Санкт-Петербург",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
+    },
+    {
+      "city": "Липецк",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 240,
+      "monthlyMaxRub": 120960
+    },
+    {
+      "city": "Москва",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ+СНГ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
+    },
+    {
+      "city": "Нижний Новгород",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 280,
+      "monthlyMaxRub": 140800
+    },
+    {
+      "city": "Великий Новгород",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 270,
+      "monthlyMaxRub": 135840
+    },
+    {
+      "city": "Новосибирск",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 270,
+      "monthlyMaxRub": 135840
+    },
+    {
+      "city": "Омск",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ",
+      "hourlyRub": 260,
+      "monthlyMaxRub": 130880
+    },
+    {
+      "city": "Оренбург",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116000
+    },
+    {
+      "city": "Орёл",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116000
+    },
+    {
+      "city": "Пенза",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 250,
+      "monthlyMaxRub": 125920
+    },
+    {
+      "city": "Пермь",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 250,
+      "monthlyMaxRub": 125920
+    },
+    {
+      "city": "Псков",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 235,
+      "monthlyMaxRub": 119120
+    },
+    {
+      "city": "Уфа",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 250,
+      "monthlyMaxRub": 125920
+    },
+    {
+      "city": "Казань",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 280,
+      "monthlyMaxRub": 140800
+    },
+    {
+      "city": "Набережные Челны",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 320,
+      "monthlyMaxRub": 160640
+    },
+    {
+      "city": "Альметьевск",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116000
+    },
+    {
+      "city": "Ижевск",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 280,
+      "monthlyMaxRub": 140800
+    },
+    {
+      "city": "Чебоксары",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 265,
+      "monthlyMaxRub": 133360
+    },
+    {
+      "city": "Ростов-на-Дону",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 280,
+      "monthlyMaxRub": 140800
+    },
+    {
+      "city": "Таганрог",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116000
+    },
+    {
+      "city": "Рязань",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ",
+      "hourlyRub": 310,
+      "monthlyMaxRub": 155680
+    },
+    {
+      "city": "Самара",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 250,
+      "monthlyMaxRub": 125920
+    },
+    {
+      "city": "Саратов",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 250,
+      "monthlyMaxRub": 125920
+    },
+    {
+      "city": "Энгельс",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 250,
+      "monthlyMaxRub": 125920
+    },
+    {
+      "city": "Екатеринбург",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 300,
+      "monthlyMaxRub": 150720
+    },
+    {
+      "city": "Нижний Тагил",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116000
+    },
+    {
+      "city": "Смоленск",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 250,
+      "monthlyMaxRub": 126560
+    },
+    {
+      "city": "Ставрополь",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116000
+    },
+    {
+      "city": "Тамбов",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116000
+    },
+    {
+      "city": "Тверь",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 270,
+      "monthlyMaxRub": 135840
+    },
+    {
+      "city": "Томск",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116000
+    },
+    {
+      "city": "Тула",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
+    },
+    {
+      "city": "Тюмень",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ",
+      "hourlyRub": 250,
+      "monthlyMaxRub": 125920
+    },
+    {
+      "city": "Ульяновск",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 240,
+      "monthlyMaxRub": 120960
+    },
+    {
+      "city": "Ханты-Мансийск",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ",
+      "hourlyRub": 350,
+      "monthlyMaxRub": 175520
+    },
+    {
+      "city": "Нижневартовск",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
+    },
+    {
+      "city": "Магнитогорск",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116000
+    },
+    {
+      "city": "Челябинск",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 250,
+      "monthlyMaxRub": 125920
+    },
+    {
+      "city": "Ярославль",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 240,
+      "monthlyMaxRub": 120960
+    },
+    {
+      "city": "Тольятти",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116000
+    },
+    {
+      "city": "Старый Оскол",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ",
+      "hourlyRub": 260,
+      "monthlyMaxRub": 130880
+    },
+    {
+      "city": "Нижнекамск",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ",
+      "hourlyRub": 270,
+      "monthlyMaxRub": 135840
+    },
+    {
+      "city": "Астрахань",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116640
+    },
+    {
+      "city": "Обнинск",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 330,
+      "monthlyMaxRub": 165600
+    },
+    {
+      "city": "Калуга",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 330,
+      "monthlyMaxRub": 165600
+    },
+    {
+      "city": "Белгород",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116000
+    },
+    {
+      "city": "Наро-Фоминск",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ"
+    },
+    {
+      "city": "Королёв",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ"
+    },
+    {
+      "city": "Ногинск",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ",
+      "hourlyRub": 270,
+      "monthlyMaxRub": 135840
+    },
+    {
+      "city": "Коломна",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 270,
+      "monthlyMaxRub": 135840
+    },
+    {
+      "city": "Щёлково",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ"
+    },
+    {
+      "city": "Видное",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ"
+    },
+    {
+      "city": "Балашиха",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ"
+    },
+    {
+      "city": "Химки",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ"
+    },
+    {
+      "city": "Звенигород",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ"
+    },
+    {
+      "city": "Ивантеевка",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ"
+    },
+    {
+      "city": "Мытищи",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ"
+    },
+    {
+      "city": "Орехово-Зуево",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ",
+      "hourlyRub": 270,
+      "monthlyMaxRub": 135840
+    },
+    {
+      "city": "Люберцы",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ"
+    },
+    {
+      "city": "Троицк",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ"
+    },
+    {
+      "city": "Зеленоград",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ"
+    },
+    {
+      "city": "Красногорск",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ"
+    },
+    {
+      "city": "Солнечногорск",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ"
+    },
+    {
+      "city": "Одинцово",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ"
+    },
+    {
+      "city": "Домодедово",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ"
+    },
+    {
+      "city": "Фрязино",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ"
+    },
+    {
+      "city": "Подольск",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ"
+    },
+    {
+      "city": "Лобня",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ"
+    },
+    {
+      "city": "Раменское",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ"
+    },
+    {
+      "city": "Котельники",
+      "transport": "bicycle",
+      "isActive": false,
+      "citizenship": "РФ"
+    },
+    {
+      "city": "Кемерово",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116000
+    },
+    {
+      "city": "Новороссийск",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 235,
+      "monthlyMaxRub": 118480
+    },
+    {
+      "city": "Петрозаводск",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 250,
+      "monthlyMaxRub": 125920
+    },
+    {
+      "city": "Кострома",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116000
+    },
+    {
+      "city": "Балаково",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116000
+    }
+  ]
+}

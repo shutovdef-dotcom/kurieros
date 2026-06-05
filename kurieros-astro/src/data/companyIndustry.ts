@@ -25,6 +25,7 @@ export const COMPANY_INDUSTRY: Readonly<Record<string, string>> = {
   Ozon: 'Логистика и электронная коммерция',
   'Ozon fresh': 'Курьерская доставка',
   Efin: 'Финансовые услуги',
+  Самокат: 'Курьерская доставка',
 };
 
 /**
