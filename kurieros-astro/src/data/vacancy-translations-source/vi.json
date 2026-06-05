@@ -384,23 +384,23 @@
     ]
   },
   "samokat-courier": {
-    "shortDescription": "Доставляйте заказы клиентам сервиса Самокат на самокате или велосипеде: доход по часам, заказам и весу, надбавки за погоду. Часы доставки выбираете сами, договор о сотрудничестве — за час.",
-    "description": "Мы — официальный партнёр онлайн-магазина Самокат (продукты и товары для дома с доставкой от 15 минут). Ищем курьеров-партнёров {cityPrep}. Доход формируется за количество часов и обслуженных клиентов; добавляем за сложные погодные условия и вес заказов, есть доплата за доставку в понедельник и воскресенье и бонус за каждого приведённого друга. Часы доставки (тайм-слоты) выбираете сами. Заключение договора о сотрудничестве — в течение часа, перед стартом — вводный инструктаж по стандартам доставки сервиса Самокат.",
+    "shortDescription": "Giao đơn hàng cho khách hàng của dịch vụ Samokat bằng xe scooter hoặc xe đạp: thu nhập theo giờ, theo đơn và theo trọng lượng, phụ cấp thời tiết. Bạn tự chọn giờ giao hàng, hợp đồng hợp tác — trong vòng một giờ.",
+    "description": "Chúng tôi là đối tác chính thức của cửa hàng trực tuyến Samokat (thực phẩm và hàng gia dụng giao từ 15 phút). Chúng tôi đang tìm đối tác giao hàng {cityPrep}. Thu nhập được tính dựa trên số giờ làm và số khách hàng đã phục vụ; cộng thêm cho điều kiện thời tiết khắc nghiệt và trọng lượng đơn hàng, có phụ cấp giao hàng vào thứ Hai và Chủ Nhật cùng tiền thưởng cho mỗi người bạn được giới thiệu. Bạn tự chọn giờ giao hàng (khung giờ). Ký hợp đồng hợp tác — trong vòng một giờ, trước khi bắt đầu — buổi hướng dẫn nhập môn về tiêu chuẩn giao hàng của dịch vụ Samokat.",
     "requirements": [
-      "Возраст от 18 лет (до 55 лет).",
-      "Гражданство РФ; в ряде городов — также страны ЕАЭС / СНГ.",
-      "Смартфон на Android 5.0 и выше.",
-      "Свой самокат или велосипед.",
-      "Готовность доставлять заказы вовремя."
+      "Độ tuổi từ 18 (đến 55 tuổi).",
+      "Quốc tịch РФ; ở một số thành phố — cũng nhận công dân các nước ЕАЭС / СНГ.",
+      "Điện thoại thông minh chạy Android 5.0 trở lên.",
+      "Xe scooter hoặc xe đạp riêng.",
+      "Sẵn sàng giao đơn hàng đúng giờ."
     ],
     "benefits": [
-      "Доход по количеству часов, обслуженных клиентов и весу заказов.",
-      "Надбавки за сложные погодные условия и вес заказов.",
-      "Доплата за доставку в понедельник и воскресенье.",
-      "Бонус за каждого приведённого друга.",
-      "Часы доставки (тайм-слоты) выбираете сами.",
-      "Заключение договора о сотрудничестве в течение часа.",
-      "Вводный инструктаж — обучение стандартам доставки сервиса Самокат."
+      "Thu nhập theo số giờ, số khách hàng đã phục vụ và trọng lượng đơn hàng.",
+      "Phụ cấp cho điều kiện thời tiết khắc nghiệt và trọng lượng đơn hàng.",
+      "Phụ cấp giao hàng vào thứ Hai và Chủ Nhật.",
+      "Tiền thưởng cho mỗi người bạn được giới thiệu.",
+      "Bạn tự chọn giờ giao hàng (khung giờ).",
+      "Ký hợp đồng hợp tác trong vòng một giờ.",
+      "Hướng dẫn nhập môn — đào tạo về tiêu chuẩn giao hàng của dịch vụ Samokat."
     ],
     "requiredDocuments": [
       "Hộ chiếu.",

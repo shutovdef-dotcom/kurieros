@@ -384,23 +384,23 @@
     ]
   },
   "samokat-courier": {
-    "shortDescription": "Доставляйте заказы клиентам сервиса Самокат на самокате или велосипеде: доход по часам, заказам и весу, надбавки за погоду. Часы доставки выбираете сами, договор о сотрудничестве — за час.",
-    "description": "Мы — официальный партнёр онлайн-магазина Самокат (продукты и товары для дома с доставкой от 15 минут). Ищем курьеров-партнёров {cityPrep}. Доход формируется за количество часов и обслуженных клиентов; добавляем за сложные погодные условия и вес заказов, есть доплата за доставку в понедельник и воскресенье и бонус за каждого приведённого друга. Часы доставки (тайм-слоты) выбираете сами. Заключение договора о сотрудничестве — в течение часа, перед стартом — вводный инструктаж по стандартам доставки сервиса Самокат.",
+    "shortDescription": "Samokat xizmati mijozlariga buyurtmalarni samokat yoki velosipedda yetkazing: soatlar, buyurtmalar va og'irlik bo'yicha daromad, ob-havo uchun ustamalar. Yetkazib berish soatlarini o'zingiz tanlaysiz, hamkorlik shartnomasi — bir soatda.",
+    "description": "Biz — Samokat onlayn do'konining rasmiy hamkoriyiz (oziq-ovqat va uy mahsulotlari 15 daqiqadan yetkazib berish bilan). Kuryer-hamkorlarni qidiramiz {cityPrep}. Daromad ishlangan soatlar va xizmat ko'rsatilgan mijozlar soniga qarab shakllanadi; murakkab ob-havo sharoiti va buyurtmalar og'irligi uchun qo'shamiz, dushanba va yakshanba kunlari yetkazib berish uchun qo'shimcha to'lov va taklif qilgan har bir do'st uchun bonus bor. Yetkazib berish soatlarini (taym-slotlarni) o'zingiz tanlaysiz. Hamkorlik shartnomasini tuzish — bir soat ichida, boshlashdan oldin — Samokat xizmati yetkazib berish standartlari bo'yicha kirish yo'riqnomasi.",
     "requirements": [
-      "Возраст от 18 лет (до 55 лет).",
-      "Гражданство РФ; в ряде городов — также страны ЕАЭС / СНГ.",
-      "Смартфон на Android 5.0 и выше.",
-      "Свой самокат или велосипед.",
-      "Готовность доставлять заказы вовремя."
+      "Yosh 18 dan (55 yoshgacha).",
+      "РФ fuqaroligi; bir qator shaharlarda — shuningdek ЕАЭС / СНГ mamlakatlari.",
+      "Android 5.0 va undan yuqori smartfon.",
+      "Shaxsiy samokat yoki velosiped.",
+      "Buyurtmalarni o'z vaqtida yetkazishga tayyorlik."
     ],
     "benefits": [
-      "Доход по количеству часов, обслуженных клиентов и весу заказов.",
-      "Надбавки за сложные погодные условия и вес заказов.",
-      "Доплата за доставку в понедельник и воскресенье.",
-      "Бонус за каждого приведённого друга.",
-      "Часы доставки (тайм-слоты) выбираете сами.",
-      "Заключение договора о сотрудничестве в течение часа.",
-      "Вводный инструктаж — обучение стандартам доставки сервиса Самокат."
+      "Soatlar soni, xizmat ko'rsatilgan mijozlar va buyurtmalar og'irligi bo'yicha daromad.",
+      "Murakkab ob-havo sharoiti va buyurtmalar og'irligi uchun ustamalar.",
+      "Dushanba va yakshanba kunlari yetkazib berish uchun qo'shimcha to'lov.",
+      "Taklif qilgan har bir do'st uchun bonus.",
+      "Yetkazib berish soatlarini (taym-slotlarni) o'zingiz tanlaysiz.",
+      "Hamkorlik shartnomasini bir soat ichida tuzish.",
+      "Kirish yo'riqnomasi — Samokat xizmati yetkazib berish standartlariga o'rgatish."
     ],
     "requiredDocuments": [
       "Pasport.",
