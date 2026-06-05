@@ -2,8 +2,8 @@
   "company": "Самокат",
   "sourceUrl": "https://docs.google.com/spreadsheets/d/1pq7lPgzaipVA1kNjo3brk1eZiADLfsh_siBrC9Px5tU/edit?gid=1564426040",
   "salarySourceUrl": "https://docs.google.com/spreadsheets/d/1hCBYoVcQdfzI8IpWLGerjuym5G0B5A1MFZi3_hmIRJU/edit?gid=2013337120",
-  "updatedAt": "2026-06-05",
-  "offerCount": 88,
+  "updatedAt": "2026-06-06",
+  "offerCount": 100,
   "offers": [
     {
       "city": "Барнаул",
@@ -480,14 +480,18 @@
     {
       "city": "Наро-Фоминск",
       "transport": "bicycle",
-      "isActive": false,
-      "citizenship": "РФ"
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
     },
     {
       "city": "Королёв",
       "transport": "bicycle",
-      "isActive": false,
-      "citizenship": "РФ"
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
     },
     {
       "city": "Ногинск",
@@ -508,44 +512,58 @@
     {
       "city": "Щёлково",
       "transport": "bicycle",
-      "isActive": false,
-      "citizenship": "РФ"
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
     },
     {
       "city": "Видное",
       "transport": "bicycle",
-      "isActive": false,
-      "citizenship": "РФ"
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
     },
     {
       "city": "Балашиха",
       "transport": "bicycle",
-      "isActive": false,
-      "citizenship": "РФ"
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
     },
     {
       "city": "Химки",
       "transport": "bicycle",
-      "isActive": false,
-      "citizenship": "РФ"
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
     },
     {
       "city": "Звенигород",
       "transport": "bicycle",
-      "isActive": false,
-      "citizenship": "РФ"
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
     },
     {
       "city": "Ивантеевка",
       "transport": "bicycle",
-      "isActive": false,
-      "citizenship": "РФ"
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
     },
     {
       "city": "Мытищи",
       "transport": "bicycle",
-      "isActive": false,
-      "citizenship": "РФ"
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
     },
     {
       "city": "Орехово-Зуево",
@@ -558,74 +576,98 @@
     {
       "city": "Люберцы",
       "transport": "bicycle",
-      "isActive": false,
-      "citizenship": "РФ"
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
     },
     {
       "city": "Троицк",
       "transport": "bicycle",
-      "isActive": false,
-      "citizenship": "РФ"
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
     },
     {
       "city": "Зеленоград",
       "transport": "bicycle",
-      "isActive": false,
-      "citizenship": "РФ"
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
     },
     {
       "city": "Красногорск",
       "transport": "bicycle",
-      "isActive": false,
-      "citizenship": "РФ"
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
     },
     {
       "city": "Солнечногорск",
       "transport": "bicycle",
-      "isActive": false,
-      "citizenship": "РФ"
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
     },
     {
       "city": "Одинцово",
       "transport": "bicycle",
-      "isActive": false,
-      "citizenship": "РФ"
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
     },
     {
       "city": "Домодедово",
       "transport": "bicycle",
-      "isActive": false,
-      "citizenship": "РФ"
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
     },
     {
       "city": "Фрязино",
       "transport": "bicycle",
-      "isActive": false,
-      "citizenship": "РФ"
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
     },
     {
       "city": "Подольск",
       "transport": "bicycle",
-      "isActive": false,
-      "citizenship": "РФ"
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
     },
     {
       "city": "Лобня",
       "transport": "bicycle",
-      "isActive": false,
-      "citizenship": "РФ"
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
     },
     {
       "city": "Раменское",
       "transport": "bicycle",
-      "isActive": false,
-      "citizenship": "РФ"
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
     },
     {
       "city": "Котельники",
       "transport": "bicycle",
-      "isActive": false,
-      "citizenship": "РФ"
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 170560
     },
     {
       "city": "Кемерово",
@@ -666,6 +708,102 @@
       "citizenship": "РФ",
       "hourlyRub": 230,
       "monthlyMaxRub": 116000
+    },
+    {
+      "city": "Анапа",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 255,
+      "monthlyMaxRub": 128400
+    },
+    {
+      "city": "Йошкар-Ола",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 265,
+      "monthlyMaxRub": 133360
+    },
+    {
+      "city": "Курган",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116000
+    },
+    {
+      "city": "Нефтекамск",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116000
+    },
+    {
+      "city": "Нефтеюганск",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 320,
+      "monthlyMaxRub": 160640
+    },
+    {
+      "city": "Новокузнецк",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116000
+    },
+    {
+      "city": "Новочебоксарск",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 265,
+      "monthlyMaxRub": 133360
+    },
+    {
+      "city": "Салават",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116000
+    },
+    {
+      "city": "Саранск",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116000
+    },
+    {
+      "city": "Сочи",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 340,
+      "monthlyMaxRub": 171200
+    },
+    {
+      "city": "Стерлитамак",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 230,
+      "monthlyMaxRub": 116000
+    },
+    {
+      "city": "Сургут",
+      "transport": "bicycle",
+      "isActive": true,
+      "citizenship": "РФ",
+      "hourlyRub": 320,
+      "monthlyMaxRub": 161280
     }
   ]
 }
