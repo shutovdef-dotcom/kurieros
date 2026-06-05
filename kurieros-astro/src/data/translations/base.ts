@@ -70,7 +70,7 @@ export const base = {
     btn_close: "Продолжить без выбора"
   },
   job: {
-    salary: "Зарплата",
+    salary: "Доход",
     schedule: "График",
     education: "Образование",
     experience: "Опыт",
