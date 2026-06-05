@@ -1,8 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Самокат">
-  <rect width="64" height="64" rx="14" fill="#FF2052"/>
-  <g fill="none" stroke="#ffffff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="18" cy="46" r="6"/>
-    <circle cx="46" cy="46" r="6"/>
-    <path d="M15 40H46M46 40V14M39 14H52"/>
-  </g>
+  <rect width="64" height="64" rx="14" fill="#F9485C"/>
+  <path fill="#ffffff" fill-rule="evenodd" d="M32 14.5a17.5 17.5 0 1 0 0 35 17.5 17.5 0 0 0 0-35Zm0 9.5a8 8 0 1 0 0 16 8 8 0 0 0 0-16Z"/>
+  <circle cx="31" cy="15.2" r="3.1" fill="#F9485C"/>
 </svg>
