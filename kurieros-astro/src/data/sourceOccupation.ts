@@ -26,6 +26,7 @@ export const SOURCE_OCCUPATION: Readonly<Record<string, string>> = {
   'yandex-eda-courier': '53-3031 Driver/Sales Workers',
   'rocket:courier': '53-3031 Driver/Sales Workers',
   'express:courier': '53-3031 Driver/Sales Workers',
+  'samokat-courier': '53-3031 Driver/Sales Workers',
 
   // Bank field representatives — actually sell financial services (cards,
   // accounts, loans) to businesses and individuals, not retail merchandise.

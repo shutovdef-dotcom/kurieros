@@ -44,6 +44,13 @@ export const EFIN_LOGO =
   'https://agents.pampadu.ru/api/file/ViewFile?type=1&name=314d3acb-aba3-488c-9ddb-9c41dece71ca.png';
 export const EFIN_APPLY = 'https://trk.ppdu.ru/click/VuqTAiCx?erid=2SDnjdmxiVK';
 
+// === Самокат ========================================================
+// Самокат courier-partner — CPA via leads.su (same network as Альфа-Банк).
+// Local SVG placeholder in /public/logos/ until a real brand SVG is supplied.
+export const SAMOKAT_LOGO = '/logos/samokat.svg';
+export const SAMOKAT_APPLY =
+  'https://pxl.leads.su/click/dda95ad94f19aab8dca8a2a2647a6742';
+
 // === Альфа-Банк =====================================================
 export const ALFA_BANK_LOGO = '/logos/alfa-bank.svg';
 export const ALFA_BANK_APPLY =
