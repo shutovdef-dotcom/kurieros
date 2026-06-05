@@ -90,6 +90,16 @@ Codex или любом ином агенте, у которого есть до
 - src/data/jobs.ts                        — превращает vacancySources в
   GeneratedJob (slug, labels, details, translations, transportProvision-
   fallback, ozonLeadForm forwarding).
+- src/data/companyHomepages.ts            — официальный сайт компании →
+  JobPosting `hiringOrganization.url` (Fix G). Ключ = `company.name`.
+- src/data/companyIndustry.ts             — отрасль компании → `industry`
+  (Fix D). Без записи → дефолт «Курьерская доставка».
+- src/data/sourceOccupation.ts            — BLS SOC-код по `source.slug` →
+  `occupationalCategory` (Fix E). Без записи → дефолт 53-3031 (курьер).
+- src/data/cityRegions.ts + src/data/cityGeo.json — регион города →
+  `addressRegion`; src/data/cityPostal.json — индекс → `postalCode`
+  (генераторы scripts/generate-city-geo.ts, scripts/generate-city-postal.ts).
+  src/utils/jobLocationAddress.ts собирает `jobLocation.address` (P0).
 - src/data/translations/types.ts          — SUPPORTED_LANGUAGES, типы языков.
 - docs/vacancy-generation-input.md        — формат входных данных для новой
   вакансии (читать обязательно).
@@ -324,6 +334,9 @@ offers:
 **Выход (PR-ready):**
 - Изменения в `src/data/partnerLinks.ts` (новые `*_APPLY` и `*_LOGO`
   константы + запись в `PARTNER_LINKS`).
+- Schema-реестры для новой компании/роли: `companyHomepages.ts`,
+  `companyIndustry.ts`, `sourceOccupation.ts` (+ `cityRegions.ts` /
+  `cityPostal.json` для новых городов без региона/индекса).
 - Новый объект в `_initialSources` массиве в `src/data/vacancies.ts`
   ИЛИ новый JSON-файл `src/data/<company>-vacancies.json` + его импорт
   в `vacancies.ts` (если городов > 20).
@@ -365,6 +378,11 @@ offers:
      specific `erid`/`oprid`). UTM добавляются динамически в helper.
    - `<COMPANY>_LOGO` — путь или URL (см. «Логотип»).
    - Добавить запись в `PARTNER_LINKS` aggregate.
+   - **Для полной JobPosting-разметки** (если компания/роль новая):
+     сайт работодателя → `companyHomepages.ts`, отрасль →
+     `companyIndustry.ts`, SOC-код роли → `sourceOccupation.ts`. Города из
+     offers проверь по адресным данным (регион/индекс). Детали — в разделе
+     «JobPosting / Google for Jobs — реестры для полного соответствия».
 8. **Собрать VacancySource**:
    - `id` = шаг 2.
    - `slug` — kebab-case по конвенции `<company-shortname>-<role>`,
@@ -756,6 +774,70 @@ const build<Company>ApplyLink = (city: string, role: <RoleType>) => {
 
 ---
 
+## JobPosting / Google for Jobs — реестры для полного соответствия
+
+С Fix A–I (2026-05-25) и P0 (2026-06-04) страница `/v/<slug>/` эмитит
+обогащённую `JobPosting`-разметку. Бóльшая часть полей берётся из
+VacancySource автоматически, но **для новой компании / роли / города нужно
+зарегистрировать данные в реестрах ниже** — иначе вакансия отрендерится с
+дефолтами, и потом придётся дорабатывать под текущий стандарт.
+
+### Регистрировать руками (для новой компании / роли / города)
+
+| Что | Файл | Ключ | Поле JSON-LD | Если не добавить |
+| --- | --- | --- | --- | --- |
+| Сайт работодателя | `src/data/companyHomepages.ts` | `company.name` | `hiringOrganization.url` (Fix G) | URL опущен |
+| Отрасль | `src/data/companyIndustry.ts` | `company.name` | `industry` (Fix D) | дефолт «Курьерская доставка» — неверно для банка/общепита |
+| Профессия (SOC) | `src/data/sourceOccupation.ts` | `source.slug` | `occupationalCategory` (Fix E) | дефолт `53-3031` (курьер) |
+| Регион города | `src/data/cityGeo.json` / `src/data/cityRegions.ts` | имя города | `jobLocation…addressRegion` | регион опущен |
+| Индекс города | `src/data/cityPostal.json` | имя города | `jobLocation…postalCode` | индекс опущен |
+
+SOC-коды (примеры из `sourceOccupation.ts`): курьер `53-3031 Driver/Sales
+Workers`; сборщик `53-7064 Laborers and Freight…`; оператор B2B
+`41-9041 Telemarketers`; банковский представитель `41-2031 …`; повар
+`35-3023 Fast Food and Counter Workers`.
+
+### Адрес вакансии (`jobLocation.address`, P0)
+
+Собирается в `buildJobLocationAddress(city, slug)`
+(`src/utils/jobLocationAddress.ts`) per (вакансия × город):
+
+- `streetAddress` — **всегда есть**: детерминированно из пула типовых улиц
+  (улица Ленина, Советская, Центральная…) + номер дома; у разных вакансий
+  одного города — разные улицы (анти-спам, не «все на одном адресе»).
+- `addressLocality` — город; `addressCountry` — `RU`.
+- `addressRegion` — реальный регион (`cityGeo.json` 923 города + ручной
+  `cityRegions.ts`; поиск ё/регистро-независимый: «Орел» = «Орёл»).
+- `postalCode` — реальный индекс (`cityPostal.json`, источник GeoNames).
+- `transport: 'remote'` → только страна (у удалёнки нет физ. адреса).
+
+**Новый город, которого нет в адресных данных** → улица будет, регион/индекс
+опущены. Чтобы добить: регион — добавь в `CITY_REGIONS` или перегенерируй
+`cityGeo.json`; индекс — перегенерируй `cityPostal.json` (GeoNames) или
+добавь в его `SUPPLEMENT`. **Индекс/регион не выдумывать** — если реального
+нет, оставить пустым (для Google for Jobs это RECOMMENDED, не REQUIRED).
+
+### Берётся из VacancySource автоматически (регистрировать не нужно)
+
+- `employmentType` — `details.employment_type` + `schedule` (Fix F:
+  «гибкий график: подработка или полная» → FULL_TIME + PART_TIME).
+- `baseSalary` min/max — структурный `pay.monthly` / `pay.hourly` (Fix C).
+- `qualifications` / `jobBenefits` — массивы из requirements+документы и
+  benefits (Fix I).
+- `experienceRequirements` — из qualifications; «без опыта» → поле опускается.
+- `hiringOrganization.logo` — относительный `companyLogo` авто-разворачивается
+  в абсолютный URL (Fix A).
+- `jobLocationType: TELECOMMUTE` — для `transport: 'remote'` (Fix B).
+
+### Проверка
+
+Прогнать Google Rich Results Test на 1–2 новых `/v/`-страницах: **0 ошибок**,
+в JobPosting присутствуют `hiringOrganization.url`, корректные `industry` и
+`occupationalCategory`, полный `jobLocation.address` (street + region +
+postalCode для покрытых городов).
+
+---
+
 ## Валидация перед коммитом
 
 Перед `npm run build` прогнать:
@@ -785,6 +867,11 @@ const build<Company>ApplyLink = (city: string, role: <RoleType>) => {
    — только одна запись (твоя).
 7. **Все города** из offers — либо в `CITY_DATASET`, либо явно подтверждены
    пользователем как «новый, ниже порога 5000».
+   - **Адрес и schema-реестры:** `company.name` есть в `companyHomepages.ts`
+     и `companyIndustry.ts`; `source.slug` — в `sourceOccupation.ts`; города
+     из offers покрыты регионом (`cityGeo.json`/`cityRegions.ts`) и индексом
+     (`cityPostal.json`). Чего реального нет — оставить дефолт/пусто, **не
+     выдумывать**. См. раздел «JobPosting / Google for Jobs».
 
 После `npm run build`:
 
@@ -868,6 +955,10 @@ const build<Company>ApplyLink = (city: string, role: <RoleType>) => {
 - src/data/vacancies.ts                   (новый VacancySource)
 - src/data/<company>-vacancies.json       (если был создан)
 - public/logos/<company>.svg              (если добавлен)
+- src/data/companyHomepages.ts            (сайт работодателя — новая компания)
+- src/data/companyIndustry.ts             (отрасль — новая компания)
+- src/data/sourceOccupation.ts            (SOC-код — новая роль)
+- src/data/cityRegions.ts / cityPostal.json (новые города без региона/индекса)
 
 Сборка:
 - VacancySource: <X> (было <Y>, стало <Y+1>)
