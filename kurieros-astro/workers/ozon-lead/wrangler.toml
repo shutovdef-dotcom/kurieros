@@ -3,6 +3,14 @@ main = "src/index.js"
 compatibility_date = "2025-04-01"
 workers_dev = true
 
+# Observability: persist Worker logs (incl. the Telegram-failure warnings
+# added in src/index.js) so a stale/revoked bot token is visible in the
+# dashboard instead of failing silently. Keeping it here means a future
+# `wrangler deploy` won't turn logging back off.
+[observability.logs]
+enabled = true
+invocation_logs = true
+
 # Per-IP rate limit: 5 leads in 60 seconds. Anything over -> 429.
 # Required so a bot can't burn Ozon SMS / Telegram quota by curling
 # this endpoint directly (CORS-only protection is browser-side only).
