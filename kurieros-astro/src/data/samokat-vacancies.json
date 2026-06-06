@@ -8,7 +8,7 @@
     {
       "city": "Барнаул",
       "transport": "bicycle",
-      "isActive": false,
+      "isActive": true,
       "citizenship": "РФ",
       "hourlyRub": 230,
       "monthlyMaxRub": 116000
@@ -32,7 +32,7 @@
     {
       "city": "Волгоград",
       "transport": "bicycle",
-      "isActive": false,
+      "isActive": true,
       "citizenship": "РФ",
       "hourlyRub": 250,
       "monthlyMaxRub": 126560
@@ -80,7 +80,7 @@
     {
       "city": "Геленджик",
       "transport": "bicycle",
-      "isActive": false,
+      "isActive": true,
       "citizenship": "РФ",
       "hourlyRub": 280,
       "monthlyMaxRub": 140800
@@ -104,7 +104,7 @@
     {
       "city": "Курск",
       "transport": "bicycle",
-      "isActive": false,
+      "isActive": true,
       "citizenship": "РФ",
       "hourlyRub": 260,
       "monthlyMaxRub": 130880
@@ -160,7 +160,7 @@
     {
       "city": "Омск",
       "transport": "bicycle",
-      "isActive": false,
+      "isActive": true,
       "citizenship": "РФ",
       "hourlyRub": 260,
       "monthlyMaxRub": 130880
@@ -168,7 +168,7 @@
     {
       "city": "Оренбург",
       "transport": "bicycle",
-      "isActive": false,
+      "isActive": true,
       "citizenship": "РФ",
       "hourlyRub": 230,
       "monthlyMaxRub": 116000
@@ -272,7 +272,7 @@
     {
       "city": "Рязань",
       "transport": "bicycle",
-      "isActive": false,
+      "isActive": true,
       "citizenship": "РФ",
       "hourlyRub": 310,
       "monthlyMaxRub": 155680
@@ -312,7 +312,7 @@
     {
       "city": "Нижний Тагил",
       "transport": "bicycle",
-      "isActive": false,
+      "isActive": true,
       "citizenship": "РФ",
       "hourlyRub": 230,
       "monthlyMaxRub": 116000
@@ -328,7 +328,7 @@
     {
       "city": "Ставрополь",
       "transport": "bicycle",
-      "isActive": false,
+      "isActive": true,
       "citizenship": "РФ",
       "hourlyRub": 230,
       "monthlyMaxRub": 116000
@@ -352,7 +352,7 @@
     {
       "city": "Томск",
       "transport": "bicycle",
-      "isActive": false,
+      "isActive": true,
       "citizenship": "РФ",
       "hourlyRub": 230,
       "monthlyMaxRub": 116000
@@ -368,7 +368,7 @@
     {
       "city": "Тюмень",
       "transport": "bicycle",
-      "isActive": false,
+      "isActive": true,
       "citizenship": "РФ",
       "hourlyRub": 250,
       "monthlyMaxRub": 125920
@@ -384,7 +384,7 @@
     {
       "city": "Ханты-Мансийск",
       "transport": "bicycle",
-      "isActive": false,
+      "isActive": true,
       "citizenship": "РФ",
       "hourlyRub": 350,
       "monthlyMaxRub": 175520
@@ -392,7 +392,7 @@
     {
       "city": "Нижневартовск",
       "transport": "bicycle",
-      "isActive": false,
+      "isActive": true,
       "citizenship": "РФ",
       "hourlyRub": 340,
       "monthlyMaxRub": 170560
@@ -400,7 +400,7 @@
     {
       "city": "Магнитогорск",
       "transport": "bicycle",
-      "isActive": false,
+      "isActive": true,
       "citizenship": "РФ",
       "hourlyRub": 230,
       "monthlyMaxRub": 116000
@@ -432,7 +432,7 @@
     {
       "city": "Старый Оскол",
       "transport": "bicycle",
-      "isActive": false,
+      "isActive": true,
       "citizenship": "РФ",
       "hourlyRub": 260,
       "monthlyMaxRub": 130880
@@ -440,7 +440,7 @@
     {
       "city": "Нижнекамск",
       "transport": "bicycle",
-      "isActive": false,
+      "isActive": true,
       "citizenship": "РФ",
       "hourlyRub": 270,
       "monthlyMaxRub": 135840
@@ -448,7 +448,7 @@
     {
       "city": "Астрахань",
       "transport": "bicycle",
-      "isActive": false,
+      "isActive": true,
       "citizenship": "РФ",
       "hourlyRub": 230,
       "monthlyMaxRub": 116640
@@ -496,7 +496,7 @@
     {
       "city": "Ногинск",
       "transport": "bicycle",
-      "isActive": false,
+      "isActive": true,
       "citizenship": "РФ",
       "hourlyRub": 270,
       "monthlyMaxRub": 135840
@@ -568,7 +568,7 @@
     {
       "city": "Орехово-Зуево",
       "transport": "bicycle",
-      "isActive": false,
+      "isActive": true,
       "citizenship": "РФ",
       "hourlyRub": 270,
       "monthlyMaxRub": 135840
