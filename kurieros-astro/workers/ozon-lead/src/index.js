@@ -121,7 +121,7 @@ async function notifyTelegram(env, { name, phone, transport, vacancy, cityID, hi
 		.filter(Boolean)
 		.join('\n');
 	try {
-		await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+		const res = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
@@ -131,6 +131,19 @@ async function notifyTelegram(env, { name, phone, transport, vacancy, cityID, hi
 				disable_web_page_preview: true,
 			}),
 		});
+		// fetch() only rejects on network errors — a 4xx from Telegram
+		// (401 invalid/revoked bot token, 403 bot blocked by the user,
+		// 400 wrong chat_id) RESOLVES with res.ok === false. Without this
+		// check those failures were SILENT: the lead still reached Ozon but
+		// the owner got no alert and nothing was logged. Surface the status
+		// + Telegram's error description so a stale token is visible in the
+		// Cloudflare Worker logs (this is exactly how alerts broke once).
+		if (!res.ok) {
+			const detail = await res.text().catch(() => '');
+			console.warn(
+				`[ozon-lead] Telegram sendMessage failed: HTTP ${res.status} ${detail.slice(0, 300)}`,
+			);
+		}
 	} catch (err) {
 		// Best-effort — Telegram failure must not break the lead flow.
 		// Log it so a missing/invalid bot token or a Telegram outage is
