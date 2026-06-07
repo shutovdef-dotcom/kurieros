@@ -23,7 +23,7 @@ export type { ReviewLike };
 export const MIN_REVIEWS_PER_BRAND = 3;
 
 /**
- * Explicit map from the exact 8 display names used in reviews.json to
+ * Explicit map from the exact 9 display names used in reviews.json to
  * their corresponding /companies/{slug}/ page slugs.
  *
  * Do NOT derive this from slugifyCompany — it does not round-trip all
@@ -41,6 +41,7 @@ export const REVIEWS_BRAND_SLUG: Readonly<Record<string, string>> = {
   'Т-Банк': 't-bank',
   'Яндекс Еда': 'yandex-eda',
   'Бургер Кинг': 'burger-king',
+  'Самокат': 'samokat',
   'Ozon fresh': 'ozon-fresh',
   'Ozon': 'ozon',
 } as const;

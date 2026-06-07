@@ -47,11 +47,6 @@ const formatDate = (dateStr: string): string => {
   }
 };
 
-/**
- * Maximum percentage width for the widest bar in a brand's distribution.
- * Each bar width is proportional within the brand's own max bucket.
- */
-const MAX_BAR_PCT = 100;
 ---
 
 <div class="reviews-aggregate">
@@ -129,19 +124,21 @@ const MAX_BAR_PCT = 100;
           </div>
 
           <!-- Rating distribution bars -->
-          <div class="ra-distribution" aria-label="Распределение оценок">
+          <div class="ra-distribution" role="group" aria-label="Распределение оценок">
             {([5, 4, 3, 2, 1] as const).map((star) => {
               const count = summary.ratingDistribution[star] ?? 0;
-              const pct = Math.round((count / maxBucketCount) * MAX_BAR_PCT);
               return (
                 <div class="ra-dist-row">
                   <span class="ra-dist-label">{star}★</span>
-                  <div class="ra-dist-track" role="meter" aria-label={`${star} звезды: ${count}`}>
-                    <div
-                      class="ra-dist-bar"
-                      style={`width: ${pct}%`}
-                    />
-                  </div>
+                  <meter
+                    class="ra-dist-meter"
+                    min="0"
+                    max={maxBucketCount}
+                    value={count}
+                    aria-label={`${star} звезды: ${count}`}
+                  >
+                    {count}
+                  </meter>
                   <span class="ra-dist-count">{count}</span>
                 </div>
               );
@@ -368,18 +365,28 @@ const MAX_BAR_PCT = 100;
     color: var(--ink-500);
     text-align: right;
   }
-  .ra-dist-track {
-    background: var(--ink-100);
-    border-radius: 4px;
+  .ra-dist-meter {
+    display: block;
+    width: 100%;
     height: 8px;
-    overflow: hidden;
-  }
-  .ra-dist-bar {
-    height: 100%;
-    background: var(--brand-700);
+    border: 0;
     border-radius: 4px;
+    background: var(--ink-100);
+  }
+  .ra-dist-meter::-webkit-meter-bar {
+    border: 0;
+    border-radius: 4px;
+    background: var(--ink-100);
+  }
+  .ra-dist-meter::-webkit-meter-optimum-value {
     min-width: 2px;
-    transition: width 0.2s ease;
+    border-radius: 4px;
+    background: var(--brand-700);
+  }
+  .ra-dist-meter::-moz-meter-bar {
+    min-width: 2px;
+    border-radius: 4px;
+    background: var(--brand-700);
   }
   .ra-dist-count {
     font-size: 12px;
@@ -595,10 +602,12 @@ const MAX_BAR_PCT = 100;
   :global(:where(html, body).dark-mode) .ra-brand {
     border-top-color: var(--ink-200);
   }
-  :global(:where(html, body).dark-mode) .ra-dist-track {
+  :global(:where(html, body).dark-mode) .ra-dist-meter,
+  :global(:where(html, body).dark-mode) .ra-dist-meter::-webkit-meter-bar {
     background: var(--ink-200);
   }
-  :global(:where(html, body).dark-mode) .ra-dist-bar {
+  :global(:where(html, body).dark-mode) .ra-dist-meter::-webkit-meter-optimum-value,
+  :global(:where(html, body).dark-mode) .ra-dist-meter::-moz-meter-bar {
     background: var(--brand-500);
   }
   :global(:where(html, body).dark-mode) .ra-exit-ramp {

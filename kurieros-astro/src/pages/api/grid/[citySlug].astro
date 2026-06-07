@@ -25,13 +25,15 @@ import { citiesFromJobs } from '../../../utils/citiesIndex';
 // The fragment is server-rendered with the SAME `<JobCard>` component
 // the full listing page uses, so the (complex, ~566-LOC) card markup
 // is never duplicated in client JS. The slicing below mirrors
-// `JobGrid.astro` in its `limit=24, revealable` mode exactly:
+// `JobGrid.astro` in its `limit=24, revealable` mode:
 //   • first 24 matched jobs → visible `.job-card`s
-//   • the remainder         → `<template class="jobs-grid-overflow">`
+//   • remaining jobs        → static `/api/grid-batch/.../` fragments
 //   • zero matches          → `.no-results` block
-//   • `#jobs-grid` carries `data-overflow-count` + `data-batch-size`
+//   • `#jobs-grid` carries `data-overflow-count`, `data-batch-size` and
+//     `data-next-batch-url`
 // so the client's `swapGridContent` whitelist-clone (PR #174) and the
-// C2 «reveal more» logic keep working unchanged after a hot-swap.
+// C2 «reveal more» logic keep working after a hot-swap without making the
+// city fragment itself heavy.
 //
 // CONSUMER: `src/components/JobGrid.astro` → `renderJobsForCity()`.
 // It fetches `/api/grid/<citySlug>/`, parses the fragment, and feeds
@@ -54,6 +56,7 @@ export function getStaticPaths() {
 const VISIBLE_LIMIT = 24;
 
 const { cityName } = Astro.props as { cityName: string };
+const citySlug = Astro.params.citySlug || '';
 
 // Reuse the shared per-city Map (`jobsByCityIndex.ts` — built ONCE at
 // module load, not per page) — same data path `[slug].astro` uses for
@@ -62,19 +65,21 @@ const { cityName } = Astro.props as { cityName: string };
 const matchedJobs = getCityJobsFromMap(jobsByCity, cityName);
 
 const visibleJobs = matchedJobs.slice(0, VISIBLE_LIMIT);
-const overflowJobs = matchedJobs.slice(VISIBLE_LIMIT);
-const overflowCount = overflowJobs.length;
+const overflowCount = Math.max(0, matchedJobs.length - VISIBLE_LIMIT);
 
 // `swapGridContent` (JobGrid.astro) reads these two attributes off the
 // fetched `#jobs-grid` to keep the bottom-nav «Вакансии» reveal-more
 // flow working after a city hot-swap. `batchSize` mirrors
 // `JobGrid.astro`: `limitActive ? limit! : 24` → always 24 here.
 const batchSize = VISIBLE_LIMIT;
+const nextBatchUrl = overflowCount > 0
+	? `/api/grid-batch/rabota-kurerom-${citySlug}/2/`
+	: undefined;
 ---
 {/*
   Emit ONLY the `#jobs-grid` element — same id, class and data-* attrs
   the live grid on a city page carries. `swapGridContent` clones this
-  element's children (whitelisting `.job-card`, the overflow
+  element's children (whitelisting `.job-card`, a legacy overflow
   `<template>`, and `.no-results`) into the live grid. No surrounding
   layout, no <html>/<head> — Astro outputs exactly this markup.
 */}
@@ -83,6 +88,8 @@ const batchSize = VISIBLE_LIMIT;
 	id="jobs-grid"
 	data-overflow-count={overflowCount}
 	data-batch-size={batchSize}
+	data-total-count={matchedJobs.length}
+	data-next-batch-url={nextBatchUrl}
 >
 	{visibleJobs.length > 0 ? (
 		visibleJobs.map((job) => <JobCard job={job} />)
@@ -92,10 +99,5 @@ const batchSize = VISIBLE_LIMIT;
 			<p data-t="jobgrid.empty_desc">Попробуйте сбросить фильтры или изменить поиск.</p>
 			<a class="btn-secondary" href="/" data-t="jobgrid.reset">Сбросить всё</a>
 		</div>
-	)}
-	{overflowCount > 0 && (
-		<template class="jobs-grid-overflow">
-			{overflowJobs.map((job) => <JobCard job={job} />)}
-		</template>
 	)}
 </div>

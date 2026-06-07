@@ -34,6 +34,8 @@
 
 - SEO/GEO: `seo`, `indexlift-seo-auditor`, `research-ops`.
 - UI/frontend: `frontend-patterns`, `frontend-design`, `playwright` только для реальной визуальной проверки.
+- Preview handoff: после визуальных, роутинговых, контентных или других проверяемых в браузере изменений используй `local-preview-handoff`: пересобери/проверь preview, подними localhost при необходимости и дай точные ссылки.
+- Visual/browser QA: после визуальных или серьёзных браузерных функциональных изменений используй `visual-browser-qa`: проверь affected routes в Chrome и Safari/WebKit на desktop и особенно нескольких mobile viewport'ах, инспектируй скриншоты и не отдавай handoff без статуса QA.
 - GitHub/PR: GitHub plugin skills.
 - Browser/screenshot: `playwright`; сохраняй артефакты в файл, не печатай binary output.
 - Context/token: `strategic-compact`, `agent-sort`.

@@ -66,12 +66,10 @@ const { totalVacancies, companiesCount, citiesCount } = Astro.props;
 				<dt class="hero-v2-trust-label">Вакансий</dt>
 				<dd class="hero-v2-trust-num">{totalVacancies}</dd>
 			</div>
-			<span class="hero-v2-trust-sep" aria-hidden="true">·</span>
 			<div class="hero-v2-trust-item">
 				<dt class="hero-v2-trust-label">Компаний</dt>
 				<dd class="hero-v2-trust-num">{companiesCount}</dd>
 			</div>
-			<span class="hero-v2-trust-sep" aria-hidden="true">·</span>
 			<div class="hero-v2-trust-item">
 				<dt class="hero-v2-trust-label">Городов</dt>
 				<dd class="hero-v2-trust-num">{citiesCount}</dd>
@@ -287,6 +285,12 @@ const { totalVacancies, companiesCount, citiesCount } = Astro.props;
 		gap: 0.35rem;
 		margin: 0;
 	}
+	.hero-v2-trust-item + .hero-v2-trust-item::before {
+		content: "·";
+		color: var(--ink-300);
+		font-weight: 600;
+		margin-right: 0.3rem;
+	}
 	.hero-v2-trust-label {
 		margin: 0;
 		font-family: var(--font-main);
@@ -301,11 +305,6 @@ const { totalVacancies, companiesCount, citiesCount } = Astro.props;
 		font-size: 1.05rem;
 		color: var(--ink-900);
 	}
-	.hero-v2-trust-sep {
-		color: var(--ink-300);
-		font-weight: 600;
-	}
-
 	/* Dark mode for .hero-v2 */
 	:global(:where(html, body).dark-mode) .hero-v2 {
 		background: linear-gradient(135deg,
@@ -368,7 +367,7 @@ const { totalVacancies, companiesCount, citiesCount } = Astro.props;
 	:global(:where(html, body).dark-mode) .hero-v2-trust-num {
 		color: var(--ink-800);
 	}
-	:global(:where(html, body).dark-mode) .hero-v2-trust-sep {
+	:global(:where(html, body).dark-mode) .hero-v2-trust-item + .hero-v2-trust-item::before {
 		color: rgba(231, 234, 240, 0.3);
 	}
 
@@ -513,7 +512,7 @@ const { totalVacancies, companiesCount, citiesCount } = Astro.props;
 		.hero-v2-trust-num {
 			font-size: 0.9rem;
 		}
-		.hero-v2-trust-sep {
+		.hero-v2-trust-item + .hero-v2-trust-item::before {
 			font-size: 0.7rem;
 		}
 	}
@@ -527,7 +526,7 @@ const { totalVacancies, companiesCount, citiesCount } = Astro.props;
 		.hero-v2-trust-num {
 			font-size: 0.95rem;
 		}
-		.hero-v2-trust-sep {
+		.hero-v2-trust-item + .hero-v2-trust-item::before {
 			font-size: 0.7rem;
 			color: var(--ink-300);
 		}

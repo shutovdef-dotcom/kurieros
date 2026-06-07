@@ -1,5 +1,5 @@
 ---
-/* eslint-disable max-lines -- TODO(H14): JobGrid.astro is ~998 LOC (eslint count). Wave 21d (audit v5 M8) already extracted the two define:vars-free script blocks (scroll/back-to-top -> src/scripts/jobGridScroll.ts, geo-prefetch -> src/scripts/jobGridGeoPrefetch.ts) and the home-grid selection algorithm (distributeAcrossCities/cityRank -> src/utils/distributeJobs.ts). The remaining bulk is IIFE #1 (compare-list + city hot-swap + the inline stripEventHandlers twin + dropdown filtering + reveal-more) which is `is:inline` because it needs the define:vars constants and so cannot be moved to a bundled module. Next step to remove this disable: split IIFE #1's concerns into per-concern sub-components/handlers. */
+/* eslint-disable max-lines -- TODO(H14): JobGrid.astro is ~998 LOC (eslint count). Wave 21d (audit v5 M8) already extracted the scroll/back-to-top block (src/scripts/jobGridScroll.ts), geo-prefetch block (src/scripts/jobGridGeoPrefetch.ts), and the home-grid selection algorithm (distributeAcrossCities/cityRank -> src/utils/distributeJobs.ts). The remaining bulk is IIFE #1 (compare-list + city hot-swap + the inline stripEventHandlers twin + dropdown filtering + reveal-more). Next step to remove this disable: split IIFE #1's concerns into per-concern sub-components/handlers. */
 import JobCard from './JobCard.astro';
 import jobsData from '../data/jobs';
 import { filterJobsByCriteria } from '../utils/jobFilters';
@@ -17,11 +17,11 @@ interface Props {
 	 * Two `limit` modes (C2):
 	 *   • `revealable=false` (default — home page): top-N curated via
 	 *     `distributeAcrossCities` + a more-link to /cities/.
-	 *   • `revealable=true` (city / category listings): render every
-	 *     matched job — first `limit` visible, the rest stashed in a
-	 *     `<template>` inside `#jobs-grid` and revealed in batches by
-	 *     the bottom-nav «Вакансии» button. Keeps the initial render
-	 *     light while keeping all city jobs reachable on the same page.
+	 *   • `revealable=true` (city / category / hub listings): render only
+	 *     the first `limit` jobs in the main HTML and point the bottom-nav
+	 *     «Вакансии» reveal flow at a static `/api/grid-batch/.../`
+	 *     fragment for the next batch. Keeps the initial listing HTML
+	 *     crawler-sized while keeping the full set reachable on demand.
 	 */
 	revealable?: boolean;
 	/**
@@ -34,6 +34,11 @@ interface Props {
 	 * the component self-filters as before.
 	 */
 	jobs?: GeneratedJob[];
+	/**
+	 * URL slug used by `/api/grid-batch/[listingSlug]/[page]/`.
+	 * Required for `revealable` grids that have more than `limit` jobs.
+	 */
+	listingSlug?: string;
 }
 
 const {
@@ -45,8 +50,10 @@ const {
 	moreLabel = 'Открыть все города',
 	revealable = false,
 	jobs,
+	listingSlug,
 } = Astro.props;
 const availableJobIds = jobsData.map((job) => job.id);
+const availableJobIdsJson = JSON.stringify(availableJobIds);
 
 // Server-side frontmatter filter — single source of truth lives in
 // `src/utils/jobFilters.ts` (shared with [slug].astro and the sitemap
@@ -72,23 +79,37 @@ const matchedJobs = jobs ?? filterJobsByCriteria(jobsData, {
 const limitActive = typeof limit === 'number' && limit > 0;
 // `limitActive && !revealable` is the legacy curated-home mode: pick a
 // distributed top-N and link to /cities/ for "more". `limitActive &&
-// revealable` (C2) keeps every matched job rendered on the same page —
-// first N visible, the rest in a hidden <template> the bottom-nav
-// «Вакансии» button reveals in batches.
+// revealable` (C2) renders first N jobs and lazy-loads the rest from
+// `/api/grid-batch/.../` instead of stashing thousands of hidden cards
+// into the initial HTML.
 const filteredJobs = (limitActive && !revealable)
 	? distributeAcrossCities(matchedJobs, limit!)
 	: matchedJobs;
 const visibleJobs = limitActive && revealable
 	? filteredJobs.slice(0, limit!)
 	: filteredJobs;
-const overflowJobs = limitActive && revealable
-	? filteredJobs.slice(limit!)
-	: [];
-const overflowCount = overflowJobs.length;
+const canLoadOverflow = Boolean(listingSlug);
+const overflowCount = limitActive && revealable && canLoadOverflow
+	? Math.max(0, filteredJobs.length - limit!)
+	: 0;
 const batchSize = limitActive ? limit! : 24;
+const nextBatchUrl = overflowCount > 0
+	? `/api/grid-batch/${listingSlug}/2/`
+	: undefined;
 const hasMore = limitActive && !revealable && matchedJobs.length > limit!;
+const hasRevealMore = limitActive && revealable && overflowCount > 0;
 const totalMatched = matchedJobs.length;
+const nextRevealCount = Math.min(batchSize, overflowCount);
 const hasVacancies = jobsData.length > 0;
+
+const vacancyWord = (count: number) => {
+	const abs = Math.abs(count) % 100;
+	const last = abs % 10;
+	if (abs > 10 && abs < 20) return 'вакансий';
+	if (last === 1) return 'вакансия';
+	if (last >= 2 && last <= 4) return 'вакансии';
+	return 'вакансий';
+};
 ---
 
 <div class="job-grid-container">
@@ -108,6 +129,11 @@ const hasVacancies = jobsData.length > 0;
 			id="jobs-grid"
 			data-overflow-count={overflowCount}
 			data-batch-size={batchSize}
+			data-total-count={filteredJobs.length}
+			data-next-batch-url={nextBatchUrl}
+			data-initial-city={initialCity}
+			data-initial-search={initialSearch}
+			data-available-job-ids={availableJobIdsJson}
 		>
 			{visibleJobs.length > 0 ? (
 				visibleJobs.map((job) => (
@@ -126,17 +152,6 @@ const hasVacancies = jobsData.length > 0;
 					{hasVacancies && <a class="btn-secondary" href="/" data-t="jobgrid.reset">Сбросить всё</a>}
 				</div>
 			)}
-			{/* C2 overflow stash — bottom-nav «Вакансии» reveals in batches.
-			    Lives inside #jobs-grid so the home page's `swapGridContent`
-			    city-fetch swap clones it along with the visible cards
-			    (it's an explicitly whitelisted node — see JobGrid script). */}
-			{overflowCount > 0 && (
-				<template class="jobs-grid-overflow">
-					{overflowJobs.map((job) => (
-						<JobCard job={job} />
-					))}
-				</template>
-			)}
 		</div>
 		{hasMore && (
 			<div class="jobs-grid-more">
@@ -144,6 +159,21 @@ const hasVacancies = jobsData.length > 0;
 					Показано {filteredJobs.length} из {totalMatched} вакансий
 				</p>
 				<a class="jobs-grid-more-btn" href={moreHref}>{moreLabel}</a>
+			</div>
+		)}
+		{hasRevealMore && (
+			<div class="jobs-grid-more jobs-grid-reveal-more" id="jobs-grid-reveal-more">
+				<p class="jobs-grid-more-text" id="jobs-grid-reveal-more-text" aria-live="polite">
+					{visibleJobs.length} {vacancyWord(visibleJobs.length)} из {filteredJobs.length} {vacancyWord(filteredJobs.length)}
+				</p>
+				<a
+					class="jobs-grid-more-btn"
+					id="jobs-grid-reveal-more-btn"
+					href={nextBatchUrl}
+					aria-controls="jobs-grid"
+				>
+					Показать ещё {nextRevealCount} {vacancyWord(nextRevealCount)}
+				</a>
 			</div>
 		)}
 	</section>
@@ -270,18 +300,27 @@ const hasVacancies = jobsData.length > 0;
 		display: inline-flex;
 		align-items: center;
 		gap: 8px;
+		border: 0;
 		padding: 12px 24px;
 		border-radius: 999px;
 		background: var(--brand-700);
 		color: #fff;
+		font-family: inherit;
 		text-decoration: none;
 		font-weight: 700;
 		font-size: 15px;
+		cursor: pointer;
 		transition: background-color 0.15s ease, transform 0.15s ease;
 	}
 	.jobs-grid-more-btn:hover {
 		background: var(--brand-800);
 		transform: translateY(-1px);
+	}
+	.jobs-grid-more-btn[aria-disabled="true"] {
+		cursor: wait;
+		opacity: 0.72;
+		transform: none;
+		pointer-events: none;
 	}
 	:global(:where(html, body).dark-mode) .jobs-grid-more-btn {
 		background: var(--brand-500);
@@ -449,12 +488,18 @@ const hasVacancies = jobsData.length > 0;
 	}
 </style>
 
-<script is:inline define:vars={{ initialCity, initialTag, initialSearch, availableJobIds }}>
+<script is:inline>
+	(function () {
+	const gridConfig = document.getElementById('jobs-grid')?.dataset || {};
+	const initialCity = gridConfig.initialCity || '';
+	const initialSearch = gridConfig.initialSearch || '';
+	let availableJobIds = [];
+	try { availableJobIds = JSON.parse(gridConfig.availableJobIds || '[]'); } catch (_) { availableJobIds = []; }
+
 	// Source of truth: `MAX_COMPARE_IDS` in src/scripts/compare/compareList.ts.
-	// This `is:inline` script needs `define:vars`, which forces inlining and
-	// blocks `import` — so the cap is duplicated as a local literal. Keep this
-	// value in sync with compareList.ts (tests/compareListParity.test.ts pins
-	// the two together).
+	// This inline script stays colocated with the server-rendered grid, so the
+	// cap is duplicated as a local literal. Keep this value in sync with
+	// compareList.ts (tests/compareListParity.test.ts pins the two together).
 	const MAX_COMPARE_IDS = 4;
 	let compareList = [];
 	const availableJobIdSet = new Set(availableJobIds);
@@ -524,11 +569,15 @@ const hasVacancies = jobsData.length > 0;
 	function matchesSearch(card, searchTerm) {
 		if (!searchTerm) return true;
 
+		const searchText = (card.dataset.searchText || '').toLowerCase();
 		const title = card.querySelector('.job-title')?.textContent?.toLowerCase() || '';
 		const company = card.querySelector('.company-name')?.textContent?.toLowerCase() || '';
 		const location = (card.dataset.location || '').toLowerCase();
 
-		return title.includes(searchTerm) || company.includes(searchTerm) || location.includes(searchTerm);
+		return searchText.includes(searchTerm)
+			|| title.includes(searchTerm)
+			|| company.includes(searchTerm)
+			|| location.includes(searchTerm);
 	}
 
 	function mapAgeFilterToTag(value) {
@@ -550,9 +599,8 @@ const hasVacancies = jobsData.length > 0;
 	// City-key helpers — the inline twin of `normalizeCityKey` (owned by
 	// `src/utils/cities.ts`) and `splitLocationKeys` (owned by
 	// `src/utils/jobFilters.ts`, which builds on the re-exported
-	// `normalizeCityKey`). This `is:inline` script can't `import` (it needs
-	// `define:vars`), so the logic is ported verbatim. The two MUST behave
-	// identically: lowercase +
+	// `normalizeCityKey`). This `is:inline` script keeps the logic ported
+	// verbatim. The two MUST behave identically: lowercase +
 	// ё→е + NBSP/narrow-NBSP/figure-space repair + em-dash→hyphen +
 	// whitespace collapse + dash trimming, then a comma-split into the
 	// set of cities a `job.location` covers (rare «Алнаши, Вавож» rows).
@@ -616,6 +664,9 @@ const hasVacancies = jobsData.length > 0;
 		});
 
 		const grid = document.getElementById('jobs-grid');
+		const revealMorePanel = document.getElementById('jobs-grid-reveal-more');
+		const revealMoreText = document.getElementById('jobs-grid-reveal-more-text');
+		const revealMoreButton = document.getElementById('jobs-grid-reveal-more-btn');
 		const cityCache = new Map();
 		let activeFetch = 0;
 		// Snapshot the server-rendered grid as a cloned DocumentFragment
@@ -631,12 +682,76 @@ const hasVacancies = jobsData.length > 0;
 		}
 		// Also snapshot the grid element's own reveal-more state attrs
 		// (S5 / audit v3 M12). A city switch overwrites `data-overflow-
-		// count` / `data-batch-size` with the fetched city's values; on
-		// restore we must put the INITIAL values back, otherwise the
-		// bottom-nav «Вакансии» reveal logic keeps reading the failed
-		// city's stale counts against the restored home grid.
+		// count` / `data-batch-size` / `data-next-batch-url` with the
+		// fetched city's values; on restore we must put the INITIAL values
+		// back, otherwise the bottom-nav «Вакансии» reveal logic keeps
+		// reading the failed city's stale counts against the restored home grid.
 		const initialOverflowCount = grid?.getAttribute('data-overflow-count') || '0';
 		const initialBatchSize = grid?.getAttribute('data-batch-size') || '24';
+		const initialTotalCount = grid?.getAttribute('data-total-count') || '0';
+		const initialNextBatchUrl = grid?.getAttribute('data-next-batch-url') || '';
+		function setNextBatchUrl(targetGrid, url) {
+			if (!targetGrid) return;
+			if (url) {
+				targetGrid.setAttribute('data-next-batch-url', url);
+			} else {
+				targetGrid.removeAttribute('data-next-batch-url');
+			}
+		}
+		function vacancyWord(count) {
+			const abs = Math.abs(count) % 100;
+			const last = abs % 10;
+			if (abs > 10 && abs < 20) return 'вакансий';
+			if (last === 1) return 'вакансия';
+			if (last >= 2 && last <= 4) return 'вакансии';
+			return 'вакансий';
+		}
+		function countRenderedCards() {
+			if (!grid) return 0;
+			return Array.from(grid.children).filter((child) => child.classList.contains('job-card')).length;
+		}
+		function scrollToFirstNewCard(revealed) {
+			if (!grid || revealed <= 0) return;
+			const cards = grid.querySelectorAll('.job-card');
+			const firstNew = cards[cards.length - revealed];
+			if (!firstNew) return;
+			window.requestAnimationFrame(() => {
+				firstNew.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			});
+		}
+		function setRevealMoreBusy(isBusy) {
+			if (!revealMoreButton) return;
+			if (isBusy) {
+				revealMoreButton.setAttribute('aria-disabled', 'true');
+				revealMoreButton.textContent = 'Показываем вакансии...';
+			} else {
+				revealMoreButton.setAttribute('aria-disabled', 'false');
+			}
+		}
+		function updateRevealMoreControls() {
+			if (!revealMorePanel) return;
+			const remaining = getOverflowCount();
+			const hasRemaining = remaining > 0;
+			const rendered = countRenderedCards();
+			const total = Number.parseInt(grid?.getAttribute('data-total-count') || '', 10)
+				|| rendered + remaining;
+			const batchSize = Number.parseInt(grid?.getAttribute('data-batch-size') || '24', 10) || 24;
+			const nextCount = Math.min(batchSize, remaining);
+			const nextBatchHref = grid?.getAttribute('data-next-batch-url') || '#vacancies';
+			revealMorePanel.hidden = !hasRemaining;
+			if (revealMoreText) {
+				revealMoreText.textContent = `${rendered} ${vacancyWord(rendered)} из ${total} ${vacancyWord(total)}`;
+			}
+			if (revealMoreButton) {
+				revealMoreButton.setAttribute('aria-disabled', 'false');
+				if (revealMoreButton instanceof HTMLAnchorElement) {
+					revealMoreButton.href = nextBatchHref;
+				}
+				if (hasRemaining) {
+					revealMoreButton.textContent = `Показать ещё ${nextCount} ${vacancyWord(nextCount)}`;
+				}
+			}
+		}
 		// Re-render the grid from the initial server snapshot — both the
 		// child nodes AND the reveal-more state attributes.
 		function restoreInitialGrid() {
@@ -645,6 +760,9 @@ const hasVacancies = jobsData.length > 0;
 			grid.appendChild(initialGridNodes.cloneNode(true));
 			grid.setAttribute('data-overflow-count', initialOverflowCount);
 			grid.setAttribute('data-batch-size', initialBatchSize);
+			grid.setAttribute('data-total-count', initialTotalCount);
+			setNextBatchUrl(grid, initialNextBatchUrl);
+			updateRevealMoreControls();
 		}
 
 		// Audit H10 / v3 M15 — XSS hardening for the city-swap hot path.
@@ -762,8 +880,8 @@ const hasVacancies = jobsData.length > 0;
 
 		// Whitelist-clone the children of a freshly fetched #jobs-grid
 		// into the live grid. Replaces the old `innerHTML` assignment:
-		// we only adopt nodes we recognise (`.job-card`, the C2 overflow
-		// `<template>`, and the server's `.no-results` block), clone them
+		// we only adopt nodes we recognise (`.job-card`, the legacy C2
+		// overflow `<template>`, and the server's `.no-results` block), clone them
 		// via the DOM API (parsed-doc scripts stay inert through a
 		// clone), and strip every event-handler attribute before the
 		// node enters the live tree.
@@ -936,6 +1054,9 @@ const hasVacancies = jobsData.length > 0;
 				wrap.append(heading, lead, link);
 				grid.replaceChildren(wrap);
 				grid.setAttribute('data-overflow-count', '0');
+				grid.setAttribute('data-total-count', '0');
+				setNextBatchUrl(grid, '');
+				updateRevealMoreControls();
 				return;
 			}
 			// Audit H10 — DOM-API whitelist clone instead of
@@ -949,6 +1070,9 @@ const hasVacancies = jobsData.length > 0;
 			// the home grid is hot-swapped.
 			grid.setAttribute('data-overflow-count', newGrid.getAttribute('data-overflow-count') || '0');
 			grid.setAttribute('data-batch-size', newGrid.getAttribute('data-batch-size') || '24');
+			grid.setAttribute('data-total-count', newGrid.getAttribute('data-total-count') || '0');
+			setNextBatchUrl(grid, newGrid.getAttribute('data-next-batch-url') || '');
+			updateRevealMoreControls();
 			rebindCompareButtons();
 			filterJobs();
 		}
@@ -972,26 +1096,17 @@ const hasVacancies = jobsData.length > 0;
 
 		// Hub city filter — bead B15 / Decision H. The hub page's <select>
 		// dispatches `kurieros:hub-city-filter` with the chosen city name
-		// (or '' for "Все города"). Unlike `kurieros:city-selected` it does
-		// NOT fetch a city fragment: the hub already has all its
-		// (transport-filtered) jobs on the page, so the overflow <template>
-		// is materialised once and the existing client-side `filterJobs()`
-		// city pass is re-run. Initial page load stays light (limit=24);
-		// the one-time materialise happens only on an explicit user action.
+		// (or '' for "Все города"). Hubs now keep the initial HTML to the
+		// first 24 cards, so a specific city filter first materialises all
+		// lazy batches from `/api/grid-batch/.../`, then re-runs the existing
+		// client-side city pass. The network work happens only after an
+		// explicit user action.
 		let hubOverflowMaterialised = false;
-		window.addEventListener('kurieros:hub-city-filter', (event) => {
+		window.addEventListener('kurieros:hub-city-filter', async (event) => {
 			selectedCity = event.detail?.city || '';
-			if (!hubOverflowMaterialised && grid) {
-				const tpl = grid.querySelector('template.jobs-grid-overflow');
-				if (tpl && 'content' in tpl) {
-					// Moving a <template>'s content fragment relocates every
-					// stashed card into the live grid in one operation.
-					grid.insertBefore(tpl.content, tpl);
-					tpl.remove();
-					grid.setAttribute('data-overflow-count', '0');
-					rebindCompareButtons();
-				}
-				hubOverflowMaterialised = true;
+			if (selectedCity && !hubOverflowMaterialised && grid) {
+				await ensureAllOverflowLoaded();
+				hubOverflowMaterialised = getOverflowCount() === 0;
 			}
 			filterJobs();
 		});
@@ -1005,21 +1120,19 @@ const hasVacancies = jobsData.length > 0;
 			});
 		});
 
-		ageFilterSelect?.addEventListener('change', () => {
-			filterJobs();
-		});
+		ageFilterSelect?.addEventListener('change', filterJobsAfterOptionalLoad);
+		transportFilterSelect?.addEventListener('change', filterJobsAfterOptionalLoad);
+		employmentFilterSelect?.addEventListener('change', filterJobsAfterOptionalLoad);
+		citizenshipFilterSelect?.addEventListener('change', filterJobsAfterOptionalLoad);
 
-		transportFilterSelect?.addEventListener('change', () => {
-			filterJobs();
-		});
-
-		employmentFilterSelect?.addEventListener('change', () => {
-			filterJobs();
-		});
-
-		citizenshipFilterSelect?.addEventListener('change', () => {
-			filterJobs();
-		});
+		function hasActiveDropdownFilters() {
+			return (
+				(ageFilterSelect && ageFilterSelect.value !== 'all') ||
+				(transportFilterSelect && transportFilterSelect.value !== 'all') ||
+				(employmentFilterSelect && employmentFilterSelect.value !== 'all') ||
+				(citizenshipFilterSelect && citizenshipFilterSelect.value !== 'all')
+			);
+		}
 
 		// see src/utils/jobFilters.ts for the source-of-truth predicate;
 		// this is the DOM-side adapter (reads card.dataset.*, layers
@@ -1064,12 +1177,7 @@ const hasVacancies = jobsData.length > 0;
 			});
 
 			const noMatchNotice = document.getElementById('no-filter-match');
-			const anyDropdownActive = (
-				(ageFilterSelect && ageFilterSelect.value !== 'all') ||
-				(transportFilterSelect && transportFilterSelect.value !== 'all') ||
-				(employmentFilterSelect && employmentFilterSelect.value !== 'all') ||
-				(citizenshipFilterSelect && citizenshipFilterSelect.value !== 'all')
-			);
+			const anyDropdownActive = hasActiveDropdownFilters();
 
 			if (matches.length === 0 && anyDropdownActive) {
 				// Fall back to the full city/category set with a banner.
@@ -1084,47 +1192,146 @@ const hasVacancies = jobsData.length > 0;
 			}
 		}
 
-		filterJobs();
+		let overflowMaterialisedForDropdowns = false;
+		async function filterJobsAfterOptionalLoad() {
+			if (!overflowMaterialisedForDropdowns && hasActiveDropdownFilters()) {
+				await ensureAllOverflowLoaded();
+				overflowMaterialisedForDropdowns = getOverflowCount() === 0;
+			}
+			filterJobs();
+		}
 
-		// C2: reveal-more-jobs — pop the next `data-batch-size` cards out
-		// of the in-grid <template class="jobs-grid-overflow"> and append
-		// them to the live grid. Decrements `data-overflow-count` so the
-		// bottom-nav button knows when to fall back to default-href nav.
-		// Returns the number of cards revealed (0 when nothing to show).
-		function revealMoreJobs() {
+		filterJobs();
+		updateRevealMoreControls();
+
+		function getOverflowCount() {
+			if (!grid) return 0;
+			return Number.parseInt(grid.getAttribute('data-overflow-count') || '0', 10) || 0;
+		}
+
+		function appendBatchCards(sourceRoot, insertBeforeNode = null) {
+			if (!grid || !sourceRoot) return 0;
+			const fragment = document.createDocumentFragment();
+			let appended = 0;
+			for (const sourceChild of Array.from(sourceRoot.children)) {
+				if (!sourceChild.classList.contains('job-card')) continue;
+				const cloned = sourceChild.cloneNode(true);
+				stripEventHandlers(cloned);
+				fragment.appendChild(cloned);
+				appended += 1;
+			}
+			if (appended === 0) return 0;
+			grid.insertBefore(fragment, insertBeforeNode);
+			return appended;
+		}
+
+		function revealFromLegacyTemplate() {
 			if (!grid) return 0;
 			const tpl = grid.querySelector('template.jobs-grid-overflow');
 			if (!tpl || !('content' in tpl)) return 0;
 			const remaining = tpl.content.querySelectorAll('.job-card');
 			if (remaining.length === 0) {
 				grid.setAttribute('data-overflow-count', '0');
+				setNextBatchUrl(grid, '');
+				updateRevealMoreControls();
 				return 0;
 			}
 			const batchSize = Number.parseInt(grid.dataset.batchSize || '24', 10) || 24;
 			const take = Math.min(batchSize, remaining.length);
 			for (let i = 0; i < take; i++) {
 				const card = remaining[i];
-				grid.insertBefore(card.cloneNode(true), tpl);
+				const cloned = card.cloneNode(true);
+				stripEventHandlers(cloned);
+				grid.insertBefore(cloned, tpl);
 				card.remove();
 			}
 			const next = tpl.content.querySelectorAll('.job-card').length;
 			grid.setAttribute('data-overflow-count', String(next));
+			if (next === 0) setNextBatchUrl(grid, '');
+			updateRevealMoreControls();
 			rebindCompareButtons();
 			filterJobs();
 			return take;
 		}
 
-		window.addEventListener('kurieros:reveal-more-jobs', () => {
-			const revealed = revealMoreJobs();
-			if (revealed > 0) {
-				// Smooth-scroll the first newly revealed card into view so
-				// the user sees the new content without manual scrolling.
-				const cards = grid?.querySelectorAll('.job-card');
-				const firstNew = cards?.[cards.length - revealed];
-				firstNew?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		let revealMoreInFlight = null;
+
+		async function revealMoreJobsOnce() {
+			if (!grid) return 0;
+
+			const legacyRevealed = revealFromLegacyTemplate();
+			if (legacyRevealed > 0) return legacyRevealed;
+
+			const batchUrl = grid.getAttribute('data-next-batch-url') || '';
+			if (!batchUrl) {
+				grid.setAttribute('data-overflow-count', '0');
+				updateRevealMoreControls();
+				return 0;
 			}
+
+			let html = '';
+			try {
+				const res = await fetch(batchUrl, { cache: 'no-cache' });
+				if (!res.ok) throw new Error('HTTP ' + res.status);
+				html = await res.text();
+			} catch (err) {
+				console.warn('job batch fetch failed', err);
+				return 0;
+			}
+
+			const doc = new DOMParser().parseFromString(html, 'text/html');
+			const batchRoot = doc.querySelector('.jobs-grid-batch');
+			if (!batchRoot) {
+				grid.setAttribute('data-overflow-count', '0');
+				setNextBatchUrl(grid, '');
+				updateRevealMoreControls();
+				return 0;
+			}
+
+			const revealed = appendBatchCards(batchRoot);
+			grid.setAttribute('data-overflow-count', batchRoot.getAttribute('data-overflow-count') || '0');
+			setNextBatchUrl(grid, batchRoot.getAttribute('data-next-batch-url') || '');
+			updateRevealMoreControls();
+			rebindCompareButtons();
+			filterJobs();
+			return revealed;
+		}
+
+		async function revealMoreJobs() {
+			if (revealMoreInFlight) return revealMoreInFlight;
+			revealMoreInFlight = revealMoreJobsOnce();
+			try {
+				return await revealMoreInFlight;
+			} finally {
+				revealMoreInFlight = null;
+			}
+		}
+
+		async function ensureAllOverflowLoaded() {
+			let guard = 0;
+			while (getOverflowCount() > 0 && guard < 250) {
+				const revealed = await revealMoreJobs();
+				if (revealed <= 0) break;
+				guard += 1;
+			}
+		}
+
+		window.addEventListener('kurieros:reveal-more-jobs', async () => {
+			const revealed = await revealMoreJobs();
+			scrollToFirstNewCard(revealed);
+		});
+
+		revealMoreButton?.addEventListener('click', async (event) => {
+			event.preventDefault();
+			if (revealMoreButton.getAttribute('aria-disabled') === 'true') return;
+			setRevealMoreBusy(true);
+			const revealed = await revealMoreJobs();
+			setRevealMoreBusy(false);
+			updateRevealMoreControls();
+			scrollToFirstNewCard(revealed);
 		});
 	});
+	})();
 </script>
 
 <script>

@@ -234,7 +234,7 @@ export function buildHubFaqItems(
       : 'Яндекс.Еда, Купер, Озон';
 
   const seedItems: FaqItem[] = cfg.faqSeeds.map((seed) =>
-    buildSeedFaqItem(cfg, seed, count, companySample),
+    buildSeedFaqItem(seed, count, companySample),
   );
 
   const closingItem: FaqItem = {
@@ -249,7 +249,6 @@ export function buildHubFaqItems(
 
 /** Map a single seed question string to a proper FaqItem with a real answer. */
 function buildSeedFaqItem(
-  cfg: HubConfig,
   seed: string,
   count: number,
   companySample: string,

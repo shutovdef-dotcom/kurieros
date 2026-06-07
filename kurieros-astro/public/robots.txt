@@ -2,6 +2,8 @@ User-agent: *
 Allow: /
 Disallow: /owner/
 Disallow: /designs/
+Disallow: /api/grid/
+Disallow: /api/grid-batch/
 Disallow: /*?*
 Disallow: /search/
 
@@ -34,9 +36,13 @@ Disallow: /*?owner-
 
 User-agent: Googlebot
 Allow: /
+Disallow: /api/grid/
+Disallow: /api/grid-batch/
 Disallow: /*?owner-
 User-agent: GoogleOther
 Allow: /
+Disallow: /api/grid/
+Disallow: /api/grid-batch/
 Disallow: /*?owner-
 User-agent: Google-Extended
 Allow: /
@@ -44,17 +50,25 @@ Disallow: /*?owner-
 
 User-agent: Yandex
 Allow: /
+Disallow: /api/grid/
+Disallow: /api/grid-batch/
 Disallow: /*?owner-
 Clean-param: owner-mute&owner-unmute /
 User-agent: YandexBot
 Allow: /
+Disallow: /api/grid/
+Disallow: /api/grid-batch/
 Disallow: /*?owner-
 User-agent: YandexAdditionalBot
 Allow: /
+Disallow: /api/grid/
+Disallow: /api/grid-batch/
 Disallow: /*?owner-
 
 User-agent: Bingbot
 Allow: /
+Disallow: /api/grid/
+Disallow: /api/grid-batch/
 Disallow: /*?owner-
 User-agent: Slurp
 Allow: /

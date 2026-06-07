@@ -23,7 +23,7 @@ interface Props {
   class?: string;
   href?: string;
 }
-const { jobId, field, fallback, as = 'span', class: className, href } = Astro.props;
+const { jobId, field, fallback, as = 'span', class: className, href } = Astro.props as Props;
 const Tag = (as ?? 'span') as keyof HTMLElementTagNameMap;
 ---
 <Tag data-t={`vacancies.${jobId}.${field}`} class={className} href={href}>{fallback}</Tag>

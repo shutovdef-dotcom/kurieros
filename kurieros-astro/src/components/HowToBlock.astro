@@ -60,7 +60,7 @@ const howToJsonLd = hasSteps
         </li>
       ))}
     </ol>
-    {emitJsonLd && <script type="application/ld+json" set:html={howToJsonLd} />}
+    {emitJsonLd && <script is:inline type="application/ld+json" set:html={howToJsonLd} />}
   </section>
 )}
 

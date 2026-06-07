@@ -6,6 +6,7 @@ import JobGrid from '../components/JobGrid.astro';
 import JobFilters from '../components/JobFilters.astro';
 import PartnerBanner from '../components/PartnerBanner.astro';
 import CityInsights from '../components/CityInsights.astro';
+import ListingCityFilter from '../components/ListingCityFilter.astro';
 import jobsData from '../data/jobs';
 import { CATEGORIES } from '../data/constants';
 import { getCitiesFromJobs } from '../utils/cities';
@@ -25,7 +26,7 @@ import {
 	filterJobsByCriteria,
 	getCityJobsFromMap,
 } from '../utils/jobFilters';
-import { HUB_CONFIGS, isHubEmpty } from '../utils/transportHubs';
+import { HUB_CONFIGS, extractHubCities, isHubEmpty } from '../utils/transportHubs';
 import { CATEGORY_CANONICAL_HUB } from '../utils/categoryCanonicalHub';
 // `jobsByCity` is built ONCE at module load inside jobsByCityIndex.ts
 // (imports are module-cached). It is NOT rebuilt per page — a local
@@ -122,6 +123,7 @@ const isMoscowCityPage = type === 'city' && data.slug === 'moskva';
 const isEzhednevLanding = type === 'category' && data.slug === 'ezhednevnaya-oplata';
 const searchTerm = type === 'category' ? (data.query || '').toLowerCase() : '';
 const tagFilter = type === 'category' ? data.tag || 'all' : 'all';
+const listingSlug = `rabota-kurerom-${data.slug}`;
 
 // Single source of truth for the city/tag/search predicate lives in
 // `src/utils/jobFilters.ts` — sitemap emitter + JobGrid + this page
@@ -250,6 +252,8 @@ const factCards = buildFactCards({
 	transportTypes,
 	paymentTypes,
 });
+const listingCities =
+	type === 'category' && !isEmptyListing ? extractHubCities(filteredJobs) : [];
 
 const faqItems = buildFaqItems({
 	type,
@@ -342,14 +346,17 @@ const pageSchemaGraph = buildPageSchemaGraph({
 			<JobFilters />
 		</section>
 
+		<ListingCityFilter cities={listingCities} isEmpty={isEmptyListing} />
+
 		<JobGrid
 			initialCity={type === 'city' ? data.name : undefined}
 			initialTag={type === 'category' ? data.tag : undefined}
 			initialSearch={type === 'category' ? data.query : undefined}
-			jobs={filteredJobs}
-			limit={24}
-			revealable
-		/>
+				jobs={filteredJobs}
+				limit={24}
+				revealable
+				listingSlug={listingSlug}
+			/>
 
 		{/* City-insights (stats + rate table + neighbours) is merged into the
 		    hero panel above — Z1.1 full merge, no separate section here. */}

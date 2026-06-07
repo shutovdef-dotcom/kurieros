@@ -1,0 +1,151 @@
+---
+import type { HubCity } from '../utils/transportHubs';
+
+interface Props {
+	cities: HubCity[];
+	isEmpty?: boolean;
+}
+
+const { cities, isEmpty = false } = Astro.props;
+---
+
+{!isEmpty && cities.length > 0 && (
+	<section class="hub-city-filter" aria-label="Фильтр вакансий по городу">
+		<label for="hub-city-filter">Город:</label>
+		<select
+			id="hub-city-filter"
+			data-listing-city-filter
+			aria-label="Показать вакансии в выбранном городе"
+		>
+			<option value="">Все города</option>
+			{cities.map((city) => (
+				<option value={city.slug} data-name={city.name}>
+					{city.name} — {city.count}
+				</option>
+			))}
+		</select>
+	</section>
+)}
+
+<style>
+	.hub-city-filter {
+		max-width: var(--content-max-width);
+		margin: 0 auto var(--space-3);
+		padding: 0 1rem;
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		flex-wrap: wrap;
+	}
+	.hub-city-filter label {
+		font-size: 0.92rem;
+		font-weight: 700;
+		color: var(--ink-700);
+	}
+	.hub-city-filter select {
+		min-height: 2.6rem;
+		padding: 0.4rem 0.8rem;
+		border: 1px solid var(--ink-200);
+		border-radius: 8px;
+		background: var(--ink-0);
+		color: var(--ink-800);
+		font-family: var(--font-main);
+		font-size: 0.95rem;
+		font-weight: 600;
+		cursor: pointer;
+		max-width: 100%;
+	}
+	.hub-city-filter select:focus-visible {
+		outline: 2px solid var(--brand-600);
+		outline-offset: 1px;
+	}
+	:global(:where(html, body).dark-mode) .hub-city-filter label {
+		color: rgba(231, 234, 240, 0.7);
+	}
+	:global(:where(html, body).dark-mode) .hub-city-filter select {
+		background: var(--ink-100);
+		border-color: var(--ink-200);
+		color: var(--ink-900);
+	}
+</style>
+
+<script>
+	(() => {
+		// Shared listing city filter. JobGrid listens for this event and applies
+		// the selected city to the already-rendered/revealable vacancy list.
+		const CITY_STORAGE_KEY = 'kurieros-selected-city';
+		const selects = Array.from(
+			document.querySelectorAll<HTMLSelectElement>('[data-listing-city-filter]'),
+		);
+
+		for (const select of selects) {
+			const optionBySlug = new Map<string, HTMLOptionElement>();
+			const optionByName = new Map<string, HTMLOptionElement>();
+			for (const option of Array.from(select.options)) {
+				if (!option.value) continue;
+				optionBySlug.set(option.value, option);
+				const name = option.dataset.name;
+				if (name) optionByName.set(name, option);
+			}
+
+			const readStore = (key: string): string | null => {
+				try {
+					return localStorage.getItem(key);
+				} catch {
+					return null;
+				}
+			};
+			const writeStore = (key: string, value: string): void => {
+				try {
+					localStorage.setItem(key, value);
+				} catch {
+					/* Safari private mode / quota */
+				}
+			};
+			const removeStore = (key: string): void => {
+				try {
+					localStorage.removeItem(key);
+				} catch {
+					/* Safari private mode */
+				}
+			};
+
+			const selectedCityName = (): string =>
+				select.selectedOptions[0]?.dataset.name ?? '';
+
+			const fireFilter = (): void => {
+				window.dispatchEvent(
+					new CustomEvent('kurieros:hub-city-filter', {
+						detail: { city: selectedCityName() },
+					}),
+				);
+			};
+
+			let initial: HTMLOptionElement | undefined;
+			const hashSlug = window.location.hash.match(/^#city=([a-z0-9-]+)$/)?.[1];
+			if (hashSlug) initial = optionBySlug.get(hashSlug);
+			if (!initial) {
+				const stored = readStore(CITY_STORAGE_KEY);
+				if (stored) initial = optionByName.get(stored);
+			}
+
+			if (initial) {
+				select.value = initial.value;
+				window.setTimeout(fireFilter, 0);
+			}
+
+			select.addEventListener('change', () => {
+				const slug = select.value;
+				const base = window.location.pathname + window.location.search;
+				window.history.replaceState(null, '', slug ? `${base}#city=${slug}` : base);
+				const name = selectedCityName();
+				if (name) {
+					writeStore(CITY_STORAGE_KEY, name);
+				} else {
+					removeStore(CITY_STORAGE_KEY);
+				}
+				fireFilter();
+			});
+		}
+	})();
+</script>

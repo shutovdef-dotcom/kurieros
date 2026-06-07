@@ -10,6 +10,7 @@
 // behaviourally identical across initial render and re-render.
 
 import { escapeHtml } from './domHelpers';
+import { setCompareGridColumnClass } from './gridColumns';
 import type { CompareJob, Feature } from './types';
 
 /** Public API returned by {@link createRenderer}. */
@@ -78,7 +79,7 @@ export function createRenderer(deps: RendererDeps): CompareRenderer {
           link: 'Вернуться на главную',
         };
 
-    grid.style.setProperty('--cols', '0');
+    setCompareGridColumnClass(grid, 0);
     grid.innerHTML = `
       <div class="compare-empty-state">
         <h3>${emptyCopy.heading}</h3>
@@ -95,7 +96,7 @@ export function createRenderer(deps: RendererDeps): CompareRenderer {
       return;
     }
 
-    grid.style.setProperty('--cols', jobs.length.toString());
+    setCompareGridColumnClass(grid, jobs.length);
 
     const headerCells = jobs
       .map(

@@ -4,8 +4,8 @@
  *
  * Design decisions (plan.md §3.4 Decision C, bead B11):
  * - reviews.json is imported at build time ONLY. At most 6 reviews per brand
- *   reach the HTML (≤48 .review-card elements total). The 10 MB JSON never
- *   ships to the client.
+ *   reach the HTML (≤54 .review-card elements total across 9 mapped brands).
+ *   The 10 MB JSON never ships to the client.
  * - JSON-LD: CollectionPage + ItemList top node + per-brand Organization /
  *   aggregateRating only for brands with a /companies/{slug}/ page AND
  *   reviewCount ≥ MIN_REVIEWS_PER_BRAND (enforced by buildReviewsSchemaGraph).
@@ -59,7 +59,7 @@ const robotsMeta =
   totalCount === 0 ? 'noindex, follow' : undefined;
 
 const PAGE_TITLE =
-  'Отзывы курьеров о работодателях — Купер, Яндекс Еда, Ozon и другие | КурьерОк';
+  'Отзывы курьеров о работодателях | КурьерОк';
 const PAGE_DESCRIPTION =
   'Читайте отзывы курьеров о работодателях: Купер, Яндекс Еда, Ozon, Т-Банк, Альфа-Банк и др. Рейтинги, плюсы и минусы условий работы.';
 ---

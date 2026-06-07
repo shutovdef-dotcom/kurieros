@@ -29,3 +29,8 @@ qa_screenshots*
 
 # test scratch dirs
 tests/.tmp-*
+
+# local Codex / QA artifacts
+.playwright-cli/
+coverage/
+output/

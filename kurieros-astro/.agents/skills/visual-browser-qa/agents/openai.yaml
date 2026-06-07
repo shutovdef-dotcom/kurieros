@@ -1,0 +1,4 @@
+interface:
+  display_name: "Visual Browser QA"
+  short_description: "Cross-browser visual QA for desktop and mobile previews"
+  default_prompt: "After visual or browser-observable changes, run cross-browser QA in Chrome and Safari/WebKit across desktop and mobile viewports, inspect screenshots and layout signals, and report any regressions before handoff."

@@ -1,94 +1,118 @@
-# Kurieros Astro
+# КурьерОК Astro
 
-Статический Astro-проект для сайта `kurieros` с вакансиями курьеров, страницами городов и категорий, сравнением вакансий и блогом.
+Статический Astro-сайт для `kurerok.ru`: каталог курьерских вакансий,
+городские и форматные хабы, страницы вакансий, сравнение, калькулятор,
+гайды, отзывы и SEO/GEO-страницы.
 
-## Стек
-
-- `Astro`
-- `@astrojs/sitemap`
-- локальный `Node.js` из `/Users/ivan/Documents/scratch/node-v22.14.0-darwin-arm64`
-
-## Основные команды
-
-Из папки `/Users/ivan/Documents/scratch/kurieros/kurieros-astro`:
+## Быстрый старт
 
 ```sh
 npm install
-npm run generate:data
 npm run build
-npm run dev
-npm run preview
+npm run preview -- --host 127.0.0.1 --port 4323
 ```
 
-Локальные скрипты через встроенный Node:
+Локальные wrapper-скрипты:
 
 ```sh
-./scripts/build-local.sh
-./scripts/dev-local.sh
-./scripts/preview-local.sh
+npm run local:build
+npm run local:preview
+npm run local:dev
 ```
 
-## Локальная проверка
+Обычный preview для проверки в браузере:
 
-- `build`: собирает статический сайт в `dist/`
-- `dev`: запускает dev-сервер Astro
-- `preview`: поднимает локальный preview production-сборки
+- `http://127.0.0.1:4323/`
+- `http://127.0.0.1:4323/podrabotka-kurerom/`
+- `http://127.0.0.1:4323/rabota-peshim-kurerom/`
+- `http://127.0.0.1:4323/compare/`
 
-Если нужен локальный Node из репозитория, он добавляется через скрипты в `scripts/`.
+## Основные команды
 
-## SEO аналитика (production)
-
-В `BaseLayout` уже добавлено подключение аналитики для production-сборок:
-
-- `PUBLIC_GA4_MEASUREMENT_ID` — ID счётчика Google Analytics 4 (например, `G-XXXXXXX`)
-- `PUBLIC_YANDEX_METRIKA_ID` — ID счётчика Яндекс.Метрики
-
-## Структура проекта
-
-```text
-src/
-  components/   UI-компоненты и клиентские скрипты
-  data/         вакансии, переводы, статьи, отзывы
-  layouts/      базовый layout
-  pages/        страницы сайта и динамические маршруты
-  styles/       глобальные стили и темы
-  utils/        вспомогательные функции
-
-public/         статические файлы
-scripts/        локальные команды сборки и dev-preview
-docs/           вспомогательные заметки
+```sh
+npm run generate:data       # i18n, отзывы, llms, empty-listings
+npm run build               # production static build в dist/
+npm run preview             # preview production-сборки
+npm run typecheck           # astro check
+npm run lint                # eslint по src/ и scripts/
+npm test                    # vitest
+npm run test:coverage       # vitest coverage
 ```
 
-## Важные поверхности
+`npm run build` автоматически запускает `generate:data` через `prebuild`.
+`dist/` не редактируется вручную.
 
-- `src/pages/[slug].astro` — страницы городов и категорий
-- `src/components/JobGrid.astro` — фильтрация и вывод сетки вакансий
-- `src/components/JobCard.astro` — карточка вакансии
-- `src/pages/compare.astro` — страница сравнения вакансий
-- `src/layouts/BaseLayout.astro` — общий layout и глобальные модалки
-- `src/styles/index.css` — глобальные стили
+## Документация
+
+- [Карта проекта](docs/project-overview.md)
+- [Архитектура](docs/architecture.md)
+- [QA и релизные проверки](docs/qa-and-release-checklist.md)
+- [CSS conventions](docs/css-conventions.md)
+- [Design tokens](docs/design-tokens.md)
+- [Backlog](docs/backlog.md)
+
+## Ключевые поверхности
+
+- `src/pages/[slug].astro` — городские и категорийные listing pages.
+- `src/components/TransportHub.astro` — 4 транспортных хаба.
+- `src/components/JobGrid.astro` — сетка вакансий, фильтры, city hot-swap,
+  compare state и lazy batch loading.
+- `src/components/JobCard.astro` — карточка вакансии.
+- `src/pages/api/grid/[citySlug].astro` — статический HTML-фрагмент city grid.
+- `src/pages/api/grid-batch/[listingSlug]/[page].astro` — batch-фрагменты
+  для догрузки карточек.
+- `src/pages/v/[slug].astro` — детальная страница вакансии.
+- `src/layouts/BaseLayout.astro` — head, schema, analytics, модалки,
+  runtime i18n fragments.
+- `astro.config.mjs` — sitemap, build timestamp, empty-listings guard.
 
 ## Данные
 
-- `src/data/vacancies.ts` — исходники базовых вакансий
-- `src/data/jobs.ts` — сгенерированный список вакансий
-- `src/data/translations/` — общий shell-UI словарь (Russian only после PR #131)
-- `src/data/i18n/clauses/<lang>.json` — клаузный словарь переводов (PR #130)
-- `src/data/vacancy-translations-source/<lang>.json` — собранные per-source фрагменты, генерируются из клаузных словарей
-- `public/vacancy-translations/<lang>/<sourceSlug>.json` — runtime-фрагменты, грузятся в браузере
-- `src/data/articles.json` — блог
-- `src/data/reviews.json` — отзывы
+- `src/data/vacancies.ts` и `src/data/sources/*` — исходники вакансий.
+- `src/data/jobs.ts` — сгенерированный каталог вакансий.
+- `src/data/cities-dataset.ts`, `src/data/cityGeo.json`,
+  `src/data/cityPostal.json` — города, гео и почтовые данные.
+- `src/data/translations/` — shell UI dictionary.
+- `src/data/i18n/clauses/*` и `src/data/vacancy-translations-source/*` —
+  источники переводов вакансий.
+- `public/vacancy-translations/<lang>/<sourceSlug>.json` — runtime-фрагменты
+  переводов после генерации.
+- `public/empty-listings.json` — thin-listing exclusion для sitemap.
 
-## Checklist перед merge
+## Минимальный чек перед handoff
 
 ```sh
 npm run build
+npm test
+npm run lint
+npm run typecheck
+git diff --check
 ```
 
-Для UI-правок стоит отдельно проверить:
+Для визуальных или браузерных правок дополнительно:
 
-- главную страницу
-- одну страницу города
-- одну страницу категории
-- страницу сравнения
-- одну страницу вакансии
+```sh
+PATH='/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin' \
+QA_BASE_URL='http://127.0.0.1:4323' \
+QA_ROUTES='/podrabotka-kurerom/ /rabota-peshim-kurerom/ /compare/' \
+.agents/skills/visual-browser-qa/scripts/run-visual-browser-qa.sh
+```
+
+## Работа с preview
+
+После визуальных, SEO, routing или browser-observable изменений:
+
+1. Собрать проект.
+2. Поднять или проверить preview на `127.0.0.1:4323`.
+3. Проверить точные affected URLs через `curl -I`.
+4. Для UI пройти Chrome + WebKit/Safari-engine, особенно mobile viewports.
+5. В финальном handoff дать конкретные localhost-ссылки.
+
+## Важные ограничения
+
+- Не менять домен, DNS, email, slugs и реферальные реквизиты без отдельного
+  явного запроса.
+- Не редактировать `dist/` вручную.
+- Не откатывать чужие незакоммиченные изменения.
+- Для новых глобальных CSS-правил следовать `docs/css-conventions.md`.
+- Для крупных визуальных изменений запускать mobile-first visual QA.

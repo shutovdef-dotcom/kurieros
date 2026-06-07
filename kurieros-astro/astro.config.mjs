@@ -85,6 +85,8 @@ export default defineConfig({
       filter: (page) =>
         !page.includes('/designs/') &&
         !page.includes('/owner/') &&
+        !page.includes('/api/grid/') &&
+        !page.includes('/api/grid-batch/') &&
         !emptyListingUrls.has(page),
       changefreq: 'daily',
       lastmod: new Date(),

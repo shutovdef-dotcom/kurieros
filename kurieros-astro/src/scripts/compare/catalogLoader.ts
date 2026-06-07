@@ -15,6 +15,7 @@
 // Endpoint: GET /api/compare-jobs.json — returns CompareJob[].
 
 import type { CompareJob } from './types';
+import { setCompareGridColumnClass } from './gridColumns';
 
 /** Read-only snapshot of the catalog loader's mutable internal state. */
 export interface CatalogState {
@@ -98,7 +99,7 @@ export function createCatalogLoader(
    */
   function showCatalogError(): void {
     if (jobsById.size > 0) return;
-    grid.style.setProperty('--cols', '0');
+    setCompareGridColumnClass(grid, 0);
     grid.innerHTML = `
       <div class="compare-empty-state" id="compare-error" role="alert">
         <h3>Не удалось загрузить данные</h3>

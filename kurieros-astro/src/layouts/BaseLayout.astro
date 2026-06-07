@@ -43,6 +43,12 @@ const vacancyTranslationsVersion = (typeof __BUILD_TIMESTAMP__ === 'string'
 	&& __BUILD_TIMESTAMP__ && __BUILD_TIMESTAMP__ !== 'undefined')
 	? __BUILD_TIMESTAMP__
 	: (() => { console.error('[BaseLayout] __BUILD_TIMESTAMP__ not injected'); return String(Date.now()); })();
+const i18nConfigJson = JSON.stringify({
+	translations,
+	supportedLanguages,
+	vacancyTranslationsBase,
+	vacancyTranslationsVersion,
+}).replace(/</g, '\\u003c');
 
 interface Props {
 	title?: string;
@@ -134,21 +140,10 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 			{googleSiteVerification && <meta name="google-site-verification" content={googleSiteVerification} />}
 		<meta name="format-detection" content="telephone=no" />
 
-		<!-- Manrope (primary UI font, design tokens use it).
-		     Non-blocking preload pattern: a plain `<link rel="stylesheet">`
-		     to a third-party CSS endpoint stalls HTML parsing until the
-		     stylesheet downloads (~50–150ms RTT to Google's CDN), even
-		     with `display=swap` (which only controls the resulting
-		     @font-face rules, not the CSS request itself). Fetch as
-		     `preload as=style` instead, then promote to `stylesheet`
-		     once the asset is in the cache so subsequent paints see it.
-		     The `<noscript>` fallback ensures the font still loads on
-		     browsers with JS disabled (where the onload handler can't
-		     run). -->
+		<!-- Manrope (primary UI font, design tokens use it). -->
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-		<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap"></noscript>
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
 
 			<!-- Theme Persistence -->
 			<script is:inline>
@@ -366,7 +361,7 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
 		<!-- Schema.org Markup -->
-		<script type="application/ld+json" set:html={structuredData}></script>
+			<script is:inline type="application/ld+json" set:html={structuredData}></script>
 	</head>
 		<body>
 			{isProduction && yandexMetrikaId && (
@@ -460,14 +455,24 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 				}
 			})();
 		</script>
-		<script is:inline define:vars={{ translations, supportedLanguages, vacancyTranslationsBase, vacancyTranslationsVersion }}>
+		<script is:inline id="kurieros-i18n-config" type="application/json" set:html={i18nConfigJson}></script>
+		<script is:inline>
 			// Global i18n Manager
 				(function() {
 					const STORAGE_KEY = 'site-lang';
 					const DEFAULT_LANG = 'ru';
-					const SUPPORTED_LANGS = supportedLanguages;
-					const VACANCY_TRANSLATIONS_BASE = vacancyTranslationsBase;
-					const VACANCY_TRANSLATIONS_VERSION = vacancyTranslationsVersion;
+					let i18nConfig = {};
+					try {
+						i18nConfig = JSON.parse(document.getElementById('kurieros-i18n-config')?.textContent || '{}');
+					} catch (_) {
+						i18nConfig = {};
+					}
+					const translations = i18nConfig.translations || { ru: {} };
+					const SUPPORTED_LANGS = Array.isArray(i18nConfig.supportedLanguages)
+						? i18nConfig.supportedLanguages
+						: [DEFAULT_LANG];
+					const VACANCY_TRANSLATIONS_BASE = i18nConfig.vacancyTranslationsBase || '/vacancy-translations';
+					const VACANCY_TRANSLATIONS_VERSION = i18nConfig.vacancyTranslationsVersion || '';
 					// Safari Private Browsing + restricted WKWebViews throw a
 					// SecurityError on any localStorage access. Wrap reads/writes
 					// so the i18n manager still initializes (falls back to system

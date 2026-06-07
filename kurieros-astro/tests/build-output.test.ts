@@ -6,9 +6,10 @@
  * with: `npm run build && npm test`.
  *
  * What we lock down:
- *   - Total HTML page count is in the expected band (~6750 across all
+ *   - Total HTML page count is in the expected band (~8703 across all
  *     langs — ~5790 content pages + ~958 `/api/grid/<slug>/` city-grid
- *     fragment endpoints added by M14).
+ *     fragment endpoints added by M14 + ~1810 `/api/grid-batch/.../`
+ *     listing-card batch endpoints).
  *   - Vacancy translation fragments use the post-#129 compact shape.
  *   - Detail pages preload their per-source translation fragment.
  *   - Listing pages do NOT preload a fragment (they aggregate many vacancies).
@@ -16,6 +17,8 @@
  *     homepage no longer inlines the `cityRouteMap` literal.
  *   - M14: `/api/grid/<slug>/` emits a small `#jobs-grid`-only fragment
  *     and the city-switch hot path fetches it instead of the full page.
+ *   - P0 page-weight: heavy listing pages render only the first 24 cards
+ *     in main HTML and lazy-load further cards from `/api/grid-batch/.../`.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -41,12 +44,12 @@ const countHtml = (dir: string): number => {
 };
 
 describe.skipIf(skipIfNoDist)('Build output', () => {
-  it('has expected page count (~6759)', () => {
-    // Reference build 2026-05-19: 6759 HTML files.
+  it('has expected page count (~8703)', () => {
+    // Reference build 2026-06-07: 8703 HTML files.
     // ~5790 content pages + ~958 /api/grid/<slug>/ city-grid fragments (M14)
-    // + 8 SEO-rollout routes (Flywheel Phase D B5-B12):
-    //   4 transport hubs + 3 info guides + /otzyvy/.
-    // Band: 6754-6764 (+-5 from reference count).
+    // + 1810 /api/grid-batch/<listing>/<page>/ fragments for heavy listings
+    // + SEO-rollout routes (transport hubs, info guides, /otzyvy/).
+    // Band: 8698-8708 (+-5 from reference count).
     //
     // NOTE FOR CONTRIBUTORS: always re-derive both bounds from an actual build
     // after adding new routes -- do NOT blindly add N to the upper bound.
@@ -56,8 +59,8 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     //   else if(e.isFile()&&e.name.endsWith('.html'))n++;}return n;}
     //   console.log(c('dist'));"
     const count = countHtml(DIST_DIR);
-    expect(count).toBeGreaterThanOrEqual(6754);
-    expect(count).toBeLessThanOrEqual(6764);
+    expect(count).toBeGreaterThanOrEqual(8698);
+    expect(count).toBeLessThanOrEqual(8708);
   });
 
   it('vacancy fragments use the compact format (post-#129)', () => {
@@ -151,6 +154,23 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
       // And conversely, the lazy-fetch wiring must be present.
       expect(indexHtml).toContain("fetch('/api/city-index.json'");
     });
+
+    it('homepage review teaser does not repeat reviewer names', () => {
+      const indexHtml = readFileSync(join(DIST_DIR, 'index.html'), 'utf8');
+      const reviewsStart = indexHtml.indexOf('class="reviews-grid"');
+      const templateStart = indexHtml.indexOf('<template id="review-card-template"', reviewsStart);
+      const reviewsHtml =
+        reviewsStart !== -1 && templateStart !== -1
+          ? indexHtml.slice(reviewsStart, templateStart)
+          : '';
+      const names = Array.from(
+        reviewsHtml.matchAll(/<strong\b[^>]*>([^<]+)<\/strong>/g),
+        (match) => match[1],
+      );
+
+      expect(names).toHaveLength(3);
+      expect(new Set(names).size).toBe(names.length);
+    });
   });
 
   // M14 — dedicated city-grid fragment endpoint. The city-switch hot
@@ -209,6 +229,109 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
       expect(listingHtml).toContain('/api/grid/');
       // The old full-page city fetch must be gone from the hot path.
       expect(listingHtml).not.toMatch(/fetch\(`\/rabota-kurerom-\$\{citySlug\}\/`/);
+    });
+  });
+
+  describe('P0: heavy listing page-weight', () => {
+    it('renders only the first batch in a heavy listing main HTML', () => {
+      const html = readFileSync(
+        join(DIST_DIR, 'rabota-kurerom-podrabotka', 'index.html'),
+        'utf8',
+      );
+      const cardCount = (html.match(/class="job-card"/g) || []).length;
+
+      expect(cardCount).toBe(24);
+      expect(html).toMatch(/data-overflow-count="[1-9]\d*"/);
+      expect(html).toContain('/api/grid-batch/rabota-kurerom-podrabotka/2/');
+      expect(html).toContain('id="jobs-grid-reveal-more-btn"');
+      expect(html).toMatch(/24 вакансии из \d+ вакансий/);
+      expect(html).toContain('Показать ещё 24 вакансии');
+      expect(html).not.toContain('<template class="jobs-grid-overflow"');
+      expect(html.length).toBeLessThan(500_000);
+    });
+
+    it('keeps daily-pay cards searchable by the same payment field as SSR', () => {
+      const html = readFileSync(
+        join(DIST_DIR, 'rabota-kurerom-ezhednevnaya-oplata', 'index.html'),
+        'utf8',
+      );
+      const cardCount = (html.match(/class="job-card"/g) || []).length;
+
+      expect(cardCount).toBe(24);
+      expect(html).toContain('24 вакансии из 2097 вакансий');
+      expect(html).toMatch(/data-search-text="[^"]*Ежедневно/);
+    });
+
+    it('renders a city selector on the daily-pay listing', () => {
+      const html = readFileSync(
+        join(DIST_DIR, 'rabota-kurerom-ezhednevnaya-oplata', 'index.html'),
+        'utf8',
+      );
+      const idPos = html.indexOf('id="hub-city-filter"');
+      const end = idPos === -1 ? -1 : html.indexOf('</select>', idPos);
+      const block = idPos !== -1 && end !== -1 ? html.slice(idPos, end) : '';
+      const optionCount = (block.match(/<option/g) ?? []).length;
+
+      expect(idPos).toBeGreaterThan(-1);
+      expect(block).toContain('Все города');
+      expect(block).toMatch(/data-name="[^"]+"/);
+      expect(optionCount).toBeGreaterThanOrEqual(2);
+      expect(html).toContain('data-listing-city-filter');
+    });
+
+    it('emits static job-card batch fragments for heavy listings', () => {
+      const batchPath = join(
+        DIST_DIR,
+        'api',
+        'grid-batch',
+        'rabota-kurerom-podrabotka',
+        '2',
+        'index.html',
+      );
+      expect(existsSync(batchPath), 'first batch fragment exists').toBe(true);
+
+      const html = readFileSync(batchPath, 'utf8');
+      const cardCount = (html.match(/class="job-card"/g) || []).length;
+
+      expect(html).toContain('class="jobs-grid-batch"');
+      expect(cardCount).toBe(24);
+      expect(html).toMatch(/data-overflow-count="[1-9]\d*"/);
+      expect(html).toContain('/api/grid-batch/rabota-kurerom-podrabotka/3/');
+    });
+
+    it('keeps service grid fragments out of the sitemap', () => {
+      const sitemapContent = readFileSync(join(DIST_DIR, 'sitemap-index.xml'), 'utf8')
+        .replace(/sitemap-\d+\.xml/g, (file) => readFileSync(join(DIST_DIR, file), 'utf8'));
+
+      expect(sitemapContent).not.toContain('/api/grid/');
+      expect(sitemapContent).not.toContain('/api/grid-batch/');
+    });
+
+    it('blocks service grid fragments from major search crawlers in robots.txt', () => {
+      const robotsPath = join(ROOT, '..', 'public', 'robots.txt');
+      const robots = readFileSync(robotsPath, 'utf8');
+
+      const crawlerGroups = [
+        '*',
+        'Googlebot',
+        'GoogleOther',
+        'Yandex',
+        'YandexBot',
+        'YandexAdditionalBot',
+        'Bingbot',
+      ];
+
+      for (const crawler of crawlerGroups) {
+        const crawlerPattern = crawler.replace('*', '\\*');
+        const groupPattern = new RegExp(
+          `User-agent:\\s*${crawlerPattern}[\\s\\S]*?(?=\\nUser-agent:|\\nSitemap:|$)`,
+          'i',
+        );
+        const group = robots.match(groupPattern)?.[0] ?? '';
+        expect(group, `robots group missing for ${crawler}`).not.toBe('');
+        expect(group, `${crawler} must disallow /api/grid/`).toContain('Disallow: /api/grid/');
+        expect(group, `${crawler} must disallow /api/grid-batch/`).toContain('Disallow: /api/grid-batch/');
+      }
     });
   });
 });

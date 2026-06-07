@@ -10,7 +10,7 @@
  *   - Every new route carries at least one parseable JSON-LD block with no
  *     unescaped </script> sequences.
  *   - /otzyvy/ JSON-LD graph has no top-level AggregateRating node.
- *   - /otzyvy/ has at most 48 review-card elements.
+ *   - /otzyvy/ has at most 54 review-card elements.
  *   - The 4 category pages canonicalize to their matching hub URLs.
  *   - An unaffected category page stays self-canonical.
  *   - The homepage links all 4 hub URLs and /skolko-zarabatyvaet-kurer/.
@@ -282,7 +282,7 @@ describe.skipIf(skipIfNoDist)('SEO rollout build output', () => {
       ).toHaveLength(0);
     });
 
-    it('/otzyvy/ has at most 48 review-card elements', () => {
+    it('/otzyvy/ has at most 54 review-card elements', () => {
       // Arrange
       const html = readPage('otzyvy');
       // Act: count elements whose class attribute contains "review-card" as a word
@@ -290,8 +290,8 @@ describe.skipIf(skipIfNoDist)('SEO rollout build output', () => {
       // Assert
       expect(
         reviewCards,
-        `/otzyvy/: review-card count ${reviewCards} exceeds the 48-card cap`,
-      ).toBeLessThanOrEqual(48);
+        `/otzyvy/: review-card count ${reviewCards} exceeds the 54-card cap`,
+      ).toBeLessThanOrEqual(54);
     });
   });
 

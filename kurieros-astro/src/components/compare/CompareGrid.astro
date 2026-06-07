@@ -23,10 +23,11 @@ interface Props {
 }
 
 const { compareJobs, features } = Astro.props;
+const colsClass = `compare-grid--cols-${Math.min(compareJobs.length, 12)}`;
 ---
 
 <div class="compare-table-wrapper" id="compare-table">
-  <div class="compare-grid" style={`--cols: ${compareJobs.length};`}>
+  <div class={`compare-grid ${colsClass}`}>
     {compareJobs.length > 0 ? (
       <>
         <div class="compare-row compare-head">
@@ -117,6 +118,19 @@ const { compareJobs, features } = Astro.props;
     background: var(--border-color);
     gap: 1px;
   }
+  .compare-grid--cols-0 { --cols: 0; }
+  .compare-grid--cols-1 { --cols: 1; }
+  .compare-grid--cols-2 { --cols: 2; }
+  .compare-grid--cols-3 { --cols: 3; }
+  .compare-grid--cols-4 { --cols: 4; }
+  .compare-grid--cols-5 { --cols: 5; }
+  .compare-grid--cols-6 { --cols: 6; }
+  .compare-grid--cols-7 { --cols: 7; }
+  .compare-grid--cols-8 { --cols: 8; }
+  .compare-grid--cols-9 { --cols: 9; }
+  .compare-grid--cols-10 { --cols: 10; }
+  .compare-grid--cols-11 { --cols: 11; }
+  .compare-grid--cols-12 { --cols: 12; }
 
   .compare-row {
     display: contents;

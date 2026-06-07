@@ -1,0 +1,4 @@
+interface:
+  display_name: "Local Preview Handoff"
+  short_description: "Build, run preview, and share exact localhost links"
+  default_prompt: "After browser-observable changes, build the Astro site, ensure local preview is running, verify affected localhost URLs, and hand off concise inspection links."

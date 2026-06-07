@@ -68,7 +68,12 @@ const ratesJson = JSON.stringify(ratesObject);
 const fallbackRateJson = JSON.stringify(fallbackByTransport);
 ---
 
-<section class="home-section" id="income-calculator">
+<section
+    class="home-section"
+    id="income-calculator"
+    data-rates={ratesJson}
+    data-fallback-rate={fallbackRateJson}
+>
     <div class="section-heading">
         <h2 data-t="calculator.title">Калькулятор дохода курьера</h2>
         <p data-t="calculator.subtitle">Узнайте, сколько вы можете заработать в месяц</p>
@@ -151,7 +156,10 @@ const fallbackRateJson = JSON.stringify(fallbackByTransport);
     </div>
 </section>
 
-<script is:inline define:vars={{ ratesJson, fallbackRateJson }}>
+<script is:inline>
+    const calculatorRoot = document.getElementById('income-calculator');
+    const ratesJson = calculatorRoot?.dataset.rates || '{}';
+    const fallbackRateJson = calculatorRoot?.dataset.fallbackRate || '{}';
     // 2D map: rates[transport][city] = hourly rub. Per A7 the user
     // picks both city AND transport (auto / bicycle / foot).
     // Guard both parses: a malformed blob degrades to the flat

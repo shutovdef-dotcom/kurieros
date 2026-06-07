@@ -26,6 +26,21 @@ let displayReviews: Review[] = [];
 let overallRating = 0;
 let totalReviewsCount = 0;
 
+const pickUniqueReviewerNames = (reviews: Review[], limit: number): Review[] => {
+  const picked: Review[] = [];
+  const seenNames = new Set<string>();
+
+  for (const review of reviews) {
+    const nameKey = review.name.trim().toLowerCase();
+    if (seenNames.has(nameKey)) continue;
+    seenNames.add(nameKey);
+    picked.push(review);
+    if (picked.length >= limit) break;
+  }
+
+  return picked;
+};
+
 if (company) {
   // O(1) Map lookup into the module-cached per-brand buckets.
   const brandReviews = reviewsByCompany.get(company) ?? [];
@@ -37,8 +52,9 @@ if (company) {
   // Stable ≤6 sample, seeded by brand so it is identical on every rebuild.
   displayReviews = seededShuffle(brandReviews, `reviews-${company}`).slice(0, 6);
 } else {
-  // Homepage logic: 3 deterministic picks (stable across builds).
-  displayReviews = seededShuffle(reviewsData, 'reviews-home').slice(0, 3);
+  // Homepage logic: 3 deterministic picks (stable across builds), without
+  // repeating the same reviewer name in the teaser.
+  displayReviews = pickUniqueReviewerNames(seededShuffle(reviewsData, 'reviews-home'), 3);
   totalReviewsCount = reviewsData.length;
 }
 

@@ -12,6 +12,18 @@
 (function () {
 	const SCROLL_KEY = 'kurieros:jobs-scroll:' + window.location.pathname;
 
+	// Chrome keeps scroll positions for reload/back-forward history entries.
+	// Job listings have their own scoped restore below (only after opening a
+	// vacancy from the grid), so native restoration can jump into the middle
+	// of a freshly rebuilt listing after preview/build changes.
+	try {
+		if ('scrollRestoration' in window.history) {
+			window.history.scrollRestoration = 'manual';
+		}
+	} catch (_) {
+		/* unsupported browser - keep native behaviour */
+	}
+
 	// --- QW6: scroll restore ---
 	// Save scrollY when the user clicks any link inside the grid
 	// (job title, company name, "сравнить", "откликнуться"). On the
@@ -40,7 +52,17 @@
 	const restoreScroll = () => {
 		let stored = null;
 		try { stored = sessionStorage.getItem(SCROLL_KEY); } catch (_) { stored = null; }
-		if (stored === null) return;
+		if (stored === null) {
+			if (window.location.hash) return;
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => {
+					if (window.scrollY > 0) {
+						window.scrollTo({ top: 0, behavior: 'auto' });
+					}
+				});
+			});
+			return;
+		}
 		const y = Number.parseInt(stored, 10);
 		if (!Number.isFinite(y) || y <= 0) {
 			try { sessionStorage.removeItem(SCROLL_KEY); } catch (_) {}

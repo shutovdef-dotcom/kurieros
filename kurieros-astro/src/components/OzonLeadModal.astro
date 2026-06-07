@@ -23,9 +23,8 @@
  *  - PUBLIC_OZON_LEAD_API — Worker URL like
  *    https://kurerok-ozon-lead.<account>.workers.dev/lead
  *
- * If the env var is blank (dev / not deployed yet), submit shows the
- * success state without dispatching — useful for previews and
- * keeps the build green before Worker deployment.
+ * If the env var is blank (dev / not deployed yet), submit shows a soft
+ * error instead of the success state so previews do not silently drop leads.
  */
 const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 ---
@@ -36,7 +35,6 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 	role="dialog"
 	aria-modal="true"
 	aria-labelledby="ozon-lead-title"
-	aria-hidden="true"
 >
 	<div class="ozon-lead-backdrop" data-ozon-lead-close></div>
 	<div class="ozon-lead-card" role="document">
@@ -48,7 +46,7 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		>×</button>
 
 		<div class="ozon-lead-stage" data-stage="form">
-			<header class="ozon-lead-head">
+			<div class="ozon-lead-head">
 				<span class="ozon-lead-eyebrow">Заявка через kurerok.ru</span>
 				<h2 id="ozon-lead-title">Откликнуться на вакансию Ozon</h2>
 				<p class="ozon-lead-lead">
@@ -56,7 +54,7 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 					в&nbsp;Ozon Job. После первой смены вы получите бонус +1&nbsp;000&nbsp;₽
 					за&nbsp;регистрацию по&nbsp;нашему реферальному коду.
 				</p>
-			</header>
+			</div>
 
 			<form id="ozon-lead-form" class="ozon-lead-form" novalidate>
 				<label class="ozon-lead-field">
@@ -173,7 +171,6 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 
 		const open = (context) => {
 			modal.classList.remove('hidden');
-			modal.setAttribute('aria-hidden', 'false');
 			document.body.classList.add('ozon-lead-modal-open');
 			modal.dataset.context = JSON.stringify(context || {});
 			stageForm?.classList.remove('hidden');
@@ -195,7 +192,6 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		};
 		const close = () => {
 			modal.classList.add('hidden');
-			modal.setAttribute('aria-hidden', 'true');
 			document.body.classList.remove('ozon-lead-modal-open');
 			form?.reset();
 			setBusy(false);

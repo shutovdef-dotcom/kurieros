@@ -45,11 +45,11 @@ function makeReviews(
 // ---- REVIEWS_BRAND_SLUG -----------------------------------------------
 
 describe('REVIEWS_BRAND_SLUG', () => {
-  it('contains exactly 8 entries', () => {
+  it('contains exactly 9 entries', () => {
     // Arrange / Act: the constant is imported directly.
     const entries = Object.entries(REVIEWS_BRAND_SLUG);
     // Assert
-    expect(entries).toHaveLength(8);
+    expect(entries).toHaveLength(9);
   });
 
   it('every value is a non-empty slug-format string', () => {
@@ -62,7 +62,7 @@ describe('REVIEWS_BRAND_SLUG', () => {
     }
   });
 
-  it('contains all 8 expected brand display names as keys', () => {
+  it('contains all 9 expected brand display names as keys', () => {
     // Arrange
     const expectedBrands = [
       'Купер (ex. СберМаркет)',
@@ -71,6 +71,7 @@ describe('REVIEWS_BRAND_SLUG', () => {
       'Т-Банк',
       'Яндекс Еда',
       'Бургер Кинг',
+      'Самокат',
       'Ozon fresh',
       'Ozon',
     ];
@@ -82,6 +83,10 @@ describe('REVIEWS_BRAND_SLUG', () => {
 
   it('maps Купер (ex. СберМаркет) to kuper-ex-sbermarket', () => {
     expect(REVIEWS_BRAND_SLUG['Купер (ex. СберМаркет)']).toBe('kuper-ex-sbermarket');
+  });
+
+  it('maps Самокат to samokat', () => {
+    expect(REVIEWS_BRAND_SLUG['Самокат']).toBe('samokat');
   });
 });
 
