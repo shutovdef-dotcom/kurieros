@@ -29,10 +29,10 @@ const YANDEX_EDA_APPLY_LINK = YANDEX_EDA_APPLY;
 const YANDEX_EDA_PAY_SOURCE_URL =
   'https://docs.google.com/spreadsheets/d/17gBp0k07GCPS3Ugf7JACHogCoYpZtYZRsQnnEhIedwY/edit?gid=1115757494#gid=1115757494';
 
-// Yandex Eda offers no remote-courier mode — the on-site transport
-// modes are foot/bicycle/auto only. Remote stays in the global
-// `TransportMode` union (used by other partners like T-Bank operators).
-type YandexEdaTransportMode = Exclude<TransportMode, 'remote'>;
+// Yandex Eda offers no remote/office courier mode — the on-site transport
+// modes are foot/bicycle/auto only. Remote and office stay in the global
+// `TransportMode` union (used by non-courier partners).
+type YandexEdaTransportMode = Exclude<TransportMode, 'remote' | 'office' | 'service'>;
 
 const TRANSPORT_MODES = ['foot', 'bicycle', 'auto'] satisfies YandexEdaTransportMode[];
 
@@ -300,6 +300,14 @@ const createOffer = (
     requiredDocumentsOverride: getRequiredDocumentOverrides(cityRate.citizenship),
     // Foot couriers don't need any vehicle of their own.
     ...(transport === 'foot' ? { transportProvision: 'not_required' as const } : {}),
+    ...(transport === 'bicycle'
+      ? {
+          transportProvision: 'own_or_partner_rental' as const,
+          benefitsOverride: [
+            'Для велокурьеров доступны предложения на аренду и покупку велосипедов и электротранспорта у партнёров.',
+          ],
+        }
+      : {}),
   };
 };
 

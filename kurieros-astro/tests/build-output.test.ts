@@ -6,10 +6,11 @@
  * with: `npm run build && npm test`.
  *
  * What we lock down:
- *   - Total HTML page count is in the expected band (~8703 across all
+ *   - Total HTML page count is in the expected band (~8903 across all
  *     langs — ~5790 content pages + ~958 `/api/grid/<slug>/` city-grid
  *     fragment endpoints added by M14 + ~1810 `/api/grid-batch/.../`
- *     listing-card batch endpoints).
+ *     listing-card batch endpoints + ~200 `/api/company-vacancies/.../`
+ *     company-card batch endpoints).
  *   - Vacancy translation fragments use the post-#129 compact shape.
  *   - Detail pages preload their per-source translation fragment.
  *   - Listing pages do NOT preload a fragment (they aggregate many vacancies).
@@ -19,6 +20,8 @@
  *     and the city-switch hot path fetches it instead of the full page.
  *   - P0 page-weight: heavy listing pages render only the first 24 cards
  *     in main HTML and lazy-load further cards from `/api/grid-batch/.../`.
+ *   - Size plan 2026-06-16: CSS is emitted as shared `_astro/*.css` assets
+ *     instead of being duplicated into every generated HTML page.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -43,13 +46,33 @@ const countHtml = (dir: string): number => {
   return count;
 };
 
+const listFilesRecursive = (dir: string): string[] => {
+  if (!existsSync(dir)) return [];
+  const out: string[] = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      out.push(...listFilesRecursive(full));
+    } else if (entry.isFile()) {
+      out.push(full);
+    }
+  }
+  return out;
+};
+
+const inlineStyleBytes = (html: string): number =>
+  Array.from(html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi))
+    .reduce((sum, match) => sum + match[1].length, 0);
+
 describe.skipIf(skipIfNoDist)('Build output', () => {
-  it('has expected page count (~8703)', () => {
-    // Reference build 2026-06-07: 8703 HTML files.
+  it('has expected page count (~9250)', () => {
+    // Reference build 2026-06-18: 9250 HTML files.
     // ~5790 content pages + ~958 /api/grid/<slug>/ city-grid fragments (M14)
     // + 1810 /api/grid-batch/<listing>/<page>/ fragments for heavy listings
-    // + SEO-rollout routes (transport hubs, info guides, /otzyvy/).
-    // Band: 8698-8708 (+-5 from reference count).
+    // + 200 /api/company-vacancies/<company>/<page>/ fragments for heavy
+    // company pages + Qlean/Voxys service expansion + Yandex Go international
+    // routes + SEO-rollout routes (transport hubs, info guides, /otzyvy/).
+    // Band: 9245-9255 (+-5 from reference count).
     //
     // NOTE FOR CONTRIBUTORS: always re-derive both bounds from an actual build
     // after adding new routes -- do NOT blindly add N to the upper bound.
@@ -59,8 +82,8 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     //   else if(e.isFile()&&e.name.endsWith('.html'))n++;}return n;}
     //   console.log(c('dist'));"
     const count = countHtml(DIST_DIR);
-    expect(count).toBeGreaterThanOrEqual(8698);
-    expect(count).toBeLessThanOrEqual(8708);
+    expect(count).toBeGreaterThanOrEqual(9245);
+    expect(count).toBeLessThanOrEqual(9255);
   });
 
   it('vacancy fragments use the compact format (post-#129)', () => {
@@ -92,6 +115,54 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     }
     const html = readFileSync(listingHtml, 'utf8');
     expect(html).not.toMatch(/rel="preload"\s+as="fetch"\s+href="\/vacancy-translations\//);
+  });
+
+  describe('site-size: shared CSS assets', () => {
+    it('emits external CSS assets under _astro', () => {
+      const cssFiles = listFilesRecursive(join(DIST_DIR, '_astro'))
+        .filter((file) => file.endsWith('.css'));
+
+      expect(cssFiles.length, 'expected at least one bundled CSS asset').toBeGreaterThan(0);
+      expect(
+        cssFiles.some((file) => statSync(file).size > 20_000),
+        'expected a non-trivial shared CSS bundle',
+      ).toBe(true);
+    });
+
+    it('does not duplicate large CSS blocks into representative HTML pages', () => {
+      const pages = [
+        join(DIST_DIR, 'index.html'),
+        join(DIST_DIR, 'v', 'qlean-cleaner-moskva-service', 'index.html'),
+        join(DIST_DIR, 'podrabotka-kurerom', 'index.html'),
+        join(DIST_DIR, 'companies', 'kuper-ex-sbermarket', 'index.html'),
+      ];
+
+      for (const page of pages) {
+        if (!existsSync(page)) continue;
+        const html = readFileSync(page, 'utf8');
+        expect(html, page).toMatch(/<link\b[^>]*rel="stylesheet"[^>]*href="\/_astro\//);
+        expect(inlineStyleBytes(html), page).toBeLessThan(8_000);
+      }
+    });
+  });
+
+  describe('site-size: shared header controller', () => {
+    it('does not inline the repeated Header controller into representative pages', () => {
+      const pages = [
+        join(DIST_DIR, 'index.html'),
+        join(DIST_DIR, 'v', 'qlean-cleaner-moskva-service', 'index.html'),
+        join(DIST_DIR, 'podrabotka-kurerom', 'index.html'),
+        join(DIST_DIR, 'companies', 'kuper-ex-sbermarket', 'index.html'),
+      ];
+
+      for (const page of pages) {
+        if (!existsSync(page)) continue;
+        const html = readFileSync(page, 'utf8');
+        expect(html, page).toMatch(/<script\b[^>]*src="\/_astro\/[^"]+\.js"/);
+        expect(html, page).not.toContain("const COLOR_MODE_KEY = 'site-color-mode';");
+        expect(html, page).not.toContain('function initBottomNavVacancies()');
+      }
+    });
   });
 
   it('every fragment file is valid JSON', () => {
@@ -199,11 +270,13 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
         join(DIST_DIR, 'rabota-kurerom-moskva', 'index.html'),
         'utf8',
       );
-      // The whole point of M14: the fragment drops BaseLayout chrome,
-      // inlined CSS, and page scripts. It must be a small fraction of
-      // the full page — a generous 40% ceiling guards the win without
-      // being brittle to per-build card-count drift.
-      expect(gridHtml.length).toBeLessThan(fullHtml.length * 0.4);
+      // The whole point of M14: the fragment drops BaseLayout chrome
+      // and page scripts. CSS is now externalized across the build, so
+      // a relative-only threshold is too sensitive to the full page
+      // shrinking. Keep both invariants: the fragment is still smaller
+      // than the document, and it stays under a stable absolute cap.
+      expect(gridHtml.length).toBeLessThan(fullHtml.length);
+      expect(gridHtml.length).toBeLessThan(120_000);
     });
 
     it('grid fragment ships no BaseLayout chrome', () => {
@@ -244,7 +317,7 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
       expect(html).toMatch(/data-overflow-count="[1-9]\d*"/);
       expect(html).toContain('/api/grid-batch/rabota-kurerom-podrabotka/2/');
       expect(html).toContain('id="jobs-grid-reveal-more-btn"');
-      expect(html).toMatch(/24 вакансии из \d+ вакансий/);
+      expect(html).toMatch(/24 вакансии из \d+ ваканс(ии|ий)/);
       expect(html).toContain('Показать ещё 24 вакансии');
       expect(html).not.toContain('<template class="jobs-grid-overflow"');
       expect(html.length).toBeLessThan(500_000);

@@ -41,7 +41,10 @@ const TRANSPORT_LABEL_TO_TAG: Record<string, string> = {
   'Авто': 'auto',
   'Велосипед / самокат': 'bicycle',
   'Пешком': 'foot',
+  'Удалённо': 'remote',
   'Удалённо / офис': 'remote',
+  'Офис': 'office',
+  'Выездные услуги': 'service',
 };
 
 /** Dependencies the filters module needs from the orchestration layer. */

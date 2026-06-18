@@ -24,6 +24,10 @@ export const SOURCE_OCCUPATION: Readonly<Record<string, string>> = {
   'kuper-bike-courier': '53-3031 Driver/Sales Workers',
   'kuper-auto-courier': '53-3031 Driver/Sales Workers',
   'yandex-eda-courier': '53-3031 Driver/Sales Workers',
+  'yandex-go-courier-belarus': '53-3031 Driver/Sales Workers',
+  'yandex-go-courier-kazakhstan': '53-3031 Driver/Sales Workers',
+  'yandex-go-courier-kyrgyzstan': '53-3031 Driver/Sales Workers',
+  'yandex-go-courier-uzbekistan': '53-3031 Driver/Sales Workers',
   'rocket:courier': '53-3031 Driver/Sales Workers',
   'express:courier': '53-3031 Driver/Sales Workers',
   'samokat-courier': '53-3031 Driver/Sales Workers',
@@ -42,6 +46,10 @@ export const SOURCE_OCCUPATION: Readonly<Record<string, string>> = {
 
   // Call-centre / outbound sales operators
   'tbank-outbound-b2b-operator': '41-9041 Telemarketers',
+  'voxys-call-center-operator': '43-4051 Customer Service Representatives',
+
+  // Cleaning / in-home service workers
+  'qlean-cleaner': '37-2012 Maids and Housekeeping Cleaners',
 
   // Fast food / kitchen
   'burger-king-cook-cashier': '35-3023 Fast Food and Counter Workers',

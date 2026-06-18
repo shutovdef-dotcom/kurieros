@@ -1,8 +1,9 @@
 ---
 // ReviewModal.astro
+const reviewsApi = String(import.meta.env.PUBLIC_REVIEWS_API ?? '').trim();
 ---
 
-<div id="review-modal" class="modal-overlay hidden">
+<div id="review-modal" class="modal-overlay hidden" data-reviews-api={reviewsApi}>
   <div class="modal-container">
     <div class="modal-header">
       <h3 data-t="reviews.leave_review">Оставить отзыв</h3>
@@ -214,6 +215,8 @@
 </style>
 
 <script>
+  import { submitReview, type ReviewPayload } from '../scripts/reviews/submitReview';
+
   document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('review-modal');
     const openBtns = document.querySelectorAll('.open-review-modal');
@@ -221,6 +224,11 @@
     const form = document.getElementById('review-form');
     const formBody = document.getElementById('review-form-body');
     const successBody = document.getElementById('review-success-body');
+    const reviewsApi = modal?.dataset.reviewsApi || '';
+    const submitButton = form instanceof HTMLFormElement
+      ? form.querySelector<HTMLButtonElement>('button[type="submit"]')
+      : null;
+    let currentJobId: string | null = null;
     
     // Rating logic
     const stars = document.querySelectorAll<HTMLElement>('#stars-select span');
@@ -286,11 +294,43 @@
       if (modal) {
         modal.classList.add('hidden');
         document.body.style.overflow = '';
+        if (successBody && !successBody.classList.contains('hidden')) {
+          resetFormState();
+        }
       }
+    }
+
+    function setSubmitBusy(isBusy: boolean) {
+      if (submitButton) {
+        submitButton.disabled = isBusy;
+      }
+    }
+
+    function resetFormState() {
+      formBody?.classList.remove('hidden');
+      successBody?.classList.add('hidden');
+      if (form instanceof HTMLFormElement) form.reset();
+      if (ratingInput) ratingInput.value = '5';
+      if(stars.length) stars[0].dispatchEvent(new Event('mouseout'));
+      setSubmitBusy(false);
+    }
+
+    function getInputValue(id: string, fallback: string): string {
+      const el = document.getElementById(id);
+      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+        return el.value.trim() || fallback;
+      }
+      return fallback;
+    }
+
+    function getCurrentJobId(): string | null {
+      return currentJobId;
     }
 
     openBtns.forEach(btn => btn.addEventListener('click', (e) => {
       e.preventDefault();
+      const target = e.currentTarget;
+      currentJobId = target instanceof HTMLElement ? target.dataset.jobId || null : null;
       openModal();
     }));
 
@@ -302,23 +342,44 @@
       }
     });
 
-    form?.addEventListener('submit', (e) => {
+    form?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      // Имитация отправки формы
-      setTimeout(() => {
+      if (submitButton?.disabled) return;
+      const payload: ReviewPayload = {
+        name: getInputValue('review-name', 'Аноним'),
+        city: getInputValue('review-city', 'Город'),
+        pros: getInputValue('review-pros', ''),
+        cons: getInputValue('review-cons', ''),
+        comment: getInputValue('review-comment', ''),
+        rating: getInputValue('review-rating', '5'),
+        jobId: getCurrentJobId(),
+        submittedAt: new Date().toISOString(),
+      };
+      setSubmitBusy(true);
+      try {
+        const result = await submitReview(reviewsApi, payload);
+        if (!result.ok) {
+          console.warn('[reviews] submit failed:', result.error);
+          return;
+        }
+        window.dispatchEvent(new CustomEvent('kurieros:review-submitted', {
+          detail: {
+            ...payload,
+            date: payload.submittedAt,
+            persistLocal: result.mode === 'local',
+          },
+        }));
         formBody?.classList.add('hidden');
         successBody?.classList.remove('hidden');
-      }, 500);
+      } finally {
+        setSubmitBusy(false);
+      }
     });
     
     // Reset modal on close
     document.getElementById('close-success-btn')?.addEventListener('click', () => {
       setTimeout(() => {
-        formBody?.classList.remove('hidden');
-        successBody?.classList.add('hidden');
-        if (form instanceof HTMLFormElement) form.reset();
-        if (ratingInput) ratingInput.value = '5';
-        if(stars.length) stars[0].dispatchEvent(new Event('mouseout'));
+        resetFormState();
       }, 300);
     });
   });

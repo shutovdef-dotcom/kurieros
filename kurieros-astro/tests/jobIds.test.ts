@@ -56,6 +56,8 @@ const TRANSPORT_ID: Record<TransportMode, number> = {
   bicycle: 2,
   auto: 3,
   remote: 4,
+  office: 5,
+  service: 6,
 };
 
 const INT32_MAX = 2 ** 31 - 1;

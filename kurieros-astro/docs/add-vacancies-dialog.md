@@ -52,17 +52,18 @@ Codex или любом ином агенте, у которого есть до
 - Не откатывай существующие незакоммиченные изменения без отдельного разрешения.
 
 Текущее состояние данных (на момент написания, требует свежей сверки):
-- 18 базовых vacancySources: 9 рукописных в vacancies.ts (id 1..9) +
-  9 Ozon-генерируемых в ozonOffers.ts (id 10..18, 5 sklad + 4 fresh).
+- Базовые vacancySources меняются по мере добавления партнёров: перед
+  работой сверяй `src/data/vacancies.ts`, `src/data/sources/*` и
+  `src/data/ozonOffers.ts`, а не старые числа из документа.
 - ≈4 500–5 500 активных GeneratedJob (точный count = wc -l на dist/v/*/).
-- 6 брендов: Яндекс Еда, Купер (ex. СберМаркет), Т-Банк, Efin, Альфа-Банк, Ozon
-  (включая Ozon fresh).
-- Поддерживаемые транспорты: foot, bicycle, auto, remote.
+- Бренды в каталоге: Яндекс Еда, Купер (ex. СберМаркет), Т-Банк, Efin,
+  Альфа-Банк, Ozon (включая Ozon fresh), Burger King, Самокат, Voxys, Qlean.
+- Поддерживаемые форматы/транспорты: foot, bicycle, auto, remote, office, service.
 - Поддерживаемые языки: ru, uz, tg, ky, hy, kk, az, uk, be, hi, vi, zh
   (источник истины — SUPPORTED_LANGUAGES в src/data/translations/types.ts).
-- Следующий id для новой рукописной вакансии: max(id) + 1 (сейчас 19, если
-  список vacancySources не изменился). Свериться:
-  grep -E '^\s+id: [0-9]+' src/data/vacancies.ts | tail -1.
+- Следующий id для новой рукописной вакансии: max(id) + 1. Не доверяй
+  числу из документа — сверяй все source-файлы:
+  rg -n "\bid:\s*[0-9]+" src/data/sources src/data/ozonOffers.ts
 
 Ключевые файлы:
 - src/data/vacancyTypes.ts                — типы VacancySource, VacancyOffer,
@@ -83,6 +84,8 @@ Codex или любом ином агенте, у которого есть до
   дублями города `Москва`.
 - src/data/efin-vacancies.json            — offer-строки Efin.
 - src/data/tbank-vacancies.json           — offer-строки Т-Банка.
+- src/data/sources/geoExpansion.ts        — системное расширение Москва/МО
+  и Санкт-Петербург для партнёров без закрытого гео-списка.
 - src/data/partnerLinks.ts                — ЦЕНТРАЛЬНЫЙ реестр партнёрских
   URL и логотипов. Все *_APPLY и *_LOGO живут здесь, и здесь же агрегатор
   PARTNER_LINKS. Любая новая компания добавляется ТОЛЬКО сюда → потом
@@ -131,6 +134,11 @@ Codex или любом ином агенте, у которого есть до
   - defaults        { ageFrom, medicalBook?, employmentFormats, schedule,
                       education?, citizenship?, uniform?, os? }
   - offers          VacancyOffer[]
+  - incomeCalculator? { mode: 'hourly' | 'estimated_hourly' |
+                    'monthly_derived_hourly' | 'meeting' | 'monthly' |
+                    'hidden', monthlyHours? }
+  - howToTemplate?  'courier' | 'bank_representative' | 'call_center' |
+                    'office_employee' | 'remote_operator' | 'service_worker'
   - extraTags?      string[]
   - isHot?          boolean
 - VacancyContent:
@@ -149,9 +157,9 @@ Codex или любом ином агенте, у которого есть до
                  Резолвится в jobs.ts:interpolate().
 - VacancyOffer:
   - city            string
-  - transport       'foot' | 'bicycle' | 'auto' | 'remote'
+  - transport       'foot' | 'bicycle' | 'auto' | 'remote' | 'office' | 'service'
   - transportProvision?  'own' | 'company' | 'not_required'
-                    Default в jobs.ts: foot/remote → not_required;
+                    Default в jobs.ts: foot/remote/office/service → not_required;
                     bicycle/auto → own. Указывай явно, если транспорт
                     выдаётся компанией (например, велосипед в аренду).
   - pay             PayModel — { currency: 'RUB',
@@ -241,6 +249,7 @@ workers/ozon-lead/ + JSON-каталоги + магический applyLink 'lea
 - график;
 - документы;
 - требования и преимущества;
+- как должен работать калькулятор дохода;
 - источник условий;
 - дата обновления условий;
 - какие offers активны.
@@ -251,6 +260,11 @@ workers/ozon-lead/ + JSON-каталоги + магический applyLink 'lea
 - employmentFormats: ["self_employed"]
 - currency: RUB
 - salaryConfidence: partner
+- incomeCalculator.mode: hourly, если есть реальная `pay.hourly`;
+  для monthly/per-meeting моделей — переспросить
+- howToTemplate: `courier` для курьерских ролей; для колл-центра,
+  удалённого оператора, офисной роли, выездного исполнителя услуг или
+  банковского представителя указывать явно
 - applyLink: "#"
 - isActive: true
 - education: "Не требуется"
@@ -276,6 +290,10 @@ vacancy:
   sourceUrl:
   updatedAt:
   isHot:
+  incomeCalculator:
+    mode:                      # hourly | estimated_hourly | monthly_derived_hourly | meeting | monthly | hidden
+    monthlyHours:              # опционально, только для monthly_derived_hourly; default 176
+  howToTemplate:               # courier | bank_representative | call_center | office_employee | remote_operator | service_worker
 
 content:
   shortDescription:
@@ -298,12 +316,12 @@ defaults:
 
 offers:
   - city:
-    transport:                # foot | bicycle | auto | remote
-    transportProvision:       # own | company | not_required (опционально, default по транспорту)
+    transport:                # foot | bicycle | auto | remote | office | service
+    transportProvision:       # own | company | not_required | own_or_partner_rental (опционально, default по транспорту)
     monthlyMin:
     monthlyMax:
     monthlyText:
-    hourlyMin:                # опционально — питает калькулятор дохода
+    hourlyMin:                # опционально — питает hourly/estimated_hourly калькулятор
     hourlyMax:
     hourlyText:
     guaranteedText:           # опционально — гарантированный минимум, например «гарантируем 80 000 ₽/мес»
@@ -402,6 +420,9 @@ offers:
      (`ageFrom`, `medicalBook`, `employmentFormats`, `schedule`,
      `education`, `citizenship`, `uniform`, `os`).
    - `offers[]` — по нормализованным (city × transport) парам.
+   - `incomeCalculator` — явно выбранный режим калькулятора дохода
+     (см. раздел «Калькулятор дохода»). Не оставляй месячные/банковские
+     роли на дефолтном hourly-режиме.
    - **`applyLink` строится через helper**, не литералом, см.
      «build<Company>ApplyLink — обязательный паттерн».
 9. **Решить bucket-ом** (где хранить данные):
@@ -494,6 +515,68 @@ pensnarik/russian-cities, население ≥ 5000). Slugifier — `slugifyCi
    выигрывает; остальные либо `isActive: false`, либо мерджатся,
    если данные дополняются (например, разные районы — район в `cityDistricts`).
 
+### Авторасширение гео Москва/СПб
+
+Если у партнёрской вакансии активны `Москва` и `Санкт-Петербург`, а источник
+не даёт точную закрытую таблицу городов и не запрещает область, **всегда**
+создавай отдельные offers через `expandCitiesForCapitalRegions()` из
+`src/data/sources/geoExpansion.ts`. Не копируй списки вручную в каждый
+источник и не складывай их в `cityDistricts`: `Химки`, `Одинцово`,
+`Мурино`, `Колпино` и похожие локации — это отдельные `offer.city` и
+отдельные страницы вакансий.
+
+`cityDistricts` оставляй только для внутригородских районов/метро/зон
+внутри одного города: `Москва Алтуфьево`, `Москва ВАО`,
+`Санкт-Петербург Сенная`, `СПб Юг`.
+
+Если города нет в `src/data/cities-dataset.ts`, не отбрасывай его. Добавь
+город в датасет/региональные справочники или явно зафиксируй в отчёте, что
+он будет добавлен вместе с вакансией. Для нового города обязательно проверить:
+`slug`, `prep`, `population`, `addressRegion`, `postalCode`.
+
+**Москва + Московская область:**
+
+```text
+Москва, Апрелевка, Балашиха, Белоозёрский, Бронницы, Верея,
+Видное, Волоколамск, Воскресенск, Высоковск, Голицыно, Дедовск,
+Дзержинский, Дмитров, Долгопрудный, Домодедово, Дрезна, Дубна,
+Егорьевск, Жуковский, Зарайск, Звенигород, Ивантеевка, Истра,
+Кашира, Клин, Коломна, Королёв, Котельники, Красноармейск,
+Красногорск, Краснозаводск, Краснознаменск, Кубинка, Куровское,
+Ликино-Дулёво, Лобня, Лосино-Петровский, Луховицы, Лыткарино,
+Люберцы, Можайск, Мытищи, Наро-Фоминск, Ногинск, Одинцово,
+Озёры, Орехово-Зуево, Павловский Посад, Пересвет, Подольск,
+Протвино, Пушкино, Пущино, Раменское, Реутов, Рошаль, Руза,
+Сергиев Посад, Серпухов, Солнечногорск, Старая Купавна,
+Ступино, Талдом, Фрязино, Химки, Хотьково, Черноголовка,
+Чехов, Шатура, Щёлково, Электрогорск, Электросталь, Электроугли,
+Яхрома
+```
+
+**Санкт-Петербург и города/посёлки в составе СПб:**
+
+```text
+Санкт-Петербург, Колпино, Красное Село, Кронштадт, Зеленогорск,
+Сестрорецк, Ломоносов, Петергоф, Павловск, Пушкин, Левашово,
+Парголово, Металлострой, Петро-Славянка, Понтонный, Сапёрный,
+Усть-Ижора, Белоостров, Комарово, Молодёжное, Песочный, Репино,
+Серово, Смолячково, Солнечное, Ушково, Стрельна, Лисий Нос,
+Александровская, Тярлево, Шушары
+```
+
+**Ленинградская область, если источник говорит `СПб и область` или
+не ограничивает только город:**
+
+```text
+Мурино, Гатчина, Всеволожск, Сертолово, Выборг, Кудрово,
+Сосновый Бор, Тихвин, Кириши, Кингисепп, Волхов, Луга, Бугры,
+Сланцы, Тосно, Кировск, Коммунар, Отрадное, Тельмана, Никольское,
+Пикалёво, Лодейное Поле, Приозерск, Подпорожье, Бокситогорск,
+Колтуши, Шлиссельбург, Светогорск, Сясьстрой, Новоселье,
+Волосово, Ивангород, Новая Ладога, Каменногорск, Приморск,
+Любань, Высоцк
+```
+
 ---
 
 ## Парсинг зарплат
@@ -545,6 +628,12 @@ pensnarik/russian-cities, население ≥ 5000). Slugifier — `slugifyCi
 
 `fmt(n)` — пробелы по тысячам (`120 000`), не запятые.
 
+Если партнёр прямо даёт фиксированную зарплату/оклад, заполняй
+`monthly.min` и `monthly.max` одним и тем же числом, а `monthly.text` —
+без «до»/«от» (`50 000 ₽/мес`). Для такой роли обычно нужен
+`incomeCalculator.mode: 'monthly'`, чтобы пользователь увидел статичный
+месячный блок, а не почасовой калькулятор.
+
 ### paymentFrequency — дефолты
 
 Если партнёр не указал:
@@ -552,19 +641,52 @@ pensnarik/russian-cities, население ≥ 5000). Slugifier — `slugifyCi
 | Транспорт | Default |
 | --- | --- |
 | `foot`, `bicycle`, `auto` | `Еженедельно` |
-| `remote` | `2 раза в месяц` |
+| `service` | `Еженедельно`, если источник не дал точнее |
+| `remote`, `office` | `2 раза в месяц` |
 
 Партнёрские формулировки оставлять как есть («Ежедневно», «После каждой
 смены», «Онлайн на карту», «1 раз в 2 недели»).
 
 ### Калькулятор дохода
 
-Калькулятор на сайте использует `pay.hourly`. Если у города только
-`monthly`, а калькулятор должен работать → производная по модели,
-которая используется в `buildPay()` в `src/data/vacancies.ts:371`:
-`monthly = hourly × 12 × 30 = hourly × 360`. То есть
-`hourly ≈ monthly / 360`. Делать **только с явного разрешения
-пользователя**, в отчёте подсветить.
+У `VacancySource` есть опциональное поле `incomeCalculator`. Его нужно
+выбрать при добавлении новой роли, потому что не все вакансии честно
+считаются как «часов × дней».
+
+```ts
+incomeCalculator: {
+  mode: 'hourly' | 'estimated_hourly' | 'monthly_derived_hourly' | 'meeting' | 'monthly' | 'hidden',
+  monthlyHours?: 176,
+}
+```
+
+Режимы:
+
+| mode | Когда использовать | Что увидит пользователь |
+| --- | --- | --- |
+| `hourly` | В источнике есть реальная `pay.hourly` по этой вакансии. Это default, если поле не указано. | Слайдеры «дней × часов × ставка». |
+| `estimated_hourly` | Ставка оценочная, например получена fallback-ом по похожим городским курьерским ставкам. Только если пользователь согласовал такую оценку. | Тот же калькулятор, но с подписью «Оценочная ставка по городу». |
+| `monthly_derived_hourly` | У партнёра месячная зарплата, но нужен рабочий hourly-калькулятор. Например Burger King: `monthlyMax / 176` (22 дня × 8 часов). | Слайдеры, но ставка подписана как расчётная по месячному доходу. |
+| `meeting` | Базовый месячный минимум + оплата за встречу/заявку (`pay.monthly` + `pay.perOrder`). Например Efin. | Слайдеры «дней × встреч в день» + база. |
+| `monthly` | Нет честной часовой ставки, а доход задан помесячно: банки, операторы, представители с KPI; также фиксированный оклад/фиксированная ЗП (`monthly.min == monthly.max`). | Статичный блок без слайдеров. |
+| `hidden` | Калькулятор не должен показываться. Использовать редко и только с причиной. | Блок калькулятора не рендерится. |
+
+Правила:
+
+- Если `mode: 'monthly_derived_hourly'`, укажи `monthlyHours`, если модель
+  отличается от дефолта 176 часов. Не используй старую модель `/360` без
+  отдельного решения: она была для грубой месячной оценки в карточках, а не
+  для вакансий с окладом.
+- Для `meeting` в `pay.perOrder.text` пиши реальный смысл единицы
+  («за встречу», «за подключение»). Код считает число, текст объясняет
+  человеку.
+- Для банковских/KPI-ролей без `pay.hourly` выбирай `monthly`, а не
+  городскую курьерскую среднюю: иначе калькулятор выглядит красиво, но
+  говорит не про эту работу.
+- Для фиксированной зарплаты/оклада не ставь `monthly_derived_hourly`:
+  это превращает понятную фиксированную сумму в выдуманную часовую ставку.
+  Ставь `monthly` и одинаковые `monthly.min`/`monthly.max`.
+- Если не уверен, какой режим выбрать, остановись и спроси пользователя.
 
 ---
 
@@ -687,16 +809,25 @@ sources = 228 файлов). Клиент при переключении язы
 | «пеший», «пешком», «foot», «walking» | `foot` |
 | «вело», «велосипед», «самокат», «scooter», «bicycle», «велик» | `bicycle` |
 | «авто», «машина», «легковой», «car», «driver», «свой авто» | `auto` |
-| «удалёнка», «офис», «оператор», «remote», «диспетчер», «онлайн» | `remote` |
+| «удалёнка», «remote», «работа из дома», «онлайн из дома» | `remote` |
+| «офис», «офисный», «колл-центр», «контакт-центр», «оператор в офисе» | `office` |
+| «клинер», «уборка», «выездной исполнитель», «мастер на заказах», «service worker» | `service` |
+
+Не смешивай `remote` и `office`: `remote` включает `jobLocationType:
+TELECOMMUTE` в JobPosting, а `office` получает обычный город/адрес. Если
+партнёр дал офисные и удалённые ставки отдельно — делай отдельные
+`VacancySource`/slug'и или отдельные offers только если модель не создаёт
+дубликат `(city, transport)`.
 
 `transportProvision`:
 
 | Партнёрская формулировка | Значение |
 | --- | --- |
 | «свой транспорт», «на своём», «требуется свой …» | `own` |
-| «велосипед/самокат в аренду», «выдаём транспорт», «компания предоставляет» | `company` |
-| Транспорт не нужен (foot/remote) | `not_required` |
-| Не указано | дефолт по транспорту (foot/remote → `not_required`, bicycle/auto → `own`) |
+| «выдаём транспорт», «компания предоставляет» | `company` |
+| «свой транспорт или аренда», «аренда у партнёра», «скидка на аренду/покупку велосипеда» | `own_or_partner_rental` |
+| Транспорт не нужен (foot/remote/office/service) | `not_required` |
+| Не указано | дефолт по транспорту (foot/remote/office/service → `not_required`, bicycle/auto → `own`) |
 
 ---
 
@@ -809,7 +940,8 @@ Workers`; сборщик `53-7064 Laborers and Freight…`; оператор B2B
 - `addressRegion` — реальный регион (`cityGeo.json` 923 города + ручной
   `cityRegions.ts`; поиск ё/регистро-независимый: «Орел» = «Орёл»).
 - `postalCode` — реальный индекс (`cityPostal.json`, источник GeoNames).
-- `transport: 'remote'` → только страна (у удалёнки нет физ. адреса).
+- `transport: 'remote'` → только страна и `jobLocationType: TELECOMMUTE`.
+- `transport: 'office'` → обычный город/адрес, без `TELECOMMUTE`.
 
 **Новый город, которого нет в адресных данных** → улица будет, регион/индекс
 опущены. Чтобы добить: регион — добавь в `CITY_REGIONS` или перегенерируй
@@ -827,7 +959,7 @@ Workers`; сборщик `53-7064 Laborers and Freight…`; оператор B2B
 - `experienceRequirements` — из qualifications; «без опыта» → поле опускается.
 - `hiringOrganization.logo` — относительный `companyLogo` авто-разворачивается
   в абсолютный URL (Fix A).
-- `jobLocationType: TELECOMMUTE` — для `transport: 'remote'` (Fix B).
+- `jobLocationType: TELECOMMUTE` — только для `transport: 'remote'` (Fix B), не для `office`.
 
 ### Проверка
 
@@ -849,7 +981,24 @@ postalCode для покрытых городов).
 3. **Каждый offer имеет**: `city`, `transport`, `pay.text`,
    `pay.paymentFrequency`, `salaryConfidence`, `isActive`,
    `updatedAt` в формате YYYY-MM-DD.
-4. **applyLink** в коде — ВСЕГДА вызов `build<Company>ApplyLink(...)`,
+4. **`incomeCalculator` выбран осознанно**:
+   - реальные почасовые роли → `hourly`;
+   - оценочные fallback-ставки → `estimated_hourly`;
+   - месячная зарплата, которую можно честно разложить на часы →
+     `monthly_derived_hourly` + `monthlyHours`;
+   - база + встреча/заявка → `meeting`;
+   - банки/KPI/операторы/сервисные роли без часовой ставки → `monthly`;
+   - скрытие блока → `hidden` только с причиной.
+5. **`howToTemplate` выбран осознанно**:
+   - курьеры и доставка → `courier` или поле пустое;
+   - банковские представители → `bank_representative`;
+   - операторы колл-центра в офисе → `call_center`;
+   - прочая офисная роль без звонков → `office_employee`;
+   - удалённые операторы/поддержка → `remote_operator`;
+   - клинеры, мастера, выездные исполнители услуг → `service_worker`.
+   Не полагайся на `transport: office` для колл-центра: сценарий HowTo
+   должен быть указан в YAML/`VacancySource`.
+6. **applyLink** в коде — ВСЕГДА вызов `build<Company>ApplyLink(...)`,
    никогда не литерал URL и не голая константа `<COMPANY>_APPLY` без
    UTM-обёртки. Проверка:
    `grep -nE "applyLink:\s*['\"\\\`]https?://" src/data/vacancies.ts`
@@ -857,15 +1006,15 @@ postalCode для покрытых городов).
    `'lead-form:ozon'` в Ozon-коде, но мы Ozon не трогаем).
    Дополнительно: `grep -nE "applyLink:\s*[A-Z_]+_APPLY[^_]" src/data/vacancies.ts`
    — тоже должно быть пусто (значит UTM не построен через helper).
-5. **`VacancySource.content` — плоский RU-объект** (без обёрток). Для
+7. **`VacancySource.content` — плоский RU-объект** (без обёрток). Для
    каждого нового slug'а проверь что во всех 11 файлах
    `src/data/vacancy-translations-source/<lang>.json` появилась запись
    `"<slug>": {}` (минимум stub). Strict-mode build script ловит
    отсутствующие slug'и с понятной ошибкой.
-6. **Slug не пересекается** с существующими:
+8. **Slug не пересекается** с существующими:
    `grep -nE 'slug: ['"'"'"]<новый-slug>' src/data/vacancies.ts src/data/ozonOffers.ts`
    — только одна запись (твоя).
-7. **Все города** из offers — либо в `CITY_DATASET`, либо явно подтверждены
+9. **Все города** из offers — либо в `CITY_DATASET`, либо явно подтверждены
    пользователем как «новый, ниже порога 5000».
    - **Адрес и schema-реестры:** `company.name` есть в `companyHomepages.ts`
      и `companyIndustry.ts`; `source.slug` — в `sourceOccupation.ts`; города
@@ -875,18 +1024,21 @@ postalCode для покрытых городов).
 
 После `npm run build`:
 
-8. **Страницы вакансий собрались**:
+10. **Страницы вакансий собрались**:
    `ls dist/v/<slug>-*/index.html | wc -l` = число активных offers
    (Astro генерирует один путь на (sourceSlug × city × transport),
    локализация — клиентская, отдельных языковых путей нет).
-9. **Страница компании**: `ls dist/companies/<companySlug>/index.html`
+11. **Страница компании**: `ls dist/companies/<companySlug>/index.html`
    существует.
-10. **Открыть одну страницу** /v/<slug>/ и проверить:
+12. **Открыть одну страницу** /v/<slug>/ и проверить:
     - заголовок из `content.ru.title` (с подставленным `{city}` / `{cityPrep}`);
     - кнопка «Откликнуться» ведёт на ожидаемый URL с UTM;
     - зарплата на странице совпадает с `pay.text`;
+    - калькулятор соответствует `incomeCalculator.mode`;
+    - HowTo соответствует `howToTemplate` и не содержит чужой сценарий
+      (например, у колл-центра нет текста про приложение курьера и заказы);
     - районы (если есть) показаны.
-11. **`git status --short` чистый по чужим файлам** — в diff должны быть
+13. **`git status --short` чистый по чужим файлам** — в diff должны быть
     ТОЛЬКО ожидаемые файлы:
     - `src/data/partnerLinks.ts`
     - `src/data/vacancies.ts`
@@ -895,12 +1047,12 @@ postalCode для покрытых городов).
     - Авто-генерируемые: `src/data/vacancy-translations/<lang>/<sourceSlug>.json`,
       `public/vacancy-translations/<lang>/<sourceSlug>.json`, `public/llms-full.txt`
       (нормально, не трогать). Чужие исходники в diff — баг.
-12. **Smoke-test в dev** (опционально, но рекомендуется):
+14. **Smoke-test в dev** (опционально, но рекомендуется):
     `npm run dev -- --host 127.0.0.1 --port 4321`, открыть
     `http://127.0.0.1:4321/v/<slug>-moskva-foot/`, убедиться что
     рендерится без ошибок в консоли и `applyLink` ведёт куда ожидается.
 
-Если что-то из 1–12 не сходится — НЕ переходить к финальному отчёту,
+Если что-то из 1–13 не сходится — НЕ переходить к финальному отчёту,
 сначала чинить.
 
 ---
@@ -913,8 +1065,9 @@ postalCode для покрытых городов).
   подтвердить, что пропускаем).
 - **Любая валюта кроме RUB** в исходных данных.
 - **Зарплата без min/max и без понятного периода** — поставлен только
-  `pay.text`, числовые поля пустые → калькулятор не сработает на этом
-  оффере.
+  текстовый `pay.*.text`, числовые поля пустые → `hourly`/`meeting`/
+  `monthly_derived_hourly` могут не сработать; выбрать `monthly` или
+  запросить структуру оплаты.
 - **Города, где partner-данные противоречат** базовому описанию
   (требуется override или раздельная VacancySource).
 - **Переводы** — RU fallback на всех 11 не-RU языках. Stub'ы

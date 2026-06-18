@@ -14,7 +14,7 @@
  */
 
 import type { ReviewLike } from './companies';
-import { seededShuffle } from './seededShuffle';
+import { pickAggregateBrandReviewSample } from './reviewSamples';
 
 // Re-export ReviewLike for consumers who import from this module.
 export type { ReviewLike };
@@ -63,9 +63,6 @@ export type BrandReviewSummary = {
   /** Deterministic sample of up to 6 reviews, seeded for stable builds */
   sampleReviews: ReviewLike[];
 };
-
-/** Number of sample reviews shown per brand. */
-const SAMPLE_REVIEWS_PER_BRAND = 6;
 
 /**
  * Clamp a number to [min, max] inclusive.
@@ -131,11 +128,8 @@ export function buildReviewAggregate(reviews: ReviewLike[]): BrandReviewSummary[
       }
     }
 
-    // Deterministic sample: shuffle with a brand-specific seed, take first N
-    const sampleReviews = seededShuffle(brandReviews, `otzyvy-${brand}`).slice(
-      0,
-      SAMPLE_REVIEWS_PER_BRAND,
-    );
+    // Deterministic sample: shuffle with the aggregate-page brand seed.
+    const sampleReviews = pickAggregateBrandReviewSample(brandReviews, brand);
 
     // Determine company page href
     const slug = REVIEWS_BRAND_SLUG[brand] ?? '';

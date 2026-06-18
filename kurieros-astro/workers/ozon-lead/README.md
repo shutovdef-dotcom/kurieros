@@ -84,6 +84,17 @@ curl -X POST http://localhost:8787/lead \
   -d '{"name":"Тестовый Кандидат","phone":"+79001234567"}'
 ```
 
+Локальные проверки из корня репозитория:
+
+```sh
+npm run lint:worker
+npm run test:worker
+npm run check:worker
+```
+
+`check:worker` запускает lint и unit-тесты Worker helpers / request handler.
+POST в реальные Ozon/Telegram API в тестах не выполняется.
+
 ## Эндпоинты
 
 | Метод | Путь | Назначение |

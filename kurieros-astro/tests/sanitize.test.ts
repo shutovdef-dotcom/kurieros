@@ -2,10 +2,10 @@ import { describe, it, expect } from 'vitest';
 import { stripEventHandlers } from '../src/scripts/sanitize.js';
 
 // Audit H10 regression suite — pins down the contract of
-// `stripEventHandlers`. The inline twin inside JobGrid.astro must keep
-// the same behaviour; if these tests fail, the city-swap hot path has
-// regressed and a DOMParser-fetched response could ship attacker
-// event handlers into the live document.
+// `stripEventHandlers`. The JobGrid controller imports this canonical
+// module; if these tests fail, the city-swap hot path has regressed and
+// a DOMParser-fetched response could ship attacker event handlers into
+// the live document.
 //
 // Tests run in Node (no jsdom) — we model the small Element surface
 // the helper actually uses (`getAttributeNames`, `hasAttribute`,
@@ -338,7 +338,7 @@ describe('stripEventHandlers — audit H10 XSS hardening', () => {
 // `escapeHtml` does not reject `javascript:`), (2) removes active-
 // content elements (script/style/iframe/object/embed/link/meta), and
 // (3) neutralizes a remote-URL href/xlink:href on an SVG `<use>`. The
-// inline twin inside JobGrid.astro must keep the same behaviour.
+// JobGrid controller import must keep using this implementation.
 // =====================================================================
 describe('stripEventHandlers — audit v3 M15: dangerous URIs', () => {
 	it('strips a javascript: URI from an href', () => {

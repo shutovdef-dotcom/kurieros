@@ -1,0 +1,97 @@
+---
+import type { JobLike } from '../../utils/companies';
+
+interface Props {
+  job: JobLike;
+}
+
+const { job } = Astro.props;
+const maybeLabels = (job as unknown as { labels?: string[] }).labels;
+const labels: string[] = Array.isArray(maybeLabels) ? maybeLabels : [];
+---
+
+<article class="job-card company-vacancy-card">
+  <div class="job-card-top">
+    <span class="job-salary">{job.salary}</span>
+    <span class="job-city">{job.location}</span>
+  </div>
+  <h3><a href={`/v/${job.slug}/`}>{job.title}</a></h3>
+  <p>{job.shortDescription || job.title}</p>
+  <div class="chip-row">
+    {labels.slice(0, 3).map((label: string) => (
+      <span class="chip">{label}</span>
+    ))}
+  </div>
+  <a class="job-link" href={`/v/${job.slug}/`}>Открыть карточку вакансии</a>
+</article>
+
+<style>
+  .company-vacancy-card {
+    display: grid;
+    gap: 0.9rem;
+    padding: 1.25rem;
+    border: 1px solid var(--scrim-border-mid);
+    border-radius: 8px;
+    background: var(--scrim-light-soft);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .job-card-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .job-salary,
+  .job-city,
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.25rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .job-city {
+    border: 1px solid var(--scrim-border-mid);
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--text-muted);
+  }
+
+  .job-salary,
+  .chip {
+    border: 1px solid rgba(var(--brand-700-rgb), 0.16);
+    background: rgba(var(--brand-700-rgb), 0.08);
+    color: var(--text-main);
+  }
+
+  h3 {
+    margin: 0;
+  }
+
+  h3 a,
+  .job-link {
+    color: var(--text-main);
+    text-decoration: none;
+    font-weight: 800;
+  }
+
+  .job-link {
+    color: var(--accent-color);
+  }
+
+  p {
+    margin: 0;
+    color: var(--text-muted);
+  }
+
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+  }
+</style>

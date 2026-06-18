@@ -46,6 +46,9 @@ const TRANSPORT_LABEL_MAP: Record<string, string> = {
 	auto: 'На авто',
 	bicycle: 'На велосипеде или самокате',
 	foot: 'Пешком',
+	remote: 'Удалённо',
+	office: 'Офис',
+	service: 'Выездные услуги',
 };
 
 // ---------------------------------------------------------------------------
@@ -126,7 +129,7 @@ export function buildSeoTitle(args: SeoTitleArgs): string {
 
 	const raw = isEzhednevLanding
 		? formattedMaxSalary
-			? `Курьер с ежедневной оплатой — до ${formattedMaxSalary} ₽ · ${vacancyCountText} | КурьерОк`
+			? `Курьер с ежедневной оплатой — до ${formattedMaxSalary} · ${vacancyCountText} | КурьерОк`
 			: `Работа курьером с ежедневной оплатой 2026 — ${vacancyCountText} | КурьерОк`
 		: isEmptyListing
 			? type === 'city'
@@ -134,10 +137,10 @@ export function buildSeoTitle(args: SeoTitleArgs): string {
 				: `Работа курьером (${(categoryNameClean ?? '').toLowerCase()}) — следите за обновлениями | КурьерОк`
 			: type === 'city'
 				? formattedMaxSalary
-					? `Курьер ${cityPrep} — до ${formattedMaxSalary} ₽/мес · ${vacancyCountText} | КурьерОк`
+					? `Курьер ${cityPrep} — до ${formattedMaxSalary}/мес · ${vacancyCountText} | КурьерОк`
 					: `Работа курьером ${cityPrep} 2026: ${vacancyCountText} | КурьерОк`
 				: formattedMaxSalary
-					? `Курьер ${(categoryNameClean ?? '').toLowerCase()} — до ${formattedMaxSalary} ₽/мес · ${vacancyCountText} | КурьерОк`
+					? `Курьер ${(categoryNameClean ?? '').toLowerCase()} — до ${formattedMaxSalary}/мес · ${vacancyCountText} | КурьерОк`
 					: `Работа курьером ${(categoryNameClean ?? '').toLowerCase()} 2026: ${vacancyCountText} | КурьерОк`;
 
 	return raw.slice(0, 70);
@@ -180,10 +183,10 @@ export function buildSeoDescription(args: SeoDescriptionArgs): string {
 				: `Сейчас активных вакансий по формату «${categoryName ?? ''}» нет — следите за обновлениями. Посмотрите похожие подборки на главной.`
 			: type === 'city'
 				? formattedMaxSalary
-					? `${vacancyCountText} курьером ${cityPrep} от прямых работодателей: ${companyNames.slice(0, 2).join(', ') || 'Y.Eda, Купер'}. Доход до ${formattedMaxSalary} ₽/мес. Выплаты ${paymentTypes.slice(0, 2).join(' / ').toLowerCase() || 'еженедельно'}. Свежие данные сегодня.`
+					? `${vacancyCountText} курьером ${cityPrep} от прямых работодателей: ${companyNames.slice(0, 2).join(', ') || 'Y.Eda, Купер'}. Доход до ${formattedMaxSalary}/мес. Выплаты ${paymentTypes.slice(0, 2).join(' / ').toLowerCase() || 'еженедельно'}. Свежие данные сегодня.`
 					: `Свежие ${vacancyCountText} курьером ${cityPrep} от прямых работодателей: ${companyNames.length} компаний. Выплаты ${paymentTypes.slice(0, 2).join(' / ').toLowerCase() || 'уточняются'}, форматы ${transportTypes.join(', ').toLowerCase() || 'разные'}.`
 				: formattedMaxSalary
-					? `${vacancyCountText} «${categoryName ?? ''}» — доход до ${formattedMaxSalary} ₽/мес. ${companyNames.length} компаний, выплаты ${paymentTypes.slice(0, 2).join(' / ').toLowerCase() || 'регулярные'}. Сравните условия и подайте заявку.`
+					? `${vacancyCountText} «${categoryName ?? ''}» — доход до ${formattedMaxSalary}/мес. ${companyNames.length} компаний, выплаты ${paymentTypes.slice(0, 2).join(' / ').toLowerCase() || 'регулярные'}. Сравните условия и подайте заявку.`
 					: `Курьер ${(categoryNameClean ?? '').toLowerCase()} 2026: ${vacancyCountText} от ${companyNames.length} компаний. Сравните выплаты, требования и оформление до отклика.`;
 
 	return raw.slice(0, 170);

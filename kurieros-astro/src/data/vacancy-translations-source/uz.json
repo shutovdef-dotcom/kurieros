@@ -119,7 +119,7 @@
       "Kuper va hamkorlar xizmatlaridan chegirmalar va bonuslar.",
       "Nuqta shartlariga ko'ra brendlangan forma.",
       "Taklif qilingan do'stlar uchun bonus (referal dastur bo'yicha).",
-      "Barcha shaharlarda 0 ₽ ga elektrovelosiped ijarasi mavjud."
+      "Транспорт со скидкой: до 30% на аренду или покупку велосипеда; для активных курьеров может быть доступна аренда электровелосипеда за 0 ₽."
     ],
     "requiredDocuments": [
       "РФ fuqarolari uchun: yashash joyi belgilangan pasport va tibbiy kitob; o'z-o'zini band qilish orqali rasmiylashtirish."
@@ -383,6 +383,32 @@
       "СНИЛС va ИНН."
     ]
   },
+  "qlean-cleaner": {
+    "shortDescription": "Выездная работа клинером Qlean: уборка квартир и домов, свободный график, обучение и регулярные выплаты.",
+    "description": "Qlean приглашает исполнителей для уборки квартир и домов {cityPrep}. Задачи: поддерживающая уборка комнат, кухни, коридора и санузлов, протирка поверхностей, мытьё посуды и аккуратная раскладка вещей. Исполнитель сам выбирает удобные заказы и график, проходит инструктаж и получает поддержку команды Qlean по телефону или в чате.",
+    "requirements": [
+      "Аккуратность, пунктуальность и внимательное отношение к клиенту.",
+      "Готовность выполнять поддерживающую уборку квартир и домов по стандартам сервиса.",
+      "Готовность пройти инструктаж перед первыми заказами.",
+      "Опыт в клининге не обязателен."
+    ],
+    "benefits": [
+      "До 120 000 ₽ в месяц при регулярном выполнении заказов.",
+      "Можно выбирать удобный график и локации заказов.",
+      "Постоянный поток клиентов: до 3 заказов в день.",
+      "Выплаты каждую неделю или наличными сразу после заказа.",
+      "Официальное сотрудничество с сервисом.",
+      "Поддержка по телефону и в чате.",
+      "Инструктаж и обучение перед стартом."
+    ],
+    "requiredDocuments": [
+      "Pasport.",
+      "ИНН.",
+      "СНИЛС.",
+      "Банковская карта для выплат.",
+      "Статус самозанятого или готовность оформить его перед стартом."
+    ]
+  },
   "samokat-courier": {
     "shortDescription": "Samokat xizmati mijozlariga buyurtmalarni samokat yoki velosipedda yetkazing: soatlar, buyurtmalar va og'irlik bo'yicha daromad, ob-havo uchun ustamalar. Yetkazib berish soatlarini o'zingiz tanlaysiz, hamkorlik shartnomasi — bir soatda.",
     "description": "Biz — Samokat onlayn do'konining rasmiy hamkoriyiz (oziq-ovqat va uy mahsulotlari 15 daqiqadan yetkazib berish bilan). Kuryer-hamkorlarni qidiramiz {cityPrep}. Daromad ishlangan soatlar va xizmat ko'rsatilgan mijozlar soniga qarab shakllanadi; murakkab ob-havo sharoiti va buyurtmalar og'irligi uchun qo'shamiz, dushanba va yakshanba kunlari yetkazib berish uchun qo'shimcha to'lov va taklif qilgan har bir do'st uchun bonus bor. Yetkazib berish soatlarini (taym-slotlarni) o'zingiz tanlaysiz. Hamkorlik shartnomasini tuzish — bir soat ichida, boshlashdan oldin — Samokat xizmati yetkazib berish standartlari bo'yicha kirish yo'riqnomasi.",
@@ -390,7 +416,7 @@
       "Yosh 18 dan (55 yoshgacha).",
       "РФ fuqaroligi; bir qator shaharlarda — shuningdek ЕАЭС / СНГ mamlakatlari.",
       "Android 5.0 va undan yuqori smartfon.",
-      "Shaxsiy samokat yoki velosiped.",
+      "Shaxsiy samokat yoki velosiped; если своего транспорта нет, уточните доступность аренды у партнёра в выбранном городе.",
       "Buyurtmalarni o'z vaqtida yetkazishga tayyorlik."
     ],
     "benefits": [
@@ -400,7 +426,8 @@
       "Taklif qilgan har bir do'st uchun bonus.",
       "Yetkazib berish soatlarini (taym-slotlarni) o'zingiz tanlaysiz.",
       "Hamkorlik shartnomasini bir soat ichida tuzish.",
-      "Kirish yo'riqnomasi — Samokat xizmati yetkazib berish standartlariga o'rgatish."
+      "Kirish yo'riqnomasi — Samokat xizmati yetkazib berish standartlariga o'rgatish.",
+      "У некоторых партнёров доступен собственный велосипед или аренда транспорта на выбор."
     ],
     "requiredDocuments": [
       "Pasport.",
@@ -453,6 +480,34 @@
       "СНИЛС"
     ]
   },
+  "voxys-call-center-operator": {
+    "shortDescription": "Оператор колл-центра Voxys: голосовая поддержка клиентов партнёрских компаний, официальное оформление, оплачиваемое обучение и гибкие смены.",
+    "description": "Voxys приглашает операторов колл-центра для работы в офисе. Нужно помогать клиентам компаний-партнёров по телефону: отвечать на вопросы, консультировать по услугам и сервисам, работать с входящими и исходящими звонками. Проектов в чатах нет.",
+    "requirements": [
+      "Готовность консультировать клиентов по сервисам, услугам и продуктам компаний-партнёров.",
+      "Работа только с голосовой поддержкой: входящие и исходящие звонки.",
+      "Грамотная устная речь и готовность общаться с клиентами по телефону.",
+      "Опыт в колл-центре не обязателен.",
+      "Возраст 18–50 лет."
+    ],
+    "benefits": [
+      "Официальное оформление по ТК РФ.",
+      "Приветственный бонус 10 000 ₽.",
+      "Бонус 15 000 ₽ за каждого приведённого друга.",
+      "Оплачиваемое обучение и поддержка наставников.",
+      "Гибкие графики: 5/2, 2/2, 3/3.",
+      "Подработка от 4 часов.",
+      "Ночные смены с доплатой 20%.",
+      "Можно совмещать с учёбой.",
+      "Корпоративные активности, конкурсы и награды."
+    ],
+    "requiredDocuments": [
+      "Pasport.",
+      "СНИЛС.",
+      "ИНН.",
+      "ТК РФ bo'yicha rasmiylashtirish uchun hujjatlar."
+    ]
+  },
   "yandex-eda-courier": {
     "shortDescription": "Uy yaqinida Ya.Pro orqali buyurtmalarni yetkazib berish, 2 soatdan boshlab erkin jadval va shaffof daromad.",
     "description": "Yandex Eda kuryerlarni yig'moqda. Ulanish shahri: {city}. Siz buyurtmalarni «Ya.Pro» ilovasi orqali tushunarli marshrutlar bo'yicha yetkazib berasiz: tumanni tanlash, 2 soatdan boshlab slotlarga chiqish, tanaffuslar olish va buyurtmalar bo'yicha daromadni oldindan ko'rish mumkin.",
@@ -485,6 +540,78 @@
     ],
     "requiredDocuments": [
       "РФ fuqarolari uchun: yashash joyi belgilangan pasport va tibbiy kitob; ГПХ shartnomasi yoki o'z-o'zini band qilish orqali rasmiylashtirish."
+    ]
+  },
+  "yandex-go-courier-belarus": {
+    "shortDescription": "Uy yaqinida Ya.Pro orqali buyurtmalarni yetkazib berish, 2 soatdan boshlab erkin jadval va shaffof daromad.",
+    "description": "Kuryer-hamkorlarni qidiramiz {cityPrep}. Daromad ishlangan soatlar va xizmat ko'rsatilgan mijozlar soniga qarab shakllanadi. Yetkazib berish soatlarini (taym-slotlarni) o'zingiz tanlaysiz.",
+    "requirements": [
+      "Yosh 18 yoshdan.",
+      "Android 5.0 va undan yuqori smartfon.",
+      "Buyurtmalarni o'z vaqtida yetkazishga tayyorlik."
+    ],
+    "benefits": [
+      "Haftalik to'lovlar kartaga.",
+      "Moslashuvchan jadval: qulay slotlar va tumanni tanlash mumkin.",
+      "Tuman tanlovi: uy yaqinida yoki ko'proq buyurtmalar bo'lgan joyda ishlang.",
+      "Shaffof daromad: pik soatlarda bonuslar va yuqori stavkalar."
+    ],
+    "requiredDocuments": [
+      "Документы для подключения уточняются при оформлении."
+    ]
+  },
+  "yandex-go-courier-kazakhstan": {
+    "shortDescription": "Uy yaqinida Ya.Pro orqali buyurtmalarni yetkazib berish, 2 soatdan boshlab erkin jadval va shaffof daromad.",
+    "description": "Kuryer-hamkorlarni qidiramiz {cityPrep}. Daromad ishlangan soatlar va xizmat ko'rsatilgan mijozlar soniga qarab shakllanadi. Yetkazib berish soatlarini (taym-slotlarni) o'zingiz tanlaysiz.",
+    "requirements": [
+      "Yosh 18 yoshdan.",
+      "Android 5.0 va undan yuqori smartfon.",
+      "Buyurtmalarni o'z vaqtida yetkazishga tayyorlik."
+    ],
+    "benefits": [
+      "Haftalik to'lovlar kartaga.",
+      "Moslashuvchan jadval: qulay slotlar va tumanni tanlash mumkin.",
+      "Tuman tanlovi: uy yaqinida yoki ko'proq buyurtmalar bo'lgan joyda ishlang.",
+      "Shaffof daromad: pik soatlarda bonuslar va yuqori stavkalar."
+    ],
+    "requiredDocuments": [
+      "Документы для подключения уточняются при оформлении."
+    ]
+  },
+  "yandex-go-courier-kyrgyzstan": {
+    "shortDescription": "Uy yaqinida Ya.Pro orqali buyurtmalarni yetkazib berish, 2 soatdan boshlab erkin jadval va shaffof daromad.",
+    "description": "Kuryer-hamkorlarni qidiramiz {cityPrep}. Daromad ishlangan soatlar va xizmat ko'rsatilgan mijozlar soniga qarab shakllanadi. Yetkazib berish soatlarini (taym-slotlarni) o'zingiz tanlaysiz.",
+    "requirements": [
+      "Yosh 18 yoshdan.",
+      "Android 5.0 va undan yuqori smartfon.",
+      "Buyurtmalarni o'z vaqtida yetkazishga tayyorlik."
+    ],
+    "benefits": [
+      "Haftalik to'lovlar kartaga.",
+      "Moslashuvchan jadval: qulay slotlar va tumanni tanlash mumkin.",
+      "Tuman tanlovi: uy yaqinida yoki ko'proq buyurtmalar bo'lgan joyda ishlang.",
+      "Shaffof daromad: pik soatlarda bonuslar va yuqori stavkalar."
+    ],
+    "requiredDocuments": [
+      "Документы для подключения уточняются при оформлении."
+    ]
+  },
+  "yandex-go-courier-uzbekistan": {
+    "shortDescription": "Uy yaqinida Ya.Pro orqali buyurtmalarni yetkazib berish, 2 soatdan boshlab erkin jadval va shaffof daromad.",
+    "description": "Kuryer-hamkorlarni qidiramiz {cityPrep}. Daromad ishlangan soatlar va xizmat ko'rsatilgan mijozlar soniga qarab shakllanadi. Yetkazib berish soatlarini (taym-slotlarni) o'zingiz tanlaysiz.",
+    "requirements": [
+      "Yosh 18 yoshdan.",
+      "Android 5.0 va undan yuqori smartfon.",
+      "Buyurtmalarni o'z vaqtida yetkazishga tayyorlik."
+    ],
+    "benefits": [
+      "Haftalik to'lovlar kartaga.",
+      "Moslashuvchan jadval: qulay slotlar va tumanni tanlash mumkin.",
+      "Tuman tanlovi: uy yaqinida yoki ko'proq buyurtmalar bo'lgan joyda ishlang.",
+      "Shaffof daromad: pik soatlarda bonuslar va yuqori stavkalar."
+    ],
+    "requiredDocuments": [
+      "Документы для подключения уточняются при оформлении."
     ]
   }
 }

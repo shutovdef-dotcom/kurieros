@@ -7,6 +7,13 @@
  * from here directly; it only re-exports per-partner sources.
  */
 import type { TransportMode, VacancyOffer } from '../vacancyTypes';
+import {
+  formatCourierRateText,
+  formatMoneyAmount,
+  formatMoneyPerDay,
+  formatMoneyPerHour,
+  formatMonthlyMaxText,
+} from '../../utils/money';
 
 /**
  * Default `updatedAt` for partner offers without a partner-supplied
@@ -19,7 +26,7 @@ export const UPDATED_AT = '2026-04-17';
 /**
  * Per-transport tie-breaker added to each offer's `priority` so that,
  * within a single source × city, higher-priority transport modes
- * (auto > bicycle > foot, remote highest) sort first.
+ * (service > office > remote > auto > bicycle > foot) sort first.
  *
  * Imported directly by four partner modules — yandex-eda, kuper,
  * tbank, and efin — each adding `TRANSPORT_PRIORITY[transport]` to its
@@ -30,6 +37,8 @@ export const TRANSPORT_PRIORITY: Record<TransportMode, number> = {
   bicycle: 2,
   auto: 3,
   remote: 4,
+  office: 5,
+  service: 6,
 };
 
 /**
@@ -48,26 +57,25 @@ export const TRANSPORT_PRIORITY: Record<TransportMode, number> = {
 export const buildPay = (hourly: number): VacancyOffer['pay'] => {
   const daily = hourly * 12;
   const monthly = daily * 30;
-  const format = (value: number) => new Intl.NumberFormat('ru-RU').format(value);
 
   return {
     currency: 'RUB',
     hourly: {
       min: hourly,
       max: hourly,
-      text: `${format(hourly)} ₽/час`,
+      text: formatMoneyPerHour(hourly, 'RUB'),
     },
     perShift: {
       min: daily,
       max: daily,
-      text: `${format(daily)} ₽/день`,
+      text: formatMoneyPerDay(daily, 'RUB'),
     },
     monthly: {
       min: monthly,
       max: monthly,
-      text: `до ${format(monthly)} ₽/мес`,
+      text: formatMonthlyMaxText(monthly, 'RUB'),
     },
-    rate: `${format(hourly)} ₽/час, ${format(daily)} ₽ за 12 часов, до ${format(monthly)} ₽ за 30 смен`,
+    rate: formatCourierRateText(hourly, daily, monthly, 'RUB'),
     paymentFrequency: 'Ежедневно',
   };
 };
@@ -85,7 +93,7 @@ export const buildPay = (hourly: number): VacancyOffer['pay'] => {
  * visible drift between partners depending on the runtime ICU version.
  */
 export const formatRub = (value: number): string =>
-  new Intl.NumberFormat('ru-RU').format(value).replace(/[  ]/g, ' ');
+  formatMoneyAmount(value);
 
 /**
  * Required-document overrides for Yandex Eda / Kuper offers based on

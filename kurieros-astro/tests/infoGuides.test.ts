@@ -2,9 +2,8 @@
  * Unit tests for src/utils/infoGuides.ts
  *
  * AAA structure throughout.
- * Anti-thin-content assertions are `it.todo` stubs — blocked on OQ#2
- * editorial content (beads B8/B9/B10). Do NOT delete these stubs;
- * their presence gates thin-content detection in code review.
+ * Anti-thin-content assertions are active: guide copy has been authored,
+ * so skipped placeholder tests must not return here.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -20,6 +19,7 @@ const SITE_URL = 'https://kurerok.ru';
 
 // Helpers
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const PLACEHOLDER_RE = /\b(TODO|TBD|placeholder|lorem|stub|заглушк|рыба)\b/i;
 
 function getGraphTypes(graph: Record<string, unknown>[]): string[] {
   return graph.map((node) => node['@type'] as string);
@@ -205,6 +205,26 @@ describe('INFO_GUIDES', () => {
         wordCount,
         `INFO_GUIDES['${key}'] total word count is ${wordCount} — must be >=300`,
       ).toBeGreaterThanOrEqual(300);
+    }
+  });
+
+  it('does not contain placeholder copy in published guide config', () => {
+    // Arrange / Act / Assert
+    for (const [key, config] of Object.entries(INFO_GUIDES)) {
+      const values = [
+        config.h1,
+        config.kicker,
+        config.lead,
+        config.seoTitle,
+        config.metaDescription,
+        ...config.sections.flatMap((section) => [section.heading, section.body]),
+        ...config.faqItems.flatMap((item) => [item.question, item.answer]),
+        ...(config.howTo ? [config.howTo.name, ...config.howTo.steps.flatMap((step) => [step.name, step.text])] : []),
+      ];
+
+      for (const value of values) {
+        expect(value, `INFO_GUIDES['${key}'] contains placeholder copy: "${value}"`).not.toMatch(PLACEHOLDER_RE);
+      }
     }
   });
 });

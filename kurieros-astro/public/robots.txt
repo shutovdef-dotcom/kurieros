@@ -4,6 +4,7 @@ Disallow: /owner/
 Disallow: /designs/
 Disallow: /api/grid/
 Disallow: /api/grid-batch/
+Disallow: /api/company-vacancies/
 Disallow: /*?*
 Disallow: /search/
 
@@ -38,11 +39,13 @@ User-agent: Googlebot
 Allow: /
 Disallow: /api/grid/
 Disallow: /api/grid-batch/
+Disallow: /api/company-vacancies/
 Disallow: /*?owner-
 User-agent: GoogleOther
 Allow: /
 Disallow: /api/grid/
 Disallow: /api/grid-batch/
+Disallow: /api/company-vacancies/
 Disallow: /*?owner-
 User-agent: Google-Extended
 Allow: /
@@ -52,23 +55,27 @@ User-agent: Yandex
 Allow: /
 Disallow: /api/grid/
 Disallow: /api/grid-batch/
+Disallow: /api/company-vacancies/
 Disallow: /*?owner-
 Clean-param: owner-mute&owner-unmute /
 User-agent: YandexBot
 Allow: /
 Disallow: /api/grid/
 Disallow: /api/grid-batch/
+Disallow: /api/company-vacancies/
 Disallow: /*?owner-
 User-agent: YandexAdditionalBot
 Allow: /
 Disallow: /api/grid/
 Disallow: /api/grid-batch/
+Disallow: /api/company-vacancies/
 Disallow: /*?owner-
 
 User-agent: Bingbot
 Allow: /
 Disallow: /api/grid/
 Disallow: /api/grid-batch/
+Disallow: /api/company-vacancies/
 Disallow: /*?owner-
 User-agent: Slurp
 Allow: /

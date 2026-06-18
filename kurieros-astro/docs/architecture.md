@@ -54,6 +54,12 @@ source vacancy data
 Этот endpoint рендерит тот же `JobCard`, поэтому разметка карточек не
 дублируется в JS.
 
+Browser behavior сетки вынесен в bundled module:
+
+- `src/scripts/jobGridController.js` — filters, compare state, reveal-more,
+  city hot-swap и analytics events.
+- `src/scripts/sanitize.js` — общий DOM sanitizer для HTML-фрагментов.
+
 ## City hot-swap
 
 При смене города клиентский код в `JobGrid.astro` fetch-ит не полную
@@ -89,6 +95,27 @@ whitelist DOM clone, а не через прямой `innerHTML`, и допол�
 Sitemap обязан исключать `/api/grid-batch/`, потому что это технические
 фрагменты, а не пользовательские страницы.
 
+## Company pages
+
+`src/pages/companies/[slug].astro` генерирует страницу компании. Чтобы
+страницы крупных брендов не разрастались до мегабайтов HTML, основной HTML
+рендерит первый batch вакансий компании, а остальные вакансии доступны через
+статический fragment endpoint:
+
+```text
+/api/company-vacancies/[companySlug]/[page]/
+```
+
+Источник batch-инвариантов:
+
+- `src/components/company/CompanyVacancyCard.astro`
+- `src/utils/companyVacancyBatches.ts`
+- `src/pages/api/company-vacancies/[companySlug]/[page].astro`
+- `src/scripts/companyVacanciesController.js`
+
+Sitemap обязан исключать `/api/company-vacancies/`: это технические
+фрагменты, не самостоятельные landing pages.
+
 ## Transport hubs
 
 Транспортные хабы:
@@ -123,8 +150,15 @@ Page files отвечают за data/schema/BaseLayout. `TransportHub.astro`
 - theme persistence;
 - analytics injection only in production;
 - owner mute flag;
-- runtime vacancy translation fragments;
+- imports browser runtime modules for region detection and vacancy
+  translation fragments;
 - global modals.
+
+Browser runtime вынесен из layout:
+
+- `src/scripts/regionDetector.js` — best-effort geo/IP detection.
+- `src/scripts/i18nRuntime.js` — `window.kurieros_i18n`,
+  `window.translations`, fragment cache и language switching.
 
 Критичный security invariant: JSON-LD сериализуется через
 `JSON.stringify(...).replace(/</g, '\\u003c')`, чтобы строки не могли
@@ -164,9 +198,10 @@ layout зависит от ширины карточки, а не всего vie
 
 Эти зоны не обязательно сломаны, но требуют осторожности:
 
-- `JobGrid.astro` остаётся крупным файлом с несколькими browser concerns
-  внутри одного inline script.
-- `BaseLayout.astro` совмещает head, analytics, i18n runtime и модалки.
+- `JobGrid.astro` всё ещё крупный UI composition file, но browser controller
+  уже вынесен в module.
+- `BaseLayout.astro` всё ещё совмещает head, analytics и модалки, но region
+  detection/i18n runtime уже вынесены в modules.
 - `src/pages/v/[slug].astro` содержит много render-side бизнес-логики.
 - `OzonLeadModal.astro` крупный и чувствительный к UX/security ошибкам.
 - `src/styles/index.css` большой; глобальные изменения могут иметь широкий

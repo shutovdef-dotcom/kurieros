@@ -18,16 +18,24 @@ import VacancyOtherCities from '../../components/vacancy/VacancyOtherCities.astr
 import VacancySidebar from '../../components/vacancy/VacancySidebar.astro';
 import jobsData from '../../data/jobs';
 import { vacancySources } from '../../data/vacancies';
-import type { VacancyOffer } from '../../data/vacancyTypes';
 import { slugifyCompany } from '../../utils/companies';
 import { getCityHref } from '../../utils/cities';
-import { applyHourlyJitter } from '../../utils/fnv1a';
 import { getApplyCta } from '../../utils/applyCta';
 import { buildBreadcrumbSchema, buildJobPostingSchema } from '../../utils/schema';
 import { getCompanyHomepage } from '../../data/companyHomepages';
 import { getCompanyIndustry } from '../../data/companyIndustry';
 import { getSourceOccupation } from '../../data/sourceOccupation';
 import { knowledgeBaseData, type KnowledgeItem } from '../../utils/knowledge';
+import {
+	buildVacancyCalculatorModel,
+	parseSalaryValue,
+	selectTopN,
+} from '../../utils/vacancyPage';
+import {
+	buildVacancyHowToSteps,
+	resolveVacancyHowToTemplate,
+} from '../../utils/vacancyHowTo';
+import { formatMoneyWithCurrency } from '../../utils/money';
 
 export async function getStaticPaths() {
 	return jobsData.map((job) => ({
@@ -49,35 +57,6 @@ const isLeadFormApply = typeof job.applyLink === 'string' && job.applyLink.start
 const leadFormType = isLeadFormApply ? job.applyLink.slice('lead-form:'.length) : null;
 const hasApplyLink = !isLeadFormApply && Boolean(job.applyLink && job.applyLink !== '#');
 const companyUrl = `/companies/${slugifyCompany(job.company)}/`;
-const parseSalaryValue = (salary: string) => Number(salary.replace(/[^\d]/g, '')) || 0;
-const parseAmountFromText = (value?: string) => {
-	if (!value) return null;
-	const normalized = value.replace(/[\u00a0\u202f]/g, ' ');
-	const match = normalized.match(/(\d[\d\s]*)/);
-	if (!match) return null;
-	const parsed = Number(match[1].replace(/\s+/g, ''));
-	return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
-};
-const parseHourlyRateFromRateText = (value: string) => {
-	const normalized = value.replace(/[\u00a0\u202f]/g, ' ');
-	if (!/(час|hour|soat|соат|саат|ժам|сағ|год|гадз|घंट|giờ|小时)/i.test(normalized)) {
-		return null;
-	}
-	const match = normalized.match(/(\d[\d\s]*)\s*₽/);
-	if (!match) return null;
-	const parsed = Number(match[1].replace(/\s+/g, ''));
-	return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
-};
-const resolveHourlyRate = (offer?: VacancyOffer) => {
-	if (!offer) return null;
-	const numericRate =
-		(typeof offer.pay.hourly?.max === 'number' && Number.isFinite(offer.pay.hourly.max) ? offer.pay.hourly.max : null) ??
-		(typeof offer.pay.hourly?.min === 'number' && Number.isFinite(offer.pay.hourly.min) ? offer.pay.hourly.min : null);
-	if (numericRate && numericRate > 0) {
-		return numericRate;
-	}
-	return parseAmountFromText(offer.pay.hourly?.text);
-};
 const salaryValue = parseSalaryValue(job.salary);
 const matchingSource = vacancySources.find((source) => source.id === job.sourceId);
 const matchingOffer =
@@ -94,37 +73,16 @@ const matchingOffer =
 			offer.city === job.location &&
 			offer.transport === job.transport,
 	);
-// Fallback hourly rate for vacancies whose source data has no
-// `pay.hourly` (Ozon, T-Bank, Efin, Альфа). We pick the BEST known
-// hourly rate among all active offers in the same city (Yandex Eda or
-// Купер typically), then drop it 3-12% via slug-derived jitter — keeps
-// the calculator number attractive (close to top of the city) while
-// staying unique per vacancy and below the actual top earners.
-const computeFallbackHourlyRate = (city: string, slug: string): number | null => {
-	let best = 0;
-	for (const source of vacancySources) {
-		for (const offer of source.offers) {
-			if (!offer.isActive || offer.city !== city) continue;
-			const rate =
-				(typeof offer.pay.hourly?.max === 'number' && Number.isFinite(offer.pay.hourly.max) ? offer.pay.hourly.max : 0) ||
-				(typeof offer.pay.hourly?.min === 'number' && Number.isFinite(offer.pay.hourly.min) ? offer.pay.hourly.min : 0) ||
-				(parseAmountFromText(offer.pay.hourly?.text) ?? 0);
-			if (rate > best) best = rate;
-		}
-	}
-	if (best <= 0) return null;
-	// Render-side jitter key — bare slug (one rate per vacancy page).
-	// Formula owned by `applyHourlyJitter` (audit ref v3 M4).
-	return applyHourlyJitter(best, slug);
-};
-
-const directHourlyRate = resolveHourlyRate(matchingOffer) ?? parseHourlyRateFromRateText(job.details.rate);
-const fallbackHourlyRate = directHourlyRate === null
-	? computeFallbackHourlyRate(job.location, job.slug)
-	: null;
-const hourlyRate = directHourlyRate ?? fallbackHourlyRate;
-const isEstimatedHourlyRate = directHourlyRate === null && fallbackHourlyRate !== null;
-const formattedHourlyRate = hourlyRate ? `${new Intl.NumberFormat('ru-RU').format(hourlyRate)} ₽/час` : null;
+const calculatorModel = buildVacancyCalculatorModel({
+	source: matchingSource,
+	offer: matchingOffer,
+	sources: vacancySources,
+	city: job.location,
+	slug: job.slug,
+	rateText: job.details.rate,
+});
+const hourlyRate = calculatorModel.kind === 'hourly' ? calculatorModel.hourlyRate : null;
+const formattedHourlyRate = calculatorModel.kind === 'hourly' ? calculatorModel.formattedHourlyRate : null;
 const jobCities = job.location
 	.split(',')
 	.map((city: string) => city.trim())
@@ -158,45 +116,6 @@ function getSimilarityTier(item: typeof job): SimilarTier {
 	if (isSameCity) return 2;
 	return 3;
 }
-// Bounded top-N selection (audit ref v3 H2 / NEW-1). The previous
-// implementation sorted the ENTIRE ~4,800-job list — allocating a
-// ~4,785-element wrapper array and running an O(n log n) sort — on
-// every one of the 4,786 `/v/` pages, just to keep the leading 6.
-//
-// `selectTopN` does a single O(n) pass keeping only the `n` best.
-// `project` is run ONCE per item (it computes the sort key — here a
-// `{ tier, salaryValue }` pair; `getSimilarityTier` does string
-// splitting, so it must not re-run inside the comparator), and the
-// raw item + its key are kept together. `compare` orders by the key.
-//
-// It reproduces `items.map(...).sort(compare).slice(0, n)` EXACTLY,
-// including the stable tie-break: a candidate is inserted at the first
-// position where it is *strictly* better than the element already
-// there, so items equal under `compare` keep their original input
-// order (`Array.prototype.sort` is stable). Output is byte-identical
-// to the old full-sort — but at most `n` wrapper objects ever exist,
-// not ~4,785, and there is no array-wide sort.
-function selectTopN<T, K>(
-	items: readonly T[],
-	n: number,
-	project: (item: T) => K,
-	compare: (a: K, b: K) => number,
-): T[] {
-	if (n <= 0) return [];
-	const kept: Array<{ item: T; key: K }> = [];
-	for (const item of items) {
-		const key = project(item);
-		let index = 0;
-		while (index < kept.length && compare(key, kept[index].key) >= 0) {
-			index++;
-		}
-		if (index >= n) continue; // not better than any of the n kept
-		kept.splice(index, 0, { item, key });
-		if (kept.length > n) kept.length = n;
-	}
-	return kept.map((entry) => entry.item);
-}
-
 const SIMILAR_JOBS_LIMIT = 6;
 const similarJobs = selectTopN(
 	jobsData.filter((item) => item.slug !== job.slug),
@@ -416,9 +335,6 @@ const { salaryMaxNumeric, applyLabel } = getApplyCta(job);
 
 // === SEO+AI block helpers (replace removed «Дальше» block) ===
 
-const formatRubAmount = (value: number) =>
-	`${new Intl.NumberFormat('ru-RU').format(Math.round(value))} ₽`;
-
 // Block: 3 concrete income scenarios. Computed only when an hourly
 // rate is available — otherwise the block is skipped.
 type IncomeScenario = { key: string; label: string; hours: number; shifts: number; income: string };
@@ -429,71 +345,24 @@ const incomeScenarios: IncomeScenario[] | null = hourlyRate
 			{ key: 'full', label: 'Полная загрузка', hours: 10, shifts: 26 },
 		].map((scenario) => ({
 			...scenario,
-			income: formatRubAmount(scenario.hours * scenario.shifts * hourlyRate),
+			income: formatMoneyWithCurrency(scenario.hours * scenario.shifts * hourlyRate, job.currency),
 		}))
 	: null;
 
-// Block: HowTo steps tailored to company + transport + employment.
+// Block: HowTo steps tailored by VacancySource howToTemplate.
 const employmentTypeText = job.details.employment_type ?? '';
 const requiresSelfEmployedRegistration = /Самозанят/i.test(employmentTypeText);
-const requiresMedicalBookFormat = job.transport === 'foot' || job.transport === 'bicycle';
-const isBankRepresentativeRole =
-	matchingSource?.slug?.startsWith('alfa-bank') ||
-	matchingSource?.slug?.startsWith('tbank') ||
-	matchingSource?.slug?.startsWith('efin');
-
-type HowToStep = { name: string; text: string };
-const buildHowToSteps = (): HowToStep[] => {
-	const steps: HowToStep[] = [];
-
-	// Disabled-vacancy HowTo branch removed per C3 — every vacancy has a
-	// real applyLink so we always render the «Fill in the partner form»
-	// step.
-	steps.push({
-		name: `Заполните анкету на сайте ${job.company}`,
-		text: `Перейдите по кнопке отклика в карточке. Укажите контакты, город${jobCities[0] ? ` (${jobCities[0]})` : ''}, удобный формат смен и подтвердите согласие на обработку данных.`,
-	});
-
-	if (isBankRepresentativeRole) {
-		steps.push({
-			name: 'Пройдите телефонное собеседование',
-			text: `Сотрудник ${job.company} перезвонит в течение 1–2 рабочих дней, обсудит график, район работы и проверит документы.`,
-		});
-		steps.push({
-			name: 'Получите оборудование и обучение',
-			text: 'В офисе банка выдадут планшет и форму. Обучение оплачиваемое, длится 3–7 дней — изучаются продукты, скрипты и правила безопасности.',
-		});
-		steps.push({
-			name: 'Выходите на встречи с клиентами',
-			text: `Маршруты приходят в приложение представителя. Выплаты — ${job.details.payment_freq.toLowerCase()}, формат оформления — ${employmentTypeText.toLowerCase()}.`,
-		});
-	} else {
-		if (requiresSelfEmployedRegistration) {
-			steps.push({
-				name: 'Оформите самозанятость в «Мой налог»',
-				text: 'Регистрация бесплатная, занимает 5 минут — нужны паспорт и ИНН. Налог: 4% с дохода от физлиц, 6% с юрлиц. Без отчётности и страховых взносов.',
-			});
-		}
-		if (requiresMedicalBookFormat) {
-			steps.push({
-				name: 'Оформите медицинскую книжку',
-				text: `Обязательна для ${job.transport === 'foot' ? 'пешей' : 'велосипедной'} доставки еды. Стоит 2500–4000 ₽, оформляется за 1 рабочий день в платных клиниках с лицензией Роспотребнадзора.`,
-			});
-		}
-		steps.push({
-			name: 'Скачайте приложение и пройдите вводное обучение',
-			text: `Получите доступ к приложению курьера ${job.company}. Внутри: 15-минутный инструктаж, тарифы, правила работы со штрафами и поддержкой.`,
-		});
-		steps.push({
-			name: 'Выходите на первую смену',
-			text: `Открывайте слоты в приложении и принимайте заказы. Выплаты — ${job.details.payment_freq.toLowerCase()}, ставка по этой вакансии — ${job.salary.toLowerCase()}.`,
-		});
-	}
-
-	return steps.slice(0, 5);
-};
-
-const howToSteps = buildHowToSteps();
+const howToTemplate = resolveVacancyHowToTemplate({
+	configuredTemplate: matchingSource?.howToTemplate,
+	sourceSlug: matchingSource?.slug,
+	transport: job.transport,
+});
+const howToSteps = buildVacancyHowToSteps({
+	job,
+	jobCities,
+	template: howToTemplate,
+	employmentTypeText,
+});
 const stepCountWord =
 	howToSteps.length === 1 ? 'шаг' : howToSteps.length < 5 ? 'шага' : 'шагов';
 const howToTitle = `Старт за ${howToSteps.length} ${stepCountWord}: ${job.title}`;
@@ -724,9 +593,7 @@ const pageSchemaGraph = [
 					salaryMaxNumeric={salaryMaxNumeric}
 					applyLabel={applyLabel}
 					employmentTypeText={employmentTypeText}
-					hourlyRate={hourlyRate}
-					formattedHourlyRate={formattedHourlyRate}
-					isEstimatedHourlyRate={isEstimatedHourlyRate}
+					calculatorModel={calculatorModel}
 				/>
 			</div>
 

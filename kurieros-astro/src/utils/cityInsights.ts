@@ -124,15 +124,25 @@ export function buildCitySummary(args: CitySummaryArgs): string {
 	);
 
 	// 2. Масштаб + «где находится» — tier, population, region, federal district.
-	const populationText = `${formatMoney(population)} ${formatRussianPlural(population, [
-		'житель',
-		'жителя',
-		'жителей',
-	])}`;
+	// Fallback cities created from partner data may not have a population
+	// record yet; avoid rendering a fake "0 жителей" fact.
 	const locationSuffix = region
 		? `, регион ${region}${district ? ` (${district} федеральный округ)` : ''}`
 		: '';
-	sentences.push(`${cityTier(population)} — ${populationText}${locationSuffix}.`);
+	if (population > 0) {
+		const populationText = `${formatMoney(population)} ${formatRussianPlural(population, [
+			'житель',
+			'жителя',
+			'жителей',
+		])}`;
+		sentences.push(`${cityTier(population)} — ${populationText}${locationSuffix}.`);
+	} else {
+		sentences.push(
+			region
+				? `Направление ${prep} относится к региону ${region}${district ? ` (${district} федеральный округ)` : ''}.`
+				: `Направление ${prep} добавлено в каталог по активным вакансиям.`,
+		);
+	}
 
 	// 3. Заработок в контексте — SEO anchor «зарплата курьера {prep}».
 	const autoShift = rates?.auto;

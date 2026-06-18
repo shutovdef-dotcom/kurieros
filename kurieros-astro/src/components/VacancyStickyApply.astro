@@ -27,17 +27,16 @@
  */
 ---
 
-<a
+<button
 	id="vacancy-sticky-apply"
 	class="vacancy-sticky-apply hidden"
-	href="#"
-	role="button"
+	type="button"
 	aria-label="Откликнуться на вакансию"
 >
 	<span class="vacancy-sticky-apply-icon" aria-hidden="true">🔥</span>
 	<span class="vacancy-sticky-apply-label">Откликнуться</span>
 	<span class="vacancy-sticky-apply-arrow" aria-hidden="true">→</span>
-</a>
+</button>
 
 <style>
 	.vacancy-sticky-apply {
@@ -53,10 +52,13 @@
 		padding: 14px 18px;
 		background: linear-gradient(135deg, #ff6a3d 0%, #ff3d6a 100%);
 		color: var(--ink-0);
+		border: 0;
 		font-weight: 800;
 		font-size: 1rem;
+		font-family: inherit;
 		letter-spacing: 0.01em;
 		text-decoration: none;
+		cursor: pointer;
 		box-shadow: 0 -6px 16px rgba(0, 0, 0, 0.18);
 		transform: translateY(0);
 		transition: transform 0.18s ease, opacity 0.18s ease;

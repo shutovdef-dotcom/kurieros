@@ -6,11 +6,22 @@
 ## Минимальный локальный gate
 
 ```sh
+npm run check:release
+```
+
+`check:release` запускает production build, lint, typecheck, coverage,
+Worker gate, performance guard и `git diff --check`.
+
+Если нужно разложить gate на отдельные команды:
+
+```sh
 npm run build
 npm test
 npm run test:coverage
 npm run lint
 npm run typecheck
+npm run check:worker
+npm run check:perf
 npx --yes html-validate dist/index.html dist/podrabotka-kurerom/index.html dist/otzyvy/index.html dist/compare/index.html
 npm audit --audit-level=moderate
 git diff --check
@@ -88,10 +99,24 @@ handoff, если есть horizontal overflow, обрезанный текст,
 4. Проверить sitemap:
    - не должен содержать `/api/grid-batch/`.
    - не должен содержать `/api/grid/`.
-   - `robots.txt` должен блокировать `/api/grid/` и `/api/grid-batch/`.
+   - не должен содержать `/api/company-vacancies/`.
+   - `robots.txt` должен блокировать `/api/grid/`, `/api/grid-batch/` и
+     `/api/company-vacancies/`.
 5. Проверить mobile карточки:
    - доход/график/образование/опыт не должны наезжать друг на друга.
    - pill `Без опыта` не должен выходить за контейнер.
+
+Если менялись company pages или `src/components/company/*`:
+
+1. Проверить крупный бренд:
+   - `/companies/kuper-ex-sbermarket/`
+   - initial HTML должен содержать первый batch вакансий, а кнопка должна
+     догружать следующий batch.
+2. Проверить fragment endpoint:
+   - `/api/company-vacancies/kuper-ex-sbermarket/2/`
+   - должен отдавать карточки вакансий без full page shell.
+3. Проверить sitemap:
+   - `/api/company-vacancies/` не должен попадать в `dist/sitemap-*.xml`.
 
 ## SEO checks
 
@@ -113,4 +138,6 @@ handoff, если есть horizontal overflow, обрезанный текст,
 - `README.md`, если изменились команды/структура/preview flow.
 - `docs/architecture.md`, если изменились page/data/batch invariants.
 - `docs/qa-and-release-checklist.md`, если изменились gates.
+- `docs/master-code-health-plan-2026-06-14.md`, если закрывается пункт
+  code-health очереди.
 - `docs/backlog.md` или audit report, если найдены новые риски.

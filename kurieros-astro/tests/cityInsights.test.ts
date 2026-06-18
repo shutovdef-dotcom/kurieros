@@ -94,6 +94,21 @@ describe('buildCitySummary', () => {
 		expect(text).not.toContain('федеральный округ');
 	});
 
+	it('does not render fake population for fallback cities', () => {
+		const text = buildCitySummary({
+			...kazan,
+			prep: 'в Алматы',
+			population: 0,
+			region: undefined,
+			district: undefined,
+			rates: null,
+		});
+
+		expect(text).toContain('Направление в Алматы добавлено в каталог по активным вакансиям.');
+		expect(text).not.toContain('0 жителей');
+		expect(text).not.toContain('Малый город');
+	});
+
 	it('omits the pay sentence in the summary when Kuper has no rates (the table carries it)', () => {
 		const text = buildCitySummary({ ...kazan, rates: null });
 

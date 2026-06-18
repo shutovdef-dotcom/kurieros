@@ -1,6 +1,6 @@
 ---
 import ReviewModal from './ReviewModal.astro';
-import { seededShuffle } from '../utils/seededShuffle';
+import { pickBrandReviewBlockSample, pickHomepageReviewSample } from '../utils/reviewSamples';
 // `reviewsData` is validated (Zod) ONCE at module load in
 // `reviewsIndex.ts`, and `reviewsByCompany` is the per-brand bucket Map
 // built there. Astro inlines frontmatter into the per-render function,
@@ -26,21 +26,6 @@ let displayReviews: Review[] = [];
 let overallRating = 0;
 let totalReviewsCount = 0;
 
-const pickUniqueReviewerNames = (reviews: Review[], limit: number): Review[] => {
-  const picked: Review[] = [];
-  const seenNames = new Set<string>();
-
-  for (const review of reviews) {
-    const nameKey = review.name.trim().toLowerCase();
-    if (seenNames.has(nameKey)) continue;
-    seenNames.add(nameKey);
-    picked.push(review);
-    if (picked.length >= limit) break;
-  }
-
-  return picked;
-};
-
 if (company) {
   // O(1) Map lookup into the module-cached per-brand buckets.
   const brandReviews = reviewsByCompany.get(company) ?? [];
@@ -50,11 +35,11 @@ if (company) {
     overallRating = Number((sum / totalReviewsCount).toFixed(1));
   }
   // Stable ≤6 sample, seeded by brand so it is identical on every rebuild.
-  displayReviews = seededShuffle(brandReviews, `reviews-${company}`).slice(0, 6);
+  displayReviews = pickBrandReviewBlockSample(brandReviews, company);
 } else {
   // Homepage logic: 3 deterministic picks (stable across builds), without
   // repeating the same reviewer name in the teaser.
-  displayReviews = pickUniqueReviewerNames(seededShuffle(reviewsData, 'reviews-home'), 3);
+  displayReviews = pickHomepageReviewSample(reviewsData);
   totalReviewsCount = reviewsData.length;
 }
 
@@ -487,11 +472,6 @@ const renderStars = (rating: number) => {
       return '★'.repeat(fullStars) + (halfStar ? '½' : '') + '☆'.repeat(emptyStars);
     }
 
-    const form = document.getElementById('review-form');
-    // Мы привязываем обработчик на документе, чтобы перехватывать событие отправки
-    // При сабмите ReviewModal он покажет окно успешной отправки, 
-    // но мы ДОЛЖНЫ добавить логику вставки в DOM
-    
     type StoredReview = {
       name: string;
       city: string;
@@ -503,29 +483,40 @@ const renderStars = (rating: number) => {
       jobId: string | null;
     };
 
-    // `.value` is exposed by HTMLInputElement and HTMLTextAreaElement,
-    // but `getElementById` only narrows to HTMLElement. Read via a
-    // type-guarded helper so we keep the value-or-fallback pattern
-    // without `as any`.
-    function getInputValue(id: string, fallback: string): string {
-      const el = document.getElementById(id);
-      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
-        return el.value;
-      }
-      return fallback;
+    type SubmittedReview = Omit<StoredReview, 'rating'> & {
+      rating: string | number;
+      persistLocal?: boolean;
+    };
+
+    function isSubmittedReview(value: unknown): value is SubmittedReview {
+      return Boolean(
+        value &&
+        typeof value === 'object' &&
+        typeof (value as SubmittedReview).name === 'string' &&
+        typeof (value as SubmittedReview).city === 'string' &&
+        typeof (value as SubmittedReview).pros === 'string' &&
+        typeof (value as SubmittedReview).cons === 'string' &&
+        typeof (value as SubmittedReview).comment === 'string' &&
+        (typeof (value as SubmittedReview).rating === 'string' ||
+          typeof (value as SubmittedReview).rating === 'number') &&
+        typeof (value as SubmittedReview).date === 'string' &&
+        ((value as SubmittedReview).jobId === null ||
+          typeof (value as SubmittedReview).jobId === 'string'),
+      );
     }
 
-    form?.addEventListener('submit', () => {
-      // Это выполнится до setTimeout в ReviewModal.astro
+    window.addEventListener('kurieros:review-submitted', (event) => {
+      const detail = event instanceof CustomEvent ? event.detail : null;
+      if (!isSubmittedReview(detail)) return;
       const newReview: StoredReview = {
-        name: getInputValue('review-name', 'Аноним'),
-        city: getInputValue('review-city', 'Город'),
-        pros: getInputValue('review-pros', ''),
-        cons: getInputValue('review-cons', ''),
-        comment: getInputValue('review-comment', ''),
-        rating: getInputValue('review-rating', '5'),
-        date: new Date().toISOString(),
-        jobId: null,
+        name: detail.name,
+        city: detail.city,
+        pros: detail.pros,
+        cons: detail.cons,
+        comment: detail.comment,
+        rating: String(detail.rating),
+        date: detail.date,
+        jobId: detail.jobId,
       };
 
       // 1. Поиск контейнера с отзывами
@@ -572,15 +563,14 @@ const renderStars = (rating: number) => {
       }
 
       // Сохранение в LocalStorage
-      const savedReviews = loadStoredReviews();
-      // Если мы на странице конкретной вакансии (можем узнать по кнопке)
-      const openBtn = document.querySelector('.open-review-modal');
-      newReview.jobId = openBtn ? openBtn.getAttribute('data-job-id') : null;
-      savedReviews.push(newReview);
-      try {
-        localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(savedReviews));
-      } catch (_) {
-        // Safari private mode / quota — silent: review still rendered above.
+      if (detail.persistLocal !== false) {
+        const savedReviews = loadStoredReviews();
+        savedReviews.push(newReview);
+        try {
+          localStorage.setItem(REVIEWS_STORAGE_KEY, JSON.stringify(savedReviews));
+        } catch (_) {
+          // Safari private mode / quota — silent: review still rendered above.
+        }
       }
     });
 

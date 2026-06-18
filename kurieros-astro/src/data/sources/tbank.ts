@@ -241,6 +241,8 @@ const tBankOperatorSource: VacancySource = {
     os: 'iOS / Android',
   },
   offers: tBankOperatorOffers,
+  incomeCalculator: { mode: 'monthly' },
+  howToTemplate: 'remote_operator',
   extraTags: ['tbank', 'operator', 'b2b', 'remote', 'source:google-sheet'],
   isHot: true,
 };
@@ -261,6 +263,8 @@ const tBankRepresentativeSource: VacancySource = {
     os: 'iOS / Android',
   },
   offers: tBankRepresentativeOffers,
+  incomeCalculator: { mode: 'monthly' },
+  howToTemplate: 'bank_representative',
   extraTags: ['tbank', 'representative', 'field-sales', 'source:google-sheet'],
   isHot: true,
 };

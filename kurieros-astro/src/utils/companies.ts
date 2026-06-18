@@ -1,5 +1,6 @@
 import { getVacancyPluralText, humanJoin, parseSalary } from './format';
 import { cyrillicToLatin } from './transliterate';
+import type { CurrencyCode } from '../data/vacancyTypes';
 
 export type JobLike = {
   slug: string;
@@ -9,6 +10,7 @@ export type JobLike = {
   applyLink?: string;
   location: string;
   salary: string;
+  currency?: CurrencyCode;
   shortDescription?: string;
   tags: string[];
   details: {
@@ -50,6 +52,7 @@ const TRANSPORT_LABELS: Record<string, string> = {
   auto: 'На авто',
   bicycle: 'Велосипед / самокат',
   foot: 'Пешком',
+  service: 'Выездные услуги',
 };
 
 export const slugifyCompany = (name: string) =>
@@ -61,6 +64,8 @@ export const slugifyCompany = (name: string) =>
 
 const companyTypeLabel = (name: string) => {
   if (/банк/i.test(name)) return 'финтех и банковская доставка';
+  if (/qlean|клин/i.test(name)) return 'клининг и бытовые услуги';
+  if (/voxys/i.test(name)) return 'контакт-центр и клиентский сервис';
   if (/яндекс еда|самокат|вкусвилл|купер|пятерочка|магнит/i.test(name)) return 'доставка еды и продуктов';
   if (/ozon|сдэк|яндекс маркет/i.test(name)) return 'логистика и e-commerce';
   if (/додо|бургер кинг/i.test(name)) return 'ресторанная доставка';
@@ -97,6 +102,8 @@ export type CompanyEntity = {
   reviewCount: number;
   rating: number | null;
   maxSalary: number;
+  maxSalaryCurrency: CurrencyCode | null;
+  currencies: CurrencyCode[];
   shortIntro: string;
   fitPoints: string[];
   cautionPoints: string[];
@@ -119,7 +126,8 @@ export const getCompaniesFromJobs = (jobs: JobLike[], reviews: ReviewLike[] = []
     employmentTypes: Set<string>;
     transportModes: Set<string>;
     reviews: ReviewLike[];
-    maxSalary: number;
+    currencies: Set<CurrencyCode>;
+    maxSalaryByCurrency: Map<CurrencyCode, number>;
   }>();
 
   jobs.forEach((job) => {
@@ -135,7 +143,8 @@ export const getCompaniesFromJobs = (jobs: JobLike[], reviews: ReviewLike[] = []
       employmentTypes: new Set<string>(),
       transportModes: new Set<string>(),
       reviews: [],
-      maxSalary: 0,
+      currencies: new Set<CurrencyCode>(),
+      maxSalaryByCurrency: new Map<CurrencyCode, number>(),
     };
 
     existing.jobs.push(job);
@@ -145,7 +154,12 @@ export const getCompaniesFromJobs = (jobs: JobLike[], reviews: ReviewLike[] = []
     existing.payments.add(job.details.payment_freq);
     existing.ages.add(job.details.age);
     existing.employmentTypes.add(job.details.employment_type);
-    existing.maxSalary = Math.max(existing.maxSalary, parseSalary(job.salary));
+    const currency = job.currency ?? 'RUB';
+    existing.currencies.add(currency);
+    existing.maxSalaryByCurrency.set(
+      currency,
+      Math.max(existing.maxSalaryByCurrency.get(currency) ?? 0, parseSalary(job.salary)),
+    );
 
     job.tags.forEach((tag) => {
       if (TRANSPORT_LABELS[tag]) {
@@ -181,6 +195,11 @@ export const getCompaniesFromJobs = (jobs: JobLike[], reviews: ReviewLike[] = []
       const paymentPreview = Array.from(company.payments).slice(0, 2);
       const employmentPreview = Array.from(company.employmentTypes).slice(0, 2);
       const agePreview = Array.from(company.ages).slice(0, 2);
+      const currencies = Array.from(company.currencies);
+      const maxSalaryCurrency = currencies.length === 1 ? currencies[0] : null;
+      const maxSalary = maxSalaryCurrency
+        ? company.maxSalaryByCurrency.get(maxSalaryCurrency) ?? 0
+        : 0;
       const shortIntro = `${company.name} на КурьерОк — это ${companyTypeLabel(company.name)}, где сейчас есть ${company.jobs.length} ${getVacancyPluralText(company.jobs.length)}. Здесь удобно сравнить формат работы, выплаты и ограничения до отклика.`;
 
       return {
@@ -202,7 +221,9 @@ export const getCompaniesFromJobs = (jobs: JobLike[], reviews: ReviewLike[] = []
         employmentPreview,
         reviewCount,
         rating,
-        maxSalary: company.maxSalary,
+        maxSalary,
+        maxSalaryCurrency,
+        currencies,
         shortIntro,
         fitPoints: [
           `Тем, кто рассматривает ${company.name} и хочет быстро понять, какой транспорт, выплаты и оформление встречаются в вакансиях бренда.`,

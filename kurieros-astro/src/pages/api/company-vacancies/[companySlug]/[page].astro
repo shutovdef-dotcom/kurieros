@@ -1,0 +1,35 @@
+---
+import CompanyVacancyCard from '../../../../components/company/CompanyVacancyCard.astro';
+import {
+  getCompanyVacancyBatch,
+  getCompanyVacancyBatchStaticPaths,
+} from '../../../../utils/companyVacancyBatches';
+
+export const prerender = true;
+
+export function getStaticPaths() {
+  return getCompanyVacancyBatchStaticPaths();
+}
+
+const companySlug = Astro.params.companySlug || '';
+const rawPageNumber = Number.parseInt(Astro.params.page || '2', 10);
+const {
+  batchJobs,
+  remainingCount,
+  nextBatchUrl,
+} = getCompanyVacancyBatch(companySlug, rawPageNumber);
+---
+{/*
+  Company vacancy batch endpoint.
+
+  Company pages render only the first rich vacancy cards in the main HTML.
+  These static fragments append the remaining cards on explicit user action
+  without duplicating card markup in JavaScript.
+*/}
+<div
+  class="company-vacancies-batch"
+  data-remaining-count={remainingCount}
+  data-next-batch-url={nextBatchUrl}
+>
+  {batchJobs.map((job) => <CompanyVacancyCard job={job} />)}
+</div>

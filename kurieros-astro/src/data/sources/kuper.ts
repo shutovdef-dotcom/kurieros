@@ -127,10 +127,15 @@ const createKuperOffer = ({
   // Kuper accepts foot/bicycle couriers from 16 with parental consent;
   // auto requires 18+ (driving licence). Packers — adults only by Kuper rules.
   const ageFrom = transport === 'auto' || role === 'packer' ? 18 : 16;
-  // Foot couriers don't need any vehicle of their own. Override only when
-  // caller didn't pass an explicit transportProvision.
+  // Foot couriers don't need a vehicle. Bike couriers can use their own
+  // bicycle/scooter or partner rental offers when available.
   const computedProvision: VacancyOffer['transportProvision'] | undefined =
-    transportProvision ?? (transport === 'foot' ? 'not_required' : undefined);
+    transportProvision ??
+    (transport === 'foot'
+      ? 'not_required'
+      : transport === 'bicycle'
+        ? 'own_or_partner_rental'
+        : undefined);
   return {
     city,
     transport,
@@ -197,10 +202,10 @@ const kuperBikeContent: VacancyContent = {
   ],
   benefits: [
     ...kuperCommonBenefits,
-    'Во всех городах доступна аренда электровелосипеда за 0 ₽.',
+    'Транспорт со скидкой: до 30% на аренду или покупку велосипеда; для активных курьеров может быть доступна аренда электровелосипеда за 0 ₽.',
   ],
   requiredDocuments: [...kuperRequiredDocuments],
-  labels: ['Велокурьер', 'Аренда электровелосипеда 0 ₽', 'Еженедельные выплаты'],
+  labels: ['Велокурьер', 'Аренда/покупка со скидкой', 'Еженедельные выплаты'],
   searchTags: ['Купер', 'велокурьер', 'самокат', 'доставка'],
 };
 
@@ -269,7 +274,9 @@ const kuperBikeOffers = kuperFootAndBikeShiftByCity.map(([city, shift], cityInde
     baseApplyLink: KUPER_FOOT_AND_BIKE_APPLY_LINK,
     priorityBase: 1950,
     schedule: 'Смена до 12 часов, гибкий график от 3 часов в день',
-    benefitsOverride: ['Во всех городах доступна аренда электровелосипеда за 0 ₽.'],
+    benefitsOverride: [
+      'Транспорт со скидкой: до 30% на аренду или покупку велосипеда; для активных курьеров может быть доступна аренда электровелосипеда за 0 ₽.',
+    ],
   }),
 );
 

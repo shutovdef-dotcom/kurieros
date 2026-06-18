@@ -39,7 +39,7 @@ const {
 			<img src={job.companyLogo} alt={job.company} class="vacancy-logo" width="80" height="80" loading="eager" decoding="async" />
 			<div>
 				<div class="vacancy-kicker" data-t="vacancy.card_kicker">Карточка вакансии</div>
-				<VacancyTKey jobId={job.id} field="title" fallback={job.title} as="h1" />
+				<VacancyTKey jobId={job.id} field="title" fallback={job.title} as="h1" class="vacancy-title" />
 				<VacancyTKey jobId={job.id} field="company" fallback={job.company} as="a" class="vacancy-company-name" href={companyUrl} />
 			</div>
 		</div>
@@ -74,7 +74,7 @@ const {
 					</svg>
 					<span>Поделиться</span>
 				</button>
-				<div class="share-dropdown" id="share-menu" aria-label="Поделиться вакансией" hidden>
+				<div class="share-dropdown" id="share-menu" hidden>
 					<button type="button" class="share-option" data-share-target="telegram">
 						<span class="share-option-icon" aria-hidden="true">
 							<svg viewBox="0 0 24 24" fill="#26A5E4"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212-.07-.060-.174-.041-.249-.024-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
@@ -126,6 +126,9 @@ const {
 					data-apply-transport={job.transport}
 					data-apply-employment={employmentTypeText}
 					data-apply-salary-max={salaryMaxNumeric || ''}
+					data-apply-vacancy-id={job.id}
+					data-apply-vacancy-slug={job.slug}
+					data-apply-source-slug={job.sourceSlug}
 					data-lead-form-type={leadFormType}
 					{...ozonDataAttrs(job.ozonLeadForm)}
 				>
@@ -144,6 +147,9 @@ const {
 				data-apply-transport={job.transport}
 				data-apply-employment={employmentTypeText}
 				data-apply-salary-max={salaryMaxNumeric || ''}
+				data-apply-vacancy-id={job.id}
+				data-apply-vacancy-slug={job.slug}
+				data-apply-source-slug={job.sourceSlug}
 			>
 				{applyLabel}
 			</a>
@@ -195,12 +201,16 @@ const {
 		position: relative;
 		z-index: 1;
 		display: grid;
+		grid-template-columns: minmax(0, 1fr);
 		gap: 1.25rem;
+		min-width: 0;
 	}
 	.vacancy-company-info {
 		display: flex;
 		gap: 1.5rem;
 		align-items: flex-start;
+		min-width: 0;
+		max-width: 100%;
 	}
 	.vacancy-logo {
 		width: 80px;
@@ -220,7 +230,7 @@ const {
 		text-transform: uppercase;
 		color: var(--vacancy-eyebrow);
 	}
-	.vacancy-header h1 {
+	:global(.vacancy-title) {
 		max-width: 13ch;
 		margin-bottom: 0.35rem;
 		font-size: 3.8rem;
@@ -229,7 +239,7 @@ const {
 		text-wrap: balance;
 		color: var(--vacancy-ink);
 	}
-	.vacancy-company-name {
+	:global(.vacancy-company-name) {
 		display: inline-flex;
 		align-items: center;
 		gap: 0.35rem;
@@ -237,7 +247,7 @@ const {
 		text-decoration: none;
 		font-weight: 800;
 	}
-	.vacancy-company-name:hover {
+	:global(.vacancy-company-name:hover) {
 		text-decoration: underline;
 	}
 	.vacancy-ai-summary {
@@ -246,11 +256,15 @@ const {
 		color: var(--vacancy-muted);
 		font-size: 1.12rem;
 		line-height: 1.75;
+		min-width: 0;
+		overflow-wrap: anywhere;
 	}
 	.vacancy-meta-row {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.65rem;
+		min-width: 0;
+		max-width: 100%;
 	}
 	.meta-pill {
 		display: inline-flex;
@@ -451,6 +465,7 @@ const {
 		display: grid;
 		align-content: start;
 		gap: 0.65rem;
+		min-width: 0;
 		min-height: 100%;
 		padding: 1.5rem;
 		border-radius: 8px;
@@ -481,9 +496,11 @@ const {
 
 	/* === Visual refresh overrides (Apply CTAs) === */
 	.apply-btn-large {
+		box-sizing: border-box;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
+		max-width: 100%;
 		background: var(--accent-500);
 		color: var(--ink-0);
 		border: none;
@@ -527,10 +544,13 @@ const {
 			padding: 1.25rem;
 		}
 
-		.vacancy-header h1 {
+		:global(.vacancy-title) {
 			font-size: 1.55rem;
 			line-height: 1.2;
 			max-width: none;
+			text-wrap: wrap;
+			overflow-wrap: anywhere;
+			word-break: break-word;
 		}
 
 		/* Mobile hero — keep logo + title in a row so the title sits in
@@ -556,6 +576,16 @@ const {
 		.vacancy-company-info > div {
 			min-width: 0;
 			flex: 1;
+		}
+		.apply-btn-hero {
+			width: 100%;
+			min-width: 0;
+			padding: 14px 12px;
+			font-size: var(--fs-16);
+			line-height: 1.2;
+			text-align: center;
+			white-space: normal;
+			overflow-wrap: anywhere;
 		}
 	}
 

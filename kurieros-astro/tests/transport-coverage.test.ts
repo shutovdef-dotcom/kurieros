@@ -6,7 +6,7 @@
  * TRANSPORT_TITLE_SUFFIXES, TRANSPORT_BANK_ROLE_TITLES, TRANSPORT_ID_PARTS,
  * TRANSPORT_TAGS) plus the production code path that maps a job's
  * `transport` to a `tags`/`labels` entry. A typo or missing key for any
- * mode (e.g. the `remote` key omitted from TRANSPORT_PRIORITY in PR #135)
+ * mode (e.g. the `remote` / `office` key omitted from TRANSPORT_PRIORITY)
  * yields `undefined` at runtime, which downstream becomes NaN, blank UI,
  * or a missing tag — none of which would fail the build.
  *
@@ -21,7 +21,7 @@ import jobs from '../src/data/jobs';
 import { vacancySources } from '../src/data/vacancies';
 import type { TransportMode } from '../src/data/vacancyTypes';
 
-const ALL_MODES: TransportMode[] = ['foot', 'bicycle', 'auto', 'remote'];
+const ALL_MODES: TransportMode[] = ['foot', 'bicycle', 'auto', 'remote', 'office', 'service'];
 
 describe('Transport coverage in generated jobs', () => {
   it.each(ALL_MODES)('produces non-empty title/labels/tags for transport=%s', (mode) => {
@@ -41,8 +41,8 @@ describe('Transport coverage in generated jobs', () => {
       expect(job.tags, `transport tag present for ${job.slug}`).toContain(mode);
 
       // details.transport_provision must resolve to a Russian label —
-      // never the literal token like 'own'/'company'/'not_required'.
-      expect(job.details.transport_provision, `transport_provision label for ${job.slug}`).not.toMatch(/^(own|company|not_required)$/);
+      // never a literal enum token like `own_or_partner_rental`.
+      expect(job.details.transport_provision, `transport_provision label for ${job.slug}`).not.toMatch(/^[a-z_]+$/);
       expect(job.details.transport_provision.length).toBeGreaterThan(0);
     }
   });
@@ -77,6 +77,18 @@ describe('Transport coverage in generated jobs', () => {
         expect(Number.isFinite(job.id), `remote job ${job.slug} has finite id`).toBe(true);
         expect(typeof job.title).toBe('string');
         expect(job.title.length).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('TRANSPORT_PRIORITY has office key', () => {
+    const officeJobs = jobs.filter((job) => job.transport === 'office');
+
+    if (officeJobs.length > 0) {
+      for (const job of officeJobs) {
+        expect(Number.isFinite(job.id), `office job ${job.slug} has finite id`).toBe(true);
+        expect(job.tags, `office job ${job.slug} has office tag`).toContain('office');
+        expect(job.labels, `office job ${job.slug} has office label`).toContain('Офис');
       }
     }
   });

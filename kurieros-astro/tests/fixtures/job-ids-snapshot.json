@@ -9748,6 +9748,10 @@
     "slug": "tbank-representative-poronaysk-auto"
   },
   {
+    "id": 760353,
+    "slug": "tbank-representative-vereya-auto"
+  },
+  {
     "id": 760553,
     "slug": "tbank-representative-buy-auto"
   },
@@ -11196,6 +11200,10 @@
     "slug": "efin-bank-representative-kem-auto"
   },
   {
+    "id": 821643,
+    "slug": "efin-bank-representative-metallostroy-auto"
+  },
+  {
     "id": 821683,
     "slug": "efin-bank-representative-danilov-auto"
   },
@@ -11418,6 +11426,10 @@
   {
     "id": 830703,
     "slug": "efin-bank-representative-noyabrsk-auto"
+  },
+  {
+    "id": 831283,
+    "slug": "efin-bank-representative-strelna-auto"
   },
   {
     "id": 831611,
@@ -16116,6 +16128,10 @@
     "slug": "alfa-bank-representative-poronaysk-auto"
   },
   {
+    "id": 960353,
+    "slug": "alfa-bank-representative-vereya-auto"
+  },
+  {
     "id": 960533,
     "slug": "alfa-bank-representative-slantsy-auto"
   },
@@ -19542,5 +19558,693 @@
   {
     "id": 2099472,
     "slug": "samokat-courier-astrahan-bicycle"
+  },
+  {
+    "id": 2100075,
+    "slug": "voxys-call-center-operator-chelyabinsk-office"
+  },
+  {
+    "id": 2100105,
+    "slug": "voxys-call-center-operator-rostov-na-donu-office"
+  },
+  {
+    "id": 2100155,
+    "slug": "voxys-call-center-operator-volgograd-office"
+  },
+  {
+    "id": 2104865,
+    "slug": "voxys-call-center-operator-cheboksary-office"
+  },
+  {
+    "id": 2106675,
+    "slug": "voxys-call-center-operator-izhevsk-office"
+  },
+  {
+    "id": 2117775,
+    "slug": "voxys-call-center-operator-kursk-office"
+  },
+  {
+    "id": 2119305,
+    "slug": "voxys-call-center-operator-kaluga-office"
+  },
+  {
+    "id": 2127965,
+    "slug": "voxys-call-center-operator-saransk-office"
+  },
+  {
+    "id": 2132195,
+    "slug": "voxys-call-center-operator-tyumen-office"
+  },
+  {
+    "id": 2132585,
+    "slug": "voxys-call-center-operator-barnaul-office"
+  },
+  {
+    "id": 2185835,
+    "slug": "voxys-call-center-operator-orel-office"
+  },
+  {
+    "id": 2189405,
+    "slug": "voxys-call-center-operator-taganrog-office"
+  },
+  {
+    "id": 2190575,
+    "slug": "voxys-call-center-operator-kaliningrad-office"
+  },
+  {
+    "id": 2196415,
+    "slug": "voxys-call-center-operator-orenburg-office"
+  },
+  {
+    "id": 2199475,
+    "slug": "voxys-call-center-operator-astrahan-office"
+  },
+  {
+    "id": 2200016,
+    "slug": "qlean-cleaner-moskva-service"
+  },
+  {
+    "id": 2200026,
+    "slug": "qlean-cleaner-sankt-peterburg-service"
+  },
+  {
+    "id": 2202726,
+    "slug": "qlean-cleaner-beloostrov-service"
+  },
+  {
+    "id": 2203476,
+    "slug": "qlean-cleaner-beloozerskiy-service"
+  },
+  {
+    "id": 2205336,
+    "slug": "qlean-cleaner-klin-service"
+  },
+  {
+    "id": 2206656,
+    "slug": "qlean-cleaner-shatura-service"
+  },
+  {
+    "id": 2207556,
+    "slug": "qlean-cleaner-domodedovo-service"
+  },
+  {
+    "id": 2208236,
+    "slug": "qlean-cleaner-orehovo-zuevo-service"
+  },
+  {
+    "id": 2209306,
+    "slug": "qlean-cleaner-luhovitsy-service"
+  },
+  {
+    "id": 2209536,
+    "slug": "qlean-cleaner-himki-service"
+  },
+  {
+    "id": 2211616,
+    "slug": "qlean-cleaner-komarovo-service"
+  },
+  {
+    "id": 2212316,
+    "slug": "qlean-cleaner-taldom-service"
+  },
+  {
+    "id": 2212976,
+    "slug": "qlean-cleaner-dolgoprudnyy-service"
+  },
+  {
+    "id": 2213226,
+    "slug": "qlean-cleaner-lomonosov-service"
+  },
+  {
+    "id": 2214036,
+    "slug": "qlean-cleaner-korolev-service"
+  },
+  {
+    "id": 2214516,
+    "slug": "qlean-cleaner-ivanteevka-service"
+  },
+  {
+    "id": 2214996,
+    "slug": "qlean-cleaner-peresvet-service"
+  },
+  {
+    "id": 2215586,
+    "slug": "qlean-cleaner-noginsk-service"
+  },
+  {
+    "id": 2216426,
+    "slug": "qlean-cleaner-losino-petrovskiy-service"
+  },
+  {
+    "id": 2216926,
+    "slug": "qlean-cleaner-aleksandrovskaya-service"
+  },
+  {
+    "id": 2217386,
+    "slug": "qlean-cleaner-zhukovskiy-service"
+  },
+  {
+    "id": 2218416,
+    "slug": "qlean-cleaner-voskresensk-service"
+  },
+  {
+    "id": 2221516,
+    "slug": "qlean-cleaner-drezna-service"
+  },
+  {
+    "id": 2221646,
+    "slug": "qlean-cleaner-metallostroy-service"
+  },
+  {
+    "id": 2223136,
+    "slug": "qlean-cleaner-chernogolovka-service"
+  },
+  {
+    "id": 2224286,
+    "slug": "qlean-cleaner-krasnoe-selo-service"
+  },
+  {
+    "id": 2226786,
+    "slug": "qlean-cleaner-chehov-service"
+  },
+  {
+    "id": 2227086,
+    "slug": "qlean-cleaner-krasnoznamensk-service"
+  },
+  {
+    "id": 2227646,
+    "slug": "qlean-cleaner-petro-slavyanka-service"
+  },
+  {
+    "id": 2227856,
+    "slug": "qlean-cleaner-serovo-service"
+  },
+  {
+    "id": 2228596,
+    "slug": "qlean-cleaner-mozhaysk-service"
+  },
+  {
+    "id": 2229826,
+    "slug": "qlean-cleaner-zelenogorsk-service"
+  },
+  {
+    "id": 2229906,
+    "slug": "qlean-cleaner-zaraysk-service"
+  },
+  {
+    "id": 2229996,
+    "slug": "qlean-cleaner-krasnoarmeysk-service"
+  },
+  {
+    "id": 2230016,
+    "slug": "qlean-cleaner-egorevsk-service"
+  },
+  {
+    "id": 2230776,
+    "slug": "qlean-cleaner-ust-izhora-service"
+  },
+  {
+    "id": 2231286,
+    "slug": "qlean-cleaner-strelna-service"
+  },
+  {
+    "id": 2236736,
+    "slug": "qlean-cleaner-petergof-service"
+  },
+  {
+    "id": 2237716,
+    "slug": "qlean-cleaner-volokolamsk-service"
+  },
+  {
+    "id": 2237766,
+    "slug": "qlean-cleaner-kolomna-service"
+  },
+  {
+    "id": 2238246,
+    "slug": "qlean-cleaner-yahroma-service"
+  },
+  {
+    "id": 2238906,
+    "slug": "qlean-cleaner-lyubertsy-service"
+  },
+  {
+    "id": 2239096,
+    "slug": "qlean-cleaner-ruza-service"
+  },
+  {
+    "id": 2239646,
+    "slug": "qlean-cleaner-aprelevka-service"
+  },
+  {
+    "id": 2242826,
+    "slug": "qlean-cleaner-ramenskoe-service"
+  },
+  {
+    "id": 2247866,
+    "slug": "qlean-cleaner-levashovo-service"
+  },
+  {
+    "id": 2249766,
+    "slug": "qlean-cleaner-elektrougli-service"
+  },
+  {
+    "id": 2251216,
+    "slug": "qlean-cleaner-hotkovo-service"
+  },
+  {
+    "id": 2251426,
+    "slug": "qlean-cleaner-kurovskoe-service"
+  },
+  {
+    "id": 2251676,
+    "slug": "qlean-cleaner-krasnozavodsk-service"
+  },
+  {
+    "id": 2253286,
+    "slug": "qlean-cleaner-lytkarino-service"
+  },
+  {
+    "id": 2255546,
+    "slug": "qlean-cleaner-pushkino-service"
+  },
+  {
+    "id": 2255616,
+    "slug": "qlean-cleaner-mytischi-service"
+  },
+  {
+    "id": 2256456,
+    "slug": "qlean-cleaner-serpuhov-service"
+  },
+  {
+    "id": 2256946,
+    "slug": "qlean-cleaner-vidnoe-service"
+  },
+  {
+    "id": 2257186,
+    "slug": "qlean-cleaner-odintsovo-service"
+  },
+  {
+    "id": 2257296,
+    "slug": "qlean-cleaner-pavlovsk-service"
+  },
+  {
+    "id": 2258156,
+    "slug": "qlean-cleaner-naro-fominsk-service"
+  },
+  {
+    "id": 2258236,
+    "slug": "qlean-cleaner-tyarlevo-service"
+  },
+  {
+    "id": 2259186,
+    "slug": "qlean-cleaner-istra-service"
+  },
+  {
+    "id": 2259596,
+    "slug": "qlean-cleaner-elektrogorsk-service"
+  },
+  {
+    "id": 2260356,
+    "slug": "qlean-cleaner-vereya-service"
+  },
+  {
+    "id": 2260606,
+    "slug": "qlean-cleaner-puschino-service"
+  },
+  {
+    "id": 2262746,
+    "slug": "qlean-cleaner-sestroretsk-service"
+  },
+  {
+    "id": 2264316,
+    "slug": "qlean-cleaner-dzerzhinskiy-service"
+  },
+  {
+    "id": 2265106,
+    "slug": "qlean-cleaner-solnechnogorsk-service"
+  },
+  {
+    "id": 2266126,
+    "slug": "qlean-cleaner-kashira-service"
+  },
+  {
+    "id": 2266626,
+    "slug": "qlean-cleaner-ushkovo-service"
+  },
+  {
+    "id": 2266746,
+    "slug": "qlean-cleaner-protvino-service"
+  },
+  {
+    "id": 2267076,
+    "slug": "qlean-cleaner-molodezhnoe-service"
+  },
+  {
+    "id": 2267136,
+    "slug": "qlean-cleaner-solnechnoe-service"
+  },
+  {
+    "id": 2267666,
+    "slug": "qlean-cleaner-ozery-service"
+  },
+  {
+    "id": 2268086,
+    "slug": "qlean-cleaner-sapernyy-service"
+  },
+  {
+    "id": 2272106,
+    "slug": "qlean-cleaner-dmitrov-service"
+  },
+  {
+    "id": 2273256,
+    "slug": "qlean-cleaner-kotelniki-service"
+  },
+  {
+    "id": 2274166,
+    "slug": "qlean-cleaner-shushary-service"
+  },
+  {
+    "id": 2274246,
+    "slug": "qlean-cleaner-vysokovsk-service"
+  },
+  {
+    "id": 2274836,
+    "slug": "qlean-cleaner-fryazino-service"
+  },
+  {
+    "id": 2275176,
+    "slug": "qlean-cleaner-elektrostal-service"
+  },
+  {
+    "id": 2279136,
+    "slug": "qlean-cleaner-golitsyno-service"
+  },
+  {
+    "id": 2281786,
+    "slug": "qlean-cleaner-kubinka-service"
+  },
+  {
+    "id": 2282096,
+    "slug": "qlean-cleaner-dubna-service"
+  },
+  {
+    "id": 2282366,
+    "slug": "qlean-cleaner-sergiev-posad-service"
+  },
+  {
+    "id": 2282856,
+    "slug": "qlean-cleaner-pavlovskiy-posad-service"
+  },
+  {
+    "id": 2283906,
+    "slug": "qlean-cleaner-smolyachkovo-service"
+  },
+  {
+    "id": 2286016,
+    "slug": "qlean-cleaner-pushkin-service"
+  },
+  {
+    "id": 2286236,
+    "slug": "qlean-cleaner-kronshtadt-service"
+  },
+  {
+    "id": 2287016,
+    "slug": "qlean-cleaner-lisiy-nos-service"
+  },
+  {
+    "id": 2287396,
+    "slug": "qlean-cleaner-pesochnyy-service"
+  },
+  {
+    "id": 2288296,
+    "slug": "qlean-cleaner-pontonnyy-service"
+  },
+  {
+    "id": 2289806,
+    "slug": "qlean-cleaner-pargolovo-service"
+  },
+  {
+    "id": 2289966,
+    "slug": "qlean-cleaner-zvenigorod-service"
+  },
+  {
+    "id": 2290206,
+    "slug": "qlean-cleaner-balashiha-service"
+  },
+  {
+    "id": 2290246,
+    "slug": "qlean-cleaner-repino-service"
+  },
+  {
+    "id": 2290396,
+    "slug": "qlean-cleaner-staraya-kupavna-service"
+  },
+  {
+    "id": 2291416,
+    "slug": "qlean-cleaner-podolsk-service"
+  },
+  {
+    "id": 2291766,
+    "slug": "qlean-cleaner-roshal-service"
+  },
+  {
+    "id": 2293616,
+    "slug": "qlean-cleaner-bronnitsy-service"
+  },
+  {
+    "id": 2293626,
+    "slug": "qlean-cleaner-lobnya-service"
+  },
+  {
+    "id": 2294096,
+    "slug": "qlean-cleaner-dedovsk-service"
+  },
+  {
+    "id": 2294336,
+    "slug": "qlean-cleaner-likino-dulevo-service"
+  },
+  {
+    "id": 2295016,
+    "slug": "qlean-cleaner-stupino-service"
+  },
+  {
+    "id": 2296456,
+    "slug": "qlean-cleaner-schelkovo-service"
+  },
+  {
+    "id": 2298236,
+    "slug": "qlean-cleaner-krasnogorsk-service"
+  },
+  {
+    "id": 2298966,
+    "slug": "qlean-cleaner-reutov-service"
+  },
+  {
+    "id": 2299676,
+    "slug": "qlean-cleaner-kolpino-service"
+  },
+  {
+    "id": 2343151,
+    "slug": "yandex-go-courier-belarus-minsk-foot"
+  },
+  {
+    "id": 2343152,
+    "slug": "yandex-go-courier-belarus-minsk-bicycle"
+  },
+  {
+    "id": 2343153,
+    "slug": "yandex-go-courier-belarus-minsk-auto"
+  },
+  {
+    "id": 2416831,
+    "slug": "yandex-go-courier-kazakhstan-kostanay-foot"
+  },
+  {
+    "id": 2416832,
+    "slug": "yandex-go-courier-kazakhstan-kostanay-bicycle"
+  },
+  {
+    "id": 2421712,
+    "slug": "yandex-go-courier-kazakhstan-karaganda-bicycle"
+  },
+  {
+    "id": 2421713,
+    "slug": "yandex-go-courier-kazakhstan-karaganda-auto"
+  },
+  {
+    "id": 2436531,
+    "slug": "yandex-go-courier-kazakhstan-aktobe-foot"
+  },
+  {
+    "id": 2436532,
+    "slug": "yandex-go-courier-kazakhstan-aktobe-bicycle"
+  },
+  {
+    "id": 2436533,
+    "slug": "yandex-go-courier-kazakhstan-aktobe-auto"
+  },
+  {
+    "id": 2443391,
+    "slug": "yandex-go-courier-kazakhstan-astana-foot"
+  },
+  {
+    "id": 2443392,
+    "slug": "yandex-go-courier-kazakhstan-astana-bicycle"
+  },
+  {
+    "id": 2443393,
+    "slug": "yandex-go-courier-kazakhstan-astana-auto"
+  },
+  {
+    "id": 2445831,
+    "slug": "yandex-go-courier-kazakhstan-almaty-foot"
+  },
+  {
+    "id": 2445832,
+    "slug": "yandex-go-courier-kazakhstan-almaty-bicycle"
+  },
+  {
+    "id": 2445833,
+    "slug": "yandex-go-courier-kazakhstan-almaty-auto"
+  },
+  {
+    "id": 2461102,
+    "slug": "yandex-go-courier-kazakhstan-shymkent-bicycle"
+  },
+  {
+    "id": 2461103,
+    "slug": "yandex-go-courier-kazakhstan-shymkent-auto"
+  },
+  {
+    "id": 2462601,
+    "slug": "yandex-go-courier-kazakhstan-pavlodar-foot"
+  },
+  {
+    "id": 2462602,
+    "slug": "yandex-go-courier-kazakhstan-pavlodar-bicycle"
+  },
+  {
+    "id": 2462603,
+    "slug": "yandex-go-courier-kazakhstan-pavlodar-auto"
+  },
+  {
+    "id": 2481411,
+    "slug": "yandex-go-courier-kazakhstan-atyrau-foot"
+  },
+  {
+    "id": 2481412,
+    "slug": "yandex-go-courier-kazakhstan-atyrau-bicycle"
+  },
+  {
+    "id": 2481413,
+    "slug": "yandex-go-courier-kazakhstan-atyrau-auto"
+  },
+  {
+    "id": 2495031,
+    "slug": "yandex-go-courier-kazakhstan-aktau-foot"
+  },
+  {
+    "id": 2495032,
+    "slug": "yandex-go-courier-kazakhstan-aktau-bicycle"
+  },
+  {
+    "id": 2495033,
+    "slug": "yandex-go-courier-kazakhstan-aktau-auto"
+  },
+  {
+    "id": 2546391,
+    "slug": "yandex-go-courier-kyrgyzstan-osh-foot"
+  },
+  {
+    "id": 2546392,
+    "slug": "yandex-go-courier-kyrgyzstan-osh-bicycle"
+  },
+  {
+    "id": 2546393,
+    "slug": "yandex-go-courier-kyrgyzstan-osh-auto"
+  },
+  {
+    "id": 2547621,
+    "slug": "yandex-go-courier-kyrgyzstan-dzhalal-abad-foot"
+  },
+  {
+    "id": 2547622,
+    "slug": "yandex-go-courier-kyrgyzstan-dzhalal-abad-bicycle"
+  },
+  {
+    "id": 2547623,
+    "slug": "yandex-go-courier-kyrgyzstan-dzhalal-abad-auto"
+  },
+  {
+    "id": 2574171,
+    "slug": "yandex-go-courier-kyrgyzstan-bishkek-foot"
+  },
+  {
+    "id": 2574172,
+    "slug": "yandex-go-courier-kyrgyzstan-bishkek-bicycle"
+  },
+  {
+    "id": 2574173,
+    "slug": "yandex-go-courier-kyrgyzstan-bishkek-auto"
+  },
+  {
+    "id": 2623493,
+    "slug": "yandex-go-courier-uzbekistan-nukus-auto"
+  },
+  {
+    "id": 2636602,
+    "slug": "yandex-go-courier-uzbekistan-andizhan-bicycle"
+  },
+  {
+    "id": 2636603,
+    "slug": "yandex-go-courier-uzbekistan-andizhan-auto"
+  },
+  {
+    "id": 2637291,
+    "slug": "yandex-go-courier-uzbekistan-samarkand-foot"
+  },
+  {
+    "id": 2637292,
+    "slug": "yandex-go-courier-uzbekistan-samarkand-bicycle"
+  },
+  {
+    "id": 2637293,
+    "slug": "yandex-go-courier-uzbekistan-samarkand-auto"
+  },
+  {
+    "id": 2637621,
+    "slug": "yandex-go-courier-uzbekistan-namangan-foot"
+  },
+  {
+    "id": 2637622,
+    "slug": "yandex-go-courier-uzbekistan-namangan-bicycle"
+  },
+  {
+    "id": 2637623,
+    "slug": "yandex-go-courier-uzbekistan-namangan-auto"
+  },
+  {
+    "id": 2678471,
+    "slug": "yandex-go-courier-uzbekistan-fergana-foot"
+  },
+  {
+    "id": 2678472,
+    "slug": "yandex-go-courier-uzbekistan-fergana-bicycle"
+  },
+  {
+    "id": 2678473,
+    "slug": "yandex-go-courier-uzbekistan-fergana-auto"
+  },
+  {
+    "id": 2688871,
+    "slug": "yandex-go-courier-uzbekistan-tashkent-foot"
+  },
+  {
+    "id": 2688872,
+    "slug": "yandex-go-courier-uzbekistan-tashkent-bicycle"
+  },
+  {
+    "id": 2688873,
+    "slug": "yandex-go-courier-uzbekistan-tashkent-auto"
   }
 ]

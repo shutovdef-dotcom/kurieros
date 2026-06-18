@@ -4,7 +4,7 @@
  *
  * Design decisions (plan.md §3.4 Decision C, bead B11):
  * - reviews.json is imported at build time ONLY. At most 6 reviews per brand
- *   reach the HTML (≤54 .review-card elements total across 9 mapped brands).
+ *   reach the HTML (≤66 .review-card elements total across 11 mapped brands).
  *   The 10 MB JSON never ships to the client.
  * - JSON-LD: CollectionPage + ItemList top node + per-brand Organization /
  *   aggregateRating only for brands with a /companies/{slug}/ page AND
@@ -28,6 +28,7 @@ import {
 } from '../utils/reviewsAggregate';
 import InfoGuideLayout from '../components/InfoGuideLayout.astro';
 import ReviewsAggregate from '../components/ReviewsAggregate.astro';
+import { BRAND_REVIEW_SAMPLE_LIMIT } from '../utils/reviewSamples';
 
 // Cast the raw import to ReviewLike[]. The data shape is stable (bead B2).
 // reviewsIndex.ts uses a cached Zod parse for the ReviewsBlock perf path;
@@ -36,8 +37,11 @@ import ReviewsAggregate from '../components/ReviewsAggregate.astro';
 // output safe regardless of individual field content.
 const reviews = reviewsRaw as unknown as ReviewLike[];
 
-// Brand-grouped summaries: each summary has ≤6 sampleReviews.
-const summaries = buildReviewAggregate(reviews);
+// Brand-grouped summaries: each summary has ≤6 sampleReviews. Keep the
+// aggregate page's historic 66-card DOM cap even as new review brands land.
+const MAX_REVIEW_CARDS = 66;
+const maxSummaries = Math.floor(MAX_REVIEW_CARDS / BRAND_REVIEW_SAMPLE_LIMIT);
+const summaries = buildReviewAggregate(reviews).slice(0, maxSummaries);
 
 // Total count: use raw array length for the hero headline (all reviews),
 // even though summaries may exclude brands below MIN_REVIEWS_PER_BRAND.

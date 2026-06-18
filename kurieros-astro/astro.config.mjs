@@ -70,7 +70,7 @@ export default defineConfig({
 
   build: {
     format: 'directory',
-    inlineStylesheets: 'always'
+    inlineStylesheets: 'never'
   },
 
   vite: {
@@ -87,6 +87,7 @@ export default defineConfig({
         !page.includes('/owner/') &&
         !page.includes('/api/grid/') &&
         !page.includes('/api/grid-batch/') &&
+        !page.includes('/api/company-vacancies/') &&
         !emptyListingUrls.has(page),
       changefreq: 'daily',
       lastmod: new Date(),

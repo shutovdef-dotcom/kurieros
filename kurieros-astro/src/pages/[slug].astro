@@ -10,7 +10,8 @@ import ListingCityFilter from '../components/ListingCityFilter.astro';
 import jobsData from '../data/jobs';
 import { CATEGORIES } from '../data/constants';
 import { getCitiesFromJobs } from '../utils/cities';
-import { formatMoney, parseSalary } from '../utils/format';
+import { parseSalary } from '../utils/format';
+import { formatMoneyWithCurrency } from '../utils/money';
 import {
 	buildFactCards,
 	buildFaqItems,
@@ -176,11 +177,17 @@ const cityNeighbours = type === 'city' ? getNearbyCities(data.slug) : [];
 // P1: max salary across the matched listings — used in title/description to
 // make the snippet more clickable in search results (cheaper-than-rewrite
 // because the number lives directly in the SERP and beats a generic count).
-const maxSalary = filteredJobs.reduce((acc, job) => {
-	const value = parseSalary(job.salary);
-	return value > acc ? value : acc;
-}, 0);
-const formattedMaxSalary = maxSalary > 0 ? formatMoney(maxSalary) : null;
+const listingCurrencies = Array.from(new Set(filteredJobs.map((job) => job.currency ?? 'RUB')));
+const maxSalaryCurrency = listingCurrencies.length === 1 ? listingCurrencies[0] : null;
+const maxSalary = maxSalaryCurrency
+	? filteredJobs.reduce((acc, job) => {
+			const value = parseSalary(job.salary);
+			return value > acc ? value : acc;
+		}, 0)
+	: 0;
+const formattedMaxSalary = maxSalary > 0 && maxSalaryCurrency
+	? formatMoneyWithCurrency(maxSalary, maxSalaryCurrency)
+	: null;
 const vacancyCountText = buildVacancyCountText(filteredJobs.length);
 
 // Z1.1 — unique per-city content block (city pages only, rendered below
@@ -312,6 +319,7 @@ const pageSchemaGraph = buildPageSchemaGraph({
 						vacancyCount={filteredJobs.length}
 						companyCount={companyNames.length}
 						maxSalary={maxSalary}
+						maxSalaryCurrency={maxSalaryCurrency}
 						comparisonPct={cityComparisonPct}
 						salaryRows={citySalaryRows}
 						rateSource={rateSource}

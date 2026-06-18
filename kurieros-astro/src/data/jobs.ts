@@ -2,6 +2,7 @@ import { CITY_DATASET } from './cities-dataset';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from './translations';
 import { vacancySources } from './vacancies';
 import type {
+  CurrencyCode,
   EmploymentFormat,
   GeneratedJob,
   MedicalBookRequirement,
@@ -15,6 +16,10 @@ import type {
 import { isCityBlocked, slugifyCity } from '../utils/cities';
 import { fnv1a } from '../utils/fnv1a';
 import { isFlexibleSchedule } from '../utils/flexibleSchedule';
+import {
+  formatCourierRateText,
+  formatMonthlyMaxText,
+} from '../utils/money';
 import { z } from 'zod';
 
 // === Per-language translation overrides =============================
@@ -86,6 +91,8 @@ const TRANSPORT_TAGS: Record<TransportMode, string> = {
   auto: 'auto',
   bicycle: 'bicycle',
   remote: 'remote',
+  office: 'office',
+  service: 'service',
 };
 
 // Internal data-tags tokens used by the home filter dropdowns.
@@ -131,7 +138,9 @@ const TRANSPORT_LABELS: Record<TransportMode, string> = {
   foot: 'Пеший',
   auto: 'На авто',
   bicycle: 'На велосипеде',
-  remote: 'Удалённо / офис',
+  remote: 'Удалённо',
+  office: 'Офис',
+  service: 'Выездные услуги',
 };
 
 const TRANSPORT_TITLES: Record<TransportMode, string> = {
@@ -139,6 +148,8 @@ const TRANSPORT_TITLES: Record<TransportMode, string> = {
   auto: 'Автокурьер',
   bicycle: 'Велокурьер',
   remote: 'Сотрудник удалённого формата',
+  office: 'Офисный сотрудник',
+  service: 'Выездной исполнитель',
 };
 
 const TRANSPORT_TITLE_SUFFIXES: Record<TransportMode, string> = {
@@ -146,6 +157,8 @@ const TRANSPORT_TITLE_SUFFIXES: Record<TransportMode, string> = {
   auto: 'на авто',
   bicycle: 'на велосипеде',
   remote: 'удалённо',
+  office: 'в офисе',
+  service: 'выездной формат',
 };
 
 const TRANSPORT_BANK_ROLE_TITLES: Record<TransportMode, string> = {
@@ -153,12 +166,15 @@ const TRANSPORT_BANK_ROLE_TITLES: Record<TransportMode, string> = {
   auto: 'Авто-представитель',
   bicycle: 'Велопредставитель',
   remote: 'Удалённый сотрудник',
+  office: 'Офисный сотрудник',
+  service: 'Выездной исполнитель',
 };
 
 const TRANSPORT_PROVISION_LABELS: Record<TransportProvision, string> = {
   own: 'Нужно своё транспортное средство',
   company: 'Компания выдает транспортное средство',
   not_required: 'Транспорт не требуется',
+  own_or_partner_rental: 'Свой транспорт или аренда у партнёра',
 };
 
 const TRANSPORT_ID_PARTS: Record<TransportMode, number> = {
@@ -166,6 +182,8 @@ const TRANSPORT_ID_PARTS: Record<TransportMode, number> = {
   bicycle: 2,
   auto: 3,
   remote: 4,
+  office: 5,
+  service: 6,
 };
 
 const EMPLOYMENT_LABELS: Record<EmploymentFormat, string> = {
@@ -205,10 +223,11 @@ const CITIZENSHIP_LABELS: Record<'all' | 'rfEaes' | 'rf' | 'default', string> = 
   default: 'РФ / ЕАЭС / страны вне ЕАЭС при наличии документов',
 };
 
-const monthlySalaryText = (amount: string) => `до ${amount} ₽/мес`;
+const monthlySalaryText = (amount: number, currency: CurrencyCode) =>
+  formatMonthlyMaxText(amount, currency);
 
-const rateText = (hourly: string, daily: string, monthly: string) =>
-  `${hourly} ₽/час, ${daily} ₽ за 12 часов, до ${monthly} ₽ за 30 смен`;
+const rateText = (hourly: number, daily: number, monthly: number, currency: CurrencyCode) =>
+  formatCourierRateText(hourly, daily, monthly, currency);
 
 const pageTitleText = (title: string) =>
   `${title} — зарплата, условия и отклик | КурьерОк`;
@@ -284,6 +303,16 @@ const cityCodes = new Map<string, number>(Object.entries(CITY_CODES));
 const NON_TOP15_SLOT_BASE = 100;
 const NON_TOP15_SLOT_COUNT = 9900; // slots 100..9999, distinct from top-15 codes 1..15.
 
+// Freeze pre-existing collision-resolved slots when the active city domain
+// grows. Without this small override, adding a new city whose FNV start slot
+// collides can shift older cityParts during sorted linear probing.
+const NON_TOP15_CITY_PART_OVERRIDES: Readonly<Record<string, number>> = {
+  'verhniy-ufaley': 2783,
+  shushary: 7416,
+  slavgorod: 2784,
+  temnikov: 8700,
+};
+
 const buildNonTop15CityParts = (sources: readonly VacancySource[]): ReadonlyMap<string, number> => {
   // Collect every UNIQUE non-top-15 city slug referenced by active,
   // non-blocked offers across all sources. `isActive`/`isCityBlocked` is
@@ -303,13 +332,27 @@ const buildNonTop15CityParts = (sources: readonly VacancySource[]): ReadonlyMap<
 
   const assignment = new Map<string, number>();
   const used = new Set<number>();
+  const reservedOverrides = new Set(Object.values(NON_TOP15_CITY_PART_OVERRIDES));
   for (const slug of orderedSlugs) {
+    const override = NON_TOP15_CITY_PART_OVERRIDES[slug];
+    if (override !== undefined) {
+      if (override < NON_TOP15_SLOT_BASE || override >= NON_TOP15_SLOT_BASE + NON_TOP15_SLOT_COUNT) {
+        throw new Error(`getGeneratedId: cityPart override out of range for slug="${slug}" (${override}).`);
+      }
+      if (used.has(override)) {
+        throw new Error(`getGeneratedId: duplicate cityPart override for slug="${slug}" (${override}).`);
+      }
+      used.add(override);
+      assignment.set(slug, override);
+      continue;
+    }
+
     const start = fnv1a(slug) % NON_TOP15_SLOT_COUNT;
     let probe = 0;
     let resolved = false;
     while (probe < NON_TOP15_SLOT_COUNT) {
       const slot = NON_TOP15_SLOT_BASE + ((start + probe) % NON_TOP15_SLOT_COUNT);
-      if (!used.has(slot)) {
+      if (!used.has(slot) && !reservedOverrides.has(slot)) {
         used.add(slot);
         assignment.set(slug, slot);
         resolved = true;
@@ -330,8 +373,6 @@ const NON_TOP15_CITY_PART = buildNonTop15CityParts(vacancySources);
 const cityPrepositions = new Map(CITY_DATASET.map((city) => [city.name, city.prep]));
 
 const unique = <T>(items: T[]) => Array.from(new Set(items.filter(Boolean)));
-
-const formatAmount = (value: number) => new Intl.NumberFormat('ru-RU').format(value);
 
 const getCompanyName = (name: string, _language: SupportedLanguage) => name;
 
@@ -405,9 +446,14 @@ const getEmploymentFormats = (source: VacancySource, offer: VacancyOffer) =>
 
 const getTransportProvision = (offer: VacancyOffer): TransportProvision => {
   if (offer.transportProvision) return offer.transportProvision;
-  // Foot couriers and remote workers don't need a vehicle by default;
-  // bicycle/auto vacancies default to "own".
-  if (offer.transport === 'foot' || offer.transport === 'remote') return 'not_required';
+  // Foot couriers, service workers, remote workers, and office workers don't
+  // need a vehicle by default; bicycle/auto vacancies default to "own".
+  if (
+    offer.transport === 'foot' ||
+    offer.transport === 'service' ||
+    offer.transport === 'remote' ||
+    offer.transport === 'office'
+  ) return 'not_required';
   return 'own';
 };
 
@@ -440,15 +486,15 @@ const getCitizenshipLabel = (value: string) => {
  * Formula: `source.id × 100000 + cityPart × 10 + transport`
  *
  * Expected component ranges:
- *   - `source.id`              — hardcoded primary key (1..19 currently),
+ *   - `source.id`              — hardcoded primary key (1..26 currently),
  *                                contributing strides of 100000.
  *   - `cityPart` (top-15)      — 1..15 (CITY_CODES table above),
  *                                producing the 10..150 band when × 10.
  *   - `cityPart` (non-top-15)  — 100..9999 (fnv1a-derived slot, see
  *                                NON_TOP15_CITY_PART above), producing
  *                                the 1000..99990 band when × 10.
- *   - `transport`              — 1..4 (TRANSPORT_ID_PARTS: foot=1,
- *                                bicycle=2, auto=3, remote=4).
+ *   - `transport`              — 1..5 (TRANSPORT_ID_PARTS: foot=1,
+ *                                bicycle=2, auto=3, remote=4, office=5).
  *
  * All resulting IDs fit comfortably in INT32. Uniqueness, range, and
  * sort-independence invariants are pinned by `tests/jobIds.test.ts`.
@@ -469,22 +515,29 @@ const getGeneratedId = (source: VacancySource, offer: VacancyOffer) => {
   return source.id * 100000 + cityPart * 10 + TRANSPORT_ID_PARTS[offer.transport];
 };
 
-const getSalaryText = (pay: PayModel) =>
-  pay.monthly?.max
-    ? monthlySalaryText(formatAmount(pay.monthly.max))
-    : pay.monthly?.text ??
+const getSalaryText = (pay: PayModel) => {
+  const monthly = pay.monthly;
+  if (monthly?.min && monthly?.max && monthly.min === monthly.max) {
+    return monthly.text;
+  }
+
+  return monthly?.max
+    ? monthlySalaryText(monthly.max, pay.currency)
+    : monthly?.text ??
       pay.guaranteed?.text ??
       pay.perShift?.text ??
       pay.hourly?.text ??
       pay.perOrder?.text ??
       'Доход уточняется';
+};
 
 const getRateText = (pay: PayModel) => {
   if (pay.hourly?.max && pay.perShift?.max && pay.monthly?.max) {
     return rateText(
-      formatAmount(pay.hourly.max),
-      formatAmount(pay.perShift.max),
-      formatAmount(pay.monthly.max),
+      pay.hourly.max,
+      pay.perShift.max,
+      pay.monthly.max,
+      pay.currency,
     );
   }
 

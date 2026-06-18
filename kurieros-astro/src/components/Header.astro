@@ -2,7 +2,7 @@
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import Logo from './Logo.astro';
 ---
-<header aria-label="Шапка сайта">
+<header class="site-header" aria-label="Шапка сайта">
     <div class="header-left">
         <Logo size="md" />
     </div>
@@ -70,7 +70,7 @@ import Logo from './Logo.astro';
     {/* /blog/ bottom-nav item hidden until first article ships. */}
 </nav>
 
-<script is:inline>
+<script>
     const COLOR_MODE_KEY = 'site-color-mode';
 
     function readStoredColorMode() {
@@ -90,7 +90,7 @@ import Logo from './Logo.astro';
         return document.body?.dataset.colorMode === 'dark' ? 'dark' : 'light';
     }
 
-    function updateThemeToggleButton(mode) {
+    function updateThemeToggleButton(mode: string) {
         const button = document.getElementById('theme-toggle');
         if (!button) return;
 
@@ -101,7 +101,7 @@ import Logo from './Logo.astro';
         button.setAttribute('title', `Переключить на ${nextModeLabel} тему`);
     }
 
-    function applyColorMode(mode, persist = true) {
+    function applyColorMode(mode: string, persist = true) {
         const resolvedMode = mode === 'dark' ? 'dark' : 'light';
         if (document.body) {
             document.body.classList.toggle('dark-mode', resolvedMode === 'dark');
@@ -193,7 +193,7 @@ import Logo from './Logo.astro';
         
         badges.forEach(badge => {
             if (badge) {
-                badge.textContent = compareList.length;
+                badge.textContent = String(compareList.length);
                 if (compareList.length > 0) {
                     badge.classList.remove('hidden');
                 } else {
@@ -275,7 +275,7 @@ import Logo from './Logo.astro';
 </script>
 
 <style>
-    header {
+    .site-header {
         background: var(--ink-100);
         border-bottom: 1px solid var(--ink-150);
         backdrop-filter: none;

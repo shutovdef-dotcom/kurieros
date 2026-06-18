@@ -833,6 +833,7 @@ export const ozonVacancySources: VacancySource[] = TEMPLATES.map((template) => (
     os: 'Android или iOS',
   },
   offers: buildOffersForTemplate(template),
+  incomeCalculator: { mode: 'estimated_hourly' },
   extraTags: template.extraTags,
   ...(template.isHot ? { isHot: true } : {}),
 }));

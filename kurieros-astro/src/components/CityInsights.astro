@@ -9,6 +9,8 @@
  * Presentational only — [slug].astro does the data lookups.
  */
 import { formatMoney, formatRussianPlural, getVacancyPluralText } from '../utils/format';
+import { getCurrencyLabel } from '../utils/money';
+import type { CurrencyCode } from '../data/vacancyTypes';
 import type { SalaryRow } from '../utils/cityInsights';
 
 interface Props {
@@ -20,6 +22,8 @@ interface Props {
 	companyCount: number;
 	/** Max monthly salary across active vacancies (0 → income tile omitted). */
 	maxSalary: number;
+	/** Currency shared by active vacancies on this listing; null means mixed currencies. */
+	maxSalaryCurrency: CurrencyCode | null;
 	/** Auto-courier shift rate vs the national mean, in %; null when the source has no auto rate. */
 	comparisonPct: number | null;
 	/** Salary rows: Купер/Yandex shift roles, or a single vacancy-derived row. */
@@ -37,6 +41,7 @@ const {
 	vacancyCount,
 	companyCount,
 	maxSalary,
+	maxSalaryCurrency,
 	comparisonPct,
 	salaryRows,
 	rateSource,
@@ -59,6 +64,8 @@ function shortPopulation(n: number): string {
 
 const companiesWord = formatRussianPlural(companyCount, ['компании', 'компаний', 'компаний']);
 const perShift = salaryRows[0]?.perShift ?? 0;
+const salaryCurrency = maxSalaryCurrency ?? 'RUB';
+const salaryCurrencyLabel = getCurrencyLabel(salaryCurrency);
 const comparisonLabel =
 	comparisonPct === null ? '' : `${comparisonPct >= 0 ? '+' : '−'}${Math.abs(comparisonPct)}%`;
 
@@ -85,7 +92,7 @@ const showRateTable = rateSource !== 'vacancies';
 				<div class="ci-stat">
 					<dt class="ci-k">Доход до</dt>
 					<dd class="ci-v">{formatMoney(maxSalary)}</dd>
-					<dd class="ci-u">₽/мес</dd>
+					<dd class="ci-u">{salaryCurrencyLabel}/мес</dd>
 				</div>
 			)}
 			{comparisonPct !== null && (
@@ -102,14 +109,14 @@ const showRateTable = rateSource !== 'vacancies';
 				<div class="ci-stat">
 					<dt class="ci-k">За смену</dt>
 					<dd class="ci-v">≈ {formatMoney(perShift)}</dd>
-					<dd class="ci-u">₽</dd>
+					<dd class="ci-u">{salaryCurrencyLabel}</dd>
 				</div>
 			)}
 			{maxSalary > 0 && (
 				<div class="ci-stat">
 					<dt class="ci-k">За месяц до</dt>
 					<dd class="ci-v">{formatMoney(maxSalary)}</dd>
-					<dd class="ci-u">₽</dd>
+					<dd class="ci-u">{salaryCurrencyLabel}</dd>
 				</div>
 			)}
 		</>
@@ -136,8 +143,8 @@ const showRateTable = rateSource !== 'vacancies';
 							{salaryRows.map((row) => (
 								<tr>
 									<td>{ROLE_ICON[row.label] ? `${ROLE_ICON[row.label]} ` : ''}{row.label}</td>
-									<td>{formatMoney(row.perShift)}&nbsp;₽</td>
-									<td>≈&nbsp;{formatMoney(row.perMonth)}&nbsp;₽</td>
+									<td>{formatMoney(row.perShift)}&nbsp;{salaryCurrencyLabel}</td>
+									<td>≈&nbsp;{formatMoney(row.perMonth)}&nbsp;{salaryCurrencyLabel}</td>
 								</tr>
 							))}
 						</tbody>
@@ -150,7 +157,7 @@ const showRateTable = rateSource !== 'vacancies';
 						<>Ставки Купер за смену (до&nbsp;12&nbsp;ч); месяц — оценка при&nbsp;22&nbsp;сменах.</>
 					)}
 					{maxSalary > 0 && (
-						<> Максимум по активным вакансиям — до&nbsp;{formatMoney(maxSalary)}&nbsp;₽/мес.</>
+						<> Максимум по активным вакансиям — до&nbsp;{formatMoney(maxSalary)}&nbsp;{salaryCurrencyLabel}/мес.</>
 					)}
 					{' '}Данные обновлены: {updatedAt}.
 				</p>
@@ -171,7 +178,7 @@ const showRateTable = rateSource !== 'vacancies';
 					<li>
 						<a class="ci-nb-link" href={`/rabota-kurerom-${city.slug}/`}>
 							{city.name}
-							<span class="ci-nb-cnt" aria-label={`${city.vacancyCount} ${getVacancyPluralText(city.vacancyCount)}`}>{city.vacancyCount}</span>
+							<span class="ci-nb-cnt" title={`${city.vacancyCount} ${getVacancyPluralText(city.vacancyCount)}`}>{city.vacancyCount}</span>
 						</a>
 					</li>
 				))}

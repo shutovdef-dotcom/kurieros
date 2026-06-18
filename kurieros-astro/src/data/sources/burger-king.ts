@@ -32,6 +32,7 @@ const BURGER_KING_COMPANY_LOGO = BURGER_KING_LOGO;
 const BURGER_KING_APPLY_LINK = BURGER_KING_APPLY;
 const BURGER_KING_CITIZENSHIP = 'РФ / ЕАЭС';
 const BURGER_KING_EMPLOYMENT_FORMATS = ['official'] satisfies EmploymentFormat[];
+const BURGER_KING_MONTHLY_HOURS = 176;
 
 // === Schema ==========================================================
 
@@ -91,11 +92,18 @@ const buildBurgerKingApplyLink = (city: string) => {
 const buildBurgerKingPay = (monthlyMin: number, monthlyMax: number): VacancyOffer['pay'] => {
   const normMin = Number.isFinite(monthlyMin) && monthlyMin > 0 ? Math.round(monthlyMin) : 0;
   const normMax = Number.isFinite(monthlyMax) && monthlyMax > 0 ? Math.round(monthlyMax) : 0;
+  const hourlyMin = normMin > 0 ? Math.round(normMin / BURGER_KING_MONTHLY_HOURS) : 0;
+  const hourlyMax = normMax > 0 ? Math.round(normMax / BURGER_KING_MONTHLY_HOURS) : 0;
 
   // Display text: prefer "X – Y ₽/мес" range; fall back to "до Y" or "от X".
   const monthlyText = normMax > 0
     ? (normMin > 0 ? `${formatRub(normMin)}–${formatRub(normMax)} ₽/мес` : `до ${formatRub(normMax)} ₽/мес`)
     : (normMin > 0 ? `от ${formatRub(normMin)} ₽/мес` : 'от 40 000 ₽/мес');
+  const hourlyText = hourlyMax > 0
+    ? (hourlyMin > 0 && hourlyMin !== hourlyMax
+        ? `${formatRub(hourlyMin)}–${formatRub(hourlyMax)} ₽/час`
+        : `${formatRub(hourlyMax)} ₽/час`)
+    : (hourlyMin > 0 ? `от ${formatRub(hourlyMin)} ₽/час` : '');
 
   return {
     currency: 'RUB',
@@ -104,6 +112,15 @@ const buildBurgerKingPay = (monthlyMin: number, monthlyMax: number): VacancyOffe
       ...(normMax > 0 ? { max: normMax } : {}),
       text: monthlyText,
     },
+    ...(hourlyText
+      ? {
+          hourly: {
+            ...(hourlyMin > 0 ? { min: hourlyMin } : {}),
+            ...(hourlyMax > 0 ? { max: hourlyMax } : {}),
+            text: hourlyText,
+          },
+        }
+      : {}),
     rate: 'Оклад + ежемесячные бонусы; питание и униформа за счёт компании',
     // Burger King hires via "Оформление по ТК РФ" — Russian labour code
     // requires payouts at least twice per month.
@@ -185,6 +202,7 @@ export const burgerKingSource: VacancySource = {
     os: 'Не требуется',
   },
   offers: burgerKingCookCashierOffers,
+  incomeCalculator: { mode: 'monthly_derived_hourly', monthlyHours: BURGER_KING_MONTHLY_HOURS },
   extraTags: [
     'burger-king',
     'restaurant',

@@ -15,7 +15,7 @@
 // interface in `src/scripts/compare/types.ts`) so any divergence between
 // this projection and the interface is a compile error.
 
-import type { GeneratedJob } from '../data/vacancyTypes';
+import type { GeneratedJob, TransportProvision } from '../data/vacancyTypes';
 import type { CompareJob } from '../scripts/compare/types';
 import { slugifyCompany } from './companies';
 
@@ -23,7 +23,9 @@ const TRANSPORT_LABELS: Record<string, string> = {
   auto: 'Авто',
   bicycle: 'Велосипед / самокат',
   foot: 'Пешком',
-  remote: 'Удалённо / офис',
+  remote: 'Удалённо',
+  office: 'Офис',
+  service: 'Выездные услуги',
 };
 
 /** Human-readable transport label from a job's tag list (first match wins). */
@@ -34,10 +36,11 @@ const getTransportLabel = (tags: string[]): string => {
 
 /** Human-readable label for who provides the transport. */
 const getTransportProvisionLabel = (
-  provision: 'own' | 'company' | 'not_required',
+  provision: TransportProvision,
 ): string => {
   if (provision === 'company') return 'Компания выдает транспортное средство';
   if (provision === 'not_required') return 'Транспорт не требуется';
+  if (provision === 'own_or_partner_rental') return 'Свой транспорт или аренда у партнёра';
   return 'Нужно своё транспортное средство';
 };
 

@@ -6,13 +6,11 @@
  * in `src/scripts/compare/compareList.ts` — a typed ES module, bundled
  * and test-covered.
  *
- * But two of the consumers — the `is:inline` `<script>` blocks in
- * `JobGrid.astro` and `Header.astro` — cannot `import` it (they need
- * `define:vars` / run before hydration), and `compare.astro`'s build-time
- * frontmatter only sees it as a module-private const. So each carries a
- * hand-maintained local `const MAX_COMPARE_IDS = 4`. A change to the cap
- * in one copy does NOT reach the others, yet `tests/compare-*.test.ts`
- * stay green.
+ * But some consumers initialise independently from that module:
+ * `jobGridController.js`, the inline block in `Header.astro`, and
+ * `compare.astro`'s build-time frontmatter each carry a hand-maintained
+ * local `const MAX_COMPARE_IDS = 4`. A change to the cap in one copy does
+ * NOT reach the others, yet `tests/compare-*.test.ts` stay green.
  *
  * This file reads all four sources as text and asserts:
  *   1. every copy declares `MAX_COMPARE_IDS = <n>` with the SAME value;
@@ -36,7 +34,7 @@ const ROOT = dirname(fileURLToPath(import.meta.url));
 /** The four files that each carry their own copy of the compare-list cap. */
 const SOURCES = {
   'compareList.ts': join(ROOT, '..', 'src', 'scripts', 'compare', 'compareList.ts'),
-  'JobGrid.astro': join(ROOT, '..', 'src', 'components', 'JobGrid.astro'),
+  'jobGridController.js': join(ROOT, '..', 'src', 'scripts', 'jobGridController.js'),
   'Header.astro': join(ROOT, '..', 'src', 'components', 'Header.astro'),
   'compare.astro': join(ROOT, '..', 'src', 'pages', 'compare.astro'),
 } as const;
@@ -55,7 +53,7 @@ const STORAGE_KEY_LITERAL = "'compareList'";
  */
 const STORAGE_KEY_CONSUMERS = [
   'compareList.ts',
-  'JobGrid.astro',
+  'jobGridController.js',
   'Header.astro',
 ] as const;
 
@@ -89,7 +87,8 @@ describe('compare-list cap parity — MAX_COMPARE_IDS', () => {
     for (const name of Object.keys(SOURCES)) {
       // If this fails: the compare-list cap was changed in one file only.
       // The source of truth is `MAX_COMPARE_IDS` in compareList.ts —
-      // mirror the new value into JobGrid.astro, Header.astro, compare.astro.
+      // mirror the new value into jobGridController.js, Header.astro,
+      // compare.astro.
       expect(extractMaxCompareIds(TEXT[name]), name).toBe(canonical);
     }
   });
@@ -106,12 +105,12 @@ describe('compare-list storage-key parity', () => {
 });
 
 describe('compare-list eviction direction — drop-oldest on add overflow', () => {
-  it('JobGrid.astro toggleCompare evicts the OLDEST id when full', () => {
+  it('jobGridController.js toggleCompare evicts the OLDEST id when full', () => {
     // The single fresh-"add to compare" overflow path. It must drop the
     // oldest id (`slice(1)`) and append the just-added one, so the job the
     // user just picked is kept (audit v5 M10). The `.slice(0, …)`
     // normalizers are defensive caps on stored data, NOT this path.
-    const jobGrid = TEXT['JobGrid.astro'];
+    const jobGrid = TEXT['jobGridController.js'];
     expect(jobGrid).toMatch(/compareList\.length\s*>=\s*MAX_COMPARE_IDS/);
     expect(jobGrid).toContain('[...compareList.slice(1), id]');
   });

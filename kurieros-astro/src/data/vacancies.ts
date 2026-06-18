@@ -2,12 +2,13 @@
  * Aggregator entry-point for the partner vacancy catalogue.
  *
  * Per-partner data and helpers live under `./sources/<partner>.ts`
- * (yandex-eda, kuper, tbank, efin, alfa-bank, burger-king). Ozon comes
- * from `./ozonOffers.ts`. Hourly-rate post-processor lives in
+ * (yandex-eda, yandex-go-international, kuper, tbank, efin, alfa-bank,
+ * burger-king, samokat, voxys, qlean).
+ * Ozon comes from `./ozonOffers.ts`. Hourly-rate post-processor lives in
  * `./sources/ozon-hourly-fallback.ts`.
  *
  * ID stability invariant: each `VacancySource.id` is a hardcoded
- * numeric primary key (1..19 currently) used by `getGeneratedId`
+ * numeric primary key (1..26 currently) used by `getGeneratedId`
  * in `jobs.ts` to derive every Job ID. NEVER reuse, renumber, or
  * remove an existing `id` — external bookmarks, GA4 events, and
  * the `compareList` localStorage all reference these IDs forever.
@@ -21,6 +22,9 @@ import { efinSource } from './sources/efin';
 import { alfaBankSource } from './sources/alfa-bank';
 import { burgerKingSource } from './sources/burger-king';
 import { samokatSource } from './sources/samokat';
+import { voxysSource } from './sources/voxys';
+import { qleanSource } from './sources/qlean';
+import { yandexGoInternationalSources } from './sources/yandex-go-international';
 import { ozonVacancySources } from './ozonOffers';
 import { applyOzonHourlyFallback } from './sources/ozon-hourly-fallback';
 
@@ -32,6 +36,9 @@ const initialSources: VacancySource[] = [
   alfaBankSource,
   burgerKingSource,
   samokatSource,
+  voxysSource,
+  qleanSource,
+  ...yandexGoInternationalSources,
   ...ozonVacancySources,
 ];
 

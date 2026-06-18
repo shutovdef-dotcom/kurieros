@@ -194,6 +194,8 @@ export const efinSource: VacancySource = {
     os: 'Android или iOS',
   },
   offers: efinRepresentativeOffers,
+  incomeCalculator: { mode: 'meeting' },
+  howToTemplate: 'bank_representative',
   extraTags: ['efin', 'bank-representative', 'field-work', 'source:google-sheet'],
   isHot: true,
 };

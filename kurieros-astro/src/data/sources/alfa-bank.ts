@@ -244,6 +244,8 @@ export const alfaBankSource: VacancySource = {
     os: 'Android или iOS',
   },
   offers: alfaBankRepresentativeOffers,
+  incomeCalculator: { mode: 'monthly' },
+  howToTemplate: 'bank_representative',
   extraTags: ['alfa-bank', 'bank-representative', 'field-sales', 'official-employment', 'source:google-sheet'],
   isHot: true,
 };

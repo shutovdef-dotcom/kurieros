@@ -37,10 +37,19 @@ npm run typecheck           # astro check
 npm run lint                # eslint по src/ и scripts/
 npm test                    # vitest
 npm run test:coverage       # vitest coverage
+npm run lint:worker         # eslint по workers/
+npm run test:worker         # vitest для Cloudflare Worker
+npm run check:worker        # lint + tests Worker
+npm run bench:city-neighbours # performance guard для geo-соседей городов
+npm run check               # lint + typecheck + coverage + worker gate
+npm run check:perf          # performance guard
+npm run check:release       # build + check + perf + git diff --check
 ```
 
 `npm run build` автоматически запускает `generate:data` через `prebuild`.
-`dist/` не редактируется вручную.
+Для code-only проверки поверх уже сгенерированных данных можно запускать
+`npx astro build`: это пересобирает `dist/`, но не перезаписывает входные
+данные вакансий и переводов. `dist/` не редактируется вручную.
 
 ## Документация
 
@@ -50,20 +59,39 @@ npm run test:coverage       # vitest coverage
 - [CSS conventions](docs/css-conventions.md)
 - [Design tokens](docs/design-tokens.md)
 - [Backlog](docs/backlog.md)
+- [Master code health plan](docs/master-code-health-plan-2026-06-14.md)
+- [Performance audit](docs/performance-audit-2026-06-14.md)
 
 ## Ключевые поверхности
 
 - `src/pages/[slug].astro` — городские и категорийные listing pages.
 - `src/components/TransportHub.astro` — 4 транспортных хаба.
 - `src/components/JobGrid.astro` — сетка вакансий, фильтры, city hot-swap,
-  compare state и lazy batch loading.
+  compare state и lazy batch loading; browser controller живёт в
+  `src/scripts/jobGridController.js`.
+- `src/components/ListingCityFilter.astro` — фильтр listing pages по городу;
+  сохранённый город не применяет тяжёлый hub-фильтр на загрузке, явный
+  `#city=<slug>` применяет его как deep link.
 - `src/components/JobCard.astro` — карточка вакансии.
 - `src/pages/api/grid/[citySlug].astro` — статический HTML-фрагмент city grid.
 - `src/pages/api/grid-batch/[listingSlug]/[page].astro` — batch-фрагменты
   для догрузки карточек.
+- `src/pages/api/company-vacancies/[companySlug]/[page].astro` —
+  batch-фрагменты вакансий на страницах компаний.
 - `src/pages/v/[slug].astro` — детальная страница вакансии.
+- `src/utils/vacancyPage.ts` — pure helpers для детальной страницы вакансии.
+- `src/utils/reviewSamples.ts` — deterministic sampling отзывов без
+  дублирования shuffle/slice логики.
+- `src/scripts/reviews/submitReview.ts` — отправка отзывов в optional
+  `PUBLIC_REVIEWS_API` с локальным fallback для preview/dev.
+- `workers/ozon-lead/src/index.js` — Cloudflare Worker для Ozon lead-form,
+  экспортирует testable helpers и валидирует заявки на серверной стороне.
 - `src/layouts/BaseLayout.astro` — head, schema, analytics, модалки,
-  runtime i18n fragments.
+  imports для runtime i18n/region modules.
+- `src/scripts/regionDetector.js` и `src/scripts/i18nRuntime.js` —
+  browser runtime для региона и переводов.
+- `src/utils/geoDistance.ts` — поиск ближайших городов для city insights,
+  оптимизирован bounded top-k без full sort всего каталога.
 - `astro.config.mjs` — sitemap, build timestamp, empty-listings guard.
 
 ## Данные
@@ -82,10 +110,14 @@ npm run test:coverage       # vitest coverage
 ## Минимальный чек перед handoff
 
 ```sh
-npm run build
-npm test
-npm run lint
-npm run typecheck
+npm run check:release
+```
+
+Для более быстрого локального цикла без полной сборки:
+
+```sh
+npm run check
+npm run check:perf
 git diff --check
 ```
 
@@ -107,6 +139,10 @@ QA_ROUTES='/podrabotka-kurerom/ /rabota-peshim-kurerom/ /compare/' \
 3. Проверить точные affected URLs через `curl -I`.
 4. Для UI пройти Chrome + WebKit/Safari-engine, особенно mobile viewports.
 5. В финальном handoff дать конкретные localhost-ссылки.
+
+Live-проверки выполняются read-only: HTTP status основных маршрутов,
+`sitemap-index.xml`, `robots.txt`, JSON API, безопасный `OPTIONS` preflight
+для Worker и browser smoke без отправки лидов или публикации изменений.
 
 ## Важные ограничения
 

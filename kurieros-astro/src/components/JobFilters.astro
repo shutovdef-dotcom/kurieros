@@ -16,36 +16,36 @@
 
 <div class="job-filter-row">
 	<select id="vacancy-age-filter" class="job-filter-select" aria-label="Фильтр по возрасту">
-		<option value="all">Возраст: любой</option>
-		<option value="16plus">Возраст: с 16 лет</option>
-		<option value="18plus">Возраст: с 18 лет</option>
+		<option value="all">Возраст</option>
+		<option value="16plus">16+</option>
+		<option value="18plus">18+</option>
 	</select>
 	<select id="vacancy-transport-filter" class="job-filter-select" aria-label="Фильтр по транспорту">
-		<option value="all">Транспорт: любой</option>
-		<option value="foot">Транспорт: пешком</option>
-		<option value="bicycle">Транспорт: велосипед / самокат</option>
-		<option value="auto">Транспорт: авто</option>
-		<option value="remote">Транспорт: работа из дома</option>
+		<option value="all">Транспорт</option>
+		<option value="foot">Пешком</option>
+		<option value="bicycle">Вело/самокат</option>
+		<option value="auto">Авто</option>
+		<option value="remote">Из дома</option>
+		<option value="office">Офис</option>
+		<option value="service">Услуги</option>
 	</select>
 	<select id="vacancy-employment-filter" class="job-filter-select" aria-label="Фильтр по типу трудоустройства">
-		<option value="all">Тип трудоустройства: любой</option>
-		<option value="gph">Тип трудоустройства: ГПХ</option>
-		<option value="self_employed">Тип трудоустройства: самозанятость</option>
-		<option value="individual_entrepreneur">Тип трудоустройства: ИП</option>
-		<option value="official">Тип трудоустройства: ТК РФ</option>
+		<option value="all">Занятость</option>
+		<option value="gph">ГПХ</option>
+		<option value="self_employed">Самозанятость</option>
+		<option value="individual_entrepreneur">ИП</option>
+		<option value="official">ТК РФ</option>
 	</select>
 	<select id="vacancy-citizenship-filter" class="job-filter-select" aria-label="Фильтр по гражданству">
-		<option value="all">Гражданство: любое</option>
-		<option value="rf">Гражданство: РФ</option>
-		<option value="cis">Гражданство: СНГ</option>
+		<option value="all">Гражданство</option>
+		<option value="rf">РФ</option>
+		<option value="cis">СНГ</option>
 	</select>
 </div>
 
 <style>
 	.job-filter-row {
 		display: grid;
-		/* 2x2 on mobile (4 filters → two rows of two), flat 1x4 on
-		   desktop. Same canonical layout as the home toolbar. */
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: var(--space-3);
 		margin: 0 0 var(--space-4);

@@ -2,13 +2,20 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
+import CompanyVacancyCard from '../../components/company/CompanyVacancyCard.astro';
 // `companiesFromJobs` is `getCompaniesFromJobs(jobsData, reviewsData)`
 // derived ONCE at module load in `companiesIndex.ts`. This page used to
 // re-derive it twice (in `getStaticPaths` and again in the per-page
 // body), each pass scanning ~4.8k jobs + 19,144 reviews — audit v5 M4.
 import { companiesFromJobs } from '../../utils/companiesIndex';
+import {
+  COMPANY_VACANCIES_BATCH_SIZE,
+  getCompanyVacancyBatchUrl,
+} from '../../utils/companyVacancyBatches';
 import { getCityHref } from '../../utils/cities';
 import { formatRussianPlural } from '../../utils/format';
+import { formatMoneyPerMonth } from '../../utils/money';
+import { pickFeaturedCompanyReviews } from '../../utils/reviewSamples';
 import { buildBreadcrumbSchema } from '../../utils/schema';
 
 export async function getStaticPaths() {
@@ -34,15 +41,13 @@ const updatedDate = new Intl.DateTimeFormat('ru-RU', {
   month: 'long',
   year: 'numeric',
 }).format(new Date(latestReviewTimestamp));
-const featuredReviews = [...company.reviews]
-  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-  .slice(0, 4);
+const featuredReviews = pickFeaturedCompanyReviews(company.reviews, company.name);
 const factCards = [
   { label: 'Активные вакансии', value: String(company.vacancyCount) },
   { label: 'Города', value: company.topCities.length ? company.topCities.join(', ') : 'Зависят от вакансий' },
   { label: 'Формат', value: company.transportModes.join(', ') || 'Смешанный формат' },
   { label: 'Выплаты', value: company.paymentPreview.join(', ') || 'Уточняются по вакансии' },
-  { label: 'Доход', value: company.maxSalary ? `до ${company.maxSalary.toLocaleString('ru-RU')} ₽/мес` : 'См. карточки' },
+  { label: 'Доход', value: company.maxSalary && company.maxSalaryCurrency ? `до ${formatMoneyPerMonth(company.maxSalary, company.maxSalaryCurrency)}` : 'См. карточки' },
   { label: 'Отзывы', value: company.rating ? `${company.rating} / 5 (${company.reviewCount})` : 'Пока мало данных' },
 ];
 const verdictPoints = [
@@ -74,6 +79,15 @@ const relatedCompanies = companiesFromJobs
   .sort((a, b) => b.score - a.score || b.vacancyCount - a.vacancyCount)
   .slice(0, 4);
 const faqItems = company.faqItems;
+const visibleCompanyJobs = company.jobs.slice(0, COMPANY_VACANCIES_BATCH_SIZE);
+const remainingCompanyVacancies = Math.max(0, company.jobs.length - visibleCompanyJobs.length);
+const nextCompanyVacanciesBatchUrl = remainingCompanyVacancies > 0
+  ? getCompanyVacancyBatchUrl(company.slug, 2)
+  : undefined;
+const nextCompanyVacanciesCount = Math.min(
+  COMPANY_VACANCIES_BATCH_SIZE,
+  remainingCompanyVacancies,
+);
 const reviewSchemas = featuredReviews.map((review) => ({
   '@type': 'Review',
   author: {
@@ -256,33 +270,31 @@ const pageSchemaGraph = [
           </div>
           <a href="/compare/" class="hero-link">Сравнить</a>
         </div>
-        <div class="vacancies-grid">
-          {company.jobs.map((job) => {
-            // `JobLike` (in src/utils/companies.ts) is a deliberately narrow
-            // contract for the helper — but at runtime each item is a
-            // `GeneratedJob` (carries `labels: string[]`). Read labels via
-            // a guarded cast through `unknown` so TS picks up the wider
-            // shape only at this access site.
-            const maybeLabels = (job as unknown as { labels?: string[] }).labels;
-            const labels: string[] = Array.isArray(maybeLabels) ? maybeLabels : [];
-            return (
-              <article class="job-card">
-                <div class="job-card-top">
-                  <span class="job-salary">{job.salary}</span>
-                  <span class="job-city">{job.location}</span>
-                </div>
-                <h3><a href={`/v/${job.slug}/`}>{job.title}</a></h3>
-                <p>{job.shortDescription || job.title}</p>
-                <div class="chip-row">
-                  {labels.slice(0, 3).map((label: string) => (
-                    <span class="chip">{label}</span>
-                  ))}
-                </div>
-                <a class="job-link" href={`/v/${job.slug}/`}>Открыть карточку вакансии</a>
-              </article>
-            );
-          })}
+        <div
+          class="vacancies-grid"
+          data-company-vacancies-grid
+          data-total-count={company.jobs.length}
+          data-batch-size={COMPANY_VACANCIES_BATCH_SIZE}
+          data-remaining-count={remainingCompanyVacancies}
+          data-next-batch-url={nextCompanyVacanciesBatchUrl}
+        >
+          {visibleCompanyJobs.map((job) => <CompanyVacancyCard job={job} />)}
         </div>
+        {remainingCompanyVacancies > 0 && (
+          <div class="company-vacancies-more" id="company-vacancies-more">
+            <p class="company-vacancies-more-text" id="company-vacancies-more-text" aria-live="polite">
+              Показано {visibleCompanyJobs.length} из {company.jobs.length} {formatRussianPlural(company.jobs.length, ['вакансии', 'вакансий', 'вакансий'])}
+            </p>
+            <a
+              class="hero-link"
+              id="company-vacancies-more-btn"
+              href={nextCompanyVacanciesBatchUrl}
+              aria-controls="company-vacancies"
+            >
+              Показать ещё {nextCompanyVacanciesCount} {formatRussianPlural(nextCompanyVacanciesCount, ['вакансию', 'вакансии', 'вакансий'])}
+            </a>
+          </div>
+        )}
       </section>
 
       {company.cities.length > 0 && (
@@ -381,6 +393,10 @@ const pageSchemaGraph = [
   <Footer />
 </BaseLayout>
 
+<script>
+  import '../../scripts/companyVacanciesController.js';
+</script>
+
 <style>
   .company-page {
     padding: 2rem 0 4rem;
@@ -469,7 +485,6 @@ const pageSchemaGraph = [
   .company-summary,
   .company-answer-copy p,
   .faq-item p,
-  .job-card p,
   .empty-card,
   .review-comment,
   .review-meta,
@@ -494,9 +509,7 @@ const pageSchemaGraph = [
 
   .meta-pill,
   .chip,
-  .hero-link,
-  .job-salary,
-  .job-city {
+  .hero-link {
     display: inline-flex;
     align-items: center;
     min-height: 2.25rem;
@@ -506,16 +519,14 @@ const pageSchemaGraph = [
     font-weight: 700;
   }
 
-  .meta-pill,
-  .job-city {
+  .meta-pill {
     border: 1px solid var(--scrim-border-mid);
     background: rgba(255, 255, 255, 0.72);
     color: var(--text-muted);
   }
 
   .hero-link,
-  .chip,
-  .job-salary {
+  .chip {
     border: 1px solid rgba(var(--brand-700-rgb), 0.16);
     background: rgba(var(--brand-700-rgb), 0.08);
     color: var(--text-main);
@@ -528,7 +539,6 @@ const pageSchemaGraph = [
   .geo-card,
   .company-section,
   .faq-item,
-  .job-card,
   .review-card,
   .empty-card {
     border: 1px solid var(--scrim-border-mid);
@@ -653,13 +663,6 @@ const pageSchemaGraph = [
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
 
-  .job-card {
-    display: grid;
-    gap: 0.9rem;
-    padding: 1.25rem;
-  }
-
-  .job-card-top,
   .review-topline {
     display: flex;
     justify-content: space-between;
@@ -668,20 +671,28 @@ const pageSchemaGraph = [
     flex-wrap: wrap;
   }
 
-  .job-card h3,
+  .company-vacancies-more {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .company-vacancies-more-text {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .company-vacancies-more .hero-link[aria-disabled="true"] {
+    cursor: wait;
+    opacity: 0.72;
+    pointer-events: none;
+  }
+
   .faq-item h3 {
     margin: 0;
-  }
-
-  .job-card h3 a,
-  .job-link {
-    color: var(--text-main);
-    text-decoration: none;
-    font-weight: 800;
-  }
-
-  .job-link {
-    color: var(--accent-color);
   }
 
   .reviews-grid,

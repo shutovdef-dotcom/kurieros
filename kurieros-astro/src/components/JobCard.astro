@@ -130,6 +130,9 @@ const searchText = [
 					data-apply-transport={job.transport}
 					data-apply-employment={applyEmploymentText}
 					data-apply-salary-max={salaryMaxNumeric || ''}
+					data-apply-vacancy-id={job.id}
+					data-apply-vacancy-slug={job.slug}
+					data-apply-source-slug={job.sourceSlug}
 					data-lead-form-type={leadFormType}
 					{...ozonDataAttrs(job.ozonLeadForm)}
 				>{applyLabel}</button>
@@ -146,6 +149,9 @@ const searchText = [
 					data-apply-transport={job.transport}
 					data-apply-employment={applyEmploymentText}
 					data-apply-salary-max={salaryMaxNumeric || ''}
+					data-apply-vacancy-id={job.id}
+					data-apply-vacancy-slug={job.slug}
+					data-apply-source-slug={job.sourceSlug}
 				>{applyLabel}</a>
 			)}
 		</div>

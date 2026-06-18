@@ -1,7 +1,11 @@
 import type { SupportedLanguage } from './translations';
 
-export type TransportMode = 'foot' | 'auto' | 'bicycle' | 'remote';
-export type TransportProvision = 'own' | 'company' | 'not_required';
+export type TransportMode = 'foot' | 'auto' | 'bicycle' | 'remote' | 'office' | 'service';
+export type TransportProvision =
+  | 'own'
+  | 'company'
+  | 'not_required'
+  | 'own_or_partner_rental';
 
 export type EmploymentFormat =
   | 'gph'
@@ -17,7 +21,32 @@ export type MedicalBookRequirement =
 
 export type SalaryConfidence = 'official' | 'partner' | 'estimated';
 
-export type CurrencyCode = 'RUB';
+export type CurrencyCode = 'RUB' | 'BYN' | 'KZT' | 'KGS' | 'UZS';
+
+export type IncomeCalculatorMode =
+  | 'hourly'
+  | 'estimated_hourly'
+  | 'monthly_derived_hourly'
+  | 'meeting'
+  | 'monthly'
+  | 'hidden';
+
+export type IncomeCalculatorConfig = {
+  mode: IncomeCalculatorMode;
+  /**
+   * Used by `monthly_derived_hourly`: monthly pay / monthlyHours.
+   * Default in page helpers is 176 hours (22 days × 8 hours).
+   */
+  monthlyHours?: number;
+};
+
+export type VacancyHowToTemplate =
+  | 'courier'
+  | 'bank_representative'
+  | 'call_center'
+  | 'office_employee'
+  | 'remote_operator'
+  | 'service_worker';
 
 export type MoneyRange = {
   min?: number;
@@ -140,6 +169,13 @@ export type VacancySource = {
     os?: string;
   };
   offers: VacancyOffer[];
+  incomeCalculator?: IncomeCalculatorConfig;
+  /**
+   * Selects the HowTo scenario rendered on vacancy pages. Leave empty for
+   * regular courier vacancies; set explicitly for call-center, office,
+   * remote operator, service worker, or bank representative roles.
+   */
+  howToTemplate?: VacancyHowToTemplate;
   extraTags?: string[];
   isHot?: boolean;
 };

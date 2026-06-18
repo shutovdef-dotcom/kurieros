@@ -69,7 +69,7 @@ const LEGACY_DEFAULTS = {
  * Accepts +79991234567 / 89991234567 / 9991234567 / +7 999 123-45-67 — all
  * normalize to the same string.
  */
-function formatPhone(raw) {
+export function formatPhone(raw) {
 	const digits = String(raw || '').replace(/\D/g, '');
 	let ten;
 	if (digits.length === 11 && (digits[0] === '7' || digits[0] === '8')) ten = digits.slice(1);
@@ -78,7 +78,7 @@ function formatPhone(raw) {
 	return `+7(${ten.slice(0, 3)})${ten.slice(3, 6)}-${ten.slice(6, 8)}-${ten.slice(8, 10)}`;
 }
 
-function corsHeaders(env, origin) {
+export function corsHeaders(env, origin) {
 	const allowed = String(env.ALLOWED_ORIGINS || 'https://kurerok.ru')
 		.split(',')
 		.map((s) => s.trim())
@@ -93,16 +93,16 @@ function corsHeaders(env, origin) {
 	};
 }
 
-function jsonResponse(body, init = {}) {
+export function jsonResponse(body, init = {}) {
 	const headers = { 'Content-Type': 'application/json; charset=utf-8', ...(init.headers || {}) };
 	return new Response(JSON.stringify(body), { ...init, headers });
 }
 
-function escapeHtml(s) {
+export function escapeHtml(s) {
 	return String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
 }
 
-async function notifyTelegram(env, { name, phone, transport, vacancy, cityID, hireObjectUUID, ozonStatus }) {
+export async function notifyTelegram(env, { name, phone, transport, vacancy, cityID, hireObjectUUID, ozonStatus }) {
 	if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return;
 	const text = [
 		'🆕 <b>Новая заявка с kurerok.ru — Ozon</b>',
@@ -159,7 +159,7 @@ async function notifyTelegram(env, { name, phone, transport, vacancy, cityID, hi
 // match the upstream landing page.
 const OZON_REFERER_FRESH = 'https://recruitment.ozon.ru/fresh-referral-office';
 
-async function submitToOzon(env, { name, phone, customer, vacancy, cityID, hireObjectUUID }) {
+export async function submitToOzon(env, { name, phone, customer, vacancy, cityID, hireObjectUUID }) {
 	const referrerName = String(env.OZON_REFERRER_NAME || '').trim();
 	const referrerPhone = String(env.OZON_REFERRER_PHONE || '').trim();
 	if (!referrerName || !referrerPhone) {

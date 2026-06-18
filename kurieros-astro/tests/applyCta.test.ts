@@ -65,20 +65,24 @@ describe('getApplyCta — applyLabel formatting', () => {
     expect(getApplyCta({ salary: 'по договорённости' }).applyLabel).toBe('Откликнуться');
   });
 
-  it('emits the ceiling-anchored CTA when salaryMaxNumeric >= 10000', () => {
-    expect(getApplyCta({ salary: '80000 руб' }).applyLabel).toBe('Откликнуться, зп до 80к. руб');
+  it('emits a fixed-salary CTA when a one-number salary has no limit marker', () => {
+    expect(getApplyCta({ salary: '80000 руб' }).applyLabel).toBe('Откликнуться, зп 80к. руб');
   });
 
   it('treats exactly 10000 as ≥ threshold (boundary)', () => {
-    expect(getApplyCta({ salary: '10000 руб' }).applyLabel).toBe('Откликнуться, зп до 10к. руб');
+    expect(getApplyCta({ salary: '10000 руб' }).applyLabel).toBe('Откликнуться, зп 10к. руб');
   });
 
   it('treats 9999 as below threshold (boundary minus 1)', () => {
     expect(getApplyCta({ salary: '9999 руб' }).applyLabel).toBe('Откликнуться');
   });
 
-  it('floors to thousands (75800 → 75к, not 76к)', () => {
-    expect(getApplyCta({ salary: '75800 руб' }).applyLabel).toBe('Откликнуться, зп до 75к. руб');
+  it('keeps one decimal for fixed salaries that are not round thousands', () => {
+    expect(getApplyCta({ salary: '43 500 ₽/мес' }).applyLabel).toBe('Откликнуться, зп 43,5к. руб');
+  });
+
+  it('uses the ceiling wording when the salary has a limit marker', () => {
+    expect(getApplyCta({ salary: 'до 75 800 руб' }).applyLabel).toBe('Откликнуться, зп до 75к. руб');
   });
 
   it('floors to thousands (298800 → 298к, not 299к) — regression for spec example', () => {
@@ -88,25 +92,45 @@ describe('getApplyCta — applyLabel formatting', () => {
   it('uses the range max for the label (60000–90000 → 90к)', () => {
     expect(getApplyCta({ salary: '60000–90000 руб' }).applyLabel).toBe('Откликнуться, зп до 90к. руб');
   });
+
+  it('uses the offer currency label for Kazakhstan salaries', () => {
+    expect(getApplyCta({ salary: 'до 595 000 ₸/мес', currency: 'KZT' }).applyLabel).toBe(
+      'Откликнуться, зп до 595к. ₸',
+    );
+  });
+
+  it('formats Uzbekistan salaries in millions for the CTA', () => {
+    expect(getApplyCta({ salary: 'до 6 800 000 сум/мес', currency: 'UZS' }).applyLabel).toBe(
+      'Откликнуться, зп до 6,8 млн. сум',
+    );
+  });
+
+  it('keeps small Belarus salaries visible instead of applying the RUB threshold', () => {
+    expect(getApplyCta({ salary: 'до 1 700 BYN/мес', currency: 'BYN' }).applyLabel).toBe(
+      'Откликнуться, зп до 1,7к. BYN',
+    );
+  });
 });
 
-describe('getApplyCta — behavioural parity with the pre-extraction IIFE', () => {
-  // Mirror of the original IIFE (JobCard.astro variant, with the
-  // NBSP+NNBSP regex class). The shared helper MUST agree with this on
-  // every input or the CTA drifts between JobCard and the detail page —
-  // the audit H4 issue.
-  const legacyCompute = (salary: string) => {
+describe('getApplyCta — formatting matrix', () => {
+  const expectedCompute = (salary: string) => {
     const raw = (salary ?? '').replace(/[  ]/g, ' ');
     const matches = raw.match(/(\d[\d\s]*)/g);
-    let salaryMaxNumeric = 0;
-    if (matches) {
-      const numbers = matches
-        .map((m: string) => Number.parseInt(m.replace(/\s+/g, ''), 10))
-        .filter((n: number) => Number.isFinite(n) && n > 0);
-      if (numbers.length) salaryMaxNumeric = Math.max(...numbers);
-    }
+    const numbers = matches
+      ? matches
+          .map((m: string) => Number.parseInt(m.replace(/\s+/g, ''), 10))
+          .filter((n: number) => Number.isFinite(n) && n > 0)
+      : [];
+    const salaryMaxNumeric = numbers.length ? Math.max(...numbers) : 0;
+    const compact = (amount: number, allowDecimal = false) => {
+      if (!allowDecimal) return `${Math.floor(amount / 1000)}к`;
+      const thousands = amount / 1000;
+      if (Number.isInteger(thousands)) return `${thousands}к`;
+      return `${Math.floor(thousands * 10) / 10}`.replace('.', ',') + 'к';
+    };
+    const isFixedSalary = numbers.length === 1 && !/(?:^|\s)(?:до|от)(?=\s|$)/i.test(raw);
     const applyLabel = salaryMaxNumeric >= 10000
-      ? `Откликнуться, зп до ${Math.floor(salaryMaxNumeric / 1000)}к. руб`
+      ? `Откликнуться, зп ${isFixedSalary ? '' : 'до '}${compact(salaryMaxNumeric, isFixedSalary)}. руб`
       : 'Откликнуться';
     return { salaryMaxNumeric, applyLabel };
   };
@@ -122,6 +146,7 @@ describe('getApplyCta — behavioural parity with the pre-extraction IIFE', () =
     '540 ₽/день',
     '9999 руб',
     '10000 руб',
+    '43 500 ₽/мес',
     'по договорённости',
     '',
     'от 70 000 до 150 000 ₽',
@@ -129,8 +154,8 @@ describe('getApplyCta — behavioural parity with the pre-extraction IIFE', () =
   ];
 
   for (const salary of fixtures) {
-    it(`matches legacy IIFE for ${JSON.stringify(salary)}`, () => {
-      expect(getApplyCta({ salary })).toEqual(legacyCompute(salary));
+    it(`formats ${JSON.stringify(salary)}`, () => {
+      expect(getApplyCta({ salary })).toEqual(expectedCompute(salary));
     });
   }
 });

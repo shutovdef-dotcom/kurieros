@@ -12,8 +12,9 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import jobs from '../src/data/jobs';
 import { vacancySources } from '../src/data/vacancies';
-import type { TransportMode } from '../src/data/vacancyTypes';
+import type { CurrencyCode, TransportMode, VacancyHowToTemplate } from '../src/data/vacancyTypes';
 
 const REQUIRED_PARTNER_SLUGS = [
   'yandex-eda-courier',
@@ -26,9 +27,24 @@ const REQUIRED_PARTNER_SLUGS = [
   'efin-bank-representative',
   'alfa-bank-representative',
   'burger-king-cook-cashier',
+  'voxys-call-center-operator',
+  'qlean-cleaner',
+  'yandex-go-courier-belarus',
+  'yandex-go-courier-kazakhstan',
+  'yandex-go-courier-kyrgyzstan',
+  'yandex-go-courier-uzbekistan',
 ];
 
-const VALID_TRANSPORT_MODES: TransportMode[] = ['foot', 'bicycle', 'auto', 'remote'];
+const VALID_TRANSPORT_MODES: TransportMode[] = ['foot', 'bicycle', 'auto', 'remote', 'office', 'service'];
+const VALID_CURRENCIES: CurrencyCode[] = ['RUB', 'BYN', 'KZT', 'KGS', 'UZS'];
+const VALID_HOW_TO_TEMPLATES: VacancyHowToTemplate[] = [
+  'courier',
+  'bank_representative',
+  'call_center',
+  'office_employee',
+  'remote_operator',
+  'service_worker',
+];
 
 const isValidApplyLink = (link: string) =>
   link.startsWith('https://') || link === 'lead-form:ozon';
@@ -82,6 +98,15 @@ describe('vacancySources structural invariants', () => {
     expect(duplicates).toEqual([]);
   });
 
+  it('every explicit HowTo template is in the supported set', () => {
+    for (const source of vacancySources) {
+      if (!source.howToTemplate) continue;
+      expect(VALID_HOW_TO_TEMPLATES, `howToTemplate for ${source.slug}`).toContain(
+        source.howToTemplate,
+      );
+    }
+  });
+
   it('every offer has required pay info, transport, citizenship, applyLink', () => {
     for (const source of vacancySources) {
       for (const offer of source.offers) {
@@ -94,7 +119,7 @@ describe('vacancySources structural invariants', () => {
 
         // pay
         expect(offer.pay, `pay defined for ${ctx}`).toBeDefined();
-        expect(offer.pay.currency, `pay.currency for ${ctx}`).toBe('RUB');
+        expect(VALID_CURRENCIES, `pay.currency for ${ctx}`).toContain(offer.pay.currency);
         expect(typeof offer.pay.paymentFrequency, `paymentFrequency for ${ctx}`).toBe('string');
         expect(offer.pay.paymentFrequency.length).toBeGreaterThan(0);
 
@@ -136,5 +161,67 @@ describe('vacancySources structural invariants', () => {
         }
       }
     }
+  });
+
+  it('renders fixed monthly salaries without a misleading "до" prefix', () => {
+    const voxysJobs = jobs.filter((job) => job.sourceSlug === 'voxys-call-center-operator');
+
+    expect(voxysJobs.length).toBeGreaterThan(0);
+    for (const job of voxysJobs) {
+      expect(job.salary, job.slug).toMatch(/^\d[\d ]+ ₽\/мес$/);
+      expect(job.details.rate, job.slug).toContain('Фиксированная ставка');
+    }
+  });
+
+  it('generates Yandex Go international courier offers with local currencies', () => {
+    const sourceSlugs = [
+      'yandex-go-courier-belarus',
+      'yandex-go-courier-kazakhstan',
+      'yandex-go-courier-kyrgyzstan',
+      'yandex-go-courier-uzbekistan',
+    ];
+    const sources = vacancySources.filter((source) => sourceSlugs.includes(source.slug));
+    const sourceOffers = sources.flatMap((source) => source.offers);
+
+    expect(sources.map((source) => source.slug).sort()).toEqual([...sourceSlugs].sort());
+    expect(sourceOffers).toHaveLength(51);
+    expect(sourceOffers.every((offer) => ['foot', 'bicycle', 'auto'].includes(offer.transport))).toBe(true);
+
+    const almatyJobs = jobs.filter(
+      (job) => job.sourceSlug === 'yandex-go-courier-kazakhstan' && job.location === 'Алматы',
+    );
+    expect(almatyJobs.map((job) => job.transport).sort()).toEqual(['auto', 'bicycle', 'foot']);
+
+    const almatyFoot = almatyJobs.find((job) => job.transport === 'foot');
+    expect(almatyFoot?.slug).toBe('yandex-go-courier-kazakhstan-almaty-foot');
+    expect(almatyFoot?.salary).toBe('до 595 000 ₸/мес');
+    expect(almatyFoot?.details.rate).toContain('1 985 ₸/час');
+    expect(almatyFoot?.currency).toBe('KZT');
+    expect(almatyFoot?.applyLink).toContain('https://my.saleads.pro/s/catm5?');
+
+    expect(
+      jobs.some(
+        (job) =>
+          job.sourceSlug === 'yandex-go-courier-belarus' &&
+          job.location === 'Минск' &&
+          job.currency === 'BYN',
+      ),
+    ).toBe(true);
+    expect(
+      jobs.some(
+        (job) =>
+          job.sourceSlug === 'yandex-go-courier-kyrgyzstan' &&
+          job.location === 'Бишкек' &&
+          job.currency === 'KGS',
+      ),
+    ).toBe(true);
+    expect(
+      jobs.some(
+        (job) =>
+          job.sourceSlug === 'yandex-go-courier-uzbekistan' &&
+          job.location === 'Ташкент' &&
+          job.currency === 'UZS',
+      ),
+    ).toBe(true);
   });
 });

@@ -93,6 +93,9 @@
 Добавить реальные вакансии на сайт.
 
 - Route: `src/data/vacancies.ts`, `src/data/jobs.ts`, company data, vacancy pages.
+- Source guide: `docs/add-vacancies-dialog.md` and `docs/vacancy-generation-input.md`.
+- Defaults: expand Moscow/SPb offers through `src/data/sources/geoExpansion.ts`,
+  set `howToTemplate`, and choose `incomeCalculator.mode` from the pay model.
 - Goal: реальные условия, честная ссылка, понятный CTA.
 - Checks: build; выборочная страница вакансии.
 

@@ -6,9 +6,8 @@
 // is loaded as a bundled (non-`is:inline`) ES module the same way
 // `compare.astro` loads `compareInit.ts`.
 //
-// Kept in its own IIFE so it can't be derailed by the larger
-// compare/filter handler (which is wrapped in DOMContentLoaded +
-// define:vars and therefore stays `is:inline` in JobGrid.astro).
+// Kept in its own IIFE so it remains independent from the larger
+// compare/filter controller.
 (function () {
 	const SCROLL_KEY = 'kurieros:jobs-scroll:' + window.location.pathname;
 

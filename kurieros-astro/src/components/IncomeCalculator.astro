@@ -1,12 +1,15 @@
 ---
 import { vacancySources } from '../data/vacancies';
+import type { CurrencyCode } from '../data/vacancyTypes';
 import { sortCityNamesByPopulation } from '../utils/cities';
+import { getCurrencyLabel } from '../utils/money';
 
 // Per-transport rate maps so the calculator can show a realistic
 // hourly per (city × transport). Was auto-only; now keys: 'auto',
-// 'bicycle', 'foot'. («remote» is excluded — it's not really a
-// transport-driven rate in the courier income context.)
+// 'bicycle', 'foot'. («remote» / «office» / «service» are excluded — none
+// uses transport-driven courier hourly rates.)
 type TransportKey = 'auto' | 'bicycle' | 'foot';
+type RateEntry = { rate: number; currency: CurrencyCode; label: string };
 const TRANSPORT_KEYS: readonly TransportKey[] = ['auto', 'bicycle', 'foot'];
 
 const yandexOffers = vacancySources
@@ -14,7 +17,7 @@ const yandexOffers = vacancySources
     .flatMap((source) => source.offers)
     .filter((offer) => offer.isActive);
 
-const ratesByTransport: Record<TransportKey, Map<string, number>> = {
+const ratesByTransport: Record<TransportKey, Map<string, RateEntry>> = {
     auto: new Map(),
     bicycle: new Map(),
     foot: new Map(),
@@ -22,33 +25,44 @@ const ratesByTransport: Record<TransportKey, Map<string, number>> = {
 
 for (const offer of yandexOffers) {
     // `offer.transport` is already `TransportMode`. Excluding the one
-    // non-rate member narrows it to `'foot' | 'auto' | 'bicycle'`,
+    // non-rate members narrows it to `'foot' | 'auto' | 'bicycle'`,
     // which IS `TransportKey` — so no cast is needed below.
     const transport = offer.transport;
-    if (transport === 'remote') continue;
+    if (transport === 'remote' || transport === 'office' || transport === 'service') continue;
     const map = ratesByTransport[transport];
 
     const hourlyCandidates = [offer.pay.hourly?.max, offer.pay.hourly?.min];
     const hourlyRate = hourlyCandidates.find((value) => Number.isFinite(value));
     if (typeof hourlyRate !== 'number') continue;
 
-    const currentBest = map.get(offer.city) ?? 0;
+    const currentBest = map.get(offer.city)?.rate ?? 0;
     if (hourlyRate > currentBest) {
-        map.set(offer.city, hourlyRate);
+        map.set(offer.city, {
+            rate: hourlyRate,
+            currency: offer.pay.currency,
+            label: getCurrencyLabel(offer.pay.currency),
+        });
     }
 }
 
-const fallbackByTransport: Record<TransportKey, number> = {
-    auto: 350,
-    bicycle: 280,
-    foot: 220,
+const fallbackByTransport: Record<TransportKey, RateEntry> = {
+    auto: { rate: 350, currency: 'RUB', label: getCurrencyLabel('RUB') },
+    bicycle: { rate: 280, currency: 'RUB', label: getCurrencyLabel('RUB') },
+    foot: { rate: 220, currency: 'RUB', label: getCurrencyLabel('RUB') },
 };
 for (const t of TRANSPORT_KEYS) {
     const map = ratesByTransport[t];
-    if (map.size > 0) {
-        fallbackByTransport[t] = Math.round(
-            Array.from(map.values()).reduce((sum, value) => sum + value, 0) / map.size
-        );
+    const rubRates = Array.from(map.values())
+        .filter((entry) => entry.currency === 'RUB')
+        .map((entry) => entry.rate);
+    if (rubRates.length > 0) {
+        fallbackByTransport[t] = {
+            rate: Math.round(
+                rubRates.reduce((sum, value) => sum + value, 0) / rubRates.length
+            ),
+            currency: 'RUB',
+            label: getCurrencyLabel('RUB'),
+        };
     }
 }
 
@@ -60,7 +74,7 @@ for (const t of TRANSPORT_KEYS) {
 }
 const sortedCities = sortCityNamesByPopulation(Array.from(allCities));
 
-// Serialize the 2D map as { transport: { city: rate, … }, … }.
+// Serialize the 2D map as { transport: { city: { rate, currency, label }, … }, … }.
 const ratesObject = Object.fromEntries(
     TRANSPORT_KEYS.map((t) => [t, Object.fromEntries(ratesByTransport[t].entries())])
 );
@@ -139,7 +153,7 @@ const fallbackRateJson = JSON.stringify(fallbackByTransport);
                 <span class="result-label" data-t="calculator.result">Примерный доход</span>
                 <div class="amount-container">
                     <span class="amount" id="total-amount">0</span>
-                    <span class="currency">₽</span>
+                    <span class="currency" id="total-currency">₽</span>
                 </div>
             </div>
             
@@ -160,7 +174,7 @@ const fallbackRateJson = JSON.stringify(fallbackByTransport);
     const calculatorRoot = document.getElementById('income-calculator');
     const ratesJson = calculatorRoot?.dataset.rates || '{}';
     const fallbackRateJson = calculatorRoot?.dataset.fallbackRate || '{}';
-    // 2D map: rates[transport][city] = hourly rub. Per A7 the user
+    // 2D map: rates[transport][city] = { rate, currency, label }. Per A7 the user
     // picks both city AND transport (auto / bicycle / foot).
     // Guard both parses: a malformed blob degrades to the flat
     // fallback (calculate() tolerates an empty `rates`) instead of
@@ -177,8 +191,25 @@ const fallbackRateJson = JSON.stringify(fallbackByTransport);
     const daysVal = document.getElementById('days-val');
     const hoursVal = document.getElementById('hours-val');
     const totalAmount = document.getElementById('total-amount');
+    const totalCurrency = document.getElementById('total-currency');
 
     let lastResult = 0;
+
+    function normalizeRateEntry(entry, fallback) {
+        if (typeof entry === 'number' && Number.isFinite(entry)) {
+            return { rate: entry, label: '₽' };
+        }
+        if (entry && typeof entry === 'object') {
+            const rate = Number(entry.rate);
+            if (Number.isFinite(rate) && rate > 0) {
+                return {
+                    rate,
+                    label: String(entry.label || '₽')
+                };
+            }
+        }
+        return fallback;
+    }
 
     function calculate() {
         const days = Number.parseInt(daysRange.value, 10);
@@ -186,9 +217,12 @@ const fallbackRateJson = JSON.stringify(fallbackByTransport);
         const cityName = citySelect.value;
         const transport = transportSelect ? transportSelect.value : 'auto';
         const ratesForTransport = rates[transport] || rates.auto || {};
-        const transportFallback =
-            (fallbackRate && fallbackRate[transport]) || fallbackRate.auto || 350;
-        const rate = Number(ratesForTransport[cityName]) || transportFallback;
+        const transportFallback = normalizeRateEntry(
+            (fallbackRate && fallbackRate[transport]) || fallbackRate.auto,
+            { rate: 350, label: '₽' }
+        );
+        const rateEntry = normalizeRateEntry(ratesForTransport[cityName], transportFallback);
+        const rate = rateEntry.rate;
         // AUDIT-OK (A8): the *1.2 multiplier is the owner-confirmed
         // "tips + peak hours" allowance. Disclaimer in the UI mentions
         // tips and bonus surcharges; the explicit factor stays implicit
@@ -198,6 +232,7 @@ const fallbackRateJson = JSON.stringify(fallbackByTransport);
         daysVal.textContent = days;
         hoursVal.textContent = hours;
         totalAmount.textContent = total.toLocaleString('ru-RU');
+        if (totalCurrency) totalCurrency.textContent = rateEntry.label;
         lastResult = total;
     }
 

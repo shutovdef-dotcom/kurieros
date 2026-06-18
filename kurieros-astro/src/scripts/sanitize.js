@@ -26,13 +26,10 @@
 //      neutralizes a remote-URL `href` / `xlink:href` on `<use>` (an
 //      SVG `<use>` can pull in an external document).
 //
-// This module is the testable mirror of the helper inlined inside the
-// `is:inline` `<script>` block in JobGrid.astro (Astro inline scripts
-// can't import modules because they need `define:vars`-injected
-// constants — the same dual-implementation pattern used for
-// homeCity.js). Keep both implementations behaviourally identical;
-// the regression tests in `tests/sanitize.test.ts` pin down the
-// expected semantics.
+// This module is the single sanitizer used by the JobGrid controller.
+// `tests/sanitize.test.ts` pins the expected semantics; the controller
+// import is guarded by `tests/sanitizeParity.test.ts` so a future edit
+// does not reintroduce a second hand-copied sanitizer.
 
 // Tag names removed outright from an adopted subtree. `<script>` is
 // already inert post-DOMParser, but a CDN-poisoned response could also

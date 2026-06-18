@@ -24,6 +24,16 @@
 // === Yandex Eda =====================================================
 export const YANDEX_EDA_APPLY = 'https://my2go.ru/mitpJ?erid=2VtzqwSDctu';
 
+// === Yandex Go international ========================================
+export const YANDEX_GO_BY_LOGO = 'https://saleads.pro/storage/logos/1999.jpg';
+export const YANDEX_GO_BY_APPLY = 'https://my.saleads.pro/s/87zbi';
+export const YANDEX_GO_KZ_LOGO = 'https://saleads.pro/storage/logos/1816.jpg';
+export const YANDEX_GO_KZ_APPLY = 'https://my.saleads.pro/s/catm5';
+export const YANDEX_GO_KG_LOGO = 'https://saleads.pro/storage/logos/1942.jpg';
+export const YANDEX_GO_KG_APPLY = 'https://my.saleads.pro/s/6vx98';
+export const YANDEX_GO_UZ_LOGO = 'https://saleads.pro/storage/logos/1764.jpg';
+export const YANDEX_GO_UZ_APPLY = 'https://my.saleads.pro/s/5weJq';
+
 // === Купер (ex. СберМаркет) =========================================
 export const KUPER_LOGO =
   'https://agents.pampadu.ru/api/file/ViewFile?type=1&name=c0a42c37-73f4-4de0-a4f9-fd0689380a79.png';
@@ -50,6 +60,16 @@ export const EFIN_APPLY = 'https://trk.ppdu.ru/click/VuqTAiCx?erid=2SDnjdmxiVK';
 export const SAMOKAT_LOGO = '/logos/samokat.svg';
 export const SAMOKAT_APPLY =
   'https://pxl.leads.su/click/dda95ad94f19aab8dca8a2a2647a6742';
+
+// === Voxys ==========================================================
+export const VOXYS_LOGO = '/logos/voxys.png';
+export const VOXYS_APPLY = 'https://my.saleads.pro/s/pu813/3127?erid=2VtzqwpNari';
+
+// === Qlean ===========================================================
+// Qlean cleaner / service-worker offer — CPA via leads.su.
+export const QLEAN_LOGO = '/logos/qlean.svg';
+export const QLEAN_APPLY =
+  'https://pxl.leads.su/click/adf39bd0196f02a416ba6dd3ff62aa71?erid=LjN8KA4D1';
 
 // === Альфа-Банк =====================================================
 export const ALFA_BANK_LOGO = '/logos/alfa-bank.svg';
