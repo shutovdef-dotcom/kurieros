@@ -3,6 +3,7 @@ import JobCard from './JobCard.astro';
 import jobsData from '../data/jobs';
 import { filterJobsByCriteria } from '../utils/jobFilters';
 import { distributeAcrossCities } from '../utils/distributeJobs';
+import { getListingBatchUrl } from '../utils/listingBatches';
 import type { GeneratedJob } from '../data/vacancyTypes';
 
 interface Props {
@@ -51,8 +52,6 @@ const {
 	jobs,
 	listingSlug,
 } = Astro.props;
-const availableJobIds = jobsData.map((job) => job.id);
-const availableJobIdsJson = JSON.stringify(availableJobIds);
 
 // Server-side frontmatter filter — single source of truth lives in
 // `src/utils/jobFilters.ts` (shared with [slug].astro and the sitemap
@@ -93,7 +92,7 @@ const overflowCount = limitActive && revealable && canLoadOverflow
 	: 0;
 const batchSize = limitActive ? limit! : 24;
 const nextBatchUrl = overflowCount > 0
-	? `/api/grid-batch/${listingSlug}/2/`
+	? getListingBatchUrl(listingSlug!, 2)
 	: undefined;
 const hasMore = limitActive && !revealable && matchedJobs.length > limit!;
 const hasRevealMore = limitActive && revealable && overflowCount > 0;
@@ -132,7 +131,6 @@ const vacancyWord = (count: number) => {
 			data-next-batch-url={nextBatchUrl}
 			data-initial-city={initialCity}
 			data-initial-search={initialSearch}
-			data-available-job-ids={availableJobIdsJson}
 		>
 			{visibleJobs.length > 0 ? (
 				visibleJobs.map((job) => (

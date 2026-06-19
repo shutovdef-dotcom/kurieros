@@ -35,7 +35,9 @@
     "check:worker": "npm run lint:worker && npm run test:worker",
     "check": "npm run lint && npm run typecheck && npm run test:coverage && npm run check:worker",
     "check:perf": "npm run bench:city-neighbours",
-    "check:release": "npm run build && npm run check && npm run check:perf && git diff --check",
+    "size:dist": "node scripts/dist-size-audit.mjs",
+    "size:dist:check": "node scripts/dist-size-audit.mjs --check",
+    "check:release": "npm run build && npm run check && npm run check:perf && npm run size:dist:check && git diff --check",
     "local:build": "./scripts/build-local.sh",
     "local:preview": "./scripts/preview-local.sh",
     "local:dev": "./scripts/dev-local.sh"

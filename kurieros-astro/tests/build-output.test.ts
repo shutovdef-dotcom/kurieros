@@ -64,15 +64,23 @@ const inlineStyleBytes = (html: string): number =>
   Array.from(html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi))
     .reduce((sum, match) => sum + match[1].length, 0);
 
+const localScriptAssetCode = (html: string): string =>
+  Array.from(html.matchAll(/<script\b[^>]*\bsrc="(\/_astro\/[^"]+\.js)"[^>]*>/gi))
+    .map((match) => join(DIST_DIR, match[1].slice(1)))
+    .filter((file) => existsSync(file))
+    .map((file) => readFileSync(file, 'utf8'))
+    .join('\n');
+
 describe.skipIf(skipIfNoDist)('Build output', () => {
-  it('has expected page count (~9250)', () => {
-    // Reference build 2026-06-18: 9250 HTML files.
+  it('has expected page count (~8150)', () => {
+    // Reference build 2026-06-19 after grid-batch canonical-key dedupe:
+    // 8147 HTML files.
     // ~5790 content pages + ~958 /api/grid/<slug>/ city-grid fragments (M14)
     // + 1810 /api/grid-batch/<listing>/<page>/ fragments for heavy listings
     // + 200 /api/company-vacancies/<company>/<page>/ fragments for heavy
     // company pages + Qlean/Voxys service expansion + Yandex Go international
     // routes + SEO-rollout routes (transport hubs, info guides, /otzyvy/).
-    // Band: 9245-9255 (+-5 from reference count).
+    // Band: 8142-8152 (+-5 from reference count).
     //
     // NOTE FOR CONTRIBUTORS: always re-derive both bounds from an actual build
     // after adding new routes -- do NOT blindly add N to the upper bound.
@@ -82,8 +90,8 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     //   else if(e.isFile()&&e.name.endsWith('.html'))n++;}return n;}
     //   console.log(c('dist'));"
     const count = countHtml(DIST_DIR);
-    expect(count).toBeGreaterThanOrEqual(9245);
-    expect(count).toBeLessThanOrEqual(9255);
+    expect(count).toBeGreaterThanOrEqual(8142);
+    expect(count).toBeLessThanOrEqual(8152);
   });
 
   it('vacancy fragments use the compact format (post-#129)', () => {
@@ -94,6 +102,19 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     const sample = JSON.parse(readFileSync(fragmentPath, 'utf8'));
     expect(sample).toHaveProperty('defaults');
     expect(sample).toHaveProperty('entries');
+  });
+
+  it('does not emit unused Russian vacancy translation fragments', () => {
+    const ruFragmentDir = join(DIST_DIR, 'vacancy-translations', 'ru');
+    const nonRuFragmentPath = join(
+      DIST_DIR,
+      'vacancy-translations',
+      'uk',
+      'yandex-eda-courier.json',
+    );
+
+    expect(existsSync(ruFragmentDir), 'RU fragments are runtime-dead weight').toBe(false);
+    expect(existsSync(nonRuFragmentPath), 'non-RU fragments still exist').toBe(true);
   });
 
   it('detail pages do NOT preload a vacancy-translations fragment (audit H1)', () => {
@@ -146,6 +167,23 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     });
   });
 
+  describe('site-size: external JS URL assets', () => {
+    it('does not inline shared module URLs as data: scripts', () => {
+      const pages = [
+        join(DIST_DIR, 'index.html'),
+        join(DIST_DIR, 'about', 'index.html'),
+        join(DIST_DIR, 'v', 'ozon-courier-moskva-auto', 'index.html'),
+        join(DIST_DIR, 'rabota-kurerom-moskva', 'index.html'),
+      ];
+
+      for (const page of pages) {
+        if (!existsSync(page)) continue;
+        const html = readFileSync(page, 'utf8');
+        expect(html, page).not.toMatch(/<script\b[^>]*src="data:text\/javascript/i);
+      }
+    });
+  });
+
   describe('site-size: shared header controller', () => {
     it('does not inline the repeated Header controller into representative pages', () => {
       const pages = [
@@ -161,6 +199,154 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
         expect(html, page).toMatch(/<script\b[^>]*src="\/_astro\/[^"]+\.js"/);
         expect(html, page).not.toContain("const COLOR_MODE_KEY = 'site-color-mode';");
         expect(html, page).not.toContain('function initBottomNavVacancies()');
+      }
+    });
+  });
+
+  describe('site-size: shared Ozon lead modal controller', () => {
+    it('does not inline the repeated Ozon lead controller into representative pages', () => {
+      const pages = [
+        join(DIST_DIR, 'index.html'),
+        join(DIST_DIR, 'v', 'ozon-courier-moskva-auto', 'index.html'),
+        join(DIST_DIR, 'rabota-kurerom-ozon', 'index.html'),
+      ];
+
+      for (const page of pages) {
+        if (!existsSync(page)) continue;
+        const html = readFileSync(page, 'utf8');
+        expect(html, page).toMatch(/<script\b[^>]*src="\/_astro\/[^"]+\.js"/);
+        expect(html, page).not.toContain('window.openOzonLeadModal = open;');
+        expect(html, page).not.toContain('submission skipped — PUBLIC_OZON_LEAD_API');
+      }
+    });
+  });
+
+  describe('site-size: shared vacancy share controller', () => {
+    it('does not inline the repeated vacancy share controller into detail pages', () => {
+      const pages = [
+        join(DIST_DIR, 'v', 'ozon-courier-moskva-auto', 'index.html'),
+        join(DIST_DIR, 'v', 'yandex-eda-courier-moskva-auto', 'index.html'),
+        join(DIST_DIR, 'v', 'qlean-cleaner-moskva-service', 'index.html'),
+      ];
+
+      for (const page of pages) {
+        if (!existsSync(page)) continue;
+        const html = readFileSync(page, 'utf8');
+        expect(html, page).toMatch(/<script\b[^>]*src="\/_astro\/[^"]+\.js"/);
+        expect(html, page).not.toContain('HV19 (rev) — Share button');
+        expect(html, page).not.toContain('Always share the canonical prod URL');
+        expect(html, page).not.toContain('share: popup blocked or failed to open');
+      }
+    });
+  });
+
+  describe('site-size: shared vacancy income calculator controller', () => {
+    it('does not inline the repeated vacancy income calculator into detail pages', () => {
+      const pages = [
+        join(DIST_DIR, 'v', 'ozon-courier-moskva-auto', 'index.html'),
+        join(DIST_DIR, 'v', 'yandex-eda-courier-moskva-auto', 'index.html'),
+        join(DIST_DIR, 'v', 'tbank-representative-moskva-foot', 'index.html'),
+      ];
+
+      for (const page of pages) {
+        if (!existsSync(page)) continue;
+        const html = readFileSync(page, 'utf8');
+        expect(html, page).toMatch(/<script\b[^>]*src="\/_astro\/[^"]+\.js"/);
+        expect(html, page).not.toContain("const vacancyIncomeCalculator = document.getElementById('vacancy-income-calculator');");
+        expect(html, page).not.toContain("source: 'vacancy_income_calculator'");
+        expect(html, page).not.toContain("source: 'vacancy_meeting_calculator'");
+      }
+    });
+  });
+
+  describe('site-size: shared vacancy sticky apply controller', () => {
+    it('does not inline the repeated sticky apply controller into detail pages', () => {
+      const pages = [
+        join(DIST_DIR, 'v', 'ozon-courier-moskva-auto', 'index.html'),
+        join(DIST_DIR, 'v', 'yandex-eda-courier-moskva-auto', 'index.html'),
+        join(DIST_DIR, 'v', 'qlean-cleaner-moskva-service', 'index.html'),
+      ];
+
+      for (const page of pages) {
+        if (!existsSync(page)) continue;
+        const html = readFileSync(page, 'utf8');
+        expect(html, page).toMatch(/<script\b[^>]*src="\/_astro\/[^"]+\.js"/);
+        expect(html, page).not.toContain("document.getElementById('vacancy-sticky-apply')");
+        expect(html, page).not.toContain("document.body.classList.add('has-vacancy-sticky-apply')");
+        expect(html, page).not.toContain('No hero CTA on the page');
+      }
+    });
+  });
+
+  describe('site-size: shared VPN modal controller', () => {
+    it('does not inline the repeated VPN modal controller into representative pages', () => {
+      const pages = [
+        join(DIST_DIR, 'index.html'),
+        join(DIST_DIR, 'about', 'index.html'),
+        join(DIST_DIR, 'v', 'ozon-courier-moskva-auto', 'index.html'),
+        join(DIST_DIR, 'rabota-kurerom-moskva', 'index.html'),
+      ];
+
+      for (const page of pages) {
+        if (!existsSync(page)) continue;
+        const html = readFileSync(page, 'utf8');
+        expect(html, page).toMatch(/<script\b[^>]*src="\/_astro\/[^"]+\.js"/);
+        expect(html, page).not.toContain("const VPN_MODAL_SESSION_KEY = 'vpn-modal-shown';");
+        expect(html, page).not.toContain("window.addEventListener('kurieros:manual-city-required'");
+        expect(html, page).not.toContain('function getVPNModal()');
+      }
+    });
+  });
+
+  describe('site-size: shared language switcher controller', () => {
+    it('does not inline the repeated language switcher controller into representative pages', () => {
+      const pages = [
+        join(DIST_DIR, 'index.html'),
+        join(DIST_DIR, 'about', 'index.html'),
+        join(DIST_DIR, 'v', 'ozon-courier-moskva-auto', 'index.html'),
+        join(DIST_DIR, 'rabota-kurerom-moskva', 'index.html'),
+      ];
+
+      for (const page of pages) {
+        if (!existsSync(page)) continue;
+        const html = readFileSync(page, 'utf8');
+        expect(html, page).toMatch(/<script\b[^>]*src="\/_astro\/[^"]+\.js"/);
+        expect(html, page).not.toContain('const languageMeta =');
+        expect(html, page).not.toContain('function getSafeLang');
+        expect(html, page).not.toContain("window.addEventListener('kurieros:lang-change'");
+      }
+    });
+  });
+
+  describe('site-size: remaining inline JS cleanup', () => {
+    it('does not inline the standalone income calculator controller', () => {
+      const pages = [
+        join(DIST_DIR, 'index.html'),
+        join(DIST_DIR, 'calculator', 'index.html'),
+        join(DIST_DIR, 'skolko-zarabatyvaet-kurer', 'index.html'),
+      ];
+
+      for (const page of pages) {
+        if (!existsSync(page)) continue;
+        const html = readFileSync(page, 'utf8');
+        expect(html, page).toMatch(/<script\b[^>]*src="\/_astro\/[^"]+\.js"/);
+        expect(html, page).not.toContain("const calculatorRoot = document.getElementById('income-calculator');");
+        expect(html, page).not.toContain("source: 'income_calculator'");
+      }
+    });
+
+    it('does not keep the old body theme bootstrap script in every page', () => {
+      const pages = [
+        join(DIST_DIR, 'index.html'),
+        join(DIST_DIR, 'about', 'index.html'),
+        join(DIST_DIR, 'v', 'ozon-courier-moskva-auto', 'index.html'),
+      ];
+
+      for (const page of pages) {
+        if (!existsSync(page)) continue;
+        const html = readFileSync(page, 'utf8');
+        expect(html, page).not.toContain('document.body.dataset.colorMode = initialColorMode');
+        expect(html, page).not.toContain('const initialTheme = document.documentElement.dataset.initialTheme');
       }
     });
   });
@@ -294,14 +480,16 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
 
     it('the city-switch fetch targets the fragment endpoint, not the full page', () => {
       // JobGrid.astro's renderJobsForCity() must hit `/api/grid/...`.
-      // The listing page is where the JobGrid script is inlined.
+      // In optimized builds the JobGrid controller is emitted as a shared
+      // `_astro/*.js` asset, so inspect the page plus its local scripts.
       const listingHtml = readFileSync(
         join(DIST_DIR, 'rabota-kurerom-moskva', 'index.html'),
         'utf8',
       );
-      expect(listingHtml).toContain('/api/grid/');
+      const listingCode = `${listingHtml}\n${localScriptAssetCode(listingHtml)}`;
+      expect(listingCode).toContain('/api/grid/');
       // The old full-page city fetch must be gone from the hot path.
-      expect(listingHtml).not.toMatch(/fetch\(`\/rabota-kurerom-\$\{citySlug\}\/`/);
+      expect(listingCode).not.toMatch(/fetch\(`\/rabota-kurerom-\$\{citySlug\}\/`/);
     });
   });
 
@@ -315,7 +503,7 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
 
       expect(cardCount).toBe(24);
       expect(html).toMatch(/data-overflow-count="[1-9]\d*"/);
-      expect(html).toContain('/api/grid-batch/rabota-kurerom-podrabotka/2/');
+      expect(html).toContain('/api/grid-batch/podrabotka-kurerom/2/');
       expect(html).toContain('id="jobs-grid-reveal-more-btn"');
       expect(html).toMatch(/24 вакансии из \d+ ваканс(ии|ий)/);
       expect(html).toContain('Показать ещё 24 вакансии');
@@ -357,7 +545,7 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
         DIST_DIR,
         'api',
         'grid-batch',
-        'rabota-kurerom-podrabotka',
+        'podrabotka-kurerom',
         '2',
         'index.html',
       );
@@ -369,7 +557,41 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
       expect(html).toContain('class="jobs-grid-batch"');
       expect(cardCount).toBe(24);
       expect(html).toMatch(/data-overflow-count="[1-9]\d*"/);
-      expect(html).toContain('/api/grid-batch/rabota-kurerom-podrabotka/3/');
+      expect(html).toContain('/api/grid-batch/podrabotka-kurerom/3/');
+    });
+
+    it('deduplicates alias grid-batch trees through canonical batch keys', () => {
+      const aliasBatchPath = join(
+        DIST_DIR,
+        'api',
+        'grid-batch',
+        'rabota-kurerom-podrabotka',
+        '2',
+        'index.html',
+      );
+      const aliasPage = readFileSync(
+        join(DIST_DIR, 'rabota-kurerom-vecherom', 'index.html'),
+        'utf8',
+      );
+
+      expect(existsSync(aliasBatchPath), 'alias batch tree should not be generated').toBe(false);
+      expect(aliasPage).toContain('/api/grid-batch/podrabotka-kurerom/2/');
+      expect(aliasPage).not.toContain('/api/grid-batch/rabota-kurerom-vecherom/2/');
+    });
+
+    it('does not ship full available-job id blobs in listing HTML', () => {
+      const pages = [
+        join(DIST_DIR, 'index.html'),
+        join(DIST_DIR, 'rabota-kurerom-moskva', 'index.html'),
+        join(DIST_DIR, 'podrabotka-kurerom', 'index.html'),
+        join(DIST_DIR, 'rabota-kurerom-podrabotka', 'index.html'),
+      ];
+
+      for (const page of pages) {
+        if (!existsSync(page)) continue;
+        const html = readFileSync(page, 'utf8');
+        expect(html, page).not.toContain('data-available-job-ids');
+      }
     });
 
     it('keeps service grid fragments out of the sitemap', () => {

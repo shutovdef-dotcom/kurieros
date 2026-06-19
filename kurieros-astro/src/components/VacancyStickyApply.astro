@@ -1,4 +1,6 @@
 ---
+import vacancyStickyApplyUrl from '../scripts/vacancyStickyApply.js?url';
+
 /**
  * Sticky bottom apply CTA for /v/[slug]/ pages.
  *
@@ -94,45 +96,4 @@
 	}
 </style>
 
-<script is:inline>
-	(function () {
-		const bar = document.getElementById('vacancy-sticky-apply');
-		if (!bar) return;
-		const labelEl = bar.querySelector('.vacancy-sticky-apply-label');
-		const heroBtn = document.querySelector('.apply-btn-hero');
-		// No hero CTA on the page — nothing to forward. Skip silently
-		// rather than show a bar that taps into nothing.
-		if (!heroBtn) return;
-
-		document.body.classList.add('has-vacancy-sticky-apply');
-
-		// Mirror the hero label so copy stays in sync if it ever changes
-		// (e.g. «Откликнуться сейчас» / «Откликнуться через нас»).
-		if (labelEl) {
-			const heroText = (heroBtn.textContent || '').trim();
-			if (heroText) labelEl.textContent = heroText;
-		}
-
-		// Hide the bar while the hero button is in viewport — no point
-		// showing two side-by-side. As soon as the user scrolls past it,
-		// the bar slides in.
-		if (typeof IntersectionObserver === 'function') {
-			const io = new IntersectionObserver(function (entries) {
-				const heroVisible = entries.some(function (e) { return e.isIntersecting; });
-				bar.classList.toggle('hidden', heroVisible);
-			}, { threshold: 0 });
-			io.observe(heroBtn);
-		} else {
-			// Fallback for browsers without IO support — show always.
-			bar.classList.remove('hidden');
-		}
-
-		bar.addEventListener('click', function (e) {
-			e.preventDefault();
-			// Forward the tap to the real hero CTA so all existing
-			// behaviour runs unchanged (external link / OzonLeadModal /
-			// GA4 `apply_click` via BaseLayout delegate).
-			heroBtn.click();
-		});
-	})();
-</script>
+<script is:inline type="module" src={vacancyStickyApplyUrl}></script>

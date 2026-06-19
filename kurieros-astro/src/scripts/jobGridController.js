@@ -4,13 +4,12 @@
 // code-health plan. It intentionally reads all page-specific state
 // from DOM/data-* attributes so the Astro component can keep only
 // server-side filtering, markup, and styles.
+import { safeLocalStorage } from './safeStorage.js';
 import { stripEventHandlers } from './sanitize.js';
 (function () {
 const gridConfig = document.getElementById('jobs-grid')?.dataset || {};
 const initialCity = gridConfig.initialCity || '';
 const initialSearch = gridConfig.initialSearch || '';
-let availableJobIds = [];
-try { availableJobIds = JSON.parse(gridConfig.availableJobIds || '[]'); } catch (_) { availableJobIds = []; }
 
 // Source of truth: `MAX_COMPARE_IDS` in src/scripts/compare/compareList.ts.
 // This browser controller still carries a local literal so the grid can
@@ -18,13 +17,13 @@ try { availableJobIds = JSON.parse(gridConfig.availableJobIds || '[]'); } catch 
 // sync with compareList.ts (tests/compareListParity.test.ts pins it).
 const MAX_COMPARE_IDS = 4;
 let compareList = [];
-const availableJobIdSet = new Set(availableJobIds);
 let selectedCity = initialCity || '';
 const normalizedInitialSearch = initialSearch.toLowerCase();
+const COMPARE_BOUND_ATTR = 'data-compare-bound';
 
 function parseStoredCompareList() {
 	try {
-		const rawList = JSON.parse(localStorage.getItem('compareList') || '[]');
+		const rawList = JSON.parse(safeLocalStorage.get('compareList') || '[]');
 		if (!Array.isArray(rawList)) return [];
 
 		return rawList
@@ -44,7 +43,7 @@ function normalizeCompareList(ids) {
 	// storage there is no "newest" to honour, so a head-truncation is
 	// the correct, predictable behaviour.
 	return ids
-		.filter((id, index, list) => availableJobIdSet.has(id) && list.indexOf(id) === index)
+		.filter((id, index, list) => list.indexOf(id) === index)
 		.slice(0, MAX_COMPARE_IDS);
 }
 
@@ -54,7 +53,7 @@ function syncCompareList({ emitEvent = true } = {}) {
 	compareList = normalizedList;
 
 	if (JSON.stringify(rawList) !== JSON.stringify(normalizedList)) {
-		localStorage.setItem('compareList', JSON.stringify(normalizedList));
+		safeLocalStorage.set('compareList', JSON.stringify(normalizedList));
 		if (emitEvent) {
 			window.dispatchEvent(new CustomEvent('compareUpdate'));
 		}
@@ -154,12 +153,29 @@ function toggleCompare(id) {
 		compareList = compareList.filter((item) => item !== id);
 	}
 
-	localStorage.setItem('compareList', JSON.stringify(compareList));
+	safeLocalStorage.set('compareList', JSON.stringify(compareList));
 	window.dispatchEvent(new CustomEvent('compareUpdate'));
 
 	document.querySelectorAll('.btn-compare').forEach((btn) => {
 		const buttonId = Number.parseInt(btn.dataset.id || '', 10);
 		setCompareButtonState(btn, compareList.includes(buttonId));
+	});
+}
+
+function syncCompareButtons(root = document) {
+	root.querySelectorAll('.btn-compare').forEach((btn) => {
+		const id = Number.parseInt(btn.dataset.id || '', 10);
+		setCompareButtonState(btn, compareList.includes(id));
+		if (btn.dataset.compareBound === 'true') return;
+		btn.dataset.compareBound = 'true';
+		btn.setAttribute(COMPARE_BOUND_ATTR, 'true');
+		btn.addEventListener('click', (event) => {
+			event.preventDefault();
+			const currentId = Number.parseInt(btn.dataset.id || '', 10);
+			if (Number.isFinite(currentId)) {
+				toggleCompare(currentId);
+			}
+		});
 	});
 }
 
@@ -169,15 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	const employmentFilterSelect = document.getElementById('vacancy-employment-filter');
 	const citizenshipFilterSelect = document.getElementById('vacancy-citizenship-filter');
 	syncCompareList();
-
-	document.querySelectorAll('.btn-compare').forEach((btn) => {
-		const id = Number.parseInt(btn.dataset.id || '', 10);
-		setCompareButtonState(btn, compareList.includes(id));
-		btn.addEventListener('click', (e) => {
-			e.preventDefault();
-			toggleCompare(id);
-		});
-	});
+	syncCompareButtons(document);
 
 	const grid = document.getElementById('jobs-grid');
 	const revealMorePanel = document.getElementById('jobs-grid-reveal-more');
@@ -364,6 +372,41 @@ document.addEventListener('DOMContentLoaded', () => {
 		document.getElementById('city-fetch-error')?.classList.add('hidden');
 	}
 
+	let overflowLoadFailed = false;
+	function showBatchFetchError() {
+		if (!grid || !grid.parentNode) return;
+		let notice = document.getElementById('batch-fetch-error');
+		if (!notice) {
+			notice = document.createElement('div');
+			notice.id = 'batch-fetch-error';
+			notice.className = 'no-filter-match';
+			notice.setAttribute('role', 'status');
+			notice.setAttribute('aria-live', 'polite');
+			grid.parentNode.insertBefore(notice, grid);
+		}
+		notice.textContent = 'Не удалось загрузить все вакансии. Проверьте соединение и попробуйте ещё раз.';
+		notice.classList.remove('hidden');
+	}
+	function hideBatchFetchError() {
+		document.getElementById('batch-fetch-error')?.classList.add('hidden');
+	}
+
+	async function applyCurrentLanguageToDynamicGrid() {
+		const i18n = window.kurieros_i18n;
+		const lang = i18n?.currentLang || 'ru';
+		if (!i18n || lang === 'ru') return;
+		await i18n.ensureVacancyTranslations?.(lang);
+		if (i18n.currentLang === lang) {
+			i18n.applyTranslations?.();
+		}
+	}
+
+	async function refreshDynamicGrid() {
+		syncCompareButtons(grid || document);
+		await applyCurrentLanguageToDynamicGrid();
+		filterJobs();
+	}
+
 	// Fetch the dedicated city-grid fragment endpoint
 	// (/api/grid/{slug}/ — audit v2 M14) and clone its
 	// already-rendered .jobs-grid children via the DOM API
@@ -383,8 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (!citySlug) {
 			// User cleared the city — restore initial server-rendered grid.
 			restoreInitialGrid();
-			rebindCompareButtons();
-			filterJobs();
+			await refreshDynamicGrid();
 			return;
 		}
 		const ticket = ++activeFetch;
@@ -428,8 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				}
 				// Re-wire the restored grid (compare buttons + dropdown
 				// filters) — the success path does this too.
-				rebindCompareButtons();
-				filterJobs();
+				await refreshDynamicGrid();
 				// Minimal inline notice so the failure isn't silent.
 				showCityFetchError();
 				return;
@@ -463,6 +504,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			grid.setAttribute('data-total-count', '0');
 			setNextBatchUrl(grid, '');
 			updateRevealMoreControls();
+			await applyCurrentLanguageToDynamicGrid();
 			return;
 		}
 		// Audit H10 — DOM-API whitelist clone instead of
@@ -479,19 +521,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		grid.setAttribute('data-total-count', newGrid.getAttribute('data-total-count') || '0');
 		setNextBatchUrl(grid, newGrid.getAttribute('data-next-batch-url') || '');
 		updateRevealMoreControls();
-		rebindCompareButtons();
-		filterJobs();
-	}
-
-	function rebindCompareButtons() {
-		grid?.querySelectorAll('.btn-compare').forEach((btn) => {
-			const id = Number.parseInt(btn.dataset.id || '', 10);
-			setCompareButtonState(btn, compareList.includes(id));
-			btn.addEventListener('click', (e) => {
-				e.preventDefault();
-				toggleCompare(id);
-			});
-		});
+		await refreshDynamicGrid();
 	}
 
 	window.addEventListener('kurieros:city-selected', (event) => {
@@ -511,8 +541,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	window.addEventListener('kurieros:hub-city-filter', async (event) => {
 		selectedCity = event.detail?.city || '';
 		if (selectedCity && !hubOverflowMaterialised && grid) {
-			await ensureAllOverflowLoaded();
-			hubOverflowMaterialised = getOverflowCount() === 0;
+			hubOverflowMaterialised = await ensureAllOverflowLoaded();
+			if (!hubOverflowMaterialised) return;
 		}
 		filterJobs();
 	});
@@ -520,10 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	window.addEventListener('storage', (event) => {
 		if (event.key !== 'compareList') return;
 		syncCompareList({ emitEvent: false });
-		document.querySelectorAll('.btn-compare').forEach((btn) => {
-			const id = Number.parseInt(btn.dataset.id || '', 10);
-			setCompareButtonState(btn, compareList.includes(id));
-		});
+		syncCompareButtons(document);
 	});
 
 	ageFilterSelect?.addEventListener('change', filterJobsAfterOptionalLoad);
@@ -601,8 +628,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	let overflowMaterialisedForDropdowns = false;
 	async function filterJobsAfterOptionalLoad() {
 		if (!overflowMaterialisedForDropdowns && hasActiveDropdownFilters()) {
-			await ensureAllOverflowLoaded();
-			overflowMaterialisedForDropdowns = getOverflowCount() === 0;
+			overflowMaterialisedForDropdowns = await ensureAllOverflowLoaded();
+			if (!overflowMaterialisedForDropdowns) return;
 		}
 		filterJobs();
 	}
@@ -655,8 +682,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		grid.setAttribute('data-overflow-count', String(next));
 		if (next === 0) setNextBatchUrl(grid, '');
 		updateRevealMoreControls();
-		rebindCompareButtons();
-		filterJobs();
 		return take;
 	}
 
@@ -666,7 +691,10 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (!grid) return 0;
 
 		const legacyRevealed = revealFromLegacyTemplate();
-		if (legacyRevealed > 0) return legacyRevealed;
+		if (legacyRevealed > 0) {
+			await refreshDynamicGrid();
+			return legacyRevealed;
+		}
 
 		const batchUrl = grid.getAttribute('data-next-batch-url') || '';
 		if (!batchUrl) {
@@ -677,11 +705,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		let html = '';
 		try {
+			hideBatchFetchError();
+			overflowLoadFailed = false;
 			const res = await fetch(batchUrl, { cache: 'no-cache' });
 			if (!res.ok) throw new Error('HTTP ' + res.status);
 			html = await res.text();
 		} catch (err) {
 			console.warn('job batch fetch failed', err);
+			overflowLoadFailed = true;
+			showBatchFetchError();
 			return 0;
 		}
 
@@ -698,8 +730,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		grid.setAttribute('data-overflow-count', batchRoot.getAttribute('data-overflow-count') || '0');
 		setNextBatchUrl(grid, batchRoot.getAttribute('data-next-batch-url') || '');
 		updateRevealMoreControls();
-		rebindCompareButtons();
-		filterJobs();
+		await refreshDynamicGrid();
 		return revealed;
 	}
 
@@ -714,12 +745,15 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	async function ensureAllOverflowLoaded() {
+		hideBatchFetchError();
+		overflowLoadFailed = false;
 		let guard = 0;
 		while (getOverflowCount() > 0 && guard < 250) {
 			const revealed = await revealMoreJobs();
 			if (revealed <= 0) break;
 			guard += 1;
 		}
+		return getOverflowCount() === 0 && !overflowLoadFailed;
 	}
 
 	window.addEventListener('kurieros:reveal-more-jobs', async () => {

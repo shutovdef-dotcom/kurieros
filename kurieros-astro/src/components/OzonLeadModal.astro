@@ -26,12 +26,15 @@
  * If the env var is blank (dev / not deployed yet), submit shows a soft
  * error instead of the success state so previews do not silently drop leads.
  */
+import ozonLeadModalUrl from '../scripts/ozonLeadModal.js?url';
+
 const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 ---
 
 <div
 	id="ozon-lead-modal"
 	class="ozon-lead-modal hidden"
+	data-ozon-lead-api={ozonLeadApi}
 	role="dialog"
 	aria-modal="true"
 	aria-labelledby="ozon-lead-title"
@@ -144,190 +147,7 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 	</div>
 </div>
 
-<script
-	is:inline
-	define:vars={{ ozonLeadApi }}
->
-	(function () {
-		const modal = document.getElementById('ozon-lead-modal');
-		if (!modal) return;
-		const form = document.getElementById('ozon-lead-form');
-		const submitBtn = document.getElementById('ozon-lead-submit');
-		const errorEl = document.getElementById('ozon-lead-error');
-		const stageForm = modal.querySelector('[data-stage="form"]');
-		const stageSuccess = modal.querySelector('[data-stage="success"]');
-		const showError = (msg) => {
-			if (!errorEl) return;
-			errorEl.textContent = msg;
-			errorEl.classList.remove('hidden');
-		};
-		const clearError = () => errorEl?.classList.add('hidden');
-
-		const setBusy = (busy) => {
-			if (!submitBtn) return;
-			submitBtn.disabled = busy;
-			submitBtn.classList.toggle('busy', busy);
-		};
-
-		const open = (context) => {
-			modal.classList.remove('hidden');
-			document.body.classList.add('ozon-lead-modal-open');
-			modal.dataset.context = JSON.stringify(context || {});
-			stageForm?.classList.remove('hidden');
-			stageSuccess?.classList.add('hidden');
-			clearError();
-			// QW12 — на мобильном (touch-input) фокус мгновенно открывает
-			// клавиатуру → перекрывает половину модалки, scroll прыгает.
-			// Автофокус оставляем только на desktop (`pointer: fine`).
-			if (!window.matchMedia('(pointer: coarse)').matches) {
-				setTimeout(() => form?.querySelector('input[name="name"]')?.focus(), 50);
-			}
-			if (typeof window.gtag === 'function') {
-				window.gtag('event', 'ozon_lead_open', {
-					context_company: context?.company || '',
-					context_city: context?.city || '',
-					context_position: context?.position || ''
-				});
-			}
-		};
-		const close = () => {
-			modal.classList.add('hidden');
-			document.body.classList.remove('ozon-lead-modal-open');
-			form?.reset();
-			setBusy(false);
-			clearError();
-		};
-
-		// Public-on-window so anything on the page can call it.
-		window.openOzonLeadModal = open;
-
-		modal.querySelectorAll('[data-ozon-lead-close]').forEach((el) => {
-			el.addEventListener('click', close);
-		});
-		document.addEventListener('keydown', (e) => {
-			if (e.key === 'Escape' && !modal.classList.contains('hidden')) close();
-		});
-
-		// Click delegation: any element with `data-lead-form-type="ozon"`
-		// opens the modal. Apply CTAs in JobCard / vacancy page set this
-		// alongside the data-ozon-* attributes that pin the request to a
-		// specific (vacancy, city, hire-object) triple — see
-		// src/data/vacancies.ts for where those are wired up per offer.
-		document.addEventListener('click', (e) => {
-			const trigger = e.target instanceof Element
-				? e.target.closest('[data-lead-form-type="ozon"]')
-				: null;
-			if (!trigger) return;
-			e.preventDefault();
-			open({
-				company: trigger.dataset.applyCompany || 'Ozon',
-				city: trigger.dataset.applyCity || '',
-				transport: trigger.dataset.applyTransport || '',
-				position: trigger.dataset.applyPosition || '',
-				ozonVacancy: trigger.dataset.ozonVacancy || '',
-				ozonCustomer: trigger.dataset.ozonCustomer || '',
-				ozonCityId: trigger.dataset.ozonCityId || '',
-				ozonHireObjectUuid: trigger.dataset.ozonHireObjectUuid || ''
-			});
-		});
-
-		const submitToWorker = async (data, ctx) => {
-			if (!ozonLeadApi) {
-				// Preview / dev environment: PUBLIC_OZON_LEAD_API not set.
-				// Make the silent skip visible in browser devtools so devs
-				// don't ship a build that swallows real users' submissions.
-				// eslint-disable-next-line no-console
-				console.warn('[ozon-lead] submission skipped — PUBLIC_OZON_LEAD_API is not set in this build');
-				return { skipped: true };
-			}
-			const res = await fetch(ozonLeadApi, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					name: data.name,
-					phone: data.phone,
-					transport: data.transport,
-					// Per-request triple. The Worker validates against
-					// its embedded whitelist and rejects unknowns. If
-					// the trigger didn't carry them (legacy bundle or
-					// non-Ozon CTA), the Worker falls back to legacy
-					// Москва / rocket:courier defaults.
-					vacancy: (ctx && ctx.ozonVacancy) || '',
-					// Ozon Fresh discriminator — `'express'` for
-					// fresh-referral-office vacancies, '' for sklad.
-					// Worker branches its upstream payload shape on this.
-					customer: (ctx && ctx.ozonCustomer) || '',
-					cityID: (ctx && ctx.ozonCityId) || '',
-					hireObjectUUID: (ctx && ctx.ozonHireObjectUuid) || ''
-				})
-			});
-			let payload = null;
-			try { payload = await res.json(); } catch (_) { payload = null; }
-			if (!res.ok || (payload && payload.ok === false)) {
-				const errCode = (payload && payload.error) || ('http_' + res.status);
-				throw new Error(errCode);
-			}
-			return { sent: true };
-		};
-
-		const transportLabels = { auto: 'Авто', foot: 'Пешком', bicycle: 'Велосипед / самокат' };
-
-		form?.addEventListener('submit', async (e) => {
-			e.preventDefault();
-			clearError();
-			const fd = new FormData(form);
-			const name = String(fd.get('name') ?? '').trim();
-			const phoneRaw = String(fd.get('phone') ?? '').trim();
-			const transportKey = String(fd.get('transport') ?? 'auto');
-			const transport = transportLabels[transportKey] || transportKey;
-
-			if (name.length < 2) {
-				showError('Укажите имя — минимум 2 символа.');
-				return;
-			}
-			const phoneDigits = phoneRaw.replace(/\D+/g, '');
-			if (phoneDigits.length < 10) {
-				showError('Похоже, в номере не хватает цифр. Проверьте телефон.');
-				return;
-			}
-
-			let ctx = {};
-			try { ctx = JSON.parse(modal.dataset.context || '{}'); } catch (_) { ctx = {}; }
-
-			setBusy(true);
-			try {
-				const result = await submitToWorker({ name, phone: phoneRaw, transport }, ctx);
-				// Only a genuine `{ sent: true }` earns the success screen.
-				// A `{ skipped: true }` result means PUBLIC_OZON_LEAD_API
-				// is unset (misconfigured build) — the lead went nowhere,
-				// so showing "заявка отправлена" would silently drop it
-				// with false feedback. Surface a soft error instead.
-				if (!result || result.sent !== true) {
-					showError('Форма временно недоступна, попробуйте позже.');
-					return;
-				}
-				if (typeof window.gtag === 'function') {
-					window.gtag('event', 'ozon_lead_submit', {
-						transport: transportKey,
-						context_position: ctx.position || ''
-					});
-				}
-				stageForm?.classList.add('hidden');
-				stageSuccess?.classList.remove('hidden');
-			} catch (err) {
-				console.warn('[ozon-lead] submit failed', err);
-				const code = String(err?.message || '');
-				let msg = 'Не удалось отправить заявку. Попробуйте ещё раз через минуту.';
-				if (code === 'invalid_phone') msg = 'Похоже, в номере не хватает цифр. Проверьте телефон.';
-				else if (code === 'name_too_short') msg = 'Укажите имя — минимум 2 символа.';
-				else if (code === 'ozon_submit_failed') msg = 'Ozon временно не отвечает. Попробуйте через минуту.';
-				showError(msg);
-			} finally {
-				setBusy(false);
-			}
-		});
-	})();
-</script>
+<script is:inline type="module" src={ozonLeadModalUrl}></script>
 
 <style>
 	.ozon-lead-modal {

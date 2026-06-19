@@ -165,7 +165,7 @@ await mkdir(publicOutputDir, { recursive: true });
 
 let fragmentCount = 0;
 await Promise.all(
-  SUPPORTED_LANGUAGES.map(async (language) => {
+  NON_RU_LANGS.map(async (language) => {
     const langPublicDir = resolve(publicOutputDir, language);
     await mkdir(langPublicDir, { recursive: true });
 
@@ -183,5 +183,5 @@ await Promise.all(
 
 console.log(
   `Generated ${fragmentCount} vacancy-translation fragments ` +
-    `(${SUPPORTED_LANGUAGES.length} languages × ${vacancySources.length} sources, compact format).`,
+    `(${NON_RU_LANGS.length} non-RU languages × ${vacancySources.length} sources, compact format).`,
 );

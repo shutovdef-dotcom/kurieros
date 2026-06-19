@@ -1,5 +1,6 @@
 ---
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../data/translations';
+import languageSwitcherUrl from '../scripts/languageSwitcher.js?url';
 
 const languageNames: Record<SupportedLanguage, { name: string; flag: string }> = {
     ru: { name: 'Русский', flag: '🇷🇺' },
@@ -21,9 +22,6 @@ const languages = SUPPORTED_LANGUAGES.map((code) => ({
     ...languageNames[code],
 }));
 
-const languageMeta = Object.fromEntries(
-    languages.map((language) => [language.code, { name: language.name, flag: language.flag }]),
-);
 ---
 
 <div class="lang-switcher" data-lang-switcher>
@@ -50,94 +48,7 @@ const languageMeta = Object.fromEntries(
     </div>
 </div>
 
-<script is:inline define:vars={{ languageMeta }}>
-    (function() {
-        const roots = Array.from(document.querySelectorAll('[data-lang-switcher]'));
-        if (!roots.length) return;
-
-        const defaultLang = 'ru';
-
-        function getSafeLang(lang) {
-            return languageMeta[lang] ? lang : defaultLang;
-        }
-
-        function getCurrentLang() {
-            return getSafeLang(window.kurieros_i18n?.currentLang || localStorage.getItem('site-lang') || defaultLang);
-        }
-
-        roots.forEach((root) => {
-            if (root.dataset.ready === 'true') return;
-            root.dataset.ready = 'true';
-
-            const toggle = root.querySelector('[data-lang-toggle]');
-            const dropdown = root.querySelector('[data-lang-dropdown]');
-            const flagEl = root.querySelector('[data-current-lang-flag]');
-            const codeEl = root.querySelector('[data-current-lang-code]');
-            const options = Array.from(root.querySelectorAll('[data-lang-option]'));
-            if (!toggle || !dropdown || !flagEl || !codeEl) return;
-
-            function closeDropdown() {
-                dropdown.hidden = true;
-                toggle.setAttribute('aria-expanded', 'false');
-            }
-
-            function toggleDropdown() {
-                const willOpen = dropdown.hidden;
-                dropdown.hidden = !willOpen;
-                toggle.setAttribute('aria-expanded', String(willOpen));
-            }
-
-            function updateUI(lang) {
-                const safeLang = getSafeLang(lang);
-                const meta = languageMeta[safeLang] || languageMeta[defaultLang];
-
-                flagEl.textContent = meta.flag;
-                codeEl.textContent = safeLang.toUpperCase();
-                toggle.setAttribute('aria-label', `Сменить язык, выбран ${meta.name}`);
-
-                options.forEach((option) => {
-                    const isActive = option.getAttribute('data-lang') === safeLang;
-                    option.classList.toggle('active', isActive);
-                    option.setAttribute('aria-current', isActive ? 'true' : 'false');
-                });
-            }
-
-            toggle.addEventListener('click', (event) => {
-                event.stopPropagation();
-                toggleDropdown();
-            });
-
-            options.forEach((option) => {
-                option.addEventListener('click', () => {
-                    const lang = getSafeLang(option.getAttribute('data-lang'));
-
-                    if (window.kurieros_i18n) {
-                        window.kurieros_i18n.setLanguage(lang);
-                    } else {
-                        localStorage.setItem('site-lang', lang);
-                        updateUI(lang);
-                    }
-
-                    closeDropdown();
-                });
-            });
-
-            document.addEventListener('click', (event) => {
-                if (!root.contains(event.target)) closeDropdown();
-            });
-
-            document.addEventListener('keydown', (event) => {
-                if (event.key === 'Escape') closeDropdown();
-            });
-
-            window.addEventListener('kurieros:lang-change', (event) => {
-                updateUI(event.detail?.lang);
-            });
-
-            updateUI(getCurrentLang());
-        });
-    })();
-</script>
+<script is:inline type="module" src={languageSwitcherUrl}></script>
 
 <style>
     .lang-switcher {

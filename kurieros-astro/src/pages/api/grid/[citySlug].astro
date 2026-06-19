@@ -2,6 +2,7 @@
 import JobCard from '../../../components/JobCard.astro';
 import { getCityJobsFromMap } from '../../../utils/jobFilters';
 import { jobsByCity } from '../../../utils/jobsByCityIndex';
+import { getListingBatchUrl } from '../../../utils/listingBatches';
 // City catalogue is module-cached in `citiesIndex.ts` (H3 rationale)
 // instead of re-derived on endpoint render (audit ref v4 MEDIUM-1).
 import { citiesFromJobs } from '../../../utils/citiesIndex';
@@ -73,7 +74,7 @@ const overflowCount = Math.max(0, matchedJobs.length - VISIBLE_LIMIT);
 // `JobGrid.astro`: `limitActive ? limit! : 24` → always 24 here.
 const batchSize = VISIBLE_LIMIT;
 const nextBatchUrl = overflowCount > 0
-	? `/api/grid-batch/rabota-kurerom-${citySlug}/2/`
+	? getListingBatchUrl(`rabota-kurerom-${citySlug}`, 2)
 	: undefined;
 ---
 {/*

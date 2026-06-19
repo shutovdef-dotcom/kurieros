@@ -10,6 +10,20 @@ export const LISTING_BATCH_SIZE = 24;
 
 const CITY_LISTING_PREFIX = 'rabota-kurerom-';
 
+const LISTING_BATCH_ALIASES = new Map<string, string>([
+	['rabota-kurerom-podrabotka', 'podrabotka-kurerom'],
+	['rabota-kurerom-na-vyhodnye', 'podrabotka-kurerom'],
+	['rabota-kurerom-zhenshchine', 'podrabotka-kurerom'],
+	['rabota-kurerom-vecherom', 'podrabotka-kurerom'],
+	['rabota-kurerom-nochyu', 'podrabotka-kurerom'],
+	['rabota-kurerom-svobodny-grafik', 'podrabotka-kurerom'],
+	['rabota-kurerom-na-avto', 'rabota-avtokurerom'],
+	['rabota-kurerom-na-velosipede', 'rabota-velokurerom'],
+	['rabota-kurerom-na-samokate', 'rabota-velokurerom'],
+	['rabota-kurerom-peshkom', 'rabota-peshim-kurerom'],
+	['rabota-kurerom-16-let', 'rabota-kurerom-dlya-studentov'],
+]);
+
 const categoryByListingSlug = new Map<string, (typeof CATEGORIES)[number]>(
 	CATEGORIES.map((category) => [`${CITY_LISTING_PREFIX}${category.slug}`, category] as const),
 );
@@ -19,6 +33,14 @@ const cityByListingSlug = new Map<string, (typeof citiesFromJobs)[number]>(
 const hubByListingSlug = new Map<string, (typeof HUB_CONFIGS)[keyof typeof HUB_CONFIGS]>(
 	Object.values(HUB_CONFIGS).map((cfg) => [cfg.slug, cfg] as const),
 );
+
+export function getListingBatchKey(listingSlug: string): string {
+	return LISTING_BATCH_ALIASES.get(listingSlug) || listingSlug;
+}
+
+export function getListingBatchUrl(listingSlug: string, page: number): string {
+	return `/api/grid-batch/${getListingBatchKey(listingSlug)}/${page}/`;
+}
 
 export function getJobsForListingSlug(listingSlug: string): GeneratedJob[] {
 	const city = cityByListingSlug.get(listingSlug);
@@ -44,11 +66,11 @@ export function getJobsForListingSlug(listingSlug: string): GeneratedJob[] {
 
 export function getListingBatchStaticPaths(batchSize = LISTING_BATCH_SIZE) {
 	const paths: Array<{ params: { listingSlug: string; page: string } }> = [];
-	const listingSlugs = [
+	const listingSlugs = new Set([
 		...citiesFromJobs.map((city) => `${CITY_LISTING_PREFIX}${city.slug}`),
 		...CATEGORIES.map((category) => `${CITY_LISTING_PREFIX}${category.slug}`),
 		...Object.values(HUB_CONFIGS).map((cfg) => cfg.slug),
-	];
+	].map(getListingBatchKey));
 
 	for (const listingSlug of listingSlugs) {
 		const matchedJobs = getJobsForListingSlug(listingSlug);

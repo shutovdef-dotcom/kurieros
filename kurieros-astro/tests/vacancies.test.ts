@@ -11,10 +11,16 @@
  * actual production sources, so they're a real safety net.
  */
 
+import { existsSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, it, expect } from 'vitest';
 import jobs from '../src/data/jobs';
 import { vacancySources } from '../src/data/vacancies';
 import type { CurrencyCode, TransportMode, VacancyHowToTemplate } from '../src/data/vacancyTypes';
+
+const ROOT = dirname(fileURLToPath(import.meta.url));
+const PUBLIC_DIR = join(ROOT, '..', 'public');
 
 const REQUIRED_PARTNER_SLUGS = [
   'yandex-eda-courier',
@@ -83,6 +89,17 @@ describe('vacancySources structural invariants', () => {
 
       expect(Array.isArray(source.offers), `offers array for slug=${source.slug}`).toBe(true);
       expect(source.offers.length, `non-empty offers for slug=${source.slug}`).toBeGreaterThan(0);
+    }
+  });
+
+  it('uses bundled local company logo files', () => {
+    for (const source of vacancySources) {
+      const logo = source.company.logo;
+      const ctx = `logo for ${source.slug}: ${logo}`;
+
+      expect(logo, ctx).toMatch(/^\/logos\/[^/]+\.(svg|png|jpe?g)$/);
+      expect(logo, ctx).not.toMatch(/^https?:\/\//);
+      expect(existsSync(join(PUBLIC_DIR, logo.slice(1))), ctx).toBe(true);
     }
   });
 

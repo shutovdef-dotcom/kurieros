@@ -74,6 +74,9 @@ export default defineConfig({
   },
 
   vite: {
+    build: {
+      assetsInlineLimit: 0,
+    },
     define: {
       __BUILD_TIMESTAMP__: JSON.stringify(buildTimestamp),
     },

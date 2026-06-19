@@ -10,10 +10,9 @@
  *   • `*_APPLY` — referral landing URL the user is sent to when
  *     clicking «Откликнуться» / «Заполнить заявку». Always carries the
  *     partner-supplied tracking params (`erid`, `utm_*`).
- *   • `*_LOGO` — bundled SVG (in /public/logos/) preferred over remote
- *     URLs. Some partner logos still hot-link from
- *     `https://agents.pampadu.ru/...` because their referral programs
- *     ship logos through that CDN.
+ *   • `*_LOGO` — bundled image under /public/logos/. Do not hot-link
+ *     partner CDN logo URLs from generated pages; browser QA treats
+ *     those as brittle external resources.
  *   • `*_REF_LANDING_*` — landing URLs for the Ozon recruitment forms;
  *     consumed by ozonOffers.ts when building the Ozon Lead modal.
  *
@@ -25,18 +24,17 @@
 export const YANDEX_EDA_APPLY = 'https://my2go.ru/mitpJ?erid=2VtzqwSDctu';
 
 // === Yandex Go international ========================================
-export const YANDEX_GO_BY_LOGO = 'https://saleads.pro/storage/logos/1999.jpg';
+export const YANDEX_GO_BY_LOGO = '/logos/yandex-go-belarus.jpg';
 export const YANDEX_GO_BY_APPLY = 'https://my.saleads.pro/s/87zbi';
-export const YANDEX_GO_KZ_LOGO = 'https://saleads.pro/storage/logos/1816.jpg';
+export const YANDEX_GO_KZ_LOGO = '/logos/yandex-go-kazakhstan.jpg';
 export const YANDEX_GO_KZ_APPLY = 'https://my.saleads.pro/s/catm5';
-export const YANDEX_GO_KG_LOGO = 'https://saleads.pro/storage/logos/1942.jpg';
+export const YANDEX_GO_KG_LOGO = '/logos/yandex-go-kyrgyzstan.jpg';
 export const YANDEX_GO_KG_APPLY = 'https://my.saleads.pro/s/6vx98';
-export const YANDEX_GO_UZ_LOGO = 'https://saleads.pro/storage/logos/1764.jpg';
+export const YANDEX_GO_UZ_LOGO = '/logos/yandex-go-uzbekistan.jpg';
 export const YANDEX_GO_UZ_APPLY = 'https://my.saleads.pro/s/5weJq';
 
 // === Купер (ex. СберМаркет) =========================================
-export const KUPER_LOGO =
-  'https://agents.pampadu.ru/api/file/ViewFile?type=1&name=c0a42c37-73f4-4de0-a4f9-fd0689380a79.png';
+export const KUPER_LOGO = '/logos/kuper.png';
 export const KUPER_FOOT_AND_BIKE_APPLY =
   'https://trk.ppdu.ru/click/qHQDwLuc?erid=2SDnjeL6Zwp&landingId=2739';
 export const KUPER_PACKER_APPLY =
@@ -45,13 +43,11 @@ export const KUPER_AUTO_APPLY =
   'https://trk.ppdu.ru/click/qHQDwLuc?erid=2SDnjeL6Zwp&landingId=2741';
 
 // === Т-Банк =========================================================
-export const T_BANK_LOGO =
-  'https://agents.pampadu.ru/api/file/ViewFile?type=1&name=23a3b3dd-48a4-4edf-a2a6-c5d681389c1a.png';
+export const T_BANK_LOGO = '/logos/t-bank.png';
 export const T_BANK_APPLY = 'https://trk.ppdu.ru/click/X76Tf6si?erid=2SDnjcbs16H';
 
 // === Efin ===========================================================
-export const EFIN_LOGO =
-  'https://agents.pampadu.ru/api/file/ViewFile?type=1&name=314d3acb-aba3-488c-9ddb-9c41dece71ca.png';
+export const EFIN_LOGO = '/logos/efin.png';
 export const EFIN_APPLY = 'https://trk.ppdu.ru/click/VuqTAiCx?erid=2SDnjdmxiVK';
 
 // === Самокат ========================================================
@@ -78,10 +74,7 @@ export const ALFA_BANK_APPLY =
 
 // === Бургер Кинг ====================================================
 // Burger King повар-кассир (cook-cashier) — CPA via pampadu (oid=2085).
-// Logo hot-links from pampadu's CDN; replace with /logos/burger-king.svg
-// once a local SVG is available.
-export const BURGER_KING_LOGO =
-  'https://agents.pampadu.ru/api/file/ViewFile?type=1&name=7caae4b8-79dc-44ba-9f4e-811e4e415e02.png';
+export const BURGER_KING_LOGO = '/logos/burger-king.png';
 export const BURGER_KING_APPLY =
   'https://trk.ppdu.ru/click?uid=119136&oid=2085&erid=2SDnjdu6ZqS';
 
