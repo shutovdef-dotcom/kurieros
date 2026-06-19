@@ -18,6 +18,7 @@ const MIN_PRICE = 1_000;
 const MAX_PRICE = 1_000_000;
 const MAX_OFFERS = 30_000;
 const DEFAULT_SITE_URL = 'https://kurerok.ru';
+const YANDEX_FEED_TIME_ZONE = 'Europe/Moscow';
 
 type FeedJobPair = {
 	job: GeneratedJob;
@@ -530,18 +531,18 @@ const renderOffer = (offer: YandexFeedOffer): string => {
 };
 
 const formatYmlDate = (date: Date): string => {
-	const pad = (value: number) => String(value).padStart(2, '0');
-	return [
-		date.getFullYear(),
-		'-',
-		pad(date.getMonth() + 1),
-		'-',
-		pad(date.getDate()),
-		' ',
-		pad(date.getHours()),
-		':',
-		pad(date.getMinutes()),
-	].join('');
+	const parts = new Intl.DateTimeFormat('en-CA', {
+		timeZone: YANDEX_FEED_TIME_ZONE,
+		year: 'numeric',
+		month: '2-digit',
+		day: '2-digit',
+		hour: '2-digit',
+		minute: '2-digit',
+		hourCycle: 'h23',
+	}).formatToParts(date);
+	const byType = new Map(parts.map((part) => [part.type, part.value]));
+
+	return `${byType.get('year')}-${byType.get('month')}-${byType.get('day')} ${byType.get('hour')}:${byType.get('minute')}`;
 };
 
 export const renderYandexVacancyFeedXml = (feed: YandexVacancyFeed): string => [
