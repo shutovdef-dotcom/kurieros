@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
+Allow: /yandex-vacancies.xml
 Disallow: /owner/
 Disallow: /designs/
 Disallow: /api/grid/
