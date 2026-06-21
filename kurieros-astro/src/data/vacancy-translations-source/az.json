@@ -57,6 +57,33 @@
       "Tibb kitabçası (şirkət hesabına rəsmiləşdirilə bilər)."
     ]
   },
+  "domovenok-window-cleaner": {
+    "shortDescription": "Выездная работа мойщиком окон в сервисе «Домовёнок»: заказы на мойку окон и балконов, свободный график, обучение и выплаты после выполненных заказов.",
+    "description": "Домовёнок приглашает исполнителей на мойку окон и балконов {cityPrep}. Сервис распределяет заказы через приложение: исполнитель видит будущие и выполненные заказы, доход и активные дни. Опыт в клининге не обязателен: перед стартом есть инструктаж и обучение, а форму, средства и инвентарь для работы предоставляет сервис.",
+    "requirements": [
+      "Паспорт, ИНН или патент, банковская карта и смартфон.",
+      "Готовность к разъездной работе и активному физическому труду.",
+      "Готовность пройти обучение и инструктаж перед первыми заказами.",
+      "Аккуратность, пунктуальность и внимательное отношение к клиенту.",
+      "Опыт в клининге не обязателен."
+    ],
+    "benefits": [
+      "До 172 500 ₽ в месяц в зависимости от города и регулярности выполненных заказов.",
+      "Выплаты после каждого выполненного заказа и 100% чаевых.",
+      "Можно выбирать дни, доступные для заказов.",
+      "Бесплатное обучение и получение навыков за несколько часов.",
+      "Форма, средства и инвентарь для мойки окон предоставляются сервисом.",
+      "Чем дольше сотрудничество, тем выше процент и больше заказов.",
+      "Заказы, доход и активные дни доступны в приложении."
+    ],
+    "requiredDocuments": [
+      "Pasport.",
+      "ИНН или патент.",
+      "Банковская карта для выплат.",
+      "Смартфон.",
+      "Статус самозанятого или готовность подключиться к сервису как самозанятый."
+    ]
+  },
   "efin-bank-representative": {
     "shortDescription": "Həftəlik ödənişlərlə səyyar iş: bank müştərisi ilə hər görüş ödənilir.",
     "description": "Efin-də işləyərkən həftəlik ödənişlər və birbaşa təsir göstərdiyiniz gəlir alırsınız: hər görüş ayrıca ödənilir. Format çevik və rahatdır — qrafiki özünüz seçirsiniz. Rəsmiləşdirmə və məhsulların verilməsi kağızsız mobil tətbiq vasitəsilə həyata keçirilir, burada xəritədən dilərləri götürmək olar. Sürətli start, işə qəbulun uzun gözləməsi olmadan, dilərlərin sıxlığı isə bankların geniş tərəfdaş şəbəkəsi sayəsində yüksəkdir. Əlavə olaraq çay pulu, referal ödənişləri və mükafatlı mütəmadi müsabiqələr mövcuddur.",
@@ -162,6 +189,35 @@
     ],
     "requiredDocuments": [
       "РФ vətəndaşları üçün: propiskası olan pasport və tibb kitabçası; məşğulluğun özünüməşğul kimi rəsmiləşdirilməsi."
+    ]
+  },
+  "mts-bank-operator": {
+    "shortDescription": "Удалённая работа оператором МТС Банка: консультации клиентов по банковским продуктам, официальное оформление, ДМС и сменный график.",
+    "description": "МТС Банк приглашает операторов клиентского сервиса. Нужно консультировать клиентов банка по кредитным продуктам, графику платежей, сумме, срокам и способам оплаты, а также информировать о программах лояльности: кредитных каникулах, рефинансировании, амнистии и других продуктах.",
+    "requirements": [
+      "Возраст от 18 до 45 лет.",
+      "РФ vətəndaşlığı.",
+      "Грамотная устная и письменная речь.",
+      "Умение легко устанавливать контакт с людьми.",
+      "Готовность быстро обучаться и ориентироваться в потоке информации.",
+      "Для удалённой работы нужно тихое место, компьютер, гарнитура и стабильный интернет.",
+      "Опыт работы в клиентском сервисе будет плюсом, но не обязателен."
+    ],
+    "benefits": [
+      "Официальное оформление с первого дня.",
+      "Доход: оклад + ежемесячная премия.",
+      "Сменный график 2/2 или 5/2.",
+      "Доплата за ночные смены 40%.",
+      "ДМС с первого месяца, включая стоматологию.",
+      "Страхование от несчастных случаев и материальная помощь.",
+      "Отпуск 28 календарных дней.",
+      "Мобильная связь за счёт компании и льготные тарифы для близких.",
+      "Скидки и специальные предложения от продуктов экосистемы МТС.",
+      "Корпоративное обучение и онлайн-библиотека."
+    ],
+    "requiredDocuments": [
+      "Паспорт гражданина РФ.",
+      "Для мужчин: приписное свидетельство или военный билет РФ."
     ]
   },
   "ozon-courier": {
@@ -409,6 +465,8 @@
       "Статус самозанятого или готовность оформить его перед стартом."
     ]
   },
+  "ruki-door-installer": {},
+  "ruki-kitchen-assembler": {},
   "samokat-courier": {
     "shortDescription": "Samokat servisinin müştərilərinə sifarişləri samokat və ya velosipedlə çatdırın: saatlara, sifarişlərə və çəkiyə görə gəlir, hava şəraitinə görə əlavə ödənişlər. Çatdırılma saatlarını özünüz seçirsiniz, əməkdaşlıq müqaviləsi — bir saata.",
     "description": "Biz Samokat onlayn mağazasının rəsmi tərəfdaşıyıq (ərzaq və ev malları 15 dəqiqədən çatdırılma ilə). Kuryer-tərəfdaşlar axtarırıq {cityPrep}. Gəlir iş saatlarının və xidmət göstərilən müştərilərin sayına görə formalaşır; çətin hava şəraitinə və sifarişlərin çəkisinə görə əlavə edirik, bazar ertəsi və bazar günü çatdırılmaya görə əlavə ödəniş və dəvət etdiyiniz hər dost üçün bonus var. Çatdırılma saatlarını (taym-slotları) özünüz seçirsiniz. Əməkdaşlıq müqaviləsinin bağlanması — bir saat ərzində, başlamazdan əvvəl — Samokat servisinin çatdırılma standartları üzrə giriş təlimatı.",

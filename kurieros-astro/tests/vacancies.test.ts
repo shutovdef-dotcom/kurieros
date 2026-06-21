@@ -34,7 +34,11 @@ const REQUIRED_PARTNER_SLUGS = [
   'alfa-bank-representative',
   'burger-king-cook-cashier',
   'voxys-call-center-operator',
+  'mts-bank-operator',
   'qlean-cleaner',
+  'ruki-door-installer',
+  'ruki-kitchen-assembler',
+  'domovenok-window-cleaner',
   'yandex-go-courier-belarus',
   'yandex-go-courier-kazakhstan',
   'yandex-go-courier-kyrgyzstan',
@@ -190,6 +194,79 @@ describe('vacancySources structural invariants', () => {
     }
   });
 
+  it('generates MTS Bank remote call-center operator offers', () => {
+    const source = vacancySources.find((item) => item.slug === 'mts-bank-operator');
+    const mtsJobs = jobs.filter((job) => job.sourceSlug === 'mts-bank-operator');
+
+    expect(source).toBeDefined();
+    expect(source?.company.name).toBe('МТС Банк');
+    expect(source?.howToTemplate).toBe('call_center');
+    expect(source?.incomeCalculator).toEqual({ mode: 'monthly' });
+    expect(source?.offers).toHaveLength(140);
+    expect(source?.offers.every((offer) => offer.transport === 'remote')).toBe(true);
+    expect(source?.offers.every((offer) => offer.employmentFormats?.includes('official'))).toBe(true);
+
+    expect(mtsJobs).toHaveLength(140);
+    expect(mtsJobs.some((job) => job.location === 'Химки')).toBe(true);
+    expect(mtsJobs.some((job) => job.location === 'Одинцово')).toBe(true);
+    expect(mtsJobs.some((job) => job.location === 'Колпино')).toBe(true);
+    expect(mtsJobs.some((job) => job.location === 'Пушкин')).toBe(true);
+    expect(mtsJobs.some((job) => job.location === 'Шушары')).toBe(true);
+
+    const ryazan = mtsJobs.find((job) => job.location === 'Рязань');
+    expect(ryazan?.slug).toBe('mts-bank-operator-ryazan-remote');
+    expect(ryazan?.title).toBe('Оператор МТС Банка в Рязани');
+    expect(ryazan?.salary).toBe('до 68 500 ₽/мес');
+    expect(ryazan?.details.rate).toBe('от 46 000 до 68 500 ₽/мес');
+    expect(ryazan?.details.employment_type).toBe('Официальное трудоустройство');
+    expect(ryazan?.details.medical_book).toBe('Не требуется');
+    expect(ryazan?.details.os).toContain('Компьютер');
+    expect(ryazan?.applyLink).toContain('https://trk.ppdu.ru/click?');
+  });
+
+  it('generates Ruki Moscow-region service worker offers only', () => {
+    const doorSource = vacancySources.find((item) => item.slug === 'ruki-door-installer');
+    const kitchenSource = vacancySources.find((item) => item.slug === 'ruki-kitchen-assembler');
+    const doorJobs = jobs.filter((job) => job.sourceSlug === 'ruki-door-installer');
+    const kitchenJobs = jobs.filter((job) => job.sourceSlug === 'ruki-kitchen-assembler');
+
+    expect(doorSource).toBeDefined();
+    expect(kitchenSource).toBeDefined();
+    expect(doorSource?.company.name).toBe('Сервис «Руки»');
+    expect(kitchenSource?.company.name).toBe('Сервис «Руки»');
+    expect(doorSource?.howToTemplate).toBe('service_worker');
+    expect(kitchenSource?.howToTemplate).toBe('service_worker');
+    expect(doorSource?.incomeCalculator).toEqual({ mode: 'monthly' });
+    expect(kitchenSource?.incomeCalculator).toEqual({ mode: 'monthly' });
+    expect(doorSource?.offers).toHaveLength(75);
+    expect(kitchenSource?.offers).toHaveLength(75);
+    expect(doorSource?.offers.every((offer) => offer.salaryConfidence === 'partner')).toBe(true);
+    expect(kitchenSource?.offers.every((offer) => offer.salaryConfidence === 'partner')).toBe(true);
+
+    expect(doorJobs).toHaveLength(75);
+    expect(kitchenJobs).toHaveLength(75);
+    expect(doorJobs.some((job) => job.location === 'Химки')).toBe(true);
+    expect(doorJobs.some((job) => job.location === 'Одинцово')).toBe(true);
+    expect(kitchenJobs.some((job) => job.location === 'Люберцы')).toBe(true);
+    expect([...doorJobs, ...kitchenJobs].some((job) => job.location === 'Санкт-Петербург')).toBe(false);
+    expect([...doorJobs, ...kitchenJobs].some((job) => job.location === 'Новосибирск')).toBe(false);
+
+    const moscowDoor = doorJobs.find((job) => job.location === 'Москва');
+    expect(moscowDoor?.slug).toBe('ruki-door-installer-moskva-service');
+    expect(moscowDoor?.title).toBe('Установщик межкомнатных дверей Сервис «Руки» в Москве');
+    expect(moscowDoor?.salary).toBe('до 300 000 ₽/мес');
+    expect(moscowDoor?.details.rate).toContain('средний доход за заказ: 15 000 ₽');
+    expect(moscowDoor?.details.employment_type).toContain('Самозанятость');
+    expect(moscowDoor?.applyLink).toContain('https://my.saleads.pro/s/1fbdx');
+
+    const moscowKitchen = kitchenJobs.find((job) => job.location === 'Москва');
+    expect(moscowKitchen?.slug).toBe('ruki-kitchen-assembler-moskva-service');
+    expect(moscowKitchen?.title).toBe('Сборщик кухонь Сервис «Руки» в Москве');
+    expect(moscowKitchen?.salary).toBe('до 350 000 ₽/мес');
+    expect(moscowKitchen?.details.rate).toContain('средний доход за заказ: 27 500 ₽');
+    expect(moscowKitchen?.details.employment_type).toContain('Самозанятость');
+  });
+
   it('generates Yandex Go international courier offers with local currencies', () => {
     const sourceSlugs = [
       'yandex-go-courier-belarus',
@@ -240,5 +317,60 @@ describe('vacancySources structural invariants', () => {
           job.currency === 'UZS',
       ),
     ).toBe(true);
+  });
+
+  it('generates Domovenok window cleaner offers for capital regions and Nizhny Novgorod city', () => {
+    const source = vacancySources.find((item) => item.slug === 'domovenok-window-cleaner');
+    const domovenokJobs = jobs.filter((job) => job.sourceSlug === 'domovenok-window-cleaner');
+
+    expect(source).toBeDefined();
+    expect(source?.company.name).toBe('Домовёнок');
+    expect(source?.howToTemplate).toBe('service_worker');
+    expect(source?.incomeCalculator).toEqual({ mode: 'monthly' });
+    expect(source?.offers).toHaveLength(144);
+    expect(domovenokJobs).toHaveLength(144);
+
+    const cities = new Set(domovenokJobs.map((job) => job.location));
+    expect(cities.has('Москва')).toBe(true);
+    expect(cities.has('Химки')).toBe(true);
+    expect(cities.has('Одинцово')).toBe(true);
+    expect(cities.has('Санкт-Петербург')).toBe(true);
+    expect(cities.has('Колпино')).toBe(true);
+    expect(cities.has('Пушкин')).toBe(true);
+    expect(cities.has('Мурино')).toBe(true);
+    expect(cities.has('Кудрово')).toBe(true);
+    expect(cities.has('Нижний Новгород')).toBe(true);
+    expect(cities.has('Дзержинск')).toBe(false);
+    expect(cities.has('Бор')).toBe(false);
+
+    const moscow = domovenokJobs.find((job) => job.location === 'Москва');
+    expect(moscow?.slug).toBe('domovenok-window-cleaner-moskva-service');
+    expect(moscow?.salary).toBe('до 172 500 ₽/мес');
+    expect(moscow?.sourceUrl).toBe('https://www.domovenok.ru/vakansii_okna');
+    expect(moscow?.applyLink).toContain('utm_content=moskva-service');
+
+    const spb = domovenokJobs.find((job) => job.location === 'Санкт-Петербург');
+    expect(spb?.slug).toBe('domovenok-window-cleaner-sankt-peterburg-service');
+    expect(spb?.salary).toBe('до 129 400 ₽/мес');
+    expect(spb?.sourceUrl).toBe('https://spb.domovenok.ru/vakansii_okna');
+    expect(spb?.applyLink).toContain('utm_content=sankt-peterburg-service');
+
+    const luban = domovenokJobs.find((job) => job.location === 'Любань');
+    expect(luban?.slug).toBe('domovenok-window-cleaner-lyuban-service');
+    expect(luban?.title).toBe('Мойщик окон Домовёнок в Любани');
+
+    const telmana = domovenokJobs.find((job) => job.location === 'Тельмана');
+    expect(telmana?.slug).toBe('domovenok-window-cleaner-telmana-service');
+    expect(telmana?.title).toBe('Мойщик окон Домовёнок в посёлке Тельмана');
+
+    const nizhny = domovenokJobs.find((job) => job.location === 'Нижний Новгород');
+    expect(nizhny?.slug).toBe('domovenok-window-cleaner-nizhniy-novgorod-service');
+    expect(nizhny?.title).toBe('Мойщик окон Домовёнок в Нижнем Новгороде');
+    expect(nizhny?.salary).toBe('до 118 500 ₽/мес');
+    expect(nizhny?.sourceUrl).toBe('https://nn.domovenok.ru/vakansii_okna');
+    expect(nizhny?.details.age).toBe('от 18 лет');
+    expect(nizhny?.details.rate).toContain('мойку окон и балконов');
+    expect(nizhny?.details.employment_type).toContain('Самозанятость');
+    expect(nizhny?.applyLink).toContain('https://my.saleads.pro/s/u8jcm/5859?');
   });
 });

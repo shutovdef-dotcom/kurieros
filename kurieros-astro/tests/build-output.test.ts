@@ -72,15 +72,16 @@ const localScriptAssetCode = (html: string): string =>
     .join('\n');
 
 describe.skipIf(skipIfNoDist)('Build output', () => {
-  it('has expected page count (~8150)', () => {
-    // Reference build 2026-06-19 after grid-batch canonical-key dedupe:
-    // 8147 HTML files.
+  it('has expected page count (~8662)', () => {
+    // Reference build 2026-06-21 after adding MTS Bank, Ruki, Domovenok,
+    // capital-region vacancy expansions, and two unblocked Leningrad Oblast
+    // locations used by partner jobs: 8662 HTML files.
     // ~5790 content pages + ~958 /api/grid/<slug>/ city-grid fragments (M14)
     // + 1810 /api/grid-batch/<listing>/<page>/ fragments for heavy listings
-    // + 200 /api/company-vacancies/<company>/<page>/ fragments for heavy
-    // company pages + Qlean/Voxys service expansion + Yandex Go international
-    // routes + SEO-rollout routes (transport hubs, info guides, /otzyvy/).
-    // Band: 8142-8152 (+-5 from reference count).
+    // + company-vacancies fragments for heavy company pages + Qlean/Voxys
+    // service expansion + Yandex Go international routes + SEO-rollout routes
+    // (transport hubs, info guides, /otzyvy/).
+    // Band: 8657-8667 (+-5 from reference count).
     //
     // NOTE FOR CONTRIBUTORS: always re-derive both bounds from an actual build
     // after adding new routes -- do NOT blindly add N to the upper bound.
@@ -90,8 +91,8 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     //   else if(e.isFile()&&e.name.endsWith('.html'))n++;}return n;}
     //   console.log(c('dist'));"
     const count = countHtml(DIST_DIR);
-    expect(count).toBeGreaterThanOrEqual(8142);
-    expect(count).toBeLessThanOrEqual(8152);
+    expect(count).toBeGreaterThanOrEqual(8657);
+    expect(count).toBeLessThanOrEqual(8667);
   });
 
   it('vacancy fragments use the compact format (post-#129)', () => {

@@ -10432,6 +10432,10 @@
     "slug": "tbank-representative-krasnogorsk-auto"
   },
   {
+    "id": 798303,
+    "slug": "tbank-representative-lyuban-auto"
+  },
+  {
     "id": 798793,
     "slug": "tbank-representative-elizovo-auto"
   },
@@ -12830,6 +12834,10 @@
   {
     "id": 883123,
     "slug": "efin-bank-representative-lesozavodsk-auto"
+  },
+  {
+    "id": 883213,
+    "slug": "efin-bank-representative-telmana-auto"
   },
   {
     "id": 883311,
@@ -20246,5 +20254,1741 @@
   {
     "id": 2688873,
     "slug": "yandex-go-courier-uzbekistan-tashkent-auto"
+  },
+  {
+    "id": 2700014,
+    "slug": "mts-bank-operator-moskva-remote"
+  },
+  {
+    "id": 2700024,
+    "slug": "mts-bank-operator-sankt-peterburg-remote"
+  },
+  {
+    "id": 2700034,
+    "slug": "mts-bank-operator-ekaterinburg-remote"
+  },
+  {
+    "id": 2700044,
+    "slug": "mts-bank-operator-novosibirsk-remote"
+  },
+  {
+    "id": 2700054,
+    "slug": "mts-bank-operator-kazan-remote"
+  },
+  {
+    "id": 2700064,
+    "slug": "mts-bank-operator-nizhniy-novgorod-remote"
+  },
+  {
+    "id": 2700084,
+    "slug": "mts-bank-operator-samara-remote"
+  },
+  {
+    "id": 2700094,
+    "slug": "mts-bank-operator-omsk-remote"
+  },
+  {
+    "id": 2700114,
+    "slug": "mts-bank-operator-ufa-remote"
+  },
+  {
+    "id": 2700134,
+    "slug": "mts-bank-operator-voronezh-remote"
+  },
+  {
+    "id": 2700144,
+    "slug": "mts-bank-operator-perm-remote"
+  },
+  {
+    "id": 2700154,
+    "slug": "mts-bank-operator-volgograd-remote"
+  },
+  {
+    "id": 2702724,
+    "slug": "mts-bank-operator-beloostrov-remote"
+  },
+  {
+    "id": 2703474,
+    "slug": "mts-bank-operator-beloozerskiy-remote"
+  },
+  {
+    "id": 2705334,
+    "slug": "mts-bank-operator-klin-remote"
+  },
+  {
+    "id": 2706654,
+    "slug": "mts-bank-operator-shatura-remote"
+  },
+  {
+    "id": 2706674,
+    "slug": "mts-bank-operator-izhevsk-remote"
+  },
+  {
+    "id": 2707554,
+    "slug": "mts-bank-operator-domodedovo-remote"
+  },
+  {
+    "id": 2708234,
+    "slug": "mts-bank-operator-orehovo-zuevo-remote"
+  },
+  {
+    "id": 2709304,
+    "slug": "mts-bank-operator-luhovitsy-remote"
+  },
+  {
+    "id": 2709534,
+    "slug": "mts-bank-operator-himki-remote"
+  },
+  {
+    "id": 2711614,
+    "slug": "mts-bank-operator-komarovo-remote"
+  },
+  {
+    "id": 2711704,
+    "slug": "mts-bank-operator-krasnodar-remote"
+  },
+  {
+    "id": 2712314,
+    "slug": "mts-bank-operator-taldom-remote"
+  },
+  {
+    "id": 2712674,
+    "slug": "mts-bank-operator-bryansk-remote"
+  },
+  {
+    "id": 2712974,
+    "slug": "mts-bank-operator-dolgoprudnyy-remote"
+  },
+  {
+    "id": 2713224,
+    "slug": "mts-bank-operator-lomonosov-remote"
+  },
+  {
+    "id": 2714034,
+    "slug": "mts-bank-operator-korolev-remote"
+  },
+  {
+    "id": 2714514,
+    "slug": "mts-bank-operator-ivanteevka-remote"
+  },
+  {
+    "id": 2714994,
+    "slug": "mts-bank-operator-peresvet-remote"
+  },
+  {
+    "id": 2715584,
+    "slug": "mts-bank-operator-noginsk-remote"
+  },
+  {
+    "id": 2716424,
+    "slug": "mts-bank-operator-losino-petrovskiy-remote"
+  },
+  {
+    "id": 2716924,
+    "slug": "mts-bank-operator-aleksandrovskaya-remote"
+  },
+  {
+    "id": 2717384,
+    "slug": "mts-bank-operator-zhukovskiy-remote"
+  },
+  {
+    "id": 2717774,
+    "slug": "mts-bank-operator-kursk-remote"
+  },
+  {
+    "id": 2718414,
+    "slug": "mts-bank-operator-voskresensk-remote"
+  },
+  {
+    "id": 2719304,
+    "slug": "mts-bank-operator-kaluga-remote"
+  },
+  {
+    "id": 2721514,
+    "slug": "mts-bank-operator-drezna-remote"
+  },
+  {
+    "id": 2721644,
+    "slug": "mts-bank-operator-metallostroy-remote"
+  },
+  {
+    "id": 2723134,
+    "slug": "mts-bank-operator-chernogolovka-remote"
+  },
+  {
+    "id": 2724284,
+    "slug": "mts-bank-operator-krasnoe-selo-remote"
+  },
+  {
+    "id": 2726784,
+    "slug": "mts-bank-operator-chehov-remote"
+  },
+  {
+    "id": 2727084,
+    "slug": "mts-bank-operator-krasnoznamensk-remote"
+  },
+  {
+    "id": 2727644,
+    "slug": "mts-bank-operator-petro-slavyanka-remote"
+  },
+  {
+    "id": 2727854,
+    "slug": "mts-bank-operator-serovo-remote"
+  },
+  {
+    "id": 2728594,
+    "slug": "mts-bank-operator-mozhaysk-remote"
+  },
+  {
+    "id": 2729654,
+    "slug": "mts-bank-operator-yoshkar-ola-remote"
+  },
+  {
+    "id": 2729824,
+    "slug": "mts-bank-operator-zelenogorsk-remote"
+  },
+  {
+    "id": 2729904,
+    "slug": "mts-bank-operator-zaraysk-remote"
+  },
+  {
+    "id": 2729994,
+    "slug": "mts-bank-operator-krasnoarmeysk-remote"
+  },
+  {
+    "id": 2730014,
+    "slug": "mts-bank-operator-egorevsk-remote"
+  },
+  {
+    "id": 2730774,
+    "slug": "mts-bank-operator-ust-izhora-remote"
+  },
+  {
+    "id": 2731284,
+    "slug": "mts-bank-operator-strelna-remote"
+  },
+  {
+    "id": 2732194,
+    "slug": "mts-bank-operator-tyumen-remote"
+  },
+  {
+    "id": 2732284,
+    "slug": "mts-bank-operator-pskov-remote"
+  },
+  {
+    "id": 2732324,
+    "slug": "mts-bank-operator-tver-remote"
+  },
+  {
+    "id": 2732584,
+    "slug": "mts-bank-operator-barnaul-remote"
+  },
+  {
+    "id": 2733934,
+    "slug": "mts-bank-operator-smolensk-remote"
+  },
+  {
+    "id": 2736734,
+    "slug": "mts-bank-operator-petergof-remote"
+  },
+  {
+    "id": 2737714,
+    "slug": "mts-bank-operator-volokolamsk-remote"
+  },
+  {
+    "id": 2737764,
+    "slug": "mts-bank-operator-kolomna-remote"
+  },
+  {
+    "id": 2738244,
+    "slug": "mts-bank-operator-yahroma-remote"
+  },
+  {
+    "id": 2738904,
+    "slug": "mts-bank-operator-lyubertsy-remote"
+  },
+  {
+    "id": 2739094,
+    "slug": "mts-bank-operator-ruza-remote"
+  },
+  {
+    "id": 2739644,
+    "slug": "mts-bank-operator-aprelevka-remote"
+  },
+  {
+    "id": 2740404,
+    "slug": "mts-bank-operator-ryazan-remote"
+  },
+  {
+    "id": 2742494,
+    "slug": "mts-bank-operator-vologda-remote"
+  },
+  {
+    "id": 2742824,
+    "slug": "mts-bank-operator-ramenskoe-remote"
+  },
+  {
+    "id": 2747864,
+    "slug": "mts-bank-operator-levashovo-remote"
+  },
+  {
+    "id": 2749764,
+    "slug": "mts-bank-operator-elektrougli-remote"
+  },
+  {
+    "id": 2751214,
+    "slug": "mts-bank-operator-hotkovo-remote"
+  },
+  {
+    "id": 2751424,
+    "slug": "mts-bank-operator-kurovskoe-remote"
+  },
+  {
+    "id": 2751674,
+    "slug": "mts-bank-operator-krasnozavodsk-remote"
+  },
+  {
+    "id": 2753284,
+    "slug": "mts-bank-operator-lytkarino-remote"
+  },
+  {
+    "id": 2755544,
+    "slug": "mts-bank-operator-pushkino-remote"
+  },
+  {
+    "id": 2755614,
+    "slug": "mts-bank-operator-mytischi-remote"
+  },
+  {
+    "id": 2756454,
+    "slug": "mts-bank-operator-serpuhov-remote"
+  },
+  {
+    "id": 2756634,
+    "slug": "mts-bank-operator-velikiy-novgorod-remote"
+  },
+  {
+    "id": 2756944,
+    "slug": "mts-bank-operator-vidnoe-remote"
+  },
+  {
+    "id": 2757184,
+    "slug": "mts-bank-operator-odintsovo-remote"
+  },
+  {
+    "id": 2757294,
+    "slug": "mts-bank-operator-pavlovsk-remote"
+  },
+  {
+    "id": 2757654,
+    "slug": "mts-bank-operator-tomsk-remote"
+  },
+  {
+    "id": 2758154,
+    "slug": "mts-bank-operator-naro-fominsk-remote"
+  },
+  {
+    "id": 2758234,
+    "slug": "mts-bank-operator-tyarlevo-remote"
+  },
+  {
+    "id": 2759184,
+    "slug": "mts-bank-operator-istra-remote"
+  },
+  {
+    "id": 2759594,
+    "slug": "mts-bank-operator-elektrogorsk-remote"
+  },
+  {
+    "id": 2760354,
+    "slug": "mts-bank-operator-vereya-remote"
+  },
+  {
+    "id": 2760604,
+    "slug": "mts-bank-operator-puschino-remote"
+  },
+  {
+    "id": 2762744,
+    "slug": "mts-bank-operator-sestroretsk-remote"
+  },
+  {
+    "id": 2763334,
+    "slug": "mts-bank-operator-kostroma-remote"
+  },
+  {
+    "id": 2764314,
+    "slug": "mts-bank-operator-dzerzhinskiy-remote"
+  },
+  {
+    "id": 2765104,
+    "slug": "mts-bank-operator-solnechnogorsk-remote"
+  },
+  {
+    "id": 2766124,
+    "slug": "mts-bank-operator-kashira-remote"
+  },
+  {
+    "id": 2766494,
+    "slug": "mts-bank-operator-kemerovo-remote"
+  },
+  {
+    "id": 2766624,
+    "slug": "mts-bank-operator-ushkovo-remote"
+  },
+  {
+    "id": 2766744,
+    "slug": "mts-bank-operator-protvino-remote"
+  },
+  {
+    "id": 2767074,
+    "slug": "mts-bank-operator-molodezhnoe-remote"
+  },
+  {
+    "id": 2767134,
+    "slug": "mts-bank-operator-solnechnoe-remote"
+  },
+  {
+    "id": 2767664,
+    "slug": "mts-bank-operator-ozery-remote"
+  },
+  {
+    "id": 2768084,
+    "slug": "mts-bank-operator-sapernyy-remote"
+  },
+  {
+    "id": 2772104,
+    "slug": "mts-bank-operator-dmitrov-remote"
+  },
+  {
+    "id": 2773254,
+    "slug": "mts-bank-operator-kotelniki-remote"
+  },
+  {
+    "id": 2774164,
+    "slug": "mts-bank-operator-shushary-remote"
+  },
+  {
+    "id": 2774244,
+    "slug": "mts-bank-operator-vysokovsk-remote"
+  },
+  {
+    "id": 2774814,
+    "slug": "mts-bank-operator-lipetsk-remote"
+  },
+  {
+    "id": 2774834,
+    "slug": "mts-bank-operator-fryazino-remote"
+  },
+  {
+    "id": 2775174,
+    "slug": "mts-bank-operator-elektrostal-remote"
+  },
+  {
+    "id": 2779134,
+    "slug": "mts-bank-operator-golitsyno-remote"
+  },
+  {
+    "id": 2781784,
+    "slug": "mts-bank-operator-kubinka-remote"
+  },
+  {
+    "id": 2782094,
+    "slug": "mts-bank-operator-dubna-remote"
+  },
+  {
+    "id": 2782364,
+    "slug": "mts-bank-operator-sergiev-posad-remote"
+  },
+  {
+    "id": 2782854,
+    "slug": "mts-bank-operator-pavlovskiy-posad-remote"
+  },
+  {
+    "id": 2783874,
+    "slug": "mts-bank-operator-saratov-remote"
+  },
+  {
+    "id": 2783904,
+    "slug": "mts-bank-operator-smolyachkovo-remote"
+  },
+  {
+    "id": 2785564,
+    "slug": "mts-bank-operator-yaroslavl-remote"
+  },
+  {
+    "id": 2785834,
+    "slug": "mts-bank-operator-orel-remote"
+  },
+  {
+    "id": 2786014,
+    "slug": "mts-bank-operator-pushkin-remote"
+  },
+  {
+    "id": 2786234,
+    "slug": "mts-bank-operator-kronshtadt-remote"
+  },
+  {
+    "id": 2787014,
+    "slug": "mts-bank-operator-lisiy-nos-remote"
+  },
+  {
+    "id": 2787394,
+    "slug": "mts-bank-operator-pesochnyy-remote"
+  },
+  {
+    "id": 2788294,
+    "slug": "mts-bank-operator-pontonnyy-remote"
+  },
+  {
+    "id": 2789804,
+    "slug": "mts-bank-operator-pargolovo-remote"
+  },
+  {
+    "id": 2789964,
+    "slug": "mts-bank-operator-zvenigorod-remote"
+  },
+  {
+    "id": 2790204,
+    "slug": "mts-bank-operator-balashiha-remote"
+  },
+  {
+    "id": 2790244,
+    "slug": "mts-bank-operator-repino-remote"
+  },
+  {
+    "id": 2790394,
+    "slug": "mts-bank-operator-staraya-kupavna-remote"
+  },
+  {
+    "id": 2791414,
+    "slug": "mts-bank-operator-podolsk-remote"
+  },
+  {
+    "id": 2791764,
+    "slug": "mts-bank-operator-roshal-remote"
+  },
+  {
+    "id": 2793614,
+    "slug": "mts-bank-operator-bronnitsy-remote"
+  },
+  {
+    "id": 2793624,
+    "slug": "mts-bank-operator-lobnya-remote"
+  },
+  {
+    "id": 2794094,
+    "slug": "mts-bank-operator-dedovsk-remote"
+  },
+  {
+    "id": 2794334,
+    "slug": "mts-bank-operator-likino-dulevo-remote"
+  },
+  {
+    "id": 2795014,
+    "slug": "mts-bank-operator-stupino-remote"
+  },
+  {
+    "id": 2795474,
+    "slug": "mts-bank-operator-vladimir-remote"
+  },
+  {
+    "id": 2796414,
+    "slug": "mts-bank-operator-orenburg-remote"
+  },
+  {
+    "id": 2796454,
+    "slug": "mts-bank-operator-schelkovo-remote"
+  },
+  {
+    "id": 2798234,
+    "slug": "mts-bank-operator-krasnogorsk-remote"
+  },
+  {
+    "id": 2798964,
+    "slug": "mts-bank-operator-reutov-remote"
+  },
+  {
+    "id": 2799334,
+    "slug": "mts-bank-operator-ulyanovsk-remote"
+  },
+  {
+    "id": 2799674,
+    "slug": "mts-bank-operator-kolpino-remote"
+  },
+  {
+    "id": 2800016,
+    "slug": "ruki-door-installer-moskva-service"
+  },
+  {
+    "id": 2803476,
+    "slug": "ruki-door-installer-beloozerskiy-service"
+  },
+  {
+    "id": 2805336,
+    "slug": "ruki-door-installer-klin-service"
+  },
+  {
+    "id": 2806656,
+    "slug": "ruki-door-installer-shatura-service"
+  },
+  {
+    "id": 2807556,
+    "slug": "ruki-door-installer-domodedovo-service"
+  },
+  {
+    "id": 2808236,
+    "slug": "ruki-door-installer-orehovo-zuevo-service"
+  },
+  {
+    "id": 2809306,
+    "slug": "ruki-door-installer-luhovitsy-service"
+  },
+  {
+    "id": 2809536,
+    "slug": "ruki-door-installer-himki-service"
+  },
+  {
+    "id": 2812316,
+    "slug": "ruki-door-installer-taldom-service"
+  },
+  {
+    "id": 2812976,
+    "slug": "ruki-door-installer-dolgoprudnyy-service"
+  },
+  {
+    "id": 2814036,
+    "slug": "ruki-door-installer-korolev-service"
+  },
+  {
+    "id": 2814516,
+    "slug": "ruki-door-installer-ivanteevka-service"
+  },
+  {
+    "id": 2814996,
+    "slug": "ruki-door-installer-peresvet-service"
+  },
+  {
+    "id": 2815586,
+    "slug": "ruki-door-installer-noginsk-service"
+  },
+  {
+    "id": 2816426,
+    "slug": "ruki-door-installer-losino-petrovskiy-service"
+  },
+  {
+    "id": 2817386,
+    "slug": "ruki-door-installer-zhukovskiy-service"
+  },
+  {
+    "id": 2818416,
+    "slug": "ruki-door-installer-voskresensk-service"
+  },
+  {
+    "id": 2821516,
+    "slug": "ruki-door-installer-drezna-service"
+  },
+  {
+    "id": 2823136,
+    "slug": "ruki-door-installer-chernogolovka-service"
+  },
+  {
+    "id": 2826786,
+    "slug": "ruki-door-installer-chehov-service"
+  },
+  {
+    "id": 2827086,
+    "slug": "ruki-door-installer-krasnoznamensk-service"
+  },
+  {
+    "id": 2828596,
+    "slug": "ruki-door-installer-mozhaysk-service"
+  },
+  {
+    "id": 2829906,
+    "slug": "ruki-door-installer-zaraysk-service"
+  },
+  {
+    "id": 2829996,
+    "slug": "ruki-door-installer-krasnoarmeysk-service"
+  },
+  {
+    "id": 2830016,
+    "slug": "ruki-door-installer-egorevsk-service"
+  },
+  {
+    "id": 2837716,
+    "slug": "ruki-door-installer-volokolamsk-service"
+  },
+  {
+    "id": 2837766,
+    "slug": "ruki-door-installer-kolomna-service"
+  },
+  {
+    "id": 2838246,
+    "slug": "ruki-door-installer-yahroma-service"
+  },
+  {
+    "id": 2838906,
+    "slug": "ruki-door-installer-lyubertsy-service"
+  },
+  {
+    "id": 2839096,
+    "slug": "ruki-door-installer-ruza-service"
+  },
+  {
+    "id": 2839646,
+    "slug": "ruki-door-installer-aprelevka-service"
+  },
+  {
+    "id": 2842826,
+    "slug": "ruki-door-installer-ramenskoe-service"
+  },
+  {
+    "id": 2849766,
+    "slug": "ruki-door-installer-elektrougli-service"
+  },
+  {
+    "id": 2851216,
+    "slug": "ruki-door-installer-hotkovo-service"
+  },
+  {
+    "id": 2851426,
+    "slug": "ruki-door-installer-kurovskoe-service"
+  },
+  {
+    "id": 2851676,
+    "slug": "ruki-door-installer-krasnozavodsk-service"
+  },
+  {
+    "id": 2853286,
+    "slug": "ruki-door-installer-lytkarino-service"
+  },
+  {
+    "id": 2855546,
+    "slug": "ruki-door-installer-pushkino-service"
+  },
+  {
+    "id": 2855616,
+    "slug": "ruki-door-installer-mytischi-service"
+  },
+  {
+    "id": 2856456,
+    "slug": "ruki-door-installer-serpuhov-service"
+  },
+  {
+    "id": 2856946,
+    "slug": "ruki-door-installer-vidnoe-service"
+  },
+  {
+    "id": 2857186,
+    "slug": "ruki-door-installer-odintsovo-service"
+  },
+  {
+    "id": 2858156,
+    "slug": "ruki-door-installer-naro-fominsk-service"
+  },
+  {
+    "id": 2859186,
+    "slug": "ruki-door-installer-istra-service"
+  },
+  {
+    "id": 2859596,
+    "slug": "ruki-door-installer-elektrogorsk-service"
+  },
+  {
+    "id": 2860356,
+    "slug": "ruki-door-installer-vereya-service"
+  },
+  {
+    "id": 2860606,
+    "slug": "ruki-door-installer-puschino-service"
+  },
+  {
+    "id": 2864316,
+    "slug": "ruki-door-installer-dzerzhinskiy-service"
+  },
+  {
+    "id": 2865106,
+    "slug": "ruki-door-installer-solnechnogorsk-service"
+  },
+  {
+    "id": 2866126,
+    "slug": "ruki-door-installer-kashira-service"
+  },
+  {
+    "id": 2866746,
+    "slug": "ruki-door-installer-protvino-service"
+  },
+  {
+    "id": 2867666,
+    "slug": "ruki-door-installer-ozery-service"
+  },
+  {
+    "id": 2872106,
+    "slug": "ruki-door-installer-dmitrov-service"
+  },
+  {
+    "id": 2873256,
+    "slug": "ruki-door-installer-kotelniki-service"
+  },
+  {
+    "id": 2874246,
+    "slug": "ruki-door-installer-vysokovsk-service"
+  },
+  {
+    "id": 2874836,
+    "slug": "ruki-door-installer-fryazino-service"
+  },
+  {
+    "id": 2875176,
+    "slug": "ruki-door-installer-elektrostal-service"
+  },
+  {
+    "id": 2879136,
+    "slug": "ruki-door-installer-golitsyno-service"
+  },
+  {
+    "id": 2881786,
+    "slug": "ruki-door-installer-kubinka-service"
+  },
+  {
+    "id": 2882096,
+    "slug": "ruki-door-installer-dubna-service"
+  },
+  {
+    "id": 2882366,
+    "slug": "ruki-door-installer-sergiev-posad-service"
+  },
+  {
+    "id": 2882856,
+    "slug": "ruki-door-installer-pavlovskiy-posad-service"
+  },
+  {
+    "id": 2889966,
+    "slug": "ruki-door-installer-zvenigorod-service"
+  },
+  {
+    "id": 2890206,
+    "slug": "ruki-door-installer-balashiha-service"
+  },
+  {
+    "id": 2890396,
+    "slug": "ruki-door-installer-staraya-kupavna-service"
+  },
+  {
+    "id": 2891416,
+    "slug": "ruki-door-installer-podolsk-service"
+  },
+  {
+    "id": 2891766,
+    "slug": "ruki-door-installer-roshal-service"
+  },
+  {
+    "id": 2893616,
+    "slug": "ruki-door-installer-bronnitsy-service"
+  },
+  {
+    "id": 2893626,
+    "slug": "ruki-door-installer-lobnya-service"
+  },
+  {
+    "id": 2894096,
+    "slug": "ruki-door-installer-dedovsk-service"
+  },
+  {
+    "id": 2894336,
+    "slug": "ruki-door-installer-likino-dulevo-service"
+  },
+  {
+    "id": 2895016,
+    "slug": "ruki-door-installer-stupino-service"
+  },
+  {
+    "id": 2896456,
+    "slug": "ruki-door-installer-schelkovo-service"
+  },
+  {
+    "id": 2898236,
+    "slug": "ruki-door-installer-krasnogorsk-service"
+  },
+  {
+    "id": 2898966,
+    "slug": "ruki-door-installer-reutov-service"
+  },
+  {
+    "id": 2900016,
+    "slug": "ruki-kitchen-assembler-moskva-service"
+  },
+  {
+    "id": 2903476,
+    "slug": "ruki-kitchen-assembler-beloozerskiy-service"
+  },
+  {
+    "id": 2905336,
+    "slug": "ruki-kitchen-assembler-klin-service"
+  },
+  {
+    "id": 2906656,
+    "slug": "ruki-kitchen-assembler-shatura-service"
+  },
+  {
+    "id": 2907556,
+    "slug": "ruki-kitchen-assembler-domodedovo-service"
+  },
+  {
+    "id": 2908236,
+    "slug": "ruki-kitchen-assembler-orehovo-zuevo-service"
+  },
+  {
+    "id": 2909306,
+    "slug": "ruki-kitchen-assembler-luhovitsy-service"
+  },
+  {
+    "id": 2909536,
+    "slug": "ruki-kitchen-assembler-himki-service"
+  },
+  {
+    "id": 2912316,
+    "slug": "ruki-kitchen-assembler-taldom-service"
+  },
+  {
+    "id": 2912976,
+    "slug": "ruki-kitchen-assembler-dolgoprudnyy-service"
+  },
+  {
+    "id": 2914036,
+    "slug": "ruki-kitchen-assembler-korolev-service"
+  },
+  {
+    "id": 2914516,
+    "slug": "ruki-kitchen-assembler-ivanteevka-service"
+  },
+  {
+    "id": 2914996,
+    "slug": "ruki-kitchen-assembler-peresvet-service"
+  },
+  {
+    "id": 2915586,
+    "slug": "ruki-kitchen-assembler-noginsk-service"
+  },
+  {
+    "id": 2916426,
+    "slug": "ruki-kitchen-assembler-losino-petrovskiy-service"
+  },
+  {
+    "id": 2917386,
+    "slug": "ruki-kitchen-assembler-zhukovskiy-service"
+  },
+  {
+    "id": 2918416,
+    "slug": "ruki-kitchen-assembler-voskresensk-service"
+  },
+  {
+    "id": 2921516,
+    "slug": "ruki-kitchen-assembler-drezna-service"
+  },
+  {
+    "id": 2923136,
+    "slug": "ruki-kitchen-assembler-chernogolovka-service"
+  },
+  {
+    "id": 2926786,
+    "slug": "ruki-kitchen-assembler-chehov-service"
+  },
+  {
+    "id": 2927086,
+    "slug": "ruki-kitchen-assembler-krasnoznamensk-service"
+  },
+  {
+    "id": 2928596,
+    "slug": "ruki-kitchen-assembler-mozhaysk-service"
+  },
+  {
+    "id": 2929906,
+    "slug": "ruki-kitchen-assembler-zaraysk-service"
+  },
+  {
+    "id": 2929996,
+    "slug": "ruki-kitchen-assembler-krasnoarmeysk-service"
+  },
+  {
+    "id": 2930016,
+    "slug": "ruki-kitchen-assembler-egorevsk-service"
+  },
+  {
+    "id": 2937716,
+    "slug": "ruki-kitchen-assembler-volokolamsk-service"
+  },
+  {
+    "id": 2937766,
+    "slug": "ruki-kitchen-assembler-kolomna-service"
+  },
+  {
+    "id": 2938246,
+    "slug": "ruki-kitchen-assembler-yahroma-service"
+  },
+  {
+    "id": 2938906,
+    "slug": "ruki-kitchen-assembler-lyubertsy-service"
+  },
+  {
+    "id": 2939096,
+    "slug": "ruki-kitchen-assembler-ruza-service"
+  },
+  {
+    "id": 2939646,
+    "slug": "ruki-kitchen-assembler-aprelevka-service"
+  },
+  {
+    "id": 2942826,
+    "slug": "ruki-kitchen-assembler-ramenskoe-service"
+  },
+  {
+    "id": 2949766,
+    "slug": "ruki-kitchen-assembler-elektrougli-service"
+  },
+  {
+    "id": 2951216,
+    "slug": "ruki-kitchen-assembler-hotkovo-service"
+  },
+  {
+    "id": 2951426,
+    "slug": "ruki-kitchen-assembler-kurovskoe-service"
+  },
+  {
+    "id": 2951676,
+    "slug": "ruki-kitchen-assembler-krasnozavodsk-service"
+  },
+  {
+    "id": 2953286,
+    "slug": "ruki-kitchen-assembler-lytkarino-service"
+  },
+  {
+    "id": 2955546,
+    "slug": "ruki-kitchen-assembler-pushkino-service"
+  },
+  {
+    "id": 2955616,
+    "slug": "ruki-kitchen-assembler-mytischi-service"
+  },
+  {
+    "id": 2956456,
+    "slug": "ruki-kitchen-assembler-serpuhov-service"
+  },
+  {
+    "id": 2956946,
+    "slug": "ruki-kitchen-assembler-vidnoe-service"
+  },
+  {
+    "id": 2957186,
+    "slug": "ruki-kitchen-assembler-odintsovo-service"
+  },
+  {
+    "id": 2958156,
+    "slug": "ruki-kitchen-assembler-naro-fominsk-service"
+  },
+  {
+    "id": 2959186,
+    "slug": "ruki-kitchen-assembler-istra-service"
+  },
+  {
+    "id": 2959596,
+    "slug": "ruki-kitchen-assembler-elektrogorsk-service"
+  },
+  {
+    "id": 2960356,
+    "slug": "ruki-kitchen-assembler-vereya-service"
+  },
+  {
+    "id": 2960606,
+    "slug": "ruki-kitchen-assembler-puschino-service"
+  },
+  {
+    "id": 2964316,
+    "slug": "ruki-kitchen-assembler-dzerzhinskiy-service"
+  },
+  {
+    "id": 2965106,
+    "slug": "ruki-kitchen-assembler-solnechnogorsk-service"
+  },
+  {
+    "id": 2966126,
+    "slug": "ruki-kitchen-assembler-kashira-service"
+  },
+  {
+    "id": 2966746,
+    "slug": "ruki-kitchen-assembler-protvino-service"
+  },
+  {
+    "id": 2967666,
+    "slug": "ruki-kitchen-assembler-ozery-service"
+  },
+  {
+    "id": 2972106,
+    "slug": "ruki-kitchen-assembler-dmitrov-service"
+  },
+  {
+    "id": 2973256,
+    "slug": "ruki-kitchen-assembler-kotelniki-service"
+  },
+  {
+    "id": 2974246,
+    "slug": "ruki-kitchen-assembler-vysokovsk-service"
+  },
+  {
+    "id": 2974836,
+    "slug": "ruki-kitchen-assembler-fryazino-service"
+  },
+  {
+    "id": 2975176,
+    "slug": "ruki-kitchen-assembler-elektrostal-service"
+  },
+  {
+    "id": 2979136,
+    "slug": "ruki-kitchen-assembler-golitsyno-service"
+  },
+  {
+    "id": 2981786,
+    "slug": "ruki-kitchen-assembler-kubinka-service"
+  },
+  {
+    "id": 2982096,
+    "slug": "ruki-kitchen-assembler-dubna-service"
+  },
+  {
+    "id": 2982366,
+    "slug": "ruki-kitchen-assembler-sergiev-posad-service"
+  },
+  {
+    "id": 2982856,
+    "slug": "ruki-kitchen-assembler-pavlovskiy-posad-service"
+  },
+  {
+    "id": 2989966,
+    "slug": "ruki-kitchen-assembler-zvenigorod-service"
+  },
+  {
+    "id": 2990206,
+    "slug": "ruki-kitchen-assembler-balashiha-service"
+  },
+  {
+    "id": 2990396,
+    "slug": "ruki-kitchen-assembler-staraya-kupavna-service"
+  },
+  {
+    "id": 2991416,
+    "slug": "ruki-kitchen-assembler-podolsk-service"
+  },
+  {
+    "id": 2991766,
+    "slug": "ruki-kitchen-assembler-roshal-service"
+  },
+  {
+    "id": 2993616,
+    "slug": "ruki-kitchen-assembler-bronnitsy-service"
+  },
+  {
+    "id": 2993626,
+    "slug": "ruki-kitchen-assembler-lobnya-service"
+  },
+  {
+    "id": 2994096,
+    "slug": "ruki-kitchen-assembler-dedovsk-service"
+  },
+  {
+    "id": 2994336,
+    "slug": "ruki-kitchen-assembler-likino-dulevo-service"
+  },
+  {
+    "id": 2995016,
+    "slug": "ruki-kitchen-assembler-stupino-service"
+  },
+  {
+    "id": 2996456,
+    "slug": "ruki-kitchen-assembler-schelkovo-service"
+  },
+  {
+    "id": 2998236,
+    "slug": "ruki-kitchen-assembler-krasnogorsk-service"
+  },
+  {
+    "id": 2998966,
+    "slug": "ruki-kitchen-assembler-reutov-service"
+  },
+  {
+    "id": 3000016,
+    "slug": "domovenok-window-cleaner-moskva-service"
+  },
+  {
+    "id": 3000026,
+    "slug": "domovenok-window-cleaner-sankt-peterburg-service"
+  },
+  {
+    "id": 3000066,
+    "slug": "domovenok-window-cleaner-nizhniy-novgorod-service"
+  },
+  {
+    "id": 3002606,
+    "slug": "domovenok-window-cleaner-shlisselburg-service"
+  },
+  {
+    "id": 3002726,
+    "slug": "domovenok-window-cleaner-beloostrov-service"
+  },
+  {
+    "id": 3003476,
+    "slug": "domovenok-window-cleaner-beloozerskiy-service"
+  },
+  {
+    "id": 3003746,
+    "slug": "domovenok-window-cleaner-tosno-service"
+  },
+  {
+    "id": 3004486,
+    "slug": "domovenok-window-cleaner-nikolskoe-service"
+  },
+  {
+    "id": 3005336,
+    "slug": "domovenok-window-cleaner-klin-service"
+  },
+  {
+    "id": 3005816,
+    "slug": "domovenok-window-cleaner-kingisepp-service"
+  },
+  {
+    "id": 3006656,
+    "slug": "domovenok-window-cleaner-shatura-service"
+  },
+  {
+    "id": 3006766,
+    "slug": "domovenok-window-cleaner-vyborg-service"
+  },
+  {
+    "id": 3007556,
+    "slug": "domovenok-window-cleaner-domodedovo-service"
+  },
+  {
+    "id": 3008236,
+    "slug": "domovenok-window-cleaner-orehovo-zuevo-service"
+  },
+  {
+    "id": 3008976,
+    "slug": "domovenok-window-cleaner-lodeynoe-pole-service"
+  },
+  {
+    "id": 3009306,
+    "slug": "domovenok-window-cleaner-luhovitsy-service"
+  },
+  {
+    "id": 3009536,
+    "slug": "domovenok-window-cleaner-himki-service"
+  },
+  {
+    "id": 3011346,
+    "slug": "domovenok-window-cleaner-kirovsk-service"
+  },
+  {
+    "id": 3011356,
+    "slug": "domovenok-window-cleaner-volosovo-service"
+  },
+  {
+    "id": 3011376,
+    "slug": "domovenok-window-cleaner-kudrovo-service"
+  },
+  {
+    "id": 3011616,
+    "slug": "domovenok-window-cleaner-komarovo-service"
+  },
+  {
+    "id": 3012316,
+    "slug": "domovenok-window-cleaner-taldom-service"
+  },
+  {
+    "id": 3012976,
+    "slug": "domovenok-window-cleaner-dolgoprudnyy-service"
+  },
+  {
+    "id": 3013226,
+    "slug": "domovenok-window-cleaner-lomonosov-service"
+  },
+  {
+    "id": 3014036,
+    "slug": "domovenok-window-cleaner-korolev-service"
+  },
+  {
+    "id": 3014516,
+    "slug": "domovenok-window-cleaner-ivanteevka-service"
+  },
+  {
+    "id": 3014996,
+    "slug": "domovenok-window-cleaner-peresvet-service"
+  },
+  {
+    "id": 3015586,
+    "slug": "domovenok-window-cleaner-noginsk-service"
+  },
+  {
+    "id": 3016426,
+    "slug": "domovenok-window-cleaner-losino-petrovskiy-service"
+  },
+  {
+    "id": 3016926,
+    "slug": "domovenok-window-cleaner-aleksandrovskaya-service"
+  },
+  {
+    "id": 3017386,
+    "slug": "domovenok-window-cleaner-zhukovskiy-service"
+  },
+  {
+    "id": 3018416,
+    "slug": "domovenok-window-cleaner-voskresensk-service"
+  },
+  {
+    "id": 3021516,
+    "slug": "domovenok-window-cleaner-drezna-service"
+  },
+  {
+    "id": 3021646,
+    "slug": "domovenok-window-cleaner-metallostroy-service"
+  },
+  {
+    "id": 3021806,
+    "slug": "domovenok-window-cleaner-ivangorod-service"
+  },
+  {
+    "id": 3023136,
+    "slug": "domovenok-window-cleaner-chernogolovka-service"
+  },
+  {
+    "id": 3024006,
+    "slug": "domovenok-window-cleaner-sosnovyy-bor-service"
+  },
+  {
+    "id": 3024286,
+    "slug": "domovenok-window-cleaner-krasnoe-selo-service"
+  },
+  {
+    "id": 3026226,
+    "slug": "domovenok-window-cleaner-primorsk-service"
+  },
+  {
+    "id": 3026786,
+    "slug": "domovenok-window-cleaner-chehov-service"
+  },
+  {
+    "id": 3027086,
+    "slug": "domovenok-window-cleaner-krasnoznamensk-service"
+  },
+  {
+    "id": 3027646,
+    "slug": "domovenok-window-cleaner-petro-slavyanka-service"
+  },
+  {
+    "id": 3027856,
+    "slug": "domovenok-window-cleaner-serovo-service"
+  },
+  {
+    "id": 3028596,
+    "slug": "domovenok-window-cleaner-mozhaysk-service"
+  },
+  {
+    "id": 3029826,
+    "slug": "domovenok-window-cleaner-zelenogorsk-service"
+  },
+  {
+    "id": 3029906,
+    "slug": "domovenok-window-cleaner-zaraysk-service"
+  },
+  {
+    "id": 3029996,
+    "slug": "domovenok-window-cleaner-krasnoarmeysk-service"
+  },
+  {
+    "id": 3030016,
+    "slug": "domovenok-window-cleaner-egorevsk-service"
+  },
+  {
+    "id": 3030426,
+    "slug": "domovenok-window-cleaner-novosele-service"
+  },
+  {
+    "id": 3030776,
+    "slug": "domovenok-window-cleaner-ust-izhora-service"
+  },
+  {
+    "id": 3031286,
+    "slug": "domovenok-window-cleaner-strelna-service"
+  },
+  {
+    "id": 3036736,
+    "slug": "domovenok-window-cleaner-petergof-service"
+  },
+  {
+    "id": 3037716,
+    "slug": "domovenok-window-cleaner-volokolamsk-service"
+  },
+  {
+    "id": 3037766,
+    "slug": "domovenok-window-cleaner-kolomna-service"
+  },
+  {
+    "id": 3038246,
+    "slug": "domovenok-window-cleaner-yahroma-service"
+  },
+  {
+    "id": 3038256,
+    "slug": "domovenok-window-cleaner-koltushi-service"
+  },
+  {
+    "id": 3038906,
+    "slug": "domovenok-window-cleaner-lyubertsy-service"
+  },
+  {
+    "id": 3039096,
+    "slug": "domovenok-window-cleaner-ruza-service"
+  },
+  {
+    "id": 3039326,
+    "slug": "domovenok-window-cleaner-syasstroy-service"
+  },
+  {
+    "id": 3039646,
+    "slug": "domovenok-window-cleaner-aprelevka-service"
+  },
+  {
+    "id": 3041776,
+    "slug": "domovenok-window-cleaner-vsevolozhsk-service"
+  },
+  {
+    "id": 3042826,
+    "slug": "domovenok-window-cleaner-ramenskoe-service"
+  },
+  {
+    "id": 3047866,
+    "slug": "domovenok-window-cleaner-levashovo-service"
+  },
+  {
+    "id": 3049376,
+    "slug": "domovenok-window-cleaner-podporozhe-service"
+  },
+  {
+    "id": 3049766,
+    "slug": "domovenok-window-cleaner-elektrougli-service"
+  },
+  {
+    "id": 3051216,
+    "slug": "domovenok-window-cleaner-hotkovo-service"
+  },
+  {
+    "id": 3051426,
+    "slug": "domovenok-window-cleaner-kurovskoe-service"
+  },
+  {
+    "id": 3051676,
+    "slug": "domovenok-window-cleaner-krasnozavodsk-service"
+  },
+  {
+    "id": 3053046,
+    "slug": "domovenok-window-cleaner-vysotsk-service"
+  },
+  {
+    "id": 3053286,
+    "slug": "domovenok-window-cleaner-lytkarino-service"
+  },
+  {
+    "id": 3055356,
+    "slug": "domovenok-window-cleaner-kommunar-service"
+  },
+  {
+    "id": 3055366,
+    "slug": "domovenok-window-cleaner-boksitogorsk-service"
+  },
+  {
+    "id": 3055546,
+    "slug": "domovenok-window-cleaner-pushkino-service"
+  },
+  {
+    "id": 3055616,
+    "slug": "domovenok-window-cleaner-mytischi-service"
+  },
+  {
+    "id": 3056456,
+    "slug": "domovenok-window-cleaner-serpuhov-service"
+  },
+  {
+    "id": 3056946,
+    "slug": "domovenok-window-cleaner-vidnoe-service"
+  },
+  {
+    "id": 3057186,
+    "slug": "domovenok-window-cleaner-odintsovo-service"
+  },
+  {
+    "id": 3057296,
+    "slug": "domovenok-window-cleaner-pavlovsk-service"
+  },
+  {
+    "id": 3058156,
+    "slug": "domovenok-window-cleaner-naro-fominsk-service"
+  },
+  {
+    "id": 3058236,
+    "slug": "domovenok-window-cleaner-tyarlevo-service"
+  },
+  {
+    "id": 3059186,
+    "slug": "domovenok-window-cleaner-istra-service"
+  },
+  {
+    "id": 3059596,
+    "slug": "domovenok-window-cleaner-elektrogorsk-service"
+  },
+  {
+    "id": 3060356,
+    "slug": "domovenok-window-cleaner-vereya-service"
+  },
+  {
+    "id": 3060536,
+    "slug": "domovenok-window-cleaner-slantsy-service"
+  },
+  {
+    "id": 3060606,
+    "slug": "domovenok-window-cleaner-puschino-service"
+  },
+  {
+    "id": 3062746,
+    "slug": "domovenok-window-cleaner-sestroretsk-service"
+  },
+  {
+    "id": 3064316,
+    "slug": "domovenok-window-cleaner-dzerzhinskiy-service"
+  },
+  {
+    "id": 3065106,
+    "slug": "domovenok-window-cleaner-solnechnogorsk-service"
+  },
+  {
+    "id": 3066126,
+    "slug": "domovenok-window-cleaner-kashira-service"
+  },
+  {
+    "id": 3066626,
+    "slug": "domovenok-window-cleaner-ushkovo-service"
+  },
+  {
+    "id": 3066746,
+    "slug": "domovenok-window-cleaner-protvino-service"
+  },
+  {
+    "id": 3067076,
+    "slug": "domovenok-window-cleaner-molodezhnoe-service"
+  },
+  {
+    "id": 3067136,
+    "slug": "domovenok-window-cleaner-solnechnoe-service"
+  },
+  {
+    "id": 3067666,
+    "slug": "domovenok-window-cleaner-ozery-service"
+  },
+  {
+    "id": 3068086,
+    "slug": "domovenok-window-cleaner-sapernyy-service"
+  },
+  {
+    "id": 3072106,
+    "slug": "domovenok-window-cleaner-dmitrov-service"
+  },
+  {
+    "id": 3073256,
+    "slug": "domovenok-window-cleaner-kotelniki-service"
+  },
+  {
+    "id": 3074166,
+    "slug": "domovenok-window-cleaner-shushary-service"
+  },
+  {
+    "id": 3074246,
+    "slug": "domovenok-window-cleaner-vysokovsk-service"
+  },
+  {
+    "id": 3074456,
+    "slug": "domovenok-window-cleaner-tihvin-service"
+  },
+  {
+    "id": 3074836,
+    "slug": "domovenok-window-cleaner-fryazino-service"
+  },
+  {
+    "id": 3075176,
+    "slug": "domovenok-window-cleaner-elektrostal-service"
+  },
+  {
+    "id": 3075386,
+    "slug": "domovenok-window-cleaner-sertolovo-service"
+  },
+  {
+    "id": 3079136,
+    "slug": "domovenok-window-cleaner-golitsyno-service"
+  },
+  {
+    "id": 3080236,
+    "slug": "domovenok-window-cleaner-volhov-service"
+  },
+  {
+    "id": 3081786,
+    "slug": "domovenok-window-cleaner-kubinka-service"
+  },
+  {
+    "id": 3082096,
+    "slug": "domovenok-window-cleaner-dubna-service"
+  },
+  {
+    "id": 3082366,
+    "slug": "domovenok-window-cleaner-sergiev-posad-service"
+  },
+  {
+    "id": 3082856,
+    "slug": "domovenok-window-cleaner-pavlovskiy-posad-service"
+  },
+  {
+    "id": 3083216,
+    "slug": "domovenok-window-cleaner-telmana-service"
+  },
+  {
+    "id": 3083906,
+    "slug": "domovenok-window-cleaner-smolyachkovo-service"
+  },
+  {
+    "id": 3084066,
+    "slug": "domovenok-window-cleaner-luga-service"
+  },
+  {
+    "id": 3085526,
+    "slug": "domovenok-window-cleaner-svetogorsk-service"
+  },
+  {
+    "id": 3086016,
+    "slug": "domovenok-window-cleaner-pushkin-service"
+  },
+  {
+    "id": 3086236,
+    "slug": "domovenok-window-cleaner-kronshtadt-service"
+  },
+  {
+    "id": 3087016,
+    "slug": "domovenok-window-cleaner-lisiy-nos-service"
+  },
+  {
+    "id": 3087146,
+    "slug": "domovenok-window-cleaner-pikalevo-service"
+  },
+  {
+    "id": 3087396,
+    "slug": "domovenok-window-cleaner-pesochnyy-service"
+  },
+  {
+    "id": 3087986,
+    "slug": "domovenok-window-cleaner-gatchina-service"
+  },
+  {
+    "id": 3088296,
+    "slug": "domovenok-window-cleaner-pontonnyy-service"
+  },
+  {
+    "id": 3089806,
+    "slug": "domovenok-window-cleaner-pargolovo-service"
+  },
+  {
+    "id": 3089966,
+    "slug": "domovenok-window-cleaner-zvenigorod-service"
+  },
+  {
+    "id": 3090206,
+    "slug": "domovenok-window-cleaner-balashiha-service"
+  },
+  {
+    "id": 3090246,
+    "slug": "domovenok-window-cleaner-repino-service"
+  },
+  {
+    "id": 3090326,
+    "slug": "domovenok-window-cleaner-bugry-service"
+  },
+  {
+    "id": 3090396,
+    "slug": "domovenok-window-cleaner-staraya-kupavna-service"
+  },
+  {
+    "id": 3091416,
+    "slug": "domovenok-window-cleaner-podolsk-service"
+  },
+  {
+    "id": 3091676,
+    "slug": "domovenok-window-cleaner-otradnoe-service"
+  },
+  {
+    "id": 3091766,
+    "slug": "domovenok-window-cleaner-roshal-service"
+  },
+  {
+    "id": 3092146,
+    "slug": "domovenok-window-cleaner-priozersk-service"
+  },
+  {
+    "id": 3092316,
+    "slug": "domovenok-window-cleaner-murino-service"
+  },
+  {
+    "id": 3093616,
+    "slug": "domovenok-window-cleaner-bronnitsy-service"
+  },
+  {
+    "id": 3093626,
+    "slug": "domovenok-window-cleaner-lobnya-service"
+  },
+  {
+    "id": 3094096,
+    "slug": "domovenok-window-cleaner-dedovsk-service"
+  },
+  {
+    "id": 3094336,
+    "slug": "domovenok-window-cleaner-likino-dulevo-service"
+  },
+  {
+    "id": 3095016,
+    "slug": "domovenok-window-cleaner-stupino-service"
+  },
+  {
+    "id": 3096456,
+    "slug": "domovenok-window-cleaner-schelkovo-service"
+  },
+  {
+    "id": 3096786,
+    "slug": "domovenok-window-cleaner-kamennogorsk-service"
+  },
+  {
+    "id": 3097306,
+    "slug": "domovenok-window-cleaner-novaya-ladoga-service"
+  },
+  {
+    "id": 3098236,
+    "slug": "domovenok-window-cleaner-krasnogorsk-service"
+  },
+  {
+    "id": 3098306,
+    "slug": "domovenok-window-cleaner-lyuban-service"
+  },
+  {
+    "id": 3098966,
+    "slug": "domovenok-window-cleaner-reutov-service"
+  },
+  {
+    "id": 3099676,
+    "slug": "domovenok-window-cleaner-kolpino-service"
+  },
+  {
+    "id": 3099746,
+    "slug": "domovenok-window-cleaner-kirishi-service"
   }
 ]

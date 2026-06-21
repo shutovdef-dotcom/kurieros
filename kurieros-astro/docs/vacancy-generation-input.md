@@ -55,6 +55,8 @@ vacancy:
   incomeCalculator:
     mode: "hourly"
   howToTemplate: "courier"
+  geoExpansion:
+    capitalRegions: "auto" # auto | closed_source_geo | owner_override
   extraTags:
     - "food_delivery"
     - "flexible"
@@ -73,6 +75,7 @@ vacancy:
 | `incomeCalculator.mode` | желательно | `hourly`, `estimated_hourly`, `monthly_derived_hourly`, `meeting`, `monthly`, `hidden` |
 | `incomeCalculator.monthlyHours` | нет | Для `monthly_derived_hourly`; если не указано, используется 176 часов |
 | `howToTemplate` | желательно | `courier`, `bank_representative`, `call_center`, `office_employee`, `remote_operator`, `service_worker`. Для обычной курьерской вакансии можно опустить: дефолт `courier`. |
+| `geoExpansion.capitalRegions` | желательно | `auto`, если при наличии `Москва` + `Санкт-Петербург` нужно автоматически создать отдельные offers для Москвы/МО и внутренних локаций СПб через `expandCitiesForCapitalRegions()`. `closed_source_geo`, если источник даёт закрытый список городов. `owner_override`, если владелец сайта явно сказал не расширять. |
 | `extraTags` | нет | Дополнительные технические теги |
 
 `howToTemplate` выбирает блок “как устроиться” и одноимённый HowTo JSON-LD.
@@ -215,6 +218,15 @@ content:
 Если города ещё нет в `src/data/cities-dataset.ts`, его нужно добавить в
 городские справочники вместе с вакансией или явно отметить как блокер перед
 публикацией.
+
+Pre-publish проверка для `geoExpansion.capitalRegions: "auto"`:
+
+- в исходнике используется `expandCitiesForCapitalRegions()`, а не ручная
+  копия списка;
+- сгенерированные вакансии содержат минимум `Химки`, `Одинцово`,
+  `Колпино`, `Пушкин`, `Шушары`;
+- если расширение не сделано, в YAML/отчёте обязательно стоит
+  `closed_source_geo` или `owner_override` с причиной.
 
 ### 6.2. Режим калькулятора дохода
 

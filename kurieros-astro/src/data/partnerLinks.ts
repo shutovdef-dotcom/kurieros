@@ -61,11 +61,27 @@ export const SAMOKAT_APPLY =
 export const VOXYS_LOGO = '/logos/voxys.png';
 export const VOXYS_APPLY = 'https://my.saleads.pro/s/pu813/3127?erid=2VtzqwpNari';
 
+// === МТС Банк =======================================================
+// MTS Bank remote call-center operator — CPA via pampadu (oid=1534).
+export const MTS_BANK_LOGO = '/logos/mts-bank.png';
+export const MTS_BANK_APPLY =
+  'https://trk.ppdu.ru/click?uid=119136&oid=1534&erid=2SDnjdhc8em';
+
 // === Qlean ===========================================================
 // Qlean cleaner / service-worker offer — CPA via leads.su.
 export const QLEAN_LOGO = '/logos/qlean.svg';
 export const QLEAN_APPLY =
   'https://pxl.leads.su/click/adf39bd0196f02a416ba6dd3ff62aa71?erid=LjN8KA4D1';
+
+// === Сервис «Руки» ==================================================
+// Repair/service-worker offers — CPA via Saleads.
+export const RUKI_LOGO = '/logos/ruki.png';
+export const RUKI_APPLY = 'https://my.saleads.pro/s/1fbdx?erid=2Vtzqv6rp1j';
+
+// === Домовёнок ======================================================
+// Window-cleaner service-worker offer — CPA via Saleads.
+export const DOMOVENOK_LOGO = '/logos/domovenok.png';
+export const DOMOVENOK_APPLY = 'https://my.saleads.pro/s/u8jcm/5859?erid=2VtzqvsLSU5';
 
 // === Альфа-Банк =====================================================
 export const ALFA_BANK_LOGO = '/logos/alfa-bank.svg';

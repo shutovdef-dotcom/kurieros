@@ -979,6 +979,8 @@ export const CITY_DATASET: readonly CityRecord[] = [
   { name: "Лисий Нос", slug: "lisiy-nos", prep: "в Лисьем Носу", population: 6500 },
   { name: "Александровская", slug: "aleksandrovskaya", prep: "в Александровской", population: 3200 },
   { name: "Тярлево", slug: "tyarlevo", prep: "в Тярлеве", population: 1800 },
+  { name: "Любань", slug: "lyuban", prep: "в Любани", population: 4565 },
+  { name: "Тельмана", slug: "telmana", prep: "в посёлке Тельмана", population: 0 },
 ] as const;
 
 // Cities with population < 5000 or unknown population. Vacancies in these cities are excluded from generation.
@@ -1223,7 +1225,6 @@ export const CITY_BLOCKLIST: readonly string[] = [
   "Ленинградская",
   "Ленинкент",
   "Лучегорск",
-  "Любань",
   "Майма",
   "Манжерок",
   "Маркова",
@@ -1285,7 +1286,6 @@ export const CITY_BLOCKLIST: readonly string[] = [
   "Тамань",
   "Тарбагатай",
   "Тарки",
-  "Тельмана",
   "Тисуль",
   "Трудовое",
   "Тучково",

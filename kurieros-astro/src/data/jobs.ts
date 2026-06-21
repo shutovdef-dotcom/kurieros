@@ -308,6 +308,7 @@ const NON_TOP15_SLOT_COUNT = 9900; // slots 100..9999, distinct from top-15 code
 // collides can shift older cityParts during sorted linear probing.
 const NON_TOP15_CITY_PART_OVERRIDES: Readonly<Record<string, number>> = {
   'verhniy-ufaley': 2783,
+  yahroma: 3824,
   shushary: 7416,
   slavgorod: 2784,
   temnikov: 8700,
@@ -486,7 +487,7 @@ const getCitizenshipLabel = (value: string) => {
  * Formula: `source.id × 100000 + cityPart × 10 + transport`
  *
  * Expected component ranges:
- *   - `source.id`              — hardcoded primary key (1..26 currently),
+ *   - `source.id`              — hardcoded primary key (1..29 currently),
  *                                contributing strides of 100000.
  *   - `cityPart` (top-15)      — 1..15 (CITY_CODES table above),
  *                                producing the 10..150 band when × 10.

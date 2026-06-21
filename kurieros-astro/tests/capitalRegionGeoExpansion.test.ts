@@ -62,5 +62,7 @@ describe('capital-region geo expansion', () => {
     expect(cityPreps.get('Химки')).toBe('в Химках');
     expect(cityPreps.get('Мытищи')).toBe('в Мытищах');
     expect(cityPreps.get('Котельники')).toBe('в Котельниках');
+    expect(cityPreps.get('Любань')).toBe('в Любани');
+    expect(cityPreps.get('Тельмана')).toBe('в посёлке Тельмана');
   });
 });

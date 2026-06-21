@@ -30,6 +30,8 @@ export const COMPANY_HOMEPAGES: Readonly<Record<string, string>> = {
   Самокат: 'https://samokat.ru/',
   Voxys: 'https://www.voxys.ru/',
   Qlean: 'https://qlean.ru/',
+  'Сервис «Руки»': 'https://hands.ru/',
+  Домовёнок: 'https://www.domovenok.ru/',
 };
 
 /**

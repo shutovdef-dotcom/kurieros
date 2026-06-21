@@ -43,6 +43,8 @@ const COMPANY_SLUGS: Record<string, string> = {
   'Пятерочка': 'pyaterochka',
   'СДЭК': 'cdek',
   'Самокат': 'samokat',
+  'Сервис «Руки»': 'servis-ruki',
+  'Домовёнок': 'domovenok',
   'ВТБ': 'vtb',
   'ВкусВилл': 'vkusvill',
   'Ozon': 'ozon',
@@ -52,6 +54,8 @@ const TRANSPORT_LABELS: Record<string, string> = {
   auto: 'На авто',
   bicycle: 'Велосипед / самокат',
   foot: 'Пешком',
+  remote: 'Удалённо',
+  office: 'Офис',
   service: 'Выездные услуги',
 };
 
@@ -64,7 +68,8 @@ export const slugifyCompany = (name: string) =>
 
 const companyTypeLabel = (name: string) => {
   if (/банк/i.test(name)) return 'финтех и банковская доставка';
-  if (/qlean|клин/i.test(name)) return 'клининг и бытовые услуги';
+  if (/руки|hands/i.test(name)) return 'ремонт и бытовые услуги';
+  if (/qlean|домов[её]нок|клин/i.test(name)) return 'клининг и бытовые услуги';
   if (/voxys/i.test(name)) return 'контакт-центр и клиентский сервис';
   if (/яндекс еда|самокат|вкусвилл|купер|пятерочка|магнит/i.test(name)) return 'доставка еды и продуктов';
   if (/ozon|сдэк|яндекс маркет/i.test(name)) return 'логистика и e-commerce';

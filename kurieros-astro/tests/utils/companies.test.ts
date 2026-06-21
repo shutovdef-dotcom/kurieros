@@ -49,6 +49,14 @@ describe('slugifyCompany', () => {
     expect(slugifyCompany('Т-Банк')).toBe('t-bank');
   });
 
+  it('returns the curated slug for Сервис «Руки»', () => {
+    expect(slugifyCompany('Сервис «Руки»')).toBe('servis-ruki');
+  });
+
+  it('returns the curated slug for Домовёнок', () => {
+    expect(slugifyCompany('Домовёнок')).toBe('domovenok');
+  });
+
   it('returns the curated slug for Купер (Сбермаркет)', () => {
     expect(slugifyCompany('Купер (Сбермаркет)')).toBe('kuper-sbermarket');
   });
@@ -141,7 +149,7 @@ describe('getCompaniesFromJobs', () => {
         applyLink: '#',
         location: 'Вся Россия',
         salary: 'по договоренности',
-        tags: ['remote'],
+        tags: [],
         details: {
           payment_freq: '',
           age: '',
@@ -166,6 +174,20 @@ describe('getCompaniesFromJobs', () => {
     expect(companies[0].faqItems[2].answer).toContain('условия зависят от вакансии');
   });
 
+  it('uses remote as a real company transport format', () => {
+    const companies = getCompaniesFromJobs([
+      makeJob({
+        company: 'МТС Банк',
+        companyLogo: '/logos/mts-bank.png',
+        tags: ['remote', '18+', 'emp:official'],
+      }),
+    ]);
+
+    expect(companies[0].primaryTransport).toBe('Удалённо');
+    expect(companies[0].transportModes).toEqual(['Удалённо']);
+    expect(companies[0].faqItems[0].answer).toContain('Основные форматы: Удалённо');
+  });
+
   it('keeps an invalid apply link as-is and does not overwrite the first valid link later', () => {
     const companies = getCompaniesFromJobs([
       makeJob({ applyLink: 'not a url' }),
@@ -180,11 +202,15 @@ describe('getCompaniesFromJobs', () => {
       makeJob({ company: 'Альфа-Банк', companyLogo: '/logos/alfa.svg' }),
       makeJob({ company: 'Ozon', companyLogo: '/logos/ozon.svg' }),
       makeJob({ company: 'Бургер Кинг', companyLogo: '/logos/burger-king.svg' }),
+      makeJob({ company: 'Сервис «Руки»', companyLogo: '/logos/ruki.png', tags: ['service'] }),
+      makeJob({ company: 'Домовёнок', companyLogo: '/logos/domovenok.png', tags: ['service'] }),
     ]);
 
     const bySlug = new Map(companies.map((company) => [company.slug, company]));
     expect(bySlug.get('alfa-bank')?.shortIntro).toContain('финтех и банковская доставка');
     expect(bySlug.get('ozon')?.shortIntro).toContain('логистика и e-commerce');
     expect(bySlug.get('burger-king')?.shortIntro).toContain('ресторанная доставка');
+    expect(bySlug.get('servis-ruki')?.shortIntro).toContain('ремонт и бытовые услуги');
+    expect(bySlug.get('domovenok')?.shortIntro).toContain('клининг и бытовые услуги');
   });
 });

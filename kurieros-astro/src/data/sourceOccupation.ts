@@ -47,9 +47,13 @@ export const SOURCE_OCCUPATION: Readonly<Record<string, string>> = {
   // Call-centre / outbound sales operators
   'tbank-outbound-b2b-operator': '41-9041 Telemarketers',
   'voxys-call-center-operator': '43-4051 Customer Service Representatives',
+  'mts-bank-operator': '43-4051 Customer Service Representatives',
 
   // Cleaning / in-home service workers
   'qlean-cleaner': '37-2012 Maids and Housekeeping Cleaners',
+  'domovenok-window-cleaner': '37-2019 Building Cleaning Workers, All Other',
+  'ruki-door-installer': '47-2031 Carpenters',
+  'ruki-kitchen-assembler': '51-7011 Cabinetmakers and Bench Carpenters',
 
   // Fast food / kitchen
   'burger-king-cook-cashier': '35-3023 Fast Food and Counter Workers',
