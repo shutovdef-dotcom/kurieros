@@ -111,7 +111,7 @@ const buildYandexGoPay = (
 });
 
 const buildContent = (companyName: string): VacancyContent => ({
-  title: `Курьер-партнёр сервиса ${companyName} {cityPrep}`,
+  title: `{transportTitle}-партнёр сервиса ${companyName} {cityPrep}`,
   shortDescription:
     'Доставка заказов через Я.Про рядом с домом, свободный график от 2 часов и прозрачный доход.',
   description:

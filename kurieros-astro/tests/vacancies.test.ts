@@ -287,7 +287,12 @@ describe('vacancySources structural invariants', () => {
     expect(almatyJobs.map((job) => job.transport).sort()).toEqual(['auto', 'bicycle', 'foot']);
 
     const almatyFoot = almatyJobs.find((job) => job.transport === 'foot');
+    const almatyBike = almatyJobs.find((job) => job.transport === 'bicycle');
+    const almatyAuto = almatyJobs.find((job) => job.transport === 'auto');
     expect(almatyFoot?.slug).toBe('yandex-go-courier-kazakhstan-almaty-foot');
+    expect(almatyFoot?.title).toBe('Пеший курьер-партнёр сервиса Еда в Яндекс Go в Алматы');
+    expect(almatyBike?.title).toBe('Велокурьер-партнёр сервиса Еда в Яндекс Go в Алматы');
+    expect(almatyAuto?.title).toBe('Автокурьер-партнёр сервиса Еда в Яндекс Go в Алматы');
     expect(almatyFoot?.salary).toBe('до 595 000 ₸/мес');
     expect(almatyFoot?.details.rate).toContain('1 985 ₸/час');
     expect(almatyFoot?.currency).toBe('KZT');
