@@ -89,6 +89,7 @@ export default defineConfig({
         !page.includes('/designs/') &&
         !page.includes('/owner/') &&
         !page.includes('/admin/') &&
+        !page.includes('/apply/') &&
         !page.includes('/api/grid/') &&
         !page.includes('/api/grid-batch/') &&
         !page.includes('/api/company-vacancies/') &&

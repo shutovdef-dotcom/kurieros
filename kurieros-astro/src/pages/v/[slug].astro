@@ -392,7 +392,7 @@ const quickFactSummary = (() => {
 	}
 	// Disabled-vacancy summary branch removed per C3 — every vacancy
 	// has a real applyLink, so the message is unconditional.
-	parts.push('Откликнуться можно сразу — кнопка ведёт на сайт работодателя.');
+	parts.push('Откликнуться можно сразу — короткая форма откроет анкету работодателя.');
 	return parts.join(' ');
 })();
 
@@ -538,7 +538,7 @@ const pageSchemaGraph = [
 			/>
 
 			<VacancyFactsTable factCards={factCards} />
-			<VacancySubjectVariants variants={job.subjectVariants} />
+			<VacancySubjectVariants variants={job.subjectVariants} jobSlug={job.slug} />
 
 			<div class="vacancy-content-grid">
 				<div class="vacancy-main">

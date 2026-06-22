@@ -82,7 +82,8 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 						inputmode="tel"
 						enterkeyhint="send"
 						placeholder="+7 (___) ___-__-__"
-						pattern="[+\d\s\(\)\-]{10,}"
+						minlength="10"
+						maxlength="32"
 					/>
 				</label>
 				<p class="ozon-lead-privacy">

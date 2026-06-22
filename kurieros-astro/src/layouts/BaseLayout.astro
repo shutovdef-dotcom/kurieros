@@ -186,6 +186,10 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 				</>
 			)}
 
+			<script>
+				import '../scripts/applyContext';
+			</script>
+
 			{isProduction && yandexMetrikaId && (
 				<script is:inline define:vars={{ yandexMetrikaId }}>
 					(function() {

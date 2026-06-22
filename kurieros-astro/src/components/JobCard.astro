@@ -1,6 +1,7 @@
 ---
 import { ozonDataAttrs } from '../utils/ozonAttrs';
 import { getApplyCta } from '../utils/applyCta';
+import { getApplyHref, getApplyPartnerDomain, isExternalApplyLink } from '../utils/applyRoute';
 import { getVacancyDetailPath } from '../utils/vacancyUrl';
 import type { JobCardViewModel } from '../utils/jobCardViewModel';
 import VacancyTKey from './VacancyTKey.astro';
@@ -21,10 +22,9 @@ const isLeadFormApply = typeof job.applyLink === 'string' && job.applyLink.start
 const leadFormType = isLeadFormApply ? job.applyLink.slice('lead-form:'.length) : null;
 const detailHref = getVacancyDetailPath(job);
 
-const applyHref = !isLeadFormApply && job.applyLink && job.applyLink !== '#'
-	? job.applyLink
-	: detailHref;
-const applyExternal = !isLeadFormApply && job.applyLink && job.applyLink !== '#';
+const applyHref = getApplyHref(job, detailHref);
+const applyExternal = !isLeadFormApply && isExternalApplyLink(applyHref);
+const applyPartnerDomain = getApplyPartnerDomain(job);
 
 // Apply CTA — single source of truth in src/utils/applyCta.ts.
 // Drift between the JobCard and detail-page copies of this computation
@@ -160,6 +160,7 @@ const searchText = [
 					data-apply-vacancy-id={job.id}
 					data-apply-vacancy-slug={job.slug}
 					data-apply-source-slug={job.sourceSlug}
+					data-apply-partner-domain={applyPartnerDomain}
 				>{applyLabel}</a>
 			)}
 		</div>

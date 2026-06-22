@@ -1,6 +1,7 @@
 ---
 import VacancyTKey from '../VacancyTKey.astro';
 import { ozonDataAttrs } from '../../utils/ozonAttrs';
+import { getApplyHref, getApplyPartnerDomain } from '../../utils/applyRoute';
 import type { GeneratedJob } from '../../data/vacancyTypes';
 import vacancyShareUrl from '../../scripts/vacancyShare.js?url';
 
@@ -32,6 +33,9 @@ const {
 	applyLabel,
 	employmentTypeText,
 } = Astro.props;
+
+const applyHref = getApplyHref(job);
+const applyPartnerDomain = getApplyPartnerDomain(job);
 ---
 
 <section class="vacancy-header">
@@ -137,9 +141,7 @@ const {
 			</button>
 		) : (
 			<a
-				href={job.applyLink}
-				target="_blank"
-				rel="noopener noreferrer nofollow sponsored"
+				href={applyHref}
 				class="apply-btn-large apply-btn-hero"
 				data-apply-cta
 				data-apply-position="vacancy_hero"
@@ -151,6 +153,7 @@ const {
 				data-apply-vacancy-id={job.id}
 				data-apply-vacancy-slug={job.slug}
 				data-apply-source-slug={job.sourceSlug}
+				data-apply-partner-domain={applyPartnerDomain}
 			>
 				{applyLabel}
 			</a>
@@ -158,7 +161,7 @@ const {
 		{/* Disabled-fallback CTA («Уточнить условия» → /contacts/) removed
 		    per C3 — site is a CPA-referral aggregator, every vacancy
 		    has a real applyLink. */}
-		<p class="apply-note apply-note-hero" data-t="vacancy.apply_note_hero">Переход на анкету работодателя или партнёра</p>
+		<p class="apply-note apply-note-hero" data-t="vacancy.apply_note_hero">Короткая форма, затем анкета работодателя или партнёра</p>
 	</div>
 </section>
 

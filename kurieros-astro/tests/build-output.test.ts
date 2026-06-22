@@ -80,12 +80,13 @@ const readAllSitemaps = (): string =>
     .join('\n');
 
 describe.skipIf(skipIfNoDist)('Build output', () => {
-  it('has expected page count (~10163)', () => {
+  it('has expected page count (~10164)', () => {
     // Reference build 2026-06-22 after removing the legacy non-courier
     // `src/pages/[city]/index.astro` route: 10163 HTML files by this
     // recursive counter. Astro logs 10162 page(s), while this guard also
     // sees the top-level generated verification HTML file.
-    // Band: 10158-10168 (+-5 from reference count).
+    // 2026-06-22: +1 for the single shared `/apply/` route.
+    // Band: 10159-10169 (+-5 from reference count).
     //
     // NOTE FOR CONTRIBUTORS: always re-derive both bounds from an actual build
     // after adding new routes -- do NOT blindly add N to the upper bound.
@@ -95,8 +96,27 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     //   else if(e.isFile()&&e.name.endsWith('.html'))n++;}return n;}
     //   console.log(c('dist'));"
     const count = countHtml(DIST_DIR);
-    expect(count).toBeGreaterThanOrEqual(10158);
-    expect(count).toBeLessThanOrEqual(10168);
+    expect(count).toBeGreaterThanOrEqual(10159);
+    expect(count).toBeLessThanOrEqual(10169);
+  });
+
+  it('keeps the shared apply form non-indexable and out of sitemap fan-out', () => {
+    const applyPage = join(DIST_DIR, 'apply', 'index.html');
+    const applyManifest = join(DIST_DIR, 'api', 'v1', 'apply-jobs.json');
+
+    expect(existsSync(applyPage)).toBe(true);
+    expect(existsSync(applyManifest)).toBe(true);
+    expect(statSync(applyManifest).size).toBeLessThan(3_500_000);
+
+    const html = readFileSync(applyPage, 'utf8');
+    expect(html).toContain('<meta name="robots" content="noindex, nofollow, noarchive">');
+    expect(html).not.toContain('https://trk.ppdu.ru/click');
+    expect(html).not.toContain('https://my.saleads.pro/');
+    expect(html).not.toContain('lead-form:ozon');
+
+    const sitemapXml = readAllSitemaps();
+    expect(sitemapXml).not.toContain('/apply/');
+    expect(existsSync(join(DIST_DIR, 'apply', 'yandex-eda-courier-moskva-auto', 'index.html'))).toBe(false);
   });
 
   it('vacancy fragments use the compact format (post-#129)', () => {

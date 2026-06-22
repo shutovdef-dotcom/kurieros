@@ -41,4 +41,20 @@ describe('GA4 grid funnel wiring', () => {
       expect(source.match(/data-apply-source-slug=\{job\.sourceSlug\}/g) ?? [], path).toHaveLength(expectedCount);
     }
   });
+
+  it('keeps partner_domain available after external CTAs route through /apply/', () => {
+    const module = readProjectFile('src/scripts/analyticsEvents.ts');
+    expect(module).toContain('target.dataset.applyPartnerDomain');
+
+    const filesWithExternalApplyCtas = [
+      'src/components/JobCard.astro',
+      'src/components/vacancy/VacancyHero.astro',
+      'src/components/vacancy/VacancySidebar.astro',
+      'src/components/vacancy/VacancySubjectVariants.astro',
+    ];
+
+    for (const path of filesWithExternalApplyCtas) {
+      expect(readProjectFile(path), path).toContain('data-apply-partner-domain');
+    }
+  });
 });

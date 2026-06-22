@@ -1,11 +1,13 @@
 ---
 import type { VacancySubjectVariant } from '../../data/vacancyTypes';
+import { getApplyPagePath, getApplyPartnerDomain, isExternalApplyLink } from '../../utils/applyRoute';
 
 interface Props {
   variants?: VacancySubjectVariant[];
+  jobSlug: string;
 }
 
-const { variants = [] } = Astro.props;
+const { variants = [], jobSlug } = Astro.props;
 const visibleVariants = variants.filter((variant) => variant.id && variant.title);
 ---
 
@@ -22,14 +24,13 @@ const visibleVariants = variants.filter((variant) => variant.id && variant.title
           {variant.label && <span class="subject-label">{variant.label}</span>}
           <h3>{variant.title}</h3>
           {variant.requirement && <p>{variant.requirement}</p>}
-          {variant.applyLink && (
+          {isExternalApplyLink(variant.applyLink) && (
             <a
               class="subject-apply"
-              href={variant.applyLink}
-              target="_blank"
-              rel="noopener noreferrer nofollow sponsored"
+              href={getApplyPagePath({ slug: `${jobSlug}--${variant.id}` })}
               data-apply-cta
               data-apply-position="subject_variant"
+              data-apply-partner-domain={getApplyPartnerDomain({ applyLink: variant.applyLink })}
             >
               Откликнуться
             </a>

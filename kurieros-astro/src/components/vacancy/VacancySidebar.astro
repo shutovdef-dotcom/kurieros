@@ -1,6 +1,7 @@
 ---
 import VacancyTKey from '../VacancyTKey.astro';
 import { ozonDataAttrs } from '../../utils/ozonAttrs';
+import { getApplyHref, getApplyPartnerDomain } from '../../utils/applyRoute';
 import type { GeneratedJob } from '../../data/vacancyTypes';
 import type { VacancyCalculatorModel } from '../../utils/vacancyPage';
 import { formatMoneyWithCurrency, getCurrencyLabel } from '../../utils/money';
@@ -30,6 +31,8 @@ const hourlyCalculator = calculatorModel.kind === 'hourly' ? calculatorModel : n
 const meetingCalculator = calculatorModel.kind === 'meeting' ? calculatorModel : null;
 const monthlyCalculator = calculatorModel.kind === 'monthly' ? calculatorModel : null;
 const currencyLabel = getCurrencyLabel(job.currency);
+const applyHref = getApplyHref(job);
+const applyPartnerDomain = getApplyPartnerDomain(job);
 ---
 
 <aside class="vacancy-sidebar">
@@ -76,9 +79,7 @@ const currencyLabel = getCurrencyLabel(job.currency);
 		) : (
 			<>
 				<a
-					href={job.applyLink}
-					target="_blank"
-					rel="noopener noreferrer nofollow sponsored"
+					href={applyHref}
 					class="apply-btn-large"
 					data-apply-cta
 					data-apply-position="vacancy_sidebar"
@@ -90,10 +91,11 @@ const currencyLabel = getCurrencyLabel(job.currency);
 					data-apply-vacancy-id={job.id}
 					data-apply-vacancy-slug={job.slug}
 					data-apply-source-slug={job.sourceSlug}
+					data-apply-partner-domain={applyPartnerDomain}
 				>
 					{applyLabel}
 				</a>
-				<p class="apply-note" data-t="vacancy.apply_note">Вы перейдете на сайт прямого работодателя</p>
+				<p class="apply-note" data-t="vacancy.apply_note">Заполните короткую форму — затем откроется сайт работодателя</p>
 			</>
 		)}
 		{/* Disabled-fallback sidebar CTA removed per C3. */}

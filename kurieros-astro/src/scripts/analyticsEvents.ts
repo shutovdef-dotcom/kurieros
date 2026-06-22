@@ -87,7 +87,9 @@ document.addEventListener('click', (event) => {
 
 	try {
 		const href = target.getAttribute('href') || '';
-		if (href && href.startsWith('http')) {
+		if (target.dataset.applyPartnerDomain) {
+			partnerDomain = target.dataset.applyPartnerDomain;
+		} else if (href && href.startsWith('http')) {
 			partnerDomain = new URL(href).hostname;
 		}
 	} catch {
