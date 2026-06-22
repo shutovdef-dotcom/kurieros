@@ -4,6 +4,7 @@ import jobsData from '../data/jobs';
 import { filterJobsByCriteria } from '../utils/jobFilters';
 import { distributeAcrossCities } from '../utils/distributeJobs';
 import { getListingBatchUrl } from '../utils/listingBatches';
+import { toJobCardViewModel } from '../utils/jobCardViewModel';
 import type { GeneratedJob } from '../data/vacancyTypes';
 
 interface Props {
@@ -134,7 +135,7 @@ const vacancyWord = (count: number) => {
 		>
 			{visibleJobs.length > 0 ? (
 				visibleJobs.map((job) => (
-					<JobCard job={job} />
+					<JobCard job={toJobCardViewModel(job)} />
 				))
 			) : (
 				<div class="no-results">

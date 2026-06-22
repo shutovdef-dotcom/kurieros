@@ -88,9 +88,12 @@ export default defineConfig({
       filter: (page) =>
         !page.includes('/designs/') &&
         !page.includes('/owner/') &&
+        !page.includes('/admin/') &&
         !page.includes('/api/grid/') &&
         !page.includes('/api/grid-batch/') &&
         !page.includes('/api/company-vacancies/') &&
+        !page.endsWith('.md') &&
+        !page.match(/\/blog\/$/) &&
         !emptyListingUrls.has(page),
       changefreq: 'daily',
       lastmod: new Date(),

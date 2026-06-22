@@ -4,7 +4,6 @@ import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import VacancyStickyApply from '../../components/VacancyStickyApply.astro';
 import ReviewsBlock from '../../components/ReviewsBlock.astro';
-import PartnerBanner from '../../components/PartnerBanner.astro';
 import VacancyBreadcrumb from '../../components/vacancy/VacancyBreadcrumb.astro';
 import VacancyHero from '../../components/vacancy/VacancyHero.astro';
 import VacancyFactsTable from '../../components/vacancy/VacancyFactsTable.astro';
@@ -16,7 +15,8 @@ import VacancyIncomeScenarios from '../../components/vacancy/VacancyIncomeScenar
 import VacancySimilar from '../../components/vacancy/VacancySimilar.astro';
 import VacancyOtherCities from '../../components/vacancy/VacancyOtherCities.astro';
 import VacancySidebar from '../../components/vacancy/VacancySidebar.astro';
-import jobsData from '../../data/jobs';
+import VacancySubjectVariants from '../../components/vacancy/VacancySubjectVariants.astro';
+import jobsData, { detailJobs } from '../../data/jobs';
 import { vacancySources } from '../../data/vacancies';
 import { slugifyCompany } from '../../utils/companies';
 import { getCityHref } from '../../utils/cities';
@@ -35,10 +35,14 @@ import {
 	buildVacancyHowToSteps,
 	resolveVacancyHowToTemplate,
 } from '../../utils/vacancyHowTo';
+import {
+	buildVacancyFaqSchema,
+	buildVacancyHowToSchema,
+} from '../../utils/vacancyStructuredData';
 import { formatMoneyWithCurrency } from '../../utils/money';
 
 export async function getStaticPaths() {
-	return jobsData.map((job) => ({
+	return detailJobs.map((job) => ({
 		params: { slug: job.slug },
 		props: { job },
 	}));
@@ -405,7 +409,7 @@ const quickFactSummary = (() => {
 // `selectTopN` already eliminated for `similarJobs`. Audit ref v5 M5.
 const SAME_ROLE_OTHER_CITIES_LIMIT = 12;
 const sameRoleOtherCities = selectTopN(
-	jobsData.filter((item) => item.sourceId === job.sourceId && item.slug !== job.slug),
+	detailJobs.filter((item) => item.sourceId === job.sourceId && item.slug !== job.slug),
 	SAME_ROLE_OTHER_CITIES_LIMIT,
 	(item) => parseSalaryValue(item.salary),
 	(a, b) => b - a,
@@ -429,18 +433,11 @@ const pageSchemaGraph = [
 			cssSelector: ['#vacancy-quick-summary-text'],
 		},
 	},
-	{
-		'@type': 'HowTo',
-		name: howToTitle,
+	buildVacancyHowToSchema({
+		title: howToTitle,
 		description: howToDescription,
-		totalTime: 'P1D',
-		step: howToSteps.map((step, index) => ({
-			'@type': 'HowToStep',
-			position: index + 1,
-			name: step.name,
-			text: step.text,
-		})),
-	},
+		steps: howToSteps,
+	}),
 	buildJobPostingSchema({
 		title: job.title,
 		description: job.description,
@@ -502,20 +499,7 @@ const pageSchemaGraph = [
 		// back to 53-3031 (courier default).
 		occupationalCategory: getSourceOccupation(job.sourceSlug),
 	}),
-	{
-		'@type': 'FAQPage',
-		// Source the FAQ schema from the curated knowledge base instead
-		// of the previous boilerplate template, so the structured data
-		// reflects the same answers shown on the page.
-		mainEntity: selectedKbItems.map((item) => ({
-			'@type': 'Question',
-			name: item.question,
-			acceptedAnswer: {
-				'@type': 'Answer',
-				text: item.answer_long || item.answer_short,
-			},
-		})),
-	},
+	buildVacancyFaqSchema(selectedKbItems),
 	buildBreadcrumbSchema(
 		[
 			{ name: 'Главная', url: '/' },
@@ -554,6 +538,7 @@ const pageSchemaGraph = [
 			/>
 
 			<VacancyFactsTable factCards={factCards} />
+			<VacancySubjectVariants variants={job.subjectVariants} />
 
 			<div class="vacancy-content-grid">
 				<div class="vacancy-main">
@@ -598,8 +583,6 @@ const pageSchemaGraph = [
 			</div>
 
 			<ReviewsBlock jobId={job.id} company={job.company} />
-
-			{isMoscowVacancy && <PartnerBanner />}
 		</div>
 		<VacancyStickyApply />
 	</main>

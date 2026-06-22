@@ -6,6 +6,7 @@ import {
 	getListingBatchUrl,
 	getListingBatchStaticPaths,
 } from '../../../../utils/listingBatches';
+import { toJobCardViewModel } from '../../../../utils/jobCardViewModel';
 
 export const prerender = true;
 
@@ -39,5 +40,5 @@ const nextBatchUrl = remainingCount > 0
 	data-overflow-count={remainingCount}
 	data-next-batch-url={nextBatchUrl}
 >
-	{batchJobs.map((job) => <JobCard job={job} />)}
+	{batchJobs.map((job) => <JobCard job={toJobCardViewModel(job)} />)}
 </div>

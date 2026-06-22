@@ -15,9 +15,12 @@ import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, it, expect } from 'vitest';
-import jobs from '../src/data/jobs';
+import jobs, { detailJobs } from '../src/data/jobs';
+import { CITY_DATASET } from '../src/data/cities-dataset';
 import { vacancySources } from '../src/data/vacancies';
 import type { CurrencyCode, TransportMode, VacancyHowToTemplate } from '../src/data/vacancyTypes';
+import { isCityBlocked, normalizeCityKey } from '../src/utils/cities';
+import { getVacancyDetailPath } from '../src/utils/vacancyUrl';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = join(ROOT, '..', 'public');
@@ -39,6 +42,11 @@ const REQUIRED_PARTNER_SLUGS = [
   'ruki-door-installer',
   'ruki-kitchen-assembler',
   'domovenok-window-cleaner',
+  'tetrika-english-teacher',
+  'tetrika-physics-teacher',
+  'tetrika-russian-teacher',
+  'tetrika-math-teacher',
+  'tetrika-teacher',
   'yandex-go-courier-belarus',
   'yandex-go-courier-kazakhstan',
   'yandex-go-courier-kyrgyzstan',
@@ -377,5 +385,83 @@ describe('vacancySources structural invariants', () => {
     expect(nizhny?.details.rate).toContain('мойку окон и балконов');
     expect(nizhny?.details.employment_type).toContain('Самозанятость');
     expect(nizhny?.applyLink).toContain('https://my.saleads.pro/s/u8jcm/5859?');
+  });
+
+  it('generates Tetrika remote tutor offers for every site city', () => {
+    const tetrikaSlugs = [
+      'tetrika-english-teacher',
+      'tetrika-physics-teacher',
+      'tetrika-russian-teacher',
+      'tetrika-math-teacher',
+    ];
+    const sources = vacancySources.filter((source) => tetrikaSlugs.includes(source.slug));
+    const detailSource = vacancySources.find((source) => source.slug === 'tetrika-teacher');
+    const tetrikaJobs = jobs.filter((job) => tetrikaSlugs.includes(job.sourceSlug));
+    const tetrikaDetailJobs = detailJobs.filter((job) => job.sourceSlug === 'tetrika-teacher');
+    const expectedSiteCityKeys = new Set([
+      ...CITY_DATASET.map((city) => city.name),
+      ...jobs
+        .filter((job) => !tetrikaSlugs.includes(job.sourceSlug))
+        .flatMap((job) => job.location.split(',').map((city) => city.trim())),
+    ].filter((city) => !isCityBlocked(city)).map((city) => normalizeCityKey(city)));
+
+    expect(sources.map((source) => source.slug).sort()).toEqual([...tetrikaSlugs].sort());
+    expect(sources.map((source) => source.id).sort((a, b) => a - b)).toEqual([31, 32, 33, 34]);
+    expect(detailSource?.id).toBe(35);
+    expect(detailSource?.visibility).toBe('detail');
+    expect(detailSource?.slug).toBe('tetrika-teacher');
+
+    for (const source of sources) {
+      const sourceCityKeys = new Set(source.offers.map((offer) => normalizeCityKey(offer.city)));
+
+      expect(source.company.name).toBe('Тетрика');
+      expect(source.visibility).toBe('listing');
+      expect(source.detailRoute?.sourceSlug).toBe('tetrika-teacher');
+      expect(source.howToTemplate).toBe('remote_operator');
+      expect(source.incomeCalculator).toEqual({ mode: 'monthly' });
+      expect(source.offers).toHaveLength(expectedSiteCityKeys.size);
+      expect(sourceCityKeys).toEqual(expectedSiteCityKeys);
+      expect(source.offers.every((offer) => offer.transport === 'remote')).toBe(true);
+      expect(source.offers.every((offer) => offer.salaryConfidence === 'partner')).toBe(true);
+      expect(source.offers.every((offer) => (offer.priority ?? 0) < 0)).toBe(true);
+    }
+
+    expect(tetrikaJobs).toHaveLength(expectedSiteCityKeys.size * tetrikaSlugs.length);
+    expect(tetrikaJobs.filter((job) => job.location === 'Москва')).toHaveLength(tetrikaSlugs.length);
+    expect(tetrikaJobs.filter((job) => job.location === 'Санкт-Петербург')).toHaveLength(tetrikaSlugs.length);
+    expect(tetrikaJobs.filter((job) => job.location === 'Новосибирск')).toHaveLength(tetrikaSlugs.length);
+    expect(tetrikaJobs.filter((job) => job.location === 'Алматы')).toHaveLength(tetrikaSlugs.length);
+    expect(tetrikaJobs.filter((job) => job.location === 'Минск')).toHaveLength(tetrikaSlugs.length);
+    expect(tetrikaDetailJobs).toHaveLength(expectedSiteCityKeys.size);
+    expect(tetrikaDetailJobs.filter((job) => job.location === 'Москва')).toHaveLength(1);
+
+    const moscowEnglish = tetrikaJobs.find(
+      (job) => job.sourceSlug === 'tetrika-english-teacher' && job.location === 'Москва',
+    );
+    expect(moscowEnglish?.slug).toBe('tetrika-english-teacher-moskva-remote');
+    expect(moscowEnglish?.title).toBe('Репетитор по английскому языку Тетрики в Москве');
+    expect(moscowEnglish?.salary).toBe('до 100 000 ₽/мес');
+    expect(moscowEnglish?.details.rate).toContain('от 60 000 до 100 000 ₽/мес');
+    expect(moscowEnglish?.details.employment_type).toContain('Самозанятость');
+    expect(moscowEnglish?.details.employment_type).toContain('ИП');
+    expect(moscowEnglish?.details.medical_book).toBe('Не требуется');
+    expect(moscowEnglish?.details.os).toContain('веб-камера');
+    expect(moscowEnglish?.applyLink).toContain('https://trk.ppdu.ru/click?');
+    expect(moscowEnglish?.applyLink).toContain('utm_campaign=tetrika-english-teacher');
+    expect(moscowEnglish?.detailSlug).toBe('tetrika-teacher-moskva-remote');
+    expect(moscowEnglish?.detailAnchor).toBe('subject-english');
+    expect(moscowEnglish ? getVacancyDetailPath(moscowEnglish) : '').toBe(
+      '/v/tetrika-teacher-moskva-remote/#subject-english',
+    );
+
+    const moscowDetail = tetrikaDetailJobs.find((job) => job.location === 'Москва');
+    expect(moscowDetail?.slug).toBe('tetrika-teacher-moskva-remote');
+    expect(moscowDetail?.title).toBe('Репетитор Тетрики в Москве');
+    expect(moscowDetail?.subjectVariants?.map((variant) => variant.id)).toEqual([
+      'subject-english',
+      'subject-physics',
+      'subject-russian',
+      'subject-math',
+    ]);
   });
 });

@@ -5,12 +5,12 @@
 //   - the 4 preselected jobs inlined into the page via a
 //     `<script type="application/json">` tag (server-rendered in
 //     `compare.astro`), and
-//   - the full catalog fetched lazily from `/api/compare-jobs.json`.
+//   - the full catalog fetched lazily from `/api/v1/compare-jobs.json`.
 //
 // `CompareJob` is the single slim-job shape produced by the `mapCompareJob`
 // projection in `src/utils/compareJob.ts` (audit fix M19 — it used to be a
 // hand-synced copy in `compare.astro` frontmatter). That one projection
-// feeds `src/pages/api/compare-jobs.json.ts#GET`, the SSR `CompareGrid.astro`,
+// feeds `src/pages/api/v1/compare-jobs.json.ts#GET`, the SSR `CompareGrid.astro`,
 // and these client modules — all consume the same record. `mapCompareJob`'s
 // return type is annotated `CompareJob`, so any drift from this interface is
 // a compile error.

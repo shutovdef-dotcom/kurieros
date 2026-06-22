@@ -55,6 +55,13 @@ export const SOURCE_OCCUPATION: Readonly<Record<string, string>> = {
   'ruki-door-installer': '47-2031 Carpenters',
   'ruki-kitchen-assembler': '51-7011 Cabinetmakers and Bench Carpenters',
 
+  // Online tutors / teachers
+  'tetrika-english-teacher': '25-3099 Teachers and Instructors, All Other',
+  'tetrika-physics-teacher': '25-3099 Teachers and Instructors, All Other',
+  'tetrika-russian-teacher': '25-3099 Teachers and Instructors, All Other',
+  'tetrika-math-teacher': '25-3099 Teachers and Instructors, All Other',
+  'tetrika-teacher': '25-3099 Teachers and Instructors, All Other',
+
   // Fast food / kitchen
   'burger-king-cook-cashier': '35-3023 Fast Food and Counter Workers',
   'express:factoryKitchen': '35-3023 Fast Food and Counter Workers',

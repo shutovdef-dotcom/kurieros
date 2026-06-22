@@ -4,6 +4,8 @@ import type { CurrencyCode } from '../data/vacancyTypes';
 
 export type JobLike = {
   slug: string;
+  detailSlug?: string;
+  detailAnchor?: string;
   title: string;
   company: string;
   companyLogo: string;

@@ -1,6 +1,7 @@
 ---
 import JobCard from '../JobCard.astro';
 import type { GeneratedJob } from '../../data/vacancyTypes';
+import { toJobCardViewModel } from '../../utils/jobCardViewModel';
 
 interface Props {
 	jobs: GeneratedJob[];
@@ -18,7 +19,7 @@ const { jobs } = Astro.props;
 		</p>
 		<div class="vacancy-similar-grid">
 			{jobs.map((other) => (
-				<JobCard job={other} />
+				<JobCard job={toJobCardViewModel(other)} />
 			))}
 		</div>
 	</section>

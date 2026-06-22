@@ -82,6 +82,66 @@ QA_ROUTES='/podrabotka-kurerom/ /rabota-peshim-kurerom/ /rabota-avtokurerom/ /co
 handoff, если есть horizontal overflow, обрезанный текст, перекрытия,
 пустой экран или сломанный основной flow.
 
+Для быстрой проверки дефолтных маршрутов можно использовать npm-алиас:
+
+```sh
+QA_BASE_URL='http://127.0.0.1:4323' \
+QA_ROUTES='/ /rabota-kurerom-moskva/ /v/yandex-eda-courier-moskva-foot/ /companies/tetrika/' \
+QA_VIEWPORTS='mobile-360:360:740 mobile-390:390:844 desktop-1366:1366:768' \
+npm run qa:visual
+```
+
+## Site-size architecture QA
+
+После изменений, которые влияют на вес сайта, i18n runtime, batch endpoints или
+общие layout-скрипты:
+
+```sh
+npm run build
+npm run test:site-size
+npm run size:dist:check
+```
+
+Ручная проверка в браузере:
+
+1. Открыть `/`, `/rabota-kurerom-moskva/`,
+   `/v/yandex-eda-courier-moskva-foot/`, `/companies/tetrika/`.
+2. В Network проверить, что `/i18n/shell.json`,
+   `/bootstrap/theme-init.js` и `/bootstrap/owner-mute.js` грузятся как
+   отдельные файлы, а не inline-копии в HTML.
+3. На русском языке вакансионные fragments не должны грузиться до смены языка.
+4. После смены языка на карточке/деталке должен грузиться только нужный
+   `/vacancy-translations/<lang>/<sourceSlug>.json`, а не общий мегасловарь.
+5. В Console не должно быть runtime errors, `kurieros:*load-failed` events или
+   warnings от i18n runtime.
+6. Проверить, что кнопка догрузки карточек продолжает получать HTML из
+   `/api/grid-batch/.../`, а смена города получает `/api/grid/<slug>/`.
+
+## Speed comparison
+
+Для сравнения текущего продакшена, локальной версии из `dist/` и модельной
+оценки Timeweb:
+
+```sh
+npm run build
+npm run preview -- --host 127.0.0.1 --port 4323
+npm run perf:compare-hosts
+```
+
+По умолчанию проверяются `/`, `/rabota-kurerom-moskva/`,
+`/v/yandex-eda-courier-moskva-foot/`, `/companies/tetrika/`. Отчёт пишется в
+`output/perf/host-speed-*/report.md` и `report.json`.
+
+Timeweb в этом тесте не измеряется напрямую, пока сайт туда не загружен:
+это прогнозная строка `timeweb-estimate`. Допущения можно менять:
+
+```sh
+TIMEWEB_TTFB_MS=160 \
+TIMEWEB_BANDWIDTH_MBPS=50 \
+TIMEWEB_COMPRESSION_RATIO=0.28 \
+npm run perf:compare-hosts
+```
+
 ## Regression checks for listing changes
 
 Если менялись `JobGrid`, `JobCard`, listing pages, хабы или API fragments:

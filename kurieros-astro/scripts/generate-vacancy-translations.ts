@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { buildJobTranslationsBySource } from '../src/data/jobs';
 import { vacancySources } from '../src/data/vacancies';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../src/data/translations';
+import { buildRuntimeTranslationFragment } from '../src/utils/vacancyTranslationFragments';
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const publicOutputDir = resolve(rootDir, 'public/vacancy-translations');
@@ -70,93 +71,25 @@ if (validationErrors.length > 0) {
 //   <outputDir>/<lang>/<sourceSlug>.json   (one file per source × language)
 // Old combined <lang>.json files are wiped beforehand.
 //
-// Compact format (M1): instead of duplicating identical fields across every
-// entry of a source (typically 35/46 fields are byte-identical for all jobs
-// from the same source × language — company name, requirements, benefits,
-// docs, details_education, etc.), emit them ONCE in `defaults` and let the
-// loader merge them into each entry at runtime:
+// Compact delta format (M2): public fragments carry only fields that are both:
+//   1. runtime-translated vacancy content (shortDescription, description,
+//      req_*, ben_*, doc_*), and
+//   2. different from the Russian DOM fallback already present in the page.
+//
+// Instead of duplicating identical translated fields across every entry of a
+// source, emit them once in `defaults` and let the loader merge them into each
+// entry at runtime:
 //
 //   { "defaults": { "company": "...", "req_0": "...", ... },
 //     "entries":  { "100011": { "title": "...", "salary": "..." }, ... } }
 //
-// Loader reconstructs each entry as `{ ...defaults, ...entries[id] }` so
-// downstream consumers see the same flat dict they always have.
-// Yields ~70-90% raw JSON shrink on large fragments (Phase 2 measured 19,482
-// KB → ~2,400 KB across a 16-fragment Moscow listing).
+// Repeated non-default field values are optionally dictionary-encoded in
+// `dict`: `{ "details": ["..."], "entries": { "1": { "req_0": 0 } } }`.
+// The loader reconstructs the same sparse per-job dictionaries before merging
+// them into `translations[lang].vacancies`.
 
 const translationsBySource = buildJobTranslationsBySource(vacancySources);
-
-interface CompactFragment {
-  defaults: Record<string, string>;
-  entries: Record<string, Record<string, string>>;
-}
-
-/**
- * Compact a `{ jobId: { ...flatEntry } }` map into `{ defaults, entries }`.
- * A field becomes a default when ALL entries have it AND every entry's
- * value is identical. Otherwise it stays in `entries[jobId]`.
- *
- * For small fragments (1-2 entries) the compaction win is negligible but
- * still safe — we just promote every field to `defaults` since there is
- * no variance.
- */
-const compactFragment = (
-  jobs: Record<string, Record<string, string>>,
-): CompactFragment => {
-  const ids = Object.keys(jobs);
-  if (ids.length === 0) {
-    return { defaults: {}, entries: {} };
-  }
-
-  // Collect every field present in any entry, plus per-field {present-in-all,
-  // unique-value} stats in a single pass.
-  const fieldStats = new Map<
-    string,
-    { presenceCount: number; firstValue: string; allEqual: boolean }
-  >();
-  for (const id of ids) {
-    const entry = jobs[id];
-    for (const [key, value] of Object.entries(entry)) {
-      const stat = fieldStats.get(key);
-      if (!stat) {
-        fieldStats.set(key, { presenceCount: 1, firstValue: value, allEqual: true });
-      } else {
-        stat.presenceCount += 1;
-        if (stat.allEqual && stat.firstValue !== value) {
-          stat.allEqual = false;
-        }
-      }
-    }
-  }
-
-  const totalEntries = ids.length;
-  const defaultKeys = new Set<string>();
-  const defaults: Record<string, string> = {};
-  for (const [key, stat] of fieldStats) {
-    if (stat.presenceCount === totalEntries && stat.allEqual) {
-      defaultKeys.add(key);
-      defaults[key] = stat.firstValue;
-    }
-  }
-
-  // Strip default keys from each entry — anything left is genuinely unique
-  // (or absent from some entries, which is the same case from the consumer's
-  // perspective: the merge `{...defaults, ...entries[id]}` still produces
-  // the right shape).
-  const entries: Record<string, Record<string, string>> = {};
-  for (const id of ids) {
-    const original = jobs[id];
-    const stripped: Record<string, string> = {};
-    for (const [key, value] of Object.entries(original)) {
-      if (!defaultKeys.has(key)) {
-        stripped[key] = value;
-      }
-    }
-    entries[id] = stripped;
-  }
-
-  return { defaults, entries };
-};
+const russianBySource = translationsBySource.ru ?? {};
 
 // Wipe output dir and recreate as empty (kills any stale combined
 // <lang>.json or stale fragments from previous runs).
@@ -172,7 +105,10 @@ await Promise.all(
     const bySlug = translationsBySource[language] ?? {};
     await Promise.all(
       Object.entries(bySlug).map(async ([slug, jobs]) => {
-        const compact = compactFragment(jobs as Record<string, Record<string, string>>);
+        const compact = buildRuntimeTranslationFragment(
+          jobs,
+          russianBySource[slug] ?? {},
+        );
         const body = `${JSON.stringify(compact)}\n`;
         await writeFile(resolve(langPublicDir, `${slug}.json`), body, 'utf8');
         fragmentCount += 1;

@@ -4,7 +4,6 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import JobGrid from '../components/JobGrid.astro';
 import JobFilters from '../components/JobFilters.astro';
-import PartnerBanner from '../components/PartnerBanner.astro';
 import CityInsights from '../components/CityInsights.astro';
 import ListingCityFilter from '../components/ListingCityFilter.astro';
 import jobsData from '../data/jobs';
@@ -111,7 +110,6 @@ export async function getStaticPaths() {
 }
 
 const { type, data, title } = Astro.props;
-const isMoscowCityPage = type === 'city' && data.slug === 'moskva';
 // Старый override `searchTerm = 'еженед'` для ezhednevnaya-oplata
 // удалён: теперь Y.Eda+Купер действительно помечены как «Ежедневно»
 // (см. buildPay() в src/data/sources/shared.ts) — мгновенные выплаты
@@ -369,7 +367,6 @@ const pageSchemaGraph = buildPageSchemaGraph({
 		{/* City-insights (stats + rate table + neighbours) is merged into the
 		    hero panel above — Z1.1 full merge, no separate section here. */}
 
-		{isMoscowCityPage && <PartnerBanner />}
 	</main>
 
 	<Footer />

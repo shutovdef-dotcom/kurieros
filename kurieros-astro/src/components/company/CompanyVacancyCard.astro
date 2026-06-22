@@ -1,13 +1,14 @@
 ---
-import type { JobLike } from '../../utils/companies';
+import type { CompanyVacancyCardViewModel } from '../../utils/jobCardViewModel';
+import { getVacancyDetailPath } from '../../utils/vacancyUrl';
 
 interface Props {
-  job: JobLike;
+  job: CompanyVacancyCardViewModel;
 }
 
-const { job } = Astro.props;
-const maybeLabels = (job as unknown as { labels?: string[] }).labels;
-const labels: string[] = Array.isArray(maybeLabels) ? maybeLabels : [];
+const { job } = Astro.props as Props;
+const labels = job.labels;
+const detailHref = getVacancyDetailPath(job);
 ---
 
 <article class="job-card company-vacancy-card">
@@ -15,14 +16,14 @@ const labels: string[] = Array.isArray(maybeLabels) ? maybeLabels : [];
     <span class="job-salary">{job.salary}</span>
     <span class="job-city">{job.location}</span>
   </div>
-  <h3><a href={`/v/${job.slug}/`}>{job.title}</a></h3>
+  <h3><a href={detailHref}>{job.title}</a></h3>
   <p>{job.shortDescription || job.title}</p>
   <div class="chip-row">
     {labels.slice(0, 3).map((label: string) => (
       <span class="chip">{label}</span>
     ))}
   </div>
-  <a class="job-link" href={`/v/${job.slug}/`}>Открыть карточку вакансии</a>
+  <a class="job-link" href={detailHref}>Открыть карточку вакансии</a>
 </article>
 
 <style>

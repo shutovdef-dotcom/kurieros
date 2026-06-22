@@ -12,7 +12,7 @@
 //   - `cache: 'force-cache'` keeps revisits fast (catalog is immutable
 //     within a build — see PR #134 / per-build cache stamp).
 //
-// Endpoint: GET /api/compare-jobs.json — returns CompareJob[].
+// Endpoint: GET /api/v1/compare-jobs.json — returns CompareJob[].
 
 import type { CompareJob } from './types';
 import { setCompareGridColumnClass } from './gridColumns';
@@ -28,7 +28,7 @@ export interface CatalogState {
 /** Public API returned by {@link createCatalogLoader}. */
 export interface CatalogLoader {
   /**
-   * Lazily fetch the full job catalog from `/api/compare-jobs.json`.
+   * Lazily fetch the full job catalog from `/api/v1/compare-jobs.json`.
    * The in-flight promise is cached, so concurrent callers share one
    * request. On success every fetched job is merged into `jobsById`.
    * On failure the rejection is swallowed (logged + banner) and `[]`
@@ -51,12 +51,12 @@ interface CatalogLoaderDeps {
   applyScopedStyles: (root: Element) => void;
 }
 
-const CATALOG_ENDPOINT = '/api/compare-jobs.json';
+const CATALOG_ENDPOINT = '/api/v1/compare-jobs.json';
 
 /**
  * Lightweight runtime shape check for one fetched catalogue element.
  *
- * `/api/compare-jobs.json` is same-origin and build-generated, but the
+ * `/api/v1/compare-jobs.json` is same-origin and build-generated, but the
  * response is still untrusted `unknown` at the boundary. Rather than a
  * blind `as CompareJob[]`, every element is filtered through this guard so
  * a malformed entry is dropped instead of poisoning `jobsById`. Only the
@@ -130,7 +130,7 @@ export function createCatalogLoader(
       })
       .catch((err: unknown): CompareJob[] => {
         const error = err instanceof Error ? err : new Error(String(err));
-        console.error('compare: failed to load /api/compare-jobs.json', error);
+        console.error('compare: failed to load /api/v1/compare-jobs.json', error);
         catalogLoadError = error;
         // Surface a user-visible error if we have nothing to show.
         showCatalogError();

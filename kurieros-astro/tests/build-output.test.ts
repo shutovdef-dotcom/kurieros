@@ -6,15 +6,14 @@
  * with: `npm run build && npm test`.
  *
  * What we lock down:
- *   - Total HTML page count is in the expected band (~8903 across all
- *     langs — ~5790 content pages + ~958 `/api/grid/<slug>/` city-grid
- *     fragment endpoints added by M14 + ~1810 `/api/grid-batch/.../`
- *     listing-card batch endpoints + ~200 `/api/company-vacancies/.../`
- *     company-card batch endpoints).
+ *   - Total HTML page count is in the expected band (~10193 across all
+ *     langs — content pages + `/api/grid/<slug>/` city-grid fragments
+ *     added by M14 + `/api/grid-batch/.../` listing-card batch endpoints
+ *     + `/api/company-vacancies/.../` company-card batch endpoints).
  *   - Vacancy translation fragments use the post-#129 compact shape.
  *   - Detail pages preload their per-source translation fragment.
  *   - Listing pages do NOT preload a fragment (they aggregate many vacancies).
- *   - H13: `/api/city-index.json` exists, carries both fields, and the
+ *   - H13: `/api/v1/city-index.json` exists, carries both fields, and the
  *     homepage no longer inlines the `cityRouteMap` literal.
  *   - M14: `/api/grid/<slug>/` emits a small `#jobs-grid`-only fragment
  *     and the city-switch hot path fetches it instead of the full page.
@@ -71,17 +70,22 @@ const localScriptAssetCode = (html: string): string =>
     .map((file) => readFileSync(file, 'utf8'))
     .join('\n');
 
+const isRuntimeTranslatedVacancyField = (key: string): boolean =>
+  /^(?:shortDescription|description|req_\d+|ben_\d+|doc_\d+)$/.test(key);
+
+const readAllSitemaps = (): string =>
+  readdirSync(DIST_DIR)
+    .filter((file) => /^sitemap-\d+\.xml$/.test(file))
+    .map((file) => readFileSync(join(DIST_DIR, file), 'utf8'))
+    .join('\n');
+
 describe.skipIf(skipIfNoDist)('Build output', () => {
-  it('has expected page count (~8662)', () => {
-    // Reference build 2026-06-21 after adding MTS Bank, Ruki, Domovenok,
-    // capital-region vacancy expansions, and two unblocked Leningrad Oblast
-    // locations used by partner jobs: 8662 HTML files.
-    // ~5790 content pages + ~958 /api/grid/<slug>/ city-grid fragments (M14)
-    // + 1810 /api/grid-batch/<listing>/<page>/ fragments for heavy listings
-    // + company-vacancies fragments for heavy company pages + Qlean/Voxys
-    // service expansion + Yandex Go international routes + SEO-rollout routes
-    // (transport hubs, info guides, /otzyvy/).
-    // Band: 8657-8667 (+-5 from reference count).
+  it('has expected page count (~10163)', () => {
+    // Reference build 2026-06-22 after removing the legacy non-courier
+    // `src/pages/[city]/index.astro` route: 10163 HTML files by this
+    // recursive counter. Astro logs 10162 page(s), while this guard also
+    // sees the top-level generated verification HTML file.
+    // Band: 10158-10168 (+-5 from reference count).
     //
     // NOTE FOR CONTRIBUTORS: always re-derive both bounds from an actual build
     // after adding new routes -- do NOT blindly add N to the upper bound.
@@ -91,8 +95,8 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     //   else if(e.isFile()&&e.name.endsWith('.html'))n++;}return n;}
     //   console.log(c('dist'));"
     const count = countHtml(DIST_DIR);
-    expect(count).toBeGreaterThanOrEqual(8657);
-    expect(count).toBeLessThanOrEqual(8667);
+    expect(count).toBeGreaterThanOrEqual(10158);
+    expect(count).toBeLessThanOrEqual(10168);
   });
 
   it('vacancy fragments use the compact format (post-#129)', () => {
@@ -103,6 +107,37 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     const sample = JSON.parse(readFileSync(fragmentPath, 'utf8'));
     expect(sample).toHaveProperty('defaults');
     expect(sample).toHaveProperty('entries');
+  });
+
+  it('vacancy fragments contain only runtime-translated content deltas', () => {
+    const fragmentPath = join(DIST_DIR, 'vacancy-translations', 'uk', 'yandex-eda-courier.json');
+    if (!existsSync(fragmentPath)) {
+      throw new Error(`expected fragment file missing: ${fragmentPath}`);
+    }
+    const sample = JSON.parse(readFileSync(fragmentPath, 'utf8')) as {
+      defaults?: Record<string, string>;
+      dict?: Record<string, string[]>;
+      entries?: Record<string, Record<string, string | number>>;
+    };
+
+    for (const key of Object.keys(sample.defaults ?? {})) {
+      expect(isRuntimeTranslatedVacancyField(key), `defaults.${key}`).toBe(true);
+    }
+    for (const key of Object.keys(sample.dict ?? {})) {
+      expect(isRuntimeTranslatedVacancyField(key), `dict.${key}`).toBe(true);
+    }
+    for (const [jobId, entry] of Object.entries(sample.entries ?? {})) {
+      for (const key of Object.keys(entry)) {
+        expect(isRuntimeTranslatedVacancyField(key), `${jobId}.${key}`).toBe(true);
+      }
+    }
+
+    const raw = JSON.stringify(sample);
+    expect(raw).not.toContain('page_title');
+    expect(raw).not.toContain('page_description');
+    expect(raw).not.toContain('details_schedule');
+    expect(raw).not.toContain('location');
+    expect(raw).not.toContain('salary');
   });
 
   it('does not emit unused Russian vacancy translation fragments', () => {
@@ -116,6 +151,43 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
 
     expect(existsSync(ruFragmentDir), 'RU fragments are runtime-dead weight').toBe(false);
     expect(existsSync(nonRuFragmentPath), 'non-RU fragments still exist').toBe(true);
+  });
+
+  it('loads shell UI translations from one shared JSON asset', () => {
+    const shellPath = join(DIST_DIR, 'i18n', 'shell.json');
+    if (!existsSync(shellPath)) {
+      throw new Error(`expected shell translation file missing: ${shellPath}`);
+    }
+    const shell = JSON.parse(readFileSync(shellPath, 'utf8')) as {
+      ru?: { nav?: { vacancies?: string } };
+    };
+    expect(Object.keys(shell)).toEqual(['ru']);
+    expect(shell.ru?.nav?.vacancies).toBe('Вакансии');
+    expect(statSync(shellPath).size, 'shell dictionary should stay shared and small').toBeLessThan(50_000);
+
+    const pages = [
+      join(DIST_DIR, 'index.html'),
+      join(DIST_DIR, 'about', 'index.html'),
+      join(DIST_DIR, 'v', 'ozon-courier-moskva-auto', 'index.html'),
+    ];
+
+    for (const page of pages) {
+      if (!existsSync(page)) continue;
+      const html = readFileSync(page, 'utf8');
+      const configBody = html.match(
+        /<script\b[^>]*id="kurieros-i18n-config"[^>]*>([\s\S]*?)<\/script>/i,
+      )?.[1];
+      expect(configBody, `${page} should emit i18n config`).toBeTruthy();
+      expect(configBody!.length, `${page} i18n config should stay tiny`).toBeLessThan(512);
+      const config = JSON.parse(configBody!);
+      expect(config.supportedLanguages).toContain('ru');
+      expect(config.supportedLanguages).toContain('uz');
+      expect(config.shellTranslationsUrl).toBe('/i18n/shell.json');
+      expect(config.shellTranslationsVersion).toMatch(/^\d+$/);
+      expect(config.vacancyTranslationsBase).toBe('/vacancy-translations');
+      expect(config.vacancyTranslationsVersion).toBe(config.shellTranslationsVersion);
+      expect(config.translations).toBeUndefined();
+    }
   });
 
   it('detail pages do NOT preload a vacancy-translations fragment (audit H1)', () => {
@@ -336,18 +408,57 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
       }
     });
 
-    it('does not keep the old body theme bootstrap script in every page', () => {
+    it('uses shared bootstrap assets for theme and owner analytics mute', () => {
       const pages = [
         join(DIST_DIR, 'index.html'),
         join(DIST_DIR, 'about', 'index.html'),
         join(DIST_DIR, 'v', 'ozon-courier-moskva-auto', 'index.html'),
       ];
 
+      const themeInit = join(DIST_DIR, 'bootstrap', 'theme-init.js');
+      const ownerMute = join(DIST_DIR, 'bootstrap', 'owner-mute.js');
+      expect(existsSync(themeInit)).toBe(true);
+      expect(existsSync(ownerMute)).toBe(true);
+      expect(statSync(themeInit).size, 'theme bootstrap should stay tiny').toBeLessThan(2_000);
+      expect(statSync(ownerMute).size, 'owner mute bootstrap should stay tiny').toBeLessThan(4_000);
+      expect(readFileSync(themeInit, 'utf8')).not.toContain('</script>');
+      expect(readFileSync(ownerMute, 'utf8')).not.toContain('</script>');
+
       for (const page of pages) {
         if (!existsSync(page)) continue;
         const html = readFileSync(page, 'utf8');
+        expect(html, page).toContain('<script src="/bootstrap/theme-init.js"></script>');
+        expect(html, page).toContain('<script src="/bootstrap/owner-mute.js"></script>');
         expect(html, page).not.toContain('document.body.dataset.colorMode = initialColorMode');
         expect(html, page).not.toContain('const initialTheme = document.documentElement.dataset.initialTheme');
+        expect(html, page).not.toContain('Safari Private Browsing and restricted WKWebViews');
+        expect(html, page).not.toContain("localStorage.setItem('kurerok-owner-mute'");
+        expect(html, page).not.toContain('window.__kurerokSkipAnalytics = (localStorage.getItem');
+      }
+    });
+  });
+
+  describe('site-size: compact JSON-LD', () => {
+    it('does not pretty-print structured data into every HTML page', () => {
+      const pages = [
+        join(DIST_DIR, 'index.html'),
+        join(DIST_DIR, 'v', 'qlean-cleaner-moskva-service', 'index.html'),
+        join(DIST_DIR, 'companies', 'tetrika', 'index.html'),
+      ];
+
+      for (const page of pages) {
+        if (!existsSync(page)) continue;
+        const html = readFileSync(page, 'utf8');
+        const scripts = Array.from(
+          html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi),
+          (match) => match[1],
+        );
+
+        expect(scripts.length, `${page} should emit JSON-LD`).toBeGreaterThan(0);
+        for (const script of scripts) {
+          expect(script.trim(), page).toMatch(/^\{"@context":"https:\/\/schema\.org"/);
+          expect(script, page).not.toMatch(/\n\s{2,}"/);
+        }
       }
     });
   });
@@ -369,12 +480,39 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     expect(checked, 'at least one fragment file checked').toBeGreaterThan(0);
   });
 
+  it('large company pages do not inline every vacancy in JSON-LD', () => {
+    const page = join(DIST_DIR, 'companies', 'tetrika', 'index.html');
+    if (!existsSync(page)) return;
+
+    const html = readFileSync(page, 'utf8');
+    const jsonLdBytes = Array.from(
+      html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi),
+    ).reduce((sum, match) => sum + match[1].length, 0);
+    const jsonLdBody = html.match(
+      /<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/i,
+    )?.[1];
+    const schema = JSON.parse(jsonLdBody ?? '{}') as {
+      '@graph'?: Array<{
+        '@type'?: string;
+        mainEntity?: { itemListElement?: unknown[] };
+      }>;
+    };
+    const collectionPage = schema['@graph']?.find((node) => node['@type'] === 'CollectionPage');
+    const listItemCount = collectionPage?.mainEntity?.itemListElement?.length ?? 0;
+
+    expect(html.length, 'Tetrika company page should stay batch-loaded').toBeLessThan(260_000);
+    expect(jsonLdBytes, 'company JSON-LD should not serialize all vacancies').toBeLessThan(80_000);
+    expect(listItemCount, 'JSON-LD ItemList should only include the initial batch').toBeLessThanOrEqual(24);
+    expect(html, 'full count remains available as lightweight metadata').toMatch(/"numberOfItems":\s*4032/);
+  });
+
   // H13 — lazy-load 49 KB of city data from a static JSON endpoint
   // instead of inlining it into every render of the homepage.
   describe('H13: city-index lazy fetch', () => {
-    it('emits dist/api/city-index.json with both lookup tables', () => {
-      const cityIndexPath = join(DIST_DIR, 'api', 'city-index.json');
+    it('emits dist/api/v1/city-index.json with both lookup tables', () => {
+      const cityIndexPath = join(DIST_DIR, 'api', 'v1', 'city-index.json');
       expect(existsSync(cityIndexPath), 'city-index.json exists').toBe(true);
+      expect(existsSync(join(DIST_DIR, 'api', 'city-index.json')), 'legacy city-index path').toBe(false);
 
       const raw = readFileSync(cityIndexPath, 'utf8');
       const data = JSON.parse(raw);
@@ -410,7 +548,20 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
       expect(indexHtml).not.toMatch(/const\s+availableCities\s*=\s*\[/);
       expect(indexHtml).not.toMatch(/const\s+cityRouteMap\s*=\s*\{/);
       // And conversely, the lazy-fetch wiring must be present.
-      expect(indexHtml).toContain("fetch('/api/city-index.json'");
+      expect(indexHtml).toContain("fetch('/api/v1/city-index.json'");
+    });
+
+    it('emits the compare catalog on the versioned API path only', () => {
+      const comparePath = join(DIST_DIR, 'api', 'v1', 'compare-jobs.json');
+      expect(existsSync(comparePath), 'versioned compare catalog exists').toBe(true);
+      expect(existsSync(join(DIST_DIR, 'api', 'compare-jobs.json')), 'legacy compare catalog path').toBe(false);
+
+      const data = JSON.parse(readFileSync(comparePath, 'utf8'));
+      expect(Array.isArray(data)).toBe(true);
+      expect(data.length).toBeGreaterThan(5_000);
+      expect(data[0]).toHaveProperty('id');
+      expect(data[0]).toHaveProperty('title');
+      expect(data[0]).toHaveProperty('link');
     });
 
     it('homepage review teaser does not repeat reviewer names', () => {
@@ -627,6 +778,43 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
         expect(group, `robots group missing for ${crawler}`).not.toBe('');
         expect(group, `${crawler} must disallow /api/grid/`).toContain('Disallow: /api/grid/');
         expect(group, `${crawler} must disallow /api/grid-batch/`).toContain('Disallow: /api/grid-batch/');
+        expect(group, `${crawler} must disallow /admin/`).toContain('Disallow: /admin/');
+      }
+    });
+  });
+
+  describe('seo surface cleanup', () => {
+    it('keeps internal and placeholder routes out of the sitemap', () => {
+      const sitemapContent = readAllSitemaps();
+
+      expect(sitemapContent).not.toContain('https://kurerok.ru/admin/board/');
+      expect(sitemapContent).not.toContain('https://kurerok.ru/blog/');
+      expect(sitemapContent).not.toContain('https://kurerok.ru/guide/dohod.md');
+      expect(sitemapContent).not.toContain('https://kurerok.ru/antonovka/');
+      expect(sitemapContent).not.toContain('https://kurerok.ru/aprelevka/');
+    });
+
+    it('marks internal admin and empty blog pages as noindex when emitted', () => {
+      const pages = [
+        join(DIST_DIR, 'admin', 'board', 'index.html'),
+        join(DIST_DIR, 'blog', 'index.html'),
+      ];
+
+      for (const page of pages) {
+        if (!existsSync(page)) continue;
+        const html = readFileSync(page, 'utf8');
+        expect(html, page).toMatch(/<meta\s+name="robots"\s+content="[^"]*noindex/i);
+      }
+    });
+
+    it('does not emit legacy non-courier city pages', () => {
+      const legacyPages = [
+        join(DIST_DIR, 'antonovka', 'index.html'),
+        join(DIST_DIR, 'aprelevka', 'index.html'),
+      ];
+
+      for (const page of legacyPages) {
+        expect(existsSync(page), `${page} should not be generated`).toBe(false);
       }
     });
   });

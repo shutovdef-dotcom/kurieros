@@ -15,7 +15,6 @@
 import JobFilters from './JobFilters.astro';
 import JobGrid from './JobGrid.astro';
 import HubCrossLinks from './HubCrossLinks.astro';
-import PartnerBanner from './PartnerBanner.astro';
 import ListingCityFilter from './ListingCityFilter.astro';
 import type { HubConfig, HubCity } from '../utils/transportHubs';
 import type { FaqItem } from '../utils/cityListingPage';
@@ -151,9 +150,6 @@ const factCards = buildFactCards({
 
 		<!-- Cross-links to other hubs + guides -->
 		<HubCrossLinks current={config.key} />
-
-		<!-- Partner banner -->
-		<PartnerBanner />
 
 	</div>
 </main>

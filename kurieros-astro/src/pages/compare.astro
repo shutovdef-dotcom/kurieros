@@ -26,12 +26,12 @@ import type { CompareData, Feature } from '../scripts/compare/types';
 
 // The slim job → `CompareJob` projection (`mapCompareJob`) and its 3
 // label helpers live in `src/utils/compareJob.ts` — the SAME module the
-// `/api/compare-jobs.json` endpoint imports, so the 4 preselected jobs
+// `/api/v1/compare-jobs.json` endpoint imports, so the 4 preselected jobs
 // rendered here and the full catalogue the client lazy-loads can never
 // drift in shape (audit v3 M19).
 
 // Only render preselected jobs in HTML (was: all ~4.8k → 3.9 MB page).
-// Full job catalog is served from /api/compare-jobs.json and fetched
+// Full job catalog is served from /api/v1/compare-jobs.json and fetched
 // lazily by the client only if user has saved compareList in localStorage.
 // The preselect count is `MAX_COMPARE_IDS` — the compare-list cap defined
 // in src/scripts/compare/compareList.ts (a user can compare at most that
@@ -92,7 +92,7 @@ const pageSchemaGraph = [
 // Server data handed to the bundled `compareInit` module. Serialized into
 // a `<script type="application/json">` tag below and parsed by the module
 // on `DOMContentLoaded`. We only inline the 4 preselected jobs (the full
-// ~4.8k-job catalog is fetched lazily from /api/compare-jobs.json) plus the
+// ~4.8k-job catalog is fetched lazily from /api/v1/compare-jobs.json) plus the
 // feature-row definitions and total count for the empty-state copy.
 const compareData: CompareData = { compareJobs, features, totalCompareJobs };
 ---

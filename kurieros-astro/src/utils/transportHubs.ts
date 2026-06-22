@@ -19,6 +19,7 @@ import type { FaqItem } from './cityListingPage';
 import { filterJobsByCriteria } from './jobFilters';
 import { buildBreadcrumbSchema } from './schema';
 import { cyrillicToLatin } from './transliterate';
+import { getVacancyCanonicalUrl } from './vacancyUrl';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -359,7 +360,7 @@ export function buildHubSchemaGraph(args: HubSchemaGraphArgs): unknown[] {
     '@type': 'ListItem',
     position: index + 1,
     name: job.title,
-    url: new URL(`/v/${job.slug}/`, siteUrl).toString(),
+    url: getVacancyCanonicalUrl(job, siteUrl),
   }));
 
   const itemList = {

@@ -32,7 +32,7 @@ import type { CompareData } from './types';
  * `.compare-grid` element is absent.
  *
  * Wires:
- *   - the lazy catalog loader (`/api/compare-jobs.json`, `force-cache`),
+ *   - the lazy catalog loader (`/api/v1/compare-jobs.json`, `force-cache`),
  *   - the localStorage `compareList` read/write store,
  *   - the grid renderer,
  *   - the city/transport server-side filter mode,

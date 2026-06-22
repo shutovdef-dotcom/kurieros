@@ -70,7 +70,7 @@ export const GET: APIRoute<Props> = ({ props }) => {
 	return new Response(lines.join('\n'), {
 		headers: {
 			'Content-Type': 'text/markdown; charset=utf-8',
-			'X-Robots-Tag': 'index, follow',
+			'X-Robots-Tag': 'noindex, follow',
 		},
 	});
 };

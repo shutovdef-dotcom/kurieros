@@ -1,10 +1,9 @@
 /**
  * Partner / affiliate URL constants.
  *
- * Centralised so partner links (referral apply URLs, externally hosted
- * logos, partner-banner click destinations) are rotatable from one
- * place. Every partner-link consumer in the codebase should pull from
- * this module.
+ * Centralised so partner links (referral apply URLs and externally
+ * hosted logos) are rotatable from one place. Every partner-link
+ * consumer in the codebase should pull from this module.
  *
  * Conventions:
  *   • `*_APPLY` — referral landing URL the user is sent to when
@@ -83,6 +82,12 @@ export const RUKI_APPLY = 'https://my.saleads.pro/s/1fbdx?erid=2Vtzqv6rp1j';
 export const DOMOVENOK_LOGO = '/logos/domovenok.png';
 export const DOMOVENOK_APPLY = 'https://my.saleads.pro/s/u8jcm/5859?erid=2VtzqvsLSU5';
 
+// === Тетрика ========================================================
+// Online tutor offers — CPA via pampadu (oid=1044).
+export const TETRIKA_LOGO = '/logos/tetrika.png';
+export const TETRIKA_APPLY =
+  'https://trk.ppdu.ru/click?uid=119136&oid=1044&erid=2SDnjeLCgoN';
+
 // === Альфа-Банк =====================================================
 export const ALFA_BANK_LOGO = '/logos/alfa-bank.svg';
 export const ALFA_BANK_APPLY =
@@ -105,7 +110,3 @@ export const OZON_REF_LANDING_FRESH =
 // Magic prefix recognised by JobCard.astro / pages/v/[slug].astro to
 // open OzonLeadModal.astro instead of navigating externally.
 export const OZON_LEAD_APPLY = 'lead-form:ozon';
-
-// === PartnerBanner default href =====================================
-export const PARTNER_BANNER_DEFAULT_HREF =
-  'https://trk.ppdu.ru/click/gtLv8Qo4?erid=2SDnjceSYW1';

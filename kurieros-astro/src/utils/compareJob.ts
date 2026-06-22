@@ -3,7 +3,7 @@
 //
 // Two surfaces need this exact projection:
 //   - `src/pages/compare.astro` — SSR-renders the 4 preselected jobs.
-//   - `src/pages/api/compare-jobs.json.ts` — serves the full catalogue
+//   - `src/pages/api/v1/compare-jobs.json.ts` — serves the full catalogue
 //     the client lazy-loads.
 // They previously each carried a byte-identical hand-synced copy of
 // `mapCompareJob` plus the 3 label helpers (audit v3 NEW-2 / M19). A
@@ -18,6 +18,7 @@
 import type { GeneratedJob, TransportProvision } from '../data/vacancyTypes';
 import type { CompareJob } from '../scripts/compare/types';
 import { slugifyCompany } from './companies';
+import { getVacancyDetailPath } from './vacancyUrl';
 
 const TRANSPORT_LABELS: Record<string, string> = {
   auto: 'Авто',
@@ -75,6 +76,6 @@ export const mapCompareJob = (job: GeneratedJob): CompareJob => {
     bonus: job.benefits[0] || 'Условия уточняются при отклике',
     age: job.details.age,
     os: normalizeOsRequirement(job.details.os),
-    link: `/v/${job.slug}/`,
+    link: getVacancyDetailPath(job),
   };
 };

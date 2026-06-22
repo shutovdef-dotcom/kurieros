@@ -5,7 +5,6 @@ import Footer from '../components/Footer.astro';
 import JobGrid from '../components/JobGrid.astro';
 import IncomeCalculator from '../components/IncomeCalculator.astro';
 import ReviewsBlock from '../components/ReviewsBlock.astro';
-import PartnerBanner from '../components/PartnerBanner.astro';
 import HomeHero from '../components/home/HomeHero.astro';
 import HomeFaq from '../components/home/HomeFaq.astro';
 import HomeGeoBanner from '../components/home/HomeGeoBanner.astro';
@@ -23,7 +22,7 @@ const cities = citiesFromJobs;
 const availableCities = sortCityNamesByPopulation(cityNamesFromJobs);
 // `cityRouteMap` used to live here as well and be threaded into the
 // inline `define:vars`. After H13 it's served from
-// `/api/city-index.json` (see `src/pages/api/city-index.json.ts`) and
+// `/api/v1/city-index.json` (see `src/pages/api/v1/city-index.json.ts`) and
 // fetched lazily by the home script — no need to inline ~38 KB into
 // every render of `dist/index.html`.
 const companies = getCompaniesFromJobs(jobsData);
@@ -177,8 +176,6 @@ const pageSchemaGraph = [
 			<ReviewsBlock />
 
 			<HomeFaq items={featuredKbItems} />
-
-			<PartnerBanner />
 		</div>
 		<HomeGeoBanner />
 	</main>
@@ -206,8 +203,8 @@ const pageSchemaGraph = [
 	// `availableCities` (972 strings) and `cityRouteMap` (958 entries) used
 	// to be inlined via `define:vars`, costing ~49 KB raw / ~6 KB gzip in
 	// every render of `dist/index.html`. They're now served as a static
-	// JSON fragment under `/api/city-index.json` (see
-	// `src/pages/api/city-index.json.ts`) and fetched lazily with
+	// JSON fragment under `/api/v1/city-index.json` (see
+	// `src/pages/api/v1/city-index.json.ts`) and fetched lazily with
 	// `force-cache`.
 	//
 	// Strategy B (H13): the fetch is fired immediately on script parse
@@ -222,7 +219,7 @@ const pageSchemaGraph = [
 		let availableCities = [];
 		let cityRouteMap = {};
 
-		const cityIndexReady = fetch('/api/city-index.json', { cache: 'force-cache' })
+		const cityIndexReady = fetch('/api/v1/city-index.json', { cache: 'force-cache' })
 			.then((response) => {
 				if (!response.ok) throw new Error('city-index fetch failed: ' + response.status);
 				return response.json();
@@ -242,7 +239,7 @@ const pageSchemaGraph = [
 				// are no-ops because the lookup tables stay empty. Log it
 				// so the failure is observable — every sibling network
 				// handler logs (matches the house pattern).
-				console.warn('home: failed to load /api/city-index.json', err);
+				console.warn('home: failed to load /api/v1/city-index.json', err);
 			});
 
 		document.addEventListener('DOMContentLoaded', async () => {

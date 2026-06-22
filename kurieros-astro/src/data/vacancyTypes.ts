@@ -48,6 +48,21 @@ export type VacancyHowToTemplate =
   | 'remote_operator'
   | 'service_worker';
 
+export type VacancySurface = 'all' | 'listing' | 'detail';
+
+export type VacancyDetailRoute = {
+  sourceSlug: string;
+  anchor?: string;
+};
+
+export type VacancySubjectVariant = {
+  id: string;
+  title: string;
+  label?: string;
+  requirement?: string;
+  applyLink?: string;
+};
+
 export type MoneyRange = {
   min?: number;
   max?: number;
@@ -123,6 +138,7 @@ export type VacancyOffer = {
   applyLink?: string;
   cityDistricts?: string[];
   priority?: number;
+  subjectVariants?: VacancySubjectVariant[];
   requirementsOverride?: string[] | LocalizedStringList;
   benefitsOverride?: string[] | LocalizedStringList;
   requiredDocumentsOverride?: string[] | LocalizedStringList;
@@ -168,6 +184,18 @@ export type VacancySource = {
     uniform?: string;
     os?: string;
   };
+  /**
+   * Controls where generated jobs from this source appear. Default `all`
+   * means the same source produces both listing cards and detail pages.
+   * `listing` is useful for card variants that point at a shared detail
+   * page; `detail` is useful for that shared canonical page itself.
+   */
+  visibility?: VacancySurface;
+  /**
+   * Optional route override for listing cards that should keep their own
+   * title/analytics/apply link but open a shared canonical detail page.
+   */
+  detailRoute?: VacancyDetailRoute;
   offers: VacancyOffer[];
   incomeCalculator?: IncomeCalculatorConfig;
   /**
@@ -191,6 +219,8 @@ export type GeneratedJob = {
    */
   sourceSlug: string;
   slug: string;
+  detailSlug?: string;
+  detailAnchor?: string;
   title: string;
   company: string;
   companyLogo: string;
@@ -226,6 +256,7 @@ export type GeneratedJob = {
   sourceUrl?: string;
   updatedAt: string;
   cityDistricts?: string[];
+  subjectVariants?: VacancySubjectVariant[];
   priority?: number;
   isHot?: boolean;
   /** Ozon lead-form metadata (only set for Ozon offers via lead-form:ozon). */

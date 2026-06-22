@@ -3,17 +3,13 @@ import '../styles/index.css';
 import '../styles/themes.css';
 import VPNModal from '../components/VPNModal.astro';
 import OzonLeadModal from '../components/OzonLeadModal.astro';
-import { SUPPORTED_LANGUAGES, translations as allTranslations } from '../data/translations';
+import { SUPPORTED_LANGUAGES } from '../data/translations';
 
 const supportedLanguages = SUPPORTED_LANGUAGES;
-// M2: shell-UI dictionary is Russian-only (post PR #131), so the 11 non-RU
-// slots in `allTranslations` were byte-identical clones of `ru`. Inlining
-// all 12 via `define:vars` cost ~147 KB of duplicate JSON literal per HTML
-// page (12 × ~13 KB shell dicts). Ship just the RU slot; the runtime falls
-// back to it for every non-RU lang. Per-language `.vacancies` slots are
-// still created on-demand by `ensureVacancyTranslations` once fragments
-// load, so nothing downstream loses data.
-const translations = { ru: allTranslations.ru };
+// Shell UI text is Russian-only (post PR #131) and the server-rendered HTML
+// already carries those Russian strings as fallbacks. Keep the heavy shell
+// dictionary in one shared JSON asset instead of repeating it in every page.
+const shellTranslationsUrl = '/i18n/shell.json';
 // TRANS-1: per-source fragments live at /vacancy-translations/<lang>/<sourceSlug>.json.
 // Client scans visible cards for `data-vacancy-source-slug` and loads only
 // the fragments it needs (typical detail page: 1 fragment ~80KB-2MB,
@@ -44,8 +40,9 @@ const vacancyTranslationsVersion = (typeof __BUILD_TIMESTAMP__ === 'string'
 	? __BUILD_TIMESTAMP__
 	: (() => { console.error('[BaseLayout] __BUILD_TIMESTAMP__ not injected'); return String(Date.now()); })();
 const i18nConfigJson = JSON.stringify({
-	translations,
 	supportedLanguages,
+	shellTranslationsUrl,
+	shellTranslationsVersion: vacancyTranslationsVersion,
 	vacancyTranslationsBase,
 	vacancyTranslationsVersion,
 }).replace(/</g, '\\u003c');
@@ -103,8 +100,6 @@ const structuredData = JSON.stringify(
 		"@context": "https://schema.org",
 		"@graph": [websiteSchema, ...normalizedSchemaGraph.filter(Boolean)],
 	},
-	null,
-	2,
 ).replace(/</g, '\\u003c');
 
 const isProduction = import.meta.env.PROD;
@@ -146,63 +141,7 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
 
 			<!-- Theme Persistence -->
-			<script is:inline>
-				(function() {
-					// Safari Private Browsing and restricted WKWebViews throw a
-					// SecurityError on `localStorage.getItem`. If that happens we
-					// fall back to the default light theme rather than letting the
-					// IIFE crash (which would leave dataset.initialTheme unset and
-					// produce a flash of unstyled content / wrong color scheme).
-					var savedTheme = null;
-					var savedColorMode = null;
-					try {
-						savedTheme = localStorage.getItem('site-theme');
-						savedColorMode = localStorage.getItem('site-color-mode');
-					} catch (_) { /* localStorage unavailable — use defaults */ }
-
-					var bodyClass = savedTheme && savedTheme !== 'default'
-						? 'theme-' + savedTheme
-						: '';
-					document.documentElement.dataset.initialTheme = bodyClass;
-
-					var hasSavedMode = savedColorMode === 'dark' || savedColorMode === 'light';
-					var systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-					var colorMode = hasSavedMode ? savedColorMode : (systemPrefersDark ? 'dark' : 'light');
-					document.documentElement.dataset.initialColorMode = colorMode;
-					document.documentElement.style.colorScheme = colorMode;
-					// Apply dark-mode class to <html> before first paint to avoid FOUC.
-					document.documentElement.classList.toggle('dark-mode', colorMode === 'dark');
-					// Mirror the class to <body> as soon as it parses. Dark-mode
-					// rules are converged on `:where(html, body).dark-mode .X`
-					// (Wave 21e M7), which matches via EITHER ancestor — so the
-					// <html> class set above already styles every rule before
-					// <body> parses; no rule needs the <body> class to apply.
-					// The <body> mirror is kept anyway so the two ancestors stay
-					// consistent within the anti-FOUC frame and any future
-					// body-scoped logic (Header.astro reads body.dataset, JS that
-					// keys off the <body> class) sees the right state without a
-					// reload. MutationObserver fires synchronously the moment the
-					// parser inserts <body>, so the mirror lands in the same frame.
-					(function syncBodyDarkClass() {
-						var isDark = colorMode === 'dark';
-						function applyBodyTheme() {
-							if (!document.body) return false;
-							document.body.className = bodyClass || '';
-							document.body.classList.toggle('dark-mode', isDark);
-							document.body.dataset.colorMode = colorMode;
-							return true;
-						}
-						if (applyBodyTheme()) {
-							return;
-						}
-						new MutationObserver(function (_records, observer) {
-							if (applyBodyTheme()) {
-								observer.disconnect();
-							}
-						}).observe(document.documentElement, { childList: true });
-					})();
-				})();
-			</script>
+			<script is:inline src="/bootstrap/theme-init.js"></script>
 
 			{/* Owner-mute toggle: prevents GA4 + Метрика from firing on
 			    dev/owner devices. Persistent localStorage flag; активация
@@ -211,23 +150,7 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 			    что надёжнее GA4 internal-traffic фильтров (IP меняется
 			    дома/мобильно/в офисе). Должен идти ПЕРЕД analytics-скриптами. */}
 			{isProduction && (
-				<script is:inline>
-					(function() {
-						try {
-							var qs = window.location.search || '';
-							if (qs.indexOf('owner-mute=1') !== -1) {
-								localStorage.setItem('kurerok-owner-mute', '1');
-								// eslint-disable-next-line no-console
-								console.info('[kurerok] Analytics muted on this device. Use ?owner-unmute=1 to restore.');
-							} else if (qs.indexOf('owner-unmute=1') !== -1) {
-								localStorage.removeItem('kurerok-owner-mute');
-								// eslint-disable-next-line no-console
-								console.info('[kurerok] Analytics restored.');
-							}
-							window.__kurerokSkipAnalytics = (localStorage.getItem('kurerok-owner-mute') === '1');
-						} catch (_) { /* localStorage unavailable — analytics fire as usual */ }
-					})();
-				</script>
+				<script is:inline src="/bootstrap/owner-mute.js"></script>
 			)}
 
 			{isProduction && ga4MeasurementId && (

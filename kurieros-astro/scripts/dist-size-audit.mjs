@@ -17,18 +17,18 @@ const DEFAULT_DIST_DIR = 'dist';
 
 /** @type {SizeBudget} */
 export const DEFAULT_BUDGET = Object.freeze({
-  totalBytes: 1_450_000_000,
+  totalBytes: 1_150_000_000,
   topLevelBytes: {
-    v: 950 * 1024 * 1024,
-    api: 270 * 1024 * 1024,
-    'api/grid-batch': 225 * 1024 * 1024,
-    'vacancy-translations': 65 * 1024 * 1024,
+    v: 780 * 1024 * 1024,
+    api: 220 * 1024 * 1024,
+    'api/grid-batch': 160 * 1024 * 1024,
+    'vacancy-translations': 16 * 1024 * 1024,
   },
   html: {
-    executableInlineScriptBytes: 300 * 1024 * 1024,
-    inlineJsonBytes: 120 * 1024 * 1024,
-    jsonLdBytes: 180 * 1024 * 1024,
-    inlineStyleBytes: 12 * 1024 * 1024,
+    executableInlineScriptBytes: 2 * 1024 * 1024,
+    inlineJsonBytes: 8 * 1024 * 1024,
+    jsonLdBytes: 80 * 1024 * 1024,
+    inlineStyleBytes: 1 * 1024 * 1024,
   },
 });
 

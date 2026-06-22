@@ -3,6 +3,7 @@ Allow: /
 Allow: /yandex-vacancies.xml
 Disallow: /owner/
 Disallow: /designs/
+Disallow: /admin/
 Disallow: /api/grid/
 Disallow: /api/grid-batch/
 Disallow: /api/company-vacancies/
@@ -38,12 +39,14 @@ Disallow: /*?owner-
 
 User-agent: Googlebot
 Allow: /
+Disallow: /admin/
 Disallow: /api/grid/
 Disallow: /api/grid-batch/
 Disallow: /api/company-vacancies/
 Disallow: /*?owner-
 User-agent: GoogleOther
 Allow: /
+Disallow: /admin/
 Disallow: /api/grid/
 Disallow: /api/grid-batch/
 Disallow: /api/company-vacancies/
@@ -54,6 +57,7 @@ Disallow: /*?owner-
 
 User-agent: Yandex
 Allow: /
+Disallow: /admin/
 Disallow: /api/grid/
 Disallow: /api/grid-batch/
 Disallow: /api/company-vacancies/
@@ -61,12 +65,14 @@ Disallow: /*?owner-
 Clean-param: owner-mute&owner-unmute /
 User-agent: YandexBot
 Allow: /
+Disallow: /admin/
 Disallow: /api/grid/
 Disallow: /api/grid-batch/
 Disallow: /api/company-vacancies/
 Disallow: /*?owner-
 User-agent: YandexAdditionalBot
 Allow: /
+Disallow: /admin/
 Disallow: /api/grid/
 Disallow: /api/grid-batch/
 Disallow: /api/company-vacancies/
@@ -74,6 +80,7 @@ Disallow: /*?owner-
 
 User-agent: Bingbot
 Allow: /
+Disallow: /admin/
 Disallow: /api/grid/
 Disallow: /api/grid-batch/
 Disallow: /api/company-vacancies/

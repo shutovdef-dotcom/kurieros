@@ -10,6 +10,7 @@ import {
 	getCityJobsFromMap,
 } from './jobFilters';
 import { HUB_CONFIGS } from './transportHubs';
+import { getVacancyDetailPath } from './vacancyUrl';
 
 export const YANDEX_VACANCY_FEED_PATH = '/yandex-vacancies.xml';
 
@@ -417,7 +418,7 @@ const buildYandexOffer = (
 		{ name: 'График работы', value: getScheduleParam(job.details.schedule) },
 		{ name: 'Тип занятости', value: getEmploymentParam(job) },
 		{ name: 'Зарплата до', value: salaryMax },
-		{ name: 'Сайт работодателя', value: job.applyLink.startsWith('https://') ? job.applyLink : absoluteUrl(`/v/${job.slug}/`, siteUrl) },
+		{ name: 'Сайт работодателя', value: job.applyLink.startsWith('https://') ? job.applyLink : absoluteUrl(getVacancyDetailPath(job), siteUrl) },
 		{ name: 'Размещено кадровым агентством', value: false },
 	];
 
@@ -425,7 +426,7 @@ const buildYandexOffer = (
 		id: offerId,
 		name: job.title,
 		vendor: job.company,
-		url: absoluteUrl(`/v/${job.slug}/`, siteUrl),
+		url: absoluteUrl(getVacancyDetailPath(job), siteUrl),
 		price,
 		currencyId: 'RUR',
 		categoryId: getYandexCategoryId(job),
@@ -471,7 +472,7 @@ export const buildYandexVacancyFeed = ({
 			name: bucket.name,
 			url: bucket.url,
 			offerUrls: bucket.jobs
-				.map((job) => absoluteUrl(`/v/${job.slug}/`, normalizedSiteUrl))
+				.map((job) => absoluteUrl(getVacancyDetailPath(job), normalizedSiteUrl))
 				.filter((url) => offers.some((offer) => offer.url === url)),
 		}))
 		.filter((set) => set.offerUrls.length >= MIN_SET_OFFERS);

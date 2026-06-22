@@ -4,6 +4,7 @@ import {
   getCompanyVacancyBatch,
   getCompanyVacancyBatchStaticPaths,
 } from '../../../../utils/companyVacancyBatches';
+import { toCompanyVacancyCardViewModel } from '../../../../utils/jobCardViewModel';
 
 export const prerender = true;
 
@@ -31,5 +32,7 @@ const {
   data-remaining-count={remainingCount}
   data-next-batch-url={nextBatchUrl}
 >
-  {batchJobs.map((job) => <CompanyVacancyCard job={job} />)}
+  {batchJobs.map((job) => (
+    <CompanyVacancyCard job={toCompanyVacancyCardViewModel(job)} />
+  ))}
 </div>

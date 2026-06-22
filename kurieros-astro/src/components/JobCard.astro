@@ -1,9 +1,16 @@
 ---
 import { ozonDataAttrs } from '../utils/ozonAttrs';
 import { getApplyCta } from '../utils/applyCta';
+import { getVacancyDetailPath } from '../utils/vacancyUrl';
+import type { JobCardViewModel } from '../utils/jobCardViewModel';
 import VacancyTKey from './VacancyTKey.astro';
 
-const { job, isInCompare = false } = Astro.props;
+interface Props {
+	job: JobCardViewModel;
+	isInCompare?: boolean;
+}
+
+const { job, isInCompare = false } = Astro.props as Props;
 
 // `applyLink: 'lead-form:<provider>'` is a magic marker (the constant
 // `OZON_LEAD_APPLY` defined in src/data/partnerLinks.ts, wired onto
@@ -12,10 +19,11 @@ const { job, isInCompare = false } = Astro.props;
 // `data-lead-form-type` and consumed by the matching modal component.
 const isLeadFormApply = typeof job.applyLink === 'string' && job.applyLink.startsWith('lead-form:');
 const leadFormType = isLeadFormApply ? job.applyLink.slice('lead-form:'.length) : null;
+const detailHref = getVacancyDetailPath(job);
 
 const applyHref = !isLeadFormApply && job.applyLink && job.applyLink !== '#'
 	? job.applyLink
-	: `/v/${job.slug}/`;
+	: detailHref;
 const applyExternal = !isLeadFormApply && job.applyLink && job.applyLink !== '#';
 
 // Apply CTA — single source of truth in src/utils/applyCta.ts.
@@ -65,7 +73,7 @@ const searchText = [
 			<div class="job-heading">
 				{/* Use <VacancyTKey> for any new vacancies.* keys; co-emits proper data attribute */}
 				<div>
-					<VacancyTKey jobId={job.id} field="title" fallback={job.title} as="a" class="job-title" href={`/v/${job.slug}/`} />
+					<VacancyTKey jobId={job.id} field="title" fallback={job.title} as="a" class="job-title" href={detailHref} />
 					<VacancyTKey jobId={job.id} field="company" fallback={job.company} as="div" class="company-name" />
 					{job.shortDescription && <VacancyTKey jobId={job.id} field="shortDescription" fallback={job.shortDescription} as="p" class="job-short-desc" />}
 				</div>

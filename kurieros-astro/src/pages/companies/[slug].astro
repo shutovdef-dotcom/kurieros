@@ -17,6 +17,8 @@ import { formatRussianPlural } from '../../utils/format';
 import { formatMoneyPerMonth } from '../../utils/money';
 import { pickFeaturedCompanyReviews } from '../../utils/reviewSamples';
 import { buildBreadcrumbSchema } from '../../utils/schema';
+import { getVacancyCanonicalUrl } from '../../utils/vacancyUrl';
+import { toCompanyVacancyCardViewModel } from '../../utils/jobCardViewModel';
 
 export async function getStaticPaths() {
   return companiesFromJobs.map((company) => ({
@@ -80,6 +82,7 @@ const relatedCompanies = companiesFromJobs
   .slice(0, 4);
 const faqItems = company.faqItems;
 const visibleCompanyJobs = company.jobs.slice(0, COMPANY_VACANCIES_BATCH_SIZE);
+const schemaCompanyJobs = visibleCompanyJobs;
 const remainingCompanyVacancies = Math.max(0, company.jobs.length - visibleCompanyJobs.length);
 const nextCompanyVacanciesBatchUrl = remainingCompanyVacancies > 0
   ? getCompanyVacancyBatchUrl(company.slug, 2)
@@ -145,11 +148,12 @@ const pageSchemaGraph = [
     },
     mainEntity: {
       '@type': 'ItemList',
-      itemListElement: company.jobs.map((job, index) => ({
+      numberOfItems: company.jobs.length,
+      itemListElement: schemaCompanyJobs.map((job, index) => ({
         '@type': 'ListItem',
         position: index + 1,
         name: job.title,
-        url: new URL(`/v/${job.slug}/`, Astro.site).toString(),
+        url: getVacancyCanonicalUrl(job, Astro.site),
       })),
     },
   },
@@ -278,7 +282,9 @@ const pageSchemaGraph = [
           data-remaining-count={remainingCompanyVacancies}
           data-next-batch-url={nextCompanyVacanciesBatchUrl}
         >
-          {visibleCompanyJobs.map((job) => <CompanyVacancyCard job={job} />)}
+          {visibleCompanyJobs.map((job) => (
+            <CompanyVacancyCard job={toCompanyVacancyCardViewModel(job)} />
+          ))}
         </div>
         {remainingCompanyVacancies > 0 && (
           <div class="company-vacancies-more" id="company-vacancies-more">

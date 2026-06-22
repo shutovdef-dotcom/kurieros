@@ -43,10 +43,60 @@ function initI18nRuntime() {
 	const supportedLangs = Array.isArray(i18nConfig.supportedLanguages)
 		? i18nConfig.supportedLanguages
 		: [DEFAULT_LANG];
+	const shellTranslationsUrl = i18nConfig.shellTranslationsUrl || '';
+	const shellTranslationsVersion = i18nConfig.shellTranslationsVersion || '';
 	const vacancyTranslationsBase = i18nConfig.vacancyTranslationsBase || '/vacancy-translations';
 	const vacancyTranslationsVersion = i18nConfig.vacancyTranslationsVersion || '';
 	const safeStorage = createSafeStorage(localStorage);
 	const loadedFragments = new Set();
+	let shellTranslationsPromise = null;
+
+	function hasShellTranslations() {
+		const ru = translations[DEFAULT_LANG];
+		return Boolean(ru && typeof ru === 'object' && Object.keys(ru).length > 0);
+	}
+
+	function mergeShellTranslations(payload) {
+		if (!payload || typeof payload !== 'object') return;
+		const ru = payload[DEFAULT_LANG] && typeof payload[DEFAULT_LANG] === 'object'
+			? payload[DEFAULT_LANG]
+			: payload;
+		if (!ru || typeof ru !== 'object') return;
+		translations[DEFAULT_LANG] = {
+			...(translations[DEFAULT_LANG] || {}),
+			...ru,
+		};
+	}
+
+	async function ensureShellTranslations() {
+		if (hasShellTranslations()) return translations;
+		if (!shellTranslationsUrl) return translations;
+		if (!shellTranslationsPromise) {
+			const separator = shellTranslationsUrl.includes('?') ? '&' : '?';
+			const versionSuffix = shellTranslationsVersion
+				? `${separator}v=${encodeURIComponent(shellTranslationsVersion)}`
+				: '';
+			const url = `${shellTranslationsUrl}${versionSuffix}`;
+			shellTranslationsPromise = fetch(url, { cache: 'force-cache' })
+				.then(async (response) => {
+					if (!response.ok) {
+						window.dispatchEvent(new CustomEvent('kurieros:shell-translations-load-failed', {
+							detail: { status: response.status, url },
+						}));
+						return;
+					}
+					mergeShellTranslations(await response.json());
+				})
+				.catch((error) => {
+					window.dispatchEvent(new CustomEvent('kurieros:shell-translations-load-failed', {
+						detail: { error: String(error), url },
+					}));
+					console.warn('Failed to load shell translations', error);
+				});
+		}
+		await shellTranslationsPromise;
+		return translations;
+	}
 
 	function sessionKey(lang, sourceSlug) {
 		return `${SESSION_KEY_PREFIX}${lang}/${sourceSlug}/${vacancyTranslationsVersion}`;
@@ -147,11 +197,22 @@ function initI18nRuntime() {
 				Object.keys(fragment).slice(0, 3));
 		}
 		const defaults = fragment.defaults || {};
+		const dict = fragment.dict || {};
 		const entries = fragment.entries || {};
 		const expanded = {};
 		for (const id in entries) {
 			if (Object.prototype.hasOwnProperty.call(entries, id)) {
-				expanded[id] = Object.assign({}, defaults, entries[id]);
+				const decodedEntry = {};
+				const entry = entries[id] || {};
+				for (const key in entry) {
+					if (!Object.prototype.hasOwnProperty.call(entry, key)) continue;
+					const value = entry[key];
+					const dictionary = dict[key];
+					decodedEntry[key] = Array.isArray(dictionary) && Number.isInteger(value)
+						? dictionary[value]
+						: value;
+				}
+				expanded[id] = Object.assign({}, defaults, decodedEntry);
 			}
 		}
 		return expanded;
@@ -196,6 +257,7 @@ function initI18nRuntime() {
 		if (lang === DEFAULT_LANG || !pageHasVacancyTranslationKeys()) {
 			return;
 		}
+		await ensureShellTranslations();
 		const slugs = getVisibleVacancySourceSlugs();
 		if (slugs.length === 0) return;
 
@@ -268,6 +330,7 @@ function initI18nRuntime() {
 			lang = getSafeLang(lang);
 			this.currentLang = lang;
 			safeStorage.set(STORAGE_KEY, lang);
+			await ensureShellTranslations();
 			await this.ensureVacancyTranslations(lang);
 			// Guard rapid switches: only the latest requested language may repaint.
 			if (this.currentLang !== lang) return;
@@ -331,7 +394,8 @@ function initI18nRuntime() {
 		},
 	};
 
-	window.kurieros_i18n.ensureVacancyTranslations(window.kurieros_i18n.currentLang)
+	ensureShellTranslations()
+		.then(() => window.kurieros_i18n.ensureVacancyTranslations(window.kurieros_i18n.currentLang))
 		.then(() => window.kurieros_i18n.applyTranslations());
 }
 

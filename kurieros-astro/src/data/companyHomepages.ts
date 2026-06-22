@@ -32,6 +32,7 @@ export const COMPANY_HOMEPAGES: Readonly<Record<string, string>> = {
   Qlean: 'https://qlean.ru/',
   'Сервис «Руки»': 'https://hands.ru/',
   Домовёнок: 'https://www.domovenok.ru/',
+  Тетрика: 'https://tetrika-school.ru/',
 };
 
 /**

@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
+  DEFAULT_BUDGET,
   auditDist,
   checkBudgets,
   formatBytes,
@@ -48,6 +49,18 @@ afterEach(() => {
 });
 
 describe('dist-size audit', () => {
+  it('keeps default budgets aligned with the post-optimization architecture', () => {
+    expect(DEFAULT_BUDGET.totalBytes).toBe(1_150_000_000);
+    expect(DEFAULT_BUDGET.topLevelBytes?.v).toBe(780 * 1024 * 1024);
+    expect(DEFAULT_BUDGET.topLevelBytes?.api).toBe(220 * 1024 * 1024);
+    expect(DEFAULT_BUDGET.topLevelBytes?.['api/grid-batch']).toBe(160 * 1024 * 1024);
+    expect(DEFAULT_BUDGET.topLevelBytes?.['vacancy-translations']).toBe(16 * 1024 * 1024);
+    expect(DEFAULT_BUDGET.html?.executableInlineScriptBytes).toBe(2 * 1024 * 1024);
+    expect(DEFAULT_BUDGET.html?.inlineJsonBytes).toBe(8 * 1024 * 1024);
+    expect(DEFAULT_BUDGET.html?.jsonLdBytes).toBe(80 * 1024 * 1024);
+    expect(DEFAULT_BUDGET.html?.inlineStyleBytes).toBe(1 * 1024 * 1024);
+  });
+
   it('separates executable inline JS from inline JSON data and JSON-LD', () => {
     const { root, repeatedController } = makeDistFixture();
     const report = auditDist(root);

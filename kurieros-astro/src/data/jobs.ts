@@ -11,6 +11,7 @@ import type {
   TransportMode,
   VacancyContent,
   VacancyOffer,
+  VacancySurface,
   VacancySource,
 } from './vacancyTypes';
 import { isCityBlocked, slugifyCity } from '../utils/cities';
@@ -572,6 +573,20 @@ const getOfferRequiredDocuments = (
 
 const getAgeTag = (ageFrom: number) => (ageFrom <= 16 ? '16plus' : '18+');
 
+type BuildJobsSurface = VacancySurface;
+
+type BuildJobsOptions = {
+  surface?: BuildJobsSurface;
+};
+
+const shouldIncludeSourceOnSurface = (
+  source: VacancySource,
+  surface: BuildJobsSurface,
+) => {
+  const visibility = source.visibility ?? 'all';
+  return surface === 'all' || visibility === 'all' || visibility === surface;
+};
+
 const buildLabels = (
   labels: string[] | undefined,
   transport: TransportMode[],
@@ -595,8 +610,13 @@ const buildLabels = (
 export const buildJobsFromVacancies = (
   sources: VacancySource[],
   language: SupportedLanguage = 'ru',
-): GeneratedJob[] =>
-  sources.flatMap((source) =>
+  options: BuildJobsOptions = {},
+): GeneratedJob[] => {
+  const surface = options.surface ?? 'listing';
+
+  return sources
+    .filter((source) => shouldIncludeSourceOnSurface(source, surface))
+    .flatMap((source) =>
     source.offers
       .filter((offer) => offer.isActive && !isCityBlocked(offer.city))
       .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
@@ -611,6 +631,10 @@ export const buildJobsFromVacancies = (
       const salary = getSalaryText(offer.pay);
       const applyLink = offer.applyLink ?? '#';
       const citySlug = slugifyCity(offer.city);
+      const slug = `${source.slug}-${citySlug}-${transport}`;
+      const detailSlug = source.detailRoute
+        ? `${source.detailRoute.sourceSlug}-${citySlug}-${transport}`
+        : undefined;
       const requirements = getOfferRequirements(content.requirements, offer, language);
       const benefits = getOfferBenefits(content.benefits, offer, language);
       const requiredDocuments = getOfferRequiredDocuments(content.requiredDocuments ?? [], offer, language);
@@ -619,7 +643,9 @@ export const buildJobsFromVacancies = (
         id: getGeneratedId(source, offer),
         sourceId: source.id,
         sourceSlug: source.slug,
-        slug: `${source.slug}-${citySlug}-${transport}`,
+        slug,
+        ...(detailSlug && detailSlug !== slug ? { detailSlug } : {}),
+        ...(source.detailRoute?.anchor ? { detailAnchor: source.detailRoute.anchor } : {}),
         title: interpolate(content.title, offer, language),
         company: getCompanyName(source.company.name, language),
         companyLogo: source.company.logo,
@@ -664,6 +690,7 @@ export const buildJobsFromVacancies = (
         ...(offer.sourceUrl ? { sourceUrl: offer.sourceUrl } : {}),
         updatedAt: offer.updatedAt,
         ...(offer.cityDistricts?.length ? { cityDistricts: offer.cityDistricts } : {}),
+        ...(offer.subjectVariants?.length ? { subjectVariants: offer.subjectVariants } : {}),
         ...(typeof offer.priority === 'number' ? { priority: offer.priority } : {}),
         ...(source.isHot ? { isHot: true } : {}),
         // Pass Ozon lead-form metadata through so JobCard / vacancy
@@ -673,6 +700,7 @@ export const buildJobsFromVacancies = (
       };
     }),
   );
+};
 
 // Build flat translation object for one job (used by both per-source
 // fragment emission and any future consumer).
@@ -728,7 +756,7 @@ export const buildJobTranslationsBySource = (
       for (const slug of idToSlug.values()) {
         bySlug[slug] = {};
       }
-      for (const job of buildJobsFromVacancies(sources, language)) {
+      for (const job of buildJobsFromVacancies(sources, language, { surface: 'all' })) {
         const slug = idToSlug.get(job.sourceId);
         if (!slug) continue;
         bySlug[slug][String(job.id)] = buildJobTranslationEntry(job, language);
@@ -741,5 +769,7 @@ export const buildJobTranslationsBySource = (
 };
 
 const jobsData = buildJobsFromVacancies(vacancySources);
+
+export const detailJobs = buildJobsFromVacancies(vacancySources, 'ru', { surface: 'detail' });
 
 export default jobsData;

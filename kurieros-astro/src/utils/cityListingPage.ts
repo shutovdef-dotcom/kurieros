@@ -11,6 +11,7 @@ import { getCitiesFromJobs } from './cities';
 import { citiesFromJobs } from './citiesIndex';
 import { getVacancyPluralText } from './format';
 import { buildBreadcrumbSchema, buildPlaceSchema } from './schema';
+import { getVacancyCanonicalUrl } from './vacancyUrl';
 
 // ---------------------------------------------------------------------------
 // Shared types
@@ -367,7 +368,7 @@ export function buildPageSchemaGraph(args: SchemaGraphArgs): unknown[] {
 					'@type': 'ListItem',
 					position: index + 1,
 					name: job.title,
-					url: new URL(`/v/${job.slug}/`, siteUrl).toString(),
+					url: getVacancyCanonicalUrl(job, siteUrl),
 				})),
 			},
 		},

@@ -1,6 +1,7 @@
 ---
 import VacancyTKey from '../VacancyTKey.astro';
 import type { GeneratedJob } from '../../data/vacancyTypes';
+import { getVacancyDetailPath } from '../../utils/vacancyUrl';
 
 interface Props {
 	jobs: GeneratedJob[];
@@ -20,7 +21,7 @@ const { jobs, currentCity } = Astro.props;
 		<ul class="vacancy-other-cities-list">
 			{jobs.map((other) => (
 				<li class="vacancy-other-cities-item">
-					<a class="vacancy-other-cities-link" href={`/v/${other.slug}/`}>
+					<a class="vacancy-other-cities-link" href={getVacancyDetailPath(other)}>
 						<VacancyTKey jobId={other.id} field="location" fallback={other.location} class="vacancy-other-cities-city" />
 						<VacancyTKey jobId={other.id} field="salary" fallback={other.salary} class="vacancy-other-cities-salary" />
 					</a>

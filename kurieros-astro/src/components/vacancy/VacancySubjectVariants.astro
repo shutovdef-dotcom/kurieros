@@ -1,0 +1,149 @@
+---
+import type { VacancySubjectVariant } from '../../data/vacancyTypes';
+
+interface Props {
+  variants?: VacancySubjectVariant[];
+}
+
+const { variants = [] } = Astro.props;
+const visibleVariants = variants.filter((variant) => variant.id && variant.title);
+---
+
+{visibleVariants.length > 0 && (
+  <section class="vacancy-subjects" aria-labelledby="vacancy-subjects-title">
+    <div class="section-heading">
+      <p class="eyebrow">Направления</p>
+      <h2 id="vacancy-subjects-title">Выберите предмет</h2>
+    </div>
+
+    <div class="subject-grid">
+      {visibleVariants.map((variant: VacancySubjectVariant) => (
+        <article class="subject-card" id={variant.id}>
+          {variant.label && <span class="subject-label">{variant.label}</span>}
+          <h3>{variant.title}</h3>
+          {variant.requirement && <p>{variant.requirement}</p>}
+          {variant.applyLink && (
+            <a
+              class="subject-apply"
+              href={variant.applyLink}
+              target="_blank"
+              rel="noopener noreferrer nofollow sponsored"
+              data-apply-cta
+              data-apply-position="subject_variant"
+            >
+              Откликнуться
+            </a>
+          )}
+        </article>
+      ))}
+    </div>
+  </section>
+)}
+
+<style>
+  .vacancy-subjects {
+    display: grid;
+    gap: var(--space-4);
+    margin: var(--space-6) 0;
+    padding: var(--space-5);
+    border: 1px solid var(--vacancy-border);
+    border-radius: var(--radius-lg);
+    background: var(--vacancy-card);
+    box-shadow: var(--vacancy-shadow);
+  }
+
+  .section-heading {
+    display: grid;
+    gap: 0.3rem;
+  }
+
+  .eyebrow {
+    margin: 0;
+    color: var(--vacancy-eyebrow);
+    font-size: var(--fs-12);
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  h2,
+  h3,
+  p {
+    margin: 0;
+  }
+
+  h2 {
+    font-size: var(--fs-22);
+    line-height: 1.2;
+  }
+
+  .subject-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+
+  .subject-card {
+    display: grid;
+    align-content: start;
+    gap: var(--space-3);
+    scroll-margin-top: 7rem;
+    padding: var(--space-4);
+    border: 1px solid var(--vacancy-border);
+    border-radius: var(--radius-md);
+    background: var(--vacancy-soft);
+  }
+
+  .subject-label {
+    width: fit-content;
+    padding: 0.35rem 0.6rem;
+    border: 1px solid var(--vacancy-chip-border);
+    border-radius: var(--radius-pill);
+    color: var(--vacancy-muted);
+    font-size: var(--fs-12);
+    font-weight: 800;
+  }
+
+  h3 {
+    font-size: var(--fs-18);
+    line-height: 1.25;
+  }
+
+  .subject-card p {
+    color: var(--vacancy-muted);
+    line-height: 1.5;
+  }
+
+  .subject-apply {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    width: fit-content;
+    padding: 0.7rem 1rem;
+    border-radius: var(--radius-md);
+    background: var(--vacancy-action);
+    color: var(--ink-0);
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .subject-apply:hover,
+  .subject-apply:focus-visible {
+    background: var(--vacancy-action-hover);
+    outline: none;
+  }
+
+  @media (max-width: 720px) {
+    .vacancy-subjects {
+      padding: var(--space-4);
+    }
+
+    .subject-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .subject-apply {
+      width: 100%;
+    }
+  }
+</style>

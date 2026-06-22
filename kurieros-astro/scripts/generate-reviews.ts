@@ -159,6 +159,74 @@ const COMMENTS_ERRORS_DB = [
   'За месяц втянулся, тепер норм.',
 ];
 
+const EDUCATION_PROS_DB = [
+  'Можно работать удалённо из дома.',
+  'Удобно совмещать с основной работой и учебой.',
+  'Платформа помогает с учениками и расписанием.',
+  'Занятия проходят в понятной онлайн-аудитории.',
+  'Поддержка быстро отвечает по организационным вопросам.',
+  'Можно самому выбирать комфортную нагрузку.',
+  'Прозрачные условия по оплате занятий.',
+  'Есть методические материалы и понятный старт.',
+  'Не нужно самому искать учеников.',
+  'Удобный формат для вечерней занятости.',
+];
+
+const EDUCATION_PROS_ERRORS_DB = [
+  'Удобно работать из дома',
+  'Граффик можно подстроить под себя',
+  'Учиников дают через платформу',
+  'Плотят нармально за занятия',
+  'Можно совмещять с другой работой',
+  'Падержка отвечает быстро',
+  'Не надо искать учеников самому',
+  'Занятия идут онлайн, это удобно',
+];
+
+const EDUCATION_CONS_DB = [
+  'Вечером нагрузка обычно выше.',
+  'Нужен стабильный интернет и тихое место.',
+  'Иногда расписание приходится согласовывать заранее.',
+  'Сложные ученики требуют больше подготовки.',
+  'Доход зависит от количества занятий.',
+  'Много общения с родителями и отчётности.',
+  'Не всем подходит работа перед камерой.',
+  'Первые недели нужно привыкнуть к платформе.',
+];
+
+const EDUCATION_CONS_ERRORS_DB = [
+  'Вечером бывает много уроков',
+  'Интернет должен быть стабильный',
+  'Инагда ученик переносит занятие',
+  'К урокам надо готовится',
+  'Перед камерой сначало непривычно',
+  'Отчёты занимают время',
+  'Не всегда сразу набирается нагрузка',
+  'Платформу надо освоить',
+];
+
+const EDUCATION_COMMENTS_DB = [
+  'Хороший вариант для преподавателей, которым нужен удалённый формат.',
+  'Если нравится объяснять материал, формат подходит.',
+  'Для частичной занятости и вечерних уроков вариант нормальный.',
+  'После привыкания к платформе работать комфортно.',
+  'Главное заранее держать расписание и готовиться к урокам.',
+  'Подходит тем, кто хочет стабильный поток онлайн-занятий.',
+  'Доход зависит от нагрузки, но условия понятные.',
+  'Можно спокойно совмещать с другой занятостью.',
+];
+
+const EDUCATION_COMMENTS_ERRORS_DB = [
+  'Для удаленки норм вариант.',
+  'Если любишь обьяснять, то зайдет.',
+  'После пары недель привык к платформе.',
+  'Можно совмещять, это плюс.',
+  'Главное готовится к урокам заранее.',
+  'Для преподавателей думаю ок.',
+  'Нагрузку надо набрать, потом норм.',
+  'Работать можна, формат удобный.',
+];
+
 // Integer 1–5 ratings, weighted so the mean ≈ 4.4. Per-brand averages drawn
 // from ~10–20 picks cluster naturally in [4.0, 5.0]; an unlucky brand can dip
 // below 3.8, so a post-generation floor clamp (MIN_BRAND_AVG, applied inside
@@ -226,6 +294,31 @@ const getCityOptions = (location: string): string[] => {
   return cityOptions.length > 0 ? cityOptions : DEFAULT_CITIES;
 };
 
+const isEducationJob = (job: (typeof jobsData)[number]): boolean =>
+  job.company === 'Тетрика' || /репетитор|преподавател|учител/i.test(job.title);
+
+const getReviewPools = (job: (typeof jobsData)[number]) => {
+  if (isEducationJob(job)) {
+    return {
+      pros: EDUCATION_PROS_DB,
+      prosErrors: EDUCATION_PROS_ERRORS_DB,
+      cons: EDUCATION_CONS_DB,
+      consErrors: EDUCATION_CONS_ERRORS_DB,
+      comments: EDUCATION_COMMENTS_DB,
+      commentsErrors: EDUCATION_COMMENTS_ERRORS_DB,
+    };
+  }
+
+  return {
+    pros: PROS_DB,
+    prosErrors: PROS_ERRORS_DB,
+    cons: CONS_DB,
+    consErrors: CONS_ERRORS_DB,
+    comments: COMMENTS_DB,
+    commentsErrors: COMMENTS_ERRORS_DB,
+  };
+};
+
 const readIfExists = async (path: string): Promise<string | null> => {
   try {
     return await readFile(path, 'utf8');
@@ -273,6 +366,7 @@ for (const brand of brands) {
     const job = brandJobs[pickIndex(brandJobs.length, random)];
     const isTypo = random() < TYPO_SHARE;
     const cityOptions = getCityOptions(job.location);
+    const reviewPools = getReviewPools(job);
     const dateOffsetDays = pickIndex(REVIEW_WINDOW_DAYS, random);
 
     reviews.push({
@@ -282,11 +376,11 @@ for (const brand of brands) {
       jobTitle: job.title,
       name: brandNames[index],
       city: pickFrom(cityOptions, random),
-      pros: isTypo ? pickFrom(PROS_ERRORS_DB, random) : pickFrom(PROS_DB, random),
-      cons: isTypo ? pickFrom(CONS_ERRORS_DB, random) : pickFrom(CONS_DB, random),
+      pros: isTypo ? pickFrom(reviewPools.prosErrors, random) : pickFrom(reviewPools.pros, random),
+      cons: isTypo ? pickFrom(reviewPools.consErrors, random) : pickFrom(reviewPools.cons, random),
       comment: isTypo
-        ? pickFrom(COMMENTS_ERRORS_DB, random)
-        : pickFrom(COMMENTS_DB, random),
+        ? pickFrom(reviewPools.commentsErrors, random)
+        : pickFrom(reviewPools.comments, random),
       rating: pickFrom(RATING_POOL, random),
       date: new Date(REVIEW_WINDOW_END - dateOffsetDays * DAY_MS).toISOString(),
     });
