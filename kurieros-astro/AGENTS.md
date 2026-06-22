@@ -11,8 +11,8 @@
 
 ## Команды
 
-- Build: `PATH='/Users/ivan/Documents/scratch/node-v22.14.0-darwin-arm64/bin:/usr/bin:/bin:/usr/sbin:/sbin' npm run build`
-- HTML check: `PATH='/Users/ivan/Documents/scratch/node-v22.14.0-darwin-arm64/bin:/usr/bin:/bin:/usr/sbin:/sbin' npx --yes html-validate dist/index.html`
+- Build: `npm run build`
+- HTML check: `npx --yes html-validate dist/index.html`
 - Local preview обычно доступен на `http://127.0.0.1:4323/`.
 
 ## Псевдо-команды

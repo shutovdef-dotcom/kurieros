@@ -105,7 +105,7 @@
 
 Запустить минимальную проверку проекта.
 
-- Command: `PATH='/Users/ivan/Documents/scratch/node-v22.14.0-darwin-arm64/bin:/usr/bin:/bin:/usr/sbin:/sbin' npm run build`
+- Command: `npm run build`
 - Add HTML validate only when markup was changed.
 - Output: pass/fail, key error lines only.
 
