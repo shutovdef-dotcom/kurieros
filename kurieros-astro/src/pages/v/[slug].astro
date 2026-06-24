@@ -22,6 +22,7 @@ import { slugifyCompany } from '../../utils/companies';
 import { getCityHref } from '../../utils/cities';
 import { getApplyCta } from '../../utils/applyCta';
 import { buildBreadcrumbSchema, buildJobPostingSchema } from '../../utils/schema';
+import { resolveJobPostingDates } from '../../utils/jobPostingDates';
 import { getCompanyHomepage } from '../../data/companyHomepages';
 import { getCompanyIndustry } from '../../data/companyIndustry';
 import { getSourceOccupation } from '../../data/sourceOccupation';
@@ -219,15 +220,7 @@ const fullDescription = buildVacancyDescription(true);
 const vacancyDescription = fullDescription.length <= 170
 	? fullDescription
 	: trimAtWordBoundary(buildVacancyDescription(false), 170);
-const datePosted = (() => {
-	const parsed = job.updatedAt ? new Date(job.updatedAt) : null;
-	return parsed && !Number.isNaN(parsed.getTime()) ? parsed.toISOString() : new Date().toISOString();
-})();
-const validThrough = (() => {
-	const base = new Date(datePosted);
-	base.setDate(base.getDate() + 60);
-	return base.toISOString();
-})();
+const { datePosted, validThrough } = resolveJobPostingDates({ updatedAt: job.updatedAt });
 const factCards = [
 	{ label: 'Доход', labelKey: 'vacancy.fact_income', value: job.salary, valueKey: `vacancies.${job.id}.salary` },
 	{ label: 'График', labelKey: 'vacancy.fact_schedule', value: job.details.schedule, valueKey: `vacancies.${job.id}.details_schedule` },
