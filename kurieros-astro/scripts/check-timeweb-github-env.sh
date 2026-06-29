@@ -15,7 +15,7 @@ Checks:
   - timeweb-production environment existence
   - required environment secrets are present by name
   - required environment variables are present by name
-  - archive deploy unpack URL readiness
+  - deploy-method-specific readiness
   - repository variable TIMEWEB_AUTO_DEPLOY status
 
 The script never prints secret values and does not mutate GitHub settings.
@@ -105,15 +105,7 @@ else
   fail "GitHub environment is missing: $environment_name"
 fi
 
-required_secrets=$'TIMEWEB_FTP_HOST\nTIMEWEB_FTP_USER\nTIMEWEB_FTP_PASSWORD'
 secret_names="$(gh secret list --repo "$repo" --env "$environment_name" --json name --jq '.[].name' 2>/dev/null || true)"
-while IFS= read -r secret_name; do
-  if contains_line "$secret_name" "$secret_names"; then
-    pass "Environment secret exists: $secret_name"
-  else
-    fail "Environment secret is missing: $secret_name"
-  fi
-done <<<"$required_secrets"
 
 required_variables=$'TIMEWEB_REMOTE_DIR\nTIMEWEB_REMOTE_ROOT_IS_SITE_ROOT\nTIMEWEB_FTP_PORT\nTIMEWEB_FTP_TLS\nTIMEWEB_DEPLOY_METHOD'
 variable_json="$(gh variable list --repo "$repo" --env "$environment_name" --json name,value 2>/dev/null || true)"
@@ -128,15 +120,51 @@ done <<<"$required_variables"
 
 deploy_method="$(jq -r '.[] | select(.name == "TIMEWEB_DEPLOY_METHOD") | .value' <<<"${variable_json:-[]}" 2>/dev/null || true)"
 deploy_method="${deploy_method:-archive}"
+
+check_secret() {
+  local secret_name="$1"
+  if contains_line "$secret_name" "$secret_names"; then
+    pass "Environment secret exists: $secret_name"
+  else
+    fail "Environment secret is missing: $secret_name"
+  fi
+}
+
+check_variable() {
+  local variable_name="$1"
+  if contains_line "$variable_name" "$variable_names"; then
+    pass "Environment variable exists: $variable_name"
+  else
+    fail "Environment variable is missing: $variable_name"
+  fi
+}
+
 case "$deploy_method" in
   archive)
+    check_secret "TIMEWEB_FTP_HOST"
+    check_secret "TIMEWEB_FTP_USER"
+    check_secret "TIMEWEB_FTP_PASSWORD"
     if contains_line "TIMEWEB_UNPACK_URL" "$variable_names"; then
       pass "TIMEWEB_UNPACK_URL is set for archive deploy."
     else
       fail "TIMEWEB_UNPACK_URL is missing. Archive deploy needs a Timeweb technical domain before DNS cutover, then https://kurerok.ru after cutover."
     fi
     ;;
+  ssh-archive)
+    check_secret "TIMEWEB_SSH_HOST"
+    check_secret "TIMEWEB_SSH_USER"
+    check_secret "TIMEWEB_SSH_PRIVATE_KEY"
+    check_variable "TIMEWEB_SSH_REMOTE_ROOT"
+    if contains_line "TIMEWEB_SSH_PORT" "$variable_names"; then
+      pass "Environment variable exists: TIMEWEB_SSH_PORT"
+    else
+      warn "TIMEWEB_SSH_PORT is unset; workflow defaults to 22."
+    fi
+    ;;
   ftp-mirror)
+    check_secret "TIMEWEB_FTP_HOST"
+    check_secret "TIMEWEB_FTP_USER"
+    check_secret "TIMEWEB_FTP_PASSWORD"
     warn "TIMEWEB_DEPLOY_METHOD=ftp-mirror. This is a slow fallback for large builds; archive is recommended."
     ;;
   "")

@@ -10,6 +10,7 @@ on:
         default: archive
         options:
           - archive
+          - ssh-archive
           - ftp-mirror
   push:
     branches: [main]
@@ -123,11 +124,15 @@ jobs:
           TIMEWEB_REMOTE_DIR: ${{ vars.TIMEWEB_REMOTE_DIR }}
           TIMEWEB_REMOTE_ROOT_IS_SITE_ROOT: ${{ vars.TIMEWEB_REMOTE_ROOT_IS_SITE_ROOT }}
           TIMEWEB_UNPACK_URL: ${{ vars.TIMEWEB_UNPACK_URL }}
+          TIMEWEB_SSH_HOST: ${{ secrets.TIMEWEB_SSH_HOST }}
+          TIMEWEB_SSH_USER: ${{ secrets.TIMEWEB_SSH_USER }}
+          TIMEWEB_SSH_PRIVATE_KEY: ${{ secrets.TIMEWEB_SSH_PRIVATE_KEY }}
+          TIMEWEB_SSH_REMOTE_ROOT: ${{ vars.TIMEWEB_SSH_REMOTE_ROOT }}
         run: |
           set -euo pipefail
 
           case "$TIMEWEB_DEPLOY_METHOD" in
-            archive|ftp-mirror) ;;
+            archive|ssh-archive|ftp-mirror) ;;
             *)
               echo "::error::Unsupported TIMEWEB_DEPLOY_METHOD: $TIMEWEB_DEPLOY_METHOD"
               exit 1
@@ -135,16 +140,30 @@ jobs:
           esac
 
           missing=0
-          for name in TIMEWEB_FTP_HOST TIMEWEB_FTP_USER TIMEWEB_FTP_PASSWORD; do
-            if [ -z "${!name:-}" ]; then
-              echo "::error::$name is not configured"
+
+          if [ "$TIMEWEB_DEPLOY_METHOD" = "archive" ] || [ "$TIMEWEB_DEPLOY_METHOD" = "ftp-mirror" ]; then
+            for name in TIMEWEB_FTP_HOST TIMEWEB_FTP_USER TIMEWEB_FTP_PASSWORD; do
+              if [ -z "${!name:-}" ]; then
+                echo "::error::$name is not configured"
+                missing=1
+              fi
+            done
+          fi
+
+          if [ "$TIMEWEB_DEPLOY_METHOD" = "archive" ]; then
+            if [ -z "${TIMEWEB_UNPACK_URL:-}" ]; then
+              echo "::error::TIMEWEB_UNPACK_URL is required for archive deployment. Use a Timeweb technical domain before DNS cutover, then https://kurerok.ru after cutover."
               missing=1
             fi
-          done
+          fi
 
-          if [ "$TIMEWEB_DEPLOY_METHOD" = "archive" ] && [ -z "${TIMEWEB_UNPACK_URL:-}" ]; then
-            echo "::error::TIMEWEB_UNPACK_URL is required for archive deployment. Use a Timeweb technical domain before DNS cutover, then https://kurerok.ru after cutover."
-            missing=1
+          if [ "$TIMEWEB_DEPLOY_METHOD" = "ssh-archive" ]; then
+            for name in TIMEWEB_SSH_HOST TIMEWEB_SSH_USER TIMEWEB_SSH_PRIVATE_KEY TIMEWEB_SSH_REMOTE_ROOT; do
+              if [ -z "${!name:-}" ]; then
+                echo "::error::$name is required for ssh-archive deployment"
+                missing=1
+              fi
+            done
           fi
 
           [ "$missing" -eq 0 ]
@@ -161,6 +180,44 @@ jobs:
           fi
 
           echo "TIMEWEB_REMOTE_DIR_NORMALIZED=$remote_dir" >> "$GITHUB_ENV"
+
+      - name: Prepare SSH access
+        if: ${{ env.TIMEWEB_DEPLOY_METHOD == 'ssh-archive' }}
+        env:
+          TIMEWEB_SSH_HOST: ${{ secrets.TIMEWEB_SSH_HOST }}
+          TIMEWEB_SSH_PRIVATE_KEY: ${{ secrets.TIMEWEB_SSH_PRIVATE_KEY }}
+          TIMEWEB_SSH_PORT: ${{ vars.TIMEWEB_SSH_PORT }}
+        run: |
+          set -euo pipefail
+
+          key_path="$RUNNER_TEMP/timeweb_deploy_key"
+          known_hosts_path="$RUNNER_TEMP/timeweb_known_hosts"
+
+          printf '%s\n' "$TIMEWEB_SSH_PRIVATE_KEY" > "$key_path"
+          chmod 600 "$key_path"
+          ssh-keyscan -p "${TIMEWEB_SSH_PORT:-22}" "$TIMEWEB_SSH_HOST" > "$known_hosts_path"
+
+          echo "TIMEWEB_SSH_KEY_PATH=$key_path" >> "$GITHUB_ENV"
+          echo "TIMEWEB_SSH_KNOWN_HOSTS_PATH=$known_hosts_path" >> "$GITHUB_ENV"
+
+      - name: Deploy archive to Timeweb over SSH
+        if: ${{ env.TIMEWEB_DEPLOY_METHOD == 'ssh-archive' }}
+        env:
+          TIMEWEB_SSH_HOST: ${{ secrets.TIMEWEB_SSH_HOST }}
+          TIMEWEB_SSH_USER: ${{ secrets.TIMEWEB_SSH_USER }}
+          TIMEWEB_SSH_PORT: ${{ vars.TIMEWEB_SSH_PORT }}
+          TIMEWEB_SSH_REMOTE_ROOT: ${{ vars.TIMEWEB_SSH_REMOTE_ROOT }}
+        run: |
+          set -euo pipefail
+
+          "$PROJECT_DIR/scripts/timeweb-ssh-archive-deploy.sh" \
+            --source-dir dist \
+            --host "$TIMEWEB_SSH_HOST" \
+            --port "${TIMEWEB_SSH_PORT:-22}" \
+            --user "$TIMEWEB_SSH_USER" \
+            --identity-file "$TIMEWEB_SSH_KEY_PATH" \
+            --known-hosts "$TIMEWEB_SSH_KNOWN_HOSTS_PATH" \
+            --remote-root "$TIMEWEB_SSH_REMOTE_ROOT"
 
       - name: Deploy archive to Timeweb
         if: ${{ env.TIMEWEB_DEPLOY_METHOD == 'archive' }}
