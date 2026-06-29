@@ -5,13 +5,23 @@ import type { GeneratedJob } from '../../data/vacancyTypes';
 interface Props {
 	job: GeneratedJob;
 	companyUrl: string;
+	cityClusterLink?: {
+		href: string;
+		label: string;
+	} | null;
 }
 
-const { job, companyUrl } = Astro.props;
+const { job, companyUrl, cityClusterLink } = Astro.props;
 ---
 
 <nav class="breadcrumb" aria-label="Breadcrumb">
-	<a href="/" data-t="nav.main">Главная</a> &gt; <a href="/companies/" data-t="nav.companies">Компании</a> &gt; <VacancyTKey jobId={job.id} field="company" fallback={job.company} as="a" href={companyUrl} /> &gt; <VacancyTKey jobId={job.id} field="title" fallback={job.title} />
+	<a href="/" data-t="nav.main">Главная</a> &gt;
+	{cityClusterLink && (
+		<>
+			<a href={cityClusterLink.href}>{cityClusterLink.label}</a> &gt;
+		</>
+	)}
+	<a href="/companies/" data-t="nav.companies">Компании</a> &gt; <VacancyTKey jobId={job.id} field="company" fallback={job.company} as="a" href={companyUrl} /> &gt; <VacancyTKey jobId={job.id} field="title" fallback={job.title} />
 </nav>
 
 <style>

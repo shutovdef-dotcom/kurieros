@@ -1,0 +1,136 @@
+---
+import type { CitySeoCluster } from '../utils/citySeoClusters';
+
+interface Props {
+  cluster: CitySeoCluster;
+  cityName: string;
+  vacancyCount: number;
+  companyNames: string[];
+  transportTypes: string[];
+  formattedMaxSalary: string | null;
+}
+
+const {
+  cluster,
+  cityName,
+  vacancyCount,
+  companyNames,
+  transportTypes,
+  formattedMaxSalary,
+} = Astro.props;
+
+const visibleCompanies = companyNames.slice(0, 4);
+const visibleFormats = transportTypes.slice(0, 4);
+---
+
+<section class="city-cluster-guide" aria-labelledby="city-cluster-guide-title">
+  <div>
+    <p class="city-cluster-eyebrow">Главный URL кластера</p>
+    <h2 id="city-cluster-guide-title">{cluster.guideTitle}</h2>
+    <p>{cluster.guideLead}</p>
+  </div>
+
+  <dl class="city-cluster-facts">
+    <div>
+      <dt>Интент</dt>
+      <dd>{cluster.primaryIntent}</dd>
+    </div>
+    <div>
+      <dt>Вакансии</dt>
+      <dd>{vacancyCount} в {cityName}</dd>
+    </div>
+    {formattedMaxSalary && (
+      <div>
+        <dt>Доход до</dt>
+        <dd>{formattedMaxSalary}/мес</dd>
+      </div>
+    )}
+    {visibleFormats.length > 0 && (
+      <div>
+        <dt>Форматы</dt>
+        <dd>{visibleFormats.join(', ')}</dd>
+      </div>
+    )}
+  </dl>
+
+  {visibleCompanies.length > 0 && (
+    <p class="city-cluster-links">
+      Работодатели: {visibleCompanies.join(', ')}.
+    </p>
+  )}
+</section>
+
+<style>
+  .city-cluster-guide {
+    max-width: var(--content-max-width);
+    margin: 0 auto var(--space-3);
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
+    gap: 1rem;
+    border: 1px solid var(--ink-200);
+    border-radius: 8px;
+    background: var(--surface, #fff);
+  }
+
+  .city-cluster-eyebrow {
+    margin: 0 0 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    color: var(--brand-700);
+  }
+
+  .city-cluster-guide h2 {
+    margin: 0 0 0.45rem;
+    font-size: clamp(1.2rem, 2vw, 1.55rem);
+    line-height: 1.2;
+  }
+
+  .city-cluster-guide p {
+    margin: 0;
+    color: var(--ink-700);
+    line-height: 1.55;
+  }
+
+  .city-cluster-facts {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+
+  .city-cluster-facts div {
+    min-width: 0;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--ink-200);
+    border-radius: 8px;
+    background: rgba(248, 250, 252, 0.72);
+  }
+
+  .city-cluster-facts dt {
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--ink-500);
+  }
+
+  .city-cluster-facts dd {
+    margin: 0.15rem 0 0;
+    font-weight: 800;
+    line-height: 1.3;
+    color: var(--ink-900);
+  }
+
+  .city-cluster-links {
+    grid-column: 1 / -1;
+    font-size: 0.92rem;
+  }
+
+  @media (max-width: 760px) {
+    .city-cluster-guide {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

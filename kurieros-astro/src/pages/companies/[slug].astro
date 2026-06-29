@@ -3,6 +3,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import CompanyVacancyCard from '../../components/company/CompanyVacancyCard.astro';
+import CompanyEditorialGuidePage from '../../components/company/CompanyEditorialGuidePage.astro';
+import { getCompanyGuide } from '../../data/companyGuides';
 // `companiesFromJobs` is `getCompaniesFromJobs(jobsData, reviewsData)`
 // derived ONCE at module load in `companiesIndex.ts`. This page used to
 // re-derive it twice (in `getStaticPaths` and again in the per-page
@@ -28,21 +30,31 @@ export async function getStaticPaths() {
 }
 
 const { company } = Astro.props;
+const companyGuide = getCompanyGuide(company.slug, company);
 // Replaced the local copy of plural-form logic with the shared helper
 // from `src/utils/format.ts` (`formatRussianPlural`). Inline `${count} <form>`
 // so call-sites read naturally.
 const formatVacancyCount = (count: number) =>
   `${count} ${formatRussianPlural(count, ['вакансия', 'вакансии', 'вакансий'])}`;
-const companyTitle = `Работа в ${company.name}: вакансии, отзывы, условия | КурьерОк`;
-const companyDescription = `${company.name}: ${formatVacancyCount(company.vacancyCount)}, ${company.primaryTransport.toLowerCase()}, ${company.paymentPreview[0] || 'формат выплат уточняйте в карточках'}. Сравните условия и отзывы перед откликом.`.slice(0, 170);
+const companyTitle = companyGuide?.title ?? `Работа в ${company.name}: вакансии, отзывы, условия | КурьерОк`;
+const companyDescription = (
+  companyGuide?.description ??
+  `${company.name}: ${formatVacancyCount(company.vacancyCount)}, ${company.primaryTransport.toLowerCase()}, ${company.paymentPreview[0] || 'формат выплат уточняйте в карточках'}. Сравните условия и отзывы перед откликом.`
+).slice(0, 170);
 const latestReviewTimestamp = company.reviews.length
   ? Math.max(...company.reviews.map((review) => new Date(review.date).getTime()))
   : Date.now();
+const latestGuideTimestamp = companyGuide
+  ? new Date(companyGuide.updatedAt).getTime()
+  : null;
+const pageUpdatedTimestamp = latestGuideTimestamp && Number.isFinite(latestGuideTimestamp)
+  ? latestGuideTimestamp
+  : latestReviewTimestamp;
 const updatedDate = new Intl.DateTimeFormat('ru-RU', {
   day: 'numeric',
   month: 'long',
   year: 'numeric',
-}).format(new Date(latestReviewTimestamp));
+}).format(new Date(pageUpdatedTimestamp));
 const featuredReviews = pickFeaturedCompanyReviews(company.reviews, company.name);
 const factCards = [
   { label: 'Активные вакансии', value: String(company.vacancyCount) },
@@ -52,7 +64,7 @@ const factCards = [
   { label: 'Доход', value: company.maxSalary && company.maxSalaryCurrency ? `до ${formatMoneyPerMonth(company.maxSalary, company.maxSalaryCurrency)}` : 'См. карточки' },
   { label: 'Отзывы', value: company.rating ? `${company.rating} / 5 (${company.reviewCount})` : 'Пока мало данных' },
 ];
-const verdictPoints = [
+const verdictPoints = companyGuide?.verdictPoints ?? [
   `${company.name} стоит открыть в первую очередь, если вам важен формат ${company.primaryTransport.toLowerCase()} и вы хотите быстро увидеть все вакансии бренда на одной странице.`,
   company.paymentPreview.length
     ? `По текущим карточкам бренда чаще всего встречаются выплаты: ${company.paymentPreview.join(', ')}.`
@@ -61,11 +73,13 @@ const verdictPoints = [
     ? `Сильнее всего бренд уже представлен в городах: ${company.topCities.join(', ')}.`
     : 'География зависит от конкретных карточек вакансий и может расширяться по мере обновления сайта.',
 ];
-const methodologyPoints = [
+const methodologyPoints = companyGuide?.sourceNotes ?? [
   `Страница обновлена ${updatedDate} на основе карточек вакансий и отзывов, которые уже есть на сайте.`,
   'Страница бренда помогает быстро понять общий контекст работодателя, но не заменяет проверку конкретной вакансии перед откликом.',
   'Если условия на стороне работодателя отличаются от карточки, ориентируйтесь на финальные условия в анкете или в прямом канале бренда.',
 ];
+const fitPoints = companyGuide?.fitPoints ?? company.fitPoints;
+const cautionPoints = companyGuide?.cautionPoints ?? company.cautionPoints;
 const relatedCompanies = companiesFromJobs
   .filter((item) => item.slug !== company.slug)
   .map((item) => {
@@ -80,17 +94,24 @@ const relatedCompanies = companiesFromJobs
   })
   .sort((a, b) => b.score - a.score || b.vacancyCount - a.vacancyCount)
   .slice(0, 4);
-const faqItems = company.faqItems;
-const visibleCompanyJobs = company.jobs.slice(0, COMPANY_VACANCIES_BATCH_SIZE);
+const faqItems = companyGuide?.faqItems ?? company.faqItems;
+const visibleCompanyJobs = company.jobs.slice(
+  0,
+  companyGuide?.vacancyPreviewLimit ?? COMPANY_VACANCIES_BATCH_SIZE,
+);
 const schemaCompanyJobs = visibleCompanyJobs;
 const remainingCompanyVacancies = Math.max(0, company.jobs.length - visibleCompanyJobs.length);
-const nextCompanyVacanciesBatchUrl = remainingCompanyVacancies > 0
+const shouldUseVacancyBatch = !companyGuide && remainingCompanyVacancies > 0;
+const nextCompanyVacanciesBatchUrl = shouldUseVacancyBatch
   ? getCompanyVacancyBatchUrl(company.slug, 2)
   : undefined;
 const nextCompanyVacanciesCount = Math.min(
   COMPANY_VACANCIES_BATCH_SIZE,
   remainingCompanyVacancies,
 );
+const visibleCompanyCities = companyGuide
+  ? company.cities.slice(0, companyGuide.cityPreviewLimit)
+  : company.cities;
 const reviewSchemas = featuredReviews.map((review) => ({
   '@type': 'Review',
   author: {
@@ -137,10 +158,10 @@ const pageSchemaGraph = [
   },
   {
     '@type': 'CollectionPage',
-    name: `${company.name} — вакансии, отзывы и условия`,
+    name: companyGuide?.h1 ?? `${company.name} — вакансии, отзывы и условия`,
     description: companyDescription,
     url: Astro.url.href,
-    dateModified: new Date(latestReviewTimestamp).toISOString(),
+    dateModified: new Date(pageUpdatedTimestamp).toISOString(),
     about: {
       '@type': 'Organization',
       name: company.name,
@@ -186,6 +207,14 @@ const pageSchemaGraph = [
 >
   <Header />
 
+  {companyGuide ? (
+    <CompanyEditorialGuidePage
+      company={company}
+      guide={companyGuide}
+      updatedDate={updatedDate}
+      featuredReviews={featuredReviews}
+    />
+  ) : (
   <main class="company-page">
     <div class="company-container">
       <nav class="breadcrumb" aria-label="Хлебные крошки">
@@ -249,7 +278,7 @@ const pageSchemaGraph = [
           <p class="section-eyebrow">Кому подходит</p>
           <h2>Кому полезно смотреть вакансии {company.name}?</h2>
           <ul class="info-list">
-            {company.fitPoints.map((point) => (
+            {fitPoints.map((point) => (
               <li>{point}</li>
             ))}
           </ul>
@@ -259,7 +288,7 @@ const pageSchemaGraph = [
           <p class="section-eyebrow">Что уточнить</p>
           <h2>Что нельзя решать только по странице бренда?</h2>
           <ol class="info-list numbered-list">
-            {company.cautionPoints.map((point) => (
+            {cautionPoints.map((point) => (
               <li>{point}</li>
             ))}
           </ol>
@@ -303,7 +332,7 @@ const pageSchemaGraph = [
         )}
       </section>
 
-      {company.cities.length > 0 && (
+      {visibleCompanyCities.length > 0 && (
         <section class="company-section">
           <div class="section-topline">
             <div>
@@ -312,7 +341,7 @@ const pageSchemaGraph = [
             </div>
           </div>
           <div class="chip-row">
-            {company.cities.map((city) => (
+            {visibleCompanyCities.map((city) => (
               <a href={getCityHref(city)} class="chip">{city}</a>
             ))}
           </div>
@@ -395,6 +424,7 @@ const pageSchemaGraph = [
       </section>
     </div>
   </main>
+  )}
 
   <Footer />
 </BaseLayout>

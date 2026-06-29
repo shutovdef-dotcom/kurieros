@@ -56,4 +56,53 @@ describe('Yandex vacancy feed', () => {
 		expect(xml).toContain('<currency id="RUR" rate="1" />');
 		expect(xml).not.toContain('<![CDATA[]]>');
 	});
+
+	it('rejects sets that only meet the offer minimum through same-page hash fragments', () => {
+		const validation = validateYandexVacancyFeed({
+			...feed,
+			sets: [
+				{
+					id: 'city-anchor-only',
+					name: 'Работа курьером Тестоград',
+					url: 'https://kurerok.ru/rabota-kurerom-testograd/',
+					offerUrls: [
+						'https://kurerok.ru/v/tetrika-tutor-testograd-foot/#subject-math',
+						'https://kurerok.ru/v/tetrika-tutor-testograd-foot/#subject-russian',
+						'https://kurerok.ru/v/tetrika-tutor-testograd-foot/#subject-english',
+					],
+				},
+			],
+			offers: [
+				{
+					...feed.offers[0],
+					id: 'anchor-1',
+					url: 'https://kurerok.ru/v/tetrika-tutor-testograd-foot/#subject-math',
+					picture: 'https://kurerok.ru/logo.svg?test=anchor-1',
+					setIds: ['city-anchor-only'],
+				},
+				{
+					...feed.offers[0],
+					id: 'anchor-2',
+					url: 'https://kurerok.ru/v/tetrika-tutor-testograd-foot/#subject-russian',
+					picture: 'https://kurerok.ru/logo.svg?test=anchor-2',
+					setIds: ['city-anchor-only'],
+				},
+				{
+					...feed.offers[0],
+					id: 'anchor-3',
+					url: 'https://kurerok.ru/v/tetrika-tutor-testograd-foot/#subject-english',
+					picture: 'https://kurerok.ru/logo.svg?test=anchor-3',
+					setIds: ['city-anchor-only'],
+				},
+			],
+			stats: {
+				...feed.stats,
+				includedOffers: 3,
+			},
+		});
+
+		expect(validation.errors).toContain(
+			'Set city-anchor-only has 1 unique base offer URLs; minimum is 3.',
+		);
+	});
 });

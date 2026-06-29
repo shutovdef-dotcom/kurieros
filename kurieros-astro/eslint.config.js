@@ -26,6 +26,9 @@ export default [
       // Data tables (long by nature, exempt from max-lines)
       'src/data/cities-dataset.ts',
       'src/data/ozonOffers.ts',
+      // Noindex design lab pages intentionally keep several visual variants
+      // in one file for side-by-side review.
+      'src/pages/designs/**',
       // Vendored or large data JSONs
       'src/data/*.json',
       'tests/fixtures/**',

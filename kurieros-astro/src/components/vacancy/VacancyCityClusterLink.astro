@@ -1,0 +1,83 @@
+---
+import type { VacancyCityClusterLink } from '../../utils/citySeoClusters';
+
+interface Props {
+  link: VacancyCityClusterLink;
+}
+
+const { link } = Astro.props;
+---
+
+<section class="vacancy-section vacancy-city-cluster" aria-label="Городской кластер вакансий">
+  <div>
+    <p class="section-eyebrow">Все варианты в городе</p>
+    <h2>{link.label}</h2>
+    <p>{link.description}</p>
+  </div>
+  <a class="vacancy-city-cluster-link" href={link.href}>{link.label}</a>
+</section>
+
+<style>
+  .vacancy-section {
+    background: var(--vacancy-card);
+    padding: 1.35rem;
+    border-radius: 8px;
+    border: 1px solid var(--vacancy-border);
+    margin-bottom: 1.5rem;
+    box-shadow: var(--vacancy-shadow);
+  }
+
+  .vacancy-city-cluster {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .section-eyebrow {
+    margin: 0 0 0.45rem;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    color: var(--vacancy-eyebrow);
+  }
+
+  .vacancy-city-cluster h2 {
+    margin: 0 0 0.4rem;
+    font-size: 1.18rem;
+    line-height: 1.25;
+  }
+
+  .vacancy-city-cluster p {
+    margin: 0;
+    color: var(--vacancy-muted);
+    line-height: 1.5;
+  }
+
+  .vacancy-city-cluster-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    background: var(--vacancy-action);
+    color: #fff;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 720px) {
+    .vacancy-city-cluster {
+      grid-template-columns: 1fr;
+    }
+
+    .vacancy-city-cluster-link {
+      width: 100%;
+      white-space: normal;
+      text-align: center;
+    }
+  }
+</style>

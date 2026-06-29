@@ -14,12 +14,14 @@ import VacancyHowTo from '../../components/vacancy/VacancyHowTo.astro';
 import VacancyIncomeScenarios from '../../components/vacancy/VacancyIncomeScenarios.astro';
 import VacancySimilar from '../../components/vacancy/VacancySimilar.astro';
 import VacancyOtherCities from '../../components/vacancy/VacancyOtherCities.astro';
+import VacancyCityClusterLink from '../../components/vacancy/VacancyCityClusterLink.astro';
 import VacancySidebar from '../../components/vacancy/VacancySidebar.astro';
 import VacancySubjectVariants from '../../components/vacancy/VacancySubjectVariants.astro';
 import jobsData, { detailJobs } from '../../data/jobs';
 import { vacancySources } from '../../data/vacancies';
 import { slugifyCompany } from '../../utils/companies';
 import { getCityHref } from '../../utils/cities';
+import { getVacancyCityClusterLink } from '../../utils/citySeoClusters';
 import { getApplyCta } from '../../utils/applyCta';
 import { buildBreadcrumbSchema, buildJobPostingSchema } from '../../utils/schema';
 import { resolveJobPostingDates } from '../../utils/jobPostingDates';
@@ -41,6 +43,7 @@ import {
 	buildVacancyHowToSchema,
 } from '../../utils/vacancyStructuredData';
 import { formatMoneyWithCurrency } from '../../utils/money';
+import { buildVacancySeoTitle } from '../../utils/vacancySeoTitle';
 
 export async function getStaticPaths() {
 	return detailJobs.map((job) => ({
@@ -97,6 +100,7 @@ const cityLinks = jobCities.map((city) => ({
 	name: city,
 	href: getCityHref(city),
 }));
+const cityClusterLink = getVacancyCityClusterLink(job);
 const currentCitySet = new Set(jobCities);
 // HV20 — «Похожие на эту вакансию» с трёхуровневой сортировкой:
 //   Tier 1 (top): другая компания + тот же транспорт + тот же город
@@ -153,14 +157,11 @@ const benefitHooks: string[] = (() => {
 // CTR lever for job-search SERPs), em-dash for visual separation,
 // and the first benefit hook in the trailing slot — but only when
 // the whole thing fits in the 70-char SERP truncation budget.
-const vacancyTitleBase = `${job.title} — ${job.salary}`;
-const vacancyTitleSuffix = ' | КурьерОк';
-const vacancyTitleWithHook = benefitHooks[0]
-	? `${vacancyTitleBase} · ${benefitHooks[0]}${vacancyTitleSuffix}`
-	: `${vacancyTitleBase}${vacancyTitleSuffix}`;
-const vacancyTitle = vacancyTitleWithHook.length <= 70
-	? vacancyTitleWithHook
-	: `${vacancyTitleBase}${vacancyTitleSuffix}`.slice(0, 70);
+const vacancyTitle = buildVacancySeoTitle({
+	title: job.title,
+	salary: job.salary,
+	benefitHook: benefitHooks[0],
+});
 
 // Description rewritten for CTR: salary first (numerical hook), then a
 // scannable «график · оплата» bullet, role+city, up to 2 benefit hooks
@@ -516,7 +517,11 @@ const pageSchemaGraph = [
 
 	<main class="vacancy-page" data-vacancy-source-slug={job.sourceSlug}>
 		<div class="container container-narrow">
-			<VacancyBreadcrumb job={job} companyUrl={companyUrl} />
+			<VacancyBreadcrumb
+				job={job}
+				companyUrl={companyUrl}
+				cityClusterLink={cityClusterLink}
+			/>
 
 			<VacancyHero
 				job={job}
@@ -531,6 +536,7 @@ const pageSchemaGraph = [
 			/>
 
 			<VacancyFactsTable factCards={factCards} />
+			{cityClusterLink && <VacancyCityClusterLink link={cityClusterLink} />}
 			<VacancySubjectVariants variants={job.subjectVariants} jobSlug={job.slug} />
 
 			<div class="vacancy-content-grid">

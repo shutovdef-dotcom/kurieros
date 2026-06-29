@@ -356,8 +356,9 @@ offers:
 **Выход (PR-ready):**
 - Изменения в `src/data/partnerLinks.ts` (новые `*_APPLY` и `*_LOGO`
   константы + запись в `PARTNER_LINKS`).
-- Schema-реестры для новой компании/роли: `companyHomepages.ts`,
-  `companyIndustry.ts`, `sourceOccupation.ts` (+ `cityRegions.ts` /
+- SEO/schema-реестры для новой компании/роли: `companyHomepages.ts`,
+  `companyIndustry.ts`, `companyPopularity.ts`, `companySeo.ts` при наличии
+  брендового листинга, `sourceOccupation.ts` (+ `cityRegions.ts` /
   `cityPostal.json` для новых городов без региона/индекса).
 - Новый объект в `_initialSources` массиве в `src/data/vacancies.ts`
   ИЛИ новый JSON-файл `src/data/<company>-vacancies.json` + его импорт
@@ -400,11 +401,15 @@ offers:
      specific `erid`/`oprid`). UTM добавляются динамически в helper.
    - `<COMPANY>_LOGO` — путь или URL (см. «Логотип»).
    - Добавить запись в `PARTNER_LINKS` aggregate.
-   - **Для полной JobPosting-разметки** (если компания/роль новая):
+   - **Для полной JobPosting-разметки и employer SEO** (если компания/роль новая):
      сайт работодателя → `companyHomepages.ts`, отрасль →
-     `companyIndustry.ts`, SOC-код роли → `sourceOccupation.ts`. Города из
-     offers проверь по адресным данным (регион/индекс). Детали — в разделе
-     «JobPosting / Google for Jobs — реестры для полного соответствия».
+     `companyIndustry.ts`, витринный порядок → `companyPopularity.ts`,
+     SOC-код роли → `sourceOccupation.ts`. Если есть отдельный
+     `/rabota-kurerom-{brand}/`, добавь его в `companySeo.ts` как
+     commercial listing с canonical на `/companies/{slug}/`. Города из offers
+     проверь по адресным данным (регион/индекс). Детали — в разделе
+     «JobPosting / Google for Jobs — реестры для полного соответствия» и
+     `docs/seo/company-seo-architecture.md`.
 8. **Собрать VacancySource**:
    - `id` = шаг 2.
    - `slug` — kebab-case по конвенции `<company-shortname>-<role>`,
@@ -1038,11 +1043,14 @@ postalCode для покрытых городов).
    — только одна запись (твоя).
 9. **Все города** из offers — либо в `CITY_DATASET`, либо явно подтверждены
    пользователем как «новый, ниже порога 5000».
-   - **Адрес и schema-реестры:** `company.name` есть в `companyHomepages.ts`
-     и `companyIndustry.ts`; `source.slug` — в `sourceOccupation.ts`; города
-     из offers покрыты регионом (`cityGeo.json`/`cityRegions.ts`) и индексом
+   - **Адрес, schema и employer SEO:** `company.name` есть в
+     `companyHomepages.ts` и `companyIndustry.ts`; `company.slug` — в
+     `companyPopularity.ts`; `source.slug` — в `sourceOccupation.ts`; при
+     наличии брендового листинга есть запись в `companySeo.ts`. Города из
+     offers покрыты регионом (`cityGeo.json`/`cityRegions.ts`) и индексом
      (`cityPostal.json`). Чего реального нет — оставить дефолт/пусто, **не
-     выдумывать**. См. раздел «JobPosting / Google for Jobs».
+     выдумывать**. См. раздел «JobPosting / Google for Jobs» и
+     `docs/seo/company-seo-architecture.md`.
    - **Москва/СПб gate:** если среди активных offers есть `Москва` и
      `Санкт-Петербург`, проверь решение по разделу «Авторасширение гео
      Москва/СПб». Для `expanded` в тестах/локальной проверке должны
@@ -1057,7 +1065,8 @@ postalCode для покрытых городов).
    (Astro генерирует один путь на (sourceSlug × city × transport),
    локализация — клиентская, отдельных языковых путей нет).
 11. **Страница компании**: `ls dist/companies/<companySlug>/index.html`
-   существует.
+   существует и строится guide-структурой. Контракт:
+   `npx vitest run tests/companySeo.test.ts`.
 12. **Открыть одну страницу** /v/<slug>/ и проверить:
     - заголовок из `content.ru.title` (с подставленным `{city}` / `{cityPrep}`);
     - кнопка «Откликнуться» ведёт на ожидаемый URL с UTM;
@@ -1138,6 +1147,8 @@ postalCode для покрытых городов).
 - public/logos/<company>.svg              (если добавлен)
 - src/data/companyHomepages.ts            (сайт работодателя — новая компания)
 - src/data/companyIndustry.ts             (отрасль — новая компания)
+- src/utils/companyPopularity.ts          (порядок в каталоге компаний)
+- src/utils/companySeo.ts                 (brand listing/canonical, если есть)
 - src/data/sourceOccupation.ts            (SOC-код — новая роль)
 - src/data/cityRegions.ts / cityPostal.json (новые города без региона/индекса)
 

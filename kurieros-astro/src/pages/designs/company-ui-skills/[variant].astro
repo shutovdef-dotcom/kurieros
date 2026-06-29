@@ -1,0 +1,1570 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getCityHref } from '../../../utils/cities';
+import {
+  UI_SKILL_VARIANTS,
+  getCompanyDesignPreview,
+  type UiSkillVariant,
+} from '../../../utils/companyDesignPreview';
+
+export function getStaticPaths() {
+  return UI_SKILL_VARIANTS.map((variant) => ({
+    params: { variant: variant.slug },
+    props: { variant },
+  }));
+}
+
+const { variant } = Astro.props as { variant: UiSkillVariant };
+const preview = getCompanyDesignPreview();
+const {
+  company,
+  guide,
+  updatedDate,
+  cities,
+  hiddenCityCount,
+  vacancyExamples,
+  reviews,
+  salaryLabel,
+  vacancyCountText,
+  cityCountText,
+  primaryPayment,
+  primaryFormat,
+} = preview;
+const title = `${variant.name}: ${company.name} | UI Skills`;
+const description = `${variant.repo}: экспериментальная версия страницы компании ${company.name}.`;
+const pageClass = `system-design-page system-${variant.slug}`;
+const stats = [
+  ['Вакансии', vacancyCountText],
+  ['Города', cityCountText],
+  ['Доход', salaryLabel],
+  ['Формат', primaryFormat],
+];
+const checks = [
+  guide.cautionPoints[0],
+  guide.cautionPoints[1],
+  guide.verdictPoints[2],
+];
+---
+
+<BaseLayout title={title} description={description} robots="noindex, nofollow">
+  <main class={pageClass}>
+    <nav class="variant-nav" aria-label="Навигация по дизайн-вариантам">
+      <div class="variant-nav-links">
+        <a href="/designs/company-ui-skills/">Все варианты</a>
+        <a href="/companies/kuper-ex-sbermarket/">Оригинал</a>
+        {UI_SKILL_VARIANTS.map((item) => (
+          <a
+            href={item.href}
+            data-theme-link
+            aria-current={item.slug === variant.slug ? 'page' : undefined}
+          >
+            {item.navLabel}
+          </a>
+        ))}
+      </div>
+      <div class="theme-switcher" aria-label="Цветовая тема">
+        <button type="button" data-theme-option="light" aria-pressed="true">Светлая</button>
+        <button type="button" data-theme-option="dark" aria-pressed="false">Тёмная</button>
+      </div>
+    </nav>
+
+    {variant.slug === 'shadcn-ui' && (
+      <div class="sh-shell">
+        <section class="sh-hero">
+          <div class="sh-copy">
+            <p class="sh-kicker">{variant.systemType}</p>
+            <h1>{guide.h1}</h1>
+            <p>{guide.subtitle}</p>
+            <div class="sh-actions">
+              <a class="sh-button sh-button-primary" href="#sh-vacancies">Смотреть карточки</a>
+              <a class="sh-button sh-button-secondary" href="#sh-faq">FAQ</a>
+            </div>
+          </div>
+          <aside class="sh-card sh-summary">
+            <div class="sh-card-header">
+              <img src={company.logo} alt={company.name} width="56" height="56" />
+              <div>
+                <h2>{company.name}</h2>
+                <p>Обновлено {updatedDate}</p>
+              </div>
+            </div>
+            <div class="sh-separator"></div>
+            <dl>
+              {stats.map(([label, value]) => (
+                <div>
+                  <dt>{label}</dt>
+                  <dd>{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </aside>
+        </section>
+
+        <section class="sh-card sh-section">
+          <div class="sh-card-header">
+            <div>
+              <p class="sh-kicker">Verdict</p>
+              <h2>{guide.verdictTitle}</h2>
+            </div>
+            <span class="sh-badge">{primaryPayment}</span>
+          </div>
+          <div class="sh-separator"></div>
+          <div class="sh-verdict-grid">
+            {guide.verdictPoints.map((point) => (
+              <article>
+                <p>{point}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section class="sh-card sh-section" id="sh-vacancies">
+          <div class="sh-card-header">
+            <div>
+              <p class="sh-kicker">Cards</p>
+              <h2>Вакансии для первого сравнения</h2>
+            </div>
+            <a class="sh-button sh-button-secondary" href={guide.primaryHubHref}>Все вакансии</a>
+          </div>
+          <div class="sh-list">
+            {vacancyExamples.map((job) => (
+              <article>
+                <div>
+                  <h3><a href={job.href}>{job.title}</a></h3>
+                  <p>{job.location}</p>
+                </div>
+                <strong>{job.salary}</strong>
+                <span class="sh-badge">{job.payment}</span>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section class="sh-two">
+          <div class="sh-card sh-section">
+            <p class="sh-kicker">Before apply</p>
+            <h2>Что проверить</h2>
+            <div class="sh-accordion">
+              {checks.map((check, index) => (
+                <details open={index === 0}>
+                  <summary>Пункт {index + 1}</summary>
+                  <p>{check}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+          <div class="sh-card sh-section" id="sh-faq">
+            <p class="sh-kicker">Cities</p>
+            <h2>Где есть предложения</h2>
+            <div class="sh-city-grid">
+              {cities.map((city) => <a href={getCityHref(city)}>{city}</a>)}
+              {hiddenCityCount > 0 && <a href={guide.primaryHubHref}>ещё {hiddenCityCount}</a>}
+            </div>
+          </div>
+        </section>
+      </div>
+    )}
+
+    {variant.slug === 'swiss-design' && (
+      <>
+        <section class="swiss-hero">
+          <div class="swiss-index">KUPER<br />2026</div>
+          <div>
+            <p class="swiss-caption">{variant.systemType}</p>
+            <h1>{guide.h1}</h1>
+            <p>{guide.summary}</p>
+          </div>
+          <aside>
+            <img src={company.logo} alt={company.name} width="56" height="56" />
+            <span>{updatedDate}</span>
+          </aside>
+        </section>
+
+        <section class="swiss-grid swiss-stats" aria-label="Факты">
+          {stats.map(([label, value]) => (
+            <article>
+              <span>{label}</span>
+              <strong>{value}</strong>
+            </article>
+          ))}
+        </section>
+
+        <section class="swiss-grid swiss-analysis">
+          <div>
+            <p class="swiss-caption">Verdict</p>
+            <h2>{guide.verdictTitle}</h2>
+          </div>
+          <div>
+            {guide.verdictPoints.map((point) => <p>{point}</p>)}
+          </div>
+        </section>
+
+        <section class="swiss-table" aria-labelledby="swiss-vacancies">
+          <div class="swiss-table-head">
+            <p class="swiss-caption">Vacancies</p>
+            <h2 id="swiss-vacancies">Примеры вакансий</h2>
+          </div>
+          {vacancyExamples.map((job) => (
+            <article>
+              <a href={job.href}>{job.title}</a>
+              <span>{job.location}</span>
+              <strong>{job.salary}</strong>
+              <span>{job.payment}</span>
+            </article>
+          ))}
+        </section>
+
+        <section class="swiss-grid swiss-lists">
+          <div>
+            <p class="swiss-caption">Checks</p>
+            <h2>Что проверить</h2>
+            <ul>
+              {checks.map((point) => <li>{point}</li>)}
+            </ul>
+          </div>
+          <div>
+            <p class="swiss-caption">Cities</p>
+            <h2>Города</h2>
+            <div class="swiss-city-list">
+              {cities.map((city) => <a href={getCityHref(city)}>{city}</a>)}
+            </div>
+          </div>
+        </section>
+      </>
+    )}
+
+    {variant.slug === 'oklch-system' && (
+      <div class="ok-shell">
+        <section class="ok-hero">
+          <div>
+            <p class="ok-system-label">{variant.systemType}</p>
+            <h1>{guide.h1}</h1>
+            <p>{guide.summary}</p>
+          </div>
+          <aside class="ok-token-card">
+            <span>Primary</span>
+            <strong>oklch(0.45 0.09 155)</strong>
+            <span>Surface</span>
+            <strong>oklch(0.98 0.012 155)</strong>
+            <span>Warning</span>
+            <strong>oklch(0.62 0.13 78)</strong>
+          </aside>
+        </section>
+
+        <section class="ok-tones" aria-label="Цветовые роли">
+          {stats.map(([label, value], index) => (
+            <article class={`ok-tone ok-tone-${index + 1}`}>
+              <span>{label}</span>
+              <strong>{value}</strong>
+            </article>
+          ))}
+        </section>
+
+        <section class="ok-flow">
+          <div class="ok-panel ok-panel-primary">
+            <h2>{guide.verdictTitle}</h2>
+            {guide.verdictPoints.map((point) => <p>{point}</p>)}
+          </div>
+          <div class="ok-panel ok-panel-warning">
+            <h2>Перед откликом</h2>
+            <ul>{checks.map((point) => <li>{point}</li>)}</ul>
+          </div>
+        </section>
+
+        <section class="ok-vacancies">
+          <div class="ok-section-head">
+            <h2>Карточки с тональными статусами</h2>
+            <a href={guide.primaryHubHref}>Все вакансии Купер</a>
+          </div>
+          <div class="ok-job-grid">
+            {vacancyExamples.map((job) => (
+              <article>
+                <span>{job.payment}</span>
+                <h3><a href={job.href}>{job.title}</a></h3>
+                <p>{job.location}</p>
+                <strong>{job.salary}</strong>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section class="ok-cities">
+          <h2>Города в той же палитре</h2>
+          <div>
+            {cities.map((city) => <a href={getCityHref(city)}>{city}</a>)}
+          </div>
+        </section>
+      </div>
+    )}
+
+    {variant.slug === 'impeccable-system' && (
+      <div class="imp-shell">
+        <section class="imp-hero">
+          <div class="imp-map" aria-hidden="true">
+            <span>Маршрут</span>
+            <span>Документы</span>
+            <span>Слоты</span>
+            <span>Выплаты</span>
+          </div>
+          <div>
+            <p>{variant.systemType}</p>
+            <h1>{guide.h1}</h1>
+            <p>{guide.subtitle}</p>
+            <a href="#imp-vacancies">Выбрать первую карточку</a>
+          </div>
+          <aside>
+            <img src={company.logo} alt={company.name} width="64" height="64" />
+            <strong>{salaryLabel}</strong>
+            <span>{primaryPayment}</span>
+          </aside>
+        </section>
+
+        <section class="imp-route">
+          <div>
+            <h2>Один маршрут вместо одинаковых карточек</h2>
+            <p>{guide.summary}</p>
+          </div>
+          <ol>
+            {guide.steps.slice(0, 4).map((step) => <li>{step}</li>)}
+          </ol>
+        </section>
+
+        <section class="imp-split">
+          <article>
+            <h2>{guide.verdictTitle}</h2>
+            {guide.verdictPoints.map((point) => <p>{point}</p>)}
+          </article>
+          <article>
+            <h2>Что не решать по бренду</h2>
+            <ul>{checks.map((point) => <li>{point}</li>)}</ul>
+          </article>
+        </section>
+
+        <section class="imp-vacancies" id="imp-vacancies">
+          <div>
+            <h2>Разные города, разные роли</h2>
+            <p>Здесь важна не сетка ради сетки, а быстрый выбор первого сравнения.</p>
+          </div>
+          <div class="imp-job-stack">
+            {vacancyExamples.map((job, index) => (
+              <article>
+                <span>{String(index + 1).padStart(2, '0')}</span>
+                <h3><a href={job.href}>{job.title}</a></h3>
+                <p>{job.location}</p>
+                <strong>{job.salary}</strong>
+              </article>
+            ))}
+          </div>
+        </section>
+      </div>
+    )}
+
+    <section class="variant-scorecard" aria-label="Оценка подхода">
+      <div>
+        <h2>Почему это дизайн-система</h2>
+        <p><strong>{variant.systemType}.</strong> Источник: <a href={variant.sourceUrl}>{variant.repo}</a>.</p>
+        <p>{variant.nameExplanation}</p>
+      </div>
+      <div>
+        <h2>Что может понравиться</h2>
+        <ul>{variant.strengths.map((item) => <li>{item}</li>)}</ul>
+      </div>
+      <div>
+        <h2>Что может не понравиться</h2>
+        <ul>{variant.risks.map((item) => <li>{item}</li>)}</ul>
+      </div>
+      {reviews.length > 0 && (
+        <div>
+          <h2>Проверка на живом тексте</h2>
+          <p>{reviews[0].comment}</p>
+        </div>
+      )}
+    </section>
+  </main>
+  <script is:inline>
+    (() => {
+      const allowedThemes = new Set(['light', 'dark']);
+      const readThemeFromUrl = () => new URL(window.location.href).searchParams.get('theme');
+      const initialTheme = allowedThemes.has(readThemeFromUrl())
+        ? readThemeFromUrl()
+        : allowedThemes.has(window.localStorage.getItem('ui-skills-theme'))
+          ? window.localStorage.getItem('ui-skills-theme')
+          : 'light';
+
+      const syncControls = (theme) => {
+        document.querySelectorAll('[data-theme-option]').forEach((control) => {
+          control.setAttribute('aria-pressed', String(control.dataset.themeOption === theme));
+        });
+        document.querySelectorAll('[data-theme-link]').forEach((link) => {
+          const nextUrl = new URL(link.getAttribute('href'), window.location.href);
+          if (theme === 'dark') {
+            nextUrl.searchParams.set('theme', 'dark');
+          } else {
+            nextUrl.searchParams.delete('theme');
+          }
+          link.setAttribute('href', `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
+        });
+      };
+
+      const syncTheme = (theme, updateUrl = false) => {
+        document.documentElement.dataset.uiSkillsTheme = theme;
+        window.localStorage.setItem('ui-skills-theme', theme);
+        syncControls(theme);
+
+        if (updateUrl) {
+          const nextCurrentUrl = new URL(window.location.href);
+          if (theme === 'dark') {
+            nextCurrentUrl.searchParams.set('theme', 'dark');
+          } else {
+            nextCurrentUrl.searchParams.delete('theme');
+          }
+          window.history.replaceState({}, '', `${nextCurrentUrl.pathname}${nextCurrentUrl.search}${nextCurrentUrl.hash}`);
+        }
+      };
+
+      syncTheme(initialTheme);
+      document.addEventListener('click', (event) => {
+        const control = event.target instanceof Element
+          ? event.target.closest('[data-theme-option]')
+          : null;
+        if (!control) return;
+        event.preventDefault();
+        syncTheme(control.dataset.themeOption, true);
+      });
+    })();
+  </script>
+</BaseLayout>
+
+<style>
+  .system-design-page {
+    --nav-bg: rgba(255, 255, 255, 0.94);
+    --nav-border: rgba(0, 0, 0, 0.12);
+    --nav-active-bg: #18181b;
+    --nav-active-fg: #fff;
+    --nav-control-bg: rgba(255, 255, 255, 0.72);
+    --scorecard-bg: rgba(255, 255, 255, 0.82);
+    --scorecard-border: rgba(0, 0, 0, 0.14);
+    min-height: 100vh;
+  }
+
+  .variant-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--nav-border);
+    background: var(--nav-bg);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    backdrop-filter: blur(14px);
+  }
+
+  .variant-nav-links,
+  .theme-switcher {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .variant-nav a,
+  .theme-switcher button {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    padding: 0 0.9rem;
+    border: 1px solid var(--nav-border);
+    border-radius: 8px;
+    background: var(--nav-control-bg);
+    color: inherit;
+    font-size: 0.88rem;
+    font-weight: 800;
+    font-family: inherit;
+    text-decoration: none;
+  }
+
+  .theme-switcher button {
+    cursor: pointer;
+  }
+
+  .variant-nav a[aria-current="page"],
+  .theme-switcher button[aria-pressed="true"] {
+    background: var(--nav-active-bg);
+    color: var(--nav-active-fg);
+  }
+
+  .variant-nav a:focus-visible,
+  .theme-switcher button:focus-visible,
+  .system-design-page a:focus-visible,
+  .system-design-page summary:focus-visible {
+    outline: 3px solid #facc15;
+    outline-offset: 3px;
+  }
+
+  .variant-scorecard {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin: 0 auto;
+    padding: 2rem 1rem 4rem;
+    max-width: 1180px;
+  }
+
+  .variant-scorecard > div {
+    padding: 1rem;
+    border: 1px solid var(--scorecard-border);
+    background: var(--scorecard-bg);
+  }
+
+  .variant-scorecard h2 {
+    margin: 0 0 0.7rem;
+    font-size: 1rem;
+  }
+
+  .variant-scorecard ul,
+  .variant-scorecard p {
+    margin: 0;
+    padding-left: 1rem;
+    line-height: 1.6;
+  }
+
+  .variant-scorecard p {
+    padding-left: 0;
+  }
+
+  .variant-scorecard p + p {
+    margin-top: 0.75rem;
+  }
+
+  .variant-scorecard a {
+    color: inherit;
+    font-weight: 850;
+    text-decoration-color: currentColor;
+    text-underline-offset: 3px;
+  }
+
+  :global(html[data-ui-skills-theme="dark"]) .system-design-page {
+    --nav-bg: rgba(12, 14, 12, 0.88);
+    --nav-border: rgba(255, 255, 255, 0.16);
+    --nav-active-bg: #f4f4f5;
+    --nav-active-fg: #111113;
+    --nav-control-bg: rgba(255, 255, 255, 0.06);
+    --scorecard-bg: rgba(255, 255, 255, 0.06);
+    --scorecard-border: rgba(255, 255, 255, 0.14);
+    color-scheme: dark;
+  }
+
+  .system-shadcn-ui {
+    --background: #fafafa;
+    --foreground: #18181b;
+    --muted: #f4f4f5;
+    --muted-foreground: #71717a;
+    --card: #ffffff;
+    --border: #e4e4e7;
+    --primary: #18181b;
+    --primary-foreground: #fafafa;
+    --radius: 0.75rem;
+    background: var(--background);
+    color: var(--foreground);
+  }
+
+  :global(html[data-ui-skills-theme="dark"]) .system-shadcn-ui {
+    --background: #09090b;
+    --foreground: #fafafa;
+    --muted: #18181b;
+    --muted-foreground: #a1a1aa;
+    --card: #111113;
+    --border: #27272a;
+    --primary: #fafafa;
+    --primary-foreground: #18181b;
+    --scorecard-bg: rgba(17, 17, 19, 0.92);
+    --scorecard-border: #27272a;
+  }
+
+  .sh-shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  .sh-hero,
+  .sh-two {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.8fr);
+    gap: 1rem;
+  }
+
+  .sh-hero {
+    align-items: stretch;
+    padding: 2rem 0 1rem;
+  }
+
+  .sh-copy {
+    display: grid;
+    align-content: center;
+    gap: 1rem;
+    min-height: 520px;
+  }
+
+  .sh-kicker {
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+
+  .sh-copy h1 {
+    max-width: 13ch;
+    margin: 0;
+    font-size: clamp(2.35rem, 7vw, 5.4rem);
+    line-height: 0.98;
+    letter-spacing: 0;
+    text-wrap: balance;
+  }
+
+  .sh-copy > p:not(.sh-kicker) {
+    max-width: 62ch;
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    text-wrap: pretty;
+  }
+
+  .sh-actions,
+  .sh-card-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .sh-button {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    border-radius: calc(var(--radius) - 2px);
+    padding: 0 1rem;
+    font-weight: 650;
+    text-decoration: none;
+  }
+
+  .sh-button-primary {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  .sh-button-secondary {
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--foreground);
+  }
+
+  .sh-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card);
+  }
+
+  .sh-summary,
+  .sh-section {
+    padding: 1.25rem;
+  }
+
+  .sh-summary img {
+    object-fit: contain;
+  }
+
+  .sh-summary h2,
+  .sh-section h2 {
+    margin: 0;
+    font-size: 1.35rem;
+  }
+
+  .sh-summary p {
+    margin: 0.25rem 0 0;
+    color: var(--muted-foreground);
+  }
+
+  .sh-separator {
+    height: 1px;
+    margin: 1rem 0;
+    background: var(--border);
+  }
+
+  .sh-summary dl {
+    display: grid;
+    gap: 0.9rem;
+    margin: 0;
+  }
+
+  .sh-summary dt {
+    color: var(--muted-foreground);
+    font-size: 0.85rem;
+  }
+
+  .sh-summary dd {
+    margin: 0.15rem 0 0;
+    font-size: 1.2rem;
+    font-weight: 750;
+  }
+
+  .sh-section {
+    margin-top: 1rem;
+  }
+
+  .sh-badge {
+    display: inline-flex;
+    min-height: 28px;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0 0.65rem;
+    background: var(--muted);
+    color: var(--foreground);
+    font-size: 0.82rem;
+    font-weight: 650;
+  }
+
+  .sh-verdict-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .sh-verdict-grid article,
+  .sh-list article {
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) - 2px);
+    background: var(--background);
+  }
+
+  .sh-verdict-grid article {
+    padding: 1rem;
+  }
+
+  .sh-verdict-grid p {
+    margin: 0;
+    color: var(--muted-foreground);
+    line-height: 1.6;
+  }
+
+  .sh-list {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .sh-list article {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.9rem;
+  }
+
+  .sh-list h3,
+  .sh-list p {
+    margin: 0;
+  }
+
+  .sh-list h3 a {
+    color: var(--foreground);
+    text-decoration: none;
+  }
+
+  .sh-list p {
+    margin-top: 0.25rem;
+    color: var(--muted-foreground);
+  }
+
+  .sh-list strong {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sh-accordion {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .sh-accordion details {
+    border-top: 1px solid var(--border);
+    padding: 0.75rem 0;
+  }
+
+  .sh-accordion summary {
+    min-height: 44px;
+    cursor: pointer;
+    font-weight: 750;
+  }
+
+  .sh-accordion p {
+    color: var(--muted-foreground);
+    line-height: 1.65;
+  }
+
+  .sh-city-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .sh-city-grid a {
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0 0.75rem;
+    color: var(--foreground);
+    text-decoration: none;
+  }
+
+  .system-swiss-design {
+    --swiss-bg: #fafaf8;
+    --swiss-ink: #1c1917;
+    --swiss-muted: rgba(28, 25, 23, 0.72);
+    --swiss-caption: rgba(28, 25, 23, 0.55);
+    --swiss-border: #e7e5e4;
+    --swiss-accent: #2d6a4f;
+    padding-bottom: 2rem;
+    background: var(--swiss-bg);
+    color: var(--swiss-ink);
+    font-family: "IBM Plex Sans", "Hanken Grotesk", "Manrope", system-ui, sans-serif;
+  }
+
+  :global(html[data-ui-skills-theme="dark"]) .system-swiss-design {
+    --swiss-bg: #11110f;
+    --swiss-ink: #f5f0e8;
+    --swiss-muted: rgba(245, 240, 232, 0.72);
+    --swiss-caption: rgba(245, 240, 232, 0.52);
+    --swiss-border: rgba(245, 240, 232, 0.18);
+    --swiss-accent: #80d4a6;
+    --scorecard-bg: rgba(245, 240, 232, 0.06);
+    --scorecard-border: rgba(245, 240, 232, 0.18);
+  }
+
+  .system-swiss-design .variant-nav a,
+  .system-swiss-design .theme-switcher button {
+    border-radius: 0;
+  }
+
+  .swiss-hero,
+  .swiss-grid,
+  .swiss-table {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 4rem 1rem;
+    border-bottom: 1px solid var(--swiss-border);
+  }
+
+  .swiss-hero {
+    display: grid;
+    grid-template-columns: 2fr 7fr 3fr;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  .swiss-index {
+    color: var(--swiss-accent);
+    font-size: clamp(2.8rem, 8vw, 6rem);
+    font-weight: 300;
+    line-height: 0.92;
+  }
+
+  .swiss-caption {
+    margin: 0 0 1rem;
+    color: var(--swiss-caption);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .swiss-hero h1 {
+    max-width: 12ch;
+    margin: 0;
+    font-size: clamp(2.4rem, 7vw, 6rem);
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: 0;
+  }
+
+  .swiss-hero p:not(.swiss-caption),
+  .swiss-analysis p,
+  .swiss-lists li {
+    max-width: 60ch;
+    color: var(--swiss-muted);
+    line-height: 1.75;
+  }
+
+  .swiss-hero aside {
+    display: grid;
+    gap: 1rem;
+    justify-items: start;
+  }
+
+  .swiss-hero img {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+  }
+
+  .swiss-hero aside span {
+    color: var(--swiss-caption);
+  }
+
+  .swiss-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .swiss-stats article {
+    grid-column: span 3;
+    min-height: 160px;
+    padding-top: 1rem;
+    border-top: 3px solid var(--swiss-accent);
+  }
+
+  .swiss-stats span,
+  .swiss-table span,
+  .swiss-table a,
+  .swiss-table strong {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .swiss-stats span {
+    color: var(--swiss-caption);
+  }
+
+  .swiss-stats strong {
+    display: block;
+    margin-top: 0.75rem;
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-weight: 400;
+    line-height: 1.1;
+  }
+
+  .swiss-analysis > div:first-child,
+  .swiss-lists > div:first-child {
+    grid-column: span 4;
+  }
+
+  .swiss-analysis > div:last-child,
+  .swiss-lists > div:last-child {
+    grid-column: span 8;
+  }
+
+  .swiss-analysis h2,
+  .swiss-lists h2,
+  .swiss-table h2 {
+    margin: 0;
+    font-size: clamp(1.75rem, 4vw, 3.5rem);
+    font-weight: 300;
+    line-height: 1.08;
+  }
+
+  .swiss-table {
+    display: grid;
+  }
+
+  .swiss-table-head {
+    margin-bottom: 1rem;
+  }
+
+  .swiss-table article {
+    display: grid;
+    grid-template-columns: 4fr 2fr 2fr 2fr;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-top: 1px solid var(--swiss-border);
+  }
+
+  .swiss-table a {
+    color: var(--swiss-ink);
+    font-weight: 500;
+    text-decoration-color: color-mix(in srgb, var(--swiss-accent) 55%, transparent);
+    text-underline-offset: 4px;
+  }
+
+  .swiss-table span {
+    color: var(--swiss-muted);
+  }
+
+  .swiss-table strong {
+    font-weight: 500;
+  }
+
+  .swiss-lists ul {
+    margin: 0;
+    padding-left: 1.2rem;
+  }
+
+  .swiss-city-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .swiss-city-list a {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    color: var(--swiss-accent);
+    text-decoration: none;
+  }
+
+  .system-oklch-system {
+    --ok-bg: oklch(0.985 0.012 155);
+    --ok-surface: oklch(1 0 0);
+    --ok-ink: oklch(0.22 0.025 155);
+    --ok-muted: oklch(0.46 0.035 155);
+    --ok-border: oklch(0.88 0.025 155);
+    --ok-primary: oklch(0.45 0.09 155);
+    --ok-primary-soft: oklch(0.91 0.045 155);
+    --ok-warning: oklch(0.62 0.13 78);
+    --ok-warning-soft: oklch(0.94 0.055 78);
+    --ok-blue-soft: oklch(0.93 0.04 225);
+    --ok-on-primary: white;
+    background: var(--ok-bg);
+    color: var(--ok-ink);
+  }
+
+  :global(html[data-ui-skills-theme="dark"]) .system-oklch-system {
+    --ok-bg: oklch(0.18 0.018 155);
+    --ok-surface: oklch(0.235 0.02 155);
+    --ok-ink: oklch(0.94 0.018 155);
+    --ok-muted: oklch(0.76 0.035 155);
+    --ok-border: oklch(0.36 0.03 155);
+    --ok-primary: oklch(0.76 0.11 155);
+    --ok-primary-soft: oklch(0.31 0.05 155);
+    --ok-warning: oklch(0.78 0.12 78);
+    --ok-warning-soft: oklch(0.32 0.06 78);
+    --ok-blue-soft: oklch(0.31 0.045 225);
+    --ok-on-primary: oklch(0.18 0.018 155);
+    --scorecard-bg: oklch(0.235 0.02 155);
+    --scorecard-border: oklch(0.36 0.03 155);
+  }
+
+  .ok-shell {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  .ok-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 1rem;
+    align-items: end;
+    min-height: 540px;
+  }
+
+  .ok-system-label,
+  .ok-tone span,
+  .ok-token-card span {
+    color: var(--ok-muted);
+    font-size: 0.86rem;
+    font-weight: 760;
+  }
+
+  .ok-hero h1 {
+    max-width: 13ch;
+    margin: 0.75rem 0;
+    color: var(--ok-primary);
+    font-size: clamp(2.35rem, 8vw, 5.8rem);
+    line-height: 0.98;
+    letter-spacing: 0;
+  }
+
+  .ok-hero p:not(.ok-system-label) {
+    max-width: 64ch;
+    color: var(--ok-muted);
+    font-size: 1.08rem;
+    line-height: 1.75;
+  }
+
+  .ok-token-card,
+  .ok-panel,
+  .ok-vacancies,
+  .ok-cities,
+  .ok-tone {
+    border: 1px solid var(--ok-border);
+    border-radius: 8px;
+    background: var(--ok-surface);
+  }
+
+  .ok-token-card {
+    display: grid;
+    gap: 0.45rem;
+    padding: 1rem;
+  }
+
+  .ok-token-card strong {
+    margin-bottom: 0.8rem;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 0.9rem;
+  }
+
+  .ok-tones {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .ok-tone {
+    min-height: 150px;
+    padding: 1rem;
+  }
+
+  .ok-tone strong {
+    display: block;
+    margin-top: 0.6rem;
+    font-size: 1.45rem;
+    line-height: 1.14;
+  }
+
+  .ok-tone-1 {
+    background: var(--ok-primary-soft);
+  }
+
+  .ok-tone-2 {
+    background: var(--ok-blue-soft);
+  }
+
+  .ok-tone-3 {
+    background: var(--ok-warning-soft);
+  }
+
+  .ok-flow {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .ok-panel,
+  .ok-vacancies,
+  .ok-cities {
+    padding: 1.25rem;
+  }
+
+  .ok-panel h2,
+  .ok-vacancies h2,
+  .ok-cities h2 {
+    margin: 0 0 1rem;
+    font-size: clamp(1.7rem, 4vw, 3rem);
+    line-height: 1.1;
+  }
+
+  .ok-panel p,
+  .ok-panel li {
+    color: var(--ok-muted);
+    line-height: 1.7;
+  }
+
+  .ok-panel-warning {
+    background: var(--ok-warning-soft);
+  }
+
+  .ok-vacancies,
+  .ok-cities {
+    margin-top: 1rem;
+  }
+
+  .ok-section-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .ok-section-head a {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    border-radius: 8px;
+    background: var(--ok-primary);
+    color: var(--ok-on-primary);
+    padding: 0 1rem;
+    font-weight: 760;
+    text-decoration: none;
+  }
+
+  .ok-job-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .ok-job-grid article {
+    display: grid;
+    gap: 0.55rem;
+    padding: 1rem;
+    border-radius: 8px;
+    background: var(--ok-bg);
+  }
+
+  .ok-job-grid span {
+    color: var(--ok-primary);
+    font-weight: 800;
+  }
+
+  .ok-job-grid h3,
+  .ok-job-grid p {
+    margin: 0;
+  }
+
+  .ok-job-grid h3 a {
+    color: var(--ok-ink);
+    text-decoration: none;
+  }
+
+  .ok-job-grid p {
+    color: var(--ok-muted);
+  }
+
+  .ok-cities > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .ok-cities a {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    border-radius: 8px;
+    background: var(--ok-primary-soft);
+    color: var(--ok-primary);
+    padding: 0 0.8rem;
+    font-weight: 760;
+    text-decoration: none;
+  }
+
+  .system-impeccable-system {
+    --imp-bg: #f7faf6;
+    --imp-ink: #17201a;
+    --imp-muted: #526157;
+    --imp-route: #2f6b4f;
+    --imp-line: rgba(23, 32, 26, 0.13);
+    --imp-card: white;
+    --imp-route-ink: white;
+    background: var(--imp-bg);
+    color: var(--imp-ink);
+  }
+
+  :global(html[data-ui-skills-theme="dark"]) .system-impeccable-system {
+    --imp-bg: #101611;
+    --imp-ink: #edf7ef;
+    --imp-muted: #a7b8ab;
+    --imp-route: #7bd2a3;
+    --imp-line: rgba(237, 247, 239, 0.16);
+    --imp-card: #172018;
+    --imp-route-ink: #0f1a13;
+    --scorecard-bg: rgba(237, 247, 239, 0.06);
+    --scorecard-border: rgba(237, 247, 239, 0.16);
+  }
+
+  .imp-shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  .imp-hero {
+    display: grid;
+    grid-template-columns: 170px minmax(0, 1fr) 260px;
+    gap: 1rem;
+    min-height: 560px;
+    align-items: stretch;
+  }
+
+  .imp-map {
+    display: grid;
+    align-content: space-between;
+    padding: 1rem;
+    border: 1px solid var(--imp-line);
+    background:
+      linear-gradient(90deg, transparent 49%, rgba(47, 107, 79, 0.18) 50%, transparent 51%),
+      linear-gradient(180deg, transparent 49%, rgba(47, 107, 79, 0.18) 50%, transparent 51%);
+    background-size: 42px 42px;
+  }
+
+  .imp-map span {
+    width: fit-content;
+    border-radius: 999px;
+    background: var(--imp-route);
+    color: var(--imp-route-ink);
+    padding: 0.4rem 0.7rem;
+    font-size: 0.82rem;
+    font-weight: 850;
+  }
+
+  .imp-hero > div:nth-child(2) {
+    display: grid;
+    align-content: center;
+    gap: 1rem;
+  }
+
+  .imp-hero > div:nth-child(2) > p:first-child {
+    margin: 0;
+    color: var(--imp-route);
+    font-weight: 850;
+  }
+
+  .imp-hero h1 {
+    max-width: 12ch;
+    margin: 0;
+    font-size: clamp(2.45rem, 8vw, 6rem);
+    line-height: 0.96;
+    letter-spacing: 0;
+    text-wrap: balance;
+  }
+
+  .imp-hero > div:nth-child(2) > p:not(:first-child) {
+    max-width: 54ch;
+    margin: 0;
+    color: var(--imp-muted);
+    font-size: 1.08rem;
+    line-height: 1.7;
+  }
+
+  .imp-hero a {
+    display: inline-flex;
+    width: fit-content;
+    min-height: 48px;
+    align-items: center;
+    border-radius: 10px;
+    background: var(--imp-route);
+    color: var(--imp-route-ink);
+    padding: 0 1.1rem;
+    font-weight: 850;
+    text-decoration: none;
+  }
+
+  .imp-hero aside {
+    align-self: center;
+    display: grid;
+    gap: 0.75rem;
+    padding: 1rem;
+    border: 1px solid var(--imp-line);
+    border-radius: 14px;
+    background: var(--imp-card);
+  }
+
+  .imp-hero aside img {
+    object-fit: contain;
+  }
+
+  .imp-hero aside strong {
+    font-size: 1.5rem;
+  }
+
+  .imp-hero aside span {
+    color: var(--imp-muted);
+  }
+
+  .imp-route,
+  .imp-split,
+  .imp-vacancies {
+    margin-top: 1rem;
+    border-top: 1px solid var(--imp-line);
+    padding-top: 2rem;
+  }
+
+  .imp-route {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    gap: 2rem;
+  }
+
+  .imp-route h2,
+  .imp-split h2,
+  .imp-vacancies h2 {
+    margin: 0 0 0.8rem;
+    font-size: clamp(1.75rem, 4vw, 3.4rem);
+    line-height: 1.08;
+  }
+
+  .imp-route p,
+  .imp-split p,
+  .imp-split li,
+  .imp-vacancies p {
+    color: var(--imp-muted);
+    line-height: 1.7;
+  }
+
+  .imp-route ol {
+    display: grid;
+    gap: 0.8rem;
+    margin: 0;
+    padding: 0;
+    counter-reset: route;
+  }
+
+  .imp-route li {
+    list-style: none;
+    counter-increment: route;
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 0.8rem;
+    align-items: start;
+    padding: 0.9rem 0;
+    border-top: 1px solid var(--imp-line);
+    line-height: 1.65;
+  }
+
+  .imp-route li::before {
+    content: counter(route);
+    display: grid;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--imp-route);
+    color: var(--imp-route-ink);
+    font-weight: 850;
+  }
+
+  .imp-split {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 1rem;
+  }
+
+  .imp-split article {
+    padding: 1rem;
+    border: 1px solid var(--imp-line);
+    border-radius: 14px;
+    background: var(--imp-card);
+  }
+
+  .imp-vacancies {
+    display: grid;
+    grid-template-columns: 330px minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .imp-job-stack {
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .imp-job-stack article {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    gap: 0.85rem;
+    align-items: center;
+    padding: 0.85rem;
+    border: 1px solid var(--imp-line);
+    border-radius: 12px;
+    background: var(--imp-card);
+  }
+
+  .imp-job-stack span {
+    color: var(--imp-route);
+    font-weight: 850;
+  }
+
+  .imp-job-stack h3,
+  .imp-job-stack p {
+    margin: 0;
+  }
+
+  .imp-job-stack h3 a {
+    color: var(--imp-ink);
+    text-decoration: none;
+  }
+
+  .imp-job-stack p {
+    color: var(--imp-muted);
+  }
+
+  .imp-job-stack strong {
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 980px) {
+    .sh-hero,
+    .sh-two,
+    .swiss-hero,
+    .ok-hero,
+    .ok-flow,
+    .imp-hero,
+    .imp-route,
+    .imp-split,
+    .imp-vacancies {
+      grid-template-columns: 1fr;
+    }
+
+    .sh-copy,
+    .ok-hero,
+    .imp-hero {
+      min-height: auto;
+    }
+
+    .sh-copy {
+      padding: 2.5rem 0;
+    }
+
+    .sh-verdict-grid,
+    .ok-tones,
+    .ok-job-grid,
+    .variant-scorecard {
+      grid-template-columns: 1fr;
+    }
+
+    .swiss-stats article,
+    .swiss-analysis > div:first-child,
+    .swiss-analysis > div:last-child,
+    .swiss-lists > div:first-child,
+    .swiss-lists > div:last-child {
+      grid-column: 1 / -1;
+    }
+
+    .swiss-table article,
+    .sh-list article,
+    .imp-job-stack article {
+      grid-template-columns: 1fr;
+    }
+
+    .swiss-city-list {
+      grid-template-columns: 1fr;
+    }
+
+    .imp-map {
+      min-height: 180px;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .variant-nav {
+      position: static;
+    }
+
+    .sh-copy h1,
+    .swiss-hero h1,
+    .ok-hero h1,
+    .imp-hero h1 {
+      max-width: 100%;
+      overflow-wrap: anywhere;
+    }
+
+    .sh-copy {
+      padding: 1.75rem 0;
+    }
+
+    .imp-map {
+      min-height: 150px;
+    }
+  }
+</style>

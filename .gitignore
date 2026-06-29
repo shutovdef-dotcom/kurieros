@@ -1,6 +1,10 @@
 
 node-v22.14.0-darwin-arm64/
 
+# Local MCP checkouts and upstream mirrors used for tooling experiments, not
+# part of the kurerok.ru site or deployment artifact.
+mcp-projects/
+
 # Per-worktree Claude Code config (launch.json for Preview MCP, etc.)
 .claude/
 

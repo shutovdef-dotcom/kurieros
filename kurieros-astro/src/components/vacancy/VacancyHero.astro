@@ -171,35 +171,14 @@ const applyPartnerDomain = getApplyPartnerDomain(job);
 		grid-template-columns: minmax(0, 1fr) minmax(250px, 0.32fr);
 		gap: 2rem;
 		align-items: stretch;
-		background: var(--vacancy-panel-gradient);
+		background: var(--vacancy-card);
 		padding: 2.25rem;
 		border: 1px solid var(--vacancy-border-strong);
 		border-radius: 8px;
 		margin-bottom: 2rem;
 		box-shadow: var(--vacancy-shadow-strong);
 		position: relative;
-		/* `overflow: hidden` was used to clip the decorative `::after` blob
-		   that overflowed the right/bottom edges.  But it also clipped the
-		   `.share-dropdown`, leaving only «Telegram» visible when the
-		   share button was opened (user feedback).  Anchor the blob fully
-		   inside the section (`inset: auto 0 0 auto` below) so we can keep
-		   `overflow: visible` and let the dropdown escape. */
 		overflow: visible;
-	}
-	/* Decorative blob in the bottom-right corner of the hero card.
-	   Both `right` and `bottom` are anchored at `0` so the blob is
-	   entirely inside the section.  This lets the section keep
-	   `overflow: visible` (so the share dropdown can escape) while
-	   still showing the decorative tint in the corner. */
-	.vacancy-header::after {
-		content: "";
-		position: absolute;
-		inset: auto 0 0 auto;
-		width: 18rem;
-		height: 18rem;
-		background: rgba(22, 61, 43, 0.06);
-		border-radius: 0 0 8px 0;
-		pointer-events: none;
 	}
 	.vacancy-hero-main {
 		position: relative;
@@ -535,12 +514,9 @@ const applyPartnerDomain = getApplyPartnerDomain(job);
 		margin-top: 0.5rem;
 	}
 
-	@media (max-width: 768px) {
+	@media (max-width: 900px) {
 		.vacancy-header {
 			grid-template-columns: 1fr;
-		}
-		.vacancy-salary-card {
-			order: -1;
 		}
 	}
 	@media (max-width: 520px) {

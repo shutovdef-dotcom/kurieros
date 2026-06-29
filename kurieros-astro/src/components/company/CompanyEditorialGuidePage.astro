@@ -1,0 +1,813 @@
+---
+import type { CompanyEntity, ReviewLike } from '../../utils/companies';
+import type { CompanyGuide } from '../../data/companyGuides';
+import { getCityHref } from '../../utils/cities';
+import { formatRussianPlural } from '../../utils/format';
+import { formatMoneyPerMonth } from '../../utils/money';
+import { getVacancyDetailPath } from '../../utils/vacancyUrl';
+import {
+  orderGuideCities,
+  pickGuideVacancyExamples,
+} from '../../utils/companyGuideExamples';
+
+type Props = {
+  company: CompanyEntity;
+  guide: CompanyGuide;
+  updatedDate: string;
+  featuredReviews: ReviewLike[];
+};
+
+const { company, guide, updatedDate, featuredReviews } = Astro.props as Props;
+
+const salaryLabel =
+  company.maxSalary && company.maxSalaryCurrency
+    ? `до ${formatMoneyPerMonth(company.maxSalary, company.maxSalaryCurrency)}`
+    : 'смотрите по городу';
+const paymentLabel = company.paymentPreview.length
+  ? company.paymentPreview.join(', ')
+  : 'уточняется в карточке';
+const formatLabel = company.transportModes.length
+  ? company.transportModes.join(', ')
+  : company.primaryTransport;
+const visibleCities = orderGuideCities(
+  company.cities,
+  guide.featuredCities,
+  Math.min(guide.cityPreviewLimit, 10),
+);
+const hiddenCityCount = Math.max(0, company.cities.length - visibleCities.length);
+const vacancyRows = pickGuideVacancyExamples(
+  company.jobs,
+  guide.featuredCities,
+  Math.min(guide.vacancyPreviewLimit, 6),
+)
+  .map((job) => ({
+    href: getVacancyDetailPath(job),
+    title: job.title,
+    location: job.location,
+    salary: job.salary,
+    labels: [
+      job.details.payment_freq,
+      job.details.employment_type,
+      job.details.age,
+    ].filter(Boolean),
+  }));
+const reviewRows = featuredReviews.slice(0, 2);
+const guideStats = [
+  {
+    label: 'Вакансии',
+    value: `${company.vacancyCount}`,
+    note: `${formatRussianPlural(company.vacancyCount, ['активная', 'активные', 'активных'])} на КурьерОк`,
+  },
+  {
+    label: 'Доход',
+    value: salaryLabel,
+    note: 'верхняя планка зависит от города и роли',
+  },
+  {
+    label: 'Формат',
+    value: formatLabel,
+    note: paymentLabel,
+  },
+];
+const decisionRows = [
+  {
+    title: 'Кому смотреть в первую очередь',
+    points: guide.fitPoints,
+  },
+  {
+    title: 'Что проверить до анкеты',
+    points: guide.cautionPoints,
+  },
+];
+---
+
+<main class="employer-guide">
+  <div class="eg-shell">
+    <nav class="eg-breadcrumb" aria-label="Хлебные крошки">
+      <a href="/">Главная</a>
+      <span>/</span>
+      <a href="/companies/">Компании</a>
+      <span>/</span>
+      <span>{company.name}</span>
+    </nav>
+
+    <section class="eg-hero">
+      <div class="eg-hero-copy">
+        <div class="eg-brand-row">
+          <img
+            src={company.logo}
+            alt={company.name}
+            class="eg-logo"
+            width="64"
+            height="64"
+            loading="eager"
+            decoding="async"
+          />
+          <div>
+            <p class="eg-kicker">{guide.kicker}</p>
+            <h1>{guide.h1}</h1>
+          </div>
+        </div>
+        <p class="eg-lead">{guide.subtitle}</p>
+        <p class="eg-summary">{guide.summary}</p>
+        <div class="eg-actions">
+          <a class="eg-primary-link" href={guide.primaryHubHref}>{guide.primaryHubLabel}</a>
+          <a class="eg-secondary-link" href="#company-guide-faq">Открыть FAQ</a>
+        </div>
+      </div>
+
+      <aside class="eg-brief" aria-label={`Коротко о ${company.name}`}>
+        <dl>
+          {guideStats.map((item) => (
+            <div>
+              <dt>{item.label}</dt>
+              <dd>{item.value}</dd>
+              <small>{item.note}</small>
+            </div>
+          ))}
+        </dl>
+        <p>Обновлено {updatedDate}</p>
+      </aside>
+    </section>
+
+    <section class="eg-verdict" aria-labelledby="company-guide-verdict">
+      <div class="eg-section-head">
+        <p class="eg-kicker">Короткий вывод</p>
+        <h2 id="company-guide-verdict">{guide.verdictTitle}</h2>
+      </div>
+      <div class="eg-verdict-list">
+        {guide.verdictPoints.map((point, index) => (
+          <p><span>{index + 1}</span>{point}</p>
+        ))}
+      </div>
+    </section>
+
+    <section class="eg-info-grid" aria-label="Ключевые условия работы">
+      {guide.guideBlocks.map((block) => (
+        <article class="eg-info-block">
+          <h2>{block.title}</h2>
+          <p>{block.text}</p>
+        </article>
+      ))}
+    </section>
+
+    <section class="eg-decision-grid" aria-label="Проверка перед откликом">
+      {decisionRows.map((row) => (
+        <article class="eg-decision-block">
+          <h2>{row.title}</h2>
+          <ul>
+            {row.points.map((point) => (
+              <li>{point}</li>
+            ))}
+          </ul>
+        </article>
+      ))}
+    </section>
+
+    <section class="eg-steps" aria-labelledby="company-guide-steps">
+      <div class="eg-section-head">
+        <p class="eg-kicker">Маршрут отклика</p>
+        <h2 id="company-guide-steps">Как сравнить вакансии {company.name} без лишнего шума</h2>
+      </div>
+      <ol>
+        {guide.steps.map((step) => (
+          <li>{step}</li>
+        ))}
+      </ol>
+    </section>
+
+    <section class="eg-vacancies" id="company-vacancies" aria-labelledby="company-guide-vacancies">
+      <div class="eg-section-head eg-section-head-row">
+        <div>
+          <p class="eg-kicker">Вакансии</p>
+          <h2 id="company-guide-vacancies">Примеры карточек, которые стоит сравнить</h2>
+        </div>
+        <a class="eg-secondary-link" href={guide.primaryHubHref}>{guide.primaryHubLabel}</a>
+      </div>
+      <div class="eg-vacancy-list">
+        {vacancyRows.map((job) => (
+          <article class="eg-vacancy-row">
+            <div>
+              <h3><a href={job.href}>{job.title}</a></h3>
+              <p>{job.location}</p>
+            </div>
+            <strong>{job.salary}</strong>
+            <div class="eg-tag-row">
+              {job.labels.slice(0, 3).map((label) => (
+                <span>{label}</span>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    {visibleCities.length > 0 && (
+      <section class="eg-cities" aria-labelledby="company-guide-cities">
+        <div class="eg-section-head">
+          <p class="eg-kicker">Города</p>
+          <h2 id="company-guide-cities">Где уже есть вакансии {company.name}</h2>
+        </div>
+        <div class="eg-city-row">
+          {visibleCities.map((city) => (
+            <a href={getCityHref(city)}>{city}</a>
+          ))}
+          {hiddenCityCount > 0 && (
+            <a href={guide.primaryHubHref}>
+              еще {hiddenCityCount} {formatRussianPlural(hiddenCityCount, ['город', 'города', 'городов'])}
+            </a>
+          )}
+        </div>
+      </section>
+    )}
+
+    {reviewRows.length > 0 && (
+      <section class="eg-reviews" aria-labelledby="company-guide-reviews">
+        <div class="eg-section-head">
+          <p class="eg-kicker">Отзывы</p>
+          <h2 id="company-guide-reviews">Что полезно вынести из отзывов</h2>
+        </div>
+        <div class="eg-review-list">
+          {reviewRows.map((review) => (
+            <article>
+              <div>
+                <strong>{review.name}</strong>
+                <span>{review.city} · {review.rating} / 5</span>
+              </div>
+              <p>{review.comment}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <section class="eg-faq" id="company-guide-faq" aria-labelledby="company-guide-faq-heading">
+      <div class="eg-section-head">
+        <p class="eg-kicker">FAQ</p>
+        <h2 id="company-guide-faq-heading">Частые вопросы о работе в {company.name}</h2>
+      </div>
+      <div class="eg-faq-list">
+        {guide.faqItems.map((item, index) => (
+          <details open={index === 0}>
+            <summary>{item.question}</summary>
+            <p>{item.answer}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <section class="eg-sources" aria-labelledby="company-guide-sources">
+      <div class="eg-section-head">
+        <p class="eg-kicker">Прозрачность</p>
+        <h2 id="company-guide-sources">Откуда взяты условия</h2>
+      </div>
+      <div class="eg-source-copy">
+        {guide.sourceNotes.map((note) => (
+          <p>{note}</p>
+        ))}
+      </div>
+      <nav class="eg-source-links" aria-label="Источники страницы">
+        {guide.sources.map((source) => (
+          <a
+            href={source.url}
+            target={source.url.startsWith('http') ? '_blank' : undefined}
+            rel={source.url.startsWith('http') ? 'noopener noreferrer nofollow' : undefined}
+          >
+            {source.label}
+          </a>
+        ))}
+      </nav>
+    </section>
+  </div>
+</main>
+
+<style>
+  .employer-guide {
+    padding: 1.5rem 0 4rem;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.92) 52%, rgba(241, 245, 249, 0.96)),
+      #f8fafc;
+  }
+
+  .eg-shell {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .eg-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-bottom: 1.35rem;
+    color: #64748b;
+    font-size: 0.875rem;
+  }
+
+  .eg-breadcrumb a {
+    color: #166534;
+    text-decoration: none;
+  }
+
+  .eg-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 2rem;
+    align-items: stretch;
+    padding: 2.2rem 0 2rem;
+    border-top: 1px solid rgba(15, 23, 42, 0.1);
+    border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+  }
+
+  .eg-hero-copy {
+    display: grid;
+    gap: 1rem;
+    align-content: center;
+    min-width: 0;
+  }
+
+  .eg-brand-row {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    min-width: 0;
+  }
+
+  .eg-brand-row > div {
+    min-width: 0;
+  }
+
+  .eg-logo {
+    flex: 0 0 auto;
+    width: 64px;
+    height: 64px;
+    padding: 0.55rem;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    border-radius: 8px;
+    background: #ffffff;
+    object-fit: contain;
+  }
+
+  .eg-kicker {
+    margin: 0 0 0.45rem;
+    color: #15803d;
+    font-size: 0.74rem;
+    font-weight: 900;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  .eg-hero h1,
+  .eg-section-head h2,
+  .eg-info-block h2,
+  .eg-decision-block h2,
+  .eg-vacancy-row h3 {
+    margin: 0;
+    color: #0f172a;
+  }
+
+  .eg-hero h1 {
+    max-width: 14ch;
+    font-size: clamp(2.35rem, 6vw, 5rem);
+    line-height: 0.96;
+    letter-spacing: 0;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+  }
+
+  .eg-lead {
+    max-width: 760px;
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.22rem;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+
+  .eg-summary,
+  .eg-verdict-list p,
+  .eg-info-block p,
+  .eg-decision-block li,
+  .eg-steps li,
+  .eg-vacancy-row p,
+  .eg-review-list p,
+  .eg-faq details p,
+  .eg-source-copy p,
+  .eg-brief p,
+  .eg-brief small {
+    color: #475569;
+    line-height: 1.75;
+  }
+
+  .eg-summary {
+    max-width: 820px;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .eg-actions,
+  .eg-tag-row,
+  .eg-city-row,
+  .eg-source-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+  }
+
+  .eg-primary-link,
+  .eg-secondary-link,
+  .eg-city-row a,
+  .eg-source-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.5rem;
+    padding: 0.55rem 0.9rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .eg-primary-link {
+    border: 1px solid #166534;
+    background: #166534;
+    color: #ffffff;
+  }
+
+  .eg-secondary-link,
+  .eg-city-row a,
+  .eg-source-links a {
+    border: 1px solid rgba(22, 101, 52, 0.18);
+    background: rgba(22, 101, 52, 0.08);
+    color: #14532d;
+  }
+
+  .eg-brief {
+    display: grid;
+    gap: 1rem;
+    padding: 1.25rem;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+  }
+
+  .eg-brief dl {
+    display: grid;
+    gap: 0.9rem;
+    margin: 0;
+  }
+
+  .eg-brief dl div {
+    display: grid;
+    gap: 0.15rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  }
+
+  .eg-brief dl div:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .eg-brief dt {
+    color: #64748b;
+    font-size: 0.76rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .eg-brief dd {
+    margin: 0;
+    color: #0f172a;
+    font-size: 1.1rem;
+    font-weight: 900;
+    line-height: 1.35;
+  }
+
+  .eg-brief p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  .eg-verdict,
+  .eg-steps,
+  .eg-vacancies,
+  .eg-cities,
+  .eg-reviews,
+  .eg-faq,
+  .eg-sources {
+    padding: 2rem 0;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+  }
+
+  .eg-verdict,
+  .eg-section-head-row {
+    display: grid;
+    grid-template-columns: minmax(220px, 0.34fr) minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+
+  .eg-section-head-row {
+    align-items: start;
+    margin-bottom: 1.1rem;
+  }
+
+  .eg-section-head-row .eg-secondary-link {
+    justify-self: end;
+  }
+
+  .eg-verdict-list {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .eg-verdict-list p {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr);
+    gap: 0.85rem;
+    margin: 0;
+  }
+
+  .eg-verdict-list span {
+    display: inline-grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: #dcfce7;
+    color: #14532d;
+    font-weight: 900;
+  }
+
+  .eg-info-grid,
+  .eg-decision-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    padding: 2rem 0;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+  }
+
+  .eg-decision-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .eg-info-block,
+  .eg-decision-block {
+    display: grid;
+    gap: 0.8rem;
+    align-content: start;
+    padding: 1.15rem;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.82);
+  }
+
+  .eg-info-block h2,
+  .eg-decision-block h2,
+  .eg-section-head h2 {
+    font-size: 1.35rem;
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  .eg-info-block p {
+    margin: 0;
+  }
+
+  .eg-decision-block ul,
+  .eg-steps ol {
+    display: grid;
+    gap: 0.85rem;
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+
+  .eg-decision-block li::marker,
+  .eg-steps li::marker {
+    color: #15803d;
+    font-weight: 900;
+  }
+
+  .eg-steps {
+    display: grid;
+    grid-template-columns: minmax(220px, 0.34fr) minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+
+  .eg-vacancy-list,
+  .eg-review-list,
+  .eg-faq-list,
+  .eg-source-copy {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .eg-vacancy-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(130px, 0.2fr) minmax(180px, 0.28fr);
+    gap: 1rem;
+    align-items: start;
+    padding: 1rem 0;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+  }
+
+  .eg-vacancy-row:first-child {
+    border-top: 0;
+  }
+
+  .eg-vacancy-row h3 {
+    font-size: 1rem;
+    line-height: 1.35;
+  }
+
+  .eg-vacancy-row h3 a {
+    color: #0f172a;
+    text-decoration: none;
+  }
+
+  .eg-vacancy-row p {
+    margin: 0.3rem 0 0;
+    font-size: 0.92rem;
+  }
+
+  .eg-vacancy-row strong {
+    color: #0f172a;
+    line-height: 1.4;
+  }
+
+  .eg-tag-row span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: 8px;
+    background: #fef3c7;
+    color: #713f12;
+    font-size: 0.78rem;
+    font-weight: 800;
+  }
+
+  .eg-review-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .eg-review-list article {
+    display: grid;
+    gap: 0.65rem;
+    padding: 1rem;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    border-radius: 8px;
+    background: #ffffff;
+  }
+
+  .eg-review-list article div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .eg-review-list span {
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  .eg-review-list p {
+    margin: 0;
+  }
+
+  .eg-faq-list details {
+    border-top: 1px solid rgba(15, 23, 42, 0.1);
+  }
+
+  .eg-faq-list details:first-child {
+    border-top: 0;
+  }
+
+  .eg-faq-list summary {
+    cursor: pointer;
+    padding: 1rem 0;
+    color: #0f172a;
+    font-size: 1rem;
+    font-weight: 900;
+  }
+
+  .eg-faq-list p,
+  .eg-source-copy p {
+    margin: 0 0 1rem;
+  }
+
+  .eg-sources {
+    border-bottom: 0;
+  }
+
+  @media (max-width: 920px) {
+    .eg-hero,
+    .eg-verdict,
+    .eg-steps,
+    .eg-section-head-row,
+    .eg-info-grid,
+    .eg-decision-grid,
+    .eg-review-list {
+      grid-template-columns: 1fr;
+    }
+
+    .eg-section-head-row .eg-secondary-link {
+      justify-self: start;
+    }
+
+    .eg-vacancy-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .employer-guide {
+      padding-top: 1rem;
+    }
+
+    .eg-hero {
+      gap: 1.35rem;
+      padding: 1.4rem 0 1.6rem;
+    }
+
+    .eg-brand-row {
+      display: grid;
+      grid-template-columns: 52px minmax(0, 1fr);
+      gap: 0.85rem;
+    }
+
+    .eg-logo {
+      width: 52px;
+      height: 52px;
+    }
+
+    .eg-hero h1 {
+      max-width: 100%;
+      font-size: clamp(2.05rem, 10vw, 2.55rem);
+      line-height: 1.03;
+    }
+
+    .eg-lead {
+      font-size: 1.05rem;
+    }
+
+    .eg-primary-link,
+    .eg-secondary-link,
+    .eg-city-row a,
+    .eg-source-links a {
+      width: 100%;
+    }
+
+    .eg-info-block,
+    .eg-decision-block,
+    .eg-brief {
+      padding: 1rem;
+    }
+  }
+
+  :global(:where(html, body).dark-mode) .employer-guide {
+    background: linear-gradient(180deg, var(--ink-50), var(--ink-0));
+  }
+
+  :global(:where(html, body).dark-mode) .eg-hero h1,
+  :global(:where(html, body).dark-mode) .eg-section-head h2,
+  :global(:where(html, body).dark-mode) .eg-info-block h2,
+  :global(:where(html, body).dark-mode) .eg-decision-block h2,
+  :global(:where(html, body).dark-mode) .eg-vacancy-row h3,
+  :global(:where(html, body).dark-mode) .eg-vacancy-row h3 a,
+  :global(:where(html, body).dark-mode) .eg-vacancy-row strong,
+  :global(:where(html, body).dark-mode) .eg-lead,
+  :global(:where(html, body).dark-mode) .eg-brief dd,
+  :global(:where(html, body).dark-mode) .eg-faq-list summary {
+    color: var(--text-main);
+  }
+
+  :global(:where(html, body).dark-mode) .eg-summary,
+  :global(:where(html, body).dark-mode) .eg-verdict-list p,
+  :global(:where(html, body).dark-mode) .eg-info-block p,
+  :global(:where(html, body).dark-mode) .eg-decision-block li,
+  :global(:where(html, body).dark-mode) .eg-steps li,
+  :global(:where(html, body).dark-mode) .eg-vacancy-row p,
+  :global(:where(html, body).dark-mode) .eg-review-list p,
+  :global(:where(html, body).dark-mode) .eg-faq details p,
+  :global(:where(html, body).dark-mode) .eg-source-copy p,
+  :global(:where(html, body).dark-mode) .eg-brief p,
+  :global(:where(html, body).dark-mode) .eg-brief small,
+  :global(:where(html, body).dark-mode) .eg-breadcrumb,
+  :global(:where(html, body).dark-mode) .eg-review-list span {
+    color: var(--text-muted);
+  }
+
+  :global(:where(html, body).dark-mode) .eg-logo,
+  :global(:where(html, body).dark-mode) .eg-brief,
+  :global(:where(html, body).dark-mode) .eg-info-block,
+  :global(:where(html, body).dark-mode) .eg-decision-block,
+  :global(:where(html, body).dark-mode) .eg-review-list article {
+    border-color: var(--ink-200);
+    background: var(--ink-100);
+  }
+</style>

@@ -1,0 +1,170 @@
+name: Deploy Astro to Timeweb
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-timeweb.yml'
+      - 'kurieros-astro/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: timeweb-production
+  cancel-in-progress: false
+
+env:
+  PROJECT_DIR: kurieros-astro
+  NODE_VERSION: '24.x'
+  SITE_URL: https://kurerok.ru
+  SITE_BASE: /
+  PUBLIC_GA4_MEASUREMENT_ID: G-686FXGHBWB
+  PUBLIC_YANDEX_METRIKA_ID: '108655359'
+  PUBLIC_OWNER_SEO_HASH: f08d870722fc49f961b4bddb87fe6b15c226f7880c5cc1da17697ce9be527073
+  PUBLIC_GSC_PROPERTY_URL: sc-domain:kurerok.ru
+  PUBLIC_YANDEX_WEBMASTER_HOST: https:kurerok.ru:443
+  PUBLIC_YANDEX_VERIFICATION: 9a662580de5ebac5
+  PUBLIC_GOOGLE_SITE_VERIFICATION: QIGlMj-JAXkxvnkeFNNu6hWJ5bslKtguuUxY4ty17bI
+  PUBLIC_OZON_LEAD_API: ${{ vars.PUBLIC_OZON_LEAD_API }}
+
+jobs:
+  build:
+    if: github.event_name == 'workflow_dispatch' || vars.TIMEWEB_AUTO_DEPLOY == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.PROJECT_DIR }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          check-latest: true
+          cache: npm
+          cache-dependency-path: ${{ env.PROJECT_DIR }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Test
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+
+      - name: Validate Yandex vacancy feed
+        run: npm run check:yandex-feed
+
+      - name: Validate generated output
+        run: npm run test:dist
+
+      - name: Enforce dist size budget
+        run: npm run size:dist:check
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kurerok-dist
+          path: ${{ env.PROJECT_DIR }}/dist/
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 6
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: timeweb-production
+      url: https://kurerok.ru/
+    steps:
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: kurerok-dist
+          path: dist
+
+      - name: Install lftp
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends lftp
+
+      - name: Preflight Timeweb configuration
+        env:
+          TIMEWEB_FTP_HOST: ${{ secrets.TIMEWEB_FTP_HOST }}
+          TIMEWEB_FTP_USER: ${{ secrets.TIMEWEB_FTP_USER }}
+          TIMEWEB_FTP_PASSWORD: ${{ secrets.TIMEWEB_FTP_PASSWORD }}
+          TIMEWEB_REMOTE_DIR: ${{ vars.TIMEWEB_REMOTE_DIR }}
+          TIMEWEB_REMOTE_ROOT_IS_SITE_ROOT: ${{ vars.TIMEWEB_REMOTE_ROOT_IS_SITE_ROOT }}
+        run: |
+          set -euo pipefail
+
+          missing=0
+          for name in TIMEWEB_FTP_HOST TIMEWEB_FTP_USER TIMEWEB_FTP_PASSWORD; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::$name is not configured"
+              missing=1
+            fi
+          done
+          [ "$missing" -eq 0 ]
+
+          remote_dir="${TIMEWEB_REMOTE_DIR:-/}"
+          case "$remote_dir" in
+            */) ;;
+            *) remote_dir="${remote_dir}/" ;;
+          esac
+
+          if [ "$remote_dir" = "/" ] && [ "${TIMEWEB_REMOTE_ROOT_IS_SITE_ROOT:-}" != "true" ]; then
+            echo "::error::TIMEWEB_REMOTE_DIR is '/', but TIMEWEB_REMOTE_ROOT_IS_SITE_ROOT is not true. Use a FTP user scoped to kurerok.ru/public_html or set TIMEWEB_REMOTE_DIR to the absolute public_html path."
+            exit 1
+          fi
+
+          echo "TIMEWEB_REMOTE_DIR_NORMALIZED=$remote_dir" >> "$GITHUB_ENV"
+
+      - name: Deploy dist to Timeweb
+        env:
+          TIMEWEB_FTP_HOST: ${{ secrets.TIMEWEB_FTP_HOST }}
+          TIMEWEB_FTP_PORT: ${{ vars.TIMEWEB_FTP_PORT }}
+          TIMEWEB_FTP_USER: ${{ secrets.TIMEWEB_FTP_USER }}
+          TIMEWEB_FTP_PASSWORD: ${{ secrets.TIMEWEB_FTP_PASSWORD }}
+          TIMEWEB_FTP_TLS: ${{ vars.TIMEWEB_FTP_TLS }}
+        run: |
+          set -euo pipefail
+
+          ftp_port="${TIMEWEB_FTP_PORT:-21}"
+          tls_mode="${TIMEWEB_FTP_TLS:-false}"
+
+          if [ "$tls_mode" = "true" ]; then
+            security_settings=$'set ftp:ssl-force true\nset ftp:ssl-protect-data true\nset ssl:verify-certificate true'
+          else
+            security_settings=$'set ftp:ssl-allow false'
+          fi
+
+          lftp -p "$ftp_port" -u "$TIMEWEB_FTP_USER","$TIMEWEB_FTP_PASSWORD" "$TIMEWEB_FTP_HOST" <<LFTP
+          set cmd:fail-exit yes
+          set ftp:passive-mode yes
+          set net:timeout 30
+          set net:max-retries 3
+          set net:reconnect-interval-base 5
+          $security_settings
+          mirror --reverse --delete --parallel=4 --verbose=1 --exclude-glob .htaccess --exclude-glob .well-known --exclude-glob .well-known/** ./dist/ "$TIMEWEB_REMOTE_DIR_NORMALIZED"
+          bye
+          LFTP
+
+      - name: Optional production smoke check
+        if: ${{ vars.TIMEWEB_VERIFY_URL != '' }}
+        env:
+          TIMEWEB_VERIFY_URL: ${{ vars.TIMEWEB_VERIFY_URL }}
+        run: |
+          set -euo pipefail
+          curl -fsSI "$TIMEWEB_VERIFY_URL" | sed -n '1,20p'

@@ -5,6 +5,7 @@ import Footer from '../components/Footer.astro';
 import JobGrid from '../components/JobGrid.astro';
 import JobFilters from '../components/JobFilters.astro';
 import CityInsights from '../components/CityInsights.astro';
+import CityClusterGuide from '../components/CityClusterGuide.astro';
 import ListingCityFilter from '../components/ListingCityFilter.astro';
 import jobsData from '../data/jobs';
 import { CATEGORIES } from '../data/constants';
@@ -28,6 +29,11 @@ import {
 } from '../utils/jobFilters';
 import { HUB_CONFIGS, extractHubCities, isHubEmpty } from '../utils/transportHubs';
 import { CATEGORY_CANONICAL_HUB } from '../utils/categoryCanonicalHub';
+import {
+	getBrandCategoryCompanyCanonical,
+	getBrandCategoryCompanyLink,
+} from '../utils/companySeo';
+import { getCitySeoCluster } from '../utils/citySeoClusters';
 // `jobsByCity` is built ONCE at module load inside jobsByCityIndex.ts
 // (imports are module-cached). It is NOT rebuilt per page — a local
 // `const jobsByCity = buildJobsByCityMap(jobsData)` in this frontmatter
@@ -160,10 +166,15 @@ const isEmptyListing = filteredJobs.length <= 1;
 // (BaseLayout falls back to self-canonical via Astro.url.pathname).
 const _hubPath = type === 'category' ? CATEGORY_CANONICAL_HUB[data.slug] : undefined;
 const _hubCfg = _hubPath !== undefined ? _hubPathToConfig[_hubPath] : undefined;
+const brandCategoryCompanyLink =
+	type === 'category' ? getBrandCategoryCompanyLink(data.slug) : undefined;
+const brandCategoryCompanyCanonical =
+	type === 'category' ? getBrandCategoryCompanyCanonical(data.slug) : undefined;
 const canonicalURL =
-	_hubPath !== undefined && _hubCfg !== undefined && !isHubEmpty(jobsData, _hubCfg)
+	brandCategoryCompanyCanonical ??
+	(_hubPath !== undefined && _hubCfg !== undefined && !isHubEmpty(jobsData, _hubCfg)
 		? _hubPath
-		: undefined;
+		: undefined);
 
 // «Соседние города» — exit-ramp для search-визитёров (GSC 2026-05-03:
 // page_depth 2.49 → 1.62 без «куда ещё кликнуть»). Z1.1: вместо топ-12
@@ -171,6 +182,7 @@ const canonicalURL =
 // ближайшие города с вакансиями, уникальный набор на каждый город.
 const cityGeo = type === 'city' ? getCityGeo(data.slug) : null;
 const cityNeighbours = type === 'city' ? getNearbyCities(data.slug) : [];
+const citySeoCluster = type === 'city' ? getCitySeoCluster(data.slug) : undefined;
 
 // P1: max salary across the matched listings — used in title/description to
 // make the snippet more clickable in search results (cheaper-than-rewrite
@@ -228,7 +240,7 @@ const cityPrep = type === 'city' ? data.prep : undefined;
 const categoryName = type === 'category' ? data.name : undefined;
 const categoryNameClean = type === 'category' ? cleanCategoryName(data.name) : undefined;
 
-const seoTitle = buildSeoTitle({
+const defaultSeoTitle = buildSeoTitle({
 	type,
 	cityPrep,
 	categoryNameClean,
@@ -237,6 +249,7 @@ const seoTitle = buildSeoTitle({
 	isEmptyListing,
 	isEzhednevLanding,
 });
+const seoTitle = citySeoCluster?.title ?? defaultSeoTitle;
 const seoDescription = buildSeoDescription({
 	type,
 	cityPrep,
@@ -270,11 +283,12 @@ const faqItems = buildFaqItems({
 	transportTypes,
 	vacancyCountText,
 });
+const pageH1 = citySeoCluster?.h1 ?? title;
 
 const pageSchemaGraph = buildPageSchemaGraph({
 	type,
 	dataName: data.name,
-	title,
+	title: pageH1,
 	seoDescription,
 	pageUrlHref: Astro.url.href,
 	pageUrlPathname: Astro.url.pathname,
@@ -309,7 +323,7 @@ const pageSchemaGraph = buildPageSchemaGraph({
 					<span>{type === 'city' ? `Работа курьером ${data.prep}` : data.name}</span>
 				</nav>
 				<p class="section-eyebrow">{type === 'city' ? 'Вакансии в городе' : 'Готовый фильтр'}</p>
-				<h1>{title}</h1>
+				<h1>{pageH1}</h1>
 				<p>{type === 'city' && citySummary ? citySummary : heroIntro}</p>
 				{type === 'city' && citySummary ? (
 					<CityInsights
@@ -327,6 +341,11 @@ const pageSchemaGraph = buildPageSchemaGraph({
 						<div class="listing-hero-actions">
 							<a href="#vacancies" class="listing-primary-link">Смотреть вакансии</a>
 							<a href="/compare/" class="listing-secondary-link">Сравнить</a>
+							{brandCategoryCompanyLink && (
+								<a href={brandCategoryCompanyLink.companyHref} class="listing-secondary-link">
+									{brandCategoryCompanyLink.label}
+								</a>
+							)}
 						</div>
 					</CityInsights>
 				) : (
@@ -334,6 +353,11 @@ const pageSchemaGraph = buildPageSchemaGraph({
 						<div class="listing-hero-actions">
 							<a href="#vacancies" class="listing-primary-link">Смотреть вакансии</a>
 							<a href="/compare/" class="listing-secondary-link">Сравнить</a>
+							{brandCategoryCompanyLink && (
+								<a href={brandCategoryCompanyLink.companyHref} class="listing-secondary-link">
+									{brandCategoryCompanyLink.label}
+								</a>
+							)}
 						</div>
 						<div class="listing-fact-grid listing-fact-grid-hero">
 							{factCards.map((fact) => (
@@ -347,6 +371,17 @@ const pageSchemaGraph = buildPageSchemaGraph({
 				)}
 			</div>
 		</section>
+
+		{type === 'city' && citySeoCluster && !isEmptyListing && (
+			<CityClusterGuide
+				cluster={citySeoCluster}
+				cityName={data.name}
+				vacancyCount={filteredJobs.length}
+				companyNames={companyNames}
+				transportTypes={transportTypes}
+				formattedMaxSalary={formattedMaxSalary}
+			/>
+		)}
 
 		<section class="listing-filters" aria-label="Фильтры вакансий">
 			<JobFilters />

@@ -1,0 +1,215 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import {
+  UI_SKILL_VARIANTS,
+  getCompanyDesignPreview,
+} from '../../../utils/companyDesignPreview';
+
+const preview = getCompanyDesignPreview();
+const title = 'UI Skills: варианты страницы компании | КурьерОК';
+const description = 'Экспериментальные дизайн-версии страницы компании Купер, созданные по разным UI Skills для сравнения подходов.';
+---
+
+<BaseLayout title={title} description={description} robots="noindex, nofollow">
+  <main class="skill-compare">
+    <section class="compare-hero">
+      <a class="back-link" href="/companies/kuper-ex-sbermarket/">Оригинальная страница</a>
+      <p class="eyebrow">UI Skills comparison</p>
+      <h1>Четыре дизайн-подхода к странице {preview.company.name}</h1>
+      <p>
+        Один и тот же контент, одна и та же компания, четыре разных системных подхода из UI Skills.
+        Откройте версии рядом и отмечайте, где лучше читаются условия, вакансии и доверительные блоки.
+      </p>
+    </section>
+
+    <section class="variant-grid" aria-label="Варианты дизайна">
+      {UI_SKILL_VARIANTS.map((variant) => (
+        <article class="variant-card" style={`--variant-accent: ${variant.accent}`}>
+          <div>
+            <p>{variant.skill}</p>
+            <h2>{variant.name}</h2>
+            <span>{variant.systemType}</span>
+          </div>
+          <p>{variant.thesis}</p>
+          <p>{variant.nameExplanation}</p>
+          <small>Source: <a href={variant.sourceUrl}>{variant.repo}</a></small>
+          <div class="variant-actions">
+            <a href={variant.href}>Светлая</a>
+            <a href={`${variant.href}?theme=dark`}>Тёмная</a>
+          </div>
+        </article>
+      ))}
+    </section>
+
+    <section class="compare-notes">
+      <h2>Как сравнивать</h2>
+      <ul>
+        <li>Сначала посмотрите mobile: понятно ли, куда нажимать и что проверить перед откликом.</li>
+        <li>Потом desktop: насколько легко сканировать факты, вакансии, города и FAQ.</li>
+        <li>Отдельно отметьте элементы, которые хочется перенести в реальную страницу.</li>
+      </ul>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .skill-compare {
+    min-height: 100vh;
+    padding: clamp(1rem, 2vw, 2rem);
+    background: #f7faf6;
+    color: #162016;
+  }
+
+  .compare-hero,
+  .variant-grid,
+  .compare-notes {
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+
+  .back-link {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    color: #245f43;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .eyebrow {
+    margin: 2rem 0 0.5rem;
+    color: #5f6f63;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .compare-hero h1 {
+    max-width: 14ch;
+    margin: 0;
+    font-size: clamp(2.25rem, 8vw, 5.75rem);
+    line-height: 0.98;
+    letter-spacing: 0;
+  }
+
+  .compare-hero > p:last-child {
+    max-width: 64ch;
+    margin: 1.25rem 0 0;
+    color: #475349;
+    font-size: 1.08rem;
+    line-height: 1.7;
+  }
+
+  .variant-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .variant-card {
+    display: grid;
+    gap: 1rem;
+    min-height: 320px;
+    padding: 1.25rem;
+    border: 1px solid rgba(22, 32, 22, 0.15);
+    border-top: 8px solid var(--variant-accent);
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  .variant-card p:first-child,
+  .variant-card span {
+    margin: 0;
+    color: #68746b;
+    font-size: 0.8rem;
+    font-weight: 800;
+  }
+
+  .variant-card h2 {
+    margin: 0.25rem 0;
+    font-size: 1.7rem;
+  }
+
+  .variant-card > p {
+    margin: 0;
+    color: #3e4b42;
+    line-height: 1.65;
+  }
+
+  .variant-actions {
+    align-self: end;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .variant-actions a {
+    display: inline-flex;
+    min-height: 48px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: var(--variant-accent);
+    color: #fff;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .variant-actions a:last-child {
+    border: 1px solid var(--variant-accent);
+    background: #162016;
+  }
+
+  .variant-card small {
+    color: #68746b;
+    line-height: 1.45;
+  }
+
+  .variant-card small a {
+    color: inherit;
+    font-weight: 800;
+  }
+
+  .variant-card a:focus-visible,
+  .back-link:focus-visible {
+    outline: 3px solid #f1c84b;
+    outline-offset: 3px;
+  }
+
+  .compare-notes {
+    margin-top: 2rem;
+    padding: 1.25rem;
+    border: 1px solid rgba(22, 32, 22, 0.12);
+    border-radius: 8px;
+    background: #eef5ee;
+  }
+
+  .compare-notes h2 {
+    margin: 0 0 0.75rem;
+  }
+
+  .compare-notes ul {
+    margin: 0;
+    padding-left: 1.2rem;
+    color: #3e4b42;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 1080px) {
+    .variant-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 720px) {
+    .variant-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .compare-hero h1 {
+      max-width: 100%;
+    }
+  }
+</style>

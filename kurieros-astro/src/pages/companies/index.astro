@@ -6,11 +6,11 @@ import Footer from '../../components/Footer.astro';
 // derived ONCE at module load in `companiesIndex.ts`, so this page no
 // longer rescans ~4.8k jobs + 19,144 reviews per build — audit v5 M4.
 import { companiesFromJobs } from '../../utils/companiesIndex';
+import { sortCompaniesByPopularity } from '../../utils/companyPopularity';
 import { formatRussianPlural } from '../../utils/format';
 import { buildBreadcrumbSchema } from '../../utils/schema';
 
-const companies = [...companiesFromJobs]
-  .sort((a, b) => b.vacancyCount - a.vacancyCount || (b.rating || 0) - (a.rating || 0));
+const companies = sortCompaniesByPopularity(companiesFromJobs);
 const totalVacancies = companies.reduce((sum, company) => sum + company.vacancyCount, 0);
 const companiesTitle = 'Работа курьером по компаниям: бренды и вакансии | КурьерОк';
 const companiesDescription = `Компании с вакансиями курьеров: ${companies.length} брендов и ${totalVacancies} вакансий. Выберите работодателя, сравните бренды и переходите в подходящие карточки.`.slice(0, 170);
@@ -81,22 +81,12 @@ const pageSchemaGraph = [
     </section>
 
     <section class="companies-grid">
-      {/* AUDIT-OK (A5): clicking a company card on /companies/ goes to
-          the external apply-link (or the lead-form for Ozon), not to
-          /companies/{slug}/. Owner-confirmed: this is the intended
-          conversion-first behaviour — the in-app /companies/{slug}/
-          page is a secondary destination reachable via search/breadcrumb.
-          Do not re-flag. */}
-      {companies.map((company) => {
-        const isExternalApplyLink = /^https?:\/\//i.test(company.applyLink);
-        return (
+      {companies.map((company) => (
           <article class="company-listing-card">
             <a
               class="company-card-link"
-              href={company.applyLink}
-              target={isExternalApplyLink ? '_blank' : undefined}
-              rel={isExternalApplyLink ? 'noopener noreferrer nofollow sponsored' : undefined}
-              aria-label={`Открыть заявку ${company.name}`}
+              href={company.href}
+              aria-label={`Открыть страницу ${company.name}`}
             ></a>
             <div class="company-logo-large">
               <img src={company.logo} alt={company.name} />
@@ -105,8 +95,7 @@ const pageSchemaGraph = [
             <p class="company-meta"><strong>{company.vacancyCount}</strong> <span data-t="companies.active_vacancies">{formatRussianPlural(company.vacancyCount, ['активная вакансия', 'активные вакансии', 'активных вакансий'])}</span></p>
             <p class="company-snippet">{company.shortIntro}</p>
           </article>
-        );
-      })}
+      ))}
     </section>
 
     <section class="partner-section">
@@ -147,6 +136,18 @@ const pageSchemaGraph = [
 
   .companies-breadcrumb a:hover {
     color: var(--primary-color);
+  }
+
+  .companies-hero h1 {
+    max-width: min(100%, 16ch);
+    margin-left: auto;
+    margin-right: auto;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+
+  .companies-hero p {
+    max-width: min(100%, 38rem);
   }
 
   .companies-grid {
@@ -236,6 +237,7 @@ const pageSchemaGraph = [
     margin: 0;
     color: var(--text-muted);
     line-height: 1.7;
+    overflow-wrap: anywhere;
   }
 
   .partner-section {
@@ -282,6 +284,7 @@ const pageSchemaGraph = [
     .company-listing-card h2 {
       font-size: 1rem;
       margin-bottom: 0.25rem;
+      overflow-wrap: anywhere;
     }
 
     .company-meta,

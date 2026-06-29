@@ -124,6 +124,16 @@ const normalizeSiteUrl = (siteUrl: string): string => siteUrl.replace(/\/+$/, ''
 const absoluteUrl = (pathOrUrl: string, siteUrl: string): string =>
 	new URL(pathOrUrl, `${normalizeSiteUrl(siteUrl)}/`).toString();
 
+const normalizeSetOfferUrl = (url: string): string => {
+	try {
+		const parsed = new URL(url);
+		parsed.hash = '';
+		return parsed.toString();
+	} catch {
+		return url.split('#')[0] ?? url;
+	}
+};
+
 const escapeXml = (value: string | number | boolean): string =>
 	String(value)
 		.replace(/&/g, '&amp;')
@@ -356,6 +366,19 @@ const buildOfferSetIds = (buckets: Map<string, SetBucket>): Map<string, string[]
 	return byJobSlug;
 };
 
+const getBucketOfferUrls = (bucket: SetBucket, siteUrl: string): string[] =>
+	bucket.jobs.map((job) => absoluteUrl(getVacancyDetailPath(job), siteUrl));
+
+const hasEnoughUniqueBaseOfferUrls = (urls: string[]): boolean =>
+	new Set(urls.map(normalizeSetOfferUrl)).size >= MIN_SET_OFFERS;
+
+const filterQualifiedSetBuckets = (buckets: Map<string, SetBucket>, siteUrl: string): Map<string, SetBucket> =>
+	new Map(
+		[...buckets].filter(([, bucket]) =>
+			hasEnoughUniqueBaseOfferUrls(getBucketOfferUrls(bucket, siteUrl)),
+		),
+	);
+
 const buildPairs = (
 	jobs: GeneratedJob[],
 	sources: VacancySource[],
@@ -448,7 +471,8 @@ export const buildYandexVacancyFeed = ({
 	const { pairs, stats } = buildPairs(jobs, sources);
 	const feedJobs = pairs.map((pair) => pair.job);
 	const buckets = buildSetBuckets(feedJobs, normalizedSiteUrl);
-	const setIdsByJobSlug = buildOfferSetIds(buckets);
+	const qualifiedBuckets = filterQualifiedSetBuckets(buckets, normalizedSiteUrl);
+	const setIdsByJobSlug = buildOfferSetIds(qualifiedBuckets);
 	const offers: YandexFeedOffer[] = [];
 	let excludedNoSets = 0;
 
@@ -466,16 +490,15 @@ export const buildYandexVacancyFeed = ({
 		...REQUIRED_CATEGORIES,
 		...VACANCY_CATEGORIES.filter((category) => usedCategoryIds.has(category.id)),
 	];
-	const sets = [...buckets.values()]
+	const sets = [...qualifiedBuckets.values()]
 		.map((bucket) => ({
 			id: bucket.id,
 			name: bucket.name,
 			url: bucket.url,
-			offerUrls: bucket.jobs
-				.map((job) => absoluteUrl(getVacancyDetailPath(job), normalizedSiteUrl))
+			offerUrls: getBucketOfferUrls(bucket, normalizedSiteUrl)
 				.filter((url) => offers.some((offer) => offer.url === url)),
 		}))
-		.filter((set) => set.offerUrls.length >= MIN_SET_OFFERS);
+		.filter((set) => set.offerUrls.length >= MIN_SET_OFFERS && hasEnoughUniqueBaseOfferUrls(set.offerUrls));
 
 	return {
 		generatedAt,
@@ -591,6 +614,10 @@ export const validateYandexVacancyFeed = (feed: YandexVacancyFeed): YandexFeedVa
 	for (const set of feed.sets) {
 		if (set.offerUrls.length < MIN_SET_OFFERS) {
 			errors.push(`Set ${set.id} has ${set.offerUrls.length} offers; minimum is ${MIN_SET_OFFERS}.`);
+		}
+		const uniqueBaseOfferUrlCount = new Set(set.offerUrls.map(normalizeSetOfferUrl)).size;
+		if (uniqueBaseOfferUrlCount < MIN_SET_OFFERS) {
+			errors.push(`Set ${set.id} has ${uniqueBaseOfferUrlCount} unique base offer URLs; minimum is ${MIN_SET_OFFERS}.`);
 		}
 	}
 	for (const offer of feed.offers) {
