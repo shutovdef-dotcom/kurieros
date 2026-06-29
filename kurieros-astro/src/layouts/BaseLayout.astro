@@ -105,6 +105,11 @@ const structuredData = JSON.stringify(
 const isProduction = import.meta.env.PROD;
 const ga4MeasurementId = String(import.meta.env.PUBLIC_GA4_MEASUREMENT_ID ?? '').trim();
 const yandexMetrikaId = String(import.meta.env.PUBLIC_YANDEX_METRIKA_ID ?? '').trim();
+const hasAnalytics = isProduction && (ga4MeasurementId || yandexMetrikaId);
+const analyticsConfigJson = JSON.stringify({
+	ga4MeasurementId,
+	yandexMetrikaId,
+}).replace(/</g, '\\u003c');
 // Verification tokens are set per environment via .env.example vars.
 // Hardcoded fallbacks were removed (M19): tokens that drift in source
 // outlive their post-rotation usefulness in git history. When a var is
@@ -153,65 +158,22 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 				<script is:inline src="/bootstrap/owner-mute.js"></script>
 			)}
 
-			{isProduction && ga4MeasurementId && (
+			{hasAnalytics && (
 				<>
-					<script is:inline define:vars={{ ga4MeasurementId }}>
-						(function() {
-							if (window.__kurerokSkipAnalytics) {
-								// Stub gtag so per-page event handlers don't crash.
-								window.gtag = function() {};
-								return;
-							}
-							// Dynamic inject (replaces the previous static <script async src>),
-							// so muted devices skip the network request entirely.
-							var s = document.createElement('script');
-							s.async = true;
-							s.src = 'https://www.googletagmanager.com/gtag/js?id=' + ga4MeasurementId;
-							document.head.appendChild(s);
+					<script is:inline id="kurerok-analytics-config" type="application/json" set:html={analyticsConfigJson}></script>
+					<script is:inline src="/bootstrap/analytics-init.js" defer></script>
 
-							window.dataLayer = window.dataLayer || [];
-							function gtag(){window.dataLayer.push(arguments);}
-							gtag('js', new Date());
-							gtag('config', ga4MeasurementId, {
-								anonymize_ip: true,
-							});
-							// Expose gtag globally so per-page event handlers can call it.
-							window.gtag = gtag;
-						})();
-					</script>
-
-					<script>
-						import '../scripts/analyticsEvents';
-					</script>
+					{ga4MeasurementId && (
+						<script>
+							import '../scripts/analyticsEvents';
+						</script>
+					)}
 				</>
 			)}
 
 			<script>
 				import '../scripts/applyContext';
 			</script>
-
-			{isProduction && yandexMetrikaId && (
-				<script is:inline define:vars={{ yandexMetrikaId }}>
-					(function() {
-						if (window.__kurerokSkipAnalytics) return;
-						(function(m,e,t,r,i,k,a){
-							m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-							m[i].l=1*new Date();
-							for (var j = 0; j < document.scripts.length; j++) {
-								if (document.scripts[j].src === r) return;
-							}
-							k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a);
-						})(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js', 'ym');
-
-						ym(Number(yandexMetrikaId), 'init', {
-							clickmap:true,
-							trackLinks:true,
-							accurateTrackBounce:true,
-							webvisor:true
-						});
-					})();
-				</script>
-			)}
 
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content={ogType} />
