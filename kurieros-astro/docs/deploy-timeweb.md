@@ -26,14 +26,15 @@ switched to Timeweb only after the Timeweb copy is verified.
 1. In Timeweb, create or verify the site `kurerok.ru`.
 2. Enable SSL for `kurerok.ru` after the site exists.
 3. Create a dedicated "Пользователь ПУ/FTP" for deployment.
-4. Scope that user to the exact website directory:
+4. Scope that user to the exact website directory. In this Timeweb account,
+   `kurerok.ru` is attached to the "Основной сайт", whose document root is:
 
 ```text
-/kurerok.ru/public_html
+/public_html
 ```
 
-When the FTP user is scoped to `kurerok.ru/public_html`, FTP `/` is already the
-site root. Do not use the main Timeweb account password for CI.
+When the FTP user is scoped to `/public_html`, FTP `/` is already the site root.
+Do not use the main Timeweb account password for CI.
 
 ## GitHub configuration
 
@@ -65,9 +66,10 @@ TIMEWEB_VERIFY_URL                 <empty until DNS cutover>
 ```
 
 `TIMEWEB_REMOTE_ROOT_IS_SITE_ROOT=true` is a safety latch. It is valid only
-when the FTP user is scoped to `kurerok.ru/public_html`. If the FTP user is not
-scoped, set `TIMEWEB_REMOTE_DIR` to the absolute public directory instead, for
-example `/kurerok.ru/public_html/`, and leave the safety latch unset.
+when the FTP user is scoped to the site's public directory. For the current
+Timeweb setup that directory is `/public_html`. If the FTP user is not scoped,
+set `TIMEWEB_REMOTE_DIR` to the absolute public directory instead, for example
+`/public_html/`, and leave the safety latch unset.
 
 Leave `TIMEWEB_VERIFY_URL` empty before DNS cutover unless Timeweb gives a
 technical preview URL. If it is set to `https://kurerok.ru/` too early, the
@@ -147,7 +149,7 @@ After DNS cutover:
 ## Safety notes
 
 - Do not commit FTP passwords or Timeweb panel tokens.
-- Keep the deploy FTP user scoped to `kurerok.ru/public_html`.
+- Keep the deploy FTP user scoped to `/public_html`.
 - The workflow preserves `.htaccess` and `.well-known/` on the server while
   deleting stale generated site files.
 - DNS changes are not automated by this workflow.

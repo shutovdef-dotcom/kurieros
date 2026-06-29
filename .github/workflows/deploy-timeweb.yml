@@ -125,7 +125,7 @@ jobs:
           esac
 
           if [ "$remote_dir" = "/" ] && [ "${TIMEWEB_REMOTE_ROOT_IS_SITE_ROOT:-}" != "true" ]; then
-            echo "::error::TIMEWEB_REMOTE_DIR is '/', but TIMEWEB_REMOTE_ROOT_IS_SITE_ROOT is not true. Use a FTP user scoped to kurerok.ru/public_html or set TIMEWEB_REMOTE_DIR to the absolute public_html path."
+            echo "::error::TIMEWEB_REMOTE_DIR is '/', but TIMEWEB_REMOTE_ROOT_IS_SITE_ROOT is not true. Use a FTP user scoped to the site's public_html directory or set TIMEWEB_REMOTE_DIR to the absolute public_html path."
             exit 1
           fi
 

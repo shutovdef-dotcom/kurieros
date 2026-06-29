@@ -74,7 +74,7 @@ timeweb_auto_deploy="${TIMEWEB_AUTO_DEPLOY:-false}"
 
 if [ "$timeweb_remote_dir" = "/" ] && [ "$timeweb_remote_root_is_site_root" != "true" ]; then
   echo "TIMEWEB_REMOTE_DIR=/ requires TIMEWEB_REMOTE_ROOT_IS_SITE_ROOT=true." >&2
-  echo "Use a Timeweb FTP user scoped to kurerok.ru/public_html, or set TIMEWEB_REMOTE_DIR to the absolute public_html path." >&2
+  echo "Use a Timeweb FTP user scoped to the site's public_html directory, or set TIMEWEB_REMOTE_DIR to the absolute public_html path." >&2
   exit 1
 fi
 
