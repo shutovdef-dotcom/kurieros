@@ -18,7 +18,7 @@ Required environment variables for TIMEWEB_DEPLOY_METHOD=archive or ftp-mirror:
 Required environment variables for TIMEWEB_DEPLOY_METHOD=ssh-archive:
   TIMEWEB_SSH_HOST
   TIMEWEB_SSH_USER
-  TIMEWEB_SSH_PRIVATE_KEY
+  TIMEWEB_SSH_PRIVATE_KEY or TIMEWEB_SSH_PRIVATE_KEY_FILE
   TIMEWEB_SSH_REMOTE_ROOT
 
 Optional environment variables:
@@ -44,7 +44,7 @@ Usage:
   TIMEWEB_DEPLOY_METHOD='ssh-archive' \
   TIMEWEB_SSH_HOST='vh440.timeweb.ru' \
   TIMEWEB_SSH_USER='cw556341' \
-  TIMEWEB_SSH_PRIVATE_KEY="$(cat ~/.ssh/timeweb_kurerok)" \
+  TIMEWEB_SSH_PRIVATE_KEY_FILE="$HOME/.ssh/kurerok_timeweb_deploy" \
   TIMEWEB_SSH_REMOTE_ROOT='/home/c/cw556341/public_html' \
   ./scripts/setup-timeweb-github-env.sh
 
@@ -106,7 +106,14 @@ fi
 if [ "$timeweb_deploy_method" = "ssh-archive" ]; then
   require_env TIMEWEB_SSH_HOST
   require_env TIMEWEB_SSH_USER
-  require_env TIMEWEB_SSH_PRIVATE_KEY
+  if [ -z "${TIMEWEB_SSH_PRIVATE_KEY:-}" ] && [ -z "${TIMEWEB_SSH_PRIVATE_KEY_FILE:-}" ]; then
+    echo "Missing required environment variable: TIMEWEB_SSH_PRIVATE_KEY or TIMEWEB_SSH_PRIVATE_KEY_FILE" >&2
+    exit 1
+  fi
+  if [ -n "${TIMEWEB_SSH_PRIVATE_KEY_FILE:-}" ] && [ ! -f "$TIMEWEB_SSH_PRIVATE_KEY_FILE" ]; then
+    echo "TIMEWEB_SSH_PRIVATE_KEY_FILE does not exist: $TIMEWEB_SSH_PRIVATE_KEY_FILE" >&2
+    exit 1
+  fi
   require_env TIMEWEB_SSH_REMOTE_ROOT
 fi
 
@@ -158,9 +165,13 @@ if [ "$timeweb_deploy_method" = "archive" ] || [ "$timeweb_deploy_method" = "ftp
 fi
 
 if [ "$timeweb_deploy_method" = "ssh-archive" ]; then
+  timeweb_ssh_private_key="${TIMEWEB_SSH_PRIVATE_KEY:-}"
+  if [ -z "$timeweb_ssh_private_key" ]; then
+    timeweb_ssh_private_key="$(cat "$TIMEWEB_SSH_PRIVATE_KEY_FILE")"
+  fi
   gh secret set TIMEWEB_SSH_HOST --repo "$repo" --env "$environment_name" --body "$TIMEWEB_SSH_HOST" >/dev/null
   gh secret set TIMEWEB_SSH_USER --repo "$repo" --env "$environment_name" --body "$TIMEWEB_SSH_USER" >/dev/null
-  gh secret set TIMEWEB_SSH_PRIVATE_KEY --repo "$repo" --env "$environment_name" --body "$TIMEWEB_SSH_PRIVATE_KEY" >/dev/null
+  gh secret set TIMEWEB_SSH_PRIVATE_KEY --repo "$repo" --env "$environment_name" --body "$timeweb_ssh_private_key" >/dev/null
   gh variable set TIMEWEB_SSH_REMOTE_ROOT --repo "$repo" --env "$environment_name" --body "$TIMEWEB_SSH_REMOTE_ROOT" >/dev/null
 fi
 

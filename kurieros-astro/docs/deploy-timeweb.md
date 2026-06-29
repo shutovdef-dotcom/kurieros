@@ -49,6 +49,8 @@ Do not use the main Timeweb account password for CI.
 5. For the preferred `ssh-archive` method, enable SSH access in Timeweb, add a
    deploy public key, and identify the absolute SSH path for the same document
    root as `/public_html`.
+   In the current Timeweb panel, SSH access is shown as disabled until it is
+   activated from the hosting dashboard.
 6. For the fallback `archive` method, create a Timeweb technical domain that
    points to the same `/public_html` document root. Use it as
    `TIMEWEB_UNPACK_URL` so GitHub Actions can trigger the temporary unpacker
@@ -162,13 +164,20 @@ For the preferred SSH method:
 
 ```bash
 cd kurieros-astro
+npm run deploy:timeweb:ssh:key
+```
+
+Add the printed public key to Timeweb SSH access. The private key is not
+printed. After SSH is enabled and the public key is registered:
+
+```bash
 export TIMEWEB_DEPLOY_METHOD='ssh-archive'
 export TIMEWEB_SSH_HOST='vh440.timeweb.ru'
 export TIMEWEB_SSH_USER='cw556341'
-export TIMEWEB_SSH_PRIVATE_KEY="$(cat ~/.ssh/timeweb_kurerok)"
+export TIMEWEB_SSH_PRIVATE_KEY_FILE="$HOME/.ssh/kurerok_timeweb_deploy"
 export TIMEWEB_SSH_REMOTE_ROOT='<absolute public_html path over SSH>'
 npm run deploy:timeweb:setup
-unset TIMEWEB_DEPLOY_METHOD TIMEWEB_SSH_HOST TIMEWEB_SSH_USER TIMEWEB_SSH_PRIVATE_KEY TIMEWEB_SSH_REMOTE_ROOT
+unset TIMEWEB_DEPLOY_METHOD TIMEWEB_SSH_HOST TIMEWEB_SSH_USER TIMEWEB_SSH_PRIVATE_KEY_FILE TIMEWEB_SSH_REMOTE_ROOT
 ```
 
 The script creates/updates the `timeweb-production` environment, stores the

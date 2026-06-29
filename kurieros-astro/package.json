@@ -46,6 +46,7 @@
     "deploy:timeweb:run:archive": "gh workflow run deploy-timeweb.yml --repo shutovdef-dotcom/kurieros --ref main -f deploy_method=archive",
     "deploy:timeweb:run:ssh": "gh workflow run deploy-timeweb.yml --repo shutovdef-dotcom/kurieros --ref main -f deploy_method=ssh-archive",
     "deploy:timeweb:run:ftp": "gh workflow run deploy-timeweb.yml --repo shutovdef-dotcom/kurieros --ref main -f deploy_method=ftp-mirror",
+    "deploy:timeweb:ssh:key": "./scripts/prepare-timeweb-ssh-key.sh",
     "deploy:timeweb:setup": "./scripts/setup-timeweb-github-env.sh",
     "deploy:timeweb:watch": "gh run watch --repo shutovdef-dotcom/kurieros",
     "perf:compare-hosts": "node scripts/perf/compare-host-speed.mjs",
