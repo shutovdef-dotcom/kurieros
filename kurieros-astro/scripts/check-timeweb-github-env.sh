@@ -15,6 +15,7 @@ Checks:
   - timeweb-production environment existence
   - required environment secrets are present by name
   - required environment variables are present by name
+  - archive deploy unpack URL readiness
   - repository variable TIMEWEB_AUTO_DEPLOY status
 
 The script never prints secret values and does not mutate GitHub settings.
@@ -114,8 +115,9 @@ while IFS= read -r secret_name; do
   fi
 done <<<"$required_secrets"
 
-required_variables=$'TIMEWEB_REMOTE_DIR\nTIMEWEB_REMOTE_ROOT_IS_SITE_ROOT\nTIMEWEB_FTP_PORT\nTIMEWEB_FTP_TLS'
-variable_names="$(gh variable list --repo "$repo" --env "$environment_name" --json name --jq '.[].name' 2>/dev/null || true)"
+required_variables=$'TIMEWEB_REMOTE_DIR\nTIMEWEB_REMOTE_ROOT_IS_SITE_ROOT\nTIMEWEB_FTP_PORT\nTIMEWEB_FTP_TLS\nTIMEWEB_DEPLOY_METHOD'
+variable_json="$(gh variable list --repo "$repo" --env "$environment_name" --json name,value 2>/dev/null || true)"
+variable_names="$(jq -r '.[].name' <<<"${variable_json:-[]}" 2>/dev/null || true)"
 while IFS= read -r variable_name; do
   if contains_line "$variable_name" "$variable_names"; then
     pass "Environment variable exists: $variable_name"
@@ -123,6 +125,27 @@ while IFS= read -r variable_name; do
     fail "Environment variable is missing: $variable_name"
   fi
 done <<<"$required_variables"
+
+deploy_method="$(jq -r '.[] | select(.name == "TIMEWEB_DEPLOY_METHOD") | .value' <<<"${variable_json:-[]}" 2>/dev/null || true)"
+deploy_method="${deploy_method:-archive}"
+case "$deploy_method" in
+  archive)
+    if contains_line "TIMEWEB_UNPACK_URL" "$variable_names"; then
+      pass "TIMEWEB_UNPACK_URL is set for archive deploy."
+    else
+      fail "TIMEWEB_UNPACK_URL is missing. Archive deploy needs a Timeweb technical domain before DNS cutover, then https://kurerok.ru after cutover."
+    fi
+    ;;
+  ftp-mirror)
+    warn "TIMEWEB_DEPLOY_METHOD=ftp-mirror. This is a slow fallback for large builds; archive is recommended."
+    ;;
+  "")
+    warn "TIMEWEB_DEPLOY_METHOD is unset; workflow defaults to archive and will need TIMEWEB_UNPACK_URL."
+    ;;
+  *)
+    fail "Unsupported TIMEWEB_DEPLOY_METHOD: $deploy_method"
+    ;;
+esac
 
 if contains_line "TIMEWEB_VERIFY_URL" "$variable_names"; then
   warn "TIMEWEB_VERIFY_URL is set. Before DNS cutover, make sure it points to a real Timeweb preview, not the current GitHub Pages domain."

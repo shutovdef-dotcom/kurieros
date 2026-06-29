@@ -21,6 +21,9 @@ Optional environment variables:
   TIMEWEB_REMOTE_ROOT_IS_SITE_ROOT  default: true
   TIMEWEB_FTP_PORT                  default: 21
   TIMEWEB_FTP_TLS                   default: false
+  TIMEWEB_DEPLOY_METHOD             default: archive
+  TIMEWEB_UNPACK_URL                default: unset/deleted
+  TIMEWEB_UNPACK_INSECURE_HTTPS     default: false
   TIMEWEB_VERIFY_URL                default: unset/deleted
   TIMEWEB_AUTO_DEPLOY               default: false
   TIMEWEB_GITHUB_ENVIRONMENT        default: timeweb-production
@@ -70,7 +73,17 @@ timeweb_remote_dir="${TIMEWEB_REMOTE_DIR:-/}"
 timeweb_remote_root_is_site_root="${TIMEWEB_REMOTE_ROOT_IS_SITE_ROOT:-true}"
 timeweb_ftp_port="${TIMEWEB_FTP_PORT:-21}"
 timeweb_ftp_tls="${TIMEWEB_FTP_TLS:-false}"
+timeweb_deploy_method="${TIMEWEB_DEPLOY_METHOD:-archive}"
+timeweb_unpack_insecure_https="${TIMEWEB_UNPACK_INSECURE_HTTPS:-false}"
 timeweb_auto_deploy="${TIMEWEB_AUTO_DEPLOY:-false}"
+
+case "$timeweb_deploy_method" in
+  archive|ftp-mirror) ;;
+  *)
+    echo "TIMEWEB_DEPLOY_METHOD must be archive or ftp-mirror." >&2
+    exit 1
+    ;;
+esac
 
 if [ "$timeweb_remote_dir" = "/" ] && [ "$timeweb_remote_root_is_site_root" != "true" ]; then
   echo "TIMEWEB_REMOTE_DIR=/ requires TIMEWEB_REMOTE_ROOT_IS_SITE_ROOT=true." >&2
@@ -96,6 +109,14 @@ gh variable set TIMEWEB_REMOTE_DIR --repo "$repo" --env "$environment_name" --bo
 gh variable set TIMEWEB_REMOTE_ROOT_IS_SITE_ROOT --repo "$repo" --env "$environment_name" --body "$timeweb_remote_root_is_site_root" >/dev/null
 gh variable set TIMEWEB_FTP_PORT --repo "$repo" --env "$environment_name" --body "$timeweb_ftp_port" >/dev/null
 gh variable set TIMEWEB_FTP_TLS --repo "$repo" --env "$environment_name" --body "$timeweb_ftp_tls" >/dev/null
+gh variable set TIMEWEB_DEPLOY_METHOD --repo "$repo" --env "$environment_name" --body "$timeweb_deploy_method" >/dev/null
+gh variable set TIMEWEB_UNPACK_INSECURE_HTTPS --repo "$repo" --env "$environment_name" --body "$timeweb_unpack_insecure_https" >/dev/null
+
+if [ -n "${TIMEWEB_UNPACK_URL:-}" ]; then
+  gh variable set TIMEWEB_UNPACK_URL --repo "$repo" --env "$environment_name" --body "$TIMEWEB_UNPACK_URL" >/dev/null
+else
+  gh api --method DELETE "repos/${repo}/environments/${environment_name}/variables/TIMEWEB_UNPACK_URL" --silent >/dev/null 2>&1 || true
+fi
 
 if [ -n "${TIMEWEB_VERIFY_URL:-}" ]; then
   gh variable set TIMEWEB_VERIFY_URL --repo "$repo" --env "$environment_name" --body "$TIMEWEB_VERIFY_URL" >/dev/null

@@ -40,6 +40,7 @@
     "check": "npm run lint && npm run typecheck && npm run test:coverage && npm run check:worker && npm run check:yandex-feed",
     "check:perf": "npm run bench:city-neighbours",
     "deploy:timeweb:check": "./scripts/check-timeweb-github-env.sh",
+    "deploy:timeweb:archive:dry-run": "python3 scripts/timeweb-archive-deploy.py --source-dir dist --ftp-host localhost --ftp-user dry-run --ftp-password-env TIMEWEB_FTP_PASSWORD --unpack-url http://example.invalid --dry-run",
     "deploy:timeweb:run": "gh workflow run deploy-timeweb.yml --repo shutovdef-dotcom/kurieros --ref main",
     "deploy:timeweb:setup": "./scripts/setup-timeweb-github-env.sh",
     "deploy:timeweb:watch": "gh run watch --repo shutovdef-dotcom/kurieros",

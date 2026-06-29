@@ -2,6 +2,15 @@ name: Deploy Astro to Timeweb
 
 on:
   workflow_dispatch:
+    inputs:
+      deploy_method:
+        description: Deployment transport to use.
+        required: false
+        type: choice
+        default: archive
+        options:
+          - archive
+          - ftp-mirror
   push:
     branches: [main]
     paths:
@@ -28,6 +37,7 @@ env:
   PUBLIC_YANDEX_VERIFICATION: 9a662580de5ebac5
   PUBLIC_GOOGLE_SITE_VERIFICATION: QIGlMj-JAXkxvnkeFNNu6hWJ5bslKtguuUxY4ty17bI
   PUBLIC_OZON_LEAD_API: ${{ vars.PUBLIC_OZON_LEAD_API }}
+  TIMEWEB_DEPLOY_METHOD: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_method || vars.TIMEWEB_DEPLOY_METHOD || 'archive' }}
 
 jobs:
   build:
@@ -84,10 +94,14 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     environment:
       name: timeweb-production
       url: https://kurerok.ru/
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
       - name: Download dist artifact
         uses: actions/download-artifact@v4
         with:
@@ -95,19 +109,30 @@ jobs:
           path: dist
 
       - name: Install lftp
+        if: ${{ env.TIMEWEB_DEPLOY_METHOD == 'ftp-mirror' }}
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends lftp
 
       - name: Preflight Timeweb configuration
         env:
+          TIMEWEB_DEPLOY_METHOD: ${{ env.TIMEWEB_DEPLOY_METHOD }}
           TIMEWEB_FTP_HOST: ${{ secrets.TIMEWEB_FTP_HOST }}
           TIMEWEB_FTP_USER: ${{ secrets.TIMEWEB_FTP_USER }}
           TIMEWEB_FTP_PASSWORD: ${{ secrets.TIMEWEB_FTP_PASSWORD }}
           TIMEWEB_REMOTE_DIR: ${{ vars.TIMEWEB_REMOTE_DIR }}
           TIMEWEB_REMOTE_ROOT_IS_SITE_ROOT: ${{ vars.TIMEWEB_REMOTE_ROOT_IS_SITE_ROOT }}
+          TIMEWEB_UNPACK_URL: ${{ vars.TIMEWEB_UNPACK_URL }}
         run: |
           set -euo pipefail
+
+          case "$TIMEWEB_DEPLOY_METHOD" in
+            archive|ftp-mirror) ;;
+            *)
+              echo "::error::Unsupported TIMEWEB_DEPLOY_METHOD: $TIMEWEB_DEPLOY_METHOD"
+              exit 1
+              ;;
+          esac
 
           missing=0
           for name in TIMEWEB_FTP_HOST TIMEWEB_FTP_USER TIMEWEB_FTP_PASSWORD; do
@@ -116,6 +141,12 @@ jobs:
               missing=1
             fi
           done
+
+          if [ "$TIMEWEB_DEPLOY_METHOD" = "archive" ] && [ -z "${TIMEWEB_UNPACK_URL:-}" ]; then
+            echo "::error::TIMEWEB_UNPACK_URL is required for archive deployment. Use a Timeweb technical domain before DNS cutover, then https://kurerok.ru after cutover."
+            missing=1
+          fi
+
           [ "$missing" -eq 0 ]
 
           remote_dir="${TIMEWEB_REMOTE_DIR:-/}"
@@ -131,7 +162,41 @@ jobs:
 
           echo "TIMEWEB_REMOTE_DIR_NORMALIZED=$remote_dir" >> "$GITHUB_ENV"
 
-      - name: Deploy dist to Timeweb
+      - name: Deploy archive to Timeweb
+        if: ${{ env.TIMEWEB_DEPLOY_METHOD == 'archive' }}
+        env:
+          TIMEWEB_FTP_HOST: ${{ secrets.TIMEWEB_FTP_HOST }}
+          TIMEWEB_FTP_PORT: ${{ vars.TIMEWEB_FTP_PORT }}
+          TIMEWEB_FTP_USER: ${{ secrets.TIMEWEB_FTP_USER }}
+          TIMEWEB_FTP_PASSWORD: ${{ secrets.TIMEWEB_FTP_PASSWORD }}
+          TIMEWEB_FTP_TLS: ${{ vars.TIMEWEB_FTP_TLS }}
+          TIMEWEB_UNPACK_URL: ${{ vars.TIMEWEB_UNPACK_URL }}
+          TIMEWEB_UNPACK_INSECURE_HTTPS: ${{ vars.TIMEWEB_UNPACK_INSECURE_HTTPS }}
+        run: |
+          set -euo pipefail
+
+          args=(
+            --source-dir dist
+            --ftp-host "$TIMEWEB_FTP_HOST"
+            --ftp-port "${TIMEWEB_FTP_PORT:-21}"
+            --ftp-user "$TIMEWEB_FTP_USER"
+            --ftp-password-env TIMEWEB_FTP_PASSWORD
+            --remote-root "$TIMEWEB_REMOTE_DIR_NORMALIZED"
+            --unpack-url "$TIMEWEB_UNPACK_URL"
+          )
+
+          if [ "${TIMEWEB_FTP_TLS:-false}" = "true" ]; then
+            args+=(--ftp-tls)
+          fi
+
+          if [ "${TIMEWEB_UNPACK_INSECURE_HTTPS:-false}" = "true" ]; then
+            args+=(--insecure-https)
+          fi
+
+          python3 "$PROJECT_DIR/scripts/timeweb-archive-deploy.py" "${args[@]}"
+
+      - name: Deploy dist to Timeweb with FTP mirror
+        if: ${{ env.TIMEWEB_DEPLOY_METHOD == 'ftp-mirror' }}
         env:
           TIMEWEB_FTP_HOST: ${{ secrets.TIMEWEB_FTP_HOST }}
           TIMEWEB_FTP_PORT: ${{ vars.TIMEWEB_FTP_PORT }}
