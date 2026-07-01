@@ -60,6 +60,8 @@ interface Props {
 	articleSection?: string;
 	articlePublishedTime?: string;
 	articleModifiedTime?: string;
+	includeRegionModal?: boolean;
+	includeOzonLeadModal?: boolean;
 }
 
 const {
@@ -75,6 +77,8 @@ const {
 	articleSection,
 	articlePublishedTime,
 	articleModifiedTime,
+	includeRegionModal = true,
+	includeOzonLeadModal = true,
 } = Astro.props;
 
 const resolvedCanonicalUrl = canonicalURL instanceof URL ? canonicalURL : new URL(canonicalURL, Astro.site);
@@ -222,12 +226,14 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 			)}
 		<slot />
 
-		<VPNModal />
-		<OzonLeadModal />
+		{includeRegionModal && <VPNModal />}
+		{includeOzonLeadModal && <OzonLeadModal />}
 
-		<script>
-			import '../scripts/regionDetector.js';
-		</script>
+		{includeRegionModal && (
+			<script>
+				import '../scripts/regionDetector.js';
+			</script>
+		)}
 		<script is:inline id="kurieros-i18n-config" type="application/json" set:html={i18nConfigJson}></script>
 		<script>
 			import '../scripts/i18nRuntime.js';

@@ -26,8 +26,4 @@
 		bar.classList.remove('hidden');
 	}
 
-	bar.addEventListener('click', function (event) {
-		event.preventDefault();
-		heroBtn.click();
-	});
 })();

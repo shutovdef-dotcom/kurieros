@@ -32,6 +32,7 @@ const buildTimestamp = String(Date.now());
 // just read it here — sync, no data-layer imports, fast cold start.
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const emptyListingsPath = resolve(__dirname, 'public/empty-listings.json');
+const vacancyIndexabilityPath = resolve(__dirname, 'public/vacancy-indexability.json');
 
 // Read failure handling (audit v3 M11): a *missing* file (ENOENT) is an
 // acceptable degradation in local `astro dev` — warn and continue with an
@@ -61,6 +62,63 @@ try {
   );
 }
 const emptyListingUrls = new Set(emptyListings);
+
+let vacancyNoindexUrls = [];
+try {
+  const vacancyIndexability = JSON.parse(readFileSync(vacancyIndexabilityPath, 'utf8'));
+  vacancyNoindexUrls = Array.isArray(vacancyIndexability.noindexUrls)
+    ? vacancyIndexability.noindexUrls
+    : [];
+} catch (err) {
+  const isMissingFile = err && err.code === 'ENOENT';
+  const isProductionBuild = Boolean(process.env.CI) || import.meta.env.PROD;
+  if (!isMissingFile || isProductionBuild) {
+    console.error(
+      `\n✗ Failed to read ${vacancyIndexabilityPath}.\n` +
+      `   ${isMissingFile ? 'File is missing' : 'File is unreadable or corrupt'} ` +
+      `and this is a ${isProductionBuild ? 'production/CI' : 'parse-error'} build.\n` +
+      `   Hint: Run 'npm run generate:data' before 'astro build'.\n`
+    );
+    throw err;
+  }
+  console.warn(
+    `\n⚠️  ${vacancyIndexabilityPath} not found.\n` +
+    `   Hint: Run 'npm run generate:data' before 'astro dev'.\n` +
+    `   Continuing with empty vacancy noindex list.\n`
+  );
+}
+const vacancyNoindexUrlSet = new Set(vacancyNoindexUrls);
+
+const pathnameOf = (url) => new URL(url).pathname;
+const isCommercialHubPath = (pathname) =>
+  [
+    '/rabota-peshim-kurerom/',
+    '/rabota-avtokurerom/',
+    '/rabota-velokurerom/',
+    '/podrabotka-kurerom/',
+  ].includes(pathname);
+const sitemapChunks = {
+  vacancies: (item) => pathnameOf(item.url).startsWith('/v/') ? item : undefined,
+  listings: (item) => {
+    const pathname = pathnameOf(item.url);
+    return pathname.startsWith('/rabota-kurerom-') ? item : undefined;
+  },
+  hubs: (item) => isCommercialHubPath(pathnameOf(item.url)) ? item : undefined,
+  companies: (item) => pathnameOf(item.url).startsWith('/companies/') ? item : undefined,
+  metro: (item) => pathnameOf(item.url).startsWith('/metro/') ? item : undefined,
+  guides: (item) => {
+    const pathname = pathnameOf(item.url);
+    return pathname.startsWith('/guide/') ||
+      [
+        '/skolko-zarabatyvaet-kurer/',
+        '/kak-stat-kurerom/',
+        '/usloviya-raboty-kurerom/',
+        '/otzyvy/',
+      ].includes(pathname)
+      ? item
+      : undefined;
+  },
+};
 
 export default defineConfig({
   site,
@@ -95,7 +153,8 @@ export default defineConfig({
         !page.includes('/api/company-vacancies/') &&
         !page.endsWith('.md') &&
         !page.match(/\/blog\/$/) &&
-        !emptyListingUrls.has(page),
+        !emptyListingUrls.has(page) &&
+        !vacancyNoindexUrlSet.has(page),
       changefreq: 'daily',
       lastmod: new Date(),
       // Split the ~5 460-URL catalogue (88 fresh Ozon offers added
@@ -107,6 +166,7 @@ export default defineConfig({
       // «GSC Pages stuck 4 days» symptom (chunks larger than ~600 KB
       // tend to back-pressure Google's URL-inspection pipeline).
       entryLimit: 1000,
+      chunks: sitemapChunks,
       serialize(item) {
         const url = item.url;
         const siteBase = site.replace(/\/$/, '');

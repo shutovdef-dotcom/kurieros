@@ -3,7 +3,7 @@
     "shortDescription": "Alfa-Bank-da səyyar iş: bank məhsullarının müştərilərə çatdırılması, sənədlərin imzalanması və bankın xidmətlərinin qoşulmasına kömək.",
     "description": "Alfa-Bank səyyar müştərilərlə işləmək üçün nümayəndələr axtarır. Bank məhsullarını çatdırmaq, müştərilərlə şəhərin rahat nöqtələrində görüşmək, sənədləri imzalamaq, bankın xidmət və təklifləri üzrə məsləhət vermək, həmçinin əlavə xidmətlərin qoşulmasına kömək etmək lazımdır. Format təcrübəsiz namizədlərə uyğundur: startdan əvvəl təlim, dəstək və anlaşıqlı işə giriş var. Bank rəsmi rəsmiləşdirmə, çevik qrafik, inkişaf imkanları və korporativ güzəştlərə, endirimlərə və təhsil proqramlarına giriş təklif edir.",
     "requirements": [
-      "18 yaşdan yuxarı; 40 yaşdan sonra bank əlavə olaraq namizədin təcrübəsinə və bacarıqlarına baxır.",
+      "Yaş 18 yaşdan; 40 yaşdan sonra bank əlavə olaraq namizədin təcrübəsinə və bacarıqlarına baxır.",
       "РФ, Belarus və ya Qazaxıstan vətəndaşlığı.",
       "Orta ixtisaslı və yuxarı təhsil; orta təhsilli namizədlər ayrıca nəzərdən keçirilə bilər.",
       "Səyyar iş xarakterinə və satışlara hazırlıq.",
@@ -224,7 +224,7 @@
     "shortDescription": "Şəxsi minik və ya Ozon-un xidməti avtomobilində sifarişlərin çatdırılması. Çevik qrafik, həftəlik ödənişlər, Gosuslugi vasitəsilə qeydiyyat.",
     "description": "Ozon {city} müştərilərinə sifarişlərin çatdırılması üçün avtokuryerlər axtarır. Şəxsi minik və ya yük avtomobilində işləmək, ya da şirkətin xidməti avtomobilini götürmək mümkündür. Format — özünüməşğulluq və ya ИП. Qeydiyyat və təlim Gosuslugi vasitəsilə Ozon Job tətbiqində keçir. Azad qrafik, digər əlavə işlərlə birləşdirmək olar. Birbaşa karta həftədə bir dəfə ödənişlər. Bizim müraciətimiz vasitəsilə qoşulma: əlaqələri buraxın — onları Ozon-a ötürəcəyik, sonra sizə qeydiyyat üçün keçidlə SMS gələcək.",
     "requirements": [
-      "18 yaşdan yuxarı.",
+      "Yaş 18 yaşdan.",
       "РФ və ya ЕАЭС vətəndaşlığı.",
       "Şəxsi və ya xidməti avtomobil (minik / yük).",
       "B kateqoriyalı qüvvədə olan sürücülük vəsiqəsi.",
@@ -297,7 +297,7 @@
     "shortDescription": "Ozon fresh darkstorlarından təzə məhsulların piyada və ya velosipedlə çatdırılması. Yaxınlıqda sifarişlər, həftədə bir dəfə ödənişlər, Gosuslugi vasitəsilə qeydiyyat.",
     "description": "Ozon fresh — 30–60 dəqiqəyə məhsulların və hazır yeməyin çatdırılması. Kuryerlər piyada, velosipedlə və ya skuterlə işləyirlər — sifarişlər ev yaxınlığındakı darkstorda verilir, marşrut tətbiqlə qurulur. Azad qrafik (4 saatdan slotlar), həftədə bir dəfə karta ödənişlər, pik saatlar və pis hava üçün bonuslar. Bizim müraciətimiz vasitəsilə qoşulma: əlaqələri buraxın — Ozon Gosuslugi-də qeydiyyat üçün keçidlə SMS göndərəcək.",
     "requirements": [
-      "18 yaşdan yuxarı.",
+      "Yaş 18 yaşdan.",
       "РФ, ЕАЭС və ya СНГ vətəndaşlığı (ЕАЭС-dən kənar olanlar üçün ВНЖ + patent lazımdır).",
       "Özünüməşğulluq və ya ИП (Moy nalog vasitəsilə 5 dəqiqədə rəsmiləşdirməyə kömək edəcəyik).",
       "Gosuslugi vasitəsilə Ozon Job tətbiqində onbordinqdən keçməyə hazırlıq.",
@@ -322,7 +322,7 @@
     "shortDescription": "Ozon fresh üçün hazır yeməklərin bişirilməsi və qablaşdırılması. Təcrübəsiz, şirkət hesabına təlim, pulsuz yemək, Ozon-dan tibb kitabçası.",
     "description": "Ozon fresh fabrik-mətbəxi salatlar, şorbalar, isti yeməklər, çörək məhsulları hazırlayır və onları çatdırılma üçün qablaşdırır. İşçilər ayrı xətlərdə işləyirlər: doğramaq, yığmaq, qablaşdırmaq, markalamaq. Təcrübəsiz — 1–2 növbədə yerində təlim, təcrübəli şef-mentorlar. Növbəli qrafik 2/2 və ya 5/2, pulsuz isti yemək, tibb kitabçası şirkət hesabına rəsmiləşdirilir. Bizim müraciətimiz vasitəsilə qoşulma.",
     "requirements": [
-      "18 yaşdan yuxarı.",
+      "Yaş 18 yaşdan.",
       "РФ, ЕАЭС və ya СНГ vətəndaşlığı.",
       "Tibb kitabçası məcburidir (yoxdursa, şirkət hesabına rəsmiləşdirəcəyik).",
       "Növbəli qrafikə və ayaqda işə hazırlıq.",
@@ -347,7 +347,7 @@
     "shortDescription": "Ozon fresh darkstor-a təzə məhsulların yığılması: sifarişdən kuryerə təhvil verilməsinədək 30–60 dəqiqə. Növbəli qrafik, pulsuz yemək, ТК РФ.",
     "description": "Ozon fresh — müştəridən 3 km radiusunda məhsullarla mini-anbarlar. Yığıcı tətbiqdə sifariş alır, malları darkstor rəflərindən yığır və 6–10 dəqiqədə kuryerə verir. Soyuq və soyudulmuş zonalarda iş (ayrıca isti gödəkçələr verilir), növbəli qrafik 2/2 və ya 5/2, pulsuz isti yemək, ТК РФ üzrə rəsmiləşdirmə. Bizim müraciətimiz vasitəsilə qoşulma: əlaqələri buraxın — Ozon SMS göndərəcək.",
     "requirements": [
-      "18 yaşdan yuxarı.",
+      "Yaş 18 yaşdan.",
       "РФ, ЕАЭС və ya СНГ vətəndaşlığı.",
       "Ayaqda 12 saat işləməyə və soyuqda olmağa hazırlıq.",
       "Təcrübəsiz — ilk növbədə təlim.",
@@ -372,7 +372,7 @@
     "shortDescription": "Ozon anbarında malların qəbulu, qablaşdırılması və göndərilməsi. Növbəli qrafik, həftəlik ödənişlər, şirkət hesabına təlim.",
     "description": "Ozon mal emalı mütəxəssislərini dəvət edir {cityPrep} — daxilolmaların qəbulu, müştəri sifarişlərinin qablaşdırılması, maşınlara göndərmə. İsti müasir anbarda iş, küçəsiz. Təcrübəsiz — 1 növbədə yerində təlim. Növbəli qrafik 2/2 və ya 5/2, pulsuz yemək, metrodan korporativ nəqliyyat. Bizim müraciətimiz vasitəsilə qoşulma: əlaqələri buraxın — Ozon SMS göndərəcək.",
     "requirements": [
-      "18 yaşdan yuxarı.",
+      "Yaş 18 yaşdan.",
       "РФ, ЕАЭС və ya СНГ vətəndaşlığı.",
       "Ayaqda işləməyə və 15 kq-dək yük qaldırmağa hazırlıq.",
       "Təcrübəsiz — ilk növbədə təlim."
@@ -420,7 +420,7 @@
     "shortDescription": "Ozon fulfilment anbarında sifarişlərin yığılması, qablaşdırılması və çeşidlənməsi. Növbəli qrafik, həftəlik ödənişlər, pulsuz yemək.",
     "description": "Ozon {cityPrep} anbar operatorlarını dəvət edir — müştəri sifarişlərinin yığılması, malların qablaşdırılması və çeşidlənməsi. Müasir isti anbarda iş, küçə və hava şəraitsiz. Növbəli qrafik 2/2 və ya 5/2 — rahatı seçirsiniz, həftə sonu əlavə işləmək olar. Pulsuz yemək, metrodan / dəmir yolu stansiyasından korporativ nəqliyyat, güzəştli tibbi komissiya. Bizim müraciətimiz vasitəsilə qoşulma: əlaqələri buraxın — Ozon növbəyə dəvətlə SMS göndərəcək.",
     "requirements": [
-      "18 yaşdan yuxarı.",
+      "Yaş 18 yaşdan.",
       "РФ, ЕАЭС və ya СНГ vətəndaşlığı.",
       "Ayaqda işləməyə və 15 kq-dək yük qaldırmağa hazırlıq.",
       "Təcrübəsiz — 1 növbədə yerində təlim."
@@ -462,7 +462,7 @@
       "ИНН.",
       "СНИЛС.",
       "Банковская карта для выплат.",
-      "Статус самозанятого или готовность оформить его перед стартом."
+      "Özünüməşğul statusu və ya startdan əvvəl onu rəsmiləşdirməyə hazır olmaq."
     ]
   },
   "ruki-door-installer": {},
@@ -542,7 +542,7 @@
     "shortDescription": "Удалённая работа в Тетрике: проводите индивидуальные онлайн-занятия по английскому языку, выбирайте нагрузку и получайте поток учеников от платформы.",
     "description": "Тетрика приглашает преподавателей для индивидуальных онлайн-занятий по английскому языку. Нужно проводить диагностику знаний, составлять программу обучения, заниматься с учениками на интерактивной платформе, давать обратную связь родителям и вести отчётность по урокам. Формат полностью удалённый: занятия проходят из дома, а сервис помогает с потоком учеников, расписанием и организационными вопросами.",
     "requirements": [
-      "18 yaşdan yuxarı.",
+      "Yaş 18 yaşdan.",
       "Уверенное знание английского языка и умение объяснять школьную программу простым языком.",
       "Опыт преподавания, репетиторства или регулярной подготовки учеников будет преимуществом.",
       "Грамотная устная и письменная речь.",
@@ -571,7 +571,7 @@
     "shortDescription": "Удалённая работа в Тетрике: проводите индивидуальные онлайн-занятия по математике, выбирайте нагрузку и получайте поток учеников от платформы.",
     "description": "Тетрика приглашает преподавателей для индивидуальных онлайн-занятий по математике. Нужно проводить диагностику знаний, составлять программу обучения, заниматься с учениками на интерактивной платформе, давать обратную связь родителям и вести отчётность по урокам. Формат полностью удалённый: занятия проходят из дома, а сервис помогает с потоком учеников, расписанием и организационными вопросами.",
     "requirements": [
-      "18 yaşdan yuxarı.",
+      "Yaş 18 yaşdan.",
       "Уверенное знание математики в рамках школьной программы и умение объяснять задачи пошагово.",
       "Опыт преподавания, репетиторства или регулярной подготовки учеников будет преимуществом.",
       "Грамотная устная и письменная речь.",
@@ -600,7 +600,7 @@
     "shortDescription": "Удалённая работа в Тетрике: проводите индивидуальные онлайн-занятия по физике, выбирайте нагрузку и получайте поток учеников от платформы.",
     "description": "Тетрика приглашает преподавателей для индивидуальных онлайн-занятий по физике. Нужно проводить диагностику знаний, составлять программу обучения, заниматься с учениками на интерактивной платформе, давать обратную связь родителям и вести отчётность по урокам. Формат полностью удалённый: занятия проходят из дома, а сервис помогает с потоком учеников, расписанием и организационными вопросами.",
     "requirements": [
-      "18 yaşdan yuxarı.",
+      "Yaş 18 yaşdan.",
       "Уверенное знание физики в рамках школьной программы и умение готовить учеников к занятиям и проверочным работам.",
       "Опыт преподавания, репетиторства или регулярной подготовки учеников будет преимуществом.",
       "Грамотная устная и письменная речь.",
@@ -629,7 +629,7 @@
     "shortDescription": "Удалённая работа в Тетрике: проводите индивидуальные онлайн-занятия по русскому языку, выбирайте нагрузку и получайте поток учеников от платформы.",
     "description": "Тетрика приглашает преподавателей для индивидуальных онлайн-занятий по русскому языку. Нужно проводить диагностику знаний, составлять программу обучения, заниматься с учениками на интерактивной платформе, давать обратную связь родителям и вести отчётность по урокам. Формат полностью удалённый: занятия проходят из дома, а сервис помогает с потоком учеников, расписанием и организационными вопросами.",
     "requirements": [
-      "18 yaşdan yuxarı.",
+      "Yaş 18 yaşdan.",
       "Глубокое знание русского языка, грамотная речь и умение разбирать школьные темы с учениками разного уровня.",
       "Опыт преподавания, репетиторства или регулярной подготовки учеников будет преимуществом.",
       "Грамотная устная и письменная речь.",
@@ -658,7 +658,7 @@
     "shortDescription": "Удалённая работа в Тетрике: проводите индивидуальные онлайн-занятия по английскому языку, математике, физике или русскому языку, выбирайте нагрузку и получайте поток учеников от платформы.",
     "description": "Тетрика приглашает преподавателей для индивидуальных онлайн-занятий по английскому языку, математике, физике и русскому языку. Нужно проводить диагностику знаний, составлять программу обучения, заниматься с учениками на интерактивной платформе, давать обратную связь родителям и вести отчётность по урокам. Формат полностью удалённый: занятия проходят из дома, а сервис помогает с потоком учеников, расписанием и организационными вопросами.",
     "requirements": [
-      "18 yaşdan yuxarı.",
+      "Yaş 18 yaşdan.",
       "Уверенное знание одного из направлений: английский язык, математика, физика или русский язык.",
       "Опыт преподавания, репетиторства или регулярной подготовки учеников будет преимуществом.",
       "Грамотная устная и письменная речь.",
@@ -711,6 +711,34 @@
       "ТК РФ üzrə rəsmiləşdirmə üçün sənədlər."
     ]
   },
+  "x5-delivery-auto-courier": {
+    "shortDescription": "X5 sifarişlərinin şəxsi avtomobillə çatdırılması: gündüz növbələrini seçirsiniz, karta həftəlik ödənişlər, pulsuz termosumka və ayda 182 000 ₽-dək gəlir.",
+    "description": "X5 Delivery {cityPrep} şəxsi avtomobili olan sürücüləri dəvət edir. Məhsulları mağazadan götürüb müştərilərə çatdırmaq lazımdır. Əməkdaşlıq formatı — özünüməşğulluq vasitəsilə xidmət göstərilməsi müqaviləsi; növbələr seçiminizə görə planlaşdırılır, çatdırılma gündüz vaxtı aparılır. Ödənişlər hər həftə karta köçürülür.",
+    "requirements": [
+      "Yaş 18 yaşdan.",
+      "ЕАЭС vətəndaşlığı.",
+      "Şəxsi avtomobil.",
+      "РФ sürücülük vəsiqəsi.",
+      "Özünüməşğul statusu və ya onu rəsmiləşdirməyə hazır olmaq.",
+      "Səliqəlilik, punktuallıq və məhsulları müştərilərə çatdırmağa hazır olmaq."
+    ],
+    "benefits": [
+      "Gündə 6 000 ₽-dan gəlir və ayda 182 000 ₽-dək orientir.",
+      "Gündüz çatdırılma.",
+      "Növbələrin seçiminizə görə planlaşdırılması.",
+      "Xidmət göstərilməsi müqaviləsi üzrə əməkdaşlıq.",
+      "Karta hər həftə ödənişlər.",
+      "Pulsuz termosumka.",
+      "Offer şərtlərinə görə cərimələr yoxdur.",
+      "“Dostunu gətir” aksiyası: 10 000 ₽."
+    ],
+    "requiredDocuments": [
+      "Pasport.",
+      "РФ sürücülük vəsiqəsi.",
+      "Avtomobil sənədləri.",
+      "Özünüməşğul statusu və ya startdan əvvəl onu rəsmiləşdirməyə hazır olmaq."
+    ]
+  },
   "yandex-eda-courier": {
     "shortDescription": "Ev yaxınlığında Ya.Pro vasitəsilə sifarişlərin çatdırılması, 2 saatdan azad qrafik və şəffaf gəlir.",
     "description": "Yandex Eda kuryerlər toplayır. Qoşulma şəhəri: {city}. Siz «Ya.Pro» tətbiqi vasitəsilə anlaşıqlı marşrutlarla sifarişləri çatdırırsınız: rayonu seçə, 2 saatdan slotlara çıxa, fasilələr götürə və sifarişlər üzrə gəliri əvvəlcədən görə bilərsiniz.",
@@ -749,7 +777,7 @@
     "shortDescription": "Ev yaxınlığında Ya.Pro vasitəsilə sifarişlərin çatdırılması, 2 saatdan azad qrafik və şəffaf gəlir.",
     "description": "Kuryer-tərəfdaşlar axtarırıq {cityPrep}. Gəlir iş saatlarının və xidmət göstərilən müştərilərin sayına görə formalaşır. Çatdırılma saatlarını (taym-slotları) özünüz seçirsiniz.",
     "requirements": [
-      "18 yaşdan yuxarı.",
+      "Yaş 18 yaşdan.",
       "Android 5.0 və daha yüksək smartfon.",
       "Sifarişləri vaxtında çatdırmağa hazır olmaq."
     ],
@@ -767,7 +795,7 @@
     "shortDescription": "Ev yaxınlığında Ya.Pro vasitəsilə sifarişlərin çatdırılması, 2 saatdan azad qrafik və şəffaf gəlir.",
     "description": "Kuryer-tərəfdaşlar axtarırıq {cityPrep}. Gəlir iş saatlarının və xidmət göstərilən müştərilərin sayına görə formalaşır. Çatdırılma saatlarını (taym-slotları) özünüz seçirsiniz.",
     "requirements": [
-      "18 yaşdan yuxarı.",
+      "Yaş 18 yaşdan.",
       "Android 5.0 və daha yüksək smartfon.",
       "Sifarişləri vaxtında çatdırmağa hazır olmaq."
     ],
@@ -785,7 +813,7 @@
     "shortDescription": "Ev yaxınlığında Ya.Pro vasitəsilə sifarişlərin çatdırılması, 2 saatdan azad qrafik və şəffaf gəlir.",
     "description": "Kuryer-tərəfdaşlar axtarırıq {cityPrep}. Gəlir iş saatlarının və xidmət göstərilən müştərilərin sayına görə formalaşır. Çatdırılma saatlarını (taym-slotları) özünüz seçirsiniz.",
     "requirements": [
-      "18 yaşdan yuxarı.",
+      "Yaş 18 yaşdan.",
       "Android 5.0 və daha yüksək smartfon.",
       "Sifarişləri vaxtında çatdırmağa hazır olmaq."
     ],
@@ -803,7 +831,7 @@
     "shortDescription": "Ev yaxınlığında Ya.Pro vasitəsilə sifarişlərin çatdırılması, 2 saatdan azad qrafik və şəffaf gəlir.",
     "description": "Kuryer-tərəfdaşlar axtarırıq {cityPrep}. Gəlir iş saatlarının və xidmət göstərilən müştərilərin sayına görə formalaşır. Çatdırılma saatlarını (taym-slotları) özünüz seçirsiniz.",
     "requirements": [
-      "18 yaşdan yuxarı.",
+      "Yaş 18 yaşdan.",
       "Android 5.0 və daha yüksək smartfon.",
       "Sifarişləri vaxtında çatdırmağa hazır olmaq."
     ],

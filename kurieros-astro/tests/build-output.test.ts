@@ -63,30 +63,36 @@ const inlineStyleBytes = (html: string): number =>
   Array.from(html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi))
     .reduce((sum, match) => sum + match[1].length, 0);
 
-const localScriptAssetCode = (html: string): string =>
+const localScriptAssetCodes = (html: string): string[] =>
   Array.from(html.matchAll(/<script\b[^>]*\bsrc="(\/_astro\/[^"]+\.js)"[^>]*>/gi))
     .map((match) => join(DIST_DIR, match[1].slice(1)))
     .filter((file) => existsSync(file))
-    .map((file) => readFileSync(file, 'utf8'))
-    .join('\n');
+    .map((file) => readFileSync(file, 'utf8'));
+
+const localScriptAssetCode = (html: string): string =>
+  localScriptAssetCodes(html).join('\n');
 
 const isRuntimeTranslatedVacancyField = (key: string): boolean =>
   /^(?:shortDescription|description|req_\d+|ben_\d+|doc_\d+)$/.test(key);
 
 const readAllSitemaps = (): string =>
   readdirSync(DIST_DIR)
-    .filter((file) => /^sitemap-\d+\.xml$/.test(file))
+    .filter((file) => /^sitemap-(?!index)[\w-]+\.xml$/.test(file))
     .map((file) => readFileSync(join(DIST_DIR, file), 'utf8'))
     .join('\n');
 
 describe.skipIf(skipIfNoDist)('Build output', () => {
-  it('has expected page count (~10164)', () => {
+  it('has expected page count (~11012)', () => {
     // Reference build 2026-06-22 after removing the legacy non-courier
     // `src/pages/[city]/index.astro` route: 10163 HTML files by this
     // recursive counter. Astro logs 10162 page(s), while this guard also
     // sees the top-level generated verification HTML file.
     // 2026-06-22: +1 for the single shared `/apply/` route.
-    // Band: 10159-10169 (+-5 from reference count).
+    // 2026-06-30: +1 for the shared `/calendar/` route.
+    // 2026-07-01: +X5 Delivery source expansion. Reference build: 10388.
+    // 2026-07-01: +312 metro station pages and +312 metro grid-batch fragments.
+    // Reference build: 11012.
+    // Band: 11007-11017 (+-5 from reference count, plus intentionally added routes).
     //
     // NOTE FOR CONTRIBUTORS: always re-derive both bounds from an actual build
     // after adding new routes -- do NOT blindly add N to the upper bound.
@@ -96,11 +102,11 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     //   else if(e.isFile()&&e.name.endsWith('.html'))n++;}return n;}
     //   console.log(c('dist'));"
     const count = countHtml(DIST_DIR);
-    expect(count).toBeGreaterThanOrEqual(10159);
-    expect(count).toBeLessThanOrEqual(10169);
+    expect(count).toBeGreaterThanOrEqual(11007);
+    expect(count).toBeLessThanOrEqual(11017);
   });
 
-  it('keeps the shared apply form non-indexable and out of sitemap fan-out', () => {
+  it('keeps the shared apply redirect page non-indexable and out of sitemap fan-out', () => {
     const applyPage = join(DIST_DIR, 'apply', 'index.html');
     const applyManifest = join(DIST_DIR, 'api', 'v1', 'apply-jobs.json');
 
@@ -109,10 +115,17 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     expect(statSync(applyManifest).size).toBeLessThan(3_500_000);
 
     const html = readFileSync(applyPage, 'utf8');
+    const applyCode = localScriptAssetCodes(html).find((code) =>
+      code.includes('/api/v1/apply-jobs.json'),
+    ) ?? '';
     expect(html).toContain('<meta name="robots" content="noindex, nofollow, noarchive">');
     expect(html).not.toContain('https://trk.ppdu.ru/click');
     expect(html).not.toContain('https://my.saleads.pro/');
     expect(html).not.toContain('lead-form:ozon');
+    expect(applyCode).not.toBe('');
+    expect(applyCode).toContain('/api/v1/apply-jobs.json?v=');
+    expect(applyCode).toContain('cache:"no-cache"');
+    expect(applyCode).not.toContain('cache:"force-cache"');
 
     const sitemapXml = readAllSitemaps();
     expect(sitemapXml).not.toContain('/apply/');
@@ -767,8 +780,7 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     });
 
     it('keeps service grid fragments out of the sitemap', () => {
-      const sitemapContent = readFileSync(join(DIST_DIR, 'sitemap-index.xml'), 'utf8')
-        .replace(/sitemap-\d+\.xml/g, (file) => readFileSync(join(DIST_DIR, file), 'utf8'));
+      const sitemapContent = readAllSitemaps();
 
       expect(sitemapContent).not.toContain('/api/grid/');
       expect(sitemapContent).not.toContain('/api/grid-batch/');
@@ -804,6 +816,50 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
   });
 
   describe('seo surface cleanup', () => {
+    it('keeps selective vacancy indexation consistent across robots, JobPosting and sitemap', () => {
+      const sitemapContent = readAllSitemaps();
+      const indexableVacancyUrl = 'https://kurerok.ru/v/kuper-foot-courier-olenegorsk-foot/';
+      const noindexVacancyUrl = 'https://kurerok.ru/v/efin-bank-representative-chudovo-auto/';
+      const indexableHtml = readFileSync(
+        join(DIST_DIR, 'v', 'kuper-foot-courier-olenegorsk-foot', 'index.html'),
+        'utf8',
+      );
+      const noindexHtml = readFileSync(
+        join(DIST_DIR, 'v', 'efin-bank-representative-chudovo-auto', 'index.html'),
+        'utf8',
+      );
+
+      expect(sitemapContent).toContain(indexableVacancyUrl);
+      expect(indexableHtml).toContain('"@type":"JobPosting"');
+      expect(indexableHtml).not.toMatch(/<meta\s+name="robots"\s+content="[^"]*noindex/i);
+
+      expect(sitemapContent).not.toContain(noindexVacancyUrl);
+      expect(noindexHtml).toMatch(/<meta\s+name="robots"\s+content="noindex, follow"/i);
+      expect(noindexHtml).not.toContain('"@type":"JobPosting"');
+    });
+
+    it('emits semantic sitemap chunks including metro pages', () => {
+      const sitemapIndex = readFileSync(join(DIST_DIR, 'sitemap-index.xml'), 'utf8');
+      const metroSitemap = readFileSync(join(DIST_DIR, 'sitemap-metro-0.xml'), 'utf8');
+      const vacancySitemap = readFileSync(join(DIST_DIR, 'sitemap-vacancies-0.xml'), 'utf8');
+
+      expect(sitemapIndex).toContain('sitemap-vacancies-0.xml');
+      expect(sitemapIndex).toContain('sitemap-listings-0.xml');
+      expect(sitemapIndex).toContain('sitemap-metro-0.xml');
+      expect(metroSitemap).toContain('https://kurerok.ru/metro/moskva/sokol/');
+      expect(vacancySitemap).toContain('https://kurerok.ru/v/kuper-foot-courier-olenegorsk-foot/');
+      expect(vacancySitemap).not.toContain('https://kurerok.ru/v/efin-bank-representative-chudovo-auto/');
+    });
+
+    it('keeps metro pages indexable without JobPosting structured data', () => {
+      const html = readFileSync(join(DIST_DIR, 'metro', 'moskva', 'sokol', 'index.html'), 'utf8');
+
+      expect(html).toContain('<link rel="canonical" href="https://kurerok.ru/metro/moskva/sokol/">');
+      expect(html).not.toMatch(/<meta\s+name="robots"\s+content="[^"]*noindex/i);
+      expect(html).toContain('"@type":"SubwayStation"');
+      expect(html).not.toContain('"@type":"JobPosting"');
+    });
+
     it('keeps internal and placeholder routes out of the sitemap', () => {
       const sitemapContent = readAllSitemaps();
 

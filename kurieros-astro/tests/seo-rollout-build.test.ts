@@ -72,9 +72,9 @@ function extractParsedLdJson(html: string): unknown[] {
   return results;
 }
 
-/** Concatenate all numbered sitemap files (sitemap-0.xml, sitemap-1.xml, …). */
+/** Concatenate all sitemap chunk files, excluding sitemap-index.xml. */
 function readAllSitemaps(): string {
-  const files = readdirSync(DIST_DIR).filter((f) => /^sitemap-\d+\.xml$/.test(f));
+  const files = readdirSync(DIST_DIR).filter((f) => /^sitemap-(?!index)[\w-]+\.xml$/.test(f));
   return files.map((f) => readFileSync(join(DIST_DIR, f), 'utf8')).join('\n');
 }
 

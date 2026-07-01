@@ -8,7 +8,7 @@
   "scripts": {
     "generate": "astro sync",
     "pregenerate": "npm run generate:data",
-    "generate:data": "npm run i18n:extract && npm run i18n:assemble && npm run i18n:test && npm run i18n:validate-keys && concurrently -n shell,trans,reviews,llms 'npm:generate:shell-translations' 'npm:generate:vacancy-translations' 'npm:generate:reviews' 'npm:generate:llms' && npm run emit:empty-listings",
+    "generate:data": "npm run i18n:extract && npm run i18n:assemble && npm run i18n:test && npm run i18n:validate-keys && concurrently -n shell,trans,reviews,llms 'npm:generate:shell-translations' 'npm:generate:vacancy-translations' 'npm:generate:reviews' 'npm:generate:llms' && npm run emit:empty-listings && npm run emit:vacancy-indexability",
     "i18n:extract": "tsx scripts/i18n/extract-clauses.ts",
     "i18n:analyze": "tsx scripts/i18n/analyze-tokens.ts",
     "i18n:assemble": "tsx scripts/i18n/assemble-translations.ts",
@@ -19,6 +19,7 @@
     "generate:reviews": "tsx scripts/generate-reviews.ts",
     "generate:llms": "node scripts/generate-llms.mjs",
     "emit:empty-listings": "tsx scripts/emit-empty-listings.ts",
+    "emit:vacancy-indexability": "tsx scripts/emit-vacancy-indexability.ts",
     "bench:city-neighbours": "node --expose-gc --import tsx scripts/perf/bench-city-neighbours.ts",
     "predev": "npm run generate:data",
     "dev": "astro dev",

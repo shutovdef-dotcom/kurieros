@@ -34,6 +34,7 @@ import {
 	getBrandCategoryCompanyLink,
 } from '../utils/companySeo';
 import { getCitySeoCluster } from '../utils/citySeoClusters';
+import { getMetroStationsByCity, type MetroCitySlug } from '../utils/metroStations';
 // `jobsByCity` is built ONCE at module load inside jobsByCityIndex.ts
 // (imports are module-cached). It is NOT rebuilt per page — a local
 // `const jobsByCity = buildJobsByCityMap(jobsData)` in this frontmatter
@@ -155,10 +156,11 @@ const filteredJobs =
 const companyNames = Array.from(new Set(filteredJobs.map((job) => job.company)));
 const paymentTypes = Array.from(new Set(filteredJobs.map((job) => job.details.payment_freq)));
 const transportTypes = buildTransportTypes(filteredJobs);
-// P0: thin listings (0 or 1 vacancy) need noindex so Google/Yandex don't
-// penalise us for thin content. We also drop them from the sitemap (see
-// astro.config.mjs). Threshold mirrors getEmptyListingPaths() in listingSlugs.ts.
-const isEmptyListing = filteredJobs.length <= 1;
+// City pages are the primary geo layer: if a city has at least one active
+// vacancy, keep it indexable. Category/facet listings stay stricter because
+// they duplicate broader hubs more easily.
+const isEmptyListing =
+	type === 'city' ? filteredJobs.length === 0 : filteredJobs.length <= 1;
 
 // Decision A: emit cross-canonical to hub page for the 4 canonicaled category
 // facets — but only when the hub itself is non-empty (a noindexed hub as
@@ -183,6 +185,11 @@ const canonicalURL =
 const cityGeo = type === 'city' ? getCityGeo(data.slug) : null;
 const cityNeighbours = type === 'city' ? getNearbyCities(data.slug) : [];
 const citySeoCluster = type === 'city' ? getCitySeoCluster(data.slug) : undefined;
+const metroCitySlug =
+	type === 'city' && (data.slug === 'moskva' || data.slug === 'sankt-peterburg')
+		? (data.slug as MetroCitySlug)
+		: null;
+const metroStationLinks = metroCitySlug ? getMetroStationsByCity(metroCitySlug).slice(0, 24) : [];
 
 // P1: max salary across the matched listings — used in title/description to
 // make the snippet more clickable in search results (cheaper-than-rewrite
@@ -383,6 +390,20 @@ const pageSchemaGraph = buildPageSchemaGraph({
 			/>
 		)}
 
+		{type === 'city' && metroStationLinks.length > 0 && !isEmptyListing && (
+			<section class="metro-station-cloud" aria-labelledby="metro-stations-title">
+				<div>
+					<p class="section-eyebrow">Метро</p>
+					<h2 id="metro-stations-title">Работа у станций метро в {data.prep}</h2>
+				</div>
+				<div class="metro-station-links">
+					{metroStationLinks.map((station) => (
+						<a href={station.href}>{station.stationName}</a>
+					))}
+				</div>
+			</section>
+		)}
+
 		<section class="listing-filters" aria-label="Фильтры вакансий">
 			<JobFilters />
 		</section>
@@ -410,6 +431,7 @@ const pageSchemaGraph = buildPageSchemaGraph({
 <style>
 	.listing-hero,
 	.listing-fact-grid,
+	.metro-station-cloud,
 	.listing-filters {
 		max-width: var(--content-max-width);
 		margin-inline: auto;
@@ -417,6 +439,39 @@ const pageSchemaGraph = buildPageSchemaGraph({
 	.listing-filters {
 		padding: 0 1rem;
 		margin-bottom: var(--space-3);
+	}
+
+	.metro-station-cloud {
+		display: grid;
+		gap: var(--space-4);
+		padding: 0 1rem 1.25rem;
+	}
+
+	.metro-station-cloud h2 {
+		margin: 0;
+		font-size: clamp(1.25rem, 2.4vw, 1.8rem);
+		line-height: 1.15;
+		letter-spacing: 0;
+	}
+
+	.metro-station-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.metro-station-links a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 38px;
+		padding: 0 0.85rem;
+		border: 1px solid var(--ink-200);
+		border-radius: var(--radius-md, 12px);
+		background: var(--surface-100);
+		color: var(--ink-800);
+		font-size: 0.9rem;
+		font-weight: 800;
+		text-decoration: none;
 	}
 
 	.listing-hero {

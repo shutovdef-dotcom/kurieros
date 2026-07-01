@@ -100,10 +100,7 @@ describe('Fix B (2026-05-25) — isRemote → TELECOMMUTE + country-only jobLoca
     expect(out.jobLocation[0].address).not.toHaveProperty('addressLocality');
   });
 
-  it('emits a complete, varied PostalAddress per city when isRemote=false (P0)', () => {
-    // P0 (2026-06-04) — streetAddress is back, but VARIED per vacancy from a
-    // pool of ubiquitous streets (no single shared landmark). addressRegion is
-    // the real region; postalCode is a real central code for major cities.
+  it('emits an honest city-level PostalAddress when isRemote=false', () => {
     const out = buildJobPostingSchema({ ...baseInput, cities: ['Москва'] });
     const address = out.jobLocation[0].address as Record<string, unknown>;
 
@@ -111,16 +108,15 @@ describe('Fix B (2026-05-25) — isRemote → TELECOMMUTE + country-only jobLoca
       '@type': 'PostalAddress',
       addressLocality: 'Москва',
       addressRegion: 'Москва',
-      postalCode: '101000',
       addressCountry: 'RU',
     });
-    // streetAddress is seeded by «slug|city» — assert shape, not exact value.
-    expect(address.streetAddress).toMatch(/, \d+$/);
+    expect(address).not.toHaveProperty('streetAddress');
+    expect(address).not.toHaveProperty('postalCode');
   });
 });
 
-describe('P0 (2026-06-04) — full addressRegion coverage + varied street', () => {
-  it('emits region + real postalCode for a curated major city (Барнаул)', () => {
+describe('JobPosting jobLocation — city-level location hygiene', () => {
+  it('emits real region but no fabricated street/postalCode for a known city', () => {
     const out = buildJobPostingSchema({ ...baseInput, cities: ['Барнаул'] });
     const address = out.jobLocation[0].address as Record<string, unknown>;
 
@@ -130,11 +126,11 @@ describe('P0 (2026-06-04) — full addressRegion coverage + varied street', () =
       addressRegion: 'Алтайский край',
       addressCountry: 'RU',
     });
-    expect(address.streetAddress).toMatch(/, \d+$/);
-    expect(address.postalCode).toMatch(/^\d{6}$/);
+    expect(address).not.toHaveProperty('streetAddress');
+    expect(address).not.toHaveProperty('postalCode');
   });
 
-  it('resolves region + real postalCode for previously-uncovered cities (Апрелевка → Московская область)', () => {
+  it('resolves region for previously-uncovered cities (Апрелевка → Московская область)', () => {
     const out = buildJobPostingSchema({ ...baseInput, cities: ['Апрелевка'] });
     const address = out.jobLocation[0].address as Record<string, unknown>;
 
@@ -144,9 +140,8 @@ describe('P0 (2026-06-04) — full addressRegion coverage + varied street', () =
       addressRegion: 'Московская область',
       addressCountry: 'RU',
     });
-    expect(address.streetAddress).toMatch(/, \d+$/);
-    // postalCode is now vendored from GeoNames for this city too.
-    expect(address.postalCode).toMatch(/^\d{6}$/);
+    expect(address).not.toHaveProperty('streetAddress');
+    expect(address).not.toHaveProperty('postalCode');
   });
 
   it('omits addressRegion only when the city is in neither cityGeo nor the curated map', () => {
@@ -160,6 +155,26 @@ describe('P0 (2026-06-04) — full addressRegion coverage + varied street', () =
     });
     expect(address).not.toHaveProperty('addressRegion');
     expect(address).not.toHaveProperty('postalCode');
+    expect(address).not.toHaveProperty('streetAddress');
+  });
+
+  it('normalizes city strings with metro hints before building jobLocation', () => {
+    const out = buildJobPostingSchema({
+      ...baseInput,
+      cities: ['Москва (метро Сокол)', 'метро Арбатская', 'Москва'],
+    });
+
+    expect(out.jobLocation).toEqual([
+      {
+        '@type': 'Place',
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: 'Москва',
+          addressRegion: 'Москва',
+          addressCountry: 'RU',
+        },
+      },
+    ]);
   });
 
   it('emits country-only Place for the «Россия» pseudo-city (no locality)', () => {

@@ -201,7 +201,7 @@ describe.skipIf(!distExists)('sitemap priorities (build-output)', () => {
     const sitemapIndex = resolve(worktreeRoot, 'dist', 'sitemap-index.xml');
     if (!existsSync(sitemapIndex)) return '';
     const indexContent = readFileSync(sitemapIndex, 'utf8');
-    const sitemapFiles = [...indexContent.matchAll(/sitemap-\d+\.xml/g)].map((m) => m[0]);
+    const sitemapFiles = [...indexContent.matchAll(/sitemap-(?!index)[\w-]+\.xml/g)].map((m) => m[0]);
     return sitemapFiles
       .map((f) => {
         const p = resolve(worktreeRoot, 'dist', f);

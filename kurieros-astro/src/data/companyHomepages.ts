@@ -29,6 +29,7 @@ export const COMPANY_HOMEPAGES: Readonly<Record<string, string>> = {
   'Ozon fresh': 'https://www.ozon.ru/',
   Efin: 'https://efin.online/',
   Самокат: 'https://samokat.ru/',
+  'X5 Доставка': 'https://dostavka.x5.ru/',
   'Еда в Яндекс Go': 'https://go.yandex.com/',
   'Еда в Yandex Go': 'https://go.yandex.com/',
   Voxys: 'https://www.voxys.ru/',

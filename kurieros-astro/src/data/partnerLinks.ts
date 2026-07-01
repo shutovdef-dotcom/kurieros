@@ -56,6 +56,11 @@ export const SAMOKAT_LOGO = '/logos/samokat.svg';
 export const SAMOKAT_APPLY =
   'https://pxl.leads.su/click/dda95ad94f19aab8dca8a2a2647a6742';
 
+// === X5 Доставка ====================================================
+// X5 Delivery driver offer — CPA via Lovko/Affise.
+export const X5_DELIVERY_LOGO = '/logos/x5-delivery.png';
+export const X5_DELIVERY_APPLY = 'https://tracking.lovko.pro/click?pid=5005&offer_id=40';
+
 // === Voxys ==========================================================
 export const VOXYS_LOGO = '/logos/voxys.png';
 export const VOXYS_APPLY = 'https://my.saleads.pro/s/pu813/3127?erid=2VtzqwpNari';

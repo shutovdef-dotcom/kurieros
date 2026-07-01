@@ -3,7 +3,7 @@
     "shortDescription": "Alfa-Bank'da harakatchan ish: bank mahsulotlarini mijozlarga yetkazib berish, hujjatlarni imzolash va bank xizmatlarini ulashga yordam berish.",
     "description": "Alfa-Bank tashqarida mijozlar bilan ishlash uchun vakillarni qidirmoqda. Bank mahsulotlarini yetkazib berish, mijozlar bilan shaharning qulay nuqtalarida uchrashish, hujjatlarni imzolash, xizmatlar va bank takliflari bo'yicha maslahat berish, shuningdek qo'shimcha xizmatlarni ulashga yordam berish kerak. Format tajribasiz nomzodlar uchun mos: startgacha o'qitish, qo'llab-quvvatlash va ishga tushunarli kirish bor. Bank rasmiy rasmiylashtirishni, moslashuvchan jadvalni, o'sish imkoniyatlarini va korporativ imtiyozlar, chegirmalar hamda o'qitish dasturlariga kirishni taklif etadi.",
     "requirements": [
-      "Yosh 18 yoshdan; 40 yoshdan keyin bank qo'shimcha ravishda nomzodning tajribasi va ko'nikmalariga qaraydi.",
+      "Yosh 18 yoshdan boshlab; 40 yoshdan keyin bank qo'shimcha ravishda nomzodning tajribasi va ko'nikmalariga qaraydi.",
       "РФ, Belarus yoki Kazakhstan fuqaroligi.",
       "O'rta maxsus va undan yuqori ta'lim; o'rta ta'limga ega nomzodlarni alohida ko'rib chiqish mumkin.",
       "Ishning harakatchan xarakteriga va savdoga tayyorlik.",
@@ -224,7 +224,7 @@
     "shortDescription": "Buyurtmalarni Ozon shaxsiy yengil yoki xizmat avtomobilida yetkazib berish. Moslashuvchan jadval, haftalik to'lovlar, Gosuslugi orqali ro'yxatdan o'tish.",
     "description": "Ozon {city} mijozlariga buyurtmalarni yetkazib berish uchun avtokuryerlarni qidirmoqda. O'zingizning yengil yoki yuk avtomobilingizda ishlash mumkin yoki kompaniyaning xizmat avtomobilini olishingiz mumkin. Format — o'z-o'zini band qilish yoki ИП. Ro'yxatdan o'tish va o'qitish Ozon Job ilovasida Gosuslugi orqali o'tadi. Erkin jadval, boshqa qo'shimcha ishlar bilan birga olib borish mumkin. To'lovlar haftada bir marta to'g'ridan-to'g'ri kartaga. Bizning arizamiz orqali ulanish: kontaktlarni qoldiring — biz ularni Ozon'ga uzatamiz, shundan keyin sizga ro'yxatdan o'tish havolasi bilan SMS keladi.",
     "requirements": [
-      "Yosh 18 yoshdan.",
+      "Yosh 18 yoshdan boshlab.",
       "РФ yoki ЕАЭС fuqaroligi.",
       "Shaxsiy yoki xizmat avtomobili (yengil / yuk).",
       "B toifasidagi amaldagi haydovchilik guvohnomasi.",
@@ -297,7 +297,7 @@
     "shortDescription": "Ozon fresh darkstorlaridan yangi mahsulotlarni piyoda yoki velosipedda yetkazib berish. Yaqin atrofdagi buyurtmalar, to'lovlar haftada bir marta, Gosuslugi orqali ro'yxatdan o'tish.",
     "description": "Ozon fresh — mahsulot va tayyor ovqatni 30–60 daqiqada yetkazib berish. Kuryerlar piyoda, velosiped yoki samokatda ishlaydi — buyurtmalar uy yaqinidagi darkstorda beriladi, marshrut ilova tomonidan tuziladi. Erkin jadval (4 soatdan slotlar), to'lovlar haftada bir marta kartaga, pik soatlar va yomon ob-havo uchun bonuslar. Bizning arizamiz orqali ulanish: kontaktlarni qoldiring — Ozon Gosuslugi'da ro'yxatdan o'tish havolasi bilan SMS yuboradi.",
     "requirements": [
-      "Yosh 18 yoshdan.",
+      "Yosh 18 yoshdan boshlab.",
       "РФ, ЕАЭС yoki СНГ fuqaroligi (ЕАЭС'dan tashqari uchun ВНЖ + Patent kerak).",
       "O'z-o'zini band qilish yoki ИП (Moy nalog orqali 5 daqiqada rasmiylashtirishga yordam beramiz).",
       "Ozon Job ilovasida Gosuslugi orqali onbording o'tishga tayyorlik.",
@@ -322,7 +322,7 @@
     "shortDescription": "Ozon fresh uchun tayyor taomlarni pishirish va qadoqlash. Tajribasiz, kompaniya hisobidan o'qitish, bepul ovqat, Ozon'dan tibbiy kitob.",
     "description": "Ozon fresh fabrika-oshxonasi salatlar, sho'rvalar, issiq taomlar, pishiriqlar tayyorlaydi va ularni yetkazib berish uchun qadoqlaydi. Xodimlar alohida liniyalarda ishlaydi: kesish, yig'ish, qadoqlash, markirovka. Tajribasiz — joyida 1–2 smenada o'qitish, tajribali shef-mentorlar. Smenali jadval 2/2 yoki 5/2, bepul issiq ovqat, tibbiy kitob kompaniya hisobidan rasmiylashtiriladi. Bizning arizamiz orqali ulanish.",
     "requirements": [
-      "Yosh 18 yoshdan.",
+      "Yosh 18 yoshdan boshlab.",
       "РФ, ЕАЭС yoki СНГ fuqaroligi.",
       "Tibbiy kitob majburiy (agar yo'q bo'lsa, kompaniya hisobidan rasmiylashtiramiz).",
       "Smenali jadval va oyoqda ishlashga tayyorlik.",
@@ -347,7 +347,7 @@
     "shortDescription": "Ozon fresh darkstorida yangi mahsulotlarni yig'ish: buyurtmadan kuryerga topshirishgacha 30–60 daqiqa. Smenali jadval, bepul ovqat, ТК РФ.",
     "description": "Ozon fresh — mijozdan 3 km radiusda mahsulotli mini-omborlar. Yig'uvchi buyurtmani ilovada oladi, tovarlarni darkstor javonlaridan yig'adi va kuryerga 6–10 daqiqada beradi. Sovuq va sovutilgan zonalarda ish (alohida issiq kurtkalar beriladi), smenali jadval 2/2 yoki 5/2, bepul issiq ovqat, ТК РФ bo'yicha rasmiylashtirish. Bizning arizamiz orqali ulanish: kontaktlarni qoldiring — Ozon SMS yuboradi.",
     "requirements": [
-      "Yosh 18 yoshdan.",
+      "Yosh 18 yoshdan boshlab.",
       "РФ, ЕАЭС yoki СНГ fuqaroligi.",
       "12 soat oyoqda ishlash va sovuqda bo'lishga tayyorlik.",
       "Tajribasiz — birinchi smenada o'qitish.",
@@ -372,7 +372,7 @@
     "shortDescription": "Ozon omborida tovarlarni qabul qilish, qadoqlash va jo'natish. Smenali jadval, haftalik to'lovlar, kompaniya hisobidan o'qitish.",
     "description": "Ozon tovarlarni qayta ishlash bo'yicha mutaxassislarni taklif qiladi {cityPrep} — yetkazib berishlarni qabul qilish, mijoz buyurtmalarini qadoqlash, mashinalarga jo'natish. Issiq zamonaviy omborda ish, ko'chasiz. Tajribasiz — joyida 1 smenada o'qitish. Smenali jadval 2/2 yoki 5/2, bepul ovqat, metrodan korporativ transport. Bizning arizamiz orqali ulanish: kontaktlarni qoldiring — Ozon SMS yuboradi.",
     "requirements": [
-      "Yosh 18 yoshdan.",
+      "Yosh 18 yoshdan boshlab.",
       "РФ, ЕАЭС yoki СНГ fuqaroligi.",
       "Oyoqda ishlash va 15 kg gacha yuk ko'tarishga tayyorlik.",
       "Tajribasiz — birinchi smenada o'qitish."
@@ -420,7 +420,7 @@
     "shortDescription": "Ozon fulfilment omborida buyurtmalarni yig'ish, qadoqlash va tartiblash. Smenali jadval, haftalik to'lovlar, bepul ovqat.",
     "description": "Ozon ombor operatorlarini taklif qiladi {cityPrep} — mijoz buyurtmalarini yig'ish, tovarlarni qadoqlash va tartiblash. Zamonaviy issiq omborda ish, ko'cha va ob-havosiz. Smenali jadval 2/2 yoki 5/2 — qulayini tanlaysiz, dam olish kunlarida qo'shimcha ishlash mumkin. Bepul ovqat, metro / temir yo'l stansiyasidan korporativ transport, imtiyozli tibbiy ko'rik. Bizning arizamiz orqali ulanish: kontaktlarni qoldiring — Ozon smena uchun taklifnoma bilan SMS yuboradi.",
     "requirements": [
-      "Yosh 18 yoshdan.",
+      "Yosh 18 yoshdan boshlab.",
       "РФ, ЕАЭС yoki СНГ fuqaroligi.",
       "Oyoqda ishlash va 15 kg gacha yuk ko'tarishga tayyorlik.",
       "Tajribasiz — joyida 1 smenada o'qitish."
@@ -462,7 +462,7 @@
       "ИНН.",
       "СНИЛС.",
       "Банковская карта для выплат.",
-      "Статус самозанятого или готовность оформить его перед стартом."
+      "O‘zini o‘zi band qilgan maqomi yoki startdan oldin uni rasmiylashtirishga tayyorlik."
     ]
   },
   "ruki-door-installer": {},
@@ -542,7 +542,7 @@
     "shortDescription": "Удалённая работа в Тетрике: проводите индивидуальные онлайн-занятия по английскому языку, выбирайте нагрузку и получайте поток учеников от платформы.",
     "description": "Тетрика приглашает преподавателей для индивидуальных онлайн-занятий по английскому языку. Нужно проводить диагностику знаний, составлять программу обучения, заниматься с учениками на интерактивной платформе, давать обратную связь родителям и вести отчётность по урокам. Формат полностью удалённый: занятия проходят из дома, а сервис помогает с потоком учеников, расписанием и организационными вопросами.",
     "requirements": [
-      "Yosh 18 yoshdan.",
+      "Yosh 18 yoshdan boshlab.",
       "Уверенное знание английского языка и умение объяснять школьную программу простым языком.",
       "Опыт преподавания, репетиторства или регулярной подготовки учеников будет преимуществом.",
       "Грамотная устная и письменная речь.",
@@ -571,7 +571,7 @@
     "shortDescription": "Удалённая работа в Тетрике: проводите индивидуальные онлайн-занятия по математике, выбирайте нагрузку и получайте поток учеников от платформы.",
     "description": "Тетрика приглашает преподавателей для индивидуальных онлайн-занятий по математике. Нужно проводить диагностику знаний, составлять программу обучения, заниматься с учениками на интерактивной платформе, давать обратную связь родителям и вести отчётность по урокам. Формат полностью удалённый: занятия проходят из дома, а сервис помогает с потоком учеников, расписанием и организационными вопросами.",
     "requirements": [
-      "Yosh 18 yoshdan.",
+      "Yosh 18 yoshdan boshlab.",
       "Уверенное знание математики в рамках школьной программы и умение объяснять задачи пошагово.",
       "Опыт преподавания, репетиторства или регулярной подготовки учеников будет преимуществом.",
       "Грамотная устная и письменная речь.",
@@ -600,7 +600,7 @@
     "shortDescription": "Удалённая работа в Тетрике: проводите индивидуальные онлайн-занятия по физике, выбирайте нагрузку и получайте поток учеников от платформы.",
     "description": "Тетрика приглашает преподавателей для индивидуальных онлайн-занятий по физике. Нужно проводить диагностику знаний, составлять программу обучения, заниматься с учениками на интерактивной платформе, давать обратную связь родителям и вести отчётность по урокам. Формат полностью удалённый: занятия проходят из дома, а сервис помогает с потоком учеников, расписанием и организационными вопросами.",
     "requirements": [
-      "Yosh 18 yoshdan.",
+      "Yosh 18 yoshdan boshlab.",
       "Уверенное знание физики в рамках школьной программы и умение готовить учеников к занятиям и проверочным работам.",
       "Опыт преподавания, репетиторства или регулярной подготовки учеников будет преимуществом.",
       "Грамотная устная и письменная речь.",
@@ -629,7 +629,7 @@
     "shortDescription": "Удалённая работа в Тетрике: проводите индивидуальные онлайн-занятия по русскому языку, выбирайте нагрузку и получайте поток учеников от платформы.",
     "description": "Тетрика приглашает преподавателей для индивидуальных онлайн-занятий по русскому языку. Нужно проводить диагностику знаний, составлять программу обучения, заниматься с учениками на интерактивной платформе, давать обратную связь родителям и вести отчётность по урокам. Формат полностью удалённый: занятия проходят из дома, а сервис помогает с потоком учеников, расписанием и организационными вопросами.",
     "requirements": [
-      "Yosh 18 yoshdan.",
+      "Yosh 18 yoshdan boshlab.",
       "Глубокое знание русского языка, грамотная речь и умение разбирать школьные темы с учениками разного уровня.",
       "Опыт преподавания, репетиторства или регулярной подготовки учеников будет преимуществом.",
       "Грамотная устная и письменная речь.",
@@ -658,7 +658,7 @@
     "shortDescription": "Удалённая работа в Тетрике: проводите индивидуальные онлайн-занятия по английскому языку, математике, физике или русскому языку, выбирайте нагрузку и получайте поток учеников от платформы.",
     "description": "Тетрика приглашает преподавателей для индивидуальных онлайн-занятий по английскому языку, математике, физике и русскому языку. Нужно проводить диагностику знаний, составлять программу обучения, заниматься с учениками на интерактивной платформе, давать обратную связь родителям и вести отчётность по урокам. Формат полностью удалённый: занятия проходят из дома, а сервис помогает с потоком учеников, расписанием и организационными вопросами.",
     "requirements": [
-      "Yosh 18 yoshdan.",
+      "Yosh 18 yoshdan boshlab.",
       "Уверенное знание одного из направлений: английский язык, математика, физика или русский язык.",
       "Опыт преподавания, репетиторства или регулярной подготовки учеников будет преимуществом.",
       "Грамотная устная и письменная речь.",
@@ -711,6 +711,34 @@
       "ТК РФ bo'yicha rasmiylashtirish uchun hujjatlar."
     ]
   },
+  "x5-delivery-auto-courier": {
+    "shortDescription": "X5 buyurtmalarini shaxsiy avtomobilda yetkazish: kunduzgi smenalarni tanlash, kartaga haftalik to‘lovlar, bepul termosumka va oyiga 182 000 ₽ gacha daromad.",
+    "description": "X5 Delivery {cityPrep} shaxsiy avtomobili bor haydovchilarni taklif qiladi. Do‘kondan tovarlarni olib, mijozlarga yetkazish kerak. Hamkorlik formati — o‘zini o‘zi band qilgan sifatida xizmat ko‘rsatish shartnomasi; smenalar tanlov asosida rejalashtiriladi, yetkazish kunduzgi vaqtda amalga oshiriladi. To‘lovlar har hafta kartaga o‘tkaziladi.",
+    "requirements": [
+      "Yosh 18 yoshdan boshlab.",
+      "ЕАЭС fuqaroligi.",
+      "Shaxsiy avtomobil.",
+      "РФ haydovchilik guvohnomasi.",
+      "O‘zini o‘zi band qilgan maqomi yoki uni rasmiylashtirishga tayyorlik.",
+      "Ehtiyotkorlik, punktuallik va tovarlarni mijozlarga yetkazishga tayyorlik."
+    ],
+    "benefits": [
+      "Kuniga 6 000 ₽ dan daromad va oyiga 182 000 ₽ gacha mo‘ljal.",
+      "Kunduzgi yetkazish.",
+      "Smenalarni o‘zingiz tanlab rejalashtirish.",
+      "Xizmat ko‘rsatish shartnomasi bo‘yicha hamkorlik.",
+      "Kartaga har hafta to‘lovlar.",
+      "Bepul termosumka.",
+      "Offer shartlariga ko‘ra jarimalar yo‘q.",
+      "“Do‘stingni olib kel” aksiyasi: 10 000 ₽."
+    ],
+    "requiredDocuments": [
+      "Pasport.",
+      "РФ haydovchilik guvohnomasi.",
+      "Avtomobil hujjatlari.",
+      "O‘zini o‘zi band qilgan maqomi yoki startdan oldin uni rasmiylashtirishga tayyorlik."
+    ]
+  },
   "yandex-eda-courier": {
     "shortDescription": "Uy yaqinida Ya.Pro orqali buyurtmalarni yetkazib berish, 2 soatdan boshlab erkin jadval va shaffof daromad.",
     "description": "Yandex Eda kuryerlarni yig'moqda. Ulanish shahri: {city}. Siz buyurtmalarni «Ya.Pro» ilovasi orqali tushunarli marshrutlar bo'yicha yetkazib berasiz: tumanni tanlash, 2 soatdan boshlab slotlarga chiqish, tanaffuslar olish va buyurtmalar bo'yicha daromadni oldindan ko'rish mumkin.",
@@ -749,7 +777,7 @@
     "shortDescription": "Uy yaqinida Ya.Pro orqali buyurtmalarni yetkazib berish, 2 soatdan boshlab erkin jadval va shaffof daromad.",
     "description": "Kuryer-hamkorlarni qidiramiz {cityPrep}. Daromad ishlangan soatlar va xizmat ko'rsatilgan mijozlar soniga qarab shakllanadi. Yetkazib berish soatlarini (taym-slotlarni) o'zingiz tanlaysiz.",
     "requirements": [
-      "Yosh 18 yoshdan.",
+      "Yosh 18 yoshdan boshlab.",
       "Android 5.0 va undan yuqori smartfon.",
       "Buyurtmalarni o'z vaqtida yetkazishga tayyorlik."
     ],
@@ -767,7 +795,7 @@
     "shortDescription": "Uy yaqinida Ya.Pro orqali buyurtmalarni yetkazib berish, 2 soatdan boshlab erkin jadval va shaffof daromad.",
     "description": "Kuryer-hamkorlarni qidiramiz {cityPrep}. Daromad ishlangan soatlar va xizmat ko'rsatilgan mijozlar soniga qarab shakllanadi. Yetkazib berish soatlarini (taym-slotlarni) o'zingiz tanlaysiz.",
     "requirements": [
-      "Yosh 18 yoshdan.",
+      "Yosh 18 yoshdan boshlab.",
       "Android 5.0 va undan yuqori smartfon.",
       "Buyurtmalarni o'z vaqtida yetkazishga tayyorlik."
     ],
@@ -785,7 +813,7 @@
     "shortDescription": "Uy yaqinida Ya.Pro orqali buyurtmalarni yetkazib berish, 2 soatdan boshlab erkin jadval va shaffof daromad.",
     "description": "Kuryer-hamkorlarni qidiramiz {cityPrep}. Daromad ishlangan soatlar va xizmat ko'rsatilgan mijozlar soniga qarab shakllanadi. Yetkazib berish soatlarini (taym-slotlarni) o'zingiz tanlaysiz.",
     "requirements": [
-      "Yosh 18 yoshdan.",
+      "Yosh 18 yoshdan boshlab.",
       "Android 5.0 va undan yuqori smartfon.",
       "Buyurtmalarni o'z vaqtida yetkazishga tayyorlik."
     ],
@@ -803,7 +831,7 @@
     "shortDescription": "Uy yaqinida Ya.Pro orqali buyurtmalarni yetkazib berish, 2 soatdan boshlab erkin jadval va shaffof daromad.",
     "description": "Kuryer-hamkorlarni qidiramiz {cityPrep}. Daromad ishlangan soatlar va xizmat ko'rsatilgan mijozlar soniga qarab shakllanadi. Yetkazib berish soatlarini (taym-slotlarni) o'zingiz tanlaysiz.",
     "requirements": [
-      "Yosh 18 yoshdan.",
+      "Yosh 18 yoshdan boshlab.",
       "Android 5.0 va undan yuqori smartfon.",
       "Buyurtmalarni o'z vaqtida yetkazishga tayyorlik."
     ],

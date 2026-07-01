@@ -36,6 +36,7 @@ const REQUIRED_PARTNER_SLUGS = [
   'efin-bank-representative',
   'alfa-bank-representative',
   'burger-king-cook-cashier',
+  'x5-delivery-auto-courier',
   'voxys-call-center-operator',
   'mts-bank-operator',
   'qlean-cleaner',
@@ -230,6 +231,50 @@ describe('vacancySources structural invariants', () => {
     expect(ryazan?.details.medical_book).toBe('Не требуется');
     expect(ryazan?.details.os).toContain('Компьютер');
     expect(ryazan?.applyLink).toContain('https://trk.ppdu.ru/click?');
+  });
+
+  it('generates X5 Delivery auto-courier offers with standard capital-region geo', () => {
+    const source = vacancySources.find((item) => item.slug === 'x5-delivery-auto-courier');
+    const x5Jobs = jobs.filter((job) => job.sourceSlug === 'x5-delivery-auto-courier');
+
+    expect(source).toBeDefined();
+    expect(source?.id).toBe(36);
+    expect(source?.company.name).toBe('X5 Доставка');
+    expect(source?.howToTemplate).toBe('courier');
+    expect(source?.incomeCalculator).toEqual({ mode: 'monthly' });
+    expect(source?.offers).toHaveLength(179);
+    expect(source?.offers.every((offer) => offer.transport === 'auto')).toBe(true);
+    expect(source?.offers.every((offer) => offer.transportProvision === 'own')).toBe(true);
+    expect(source?.offers.every((offer) => offer.ageFrom === 18)).toBe(true);
+
+    expect(x5Jobs).toHaveLength(179);
+
+    const cities = new Set(x5Jobs.map((job) => job.location));
+    expect(cities.has('Москва')).toBe(true);
+    expect(cities.has('Химки')).toBe(true);
+    expect(cities.has('Одинцово')).toBe(true);
+    expect(cities.has('Санкт-Петербург')).toBe(true);
+    expect(cities.has('Колпино')).toBe(true);
+    expect(cities.has('Пушкин')).toBe(true);
+    expect(cities.has('Шушары')).toBe(true);
+    expect(cities.has('Мурино')).toBe(true);
+    expect(cities.has('Кудрово')).toBe(true);
+    expect(cities.has('Бугры')).toBe(false);
+    expect(cities.has('Бокситогорск')).toBe(true);
+    expect(cities.has('Пикалёво')).toBe(false);
+    expect(cities.has('Комсомольск-на-Амуре')).toBe(true);
+    expect(cities.has('Солнечный')).toBe(false);
+
+    const moscow = x5Jobs.find((job) => job.location === 'Москва');
+    expect(moscow?.slug).toBe('x5-delivery-auto-courier-moskva-auto');
+    expect(moscow?.title).toBe('Водитель X5 Доставки на личном авто в Москве');
+    expect(moscow?.salary).toBe('до 182 000 ₽/мес');
+    expect(moscow?.details.rate).toContain('от 6 000 ₽/день');
+    expect(moscow?.details.age).toBe('от 18 лет');
+    expect(moscow?.details.employment_type).toBe('Самозанятость');
+    expect(moscow?.requiredDocuments).toContain('Водительское удостоверение РФ.');
+    expect(moscow?.requiredDocuments).toContain('Документы на автомобиль.');
+    expect(moscow?.sourceUrl).toBe('https://lk.lovko.pro/v2/offer/40');
   });
 
   it('generates Ruki Moscow-region service worker offers only', () => {

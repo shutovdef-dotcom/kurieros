@@ -208,6 +208,36 @@ const CITY_TO_REGION: Readonly<Record<string, string>> = {
 export const getAddressRegion = (city: string): string | undefined =>
   CITY_TO_REGION[city];
 
+const STATION_ONLY_PATTERN =
+  /^(?:м\.?|метро|станц(?:ия|ии)|ж\/д\s*станц(?:ия|ии))(?:\s|$)/i;
+const STATION_HINT_PATTERN = /(метро|станц(?:ия|ии)|ж\/д\s*станц(?:ия|ии))/i;
+
+const normalizeJobLocationCity = (city: string): string | null => {
+  const trimmed = city.trim();
+  if (!trimmed || trimmed === 'Вся Россия') return null;
+  if (trimmed === 'Россия') return 'Россия';
+  if (STATION_ONLY_PATTERN.test(trimmed)) return null;
+
+  const withoutStationHint = trimmed
+    .replace(/\s*\([^)]*\)\s*/g, (match) =>
+      STATION_HINT_PATTERN.test(match) ? ' ' : match,
+    )
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (!withoutStationHint || withoutStationHint === 'Вся Россия') return null;
+  if (STATION_ONLY_PATTERN.test(withoutStationHint)) return null;
+  return withoutStationHint;
+};
+
+const getJobLocationCities = (cities: readonly string[]): string[] => {
+  const normalized = cities
+    .map(normalizeJobLocationCity)
+    .filter((city): city is string => Boolean(city));
+  const unique = Array.from(new Set(normalized));
+  return unique.length ? unique : ['Россия'];
+};
+
 export type JobPostingInput = {
   title: string;
   description: string;
@@ -293,7 +323,7 @@ export type JobPostingInput = {
 };
 
 export const buildJobPostingSchema = (input: JobPostingInput) => {
-  const cities = input.cities.length ? input.cities : ['Россия'];
+  const cities = getJobLocationCities(input.cities);
   // Fix B (2026-05-25) — for fully-remote roles, collapse jobLocation
   // to a country-only Place. Emitting a synthetic city street address
   // for a role that has no physical workplace contradicts the
@@ -310,13 +340,9 @@ export const buildJobPostingSchema = (input: JobPostingInput) => {
         },
       ]
     : cities.map((city) => {
-        // P0 (2026-06-04) — complete PostalAddress, but VARIED per vacancy.
-        // `streetAddress` is drawn from a pool of ubiquitous street names
-        // seeded by «slug|city» (see jobLocationAddress.ts), so a city's
-        // vacancies spread across many streets instead of all claiming one
-        // landmark — the reason synthetic addresses were reverted 2026-05-25.
-        // `addressRegion` is the real region; `postalCode` is a real central
-        // code for major cities, omitted (never fabricated) for the long tail.
+        // City-level location only: we do not know real per-vacancy streets
+        // or postal codes, so JobPosting must not invent them. Metro/station
+        // hints are filtered before this point and stay in page content only.
         if (city === 'Россия') {
           return {
             '@type': 'Place',
@@ -328,7 +354,7 @@ export const buildJobPostingSchema = (input: JobPostingInput) => {
         }
         return {
           '@type': 'Place',
-          address: buildJobLocationAddress(city, input.slug),
+          address: buildJobLocationAddress(city),
         };
       });
 

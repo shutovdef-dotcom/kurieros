@@ -1,0 +1,887 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { buildBreadcrumbSchema } from '../utils/schema';
+
+const YEAR = 2026;
+const title = 'Производственный календарь 2026 — рабочие, выходные и нормы часов';
+const description =
+  'Производственный календарь России на 2026 год: рабочие и выходные дни, праздники, переносы, сокращённые дни и нормы рабочего времени для 40-, 36- и 24-часовой недели.';
+
+const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+const months = [
+  'Январь',
+  'Февраль',
+  'Март',
+  'Апрель',
+  'Май',
+  'Июнь',
+  'Июль',
+  'Август',
+  'Сентябрь',
+  'Октябрь',
+  'Ноябрь',
+  'Декабрь',
+];
+
+const fixedHolidays = new Map([
+  ['2026-01-01', 'Новогодние каникулы'],
+  ['2026-01-02', 'Новогодние каникулы'],
+  ['2026-01-03', 'Новогодние каникулы'],
+  ['2026-01-04', 'Новогодние каникулы'],
+  ['2026-01-05', 'Новогодние каникулы'],
+  ['2026-01-06', 'Новогодние каникулы'],
+  ['2026-01-07', 'Рождество Христово'],
+  ['2026-01-08', 'Новогодние каникулы'],
+  ['2026-02-23', 'День защитника Отечества'],
+  ['2026-03-08', 'Международный женский день'],
+  ['2026-05-01', 'Праздник Весны и Труда'],
+  ['2026-05-09', 'День Победы'],
+  ['2026-06-12', 'День России'],
+  ['2026-11-04', 'День народного единства'],
+]);
+
+const observedRestDays = new Map([
+  ['2026-03-09', 'Выходной за 8 марта'],
+  ['2026-05-11', 'Выходной за 9 мая'],
+]);
+
+const transferRestDays = new Map([
+  ['2026-01-09', 'Перенос выходного с 3 января'],
+  ['2026-12-31', 'Перенос выходного с 4 января'],
+]);
+
+const shortDays = new Map([
+  ['2026-04-30', 'Перед 1 мая'],
+  ['2026-05-08', 'Перед 9 мая'],
+  ['2026-06-11', 'Перед 12 июня'],
+  ['2026-11-03', 'Перед 4 ноября'],
+]);
+
+const longBreaks = [
+  { label: 'Новогодние каникулы', value: '31 декабря 2025 — 11 января 2026', days: '12 дней' },
+  { label: 'Февральские выходные', value: '21 — 23 февраля', days: '3 дня' },
+  { label: 'Мартовские выходные', value: '7 — 9 марта', days: '3 дня' },
+  { label: 'Майские: Праздник Весны и Труда', value: '1 — 3 мая', days: '3 дня' },
+  { label: 'Майские: День Победы', value: '9 — 11 мая', days: '3 дня' },
+  { label: 'День России', value: '12 — 14 июня', days: '3 дня' },
+  { label: 'День народного единства', value: '4 ноября', days: '1 день' },
+  { label: 'Предновогодний выходной', value: '31 декабря', days: '1 день' },
+];
+
+const dateKey = (date: Date) => {
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${date.getFullYear()}-${month}-${day}`;
+};
+
+const isWeekend = (date: Date) => date.getDay() === 0 || date.getDay() === 6;
+const isRestDay = (key: string, date: Date) =>
+  isWeekend(date) || fixedHolidays.has(key) || observedRestDays.has(key) || transferRestDays.has(key);
+const isShortDay = (key: string) => shortDays.has(key);
+
+const dayLabel = (key: string, date: Date) => {
+  if (fixedHolidays.has(key)) return fixedHolidays.get(key);
+  if (observedRestDays.has(key)) return observedRestDays.get(key);
+  if (transferRestDays.has(key)) return transferRestDays.get(key);
+  if (isShortDay(key)) return shortDays.get(key);
+  return isWeekend(date) ? 'Выходной день' : 'Рабочий день';
+};
+
+const roundHours = (value: number) => Math.round(value * 10) / 10;
+const formatHours = (value: number) =>
+  Number.isInteger(value) ? String(value) : String(value).replace('.', ',');
+
+type MonthDay = {
+  key: string;
+  date: Date;
+  day: number;
+  rest: boolean;
+  holiday: boolean;
+  transfer: boolean;
+  short: boolean;
+  label: string;
+};
+
+const monthDays = months.map((_, monthIndex) => {
+  const daysInMonth = new Date(YEAR, monthIndex + 1, 0).getDate();
+  return Array.from({ length: daysInMonth }, (_, dayIndex): MonthDay => {
+    const date = new Date(YEAR, monthIndex, dayIndex + 1);
+    const key = dateKey(date);
+    return {
+      key,
+      date,
+      day: dayIndex + 1,
+      rest: isRestDay(key, date),
+      holiday: fixedHolidays.has(key) || observedRestDays.has(key),
+      transfer: transferRestDays.has(key),
+      short: isShortDay(key),
+      label: dayLabel(key, date) || '',
+    };
+  });
+});
+
+const monthStats = monthDays.map((days, monthIndex) => {
+  const calendarDays = days.length;
+  const workDays = days.filter((day) => !day.rest).length;
+  const restDays = calendarDays - workDays;
+  const shortCount = days.filter((day) => day.short).length;
+
+  return {
+    name: months[monthIndex],
+    key: months[monthIndex].toLowerCase(),
+    calendarDays,
+    workDays,
+    restDays,
+    shortCount,
+    hours40: roundHours(workDays * 8 - shortCount),
+    hours36: roundHours(workDays * 7.2 - shortCount),
+    hours24: roundHours(workDays * 4.8 - shortCount),
+  };
+});
+
+const quarterStats = [0, 3, 6, 9].map((startIndex) => {
+  const quarterMonths = monthStats.slice(startIndex, startIndex + 3);
+  const sum = (field: keyof typeof quarterMonths[number]) =>
+    quarterMonths.reduce((total, item) => total + Number(item[field]), 0);
+  return {
+    label: `${startIndex / 3 + 1} квартал`,
+    calendarDays: sum('calendarDays'),
+    workDays: sum('workDays'),
+    restDays: sum('restDays'),
+    hours40: roundHours(sum('hours40')),
+    hours36: roundHours(sum('hours36')),
+    hours24: roundHours(sum('hours24')),
+  };
+});
+
+const annual = {
+  calendarDays: monthStats.reduce((total, item) => total + item.calendarDays, 0),
+  workDays: monthStats.reduce((total, item) => total + item.workDays, 0),
+  restDays: monthStats.reduce((total, item) => total + item.restDays, 0),
+  shortDays: monthStats.reduce((total, item) => total + item.shortCount, 0),
+  hours40: roundHours(monthStats.reduce((total, item) => total + item.hours40, 0)),
+  hours36: roundHours(monthStats.reduce((total, item) => total + item.hours36, 0)),
+  hours24: roundHours(monthStats.reduce((total, item) => total + item.hours24, 0)),
+};
+
+const sourceLinks = [
+  {
+    label: 'Постановление Правительства РФ от 24.09.2025 № 1466',
+    href: 'https://static.government.ru/media/files/4jeB8hNKm69ggOa9yDiYOli6YoAyM21i.pdf',
+  },
+  {
+    label: 'Производственный календарь 2026 — КонсультантПлюс',
+    href: 'https://www.consultant.ru/law/ref/calendar/proizvodstvennye/2026/',
+  },
+];
+
+const pageSchemaGraph = [
+  {
+    '@type': 'WebPage',
+    name: title,
+    description,
+    url: Astro.url.href,
+    dateModified: '2026-06-30',
+  },
+  buildBreadcrumbSchema(
+    [
+      { name: 'Главная', url: '/' },
+      { name: 'Производственный календарь', url: '/calendar/' },
+    ],
+    Astro.site,
+  ),
+];
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalURL={new URL('/calendar/', Astro.site)}
+  schemaGraph={pageSchemaGraph}
+>
+  <Header />
+
+  <main class="calendar-page">
+    <section class="calendar-hero">
+      <div class="calendar-hero-copy">
+        <span class="calendar-eyebrow">Россия · 2026</span>
+        <h1>Производственный календарь 2026</h1>
+        <p>
+          Федеральный календарь для пятидневной рабочей недели: рабочие дни,
+          праздники, переносы, сокращённые смены и нормы часов.
+        </p>
+        <div class="calendar-legend">
+          <span><i class="legend-dot legend-dot-work" aria-hidden="true"></i>Рабочий день</span>
+          <span><i class="legend-dot legend-dot-rest" aria-hidden="true"></i>Выходной / праздник</span>
+          <span><i class="legend-dot legend-dot-short" aria-hidden="true"></i>Сокращённый день</span>
+        </div>
+      </div>
+
+      <div class="calendar-summary">
+        <div>
+          <span>Рабочих дней</span>
+          <strong>{annual.workDays}</strong>
+        </div>
+        <div>
+          <span>Выходных и праздников</span>
+          <strong>{annual.restDays}</strong>
+        </div>
+        <div>
+          <span>Норма при 40 ч/нед.</span>
+          <strong>{formatHours(annual.hours40)} ч</strong>
+        </div>
+        <div>
+          <span>Сокращённых дней</span>
+          <strong>{annual.shortDays}</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="calendar-section calendar-alert">
+      <div>
+        <h2>Главное на год</h2>
+        <p>
+          В 2026 году при пятидневной неделе: {annual.calendarDays} календарных дней,
+          {annual.workDays} рабочих и {annual.restDays} выходных/праздничных.
+          Сокращённые рабочие дни: 30 апреля, 8 мая, 11 июня и 3 ноября.
+        </p>
+      </div>
+      <a class="calendar-source-link" href="#sources">Источники данных</a>
+    </section>
+
+    <section class="calendar-section" aria-labelledby="breaks-title">
+      <div class="section-head">
+        <span class="calendar-eyebrow">Планирование</span>
+        <h2 id="breaks-title">Длинные выходные и переносы</h2>
+      </div>
+      <div class="break-grid">
+        {longBreaks.map((item) => (
+          <article class="break-card">
+            <span>{item.days}</span>
+            <h3>{item.label}</h3>
+            <p>{item.value}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="calendar-section" aria-labelledby="months-title">
+      <div class="section-head">
+        <span class="calendar-eyebrow">Календарь</span>
+        <h2 id="months-title">Месяцы 2026 года</h2>
+      </div>
+      <div class="month-grid">
+        {months.map((month, monthIndex) => {
+          const stats = monthStats[monthIndex];
+          const offset = (new Date(YEAR, monthIndex, 1).getDay() + 6) % 7;
+
+          return (
+            <article class="month-card" id={stats.key}>
+              <header>
+                <h3>{month}</h3>
+                <p>{stats.workDays} рабочих · {stats.restDays} выходных</p>
+              </header>
+              <div class="month-weekdays" aria-hidden="true">
+                {weekdays.map((day) => <span>{day}</span>)}
+              </div>
+              <div class="month-days">
+                {Array.from({ length: offset }, () => <span class="calendar-day calendar-day-blank"></span>)}
+                {monthDays[monthIndex].map((day) => (
+                  <time
+                    class:list={[
+                      'calendar-day',
+                      day.rest && 'calendar-day-rest',
+                      day.holiday && 'calendar-day-holiday',
+                      day.transfer && 'calendar-day-transfer',
+                      day.short && 'calendar-day-short',
+                    ]}
+                    datetime={day.key}
+                    title={day.label}
+                  >
+                    <span aria-hidden="true">{day.day}</span>
+                    <span class="sr-only">{day.day} {month}: {day.label}</span>
+                  </time>
+                ))}
+              </div>
+              <dl class="month-stats">
+                <div>
+                  <dt>40 ч</dt>
+                  <dd>{formatHours(stats.hours40)}</dd>
+                </div>
+                <div>
+                  <dt>36 ч</dt>
+                  <dd>{formatHours(stats.hours36)}</dd>
+                </div>
+                <div>
+                  <dt>24 ч</dt>
+                  <dd>{formatHours(stats.hours24)}</dd>
+                </div>
+              </dl>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+
+    <section class="calendar-section split-section" aria-labelledby="norms-title">
+      <div>
+        <span class="calendar-eyebrow">Нормы</span>
+        <h2 id="norms-title">Рабочее время по кварталам</h2>
+        <p>
+          Нормы рассчитаны для пятидневной рабочей недели с выходными в субботу
+          и воскресенье. Региональные праздничные дни не учитываются.
+        </p>
+      </div>
+
+      <div class="table-wrap">
+        <table class="calendar-table">
+          <thead>
+            <tr>
+              <th scope="col">Период</th>
+              <th scope="col">Раб. дни</th>
+              <th scope="col">Вых.</th>
+              <th scope="col">40 ч</th>
+              <th scope="col">36 ч</th>
+              <th scope="col">24 ч</th>
+            </tr>
+          </thead>
+          <tbody>
+            {quarterStats.map((quarter) => (
+              <tr>
+                <th scope="row">{quarter.label}</th>
+                <td>{quarter.workDays}</td>
+                <td>{quarter.restDays}</td>
+                <td>{formatHours(quarter.hours40)}</td>
+                <td>{formatHours(quarter.hours36)}</td>
+                <td>{formatHours(quarter.hours24)}</td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr>
+              <th scope="row">2026 год</th>
+              <td>{annual.workDays}</td>
+              <td>{annual.restDays}</td>
+              <td>{formatHours(annual.hours40)}</td>
+              <td>{formatHours(annual.hours36)}</td>
+              <td>{formatHours(annual.hours24)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+
+    <section class="calendar-section" aria-labelledby="faq-title">
+      <div class="section-head">
+        <span class="calendar-eyebrow">FAQ</span>
+        <h2 id="faq-title">Коротко о расчётах</h2>
+      </div>
+      <div class="faq-grid">
+        <article>
+          <h3>Какие дни сокращённые?</h3>
+          <p>30 апреля, 8 мая, 11 июня и 3 ноября. В эти даты рабочий день уменьшается на один час.</p>
+        </article>
+        <article>
+          <h3>Почему 31 декабря выходной?</h3>
+          <p>Правительство перенесло на 31 декабря выходной с воскресенья 4 января.</p>
+        </article>
+        <article>
+          <h3>Подходит ли календарь для сменного графика?</h3>
+          <p>Он показывает федеральную норму для пятидневки. Для сменного графика и региональных праздников график нужно сверять с работодателем.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="calendar-section sources-section" id="sources" aria-labelledby="sources-title">
+      <div>
+        <span class="calendar-eyebrow">Проверено</span>
+        <h2 id="sources-title">Источники</h2>
+        <p>Данные сверены по состоянию на 30 июня 2026 года.</p>
+      </div>
+      <ul>
+        {sourceLinks.map((source) => (
+          <li>
+            <a href={source.href} target="_blank" rel="noopener noreferrer">{source.label}</a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  .calendar-page {
+    box-sizing: border-box;
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--space-10) var(--space-4) var(--space-16);
+  }
+
+  .calendar-page *,
+  .calendar-page *::before,
+  .calendar-page *::after {
+    box-sizing: border-box;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .calendar-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+    gap: var(--space-6);
+    align-items: stretch;
+    margin-bottom: var(--space-8);
+  }
+
+  .calendar-hero-copy,
+  .calendar-summary,
+  .calendar-section {
+    min-width: 0;
+    border: 1px solid var(--ink-200);
+    border-radius: var(--radius-lg);
+    background: var(--ink-0);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .calendar-hero-copy {
+    padding: var(--space-8);
+  }
+
+  .calendar-eyebrow {
+    display: inline-flex;
+    width: fit-content;
+    color: var(--brand-700);
+    font-size: var(--fs-12);
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .calendar-hero h1 {
+    max-width: 15ch;
+    margin: var(--space-3) 0 var(--space-4);
+    color: var(--ink-900);
+    font-size: var(--fs-48);
+    line-height: var(--lh-48);
+    letter-spacing: 0;
+    overflow-wrap: break-word;
+  }
+
+  .calendar-hero p,
+  .calendar-section p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: var(--fs-16);
+    line-height: var(--lh-16);
+  }
+
+  .calendar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+  }
+
+  .calendar-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--ink-700);
+    font-size: var(--fs-13);
+    font-weight: 800;
+  }
+
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid var(--ink-300);
+  }
+
+  .legend-dot-work {
+    background: var(--ink-0);
+  }
+
+  .legend-dot-rest {
+    background: #fee2e2;
+    border-color: #fecaca;
+  }
+
+  .legend-dot-short {
+    background: #fef3c7;
+    border-color: #fcd34d;
+  }
+
+  .calendar-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    overflow: hidden;
+    background: var(--ink-200);
+  }
+
+  .calendar-summary div {
+    display: grid;
+    align-content: center;
+    gap: var(--space-2);
+    min-width: 0;
+    min-height: 148px;
+    padding: var(--space-5);
+    background: var(--ink-0);
+  }
+
+  .calendar-summary span {
+    color: var(--text-muted);
+    font-size: var(--fs-13);
+    font-weight: 800;
+  }
+
+  .calendar-summary strong {
+    color: var(--ink-900);
+    font-size: var(--fs-30);
+    line-height: var(--lh-30);
+  }
+
+  .calendar-section {
+    margin: var(--space-6) 0;
+    padding: var(--space-6);
+  }
+
+  .calendar-alert {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-5);
+    align-items: center;
+    background: var(--brand-50);
+  }
+
+  .calendar-alert h2,
+  .section-head h2,
+  .split-section h2,
+  .sources-section h2 {
+    margin: var(--space-2) 0 var(--space-3);
+    color: var(--ink-900);
+    font-size: var(--fs-28);
+    line-height: var(--lh-28);
+  }
+
+  .calendar-source-link,
+  .sources-section a {
+    color: var(--brand-700);
+    font-weight: 900;
+    text-decoration: none;
+  }
+
+  .calendar-source-link:hover,
+  .calendar-source-link:focus-visible,
+  .sources-section a:hover,
+  .sources-section a:focus-visible {
+    color: var(--brand-600);
+    outline: none;
+    text-decoration: underline;
+  }
+
+  .break-grid,
+  .faq-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+
+  .break-card,
+  .faq-grid article {
+    min-width: 0;
+    border: 1px solid var(--ink-200);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    background: var(--ink-50);
+  }
+
+  .break-card span {
+    color: var(--brand-700);
+    font-size: var(--fs-12);
+    font-weight: 900;
+  }
+
+  .break-card h3,
+  .faq-grid h3 {
+    margin: var(--space-2) 0;
+    color: var(--ink-900);
+    font-size: var(--fs-16);
+    line-height: var(--lh-16);
+  }
+
+  .break-card p,
+  .faq-grid p {
+    font-size: var(--fs-14);
+    line-height: var(--lh-14);
+  }
+
+  .month-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+
+  .month-card {
+    min-width: 0;
+    padding: var(--space-4);
+    border: 1px solid var(--ink-200);
+    border-radius: var(--radius-md);
+    background: var(--ink-50);
+  }
+
+  .month-card header {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    align-items: start;
+    margin-bottom: var(--space-3);
+  }
+
+  .month-card h3 {
+    margin: 0;
+    color: var(--ink-900);
+    font-size: var(--fs-20);
+    line-height: var(--lh-20);
+  }
+
+  .month-card header p {
+    max-width: 10rem;
+    text-align: right;
+    font-size: var(--fs-12);
+    line-height: 1.35;
+  }
+
+  .month-weekdays,
+  .month-days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  .month-weekdays {
+    margin-bottom: 5px;
+  }
+
+  .month-weekdays span {
+    color: var(--ink-500);
+    font-size: 0.68rem;
+    font-weight: 900;
+    text-align: center;
+  }
+
+  .calendar-day {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    min-width: 0;
+    border: 1px solid var(--ink-200);
+    border-radius: 6px;
+    background: var(--ink-0);
+    color: var(--ink-800);
+    font-size: var(--fs-13);
+    font-weight: 900;
+    text-decoration: none;
+  }
+
+  .calendar-day-blank {
+    visibility: hidden;
+  }
+
+  .calendar-day-rest {
+    border-color: #fecaca;
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .calendar-day-short {
+    border-color: #fcd34d;
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .calendar-day-holiday,
+  .calendar-day-transfer {
+    box-shadow: inset 0 0 0 1px rgba(153, 27, 27, 0.18);
+  }
+
+  .month-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-2);
+    margin: var(--space-4) 0 0;
+  }
+
+  .month-stats div {
+    border: 1px solid var(--ink-200);
+    border-radius: 6px;
+    padding: 0.45rem;
+    background: var(--ink-0);
+    text-align: center;
+  }
+
+  .month-stats dt {
+    color: var(--ink-500);
+    font-size: var(--fs-12);
+    font-weight: 900;
+  }
+
+  .month-stats dd {
+    margin: 0.15rem 0 0;
+    color: var(--ink-900);
+    font-size: var(--fs-14);
+    font-weight: 900;
+  }
+
+  .split-section {
+    display: grid;
+    grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+    gap: var(--space-6);
+    align-items: start;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+  }
+
+  .calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 620px;
+    color: var(--ink-800);
+    font-size: var(--fs-14);
+  }
+
+  .calendar-table th,
+  .calendar-table td {
+    border-bottom: 1px solid var(--ink-200);
+    padding: 0.75rem;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .calendar-table th:first-child,
+  .calendar-table td:first-child {
+    text-align: left;
+  }
+
+  .calendar-table thead th,
+  .calendar-table tfoot th,
+  .calendar-table tfoot td {
+    color: var(--ink-900);
+    font-weight: 900;
+  }
+
+  .sources-section {
+    display: grid;
+    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+    gap: var(--space-6);
+    align-items: start;
+  }
+
+  .sources-section ul {
+    margin: 0;
+    padding-left: var(--space-5);
+  }
+
+  .sources-section li {
+    margin-bottom: var(--space-3);
+    color: var(--text-main);
+  }
+
+  :global(:where(html, body).dark-mode) .calendar-hero-copy,
+  :global(:where(html, body).dark-mode) .calendar-summary div,
+  :global(:where(html, body).dark-mode) .calendar-section,
+  :global(:where(html, body).dark-mode) .month-card,
+  :global(:where(html, body).dark-mode) .break-card,
+  :global(:where(html, body).dark-mode) .faq-grid article,
+  :global(:where(html, body).dark-mode) .calendar-day,
+  :global(:where(html, body).dark-mode) .month-stats div {
+    background: var(--ink-0);
+  }
+
+  @media (max-width: 980px) {
+    .calendar-hero,
+    .split-section,
+    .sources-section {
+      grid-template-columns: 1fr;
+    }
+
+    .month-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .break-grid,
+    .faq-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 620px) {
+    .calendar-page {
+      padding-top: var(--space-6);
+    }
+
+    .calendar-hero-copy,
+    .calendar-section {
+      padding: var(--space-4);
+    }
+
+    .calendar-hero h1 {
+      font-size: var(--fs-30);
+      line-height: var(--lh-30);
+    }
+
+    .calendar-summary {
+      grid-template-columns: 1fr;
+    }
+
+    .calendar-summary div {
+      min-height: 104px;
+    }
+
+    .calendar-alert {
+      align-items: start;
+      flex-direction: column;
+    }
+
+    .month-grid,
+    .break-grid,
+    .faq-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .month-card header {
+      display: grid;
+    }
+
+    .month-card header p {
+      max-width: none;
+      text-align: left;
+    }
+
+    .calendar-table {
+      min-width: 0;
+      font-size: var(--fs-12);
+    }
+
+    .calendar-table th,
+    .calendar-table td {
+      padding: 0.55rem 0.35rem;
+    }
+  }
+</style>

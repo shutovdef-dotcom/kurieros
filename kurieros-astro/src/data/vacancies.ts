@@ -23,6 +23,7 @@ import { efinSource } from './sources/efin';
 import { alfaBankSource } from './sources/alfa-bank';
 import { burgerKingSource } from './sources/burger-king';
 import { samokatSource } from './sources/samokat';
+import { x5DeliverySource } from './sources/x5-delivery';
 import { voxysSource } from './sources/voxys';
 import { mtsBankSource } from './sources/mts-bank';
 import { qleanSource } from './sources/qlean';
@@ -41,6 +42,7 @@ const initialSources: VacancySource[] = [
   alfaBankSource,
   burgerKingSource,
   samokatSource,
+  x5DeliverySource,
   voxysSource,
   mtsBankSource,
   qleanSource,

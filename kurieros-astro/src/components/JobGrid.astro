@@ -109,6 +109,9 @@ const vacancyWord = (count: number) => {
 	if (last >= 2 && last <= 4) return 'вакансии';
 	return 'вакансий';
 };
+
+const vacancyWordAfterOf = (count: number) =>
+	vacancyWord(count) === 'вакансия' ? 'вакансии' : vacancyWord(count);
 ---
 
 <div class="job-grid-container">
@@ -162,7 +165,7 @@ const vacancyWord = (count: number) => {
 		{hasRevealMore && (
 			<div class="jobs-grid-more jobs-grid-reveal-more" id="jobs-grid-reveal-more">
 				<p class="jobs-grid-more-text" id="jobs-grid-reveal-more-text" aria-live="polite">
-					{visibleJobs.length} {vacancyWord(visibleJobs.length)} из {filteredJobs.length} {vacancyWord(filteredJobs.length)}
+					{visibleJobs.length} {vacancyWord(visibleJobs.length)} из {filteredJobs.length} {vacancyWordAfterOf(filteredJobs.length)}
 				</p>
 				<a
 					class="jobs-grid-more-btn"

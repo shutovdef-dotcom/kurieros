@@ -1,10 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Header from '../../components/Header.astro';
-import Footer from '../../components/Footer.astro';
+import Logo from '../../components/Logo.astro';
 
-const title = 'Отклик на вакансию — КурьерОк';
-const description = 'Промежуточная форма отклика на вакансию: КурьерОк не сохраняет введённые данные и открывает анкету работодателя для завершения отклика.';
+const title = 'Загрузка перехода — КурьерОк';
+const description = 'КурьерОк перенаправляет на страницу работодателя.';
 ---
 
 <BaseLayout
@@ -12,172 +11,115 @@ const description = 'Промежуточная форма отклика на �
   description={description}
   canonicalURL={new URL('/apply/', Astro.site)}
   robots="noindex, nofollow, noarchive"
+  includeRegionModal={false}
+  includeOzonLeadModal={false}
 >
-  <Header />
-
   <main class="apply-shell" id="apply-page">
     <section class="apply-panel" aria-labelledby="apply-title">
-      <div class="apply-copy">
-        <p class="apply-eyebrow">Отклик на вакансию</p>
-        <h1 id="apply-title">Заполните контакты перед переходом</h1>
-        <p>
-          Мы не сохраняем данные из этой формы. После нажатия кнопки откроется
-          анкета работодателя или партнёра, где нужно завершить отклик.
-        </p>
-      </div>
+      <Logo size="lg" />
+      <h1 class="apply-title" id="apply-title">Загрузка перехода</h1>
 
       <div class="apply-state" id="apply-loading" role="status" aria-live="polite">
-        Загружаем вакансию...
+        <span class="apply-spinner" aria-hidden="true"></span>
       </div>
 
       <div class="apply-state apply-error" id="apply-error" role="alert" hidden>
-        <h2 id="apply-error-title">Не удалось открыть отклик</h2>
-        <p id="apply-error-text">Попробуйте вернуться к каталогу и выбрать вакансию ещё раз.</p>
-        <a class="apply-secondary" href="/">Вернуться к вакансиям</a>
+        <h2 id="apply-error-title">Не нашли переход</h2>
+        <p id="apply-error-text">Попробуйте выбрать вакансию ещё раз.</p>
+        <a class="apply-submit apply-submit-secondary" href="/">На главную</a>
       </div>
 
-      <div class="apply-form-wrap" id="apply-form-wrap" hidden>
-        <div class="apply-job">
-          <span>Вы откликаетесь на</span>
-          <strong id="apply-job-title"></strong>
-          <small id="apply-job-meta"></small>
+      <div class="apply-state apply-redirect-card" id="apply-job" hidden>
+        <span class="apply-spinner" aria-hidden="true"></span>
+
+        <div class="apply-progress" aria-hidden="true">
+          <span id="apply-progress-bar"></span>
         </div>
 
-        <form class="apply-form" id="apply-form" novalidate>
-          <label class="apply-field">
-            <span>Имя и фамилия <em>*</em></span>
-            <input
-              class="ym-disable-keys"
-              data-ym-disable-keyup
-              type="text"
-              name="name"
-              autocomplete="name"
-              minlength="2"
-              maxlength="120"
-              required
-            />
-          </label>
-
-          <label class="apply-field">
-            <span>Телефон <em>*</em></span>
-            <input
-              class="ym-disable-keys"
-              data-ym-disable-keyup
-              type="tel"
-              name="phone"
-              autocomplete="tel"
-              inputmode="tel"
-              placeholder="+7 (___) ___-__-__"
-              minlength="10"
-              maxlength="32"
-              required
-            />
-          </label>
-
-          <label class="apply-field">
-            <span>Email</span>
-            <input
-              class="ym-disable-keys"
-              data-ym-disable-keyup
-              type="email"
-              name="email"
-              autocomplete="email"
-              maxlength="160"
-            />
-          </label>
-
-          <label class="apply-consent">
-            <input type="checkbox" name="consent" required />
-            <span>
-              Понимаю, что КурьерОк не сохраняет эти данные; отклик нужно
-              завершить на сайте работодателя или партнёра.
-            </span>
-          </label>
-
-          <button class="apply-submit" id="apply-submit" type="submit">
-            Продолжить к работодателю
-          </button>
-
-          <p class="apply-status" id="apply-status" role="status" aria-live="polite"></p>
-          <p class="apply-fineprint">
-            Данные не отправляются на сервер КурьерОк и не попадают в URL.
-          </p>
-        </form>
+        <p class="sr-only" id="apply-status" role="status" aria-live="polite"></p>
+        <a
+          class="apply-submit"
+          id="apply-direct-link"
+          href="#"
+          rel="nofollow sponsored"
+          hidden
+        >
+          Перейти сейчас
+        </a>
       </div>
     </section>
   </main>
-
-  <Footer />
 </BaseLayout>
 
 <script>
-  import '../../scripts/applyForm';
+  import '../../scripts/applyRedirect';
 </script>
 
 <style>
   .apply-shell {
-    width: min(960px, calc(100% - 32px));
-    margin: 0 auto;
-    padding: var(--space-10) 0 var(--space-14);
+    display: grid;
+    place-items: center;
+    min-height: 100svh;
+    padding: clamp(2rem, 8vh, 5rem) 1.25rem;
+    background: var(--ink-50);
   }
 
   .apply-panel {
     display: grid;
-    grid-template-columns: minmax(0, 0.95fr) minmax(320px, 0.82fr);
+    justify-items: center;
     gap: var(--space-6);
-    align-items: start;
-    padding: var(--space-7);
-    border: 1px solid var(--ink-200);
-    border-radius: var(--radius-lg);
-    background: var(--ink-0);
-    box-shadow: var(--shadow-sm);
+    width: min(100%, 360px);
+    text-align: center;
   }
 
-  .apply-copy {
-    display: grid;
-    gap: var(--space-4);
+  .apply-panel :global(.kurerok-logo) {
+    letter-spacing: 0;
   }
 
-  .apply-eyebrow {
-    width: fit-content;
-    margin: 0;
-    padding: 0.35rem 0.65rem;
-    border: 1px solid var(--brand-200);
-    border-radius: var(--radius-pill);
-    color: var(--brand-700);
-    font-size: var(--fs-12);
-    font-weight: 800;
-    text-transform: uppercase;
-  }
-
-  .apply-copy h1 {
-    max-width: 14ch;
+  .apply-title {
     margin: 0;
     color: var(--ink-900);
-    font-size: var(--fs-36);
-    line-height: var(--lh-36);
-  }
-
-  .apply-copy p:not(.apply-eyebrow) {
-    max-width: 56ch;
-    margin: 0;
-    color: var(--text-muted);
-    font-size: var(--fs-16);
-    line-height: var(--lh-16);
+    font-size: var(--fs-20);
+    font-weight: 900;
+    line-height: var(--lh-20);
+    letter-spacing: 0;
   }
 
   .apply-state,
-  .apply-form-wrap {
+  .apply-redirect-card {
+    width: 100%;
     min-width: 0;
-    padding: var(--space-5);
-    border: 1px solid var(--ink-200);
-    border-radius: var(--radius-md);
-    background: var(--ink-50);
   }
 
   .apply-state[hidden],
-  .apply-form-wrap[hidden] {
+  .apply-redirect-card[hidden],
+  .apply-submit[hidden] {
     display: none !important;
+  }
+
+  .apply-state {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-4);
+    min-height: 168px;
+  }
+
+  .apply-spinner {
+    width: 42px;
+    height: 42px;
+    border: 3px solid var(--ink-200);
+    border-top-color: var(--brand-700);
+    border-radius: 50%;
+    animation: apply-spin 0.85s linear infinite;
+  }
+
+  .apply-error h2 {
+    margin: 0;
+    color: var(--ink-900);
+    font-size: var(--fs-18);
+    font-weight: 900;
+    line-height: var(--lh-18);
+    letter-spacing: 0;
   }
 
   .apply-error {
@@ -185,94 +127,49 @@ const description = 'Промежуточная форма отклика на �
     gap: var(--space-3);
   }
 
-  .apply-error h2,
   .apply-error p {
     margin: 0;
-  }
-
-  .apply-secondary {
-    color: var(--brand-700);
-    font-weight: 800;
-    text-decoration: none;
-  }
-
-  .apply-job {
-    display: grid;
-    gap: 0.25rem;
-    margin-bottom: var(--space-5);
-  }
-
-  .apply-job span,
-  .apply-job small {
-    color: var(--text-muted);
-  }
-
-  .apply-job strong {
-    color: var(--ink-900);
-    font-size: var(--fs-20);
-    line-height: var(--lh-20);
-  }
-
-  .apply-form {
-    display: grid;
-    gap: var(--space-4);
-  }
-
-  .apply-field {
-    display: grid;
-    gap: var(--space-2);
-    color: var(--ink-800);
-    font-weight: 800;
-  }
-
-  .apply-field em {
-    color: var(--accent-500);
-    font-style: normal;
-  }
-
-  .apply-field input {
-    width: 100%;
-    box-sizing: border-box;
-    min-height: 48px;
-    padding: 0.75rem 0.9rem;
-    border: 1px solid var(--ink-300);
-    border-radius: var(--radius-md);
-    background: var(--ink-0);
-    color: var(--ink-900);
-    font: inherit;
-  }
-
-  .apply-field input:focus {
-    border-color: var(--brand-600);
-    outline: 3px solid rgba(47, 111, 71, 0.16);
-  }
-
-  .apply-consent {
-    display: grid;
-    grid-template-columns: 20px minmax(0, 1fr);
-    gap: var(--space-3);
-    align-items: start;
     color: var(--text-muted);
     font-size: var(--fs-14);
-    line-height: var(--lh-14);
+    line-height: 1.5;
   }
 
-  .apply-consent input {
-    width: 18px;
-    height: 18px;
-    margin-top: 2px;
-    accent-color: var(--brand-600);
+  .apply-progress {
+    overflow: hidden;
+    width: min(100%, 260px);
+    height: 4px;
+    border-radius: var(--radius-pill);
+    background: var(--ink-200);
+  }
+
+  .apply-progress span {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--brand-700);
+  }
+
+  .apply-progress span.is-running {
+    animation: apply-progress 4s linear forwards;
   }
 
   .apply-submit {
-    min-height: 52px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 176px;
+    min-height: 48px;
+    padding: 0 1.1rem;
     border: 0;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
     background: var(--brand-700);
     color: var(--ink-0);
     font: inherit;
     font-weight: 900;
     cursor: pointer;
+    text-decoration: none;
+    letter-spacing: 0;
   }
 
   .apply-submit:hover,
@@ -281,40 +178,48 @@ const description = 'Промежуточная форма отклика на �
     outline: none;
   }
 
-  .apply-submit:disabled {
-    cursor: progress;
-    opacity: 0.78;
+  .apply-submit-secondary {
+    background: var(--ink-900);
   }
 
-  .apply-status,
-  .apply-fineprint {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: var(--fs-13);
-    line-height: 1.5;
+  .apply-submit-secondary:hover,
+  .apply-submit-secondary:focus-visible {
+    background: var(--ink-700);
   }
 
-  :global(:where(html, body).dark-mode) .apply-panel,
-  :global(:where(html, body).dark-mode) .apply-field input {
-    background: var(--ink-0);
+  .sr-only {
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    white-space: nowrap;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+  }
+
+  @keyframes apply-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes apply-progress {
+    to {
+      width: 100%;
+    }
   }
 
   @media (max-width: 760px) {
     .apply-shell {
-      width: min(100% - 24px, 520px);
-      padding-top: var(--space-6);
+      align-items: center;
+      padding-inline: 1rem;
     }
 
     .apply-panel {
-      grid-template-columns: 1fr;
-      gap: var(--space-5);
-      padding: var(--space-5);
-    }
-
-    .apply-copy h1 {
-      max-width: 100%;
-      font-size: var(--fs-30);
-      line-height: var(--lh-30);
+      width: min(100%, 320px);
     }
   }
 </style>

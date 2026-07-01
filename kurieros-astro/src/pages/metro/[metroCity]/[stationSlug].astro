@@ -1,0 +1,368 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import JobGrid from '../../../components/JobGrid.astro';
+import { getCityJobsFromMap } from '../../../utils/jobFilters';
+import { jobsByCity } from '../../../utils/jobsByCityIndex';
+import {
+  getMetroStationsByCity,
+  metroStations,
+  type MetroStation,
+} from '../../../utils/metroStations';
+import { buildBreadcrumbSchema } from '../../../utils/schema';
+import { getVacancyPluralText } from '../../../utils/format';
+import { getVacancyCanonicalUrl } from '../../../utils/vacancyUrl';
+import { parseSalaryValue } from '../../../utils/vacancyPage';
+
+export async function getStaticPaths() {
+  return metroStations.map((station) => ({
+    params: {
+      metroCity: station.citySlug,
+      stationSlug: station.stationSlug,
+    },
+    props: { station },
+  }));
+}
+
+const { station } = Astro.props as { station: MetroStation };
+const jobs = getCityJobsFromMap(jobsByCity, station.jobsCityName);
+const visibleJobsLimit = 24;
+const vacancyCountText = `${jobs.length} ${getVacancyPluralText(jobs.length)}`;
+const maxSalary = Math.max(0, ...jobs.map((job) => parseSalaryValue(job.salary)));
+const formattedMaxSalary = maxSalary > 0
+  ? new Intl.NumberFormat('ru-RU').format(maxSalary)
+  : null;
+const companyNames = Array.from(new Set(jobs.map((job) => job.company))).slice(0, 4);
+const sameCityStations = getMetroStationsByCity(station.citySlug);
+const currentStationIndex = sameCityStations.findIndex(
+  (item) => item.stationSlug === station.stationSlug,
+);
+const relatedStations = sameCityStations
+  .slice(Math.max(0, currentStationIndex - 8), currentStationIndex + 9)
+  .filter((item) => item.stationSlug !== station.stationSlug)
+  .slice(0, 12);
+const title = formattedMaxSalary
+  ? `Работа у метро ${station.stationName} — до ${formattedMaxSalary} ₽/мес | КурьерОк`
+  : `Работа у метро ${station.stationName} — ${vacancyCountText} | КурьерОк`;
+const description = `${vacancyCountText} у метро ${station.stationName} в ${station.cityPrepositional}: ${companyNames.join(', ') || 'курьерские компании'}. Сравните доход, график и оформление; вакансии относятся к городу ${station.cityName}.`.slice(0, 170);
+const faqItems = [
+  {
+    question: `Какие вакансии есть у метро ${station.stationName}?`,
+    answer: `На странице показаны ${vacancyCountText} в ${station.cityPrepositional}. Станция помогает выбрать район поиска, а сами вакансии относятся к городскому пулу ${station.cityName}.`,
+  },
+  {
+    question: `Это отдельные вакансии прямо на станции ${station.stationName}?`,
+    answer: `Нет. Мы не выдаём станцию за точный адрес работодателя. Страница группирует городские вакансии рядом с метро, чтобы быстрее перейти к подходящим предложениям.`,
+  },
+  {
+    question: 'Почему условия могут отличаться?',
+    answer: 'Доход, график, оформление и требования задаёт работодатель. Перед откликом откройте карточку вакансии и проверьте детали.',
+  },
+];
+const pageSchemaGraph = [
+  {
+    '@type': 'CollectionPage',
+    name: title,
+    description,
+    url: Astro.url.href,
+    isPartOf: {
+      '@type': 'WebSite',
+      name: 'КурьерОк',
+      url: new URL('/', Astro.site).toString(),
+    },
+    about: {
+      '@type': 'SubwayStation',
+      name: station.stationName,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: station.cityName,
+        addressCountry: 'RU',
+      },
+    },
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: jobs.length,
+      itemListElement: jobs.slice(0, 10).map((job, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: job.title,
+        url: getVacancyCanonicalUrl(job, Astro.site),
+      })),
+    },
+  },
+  {
+    '@type': 'FAQPage',
+    mainEntity: faqItems.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer,
+      },
+    })),
+  },
+  buildBreadcrumbSchema(
+    [
+      { name: 'Главная', url: '/' },
+      { name: `Работа курьером в ${station.cityName}`, url: station.cityHref },
+      { name: `Метро ${station.stationName}`, url: Astro.url.pathname },
+    ],
+    Astro.site,
+  ),
+];
+---
+
+<BaseLayout title={title} description={description} schemaGraph={pageSchemaGraph}>
+  <Header />
+
+  <main class="metro-page">
+    <section class="metro-hero">
+      <div class="container metro-hero-inner">
+        <nav class="breadcrumbs" aria-label="Хлебные крошки">
+          <a href="/">Главная</a>
+          <span aria-hidden="true">›</span>
+          <a href={station.cityHref}>Работа курьером в {station.cityName}</a>
+          <span aria-hidden="true">›</span>
+          <span>Метро {station.stationName}</span>
+        </nav>
+
+        <div class="metro-hero-content">
+          <p class="eyebrow">Работа у метро</p>
+          <h1>Вакансии у метро {station.stationName}</h1>
+          <p class="lead">
+            {vacancyCountText} в {station.cityPrepositional}. Станция помогает выбрать район,
+            а условия сравниваются по городским вакансиям без выдуманных точных адресов.
+          </p>
+          <div class="metro-facts">
+            <span>{vacancyCountText}</span>
+            <span>{companyNames.length} компаний</span>
+            {formattedMaxSalary && <span>до {formattedMaxSalary} ₽/мес</span>}
+            {station.lineNames.length > 0 && <span>{station.lineNames.slice(0, 2).join(', ')}</span>}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="container metro-section" aria-labelledby="metro-vacancies-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Подборка</p>
+          <h2 id="metro-vacancies-title">Вакансии рядом с метро {station.stationName}</h2>
+        </div>
+        <a href={station.cityHref}>Все вакансии в {station.cityPrepositional}</a>
+      </div>
+      <JobGrid
+        jobs={jobs}
+        limit={visibleJobsLimit}
+        revealable={true}
+        listingSlug={station.listingSlug}
+        initialCity={station.jobsCityName}
+      />
+    </section>
+
+    <section class="container metro-section metro-info-grid">
+      <div>
+        <p class="eyebrow">Как читать страницу</p>
+        <h2>Станция не заменяет городскую страницу</h2>
+        <p>
+          Главная страница по городу остаётся <a href={station.cityHref}>работа курьером в {station.cityName}</a>.
+          Эта страница помогает тем, кто ищет работу у конкретной станции метро, но не создаёт отдельные
+          JobPosting-данные с фиктивным адресом.
+        </p>
+      </div>
+      <div>
+        <p class="eyebrow">FAQ</p>
+        <div class="faq-list">
+          {faqItems.map((item) => (
+            <details>
+              <summary>{item.question}</summary>
+              <p>{item.answer}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {relatedStations.length > 0 && (
+      <section class="container metro-section" aria-labelledby="nearby-metro-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Метро рядом</p>
+            <h2 id="nearby-metro-title">Другие станции в {station.cityPrepositional}</h2>
+          </div>
+        </div>
+        <div class="station-links">
+          {relatedStations.map((item) => (
+            <a href={item.href}>{item.stationName}</a>
+          ))}
+        </div>
+      </section>
+    )}
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  .metro-page {
+    background: var(--surface-color);
+    color: var(--ink-900);
+  }
+
+  .metro-hero {
+    background: linear-gradient(180deg, var(--brand-50), var(--surface-color));
+    border-bottom: 1px solid var(--ink-100);
+  }
+
+  .metro-hero-inner {
+    padding: var(--space-6) var(--space-4) var(--space-10);
+  }
+
+  .breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    align-items: center;
+    margin-bottom: var(--space-8);
+    color: var(--ink-600);
+    font-size: var(--fs-14);
+  }
+
+  .breadcrumbs a {
+    color: var(--brand-700);
+    font-weight: 700;
+  }
+
+  .metro-hero-content {
+    max-width: 860px;
+  }
+
+  .eyebrow {
+    margin: 0 0 var(--space-2);
+    color: var(--brand-700);
+    font-size: var(--fs-13);
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  h1,
+  h2 {
+    margin: 0;
+    letter-spacing: 0;
+    line-height: 1.08;
+  }
+
+  h1 {
+    max-width: 760px;
+    font-size: clamp(2.2rem, 7vw, 4.8rem);
+  }
+
+  h2 {
+    font-size: clamp(1.5rem, 3vw, 2.4rem);
+  }
+
+  .lead {
+    max-width: 720px;
+    margin: var(--space-4) 0 0;
+    color: var(--ink-700);
+    font-size: var(--fs-18);
+    line-height: 1.55;
+  }
+
+  .metro-facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-5);
+  }
+
+  .metro-facts span,
+  .station-links a {
+    border: 1px solid var(--ink-200);
+    border-radius: var(--radius-md);
+    background: var(--surface-100);
+    color: var(--ink-800);
+    font-size: var(--fs-14);
+    font-weight: 800;
+  }
+
+  .metro-facts span {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .metro-section {
+    padding: var(--space-10) var(--space-4);
+  }
+
+  .section-heading {
+    display: flex;
+    gap: var(--space-4);
+    align-items: end;
+    justify-content: space-between;
+    margin-bottom: var(--space-6);
+  }
+
+  .section-heading a,
+  .metro-info-grid a {
+    color: var(--brand-700);
+    font-weight: 800;
+  }
+
+  .metro-info-grid {
+    display: grid;
+    gap: var(--space-6);
+    grid-template-columns: 1fr;
+  }
+
+  .metro-info-grid p {
+    margin: var(--space-3) 0 0;
+    color: var(--ink-700);
+    line-height: 1.6;
+  }
+
+  .faq-list {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  details {
+    border: 1px solid var(--ink-200);
+    border-radius: var(--radius-md);
+    background: var(--surface-100);
+    padding: var(--space-4);
+  }
+
+  summary {
+    cursor: pointer;
+    color: var(--ink-900);
+    font-weight: 800;
+  }
+
+  details p {
+    margin-bottom: 0;
+  }
+
+  .station-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .station-links a {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  @media (min-width: 900px) {
+    .metro-info-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 0.8fr);
+    }
+  }
+
+  @media (max-width: 680px) {
+    .section-heading {
+      align-items: start;
+      flex-direction: column;
+    }
+  }
+</style>

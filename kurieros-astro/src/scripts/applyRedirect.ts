@@ -7,15 +7,12 @@ declare global {
 }
 
 type ApplyElements = {
-  root: HTMLElement;
   loading: HTMLElement;
   error: HTMLElement;
-  formWrap: HTMLElement;
-  form: HTMLFormElement;
-  submit: HTMLButtonElement;
+  jobCard: HTMLElement;
   status: HTMLElement;
-  jobTitle: HTMLElement;
-  jobMeta: HTMLElement;
+  progressBar: HTMLElement;
+  directLink: HTMLAnchorElement;
   errorTitle: HTMLElement;
   errorText: HTMLElement;
 };
@@ -30,27 +27,51 @@ type ApplyContext = {
   partnerDomain?: string;
 };
 
+declare const __BUILD_TIMESTAMP__: string;
+
+const REDIRECT_DELAY_MS = 4000;
+const applyManifestVersion = (
+  typeof __BUILD_TIMESTAMP__ === 'string' &&
+  __BUILD_TIMESTAMP__ &&
+  __BUILD_TIMESTAMP__ !== 'undefined'
+) ? __BUILD_TIMESTAMP__ : String(Date.now());
+
 const getById = <T extends HTMLElement>(id: string): T | null =>
   document.getElementById(id) as T | null;
 
 const getElements = (): ApplyElements | null => {
-  const root = getById('apply-page');
   const loading = getById('apply-loading');
   const error = getById('apply-error');
-  const formWrap = getById('apply-form-wrap');
-  const form = getById<HTMLFormElement>('apply-form');
-  const submit = getById<HTMLButtonElement>('apply-submit');
+  const jobCard = getById('apply-job');
   const status = getById('apply-status');
-  const jobTitle = getById('apply-job-title');
-  const jobMeta = getById('apply-job-meta');
+  const progressBar = getById('apply-progress-bar');
+  const directLink = getById<HTMLAnchorElement>('apply-direct-link');
   const errorTitle = getById('apply-error-title');
   const errorText = getById('apply-error-text');
 
-  if (!root || !loading || !error || !formWrap || !form || !submit || !status || !jobTitle || !jobMeta || !errorTitle || !errorText) {
+  if (
+    !loading ||
+    !error ||
+    !jobCard ||
+    !status ||
+    !progressBar ||
+    !directLink ||
+    !errorTitle ||
+    !errorText
+  ) {
     return null;
   }
 
-  return { root, loading, error, formWrap, form, submit, status, jobTitle, jobMeta, errorTitle, errorText };
+  return {
+    loading,
+    error,
+    jobCard,
+    status,
+    progressBar,
+    directLink,
+    errorTitle,
+    errorText,
+  };
 };
 
 const setVisible = (node: HTMLElement, visible: boolean) => {
@@ -59,7 +80,7 @@ const setVisible = (node: HTMLElement, visible: boolean) => {
 
 const showError = (elements: ApplyElements, title: string, text: string) => {
   setVisible(elements.loading, false);
-  setVisible(elements.formWrap, false);
+  setVisible(elements.jobCard, false);
   setVisible(elements.error, true);
   elements.errorTitle.textContent = title;
   elements.errorText.textContent = text;
@@ -87,9 +108,22 @@ const getPartnerDomain = (applyUrl: string): string => {
   }
 };
 
-const emitApplyFormSubmit = (jobKey: string, applyUrl: string, context: ApplyContext) => {
+const isSafeRedirectUrl = (applyUrl: string): boolean => {
+  try {
+    return new URL(applyUrl).protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
+const emitApplyRedirectStart = (
+  jobKey: string,
+  applyUrl: string,
+  context: ApplyContext,
+) => {
   if (typeof window.gtag !== 'function') return;
-  window.gtag('event', 'apply_form_submit', {
+
+  window.gtag('event', 'apply_redirect_start', {
     apply_slug: jobKey,
     vacancy_slug: jobKey.split('--')[0],
     source_slug: context.sourceSlug || '',
@@ -97,13 +131,14 @@ const emitApplyFormSubmit = (jobKey: string, applyUrl: string, context: ApplyCon
     city: context.city || '',
     transport: context.transport || '',
     partner_domain: context.partnerDomain || getPartnerDomain(applyUrl),
+    delay_ms: REDIRECT_DELAY_MS,
   });
 };
 
 const loadManifest = async (): Promise<ApplyManifest> => {
-  const response = await fetch('/api/v1/apply-jobs.json', {
+  const response = await fetch(`/api/v1/apply-jobs.json?v=${encodeURIComponent(applyManifestVersion)}`, {
     credentials: 'same-origin',
-    cache: 'force-cache',
+    cache: 'no-cache',
   });
   if (!response.ok) {
     throw new Error(`apply manifest failed: ${response.status}`);
@@ -111,7 +146,27 @@ const loadManifest = async (): Promise<ApplyManifest> => {
   return response.json() as Promise<ApplyManifest>;
 };
 
-const initApplyForm = async () => {
+const startRedirectCountdown = (
+  elements: ApplyElements,
+  jobKey: string,
+  applyUrl: string,
+  context: ApplyContext,
+) => {
+  elements.directLink.href = applyUrl;
+  elements.directLink.hidden = false;
+  elements.status.textContent = 'Переход откроется через 4 секунды.';
+  elements.progressBar.classList.add('is-running');
+  setVisible(elements.loading, false);
+  setVisible(elements.jobCard, true);
+
+  emitApplyRedirectStart(jobKey, applyUrl, context);
+
+  window.setTimeout(() => {
+    window.location.assign(applyUrl);
+  }, REDIRECT_DELAY_MS);
+};
+
+const initApplyRedirect = async () => {
   const elements = getElements();
   if (!elements) return;
 
@@ -138,7 +193,7 @@ const initApplyForm = async () => {
     return;
   }
 
-  if (!applyUrl) {
+  if (!applyUrl || !isSafeRedirectUrl(applyUrl)) {
     showError(
       elements,
       'Вакансия недоступна',
@@ -147,32 +202,9 @@ const initApplyForm = async () => {
     return;
   }
 
-  const context = getApplyContext(jobKey);
-  elements.jobTitle.textContent = context.title || 'Выбранная вакансия';
-  elements.jobMeta.textContent = [context.company, context.city, context.salary]
-    .filter(Boolean)
-    .join(' · ') || 'Контакты не сохраняются на КурьерОк';
-  setVisible(elements.loading, false);
-  setVisible(elements.formWrap, true);
-
-  elements.form.addEventListener('submit', (event) => {
-    event.preventDefault();
-    elements.status.textContent = '';
-
-    if (!elements.form.reportValidity()) return;
-
-    elements.submit.disabled = true;
-    elements.submit.textContent = 'Открываем анкету...';
-    elements.status.textContent =
-      'КурьерОк не сохраняет введённые данные. Сейчас откроется страница работодателя, где нужно завершить отклик.';
-    emitApplyFormSubmit(jobKey, applyUrl, context);
-
-    window.setTimeout(() => {
-      window.location.assign(applyUrl);
-    }, 650);
-  });
+  startRedirectCountdown(elements, jobKey, applyUrl, getApplyContext(jobKey));
 };
 
-void initApplyForm();
+void initApplyRedirect();
 
 export {};

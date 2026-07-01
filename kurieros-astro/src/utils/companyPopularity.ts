@@ -6,6 +6,7 @@ export const POPULAR_COMPANY_SLUGS = [
   'samokat',
   'ozon',
   'ozon-fresh',
+  'x5-dostavka',
   'alfa-bank',
   't-bank',
   'burger-king',

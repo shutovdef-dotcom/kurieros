@@ -44,6 +44,7 @@ import {
 } from '../../utils/vacancyStructuredData';
 import { formatMoneyWithCurrency } from '../../utils/money';
 import { buildVacancySeoTitle } from '../../utils/vacancySeoTitle';
+import { getVacancyIndexability } from '../../utils/vacancyIndexability';
 
 export async function getStaticPaths() {
 	return detailJobs.map((job) => ({
@@ -222,6 +223,7 @@ const vacancyDescription = fullDescription.length <= 170
 	? fullDescription
 	: trimAtWordBoundary(buildVacancyDescription(false), 170);
 const { datePosted, validThrough } = resolveJobPostingDates({ updatedAt: job.updatedAt });
+const vacancyIndexability = getVacancyIndexability(job);
 const factCards = [
 	{ label: 'Доход', labelKey: 'vacancy.fact_income', value: job.salary, valueKey: `vacancies.${job.id}.salary` },
 	{ label: 'График', labelKey: 'vacancy.fact_schedule', value: job.details.schedule, valueKey: `vacancies.${job.id}.details_schedule` },
@@ -386,7 +388,7 @@ const quickFactSummary = (() => {
 	}
 	// Disabled-vacancy summary branch removed per C3 — every vacancy
 	// has a real applyLink, so the message is unconditional.
-	parts.push('Откликнуться можно сразу — короткая форма откроет анкету работодателя.');
+	parts.push('Откликнуться можно сразу — после короткого ожидания откроется анкета работодателя.');
 	return parts.join(' ');
 })();
 
@@ -408,6 +410,70 @@ const sameRoleOtherCities = selectTopN(
 	(item) => parseSalaryValue(item.salary),
 	(a, b) => b - a,
 );
+
+const jobPostingSchema = vacancyIndexability.indexable
+	? buildJobPostingSchema({
+			title: job.title,
+			description: job.description,
+			slug: job.slug,
+			company: job.company,
+			companyUrl: new URL(companyUrl, Astro.site).toString(),
+			// Fix A — absolute logo URL. Some sources (e.g. Альфа-Банк,
+			// Yandex Eda) carry a relative `companyLogo` (`/logos/foo.svg`),
+			// which Google Rich Results test rejects: schema.org `Organization.logo`
+			// requires an absolute URL the Googlebot can fetch directly.
+			companyLogo: job.companyLogo
+				? new URL(job.companyLogo, Astro.site).toString()
+				: undefined,
+			cities: jobCities,
+			employmentTypeLabel: job.details.employment_type,
+			// Fix F (2026-05-25) — combine schedule with employment label
+			// so mixed-graphic roles (Бургер Кинг: «гибкий график:
+			// подработка или полная смена») produce both FULL_TIME and
+			// PART_TIME, not just FULL_TIME from «Официальное трудоустройство».
+			scheduleText: job.details.schedule,
+			// Fix I (2026-05-25) — pass as arrays (one item per requirement /
+			// benefit line). `buildJobPostingSchema` emits them as JSON-LD
+			// arrays, preserving semantic structure for LLM / AI consumers.
+			qualifications: [...job.requirements, ...job.requiredDocuments],
+			benefits: job.benefits,
+			hasApplyLink,
+			applyLink: job.applyLink,
+			// Fix C (2026-05-25) — pass REAL min/max from structured pay
+			// data instead of a single point + 60% heuristic. `matchingOffer`
+			// holds the original `VacancyOffer` for this slug; falls back to
+			// `salaryValue` (the legacy parsed display string) when the
+			// vacancy has no structured `pay.monthly`.
+			baseSalaryMonthlyMin: matchingOffer?.pay.monthly?.min,
+			baseSalaryMonthlyMax:
+				matchingOffer?.pay.monthly?.max ??
+				(salaryValue > 0 ? salaryValue : undefined),
+			hourlyRateMin: matchingOffer?.pay.hourly?.min,
+			hourlyRateMax: matchingOffer?.pay.hourly?.max ?? hourlyRate,
+			currency: job.currency || 'RUB',
+			datePosted,
+			validThrough,
+			// Fix B (2026-05-25) — Google for Jobs requires TELECOMMUTE for
+			// fully-remote roles (e.g. T-Bank operator B2B). Derived from
+			// the strongly-typed transport mode in vacancyTypes.ts.
+			isRemote: job.transport === 'remote',
+			// Fix G (2026-05-25) — official employer homepage (e.g.
+			// https://burgerking.ru/). Distinct from our `companyUrl`
+			// (internal /companies/{slug}/ page, kept in `sameAs`).
+			hiringOrganizationUrl: getCompanyHomepage(job.company),
+			// Fix D (2026-05-25) — per-company industry. The old hardcoded
+			// «Курьерская доставка» mislabelled Burger King (food service),
+			// T-Bank operator B2B (financial services), and Alfa-Bank
+			// representative (financial services). Undefined falls back to
+			// schema.ts default for any unmapped brand.
+			industry: getCompanyIndustry(job.company),
+			// Fix E (2026-05-25) — BLS SOC code per source-slug. Burger
+			// King cook → 35-3023, T-Bank operator B2B → 41-9041, bank
+			// reps → 41-2031, warehouse picker → 53-7064. Undefined falls
+			// back to 53-3031 (courier default).
+			occupationalCategory: getSourceOccupation(job.sourceSlug),
+		})
+	: null;
 
 const pageSchemaGraph = [
 	{
@@ -432,67 +498,7 @@ const pageSchemaGraph = [
 		description: howToDescription,
 		steps: howToSteps,
 	}),
-	buildJobPostingSchema({
-		title: job.title,
-		description: job.description,
-		slug: job.slug,
-		company: job.company,
-		companyUrl: new URL(companyUrl, Astro.site).toString(),
-		// Fix A — absolute logo URL. Some sources (e.g. Альфа-Банк,
-		// Yandex Eda) carry a relative `companyLogo` (`/logos/foo.svg`),
-		// which Google Rich Results test rejects: schema.org `Organization.logo`
-		// requires an absolute URL the Googlebot can fetch directly.
-		companyLogo: job.companyLogo
-			? new URL(job.companyLogo, Astro.site).toString()
-			: undefined,
-		cities: jobCities,
-		employmentTypeLabel: job.details.employment_type,
-		// Fix F (2026-05-25) — combine schedule with employment label
-		// so mixed-graphic roles (Бургер Кинг: «гибкий график:
-		// подработка или полная смена») produce both FULL_TIME and
-		// PART_TIME, not just FULL_TIME from «Официальное трудоустройство».
-		scheduleText: job.details.schedule,
-		// Fix I (2026-05-25) — pass as arrays (one item per requirement /
-		// benefit line). `buildJobPostingSchema` emits them as JSON-LD
-		// arrays, preserving semantic structure for LLM / AI consumers.
-		qualifications: [...job.requirements, ...job.requiredDocuments],
-		benefits: job.benefits,
-		hasApplyLink,
-		applyLink: job.applyLink,
-		// Fix C (2026-05-25) — pass REAL min/max from structured pay
-		// data instead of a single point + 60% heuristic. `matchingOffer`
-		// holds the original `VacancyOffer` for this slug; falls back to
-		// `salaryValue` (the legacy parsed display string) when the
-		// vacancy has no structured `pay.monthly`.
-		baseSalaryMonthlyMin: matchingOffer?.pay.monthly?.min,
-		baseSalaryMonthlyMax:
-			matchingOffer?.pay.monthly?.max ??
-			(salaryValue > 0 ? salaryValue : undefined),
-		hourlyRateMin: matchingOffer?.pay.hourly?.min,
-		hourlyRateMax: matchingOffer?.pay.hourly?.max ?? hourlyRate,
-		currency: job.currency || 'RUB',
-		datePosted,
-		validThrough,
-		// Fix B (2026-05-25) — Google for Jobs requires TELECOMMUTE for
-		// fully-remote roles (e.g. T-Bank operator B2B). Derived from
-		// the strongly-typed transport mode in vacancyTypes.ts.
-		isRemote: job.transport === 'remote',
-		// Fix G (2026-05-25) — official employer homepage (e.g.
-		// https://burgerking.ru/). Distinct from our `companyUrl`
-		// (internal /companies/{slug}/ page, kept in `sameAs`).
-		hiringOrganizationUrl: getCompanyHomepage(job.company),
-		// Fix D (2026-05-25) — per-company industry. The old hardcoded
-		// «Курьерская доставка» mislabelled Burger King (food service),
-		// T-Bank operator B2B (financial services), and Alfa-Bank
-		// representative (financial services). Undefined falls back to
-		// schema.ts default for any unmapped brand.
-		industry: getCompanyIndustry(job.company),
-		// Fix E (2026-05-25) — BLS SOC code per source-slug. Burger
-		// King cook → 35-3023, T-Bank operator B2B → 41-9041, bank
-		// reps → 41-2031, warehouse picker → 53-7064. Undefined falls
-		// back to 53-3031 (courier default).
-		occupationalCategory: getSourceOccupation(job.sourceSlug),
-	}),
+	...(jobPostingSchema ? [jobPostingSchema] : []),
 	buildVacancyFaqSchema(selectedKbItems),
 	buildBreadcrumbSchema(
 		[
@@ -512,10 +518,15 @@ const pageSchemaGraph = [
 	description={vacancyDescription}
 	descriptionKey={`vacancies.${job.id}.page_description`}
 	schemaGraph={pageSchemaGraph}
+	robots={vacancyIndexability.indexable ? undefined : vacancyIndexability.robots}
 >
 	<Header />
 
-	<main class="vacancy-page" data-vacancy-source-slug={job.sourceSlug}>
+	<main
+		class="vacancy-page"
+		data-vacancy-source-slug={job.sourceSlug}
+		data-vacancy-indexability={vacancyIndexability.reason}
+	>
 		<div class="container container-narrow">
 			<VacancyBreadcrumb
 				job={job}
@@ -583,7 +594,14 @@ const pageSchemaGraph = [
 
 			<ReviewsBlock jobId={job.id} company={job.company} />
 		</div>
-		<VacancyStickyApply />
+		<VacancyStickyApply
+			job={job}
+			isLeadFormApply={isLeadFormApply}
+			leadFormType={leadFormType}
+			salaryMaxNumeric={salaryMaxNumeric}
+			applyLabel={applyLabel}
+			employmentTypeText={employmentTypeText}
+		/>
 	</main>
 
 	<Footer />

@@ -1,5 +1,29 @@
 ---
 import vacancyStickyApplyUrl from '../scripts/vacancyStickyApply.js?url';
+import { ozonDataAttrs } from '../utils/ozonAttrs';
+import { getApplyHref, getApplyPartnerDomain } from '../utils/applyRoute';
+import type { GeneratedJob } from '../data/vacancyTypes';
+
+interface Props {
+	job: GeneratedJob;
+	isLeadFormApply: boolean;
+	leadFormType: string | null;
+	salaryMaxNumeric: number;
+	applyLabel: string;
+	employmentTypeText: string;
+}
+
+const {
+	job,
+	isLeadFormApply,
+	leadFormType,
+	salaryMaxNumeric,
+	applyLabel,
+	employmentTypeText,
+} = Astro.props;
+
+const applyHref = getApplyHref(job);
+const applyPartnerDomain = getApplyPartnerDomain(job);
 
 /**
  * Sticky bottom apply CTA for /v/[slug]/ pages.
@@ -17,10 +41,9 @@ import vacancyStickyApplyUrl from '../scripts/vacancyStickyApply.js?url';
  *  - Watches `.apply-btn-hero` with IntersectionObserver.
  *  - When the hero button is OUT of viewport → bar is shown.
  *  - When it's back in viewport → bar is hidden (no duplication).
- *  - Tap on bar → programmatic .click() on the source `.apply-btn-hero`.
- *    That preserves all existing flow: external nav for default cards,
- *    OzonLeadModal for Ozon cards, GA4 `apply_click` event via the
- *    BaseLayout delegate (which listens for any `[data-apply-cta]` click).
+ *  - Tap on bar → the bar itself is a real apply CTA. External vacancies
+ *    render as anchors to /apply/, while Ozon lead-form vacancies render as
+ *    buttons with the same data attributes consumed by OzonLeadModal.
  *  - Skipped when there's no `.apply-btn-hero` on the page.
  *
  * Z-index: 91, one above the existing mobile-fixed rule (90), so if
@@ -29,16 +52,52 @@ import vacancyStickyApplyUrl from '../scripts/vacancyStickyApply.js?url';
  */
 ---
 
-<button
-	id="vacancy-sticky-apply"
-	class="vacancy-sticky-apply hidden"
-	type="button"
-	aria-label="Откликнуться на вакансию"
->
-	<span class="vacancy-sticky-apply-icon" aria-hidden="true">🔥</span>
-	<span class="vacancy-sticky-apply-label">Откликнуться</span>
-	<span class="vacancy-sticky-apply-arrow" aria-hidden="true">→</span>
-</button>
+{isLeadFormApply ? (
+	<button
+		id="vacancy-sticky-apply"
+		class="vacancy-sticky-apply hidden"
+		type="button"
+		aria-label="Откликнуться на вакансию"
+		data-apply-cta
+		data-apply-position="vacancy_sticky"
+		data-apply-company={job.company}
+		data-apply-city={job.location}
+		data-apply-transport={job.transport}
+		data-apply-employment={employmentTypeText}
+		data-apply-salary-max={salaryMaxNumeric || ''}
+		data-apply-vacancy-id={job.id}
+		data-apply-vacancy-slug={job.slug}
+		data-apply-source-slug={job.sourceSlug}
+		data-lead-form-type={leadFormType}
+		{...ozonDataAttrs(job.ozonLeadForm)}
+	>
+		<span class="vacancy-sticky-apply-icon" aria-hidden="true">🔥</span>
+		<span class="vacancy-sticky-apply-label">{applyLabel}</span>
+		<span class="vacancy-sticky-apply-arrow" aria-hidden="true">→</span>
+	</button>
+) : (
+	<a
+		id="vacancy-sticky-apply"
+		class="vacancy-sticky-apply hidden"
+		href={applyHref}
+		aria-label="Откликнуться на вакансию"
+		data-apply-cta
+		data-apply-position="vacancy_sticky"
+		data-apply-company={job.company}
+		data-apply-city={job.location}
+		data-apply-transport={job.transport}
+		data-apply-employment={employmentTypeText}
+		data-apply-salary-max={salaryMaxNumeric || ''}
+		data-apply-vacancy-id={job.id}
+		data-apply-vacancy-slug={job.slug}
+		data-apply-source-slug={job.sourceSlug}
+		data-apply-partner-domain={applyPartnerDomain}
+	>
+		<span class="vacancy-sticky-apply-icon" aria-hidden="true">🔥</span>
+		<span class="vacancy-sticky-apply-label">{applyLabel}</span>
+		<span class="vacancy-sticky-apply-arrow" aria-hidden="true">→</span>
+	</a>
+)}
 
 <style>
 	.vacancy-sticky-apply {

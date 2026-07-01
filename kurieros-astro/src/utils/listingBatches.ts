@@ -4,6 +4,7 @@ import type { GeneratedJob } from '../data/vacancyTypes';
 import { citiesFromJobs } from './citiesIndex';
 import { filterJobsByCriteria, getCityJobsFromMap } from './jobFilters';
 import { jobsByCity } from './jobsByCityIndex';
+import { metroStations } from './metroStations';
 import { HUB_CONFIGS } from './transportHubs';
 
 export const LISTING_BATCH_SIZE = 24;
@@ -33,6 +34,9 @@ const cityByListingSlug = new Map<string, (typeof citiesFromJobs)[number]>(
 const hubByListingSlug = new Map<string, (typeof HUB_CONFIGS)[keyof typeof HUB_CONFIGS]>(
 	Object.values(HUB_CONFIGS).map((cfg) => [cfg.slug, cfg] as const),
 );
+const metroStationByListingSlug = new Map(
+	metroStations.map((station) => [station.listingSlug, station] as const),
+);
 
 export function getListingBatchKey(listingSlug: string): string {
 	return LISTING_BATCH_ALIASES.get(listingSlug) || listingSlug;
@@ -61,6 +65,11 @@ export function getJobsForListingSlug(listingSlug: string): GeneratedJob[] {
 		return filterJobsByCriteria(jobsData, hub.filter);
 	}
 
+	const metroStation = metroStationByListingSlug.get(listingSlug);
+	if (metroStation) {
+		return getCityJobsFromMap(jobsByCity, metroStation.jobsCityName);
+	}
+
 	return [];
 }
 
@@ -70,6 +79,7 @@ export function getListingBatchStaticPaths(batchSize = LISTING_BATCH_SIZE) {
 		...citiesFromJobs.map((city) => `${CITY_LISTING_PREFIX}${city.slug}`),
 		...CATEGORIES.map((category) => `${CITY_LISTING_PREFIX}${category.slug}`),
 		...Object.values(HUB_CONFIGS).map((cfg) => cfg.slug),
+		...metroStations.map((station) => station.listingSlug),
 	].map(getListingBatchKey));
 
 	for (const listingSlug of listingSlugs) {
