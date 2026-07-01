@@ -1,5 +1,5 @@
 #!/usr/bin/env tsx
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { detailJobs } from '../src/data/jobs';
@@ -19,6 +19,7 @@ const gscCsvPath = resolve(rootDir, gscCsvRelative);
 const generatedOutputPath = resolve(rootDir, 'src/generated/vacancy-indexability.json');
 const publicOutputPath = resolve(rootDir, 'public/vacancy-indexability.json');
 const site = (process.env.SITE_URL || 'https://kurerok.ru').replace(/\/$/, '');
+const disableLocalInputs = process.env.VACANCY_INDEXABILITY_DISABLE_LOCAL_INPUTS === '1';
 
 const parseCsvLine = (line: string): string[] => {
   const cells: string[] = [];
@@ -62,21 +63,60 @@ const splitJobCities = (location: string): string[] =>
     .map((city) => city.trim())
     .filter((city) => city && city !== 'Вся Россия');
 
-const localScoringRows = parseCsv(await readFile(localScoringCsvPath, 'utf8'));
+const fileExists = async (path: string): Promise<boolean> => {
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const readSnapshotPayload = async (): Promise<{
+  localIndexablePaths?: string[];
+  gscIndexablePaths?: string[];
+} | null> => {
+  if (!(await fileExists(generatedOutputPath))) return null;
+  const snapshot = JSON.parse(await readFile(generatedOutputPath, 'utf8')) as {
+    localIndexablePaths?: string[];
+    gscIndexablePaths?: string[];
+  };
+  return snapshot;
+};
+
+const canReadLocalInputs =
+  !disableLocalInputs && (await fileExists(localScoringCsvPath)) && (await fileExists(gscCsvPath));
+
+const snapshotPayload = canReadLocalInputs ? null : await readSnapshotPayload();
+
+if (!canReadLocalInputs && !snapshotPayload) {
+  throw new Error(
+    `Missing vacancy indexability inputs. Expected ${localScoringCsvRelative} and ${gscCsvRelative}, ` +
+      `or an existing src/generated/vacancy-indexability.json snapshot.`,
+  );
+}
+
+const localScoringRows = canReadLocalInputs
+  ? parseCsv(await readFile(localScoringCsvPath, 'utf8'))
+  : [];
 const localIndexablePaths = new Set(
-  localScoringRows
-    .filter((row) => row.decision === 'index')
-    .map((row) => row.path)
-    .filter((path) => path.startsWith('/v/') && path.endsWith('/')),
+  canReadLocalInputs
+    ? localScoringRows
+        .filter((row) => row.decision === 'index')
+        .map((row) => row.path)
+        .filter((path) => path.startsWith('/v/') && path.endsWith('/'))
+    : (snapshotPayload?.localIndexablePaths ?? []),
 );
-const gscRows = parseCsv(await readFile(gscCsvPath, 'utf8'));
+const gscRows = canReadLocalInputs ? parseCsv(await readFile(gscCsvPath, 'utf8')) : [];
 const gscIndexablePaths = new Set(
-  gscRows
-    .filter((row) =>
-      (INDEXABLE_GSC_RECOMMENDATIONS as readonly string[]).includes(row.recommendation),
-    )
-    .map((row) => row.path)
-    .filter((path) => path.startsWith('/v/') && path.endsWith('/')),
+  canReadLocalInputs
+    ? gscRows
+        .filter((row) =>
+          (INDEXABLE_GSC_RECOMMENDATIONS as readonly string[]).includes(row.recommendation),
+        )
+        .map((row) => row.path)
+        .filter((path) => path.startsWith('/v/') && path.endsWith('/'))
+    : (snapshotPayload?.gscIndexablePaths ?? []),
 );
 const hardNoindexPaths = new Set<string>(HARD_NOINDEX_VACANCY_PATHS);
 const topCitySet = new Set<string>(TOP_INDEXABLE_VACANCY_CITIES);
@@ -103,6 +143,7 @@ const payload = {
     gscCsv: gscCsvRelative,
     gscSnapshotDate: '2026-06-30',
     localScoringSnapshotDate: '2026-06-30',
+    source: canReadLocalInputs ? 'csv' : 'snapshot',
   },
   policy: {
     topIndexableCities: TOP_INDEXABLE_VACANCY_CITIES,

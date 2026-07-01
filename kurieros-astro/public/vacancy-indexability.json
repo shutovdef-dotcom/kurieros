@@ -3,7 +3,8 @@
     "localScoringCsv": "output/seo-indexability/vacancy-indexability-2026-06-30.csv",
     "gscCsv": "output/seo-indexability/gsc-vacancy-demand-2026-06-30/gsc-vacancy-pages.csv",
     "gscSnapshotDate": "2026-06-30",
-    "localScoringSnapshotDate": "2026-06-30"
+    "localScoringSnapshotDate": "2026-06-30",
+    "source": "csv"
   },
   "policy": {
     "topIndexableCities": [
