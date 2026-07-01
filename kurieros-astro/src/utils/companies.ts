@@ -35,6 +35,8 @@ export type ReviewLike = {
 
 const COMPANY_SLUGS: Record<string, string> = {
   'Яндекс Еда': 'yandex-eda',
+  'Еда в Яндекс Go': 'eda-v-yandeks-go',
+  'Еда в Yandex Go': 'eda-v-yandeks-go',
   'Яндекс Маркет': 'yandex-market',
   'Купер (Сбермаркет)': 'kuper-sbermarket',
   'Альфа-Банк': 'alfa-bank',
@@ -52,6 +54,13 @@ const COMPANY_SLUGS: Record<string, string> = {
   'Ozon': 'ozon',
 };
 
+const COMPANY_CANONICAL_NAMES: Record<string, string> = {
+  'Еда в Yandex Go': 'Еда в Яндекс Go',
+};
+
+export const normalizeCompanyName = (name: string): string =>
+  COMPANY_CANONICAL_NAMES[name.trim()] || name.trim();
+
 const TRANSPORT_LABELS: Record<string, string> = {
   auto: 'На авто',
   bicycle: 'Велосипед / самокат',
@@ -62,8 +71,8 @@ const TRANSPORT_LABELS: Record<string, string> = {
 };
 
 export const slugifyCompany = (name: string) =>
-  COMPANY_SLUGS[name] ||
-  cyrillicToLatin(name.trim())
+  COMPANY_SLUGS[normalizeCompanyName(name)] ||
+  cyrillicToLatin(normalizeCompanyName(name))
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .replace(/--+/g, '-');
@@ -138,9 +147,10 @@ export const getCompaniesFromJobs = (jobs: JobLike[], reviews: ReviewLike[] = []
   }>();
 
   jobs.forEach((job) => {
-    const existing = companies.get(job.company) || {
-      name: job.company,
-      slug: slugifyCompany(job.company),
+    const companyName = normalizeCompanyName(job.company);
+    const existing = companies.get(companyName) || {
+      name: companyName,
+      slug: slugifyCompany(companyName),
       logo: job.companyLogo,
       applyLink: null,
       jobs: [],
@@ -180,11 +190,11 @@ export const getCompaniesFromJobs = (jobs: JobLike[], reviews: ReviewLike[] = []
       .filter((city) => city && city !== 'Вся Россия')
       .forEach((city) => existing.cities.add(city));
 
-    companies.set(job.company, existing);
+    companies.set(companyName, existing);
   });
 
   reviews.forEach((review) => {
-    const company = companies.get(review.company);
+    const company = companies.get(normalizeCompanyName(review.company));
     if (company) {
       company.reviews.push(review);
     }

@@ -1,0 +1,15 @@
+{
+  "generatedFrom": {
+    "source": "companiesFromJobs"
+  },
+  "policy": {
+    "minIndexableCompanyVacancies": 3
+  },
+  "noindexCompanies": [],
+  "noindexUrls": [],
+  "summary": {
+    "totalCompanyPages": 17,
+    "indexableCompanyPages": 17,
+    "noindexCompanyPages": 0
+  }
+}

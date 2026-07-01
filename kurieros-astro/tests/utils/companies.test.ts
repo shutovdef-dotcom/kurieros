@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { getCompaniesFromJobs, slugifyCompany, type JobLike, type ReviewLike } from '../../src/utils/companies';
+import {
+  getCompaniesFromJobs,
+  normalizeCompanyName,
+  slugifyCompany,
+  type JobLike,
+  type ReviewLike,
+} from '../../src/utils/companies';
 
 const makeJob = (overrides: Partial<JobLike> = {}): JobLike => {
   const { details, ...rest } = overrides;
@@ -43,6 +49,12 @@ describe('slugifyCompany', () => {
 
   it('returns the curated slug for Яндекс Еда', () => {
     expect(slugifyCompany('Яндекс Еда')).toBe('yandex-eda');
+  });
+
+  it('returns one canonical slug for Yandex Go spelling aliases', () => {
+    expect(normalizeCompanyName('Еда в Yandex Go')).toBe('Еда в Яндекс Go');
+    expect(slugifyCompany('Еда в Яндекс Go')).toBe('eda-v-yandeks-go');
+    expect(slugifyCompany('Еда в Yandex Go')).toBe('eda-v-yandeks-go');
   });
 
   it('returns the curated slug for Т-Банк', () => {
@@ -139,6 +151,39 @@ describe('getCompaniesFromJobs', () => {
     expect(companies[0].reviewCount).toBe(2);
     expect(companies[0].rating).toBe(4.5);
     expect(companies[0].reviews.map((review) => review.company)).toEqual(['Яндекс Еда', 'Яндекс Еда']);
+  });
+
+  it('merges company spelling aliases into one catalog entity', () => {
+    const companies = getCompaniesFromJobs(
+      [
+        makeJob({
+          slug: 'go-kz-foot',
+          company: 'Еда в Яндекс Go',
+          companyLogo: '/logos/yandex-go.svg',
+          location: 'Алматы',
+        }),
+        makeJob({
+          slug: 'go-uz-foot',
+          company: 'Еда в Yandex Go',
+          companyLogo: '/logos/yandex-go.svg',
+          location: 'Ташкент',
+        }),
+      ],
+      [
+        makeReview({ company: 'Еда в Яндекс Go', rating: 4 }),
+        makeReview({ company: 'Еда в Yandex Go', rating: 5 }),
+      ],
+    );
+
+    expect(companies).toHaveLength(1);
+    expect(companies[0]).toMatchObject({
+      name: 'Еда в Яндекс Go',
+      slug: 'eda-v-yandeks-go',
+      href: '/companies/eda-v-yandeks-go/',
+      vacancyCount: 2,
+      reviewCount: 2,
+      rating: 4.5,
+    });
   });
 
   it('falls back to company href and mixed transport when source fields are sparse', () => {

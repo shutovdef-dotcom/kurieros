@@ -5,6 +5,8 @@ import Footer from '../../components/Footer.astro';
 import CompanyVacancyCard from '../../components/company/CompanyVacancyCard.astro';
 import CompanyEditorialGuidePage from '../../components/company/CompanyEditorialGuidePage.astro';
 import { getCompanyGuide } from '../../data/companyGuides';
+import { getCompanyHomepage } from '../../data/companyHomepages';
+import { isCompanyIndexableByVacancyCount } from '../../data/companyIndexabilityPolicy';
 // `companiesFromJobs` is `getCompaniesFromJobs(jobsData, reviewsData)`
 // derived ONCE at module load in `companiesIndex.ts`. This page used to
 // re-derive it twice (in `getStaticPaths` and again in the per-page
@@ -31,6 +33,7 @@ export async function getStaticPaths() {
 
 const { company } = Astro.props;
 const companyGuide = getCompanyGuide(company.slug, company);
+const isCompanyIndexable = isCompanyIndexableByVacancyCount(company.vacancyCount);
 // Replaced the local copy of plural-form logic with the shared helper
 // from `src/utils/format.ts` (`formatRussianPlural`). Inline `${count} <form>`
 // so call-sites read naturally.
@@ -112,6 +115,31 @@ const nextCompanyVacanciesCount = Math.min(
 const visibleCompanyCities = companyGuide
   ? company.cities.slice(0, companyGuide.cityPreviewLimit)
   : company.cities;
+const companyHomepage = getCompanyHomepage(company.name);
+const companySchemaId = companyHomepage
+  ? `${companyHomepage.replace(/\/$/, '')}/#organization`
+  : `${Astro.url.href}#employer`;
+const companyLogoUrl = new URL(company.logo, Astro.site).toString();
+const employerSchema = {
+  '@type': 'Organization',
+  '@id': companySchemaId,
+  name: company.name,
+  ...(companyHomepage ? { url: companyHomepage } : {}),
+  logo: companyLogoUrl,
+  description: companyDescription,
+  areaServed: company.cities.length ? company.cities : ['Россия'],
+  ...(company.rating
+    ? {
+        aggregateRating: {
+          '@type': 'AggregateRating',
+          ratingValue: company.rating,
+          reviewCount: company.reviewCount,
+          bestRating: 5,
+          worstRating: 1,
+        },
+      }
+    : {}),
+};
 const reviewSchemas = featuredReviews.map((review) => ({
   '@type': 'Review',
   author: {
@@ -129,31 +157,13 @@ const reviewSchemas = featuredReviews.map((review) => ({
     worstRating: 1,
   },
   itemReviewed: {
-    '@type': 'Organization',
-    name: company.name,
-    url: Astro.url.href,
+    '@id': companySchemaId,
   },
   inLanguage: 'ru-RU',
 }));
 const pageSchemaGraph = [
   {
-    '@type': 'Organization',
-    name: company.name,
-    url: Astro.url.href,
-    logo: company.logo,
-    description: companyDescription,
-    areaServed: company.cities.length ? company.cities : ['Россия'],
-    ...(company.rating
-      ? {
-          aggregateRating: {
-            '@type': 'AggregateRating',
-            ratingValue: company.rating,
-            reviewCount: company.reviewCount,
-            bestRating: 5,
-            worstRating: 1,
-          },
-        }
-      : {}),
+    ...employerSchema,
     ...(reviewSchemas.length ? { review: reviewSchemas } : {}),
   },
   {
@@ -163,9 +173,7 @@ const pageSchemaGraph = [
     url: Astro.url.href,
     dateModified: new Date(pageUpdatedTimestamp).toISOString(),
     about: {
-      '@type': 'Organization',
-      name: company.name,
-      url: Astro.url.href,
+      '@id': companySchemaId,
     },
     mainEntity: {
       '@type': 'ItemList',
@@ -203,6 +211,7 @@ const pageSchemaGraph = [
 <BaseLayout
   title={companyTitle}
   description={companyDescription}
+  robots={isCompanyIndexable ? 'index, follow' : 'noindex, follow'}
   schemaGraph={pageSchemaGraph}
 >
   <Header />

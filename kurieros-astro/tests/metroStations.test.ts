@@ -6,7 +6,7 @@ import {
   getMetroStationsByCity,
   metroStations,
 } from '../src/utils/metroStations';
-import { getJobsForListingSlug, getListingBatchStaticPaths } from '../src/utils/listingBatches';
+import { getListingBatchStaticPaths } from '../src/utils/listingBatches';
 
 describe('metro station dataset', () => {
   it('keeps the expected Moscow and Saint Petersburg station counts', () => {
@@ -39,16 +39,12 @@ describe('metro station dataset', () => {
     });
   });
 
-  it('wires metro listings into the shared grid batch system', () => {
+  it('does not generate duplicate grid-batch fragments for metro station pages', () => {
     const station = getMetroStationBySlug('moskva', 'sokol');
     if (!station) throw new Error('Missing metro station test fixture');
 
-    const jobs = getJobsForListingSlug(station.listingSlug);
-    expect(jobs.length).toBeGreaterThan(24);
-    expect(jobs.every((job) => job.location === 'Москва')).toBe(true);
-
     const batchPaths = getListingBatchStaticPaths();
-    expect(batchPaths).toContainEqual({
+    expect(batchPaths).not.toContainEqual({
       params: { listingSlug: station.listingSlug, page: '2' },
     });
   });

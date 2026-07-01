@@ -6,7 +6,7 @@
  * with: `npm run build && npm test`.
  *
  * What we lock down:
- *   - Total HTML page count is in the expected band (~10193 across all
+ *   - Total HTML page count is in the expected band (~10700 across all
  *     langs — content pages + `/api/grid/<slug>/` city-grid fragments
  *     added by M14 + `/api/grid-batch/.../` listing-card batch endpoints
  *     + `/api/company-vacancies/.../` company-card batch endpoints).
@@ -81,8 +81,20 @@ const readAllSitemaps = (): string =>
     .map((file) => readFileSync(join(DIST_DIR, file), 'utf8'))
     .join('\n');
 
+const extractJsonLdGraph = (html: string): Array<Record<string, unknown>> => {
+  const scripts = Array.from(
+    html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi),
+    (match) => match[1],
+  );
+
+  return scripts.flatMap((script) => {
+    const parsed = JSON.parse(script);
+    return Array.isArray(parsed['@graph']) ? parsed['@graph'] : [parsed];
+  });
+};
+
 describe.skipIf(skipIfNoDist)('Build output', () => {
-  it('has expected page count (~11012)', () => {
+  it('has expected page count (~10700)', () => {
     // Reference build 2026-06-22 after removing the legacy non-courier
     // `src/pages/[city]/index.astro` route: 10163 HTML files by this
     // recursive counter. Astro logs 10162 page(s), while this guard also
@@ -92,7 +104,11 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     // 2026-07-01: +X5 Delivery source expansion. Reference build: 10388.
     // 2026-07-01: +312 metro station pages and +312 metro grid-batch fragments.
     // Reference build: 11012.
-    // Band: 11007-11017 (+-5 from reference count, plus intentionally added routes).
+    // 2026-07-01 SEO consolidation: -312 metro grid-batch fragments after
+    // station pages switched to compact local previews with a city link, and
+    // -1 duplicate Yandex Go company alias after canonical company merging.
+    // Reference build: 10700.
+    // Band: 10695-10705 (+-5 from reference count, plus intentionally added routes).
     //
     // NOTE FOR CONTRIBUTORS: always re-derive both bounds from an actual build
     // after adding new routes -- do NOT blindly add N to the upper bound.
@@ -102,8 +118,8 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     //   else if(e.isFile()&&e.name.endsWith('.html'))n++;}return n;}
     //   console.log(c('dist'));"
     const count = countHtml(DIST_DIR);
-    expect(count).toBeGreaterThanOrEqual(11007);
-    expect(count).toBeLessThanOrEqual(11017);
+    expect(count).toBeGreaterThanOrEqual(10695);
+    expect(count).toBeLessThanOrEqual(10705);
   });
 
   it('keeps the shared apply redirect page non-indexable and out of sitemap fan-out', () => {
@@ -539,6 +555,25 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     expect(html, 'full count remains available as lightweight metadata').toMatch(/"numberOfItems":\s*4032/);
   });
 
+  it('uses official employer entities on company detail pages', () => {
+    const page = join(DIST_DIR, 'companies', 'kuper-ex-sbermarket', 'index.html');
+    if (!existsSync(page)) return;
+
+    const html = readFileSync(page, 'utf8');
+    const graph = extractJsonLdGraph(html);
+    const organization = graph.find((node) => node['@type'] === 'Organization');
+    const collectionPage = graph.find((node) => node['@type'] === 'CollectionPage');
+
+    expect(organization).toMatchObject({
+      name: 'Купер (ex. СберМаркет)',
+      url: 'https://kuper.ru/',
+    });
+    expect(organization?.logo).toMatch(/^https:\/\/kurerok\.ru\//);
+    expect(organization?.url).not.toContain('/companies/');
+    expect(collectionPage?.url).toBe('https://kurerok.ru/companies/kuper-ex-sbermarket/');
+    expect(collectionPage?.about).toMatchObject({ '@id': organization?.['@id'] });
+  });
+
   // H13 — lazy-load 49 KB of city data from a static JSON endpoint
   // instead of inlining it into every render of the homepage.
   describe('H13: city-index lazy fetch', () => {
@@ -851,6 +886,20 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
       expect(vacancySitemap).not.toContain('https://kurerok.ru/v/efin-bank-representative-chudovo-auto/');
     });
 
+    it('excludes listing pages that canonicalize to commercial hubs from sitemap', () => {
+      const sitemapContent = readAllSitemaps();
+
+      expect(sitemapContent).toContain('https://kurerok.ru/rabota-peshim-kurerom/');
+      expect(sitemapContent).toContain('https://kurerok.ru/rabota-avtokurerom/');
+      expect(sitemapContent).toContain('https://kurerok.ru/rabota-velokurerom/');
+      expect(sitemapContent).toContain('https://kurerok.ru/podrabotka-kurerom/');
+
+      expect(sitemapContent).not.toContain('https://kurerok.ru/rabota-kurerom-peshkom/');
+      expect(sitemapContent).not.toContain('https://kurerok.ru/rabota-kurerom-na-avto/');
+      expect(sitemapContent).not.toContain('https://kurerok.ru/rabota-kurerom-na-velosipede/');
+      expect(sitemapContent).not.toContain('https://kurerok.ru/rabota-kurerom-podrabotka/');
+    });
+
     it('keeps metro pages indexable without JobPosting structured data', () => {
       const html = readFileSync(join(DIST_DIR, 'metro', 'moskva', 'sokol', 'index.html'), 'utf8');
 
@@ -858,6 +907,7 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
       expect(html).not.toMatch(/<meta\s+name="robots"\s+content="[^"]*noindex/i);
       expect(html).toContain('"@type":"SubwayStation"');
       expect(html).not.toContain('"@type":"JobPosting"');
+      expect(html).not.toContain('data-next-batch-url="/api/grid-batch/metro-moskva-sokol/2/"');
     });
 
     it('keeps internal and placeholder routes out of the sitemap', () => {

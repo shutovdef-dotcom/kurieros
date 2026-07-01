@@ -11,7 +11,6 @@ export const POPULAR_COMPANY_SLUGS = [
   't-bank',
   'burger-king',
   'eda-v-yandeks-go',
-  'eda-v-yandex-go',
   'mts-bank',
   'efin',
   'servis-ruki',

@@ -32,7 +32,8 @@ const buildTimestamp = String(Date.now());
 // just read it here — sync, no data-layer imports, fast cold start.
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const emptyListingsPath = resolve(__dirname, 'public/empty-listings.json');
-const vacancyIndexabilityPath = resolve(__dirname, 'public/vacancy-indexability.json');
+const vacancyIndexabilityPath = resolve(__dirname, 'src/generated/vacancy-indexability.json');
+const companyIndexabilityPath = resolve(__dirname, 'public/company-indexability.json');
 
 // Read failure handling (audit v3 M11): a *missing* file (ENOENT) is an
 // acceptable degradation in local `astro dev` — warn and continue with an
@@ -66,8 +67,9 @@ const emptyListingUrls = new Set(emptyListings);
 let vacancyNoindexUrls = [];
 try {
   const vacancyIndexability = JSON.parse(readFileSync(vacancyIndexabilityPath, 'utf8'));
-  vacancyNoindexUrls = Array.isArray(vacancyIndexability.noindexUrls)
-    ? vacancyIndexability.noindexUrls
+  const siteBase = site.replace(/\/$/, '');
+  vacancyNoindexUrls = Array.isArray(vacancyIndexability.noindexPaths)
+    ? vacancyIndexability.noindexPaths.map((path) => `${siteBase}${path}`)
     : [];
 } catch (err) {
   const isMissingFile = err && err.code === 'ENOENT';
@@ -89,6 +91,32 @@ try {
 }
 const vacancyNoindexUrlSet = new Set(vacancyNoindexUrls);
 
+let companyNoindexUrls = [];
+try {
+  const companyIndexability = JSON.parse(readFileSync(companyIndexabilityPath, 'utf8'));
+  companyNoindexUrls = Array.isArray(companyIndexability.noindexUrls)
+    ? companyIndexability.noindexUrls
+    : [];
+} catch (err) {
+  const isMissingFile = err && err.code === 'ENOENT';
+  const isProductionBuild = Boolean(process.env.CI) || import.meta.env.PROD;
+  if (!isMissingFile || isProductionBuild) {
+    console.error(
+      `\n✗ Failed to read ${companyIndexabilityPath}.\n` +
+      `   ${isMissingFile ? 'File is missing' : 'File is unreadable or corrupt'} ` +
+      `and this is a ${isProductionBuild ? 'production/CI' : 'parse-error'} build.\n` +
+      `   Hint: Run 'npm run generate:data' before 'astro build'.\n`
+    );
+    throw err;
+  }
+  console.warn(
+    `\n⚠️  ${companyIndexabilityPath} not found.\n` +
+    `   Hint: Run 'npm run generate:data' before 'astro dev'.\n` +
+    `   Continuing with empty company noindex list.\n`
+  );
+}
+const companyNoindexUrlSet = new Set(companyNoindexUrls);
+
 const pathnameOf = (url) => new URL(url).pathname;
 const isCommercialHubPath = (pathname) =>
   [
@@ -97,6 +125,12 @@ const isCommercialHubPath = (pathname) =>
     '/rabota-velokurerom/',
     '/podrabotka-kurerom/',
   ].includes(pathname);
+const canonicalizedListingPaths = new Set([
+  '/rabota-kurerom-peshkom/',
+  '/rabota-kurerom-na-avto/',
+  '/rabota-kurerom-na-velosipede/',
+  '/rabota-kurerom-podrabotka/',
+]);
 const sitemapChunks = {
   vacancies: (item) => pathnameOf(item.url).startsWith('/v/') ? item : undefined,
   listings: (item) => {
@@ -154,7 +188,9 @@ export default defineConfig({
         !page.endsWith('.md') &&
         !page.match(/\/blog\/$/) &&
         !emptyListingUrls.has(page) &&
-        !vacancyNoindexUrlSet.has(page),
+        !vacancyNoindexUrlSet.has(page) &&
+        !companyNoindexUrlSet.has(page) &&
+        !canonicalizedListingPaths.has(pathnameOf(page)),
       changefreq: 'daily',
       lastmod: new Date(),
       // Split the ~5 460-URL catalogue (88 fresh Ozon offers added

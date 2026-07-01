@@ -27,7 +27,7 @@ export async function getStaticPaths() {
 
 const { station } = Astro.props as { station: MetroStation };
 const jobs = getCityJobsFromMap(jobsByCity, station.jobsCityName);
-const visibleJobsLimit = 24;
+const visibleJobsLimit = 12;
 const vacancyCountText = `${jobs.length} ${getVacancyPluralText(jobs.length)}`;
 const maxSalary = Math.max(0, ...jobs.map((job) => parseSalaryValue(job.salary)));
 const formattedMaxSalary = maxSalary > 0
@@ -155,8 +155,9 @@ const pageSchemaGraph = [
       <JobGrid
         jobs={jobs}
         limit={visibleJobsLimit}
-        revealable={true}
-        listingSlug={station.listingSlug}
+        revealable={false}
+        moreHref={station.cityHref}
+        moreLabel={`Все вакансии в ${station.cityPrepositional}`}
         initialCity={station.jobsCityName}
       />
     </section>
