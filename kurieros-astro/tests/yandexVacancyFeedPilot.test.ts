@@ -48,7 +48,7 @@ const visibleCanonicalUrlsByCitySlug = (() => {
 
 describe('Yandex vacancy feed pilot', () => {
 	it('builds a bounded city-only pilot from unique canonical indexable detail pages', () => {
-		const validation = validateYandexVacancyFeedPilot(pilot);
+		const validation = validateYandexVacancyFeedPilot(pilot, { mode: 'structure' });
 		const offerUrls = pilot.offers.map((offer) => offer.url);
 
 		expect(validation.errors).toEqual([]);
@@ -65,6 +65,25 @@ describe('Yandex vacancy feed pilot', () => {
 			expect(detailJob, offer.url).toBeDefined();
 			expect(getVacancyIndexability(detailJob!).indexable, offer.url).toBe(true);
 		}
+	});
+
+	it('uses sourceCheckedAt and blocks publication while any emitted offer is stale', () => {
+		const staleCutoff = new Date('2026-07-10T12:00:00+03:00').getTime() -
+			60 * 24 * 60 * 60 * 1_000;
+		const expectedStaleOffers = pilot.offers.filter((offer) => {
+			const sourceCheckedAt = detailJobByUrl.get(offer.url)?.sourceCheckedAt;
+			const checkedAt = Date.parse(sourceCheckedAt ?? '');
+			return !Number.isFinite(checkedAt) || checkedAt < staleCutoff;
+		}).length;
+
+		expect(expectedStaleOffers).toBeGreaterThan(0);
+		expect(pilot.report.staleOffers).toBe(expectedStaleOffers);
+
+		const publicationValidation = validateYandexVacancyFeedPilot(pilot);
+		expect(publicationValidation.ok).toBe(false);
+		expect(publicationValidation.errors).toEqual(
+			expect.arrayContaining([expect.stringContaining('publication blocked')]),
+		);
 	});
 
 	it('keeps every set within the pilot bounds, diverse, and visible in the landing HTML batch', () => {
