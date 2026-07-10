@@ -35,11 +35,16 @@ const emptyListingsPath = resolve(__dirname, 'public/empty-listings.json');
 const vacancyIndexabilityPath = resolve(__dirname, 'src/generated/vacancy-indexability.json');
 const companyIndexabilityPath = resolve(__dirname, 'public/company-indexability.json');
 const sitemapFreshnessPath = resolve(__dirname, 'src/generated/sitemap-freshness.json');
+const blogReleaseManifestPath = resolve(__dirname, 'src/generated/blog-release-manifest.json');
 const isRealDateOnly = (value) => {
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const parsed = new Date(`${value}T00:00:00.000Z`);
   return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
 };
+const isRealIsoTimestamp = (value) =>
+  typeof value === 'string' &&
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?:Z|[+-]\d{2}:\d{2})$/.test(value) &&
+  !Number.isNaN(Date.parse(value));
 
 // Read failure handling (audit v3 M11): a *missing* file (ENOENT) is an
 // acceptable degradation in local `astro dev` — warn and continue with an
@@ -161,6 +166,50 @@ try {
   );
 }
 
+// Blog drafts are deliberately present in the repository well before their
+// release slot. The sitemap must look only at the explicit release manifest,
+// never at the content collection or at a nominal calendar date.
+let hasPublishedBlog = false;
+try {
+  const blogReleaseManifest = JSON.parse(readFileSync(blogReleaseManifestPath, 'utf8'));
+  const releases = blogReleaseManifest?.releases;
+  const isValidRelease = (release, index) =>
+    release &&
+    release.sequence === index + 1 &&
+    typeof release.slug === 'string' &&
+    /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(release.slug) &&
+    isRealIsoTimestamp(release.releasedAt) &&
+    isRealIsoTimestamp(release.firstPublishedAt) &&
+    (release.modifiedAt === undefined || isRealIsoTimestamp(release.modifiedAt));
+
+  if (
+    blogReleaseManifest?.schemaVersion !== 1 ||
+    blogReleaseManifest?.timezone !== 'Europe/Moscow' ||
+    !Array.isArray(releases) ||
+    !releases.every(isValidRelease)
+  ) {
+    throw new Error('Invalid blog release manifest shape');
+  }
+  hasPublishedBlog = releases.length > 0;
+} catch (err) {
+  const isMissingFile = err && err.code === 'ENOENT';
+  const isProductionBuild = Boolean(process.env.CI) || import.meta.env.PROD;
+  if (!isMissingFile || isProductionBuild) {
+    console.error(
+      `\n✗ Failed to read ${blogReleaseManifestPath}.\n` +
+      `   ${isMissingFile ? 'File is missing' : 'File is unreadable or corrupt'} ` +
+      `and this is a ${isProductionBuild ? 'production/CI' : 'parse-error'} build.\n` +
+      `   Hint: Run 'npm run emit:blog-release-manifest' before 'astro build'.\n`,
+    );
+    throw err;
+  }
+  console.warn(
+    `\n⚠️  ${blogReleaseManifestPath} not found.\n` +
+    `   Hint: Run 'npm run emit:blog-release-manifest' before 'astro dev'.\n` +
+    `   Continuing with an unpublished blog.\n`,
+  );
+}
+
 const pathnameOf = (url) => new URL(url).pathname;
 const isCommercialHubPath = (pathname) =>
   [
@@ -199,6 +248,10 @@ const sitemapChunks = {
       ? item
       : undefined;
   },
+  blog: (item) => {
+    const pathname = pathnameOf(item.url);
+    return pathname === '/blog/' || pathname.startsWith('/blog/') ? item : undefined;
+  },
 };
 
 export default defineConfig({
@@ -233,7 +286,7 @@ export default defineConfig({
         !page.includes('/api/grid-batch/') &&
         !page.includes('/api/company-vacancies/') &&
         !page.endsWith('.md') &&
-        !page.match(/\/blog\/$/) &&
+        (hasPublishedBlog || !page.match(/\/blog\/$/)) &&
         !emptyListingUrls.has(page) &&
         !vacancyNoindexUrlSet.has(page) &&
         !companyNoindexUrlSet.has(page) &&

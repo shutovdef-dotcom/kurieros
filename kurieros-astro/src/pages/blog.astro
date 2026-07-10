@@ -1,194 +1,256 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import articlesData from '../data/articles.json';
+import {
+  BLOG_RELEASE_MANIFEST,
+  hasPublishedBlog,
+} from '../utils/blogManifest';
 import { buildBreadcrumbSchema } from '../utils/schema';
 
-// Shape of a `src/data/articles.json` entry. The file is intentionally
-// `[]` today (the /blog/ feature is shelved — see the empty-state note
-// below), so this interface documents the contract a future entry must
-// satisfy and lets `posts` infer instead of leaking `: any`.
-interface Article {
-	slug: string;
-	title: string;
-	description: string;
-	date: string;
-}
+const allEntries = await getCollection('blog');
+const entriesBySlug = new Map(allEntries.map((entry) => [entry.id, entry]));
+
+const posts = BLOG_RELEASE_MANIFEST.releases
+  .toReversed()
+  .map((release) => {
+    const entry = entriesBySlug.get(release.slug);
+    if (!entry) {
+      throw new Error(
+        `Published blog release ${release.slug} has no matching content entry. Refusing to expose a partial blog.`,
+      );
+    }
+    return { ...entry.data, slug: release.slug, release };
+  });
 
 const formatDate = (value: string) =>
-	new Intl.DateTimeFormat('ru-RU', {
-		day: 'numeric',
-		month: 'long',
-		year: 'numeric',
-	}).format(new Date(value));
+  new Intl.DateTimeFormat('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'Europe/Moscow',
+  }).format(new Date(value));
 
-const posts = (articlesData as Article[]).map((article) => ({
-	...article,
-	excerpt: article.description,
-	formattedDate: formatDate(article.date),
+const blogTitle = hasPublishedBlog
+  ? 'Блог о работе курьером | КурьерОк'
+  : 'Блог КурьерОк готовится к запуску';
+const blogDescription = hasPublishedBlog
+  ? 'Практические разборы дохода, условий и выбора работы курьером: с датой проверки и ссылками на источники.'
+  : 'Блог КурьерОк готовится к запуску. Материалы появятся после редакционной проверки.';
+
+const postListSchema = posts.map((post, index) => ({
+  '@type': 'ListItem',
+  position: index + 1,
+  name: post.title,
+  url: new URL(`/blog/${post.slug}/`, Astro.site).toString(),
 }));
 
-const blogTitle = 'Блог о работе курьером | КурьерОк';
-const blogDescription = 'Блог КурьерОк готовится к запуску. Скоро здесь появятся материалы про работу курьером.';
-
 const pageSchemaGraph = [
-	{
-		'@type': 'CollectionPage',
-		name: 'Блог КурьерОк',
-		description: blogDescription,
-		url: Astro.url.href,
-		mainEntity: {
-			'@type': 'ItemList',
-			itemListElement: posts.map((post, index) => ({
-				'@type': 'ListItem',
-				position: index + 1,
-				name: post.title,
-				url: new URL(`/blog/${post.slug}/`, Astro.site).toString(),
-			})),
-		},
-	},
-	buildBreadcrumbSchema(
-		[
-			{ name: 'Главная', url: '/' },
-			{ name: 'Блог', url: '/blog/' },
-		],
-		Astro.site,
-	),
+  hasPublishedBlog
+    ? {
+        '@type': 'CollectionPage',
+        name: 'Блог КурьерОк',
+        description: blogDescription,
+        url: Astro.url.href,
+        mainEntity: {
+          '@type': 'ItemList',
+          itemListElement: postListSchema,
+        },
+      }
+    : undefined,
+  buildBreadcrumbSchema(
+    [
+      { name: 'Главная', url: '/' },
+      { name: 'Блог', url: '/blog/' },
+    ],
+    Astro.site,
+  ),
 ];
 ---
 
 <BaseLayout
-	title={blogTitle}
-	description={blogDescription}
-	schemaGraph={pageSchemaGraph}
-	robots="noindex, follow"
+  title={blogTitle}
+  description={blogDescription}
+  schemaGraph={pageSchemaGraph}
+  robots={hasPublishedBlog ? undefined : 'noindex, follow'}
 >
-	<Header />
+  <Header />
 
-	<main>
-		<section class="blog-hero">
-			<div class="blog-hero-copy">
-				<span class="eyebrow">Редакция КурьерОк</span>
-				<h1>Журнал о работе курьером</h1>
-				<p>Практические разборы дохода, компаний и форматов доставки без рекламного шума и пустых обещаний.</p>
-			</div>
-			<div class="blog-hero-note">
-				<span>{posts.length === 0 ? 'Готовим материалы' : `${posts.length} материалов`}</span>
-			</div>
-		</section>
+  <main>
+    <section class="blog-hero">
+      <div class="blog-hero-copy">
+        <span class="eyebrow">Редакция КурьерОк</span>
+        <h1>Журнал о работе курьером</h1>
+        <p>
+          Практические разборы дохода, условий и выбора формата работы. У каждого
+          материала есть дата проверки и список источников — без рекламных обещаний.
+        </p>
+      </div>
+      <div class="blog-hero-note" aria-label="Статус редакции">
+        <strong>{hasPublishedBlog ? `${posts.length} ${posts.length === 1 ? 'материал' : 'материалов'}` : 'Редакционная проверка'}</strong>
+        <span>{hasPublishedBlog ? 'Выпускаем только проверенные тексты' : 'Первая публикация ещё не вышла'}</span>
+      </div>
+    </section>
 
-		{/*
-			Empty-state placeholder. `articles.json` is intentionally `[]`, so
-			`posts` is always empty and the old `posts.length > 0` listing
-			branch was permanently unreachable — it was removed (audit v3 M5).
-			The `/blog/` feature stays shelved pending a product decision.
-		*/}
-		<section class="blog-empty">
-			<h2>Скоро здесь будут материалы</h2>
-			<p>Команда готовит новые статьи о работе курьером — про доход, форматы доставки и реальные условия. Загляните позже.</p>
-		</section>
+    {hasPublishedBlog ? (
+      <section class="blog-list" aria-label="Опубликованные материалы">
+        {posts.map((post) => (
+          <article class="blog-card">
+            <p class="blog-card-meta">
+              <time datetime={post.release.firstPublishedAt}>
+                Опубликовано {formatDate(post.release.firstPublishedAt)}
+              </time>
+              {post.release.modifiedAt && (
+                <span>
+                  · Обновлено {formatDate(post.release.modifiedAt)}
+                </span>
+              )}
+            </p>
+            <h2><a href={`/blog/${post.slug}/`}>{post.title}</a></h2>
+            <p>{post.description}</p>
+            <a class="blog-card-link" href={`/blog/${post.slug}/`} aria-label={`Открыть: ${post.title}`}>
+              Читать материал <span aria-hidden="true">→</span>
+            </a>
+          </article>
+        ))}
+      </section>
+    ) : (
+      <section class="blog-empty" aria-labelledby="blog-empty-title">
+        <span class="eyebrow">Без черновиков в выдаче</span>
+        <h2 id="blog-empty-title">Материалы появятся после проверки</h2>
+        <p>
+          Мы не публикуем заготовки и не ставим статьи задним числом. Когда выйдет
+          первый текст, на этой странице появятся только фактически опубликованные материалы.
+        </p>
+      </section>
+    )}
 
-		<section class="newsletter">
-			<div class="newsletter-content">
-				<h2>Подпишитесь на новые статьи</h2>
-				<p>Получайте новые материалы о вакансиях, выплатах и выборе формата работы прямо в Telegram.</p>
-				<a href="/contacts/" class="btn-primary newsletter-link">Подписаться в Telegram</a>
-			</div>
-		</section>
-	</main>
+    <section class="newsletter" aria-label="Контакты КурьерОк">
+      <div class="newsletter-content">
+        <h2>Нужна работа курьером сейчас?</h2>
+        <p>Посмотрите актуальные вакансии и сравните условия до отклика.</p>
+        <a href="/#vacancies" class="btn-primary newsletter-link">Смотреть вакансии</a>
+      </div>
+    </section>
+  </main>
 
-	<Footer />
+  <Footer />
 </BaseLayout>
 
 <style>
-	/*
-		blog.astro is an empty-state placeholder (articles.json is []). Its
-		reachable markup uses only the hero, blog-empty and newsletter blocks;
-		the topic-grid / featured-story / blog-card families styled the
-		removed `posts.length > 0` listing branch and were deleted as dead
-		scoped CSS (audit v3 M5).
-	*/
-	.blog-hero {
-		max-width: var(--content-max-width);
-		margin: 0 auto 2rem;
-		padding: 3rem 1rem 1.5rem;
-		display: grid;
-		gap: 1.5rem;
-		grid-template-columns: minmax(0, 1fr) auto;
-		align-items: end;
-	}
-	.blog-hero-copy h1 {
-		font-size: 4.4rem;
-		line-height: 0.95;
-		letter-spacing: 0;
-		max-width: 10ch;
-		margin-bottom: 1rem;
-	}
-	.blog-hero-copy p {
-		color: var(--text-muted);
-		max-width: 60ch;
-		font-size: 1.05rem;
-		line-height: 1.8;
-	}
-	.eyebrow {
-		display: inline-flex;
-		margin-bottom: 1rem;
-		font-size: 0.78rem;
-		text-transform: uppercase;
-		letter-spacing: 0;
-		color: var(--text-muted);
-	}
-	.blog-hero-note {
-		display: grid;
-		gap: 0.5rem;
-		justify-items: end;
-		color: var(--text-muted);
-		font-size: 0.95rem;
-	}
-	.newsletter-link {
-		max-width: 300px;
-		margin: 0 auto;
-		display: block;
-	}
-	.newsletter {
-		max-width: var(--content-max-width);
-		margin: 0 auto 4rem;
-		background: linear-gradient(135deg, var(--brand-800), var(--brand-700));
-		padding: 4rem 2rem;
-		border-radius: 8px;
-		text-align: center;
-	}
-	.newsletter h2 { color: var(--ink-900); margin-bottom: 1rem; }
-	.newsletter p { color: var(--ink-700); margin-bottom: 2rem; }
-	@media (max-width: 960px) {
-		.blog-hero {
-			grid-template-columns: 1fr;
-		}
-		.blog-hero-note {
-			justify-items: start;
-		}
-	}
-	@media (max-width: 720px) {
-		.blog-hero-copy h1 {
-			font-size: 2.8rem;
-			max-width: 12ch;
-		}
-		.newsletter {
-			margin-left: 1rem;
-			margin-right: 1rem;
-			padding: 3rem 1.25rem;
-			border-radius: 8px;
-		}
-	}
-
-	/* === Visual refresh overrides (Blog listing) === */
-	.newsletter {
-		background: var(--brand-50);
-		border: 1px solid var(--brand-200);
-		border-radius: var(--radius-xl);
-	}
-
-	:global(:where(html, body).dark-mode) .newsletter h2 { color: var(--ink-900); }
-	:global(:where(html, body).dark-mode) .newsletter p { color: var(--ink-700); }
+  .blog-hero,
+  .blog-list,
+  .blog-empty,
+  .newsletter {
+    max-width: var(--content-max-width);
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .blog-hero {
+    padding: 3rem 1rem 1.5rem;
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: minmax(0, 1fr) minmax(14rem, 18rem);
+    align-items: end;
+  }
+  .blog-hero-copy h1 {
+    font-size: clamp(2.6rem, 7vw, 4.4rem);
+    line-height: 0.97;
+    letter-spacing: -0.03em;
+    max-width: 12ch;
+    margin-bottom: 1rem;
+  }
+  .blog-hero-copy p,
+  .blog-empty p,
+  .blog-card > p:not(.blog-card-meta) {
+    color: var(--text-muted);
+    max-width: 65ch;
+    line-height: 1.75;
+  }
+  .eyebrow {
+    display: inline-block;
+    margin-bottom: 0.9rem;
+    color: var(--brand-700);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .blog-hero-note {
+    border-left: 2px solid var(--brand-500);
+    padding: 0.35rem 0 0.35rem 1rem;
+    color: var(--text-muted);
+    display: grid;
+    gap: 0.25rem;
+    line-height: 1.45;
+  }
+  .blog-hero-note strong { color: var(--text); }
+  .blog-list {
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .blog-card,
+  .blog-empty {
+    border: 1px solid var(--ink-200);
+    border-radius: var(--radius-xl);
+    background: var(--surface, var(--ink-0));
+  }
+  .blog-card {
+    padding: 1.35rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+  }
+  .blog-card-meta {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    line-height: 1.4;
+    margin: 0 0 0.8rem;
+  }
+  .blog-card h2 {
+    font-size: 1.25rem;
+    line-height: 1.25;
+    margin: 0 0 0.75rem;
+  }
+  .blog-card h2 a { color: inherit; text-decoration: none; }
+  .blog-card h2 a:hover,
+  .blog-card h2 a:focus-visible { color: var(--brand-700); text-decoration: underline; }
+  .blog-card-link {
+    color: var(--brand-700);
+    font-weight: 800;
+    margin-top: auto;
+    padding-top: 1rem;
+    text-decoration: none;
+  }
+  .blog-card-link:hover,
+  .blog-card-link:focus-visible { text-decoration: underline; }
+  .blog-empty {
+    padding: clamp(1.5rem, 5vw, 3rem);
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+  }
+  .blog-empty h2 { margin: 0 0 0.75rem; }
+  .newsletter {
+    margin-top: 2rem;
+    margin-bottom: 4rem;
+    padding: 3rem 1.5rem;
+    border: 1px solid var(--brand-200);
+    border-radius: var(--radius-xl);
+    background: var(--brand-50);
+    text-align: center;
+  }
+  .newsletter h2 { margin-bottom: 0.75rem; }
+  .newsletter p { color: var(--ink-700); margin-bottom: 1.5rem; }
+  .newsletter-link { display: inline-flex; }
+  @media (max-width: 960px) {
+    .blog-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 720px) {
+    .blog-hero { grid-template-columns: 1fr; padding-top: 2rem; }
+    .blog-list { grid-template-columns: 1fr; }
+    .newsletter { margin-left: 1rem; margin-right: 1rem; }
+  }
 </style>
