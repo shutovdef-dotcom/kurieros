@@ -1,10 +1,12 @@
 {
   "schemaVersion": 1,
-  "id": "2026-07-10-jobposting-provenance-fail-closed-v3",
-  "reviewReason": "Reviewed fail-closed replacement for the temporary GSC-valid continuity bridge: all 29 URLs lack original employer postedAt and fresh verified apply flow, so JobPosting is intentionally zero until source evidence exists. Indexable surface remains 2034 routes / 2026 sitemap URLs; canonical conflicts remain zero. Review by 2026-08-10.",
+  "id": "2026-07-10-blog-release-ledger-v4",
+  "reviewReason": "Reviewed zero-release blog baseline: future drafts are excluded from routes, sitemap, RSS and internal links; each future production delta is allowed only when it exactly matches the durable release ledger and leaves the non-blog sitemap unchanged. JobPosting remains intentionally zero pending source evidence. Review by 2026-08-10.",
   "reviewedSurfaceUrlSetHashes": [
     "8011ca86bdb286b5e271c73b49380bab79e8c3377fc71c458c4d9b84b3d44644"
   ],
+  "blogReleaseSlugs": [],
+  "blogSitemapUrls": [],
   "report": {
     "schemaVersion": 1,
     "routes": {
@@ -18,6 +20,10 @@
       "pageUrlCount": 2026,
       "urlSetHash": "8011ca86bdb286b5e271c73b49380bab79e8c3377fc71c458c4d9b84b3d44644",
       "rawXmlHash": "8844e439feac0fc4e5679cafda1f42a4f2f2411b21070d2e58cb775c85ca2823",
+      "blogUrlCount": 0,
+      "blogUrlSetHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "nonBlogUrlCount": 2026,
+      "nonBlogUrlSetHash": "8011ca86bdb286b5e271c73b49380bab79e8c3377fc71c458c4d9b84b3d44644",
       "canonicalConflicts": []
     },
     "structuredData": {

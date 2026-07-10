@@ -3,12 +3,14 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import calendarJson from '../src/data/blog-calendar.json';
+import { assertReleasedBlogContentIntegrity } from '../src/utils/blogReleaseIntegrity';
 import { buildBlogReleaseManifest } from '../src/utils/blogReleaseManifest';
 import type {
   BlogCalendarEntry,
   BlogReleaseLedger,
   BlogReleaseRecord,
 } from '../src/utils/blogRelease';
+import { loadBlogContentDocuments } from './blog-content';
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const ledgerPath = resolve(rootDir, 'src/data/blog-release-ledger.json');
@@ -28,6 +30,11 @@ try {
   if (candidateEnvelope.schemaVersion !== 1 || !candidateEnvelope.release || typeof candidateEnvelope.release !== 'object') {
     throw new Error('candidate must have schemaVersion 1 and a release object');
   }
+  if (process.env.BLOG_RELEASE_ALLOW_CANDIDATE !== 'true') {
+    throw new Error(
+      'Transient blog release candidate exists, but BLOG_RELEASE_ALLOW_CANDIDATE is not true. Refusing to expose it in a regular build.',
+    );
+  }
   candidate = candidateEnvelope.release as BlogReleaseRecord;
   console.log(`✓ Including transient blog candidate: ${candidate.slug}`);
 } catch (error) {
@@ -36,6 +43,8 @@ try {
 }
 
 const manifest = buildBlogReleaseManifest(calendar, ledger, candidate);
+const documents = await loadBlogContentDocuments(resolve(rootDir, 'src/content/blog'));
+assertReleasedBlogContentIntegrity({ releases: manifest.releases }, documents);
 const nextContent = `${JSON.stringify(manifest, null, 2)}\n`;
 const previousContent = await readFile(outputPath, 'utf8').catch(() => null);
 

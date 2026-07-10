@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
@@ -6,7 +6,10 @@ import { describe, expect, it } from 'vitest';
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const workflowPath = join(projectRoot, '..', '.github', 'workflows', 'deploy-timeweb.yml');
+const legacyPagesWorkflowPath = join(projectRoot, '..', '.github', 'workflows', 'deploy.yml');
+const manifestEmitterPath = join(projectRoot, 'scripts', 'emit-blog-release-manifest.ts');
 const workflowText = readFileSync(workflowPath, 'utf8');
+const manifestEmitterText = readFileSync(manifestEmitterPath, 'utf8');
 const workflow = parse(workflowText) as {
   on?: { schedule?: Array<{ cron?: string }> };
   jobs?: Record<string, unknown>;
@@ -32,11 +35,27 @@ describe('scheduled blog release workflow', () => {
     expect(workflowText).toContain("[blog-ledger]");
     expect(workflowText).toContain('always() && github.event_name == \'schedule\'');
     expect(workflowText).toContain('npm run seo:audit');
+    expect(workflowText).toContain('BLOG_RELEASE_EXPECTED_CANDIDATE_JSON');
+    expect(workflowText).toContain('--allow-missing-remote-if-local-empty');
   });
 
   it('only wires Yandex-compatible IndexNow for one deployed URL, never Google Indexing API', () => {
     expect(workflowText).toContain('npm run indexnow:submit -- "https://kurerok.ru/blog/');
     expect(workflowText).toContain("vars.BLOG_INDEXNOW_ENABLED == 'true'");
     expect(workflowText).not.toMatch(/indexing\.googleapis\.com|google.*indexing.*api/i);
+  });
+
+  it('does not leave a second GitHub Pages deploy or bulk IndexNow path able to bypass the cursor', () => {
+    expect(existsSync(legacyPagesWorkflowPath)).toBe(false);
+    expect(workflowText).not.toMatch(/urlList:\s*\(/);
+  });
+
+  it('only accepts a transient candidate in the scheduled build context and requires SSH production stamping', () => {
+    expect(manifestEmitterText).toContain("BLOG_RELEASE_ALLOW_CANDIDATE !== 'true'");
+    expect(workflowText).toContain('BLOG_RELEASE_ALLOW_CANDIDATE');
+    expect(workflowText).toContain("TIMEWEB_DEPLOY_METHOD\" = 'ssh-archive'");
+    expect(workflowText).toContain('--blog-release-stamp-old');
+    expect(workflowText).toContain('--blog-release-stamp-slug');
+    expect(workflowText).toContain('name: timeweb-production');
   });
 });

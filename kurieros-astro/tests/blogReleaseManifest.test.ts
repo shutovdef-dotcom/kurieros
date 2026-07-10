@@ -18,6 +18,7 @@ const candidate: BlogReleaseRecord = {
   slug: 'article-one',
   releasedAt: '2026-08-03T09:03:00+03:00',
   firstPublishedAt: '2026-08-03T09:03:00+03:00',
+  sourceCheckedAt: '2026-08-03T09:00:00+03:00',
   revision: 1,
   contentSha256: 'a'.repeat(64),
   deploySha: 'abcdef1',

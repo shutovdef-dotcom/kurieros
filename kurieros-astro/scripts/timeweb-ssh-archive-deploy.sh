@@ -8,6 +8,8 @@ user=""
 identity_file=""
 known_hosts_file=""
 remote_root=""
+blog_release_stamp_old=""
+blog_release_stamp_slug=""
 dry_run="false"
 
 usage() {
@@ -37,6 +39,8 @@ Flags:
   --identity-file FILE
   --known-hosts FILE
   --remote-root PATH
+  --blog-release-stamp-old ISO
+  --blog-release-stamp-slug SLUG
   --dry-run
   --help
 USAGE
@@ -72,6 +76,14 @@ while [ "$#" -gt 0 ]; do
       remote_root="${2:?--remote-root requires PATH}"
       shift 2
       ;;
+    --blog-release-stamp-old)
+      blog_release_stamp_old="${2:?--blog-release-stamp-old requires ISO}"
+      shift 2
+      ;;
+    --blog-release-stamp-slug)
+      blog_release_stamp_slug="${2:?--blog-release-stamp-slug requires SLUG}"
+      shift 2
+      ;;
     --dry-run)
       dry_run="true"
       shift
@@ -103,6 +115,19 @@ require_value "--user" "$user"
 require_value "--identity-file" "$identity_file"
 require_value "--known-hosts" "$known_hosts_file"
 require_value "--remote-root" "$remote_root"
+
+if [ -n "$blog_release_stamp_old" ] || [ -n "$blog_release_stamp_slug" ]; then
+  require_value "--blog-release-stamp-old" "$blog_release_stamp_old"
+  require_value "--blog-release-stamp-slug" "$blog_release_stamp_slug"
+  if [[ ! "$blog_release_stamp_old" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}([.][0-9]{1,3})?(Z|[+-][0-9]{2}:[0-9]{2})$ ]]; then
+    echo "Invalid --blog-release-stamp-old ISO timestamp" >&2
+    exit 2
+  fi
+  if [[ ! "$blog_release_stamp_slug" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+    echo "Invalid --blog-release-stamp-slug" >&2
+    exit 2
+  fi
+fi
 
 if [ ! -d "$source_dir" ]; then
   echo "Source directory does not exist: $source_dir" >&2
@@ -171,7 +196,7 @@ scp "${scp_opts[@]}" "$archive_path" "$ssh_target:$remote_archive"
 echo "Uploaded archive to Timeweb."
 
 ssh "${ssh_opts[@]}" "$ssh_target" \
-  "REMOTE_ROOT='$remote_root' REMOTE_ARCHIVE='$remote_archive' REMOTE_STAGING='$remote_staging' sh -s" <<'REMOTE_SCRIPT'
+  "REMOTE_ROOT='$remote_root' REMOTE_ARCHIVE='$remote_archive' REMOTE_STAGING='$remote_staging' BLOG_RELEASE_STAMP_OLD='$blog_release_stamp_old' BLOG_RELEASE_STAMP_SLUG='$blog_release_stamp_slug' sh -s" <<'REMOTE_SCRIPT'
 set -eu
 
 cd "$REMOTE_ROOT"
@@ -179,6 +204,44 @@ cd "$REMOTE_ROOT"
 rm -rf "$REMOTE_STAGING"
 mkdir -p "$REMOTE_STAGING"
 tar -xzf "$REMOTE_ARCHIVE" -C "$REMOTE_STAGING"
+
+if [ -n "${BLOG_RELEASE_STAMP_OLD:-}" ]; then
+  manifest="$REMOTE_STAGING/api/blog-release-manifest.json"
+  article="$REMOTE_STAGING/blog/$BLOG_RELEASE_STAMP_SLUG/index.html"
+  rss="$REMOTE_STAGING/blog/rss.xml"
+  test -f "$manifest"
+  test -f "$article"
+  test -f "$rss"
+  grep -F "\"slug\": \"$BLOG_RELEASE_STAMP_SLUG\"" "$manifest" >/dev/null
+  grep -F "$BLOG_RELEASE_STAMP_OLD" "$manifest" >/dev/null
+
+  published_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+  expected_day="${BLOG_RELEASE_STAMP_OLD%%T*}"
+  published_day="$(TZ=Europe/Moscow date -d "$published_at" '+%F')"
+  if [ "$expected_day" != "$published_day" ]; then
+    echo "Refusing to stamp a different Moscow calendar day: $expected_day -> $published_day" >&2
+    exit 1
+  fi
+
+  old_rfc="$(date -u -d "$BLOG_RELEASE_STAMP_OLD" '+%a, %d %b %Y %H:%M:%S GMT')"
+  published_rfc="$(date -u -d "$published_at" '+%a, %d %b %Y %H:%M:%S GMT')"
+
+  # Only the transient candidate carries this provisional timestamp. The
+  # production host stamps it immediately before promotion, so an arbitrary
+  # build time is never committed as the public publication timestamp.
+  sed -i "s~$BLOG_RELEASE_STAMP_OLD~$published_at~g" "$manifest" "$article"
+  sed -i "s~$old_rfc~$published_rfc~g" "$rss"
+
+  if grep -F "$BLOG_RELEASE_STAMP_OLD" "$manifest" "$article" >/dev/null; then
+    echo "Provisional blog timestamp remained after production stamp" >&2
+    exit 1
+  fi
+  grep -F "\"releasedAt\": \"$published_at\"" "$manifest" >/dev/null
+  grep -F "\"firstPublishedAt\": \"$published_at\"" "$manifest" >/dev/null
+  grep -F "$published_at" "$article" >/dev/null
+  grep -F "$published_rfc" "$rss" >/dev/null
+  echo "Stamped blog publication at $published_at for $BLOG_RELEASE_STAMP_SLUG"
+fi
 
 find "$REMOTE_ROOT" -mindepth 1 -maxdepth 1 \
   ! -name '.htaccess' \

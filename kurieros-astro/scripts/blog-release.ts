@@ -11,7 +11,13 @@ import {
   type BlogReleaseSourceBrief,
 } from '../src/utils/blogReleaseOrchestrator';
 import { buildBlogReleaseManifest } from '../src/utils/blogReleaseManifest';
-import { reconcileBlogReleaseLedgers, type BlogReleaseLedger } from '../src/utils/blogRelease';
+import {
+  isSameBlogReleaseReservation,
+  reconcileBlogReleaseLedgers,
+  validateBlogReleaseLedger,
+  type BlogReleaseLedger,
+  type BlogReleaseRecord,
+} from '../src/utils/blogRelease';
 import type { BlogCalendarContentContract } from '../src/utils/blogContent';
 import { loadBlogContentDocuments } from './blog-content';
 
@@ -43,6 +49,7 @@ const option = (name: string): string | undefined => {
   const prefix = `--${name}=`;
   return args.find((value) => value.startsWith(prefix))?.slice(prefix.length);
 };
+const hasFlag = (name: string): boolean => args.includes(`--${name}`);
 
 const requireNow = (): string => {
   const value = option('now') ?? process.env.BLOG_RELEASE_NOW;
@@ -114,6 +121,8 @@ const prepare = async () => {
     slug: candidate.slug,
     sequence: String(candidate.sequence),
     candidate_path: candidatePath,
+    candidate_json: JSON.stringify(candidate),
+    released_at: candidate.releasedAt,
   });
 };
 
@@ -126,18 +135,52 @@ const syncProductionManifest = async () => {
   if (remote.protocol !== 'https:') {
     throw new Error('Production manifest URL must use HTTPS.');
   }
+  const localLedger = await readJson<BlogReleaseLedger>(ledgerPath);
   const response = await fetch(remote, { signal: AbortSignal.timeout(15_000) });
   if (!response.ok) {
+    if (
+      response.status === 404 &&
+      hasFlag('allow-missing-remote-if-local-empty') &&
+      localLedger.releases.length === 0
+    ) {
+      console.log('✓ Production manifest is not present yet; local empty ledger is the trusted base state.');
+      await writeGithubOutput({ recovered: 'false', production_manifest_missing: 'true' });
+      return;
+    }
     throw new Error(`Production manifest request failed: HTTP ${response.status}`);
   }
   const remoteLedger = await response.json() as BlogReleaseLedger;
-  const localLedger = await readJson<BlogReleaseLedger>(ledgerPath);
   const reconciliation = reconcileBlogReleaseLedgers(calendar, localLedger, remoteLedger);
   if (!reconciliation.ok) {
     throw new Error(`Production manifest reconciliation failed: ${reconciliation.reason}`);
   }
 
   if (reconciliation.mode === 'remote_ahead_by_one') {
+    const expectedRaw = option('expected-release-json') ?? process.env.BLOG_RELEASE_EXPECTED_CANDIDATE_JSON;
+    if (!expectedRaw) {
+      throw new Error(
+        'Production is one release ahead of the ledger. Automatic recovery requires the exact trusted pre-deploy candidate.',
+      );
+    }
+    let expectedRelease: BlogReleaseRecord;
+    try {
+      expectedRelease = JSON.parse(expectedRaw) as BlogReleaseRecord;
+    } catch {
+      throw new Error('Expected blog release candidate must be valid JSON.');
+    }
+    const expectedValidation = validateBlogReleaseLedger(calendar, {
+      ...localLedger,
+      releases: [...localLedger.releases, expectedRelease],
+    });
+    if (!expectedValidation.ok) {
+      throw new Error(`Expected blog release candidate is invalid: ${expectedValidation.errors.join(', ')}`);
+    }
+    if (!reconciliation.releaseToRecover || !isSameBlogReleaseReservation(
+      reconciliation.releaseToRecover,
+      expectedRelease,
+    )) {
+      throw new Error('Production release does not match the trusted pre-deploy reservation.');
+    }
     await writeJson(ledgerPath, remoteLedger);
     const manifest = buildBlogReleaseManifest(calendar, remoteLedger);
     await writeJson(manifestPath, manifest);

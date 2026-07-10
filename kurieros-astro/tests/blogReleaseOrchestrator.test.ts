@@ -38,7 +38,13 @@ const evidence: BlogReleaseEvidence = {
   }],
 };
 
-const plan = (overrides: { scheduleEnabled?: boolean; paused?: boolean } = {}) =>
+const plan = (overrides: {
+  scheduleEnabled?: boolean;
+  paused?: boolean;
+  calendarResearchRequired?: boolean;
+  registryRequiresInternalDataset?: boolean;
+  sourceGateRequired?: boolean;
+} = {}) =>
   planVerifiedBlogRelease({
     calendar: [{
       sequence: 1,
@@ -48,10 +54,15 @@ const plan = (overrides: { scheduleEnabled?: boolean; paused?: boolean } = {}) =
       primaryIntent: 'тестовый запрос',
       pillarHref: '/guide/dohod/',
       nominalPublishAt: '2026-08-03T09:00:00+03:00',
-      sourceGate: { required: true },
-      researchGate: { required: false },
+      sourceGate: { required: overrides.sourceGateRequired ?? true },
+      researchGate: { required: overrides.calendarResearchRequired ?? false },
     }],
-    sourceBriefs: [{ slug: 'test-article', sourceIds: ['official-source'], requiresInternalDataset: false }],
+    sourceBriefs: [{
+      slug: 'test-article',
+      sourceIds: ['official-source'],
+      requiresInternalDataset: overrides.registryRequiresInternalDataset ?? false,
+      ...(overrides.registryRequiresInternalDataset ? { internalDataset: { id: 'kurerok-test-snapshot' } } : {}),
+    }],
     documents: [parseBlogContentDocument('test-article', markdown)],
     evidence,
     ledger,
@@ -74,6 +85,7 @@ describe('verified blog release orchestration', () => {
       sequence: 1,
       slug: 'test-article',
       firstPublishedAt: '2026-08-03T09:05:00+03:00',
+      sourceCheckedAt: '2026-08-02T12:00:00+03:00',
       revision: 1,
     });
   });
@@ -84,5 +96,26 @@ describe('verified blog release orchestration', () => {
       reasons: ['schedule_paused'],
       candidate: undefined,
     });
+  });
+
+  it('fails closed when the calendar tries to weaken a source-registry research requirement', () => {
+    const orchestration = plan({ registryRequiresInternalDataset: true, calendarResearchRequired: false });
+
+    expect(orchestration.plan).toMatchObject({
+      eligible: false,
+      candidate: expect.objectContaining({ slug: 'test-article' }),
+    });
+    expect(orchestration.evidenceReasonsBySlug['test-article']).toContain(
+      'calendar_registry_research_gate_mismatch',
+    );
+  });
+
+  it('fails closed when a calendar entry explicitly disables its source gate', () => {
+    const orchestration = plan({ sourceGateRequired: false });
+
+    expect(orchestration.plan).toMatchObject({ eligible: false });
+    expect(orchestration.evidenceReasonsBySlug['test-article']).toContain(
+      'calendar_source_gate_disabled',
+    );
   });
 });

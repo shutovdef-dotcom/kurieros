@@ -7,6 +7,7 @@ import {
 } from './blogContent';
 import {
   evaluateBlogEvidenceGate,
+  type BlogReleaseEvidenceEntry,
   type BlogReleaseEvidence,
 } from './blogReleaseEvidence';
 import { blogPrimarySourceById } from './blogSourceRegistry';
@@ -39,6 +40,7 @@ export type BlogReleaseOrchestration = {
   audit: BlogContentAudit;
   readinessBySlug: Record<string, BlogReleaseReadiness>;
   evidenceReasonsBySlug: Record<string, string[]>;
+  evidenceBySlug: Record<string, BlogReleaseEvidenceEntry | undefined>;
   plan: BlogReleasePlan;
 };
 
@@ -63,6 +65,9 @@ export const planVerifiedBlogRelease = ({
   const sourceBriefsBySlug = new Map(sourceBriefs.map((brief) => [brief.slug, brief]));
   const readinessBySlug: Record<string, BlogReleaseReadiness> = {};
   const evidenceReasonsBySlug: Record<string, string[]> = {};
+  const evidenceBySlug = Object.fromEntries(
+    evidence.entries.map((entry) => [entry.slug, entry]),
+  ) as Record<string, BlogReleaseEvidenceEntry | undefined>;
 
   for (const entry of calendar) {
     const document = documentsBySlug.get(entry.slug);
@@ -71,6 +76,17 @@ export const planVerifiedBlogRelease = ({
       readinessBySlug[entry.slug] = { status: 'blocked', qualityGatePassed: false };
       evidenceReasonsBySlug[entry.slug] = ['missing_editorial_contract'];
       continue;
+    }
+
+    // The source registry is the authoritative description of evidence
+    // requirements. A typo or downgrade in the calendar must stop the cursor,
+    // never make an internal-dataset article publishable without its dataset.
+    const gateContractReasons: string[] = [];
+    if (entry.sourceGate?.required === false) {
+      gateContractReasons.push('calendar_source_gate_disabled');
+    }
+    if (Boolean(entry.researchGate?.required) !== sourceBrief.requiresInternalDataset) {
+      gateContractReasons.push('calendar_registry_research_gate_mismatch');
     }
 
     const evidenceGate = evaluateBlogEvidenceGate({
@@ -86,17 +102,18 @@ export const planVerifiedBlogRelease = ({
       return source?.citationVisibility === 'internal';
     });
     readinessBySlug[entry.slug] = {
-      status: document.frontmatter.status,
+      status: gateContractReasons.length === 0 ? document.frontmatter.status : 'blocked',
       contentSha256: document.contentSha256,
       sourceGatePassed: evidenceGate.sourceGatePassed && restrictedSourceIds.length === 0,
       researchGatePassed: evidenceGate.researchGatePassed,
       // A missing later draft, duplicate, or metadata mismatch makes the
       // entire planned corpus unsafe to release from automatically.
-      qualityGatePassed: audit.ok,
+      qualityGatePassed: audit.ok && gateContractReasons.length === 0,
     };
     evidenceReasonsBySlug[entry.slug] = [
       ...evidenceGate.reasons,
       ...restrictedSourceIds.map((sourceId) => `source_not_publicly_citable:${sourceId}`),
+      ...gateContractReasons,
     ];
   }
 
@@ -104,6 +121,7 @@ export const planVerifiedBlogRelease = ({
     audit,
     readinessBySlug,
     evidenceReasonsBySlug,
+    evidenceBySlug,
     plan: planNextBlogRelease({
       calendar,
       ledger,
@@ -117,7 +135,7 @@ export const planVerifiedBlogRelease = ({
 };
 
 export const createBlogReleaseCandidate = (
-  orchestration: Pick<BlogReleaseOrchestration, 'plan' | 'readinessBySlug'>,
+  orchestration: Pick<BlogReleaseOrchestration, 'plan' | 'readinessBySlug' | 'evidenceBySlug'>,
   releasedAt: string,
   deploySha: string,
 ): BlogReleaseRecord => {
@@ -129,12 +147,20 @@ export const createBlogReleaseCandidate = (
   if (!readiness?.contentSha256) {
     throw new Error(`Cannot create blog release candidate: missing content SHA for ${candidate.slug}`);
   }
+  const evidence = orchestration.evidenceBySlug[candidate.slug];
+  if (!evidence) {
+    throw new Error(`Cannot create blog release candidate: missing source evidence for ${candidate.slug}`);
+  }
 
+  // This record is an uncommitted reservation. The SSH deploy replaces its
+  // timestamp in staging immediately before public promotion; only the
+  // stamped production record is written back to the durable ledger.
   return {
     sequence: candidate.sequence,
     slug: candidate.slug,
     releasedAt,
     firstPublishedAt: releasedAt,
+    sourceCheckedAt: evidence.checkedAt,
     revision: 1,
     contentSha256: readiness.contentSha256,
     deploySha,

@@ -19,6 +19,7 @@ export const BlogReleaseRecordSchema = z.object({
   slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
   releasedAt: z.string().refine(isIsoTimestamp, 'releasedAt must be an ISO timestamp'),
   firstPublishedAt: z.string().refine(isIsoTimestamp, 'firstPublishedAt must be an ISO timestamp'),
+  sourceCheckedAt: z.string().refine(isIsoTimestamp, 'sourceCheckedAt must be an ISO timestamp'),
   modifiedAt: z.string().refine(isIsoTimestamp, 'modifiedAt must be an ISO timestamp').optional(),
   revision: z.number().int().positive(),
   contentSha256: z.string().regex(SHA256),
@@ -59,6 +60,9 @@ const assertManifestIntegrity = (manifest: BlogReleaseManifest): BlogReleaseMani
     }
     if (firstPublishedAt < releasedAt && !release.historicalPublicationEvidence) {
       throw new Error(`Blog release ${release.slug} retains an earlier publication date without evidence`);
+    }
+    if (new Date(release.sourceCheckedAt).getTime() >= releasedAt) {
+      throw new Error(`Blog release ${release.slug} has source evidence that is not earlier than publication`);
     }
     if (
       release.modifiedAt &&

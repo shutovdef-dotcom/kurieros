@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   getBlogReleaseReadiness,
   getEffectiveBlogReleaseDueAt,
+  isSameBlogReleaseReservation,
   planNextBlogRelease,
   reconcileBlogReleaseLedgers,
   validateBlogReleaseLedger,
@@ -56,6 +57,7 @@ const ledgerWithFirstRelease = (): BlogReleaseLedger => ({
       slug: 'article-1',
       releasedAt: '2026-08-03T09:05:00+03:00',
       firstPublishedAt: '2026-08-03T09:05:00+03:00',
+      sourceCheckedAt: '2026-08-03T09:00:00+03:00',
       revision: 1,
       contentSha256: sha('1'),
       deploySha: 'abc1234',
@@ -96,6 +98,19 @@ describe('blog release ledger validation', () => {
         'missing_released_at',
         'missing_first_published_at',
       ]),
+    });
+  });
+
+  it('requires source evidence that was checked before the release itself', () => {
+    const ledger = ledgerWithFirstRelease();
+    ledger.releases[0] = {
+      ...ledger.releases[0]!,
+      sourceCheckedAt: '2026-08-03T09:05:00+03:00',
+    };
+
+    expect(validateBlogReleaseLedger(calendar(3), ledger)).toMatchObject({
+      ok: false,
+      errors: ['source_checked_after_release'],
     });
   });
 
@@ -147,6 +162,7 @@ describe('blog release ledger validation', () => {
       ...earlyFirst.releases[0]!,
       releasedAt: '2026-08-03T08:59:00+03:00',
       firstPublishedAt: '2026-08-03T08:59:00+03:00',
+      sourceCheckedAt: '2026-08-03T08:58:00+03:00',
     };
     const earlySecond = ledgerWithFirstRelease();
     earlySecond.releases.push({
@@ -154,6 +170,7 @@ describe('blog release ledger validation', () => {
       slug: 'article-2',
       releasedAt: '2026-08-05T09:04:00+03:00',
       firstPublishedAt: '2026-08-05T09:04:00+03:00',
+      sourceCheckedAt: '2026-08-05T09:00:00+03:00',
       revision: 1,
       contentSha256: sha('2'),
       deploySha: 'def5678',
@@ -185,6 +202,23 @@ describe('blog release ledger validation', () => {
         'invalid_ledger_releases',
       ]),
     });
+  });
+});
+
+describe('blog release reservations', () => {
+  it('compares immutable deployment evidence while allowing the production stamper to set the final timestamp', () => {
+    const reservation = ledgerWithFirstRelease().releases[0]!;
+    const stamped = {
+      ...reservation,
+      releasedAt: '2026-08-03T06:09:42Z',
+      firstPublishedAt: '2026-08-03T06:09:42Z',
+    };
+
+    expect(isSameBlogReleaseReservation(reservation, stamped)).toBe(true);
+    expect(isSameBlogReleaseReservation(reservation, {
+      ...stamped,
+      contentSha256: sha('tampered'),
+    })).toBe(false);
   });
 });
 
@@ -234,7 +268,7 @@ describe('blog release timing and gates', () => {
     ).toEqual({ ready: false, reasons: ['missing_content_sha256'] });
   });
 
-  it('does not require a source or research gate that the calendar explicitly marks optional', () => {
+  it('does not let a calendar entry disable the universal primary-source gate', () => {
     expect(
       getBlogReleaseReadiness(
         entry(1, {
@@ -247,7 +281,7 @@ describe('blog release timing and gates', () => {
           qualityGatePassed: true,
         },
       ),
-    ).toEqual({ ready: true, reasons: [] });
+    ).toEqual({ ready: false, reasons: ['source_gate_not_passed'] });
   });
 
   it('honours the disabled and pause switches before selecting a candidate', () => {
@@ -403,6 +437,7 @@ describe('production manifest reconciliation', () => {
       slug: 'article-2',
       releasedAt: '2026-08-05T09:06:00+03:00',
       firstPublishedAt: '2026-08-05T09:06:00+03:00',
+      sourceCheckedAt: '2026-08-05T09:00:00+03:00',
       revision: 1,
       contentSha256: sha('2'),
       deploySha: 'def5678',
@@ -424,6 +459,7 @@ describe('production manifest reconciliation', () => {
         slug: 'article-2',
         releasedAt: '2026-08-05T09:06:00+03:00',
         firstPublishedAt: '2026-08-05T09:06:00+03:00',
+        sourceCheckedAt: '2026-08-05T09:00:00+03:00',
         revision: 1,
         contentSha256: sha('2'),
         deploySha: 'def5678',
@@ -433,6 +469,7 @@ describe('production manifest reconciliation', () => {
         slug: 'article-3',
         releasedAt: '2026-08-07T09:06:00+03:00',
         firstPublishedAt: '2026-08-07T09:06:00+03:00',
+        sourceCheckedAt: '2026-08-07T09:00:00+03:00',
         revision: 1,
         contentSha256: sha('3'),
         deploySha: 'fed9012',

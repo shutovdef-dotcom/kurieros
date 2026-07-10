@@ -51,11 +51,17 @@ jobs:
       (github.event_name == 'push' && vars.TIMEWEB_AUTO_DEPLOY == 'true' && !contains(github.event.head_commit.message, '[blog-ledger]')) ||
       (github.event_name == 'schedule' && vars.BLOG_SCHEDULE_ENABLED == 'true' && vars.CONTENT_SCHEDULE_PAUSED == 'false')
     runs-on: ubuntu-latest
+    # Scheduled releases need the same protected variables and secrets as the
+    # production deploy. It also makes an environment-scoped INDEXNOW_KEY
+    # available only inside this reviewed release path.
+    environment:
+      name: timeweb-production
     outputs:
       should_deploy: ${{ steps.decision.outputs.should_deploy }}
       scheduled_candidate: ${{ steps.decision.outputs.scheduled_candidate }}
       scheduled_slug: ${{ steps.decision.outputs.scheduled_slug }}
-      recovered: ${{ steps.reconcile.outputs.recovered }}
+      scheduled_candidate_json: ${{ steps.prepare.outputs.candidate_json }}
+      scheduled_candidate_provisional_at: ${{ steps.prepare.outputs.released_at }}
     defaults:
       run:
         working-directory: ${{ env.PROJECT_DIR }}
@@ -63,7 +69,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
+      - name: Require SSH transport for automatic blog release
+        id: scheduled-transport
+        if: github.event_name == 'schedule'
+        run: |
+          set -euo pipefail
+          if [ "$TIMEWEB_DEPLOY_METHOD" = 'ssh-archive' ]; then
+            echo 'safe=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'safe=false' >> "$GITHUB_OUTPUT"
+            echo "::notice::Scheduled blog release requires TIMEWEB_DEPLOY_METHOD=ssh-archive; no candidate or deploy will be created."
+          fi
+
       - name: Setup Node.js
+        if: github.event_name != 'schedule' || steps.scheduled-transport.outputs.safe == 'true'
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -72,22 +91,23 @@ jobs:
           cache-dependency-path: ${{ env.PROJECT_DIR }}/package-lock.json
 
       - name: Install dependencies
+        if: github.event_name != 'schedule' || steps.scheduled-transport.outputs.safe == 'true'
         run: npm ci
 
       - name: Reconcile durable blog ledger with production manifest
         id: reconcile
-        if: github.event_name == 'schedule'
+        if: github.event_name != 'schedule' || steps.scheduled-transport.outputs.safe == 'true'
         env:
           BLOG_RELEASE_REMOTE_MANIFEST_URL: https://kurerok.ru/api/blog-release-manifest.json
-        run: npm run blog:release -- sync-production-manifest
+        run: npm run blog:release -- sync-production-manifest --allow-missing-remote-if-local-empty
 
       - name: Validate full editorial blog corpus
-        if: github.event_name == 'schedule' && steps.reconcile.outputs.recovered != 'true'
+        if: github.event_name == 'schedule' && steps.scheduled-transport.outputs.safe == 'true'
         run: npm run check:blog-content
 
       - name: Prepare one due blog release candidate
         id: prepare
-        if: github.event_name == 'schedule' && steps.reconcile.outputs.recovered != 'true'
+        if: github.event_name == 'schedule' && steps.scheduled-transport.outputs.safe == 'true'
         run: |
           set -euo pipefail
           BLOG_RELEASE_NOW="$(date --iso-8601=seconds)" \
@@ -100,7 +120,7 @@ jobs:
         id: decision
         env:
           EVENT_NAME: ${{ github.event_name }}
-          RECOVERED: ${{ steps.reconcile.outputs.recovered }}
+          SAFE_SCHEDULE_TRANSPORT: ${{ steps.scheduled-transport.outputs.safe }}
           HAS_CANDIDATE: ${{ steps.prepare.outputs.has_candidate }}
           CANDIDATE_SLUG: ${{ steps.prepare.outputs.slug }}
         run: |
@@ -109,7 +129,7 @@ jobs:
             echo 'should_deploy=true' >> "$GITHUB_OUTPUT"
             echo 'scheduled_candidate=false' >> "$GITHUB_OUTPUT"
             echo 'scheduled_slug=' >> "$GITHUB_OUTPUT"
-          elif [ "$RECOVERED" = 'true' ]; then
+          elif [ "$SAFE_SCHEDULE_TRANSPORT" != 'true' ]; then
             echo 'should_deploy=false' >> "$GITHUB_OUTPUT"
             echo 'scheduled_candidate=false' >> "$GITHUB_OUTPUT"
             echo 'scheduled_slug=' >> "$GITHUB_OUTPUT"
@@ -143,6 +163,9 @@ jobs:
 
       - name: Build
         if: steps.decision.outputs.should_deploy == 'true'
+        env:
+          # An ignored candidate is never honoured by an ordinary build.
+          BLOG_RELEASE_ALLOW_CANDIDATE: ${{ steps.decision.outputs.scheduled_candidate == 'true' && 'true' || 'false' }}
         run: npm run build
 
       - name: Audit SEO surface and exact blog ledger delta
@@ -287,17 +310,31 @@ jobs:
           TIMEWEB_SSH_USER: ${{ secrets.TIMEWEB_SSH_USER }}
           TIMEWEB_SSH_PORT: ${{ vars.TIMEWEB_SSH_PORT }}
           TIMEWEB_SSH_REMOTE_ROOT: ${{ vars.TIMEWEB_SSH_REMOTE_ROOT }}
+          BLOG_RELEASE_STAMP_OLD: ${{ needs.build.outputs.scheduled_candidate_provisional_at }}
+          BLOG_RELEASE_STAMP_SLUG: ${{ needs.build.outputs.scheduled_slug }}
         run: |
           set -euo pipefail
 
-          "$PROJECT_DIR/scripts/timeweb-ssh-archive-deploy.sh" \
-            --source-dir dist \
-            --host "$TIMEWEB_SSH_HOST" \
-            --port "${TIMEWEB_SSH_PORT:-22}" \
-            --user "$TIMEWEB_SSH_USER" \
-            --identity-file "$TIMEWEB_SSH_KEY_PATH" \
-            --known-hosts "$TIMEWEB_SSH_KNOWN_HOSTS_PATH" \
+          args=(
+            --source-dir dist
+            --host "$TIMEWEB_SSH_HOST"
+            --port "${TIMEWEB_SSH_PORT:-22}"
+            --user "$TIMEWEB_SSH_USER"
+            --identity-file "$TIMEWEB_SSH_KEY_PATH"
+            --known-hosts "$TIMEWEB_SSH_KNOWN_HOSTS_PATH"
             --remote-root "$TIMEWEB_SSH_REMOTE_ROOT"
+          )
+
+          if [ "${{ needs.build.outputs.scheduled_candidate }}" = 'true' ]; then
+            test -n "$BLOG_RELEASE_STAMP_OLD"
+            test -n "$BLOG_RELEASE_STAMP_SLUG"
+            args+=(
+              --blog-release-stamp-old "$BLOG_RELEASE_STAMP_OLD"
+              --blog-release-stamp-slug "$BLOG_RELEASE_STAMP_SLUG"
+            )
+          fi
+
+          "$PROJECT_DIR/scripts/timeweb-ssh-archive-deploy.sh" "${args[@]}"
 
       - name: Deploy archive to Timeweb
         if: ${{ env.TIMEWEB_DEPLOY_METHOD == 'archive' }}
@@ -375,9 +412,10 @@ jobs:
     needs: [build, deploy]
     if: >-
       always() && github.event_name == 'schedule' &&
-      (needs.build.outputs.recovered == 'true' ||
-      (needs.build.outputs.scheduled_candidate == 'true' && needs.deploy.result == 'success'))
+      needs.build.outputs.scheduled_candidate == 'true' && needs.deploy.result == 'success'
     runs-on: ubuntu-latest
+    environment:
+      name: timeweb-production
     permissions:
       contents: write
     defaults:
@@ -404,6 +442,7 @@ jobs:
         id: production
         env:
           BLOG_RELEASE_REMOTE_MANIFEST_URL: https://kurerok.ru/api/blog-release-manifest.json?release=${{ github.sha }}
+          BLOG_RELEASE_EXPECTED_CANDIDATE_JSON: ${{ needs.build.outputs.scheduled_candidate_json }}
         run: npm run blog:release -- sync-production-manifest
 
       - name: Require exactly one recoverable production record

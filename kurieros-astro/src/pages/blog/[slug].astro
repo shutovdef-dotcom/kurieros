@@ -133,7 +133,7 @@ const pageSchemaGraph = [
           )}
           <div>
             <dt>Источники проверены</dt>
-            <dd><time datetime={entry.data.checkedAt}>{formatDate(`${entry.data.checkedAt}T12:00:00+03:00`)}</time></dd>
+            <dd><time datetime={release.sourceCheckedAt}>{formatDate(release.sourceCheckedAt)}</time></dd>
           </div>
           <div>
             <dt>Автор</dt>

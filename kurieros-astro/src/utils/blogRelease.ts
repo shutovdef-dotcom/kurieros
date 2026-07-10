@@ -36,10 +36,16 @@ export type BlogHistoricalPublicationEvidence = {
 export type BlogReleaseRecord = {
   sequence: number;
   slug: string;
-  /** The timestamp at which this revision was actually deployed. */
+  /**
+   * The timestamp at which this revision was promoted to production. A
+   * transient build candidate carries a provisional value only; the SSH
+   * production deploy stamps the final value before publishing it.
+   */
   releasedAt: string;
   /** The verified first-publication timestamp rendered as datePublished. */
   firstPublishedAt: string;
+  /** Fresh source-evidence snapshot checked immediately before this release. */
+  sourceCheckedAt: string;
   /** Present only after a substantive revision. */
   modifiedAt?: string;
   revision: number;
@@ -69,6 +75,9 @@ export type BlogLedgerValidationError =
   | 'missing_first_published_at'
   | 'invalid_first_published_at'
   | 'first_published_after_released_at'
+  | 'missing_source_checked_at'
+  | 'invalid_source_checked_at'
+  | 'source_checked_after_release'
   | 'missing_historical_publication_evidence'
   | 'invalid_historical_publication_evidence'
   | 'invalid_modified_at'
@@ -251,6 +260,12 @@ export const validateBlogReleaseLedger = (
       'invalid_first_published_at',
       errors,
     );
+    const sourceCheckedAt = requiredInstantError(
+      release?.sourceCheckedAt,
+      'missing_source_checked_at',
+      'invalid_source_checked_at',
+      errors,
+    );
     const nominalAt = expected ? parseInstant(expected.nominalPublishAt) : undefined;
     if (releasedAt && nominalAt && releasedAt.getTime() < nominalAt.getTime()) {
       errors.push('released_before_nominal_slot');
@@ -273,6 +288,9 @@ export const validateBlogReleaseLedger = (
       ) {
         errors.push('missing_historical_publication_evidence');
       }
+    }
+    if (releasedAt && sourceCheckedAt && sourceCheckedAt.getTime() >= releasedAt.getTime()) {
+      errors.push('source_checked_after_release');
     }
 
     if (release?.historicalPublicationEvidence && !isHistoricalEvidenceValid(release.historicalPublicationEvidence)) {
@@ -348,7 +366,9 @@ export const getBlogReleaseReadiness = (
   if (readiness.status !== 'ready') reasons.push('content_not_ready');
   if (!readiness.contentSha256) reasons.push('missing_content_sha256');
   else if (!SHA256_PATTERN.test(readiness.contentSha256)) reasons.push('invalid_content_sha256');
-  if (entry.sourceGate?.required !== false && readiness.sourceGatePassed !== true) {
+  // Every public article has a primary-source registry entry and release
+  // evidence. A calendar typo must never opt it out of that universal gate.
+  if (readiness.sourceGatePassed !== true) {
     reasons.push('source_gate_not_passed');
   }
   if (entry.researchGate?.required === true && readiness.researchGatePassed !== true) {
@@ -448,12 +468,13 @@ export const planNextBlogRelease = ({
   return { eligible: true, reasons: [], ...candidateBase };
 };
 
-const stableRecord = (record: BlogReleaseRecord): string =>
+export const getBlogReleaseRecordFingerprint = (record: BlogReleaseRecord): string =>
   JSON.stringify({
     sequence: record.sequence,
     slug: record.slug,
     releasedAt: record.releasedAt,
     firstPublishedAt: record.firstPublishedAt,
+    sourceCheckedAt: record.sourceCheckedAt,
     modifiedAt: record.modifiedAt,
     revision: record.revision,
     contentSha256: record.contentSha256,
@@ -472,7 +493,27 @@ const hasStrictRecordPrefix = (
   full: readonly BlogReleaseRecord[],
 ): boolean =>
   prefix.length <= full.length &&
-  prefix.every((record, index) => stableRecord(record) === stableRecord(full[index]!));
+  prefix.every((record, index) =>
+    getBlogReleaseRecordFingerprint(record) === getBlogReleaseRecordFingerprint(full[index]!),
+  );
+
+/**
+ * The production deploy stamps the publication timestamp immediately before
+ * promotion. These fields are intentionally excluded from the reservation
+ * comparison; all editorial and deployment identity fields must still match.
+ */
+export const isSameBlogReleaseReservation = (
+  expected: BlogReleaseRecord,
+  observed: BlogReleaseRecord,
+): boolean =>
+  expected.sequence === observed.sequence &&
+  expected.slug === observed.slug &&
+  expected.revision === observed.revision &&
+  expected.contentSha256 === observed.contentSha256 &&
+  expected.deploySha === observed.deploySha &&
+  expected.sourceCheckedAt === observed.sourceCheckedAt &&
+  JSON.stringify(expected.historicalPublicationEvidence ?? null) ===
+    JSON.stringify(observed.historicalPublicationEvidence ?? null);
 
 /**
  * Reconciles version-controlled ledger state with the deployed manifest. The

@@ -28,8 +28,12 @@ git push main
   -> server-side unpack into Timeweb public_html
 ```
 
-GitHub Pages can stay enabled as a rollback/fallback during migration. DNS is
-switched to Timeweb only after the Timeweb copy is verified.
+GitHub Pages can remain as an already-deployed rollback snapshot during
+migration, but it is not an active deployment target. The legacy Pages workflow
+has been removed so a normal push cannot race Timeweb, overwrite a blog release,
+or bulk-submit the sitemap to IndexNow. Any future Pages mirror must use a
+separate non-production domain and must not include automatic IndexNow sending.
+DNS is switched to Timeweb only after the Timeweb copy is verified.
 
 ## Timeweb setup
 
@@ -121,6 +125,11 @@ technical domain here. After DNS cutover, set both `TIMEWEB_UNPACK_URL` and
 `workflow_dispatch` run can choose `archive` or `ftp-mirror`, but `ftp-mirror`
 is a slow fallback and should not be used for routine deployments of the full
 generated site.
+
+The scheduled blog cursor requires `ssh-archive` specifically. It stamps the
+final publication time in Timeweb staging immediately before the release is
+promoted, then records the observed production manifest. Archive and FTP modes
+remain manual-only for this purpose.
 
 Keep the existing repository variable:
 
