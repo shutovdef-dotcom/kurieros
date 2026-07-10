@@ -48,4 +48,18 @@ describe('blog source registry', () => {
       expect(article?.sourceGate).toBe('required_before_release');
     }
   });
+
+  it('rejects duplicate source ids, HTTP URLs, and unknown article source references', () => {
+    const duplicateId = structuredClone(BLOG_SOURCE_REGISTRY);
+    duplicateId.sources[1].id = duplicateId.sources[0].id;
+    expect(BlogSourceRegistrySchema.safeParse(duplicateId).success).toBe(false);
+
+    const insecureUrl = structuredClone(BLOG_SOURCE_REGISTRY);
+    insecureUrl.sources[0].url = 'http://example.test/source';
+    expect(BlogSourceRegistrySchema.safeParse(insecureUrl).success).toBe(false);
+
+    const unknownCoverage = structuredClone(BLOG_SOURCE_REGISTRY);
+    unknownCoverage.articleSources[0].sourceIds = ['not-in-registry'];
+    expect(BlogSourceRegistrySchema.safeParse(unknownCoverage).success).toBe(false);
+  });
 });
