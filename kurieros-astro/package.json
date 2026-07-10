@@ -22,6 +22,7 @@
     "emit:vacancy-indexability": "tsx scripts/emit-vacancy-indexability.ts",
     "emit:company-indexability": "tsx scripts/emit-company-indexability.ts",
     "emit:blog-release-manifest": "tsx scripts/emit-blog-release-manifest.ts",
+    "check:blog-content": "tsx scripts/audit-blog-content.ts",
     "emit:sitemap-freshness": "tsx scripts/emit-sitemap-freshness.ts",
     "bench:city-neighbours": "node --expose-gc --import tsx scripts/perf/bench-city-neighbours.ts",
     "predev": "npm run generate:data",
@@ -81,7 +82,8 @@
     "eslint-plugin-astro": "^1.7.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "vitest": "^4.1.6"
+    "vitest": "^4.1.6",
+    "yaml": "^2.9.0"
   },
   "overrides": {
     "esbuild": "0.28.1",
