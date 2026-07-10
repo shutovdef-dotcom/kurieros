@@ -317,6 +317,50 @@ describe('SEO release guard', () => {
 		]);
 	});
 
+	it('rejects an unreviewed sitemap URL-set swap even when the count is unchanged', () => {
+		const report = buildSeoSurfaceReport(baseInput());
+		const baselineReport = reportWith(report, {
+			sitemapUrls: 100,
+			sitemapHash: 'baseline-hash',
+		});
+		const baseline = createSeoSurfaceBaseline(baselineReport, {
+			id: 'fixture-v1',
+			reviewReason: 'Initial reviewed fixture.',
+		});
+
+		const guard = evaluateSeoReleaseGuard(
+			reportWith(report, { sitemapUrls: 100, sitemapHash: 'replacement-hash' }),
+			baseline,
+		);
+
+		expect(guard.ok).toBe(false);
+		expect(guard.failures.map((failure) => failure.code)).toContain(
+			'surface_delta_review_required',
+		);
+	});
+
+	it('rejects a 100 URL addition even when the percentage is just below 5%', () => {
+		const report = buildSeoSurfaceReport(baseInput());
+		const baselineReport = reportWith(report, {
+			sitemapUrls: 2_026,
+			sitemapHash: 'baseline-hash',
+		});
+		const baseline = createSeoSurfaceBaseline(baselineReport, {
+			id: 'fixture-v1',
+			reviewReason: 'Initial reviewed fixture.',
+		});
+
+		const guard = evaluateSeoReleaseGuard(
+			reportWith(report, { sitemapUrls: 2_126, sitemapHash: 'bulk-addition-hash' }),
+			baseline,
+		);
+
+		expect(guard.ok).toBe(false);
+		expect(guard.failures.map((failure) => failure.code)).toContain(
+			'surface_delta_review_required',
+		);
+	});
+
 	it('fails a JobPosting drop above 5% and allows the exact 5% boundary', () => {
 		const report = buildSeoSurfaceReport(baseInput());
 		const baselineReport = reportWith(report, {
@@ -341,6 +385,28 @@ describe('SEO release guard', () => {
 			baseline,
 		);
 		expect(boundary.ok).toBe(true);
+	});
+
+	it('requires review for a mass JobPosting increase', () => {
+		const report = buildSeoSurfaceReport(baseInput());
+		const baselineReport = reportWith(report, {
+			sitemapUrls: 100,
+			jobPostingPages: 29,
+		});
+		const baseline = createSeoSurfaceBaseline(baselineReport, {
+			id: 'fixture-v1',
+			reviewReason: 'Initial reviewed fixture.',
+		});
+
+		const guard = evaluateSeoReleaseGuard(
+			reportWith(report, { sitemapUrls: 100, jobPostingPages: 1_000 }),
+			baseline,
+		);
+
+		expect(guard.ok).toBe(false);
+		expect(guard.failures.map((failure) => failure.code)).toContain(
+			'job_posting_change_review_required',
+		);
 	});
 
 	it('requires a reviewed baseline and rejects empty baseline metadata', () => {
