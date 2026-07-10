@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "id": "2026-07-10-jobposting-provenance-gsc-valid-v2",
-  "reviewReason": "Reviewed JobPosting provenance migration: emit JobPosting only on the 29 URLs currently valid in GSC, retain the temporary continuity cohort through its 2026-08-10 review deadline, and add its 10 net-new indexable URLs (19 of 29 already overlapped the prior 635-page indexability surface). Verified 645 indexable vacancy pages, 2026 sitemap URLs, and zero canonical conflicts after the full build.",
+  "id": "2026-07-10-jobposting-provenance-fail-closed-v3",
+  "reviewReason": "Reviewed fail-closed replacement for the temporary GSC-valid continuity bridge: all 29 URLs lack original employer postedAt and fresh verified apply flow, so JobPosting is intentionally zero until source evidence exists. Indexable surface remains 2034 routes / 2026 sitemap URLs; canonical conflicts remain zero. Review by 2026-08-10.",
   "reviewedSurfaceUrlSetHashes": [
     "8011ca86bdb286b5e271c73b49380bab79e8c3377fc71c458c4d9b84b3d44644"
   ],
@@ -17,12 +17,12 @@
     "sitemap": {
       "pageUrlCount": 2026,
       "urlSetHash": "8011ca86bdb286b5e271c73b49380bab79e8c3377fc71c458c4d9b84b3d44644",
-      "rawXmlHash": "1f3b8a740f569dda09af3bd6ecc71a3861cffd3affa9607239a0f82edd3c4b29",
+      "rawXmlHash": "8844e439feac0fc4e5679cafda1f42a4f2f2411b21070d2e58cb775c85ca2823",
       "canonicalConflicts": []
     },
     "structuredData": {
-      "jobPostingPages": 29,
-      "jobPostingItems": 29,
+      "jobPostingPages": 0,
+      "jobPostingItems": 0,
       "breadcrumbPages": 8071,
       "breadcrumbItems": 8071
     },
@@ -30,7 +30,7 @@
       "total": 6685,
       "indexable": 645,
       "noindex": 6040,
-      "jobPostingPages": 29,
+      "jobPostingPages": 0,
       "breadcrumbPages": 6685,
       "indexabilityReasons": {
         "gsc_vacancy_intent": 18,
