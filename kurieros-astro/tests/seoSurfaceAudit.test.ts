@@ -56,7 +56,7 @@ const baseInput = (lastmod = '2026-07-10'): SeoAuditInput => ({
 			content: html({
 				canonical: `${siteUrl}/v/open-role/`,
 				structuredTypes: ['JobPosting', 'BreadcrumbList'],
-			}),
+			}).replace('<body', '<body data-vacancy-indexability="fixture"'),
 		},
 		{
 			path: 'v/hidden-role/index.html',
@@ -64,7 +64,11 @@ const baseInput = (lastmod = '2026-07-10'): SeoAuditInput => ({
 				canonical: `${siteUrl}/v/hidden-role/`,
 				robots: 'noindex, follow',
 				structuredTypes: ['BreadcrumbList'],
-			}),
+			}).replace('<body', '<body data-vacancy-indexability="fixture"'),
+		},
+		{
+			path: 'api/grid-batch/sample/2/index.html',
+			content: '<!doctype html><div>Static fragment, not a public route</div>',
 		},
 	],
 	sitemapFiles: [
@@ -174,6 +178,64 @@ describe('SEO surface report', () => {
 			},
 		]);
 	});
+
+	it('classifies the complete sitemap conflict surface and ignores non-route fragments', () => {
+		const input = baseInput();
+		input.htmlFiles.push(
+			{
+				path: 'missing-canonical/index.html',
+				content: '<!doctype html><html><head></head><body>Missing canonical</body></html>',
+			},
+			{
+				path: 'multiple/index.html',
+				content: html({ canonical: `${siteUrl}/multiple/` }).replace(
+					'</head>',
+					`<link rel="canonical" href="${siteUrl}/other/"></head>`,
+				),
+			},
+			{
+				path: 'noindex/index.html',
+				content: html({ canonical: `${siteUrl}/noindex/`, robots: 'noindex' }),
+			},
+			{
+				path: 'standalone.html',
+				content: '<!doctype html><link rel=canonical href=/standalone.html><link rel=canonical href="http://[invalid"><script type=application/ld+json>{bad json</script>',
+			},
+			{ path: 'fragment.html', content: '<div>Not a document route</div>' },
+		);
+		input.sitemapFiles[0]!.content = input.sitemapFiles[0]!.content.replace(
+			'</urlset>',
+			[
+				`<url><loc>${siteUrl}/about/</loc></url>`,
+				`<url><loc>${siteUrl}/missing-canonical/</loc></url>`,
+				`<url><loc>${siteUrl}/multiple/</loc></url>`,
+				`<url><loc>${siteUrl}/noindex/</loc></url>`,
+				`<url><loc>${siteUrl}/missing-route/</loc></url>`,
+				'<url><loc>https://example.com/external/</loc></url>',
+				'<url><loc>http://[invalid</loc></url>',
+				'<url><loc>   </loc></url>',
+				'</urlset>',
+			].join(''),
+		);
+
+		const report = buildSeoSurfaceReport(input);
+		const conflictTypes = report.sitemap.canonicalConflicts.map((conflict) => conflict.type);
+
+		expect(conflictTypes).toEqual(expect.arrayContaining([
+			'duplicate_sitemap_url',
+			'external_sitemap_url',
+			'missing_built_route',
+			'missing_canonical',
+			'multiple_canonicals',
+			'sitemap_noindex_route',
+		]));
+		expect(report.routes.total).toBe(8);
+		expect(report.sitemap.canonicalConflicts).toEqual(
+			[...report.sitemap.canonicalConflicts].sort((a, b) =>
+				a.url.localeCompare(b.url) || a.type.localeCompare(b.type),
+			),
+		);
+	});
 });
 
 describe('SEO release guard', () => {
@@ -279,5 +341,22 @@ describe('SEO release guard', () => {
 			baseline,
 		);
 		expect(boundary.ok).toBe(true);
+	});
+
+	it('requires a reviewed baseline and rejects empty baseline metadata', () => {
+		const report = buildSeoSurfaceReport(baseInput());
+
+		expect(evaluateSeoReleaseGuard(report, null)).toMatchObject({
+			ok: false,
+			failures: [expect.objectContaining({ code: 'missing_reviewed_baseline' })],
+		});
+		expect(() => createSeoSurfaceBaseline(report, {
+			id: ' ',
+			reviewReason: 'reviewed',
+		})).toThrow(/id is required/i);
+		expect(() => createSeoSurfaceBaseline(report, {
+			id: 'fixture-v1',
+			reviewReason: ' ',
+		})).toThrow(/review reason is required/i);
 	});
 });
