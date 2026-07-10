@@ -50,7 +50,12 @@
       <span class="compare-help-link">Открыть гид →</span>
     </a>
   </div>
-  <a class="compare-help-all" href="/guide/">Все гиды для курьера →</a>
+  <div class="compare-help-actions">
+    <a class="compare-help-company" href="/companies/kuper-ex-sbermarket/">
+      Условия работы в Купере →
+    </a>
+    <a class="compare-help-all" href="/guide/">Все гиды для курьера →</a>
+  </div>
 </section>
 
 <style>
@@ -136,21 +141,38 @@
     font-weight: 600;
     color: var(--brand-700);
   }
-  .compare-help-all {
+  .compare-help-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .compare-help-all,
+  .compare-help-company {
     display: inline-flex;
     align-items: center;
-    margin-top: 18px;
     padding: 12px 20px;
     border-radius: 999px;
-    background: var(--brand-700);
-    color: #fff;
     font-weight: 700;
     font-size: 15px;
     text-decoration: none;
     transition: background 0.15s, transform 0.15s;
   }
+  .compare-help-all {
+    background: var(--brand-700);
+    color: #fff;
+  }
+  .compare-help-company {
+    border: 1px solid var(--brand-700);
+    background: transparent;
+    color: var(--brand-700);
+  }
   .compare-help-all:hover {
     background: var(--brand-800);
+    transform: translateY(-1px);
+  }
+  .compare-help-company:hover {
+    background: var(--brand-100);
     transform: translateY(-1px);
   }
   :global(:where(html, body).dark-mode) .compare-help-card {
@@ -169,5 +191,12 @@
   }
   :global(:where(html, body).dark-mode) .compare-help-all:hover {
     background: var(--brand-400);
+  }
+  :global(:where(html, body).dark-mode) .compare-help-company {
+    border-color: var(--brand-500);
+    color: var(--brand-500);
+  }
+  :global(:where(html, body).dark-mode) .compare-help-company:hover {
+    background: var(--brand-50);
   }
 </style>

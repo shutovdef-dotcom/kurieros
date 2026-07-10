@@ -23,6 +23,7 @@ import { pickFeaturedCompanyReviews } from '../../utils/reviewSamples';
 import { buildBreadcrumbSchema } from '../../utils/schema';
 import { getVacancyCanonicalUrl } from '../../utils/vacancyUrl';
 import { toCompanyVacancyCardViewModel } from '../../utils/jobCardViewModel';
+import { getCompanyAlternateNames } from '../../utils/companySeo';
 
 export async function getStaticPaths() {
   return companiesFromJobs.map((company) => ({
@@ -116,6 +117,7 @@ const visibleCompanyCities = companyGuide
   ? company.cities.slice(0, companyGuide.cityPreviewLimit)
   : company.cities;
 const companyHomepage = getCompanyHomepage(company.name);
+const companyAlternateNames = getCompanyAlternateNames(company.slug);
 const companySchemaId = companyHomepage
   ? `${companyHomepage.replace(/\/$/, '')}/#organization`
   : `${Astro.url.href}#employer`;
@@ -124,6 +126,7 @@ const employerSchema = {
   '@type': 'Organization',
   '@id': companySchemaId,
   name: company.name,
+  ...(companyAlternateNames ? { alternateName: companyAlternateNames } : {}),
   ...(companyHomepage ? { url: companyHomepage } : {}),
   logo: companyLogoUrl,
   description: companyDescription,

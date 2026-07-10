@@ -1,5 +1,8 @@
 ---
-import type { CitySeoCluster } from '../utils/citySeoClusters';
+import type {
+  CityCohortVacancyLink,
+  CitySeoCluster,
+} from '../utils/citySeoClusters';
 
 interface Props {
   cluster: CitySeoCluster;
@@ -8,6 +11,7 @@ interface Props {
   companyNames: string[];
   transportTypes: string[];
   formattedMaxSalary: string | null;
+  vacancyLinks: CityCohortVacancyLink[];
 }
 
 const {
@@ -17,24 +21,28 @@ const {
   companyNames,
   transportTypes,
   formattedMaxSalary,
+  vacancyLinks,
 } = Astro.props;
 
 const visibleCompanies = companyNames.slice(0, 4);
 const visibleFormats = transportTypes.slice(0, 4);
+const visibleEmployers = Array.from(
+  new Map(
+    vacancyLinks.map((vacancy) => [
+      vacancy.companyHref,
+      { href: vacancy.companyHref, name: vacancy.company },
+    ]),
+  ).values(),
+).slice(0, 4);
 ---
 
 <section class="city-cluster-guide" aria-labelledby="city-cluster-guide-title">
   <div>
-    <p class="city-cluster-eyebrow">Главный URL кластера</p>
     <h2 id="city-cluster-guide-title">{cluster.guideTitle}</h2>
     <p>{cluster.guideLead}</p>
   </div>
 
   <dl class="city-cluster-facts">
-    <div>
-      <dt>Интент</dt>
-      <dd>{cluster.primaryIntent}</dd>
-    </div>
     <div>
       <dt>Вакансии</dt>
       <dd>{vacancyCount} в {cityName}</dd>
@@ -53,10 +61,38 @@ const visibleFormats = transportTypes.slice(0, 4);
     )}
   </dl>
 
-  {visibleCompanies.length > 0 && (
+  {visibleEmployers.length > 0 ? (
+    <div class="city-cluster-employers">
+      <span>Работодатели:</span>
+      {visibleEmployers.map((employer) => (
+        <a href={employer.href}>{employer.name}</a>
+      ))}
+    </div>
+  ) : visibleCompanies.length > 0 && (
     <p class="city-cluster-links">
       Работодатели: {visibleCompanies.join(', ')}.
     </p>
+  )}
+
+  {vacancyLinks.length > 0 && (
+    <div class="city-cluster-vacancies">
+      <h3>Текущие предложения</h3>
+      <ul>
+        {vacancyLinks.map((vacancy) => (
+          <li>
+            <a class="city-cluster-vacancy-title" href={vacancy.href}>
+              {vacancy.title}
+            </a>
+            <div>
+              <a class="city-cluster-vacancy-company" href={vacancy.companyHref}>
+                {vacancy.company}
+              </a>
+              <strong>{vacancy.salary}</strong>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
   )}
 </section>
 
@@ -71,15 +107,6 @@ const visibleFormats = transportTypes.slice(0, 4);
     border: 1px solid var(--ink-200);
     border-radius: 8px;
     background: var(--surface, #fff);
-  }
-
-  .city-cluster-eyebrow {
-    margin: 0 0 0.4rem;
-    font-size: 0.72rem;
-    font-weight: 900;
-    letter-spacing: 0;
-    text-transform: uppercase;
-    color: var(--brand-700);
   }
 
   .city-cluster-guide h2 {
@@ -128,8 +155,91 @@ const visibleFormats = transportTypes.slice(0, 4);
     font-size: 0.92rem;
   }
 
+  .city-cluster-employers {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.75rem;
+    color: var(--ink-700);
+    font-size: 0.92rem;
+  }
+
+  .city-cluster-employers span {
+    font-weight: 800;
+    color: var(--ink-800);
+  }
+
+  .city-cluster-employers a,
+  .city-cluster-vacancy-company {
+    color: var(--brand-700);
+    font-weight: 750;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.16em;
+  }
+
+  .city-cluster-vacancies {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .city-cluster-vacancies h3 {
+    margin: 0 0 0.65rem;
+    font-size: 1.05rem;
+    line-height: 1.3;
+  }
+
+  .city-cluster-vacancies ul {
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+    list-style: none;
+  }
+
+  .city-cluster-vacancies li {
+    min-width: 0;
+    padding: 0.75rem;
+    border: 1px solid var(--ink-200);
+    border-radius: 8px;
+    background: rgba(248, 250, 252, 0.72);
+  }
+
+  .city-cluster-vacancy-title {
+    display: block;
+    color: var(--ink-900);
+    font-weight: 850;
+    line-height: 1.35;
+    text-decoration: none;
+  }
+
+  .city-cluster-vacancy-title:hover {
+    color: var(--brand-700);
+    text-decoration: underline;
+    text-underline-offset: 0.16em;
+  }
+
+  .city-cluster-vacancies li > div {
+    margin-top: 0.55rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.35rem 0.75rem;
+    align-items: baseline;
+    font-size: 0.86rem;
+  }
+
+  .city-cluster-vacancies strong {
+    color: var(--ink-800);
+  }
+
   @media (max-width: 760px) {
     .city-cluster-guide {
+      grid-template-columns: 1fr;
+    }
+
+    .city-cluster-vacancies ul {
       grid-template-columns: 1fr;
     }
   }

@@ -60,6 +60,10 @@ export const COMPANY_COMMERCIAL_HUBS: Readonly<Record<string, CompanyCommercialH
   },
 };
 
+const COMPANY_ALTERNATE_NAMES: Readonly<Record<string, readonly string[]>> = {
+  'kuper-ex-sbermarket': ['Купер', 'СберМаркет'],
+};
+
 export const getBrandCategoryCompanyLink = (
   categorySlug: string,
 ): BrandCategoryCompanyLink | undefined =>
@@ -72,3 +76,7 @@ export const getCompanyCommercialHub = (
   companySlug: string,
 ): CompanyCommercialHub | undefined =>
   COMPANY_COMMERCIAL_HUBS[companySlug];
+
+export const getCompanyAlternateNames = (
+  companySlug: string,
+): readonly string[] | undefined => COMPANY_ALTERNATE_NAMES[companySlug];

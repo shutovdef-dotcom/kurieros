@@ -1,5 +1,7 @@
 import type { GeneratedJob } from '../data/vacancyTypes';
 import { getCityHref } from './cities';
+import { slugifyCompany } from './companies';
+import { getVacancyDetailPath } from './vacancyUrl';
 
 export type CitySeoClusterKind = 'city-jobs' | 'warehouse';
 
@@ -14,6 +16,23 @@ export type CitySeoCluster = {
   hubAnchorLabel: string;
   hubAnchorDescription: string;
   appliesToSourceSlugs?: readonly string[];
+  growthCohort?: boolean;
+  preferredNeighbourSlugs?: readonly string[];
+};
+
+export type CityCohortVacancyLink = {
+  href: string;
+  title: string;
+  company: string;
+  companyHref: string;
+  salary: string;
+  sourceSlug: string;
+};
+
+export type CityClusterNeighbour = {
+  slug: string;
+  name: string;
+  vacancyCount: number;
 };
 
 export type VacancyCityClusterLink = {
@@ -28,6 +47,15 @@ const OZON_WAREHOUSE_SOURCE_SLUGS = [
   'ozon-electric-stacker-driver',
 ] as const;
 
+export const CITY_GROWTH_COHORT_SLUGS = [
+  'sredneuralsk',
+  'pervomaysk',
+  'timashevsk',
+  'kartaly',
+  'metallostroy',
+  'chkalovsk',
+] as const;
+
 const CITY_SEO_CLUSTERS: readonly CitySeoCluster[] = [
   {
     slug: 'horugvino',
@@ -35,9 +63,9 @@ const CITY_SEO_CLUSTERS: readonly CitySeoCluster[] = [
     primaryIntent: 'работа и вакансии на складе Ozon в Хоругвино',
     h1: 'Работа на складе Ozon в Хоругвино — вакансии и роли',
     title: 'Склад Ozon в Хоругвино — вакансии и роли | КурьерОк',
-    guideTitle: 'Складской кластер Ozon в Хоругвино',
+    guideTitle: 'Какие складские роли Ozon доступны в Хоругвино',
     guideLead:
-      'Эта страница собирает складские роли Ozon в Хоругвино: оператор склада, обработчик товаров и техника склада. Отдельные карточки остаются точными вакансиями по роли.',
+      'Здесь собраны роли Ozon на складе в Хоругвино: оператор, обработчик товаров и водитель складской техники. В карточках можно сверить условия для каждой роли.',
     hubAnchorLabel: 'Все складские вакансии Ozon в Хоругвино',
     hubAnchorDescription:
       'Городская страница собирает складские роли Ozon, условия и активные карточки в одном месте.',
@@ -49,9 +77,9 @@ const CITY_SEO_CLUSTERS: readonly CitySeoCluster[] = [
     primaryIntent: 'работа курьером и вакансии в Оленегорске',
     h1: 'Работа курьером в Оленегорске — вакансии, доход и работодатели',
     title: 'Работа курьером в Оленегорске — вакансии и работодатели | КурьерОк',
-    guideTitle: 'Главная страница вакансий в Оленегорске',
+    guideTitle: 'Какие вакансии доступны в Оленегорске',
     guideLead:
-      'Здесь собраны роли, работодатели и активные вакансии города. Карточки ниже отвечают за точные запросы по компании, роли и транспорту.',
+      'Здесь собраны активные роли и работодатели Оленегорска. Откройте конкретную вакансию, чтобы сверить доход, формат и условия.',
     hubAnchorLabel: 'Все вакансии в Оленегорске',
     hubAnchorDescription:
       'Городская страница собирает работодателей, роли, доход и все активные вакансии в одном месте.',
@@ -62,64 +90,144 @@ const CITY_SEO_CLUSTERS: readonly CitySeoCluster[] = [
     primaryIntent: 'работа курьером и вакансии в Волоколамске',
     h1: 'Работа курьером в Волоколамске — вакансии, доход и работодатели',
     title: 'Работа курьером в Волоколамске — вакансии и работодатели | КурьерОк',
-    guideTitle: 'Главная страница вакансий в Волоколамске',
+    guideTitle: 'Какие вакансии доступны в Волоколамске',
     guideLead:
-      'Страница объединяет вакансии Волоколамска, чтобы общий городской запрос вел на один хаб, а не на отдельные карточки.',
+      'На странице можно сравнить активные вакансии Волоколамска по роли, работодателю, формату и заявленному доходу.',
     hubAnchorLabel: 'Все вакансии в Волоколамске',
     hubAnchorDescription:
       'Городская страница собирает работодателей, роли, доход и все активные вакансии в одном месте.',
   },
   {
+    slug: 'sredneuralsk',
+    kind: 'city-jobs',
+    primaryIntent: 'работа и вакансии в Среднеуральске',
+    h1: 'Работа и вакансии в Среднеуральске — роли и работодатели',
+    title: 'Работа и вакансии в Среднеуральске | КурьерОк',
+    guideTitle: 'Какие вакансии доступны в Среднеуральске',
+    guideLead:
+      'Ниже показаны активные карточки из текущей базы: точная роль, работодатель и заявленная сумма. Переход ведёт на конкретную вакансию, где можно сверить условия.',
+    hubAnchorLabel: 'Все вакансии в Среднеуральске',
+    hubAnchorDescription:
+      'Сравните роли, работодателей и заявленный доход в Среднеуральске.',
+    growthCohort: true,
+    preferredNeighbourSlugs: [
+      'verhnyaya-pyshma',
+      'ekaterinburg',
+      'berezovskiy',
+      'pervouralsk',
+      'novouralsk',
+      'aramil',
+    ],
+  },
+  {
     slug: 'pervomaysk',
     kind: 'city-jobs',
-    primaryIntent: 'работа курьером и вакансии в Первомайске',
-    h1: 'Работа курьером в Первомайске — вакансии, доход и работодатели',
-    title: 'Работа курьером в Первомайске — вакансии и работодатели | КурьерОк',
-    guideTitle: 'Главная страница вакансий в Первомайске',
+    primaryIntent: 'работа и вакансии в Первомайске',
+    h1: 'Работа и вакансии в Первомайске — роли и работодатели',
+    title: 'Работа и вакансии в Первомайске | КурьерОк',
+    guideTitle: 'Какие вакансии доступны в Первомайске',
     guideLead:
-      'Городской хаб показывает активные роли и работодателей Первомайска, а карточки вакансий остаются дочерними страницами.',
+      'Ниже показаны активные карточки из текущей базы: точная роль, работодатель и заявленная сумма. Переход ведёт на конкретную вакансию, где можно сверить условия.',
     hubAnchorLabel: 'Все вакансии в Первомайске',
     hubAnchorDescription:
-      'Городская страница собирает работодателей, роли, доход и все активные вакансии в одном месте.',
+      'Сравните роли, работодателей и заявленный доход в Первомайске.',
+    growthCohort: true,
+    preferredNeighbourSlugs: [
+      'sarov',
+      'temnikov',
+      'krasnoslobodsk',
+      'lukoyanov',
+      'arzamas',
+      'kovylkino',
+    ],
   },
   {
     slug: 'timashevsk',
     kind: 'city-jobs',
-    primaryIntent: 'работа курьером и вакансии в Тимашевске',
-    h1: 'Работа курьером в Тимашевске — вакансии, доход и работодатели',
-    title: 'Работа курьером в Тимашевске — вакансии и работодатели | КурьерОк',
-    guideTitle: 'Главная страница вакансий в Тимашевске',
+    primaryIntent: 'работа и вакансии в Тимашевске',
+    h1: 'Работа и вакансии в Тимашевске — роли и работодатели',
+    title: 'Работа и вакансии в Тимашевске | КурьерОк',
+    guideTitle: 'Какие вакансии доступны в Тимашевске',
     guideLead:
-      'Страница закрепляет один городской URL для общего спроса по Тимашевску и ведет дальше в точные вакансии.',
+      'Ниже показаны активные карточки из текущей базы: точная роль, работодатель и заявленная сумма. Переход ведёт на конкретную вакансию, где можно сверить условия.',
     hubAnchorLabel: 'Все вакансии в Тимашевске',
     hubAnchorDescription:
-      'Городская страница собирает работодателей, роли, доход и все активные вакансии в одном месте.',
+      'Сравните роли, работодателей и заявленный доход в Тимашевске.',
+    growthCohort: true,
+    preferredNeighbourSlugs: [
+      'korenovsk',
+      'krasnodar',
+      'ust-labinsk',
+      'slavyansk-na-kubani',
+      'primorsko-ahtarsk',
+      'adygeysk',
+    ],
+  },
+  {
+    slug: 'kartaly',
+    kind: 'city-jobs',
+    primaryIntent: 'работа и вакансии в Карталах',
+    h1: 'Работа и вакансии в Карталах — роли и работодатели',
+    title: 'Работа и вакансии в Карталах | КурьерОк',
+    guideTitle: 'Какие вакансии доступны в Карталах',
+    guideLead:
+      'Ниже показаны активные карточки из текущей базы: точная роль, работодатель и заявленная сумма. Переход ведёт на конкретную вакансию, где можно сверить условия.',
+    hubAnchorLabel: 'Все вакансии в Карталах',
+    hubAnchorDescription:
+      'Сравните роли, работодателей и заявленный доход в Карталах.',
+    growthCohort: true,
+    preferredNeighbourSlugs: [
+      'magnitogorsk',
+      'troitsk',
+      'verhneuralsk',
+      'sibay',
+      'plast',
+      'uchaly',
+    ],
   },
   {
     slug: 'metallostroy',
     kind: 'city-jobs',
-    primaryIntent: 'работа курьером и вакансии в Металлострое',
-    h1: 'Работа курьером в Металлострое — вакансии, доход и работодатели',
-    title: 'Работа курьером в Металлострое — вакансии и работодатели | КурьерОк',
-    guideTitle: 'Главная страница вакансий в Металлострое',
+    primaryIntent: 'работа и вакансии в Металлострое',
+    h1: 'Работа и вакансии в Металлострое — роли и работодатели',
+    title: 'Работа и вакансии в Металлострое | КурьерОк',
+    guideTitle: 'Какие вакансии доступны в Металлострое',
     guideLead:
-      'Городской хаб помогает не размазывать общий запрос по отдельным карточкам вакансий в Металлострое.',
+      'Ниже показаны активные карточки из текущей базы: точная роль, работодатель и заявленная сумма. Переход ведёт на конкретную вакансию, где можно сверить условия.',
     hubAnchorLabel: 'Все вакансии в Металлострое',
     hubAnchorDescription:
-      'Городская страница собирает работодателей, роли, доход и все активные вакансии в одном месте.',
+      'Сравните роли, работодателей и заявленный доход в Металлострое.',
+    growthCohort: true,
+    preferredNeighbourSlugs: [
+      'kolpino',
+      'nikolskoe',
+      'otradnoe',
+      'kirovsk',
+      'shlisselburg',
+      'sankt-peterburg',
+    ],
   },
   {
     slug: 'chkalovsk',
     kind: 'city-jobs',
-    primaryIntent: 'работа курьером и вакансии в Чкаловске',
-    h1: 'Работа курьером в Чкаловске — вакансии, доход и работодатели',
-    title: 'Работа курьером в Чкаловске — вакансии и работодатели | КурьерОк',
-    guideTitle: 'Главная страница вакансий в Чкаловске',
+    primaryIntent: 'работа и вакансии в Чкаловске',
+    h1: 'Работа и вакансии в Чкаловске — роли и работодатели',
+    title: 'Работа и вакансии в Чкаловске | КурьерОк',
+    guideTitle: 'Какие вакансии доступны в Чкаловске',
     guideLead:
-      'Страница собирает активные предложения Чкаловска и делает отдельные вакансии поддерживающими точными страницами.',
+      'Ниже показаны активные карточки из текущей базы: точная роль, работодатель и заявленная сумма. Переход ведёт на конкретную вакансию, где можно сверить условия.',
     hubAnchorLabel: 'Все вакансии в Чкаловске',
     hubAnchorDescription:
-      'Городская страница собирает работодателей, роли, доход и все активные вакансии в одном месте.',
+      'Сравните роли, работодателей и заявленный доход в Чкаловске.',
+    growthCohort: true,
+    preferredNeighbourSlugs: [
+      'zavolzhe',
+      'gorodets',
+      'puchezh',
+      'balahna',
+      'volodarsk',
+      'dzerzhinsk',
+    ],
   },
   {
     slug: 'novovoronezh',
@@ -127,9 +235,9 @@ const CITY_SEO_CLUSTERS: readonly CitySeoCluster[] = [
     primaryIntent: 'работа курьером и вакансии в Нововоронеже',
     h1: 'Работа курьером в Нововоронеже — вакансии, доход и работодатели',
     title: 'Работа курьером в Нововоронеже — вакансии и работодатели | КурьерОк',
-    guideTitle: 'Главная страница вакансий в Нововоронеже',
+    guideTitle: 'Какие вакансии доступны в Нововоронеже',
     guideLead:
-      'Городская страница отвечает на общий спрос по Нововоронежу, а карточки ниже уточняют компанию, роль и формат.',
+      'Здесь можно сравнить вакансии Нововоронежа по работодателю, роли, формату и заявленному доходу.',
     hubAnchorLabel: 'Все вакансии в Нововоронеже',
     hubAnchorDescription:
       'Городская страница собирает работодателей, роли, доход и все активные вакансии в одном месте.',
@@ -140,9 +248,9 @@ const CITY_SEO_CLUSTERS: readonly CitySeoCluster[] = [
     primaryIntent: 'работа курьером и вакансии в Сосновоборске',
     h1: 'Работа курьером в Сосновоборске — вакансии, доход и работодатели',
     title: 'Работа курьером в Сосновоборске — вакансии и работодатели | КурьерОк',
-    guideTitle: 'Главная страница вакансий в Сосновоборске',
+    guideTitle: 'Какие вакансии доступны в Сосновоборске',
     guideLead:
-      'Страница закрепляет один лучший URL для городского запроса и ведет в точные вакансии Сосновоборска.',
+      'Здесь можно сравнить вакансии Сосновоборска по работодателю, роли, формату и заявленному доходу.',
     hubAnchorLabel: 'Все вакансии в Сосновоборске',
     hubAnchorDescription:
       'Городская страница собирает работодателей, роли, доход и все активные вакансии в одном месте.',
@@ -166,6 +274,68 @@ const getPrimaryCityName = (location: string): string | null =>
 
 export const getCitySeoCluster = (citySlug: string): CitySeoCluster | undefined =>
   CITY_SEO_CLUSTER_BY_SLUG[citySlug];
+
+type CityCohortJob = Pick<
+  GeneratedJob,
+  'slug' | 'detailSlug' | 'detailAnchor' | 'title' | 'company' | 'salary' | 'sourceSlug'
+>;
+
+export const buildCityCohortVacancyLinks = (
+  jobs: readonly CityCohortJob[],
+  limit = 6,
+): CityCohortVacancyLink[] => {
+  const seenHrefs = new Set<string>();
+  const companyRanks = new Map<string, number>();
+  const candidates = jobs.flatMap((job, sourceIndex) => {
+    const href = getVacancyDetailPath(job);
+    if (seenHrefs.has(href)) return [];
+
+    seenHrefs.add(href);
+    const companyRank = companyRanks.get(job.company) ?? 0;
+    companyRanks.set(job.company, companyRank + 1);
+
+    return [{ job, href, companyRank, sourceIndex }];
+  });
+
+  return candidates
+    .sort((left, right) =>
+      left.companyRank - right.companyRank || left.sourceIndex - right.sourceIndex)
+    .slice(0, Math.max(0, Math.floor(limit)))
+    .map(({ job, href }) => ({
+      href,
+      title: job.title,
+      company: job.company,
+      companyHref: `/companies/${slugifyCompany(job.company)}/`,
+      salary: job.salary,
+      sourceSlug: job.sourceSlug,
+    }));
+};
+
+export const resolveCityClusterNeighbours = (
+  cluster: CitySeoCluster | undefined,
+  availableCities: readonly CityClusterNeighbour[],
+  fallbackNeighbours: readonly CityClusterNeighbour[],
+): CityClusterNeighbour[] => {
+  const availableBySlug = new Map(
+    availableCities
+      .filter((city) => city.vacancyCount > 0)
+      .map((city) => [city.slug, city] as const),
+  );
+  const preferredSlugs = cluster?.preferredNeighbourSlugs ?? [];
+  const candidateSlugs = [
+    ...preferredSlugs,
+    ...fallbackNeighbours.map((city) => city.slug),
+  ];
+  const seen = new Set<string>();
+
+  return candidateSlugs.flatMap((slug) => {
+    const city = availableBySlug.get(slug);
+    if (!city || slug === cluster?.slug || seen.has(slug)) return [];
+
+    seen.add(slug);
+    return [{ slug: city.slug, name: city.name, vacancyCount: city.vacancyCount }];
+  }).slice(0, 6);
+};
 
 export const getVacancyCityClusterLink = (
   job: Pick<GeneratedJob, 'location' | 'sourceSlug'>,

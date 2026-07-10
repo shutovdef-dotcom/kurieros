@@ -10,7 +10,7 @@ import ListingCityFilter from '../components/ListingCityFilter.astro';
 import jobsData from '../data/jobs';
 import { CATEGORIES } from '../data/constants';
 import { getCitiesFromJobs } from '../utils/cities';
-import { parseSalary } from '../utils/format';
+import { formatRussianPlural, parseSalary } from '../utils/format';
 import { formatMoneyWithCurrency } from '../utils/money';
 import {
 	buildFactCards,
@@ -33,7 +33,11 @@ import {
 	getBrandCategoryCompanyCanonical,
 	getBrandCategoryCompanyLink,
 } from '../utils/companySeo';
-import { getCitySeoCluster } from '../utils/citySeoClusters';
+import {
+	buildCityCohortVacancyLinks,
+	getCitySeoCluster,
+	resolveCityClusterNeighbours,
+} from '../utils/citySeoClusters';
 import { getMetroStationsByCity, type MetroCitySlug } from '../utils/metroStations';
 // `jobsByCity` is built ONCE at module load inside jobsByCityIndex.ts
 // (imports are module-cached). It is NOT rebuilt per page — a local
@@ -183,8 +187,14 @@ const canonicalURL =
 // по числу вакансий (одинаковый на всех страницах) — географически
 // ближайшие города с вакансиями, уникальный набор на каждый город.
 const cityGeo = type === 'city' ? getCityGeo(data.slug) : null;
-const cityNeighbours = type === 'city' ? getNearbyCities(data.slug) : [];
 const citySeoCluster = type === 'city' ? getCitySeoCluster(data.slug) : undefined;
+const defaultCityNeighbours = type === 'city' ? getNearbyCities(data.slug) : [];
+const cityNeighbours = type === 'city'
+	? resolveCityClusterNeighbours(citySeoCluster, citiesFromJobs, defaultCityNeighbours)
+	: [];
+const cityCohortVacancyLinks = type === 'city' && citySeoCluster?.growthCohort
+	? buildCityCohortVacancyLinks(filteredJobs, 6)
+	: [];
 const metroCitySlug =
 	type === 'city' && (data.slug === 'moskva' || data.slug === 'sankt-peterburg')
 		? (data.slug as MetroCitySlug)
@@ -229,7 +239,7 @@ const cityComparisonPct =
 	cityAutoShift !== undefined && NATIONAL_AVG_SHIFT.auto > 0
 		? Math.round(((cityAutoShift - NATIONAL_AVG_SHIFT.auto) / NATIONAL_AVG_SHIFT.auto) * 100)
 		: null;
-const citySummary =
+const defaultCitySummary =
 	type === 'city' && filteredJobs.length > 0
 		? buildCitySummary({
 			prep: data.prep,
@@ -242,6 +252,14 @@ const citySummary =
 			nationalAutoAvg: NATIONAL_AVG_SHIFT.auto,
 		})
 		: '';
+const employerCountText = `${companyNames.length} ${formatRussianPlural(companyNames.length, [
+	'работодателя',
+	'работодателей',
+	'работодателей',
+])}`;
+const citySummary = type === 'city' && citySeoCluster?.growthCohort
+	? `Сейчас ${data.prep} доступно ${vacancyCountText} от ${employerCountText}: ${companyNames.slice(0, 3).join(', ')}. В карточках указаны точные роли и заявленные суммы — проверьте условия перед откликом.`
+	: defaultCitySummary;
 
 const cityPrep = type === 'city' ? data.prep : undefined;
 const categoryName = type === 'category' ? data.name : undefined;
@@ -257,7 +275,7 @@ const defaultSeoTitle = buildSeoTitle({
 	isEzhednevLanding,
 });
 const seoTitle = citySeoCluster?.title ?? defaultSeoTitle;
-const seoDescription = buildSeoDescription({
+const defaultSeoDescription = buildSeoDescription({
 	type,
 	cityPrep,
 	categoryName,
@@ -270,6 +288,13 @@ const seoDescription = buildSeoDescription({
 	paymentTypes,
 	transportTypes,
 });
+const seoDescription = type === 'city' && citySeoCluster?.growthCohort
+	? [
+			`${vacancyCountText} ${data.prep}: ${companyNames.slice(0, 3).join(', ')}.`,
+			formattedMaxSalary ? `Заявленный доход до ${formattedMaxSalary}/мес.` : '',
+			'Сравните роли, выплаты и условия до отклика.',
+		].filter(Boolean).join(' ').slice(0, 170)
+	: defaultSeoDescription;
 const heroIntro = buildHeroIntro(type, isEzhednevLanding, vacancyCountText, cityPrep);
 const factCards = buildFactCards({
 	filteredJobsCount: filteredJobs.length,
@@ -280,7 +305,7 @@ const factCards = buildFactCards({
 const listingCities =
 	type === 'category' && !isEmptyListing ? extractHubCities(filteredJobs) : [];
 
-const faqItems = buildFaqItems({
+const defaultFaqItems = buildFaqItems({
 	type,
 	isEzhednevLanding,
 	dataName: data.name,
@@ -290,6 +315,28 @@ const faqItems = buildFaqItems({
 	transportTypes,
 	vacancyCountText,
 });
+const faqItems = type === 'city' && citySeoCluster?.growthCohort
+	? [
+			{
+				question: `Какие вакансии есть ${data.prep}?`,
+				answer: `Сейчас доступно ${vacancyCountText}. Среди активных карточек: ${cityCohortVacancyLinks.slice(0, 3).map((vacancy) => vacancy.title).join('; ')}.`,
+			},
+			{
+				question: `Какие работодатели набирают ${data.prep}?`,
+				answer: `В текущей базе есть предложения от ${companyNames.join(', ')}. Состав может меняться по мере обновления карточек.`,
+			},
+			{
+				question: `Какой доход указан в вакансиях ${data.prep}?`,
+				answer: formattedMaxSalary
+					? `Максимальная заявленная сумма в текущих карточках — ${formattedMaxSalary}/мес. Фактический доход зависит от роли и условий.`
+					: 'Суммы указаны в каждой карточке; финальные условия нужно сверить перед откликом.',
+			},
+			{
+				question: 'Что проверить перед откликом?',
+				answer: 'Откройте точную карточку и сверьте роль, график, тип оформления, выплаты, документы и требования.',
+			},
+		]
+	: defaultFaqItems;
 const pageH1 = citySeoCluster?.h1 ?? title;
 
 const pageSchemaGraph = buildPageSchemaGraph({
@@ -327,7 +374,13 @@ const pageSchemaGraph = buildPageSchemaGraph({
 						</>
 					)}
 					<span>&gt;</span>
-					<span>{type === 'city' ? `Работа курьером ${data.prep}` : data.name}</span>
+					<span>
+						{type === 'city'
+							? citySeoCluster?.growthCohort
+								? `Работа и вакансии ${data.prep}`
+								: `Работа курьером ${data.prep}`
+							: data.name}
+					</span>
 				</nav>
 				<p class="section-eyebrow">{type === 'city' ? 'Вакансии в городе' : 'Готовый фильтр'}</p>
 				<h1>{pageH1}</h1>
@@ -387,6 +440,7 @@ const pageSchemaGraph = buildPageSchemaGraph({
 				companyNames={companyNames}
 				transportTypes={transportTypes}
 				formattedMaxSalary={formattedMaxSalary}
+				vacancyLinks={cityCohortVacancyLinks}
 			/>
 		)}
 

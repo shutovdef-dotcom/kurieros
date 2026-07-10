@@ -65,8 +65,10 @@ describe('city SEO clusters', () => {
       'horugvino',
       'olenegorsk',
       'volokolamsk',
+      'sredneuralsk',
       'pervomaysk',
       'timashevsk',
+      'kartaly',
       'metallostroy',
       'chkalovsk',
       'novovoronezh',
@@ -127,6 +129,7 @@ describe('city SEO clusters', () => {
     for (const slug of CITY_GROWTH_COHORT_SLUGS) {
       const cluster = getCitySeoCluster(slug);
       expect(cluster?.growthCohort, slug).toBe(true);
+      expect(cluster?.h1, slug).not.toMatch(/курьером/i);
       expect(cluster?.guideLead, slug).not.toMatch(/SEO|URL|кластер|хаб|поисков|дочерн/i);
     }
   });
