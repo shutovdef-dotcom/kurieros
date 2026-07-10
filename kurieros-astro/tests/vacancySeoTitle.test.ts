@@ -43,4 +43,16 @@ describe('buildVacancySeoTitle', () => {
 			}),
 		).toBe('Курьер в Туле — до 90 000 ₽/мес · гибкий график | КурьерОк');
 	});
+
+	it('supports a source-backed full-title override for a controlled CTR cohort', () => {
+		expect(
+			buildVacancySeoTitle({
+				title: 'Специалист по обработке товаров Ozon в Хоругвино',
+				salary: 'от 65 000 ₽/мес',
+				customTitle: 'Работа на складе Ozon в Хоругвино — от 65 000 ₽, график 2/2',
+			}),
+		).toBe(
+			'Работа на складе Ozon в Хоругвино — от 65 000 ₽, график 2/2 | КурьерОк',
+		);
+	});
 });
