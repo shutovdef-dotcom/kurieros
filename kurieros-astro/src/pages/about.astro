@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { buildBreadcrumbSchema } from '../utils/schema';
+import { EDITORIAL_POLICY } from '../data/editorialPolicy';
 
 // /about/ is a static informational page describing the project and
 // publishing the owner's requisites (required for E-E-A-T / Yandex
@@ -20,6 +21,7 @@ const pageSchemaGraph = [
 		name: 'О проекте КурьерОк',
 		description: aboutDescription,
 		url: Astro.url.href,
+		dateModified: EDITORIAL_POLICY.updatedAt,
 	},
 	buildBreadcrumbSchema(
 		[
@@ -59,6 +61,24 @@ const pageSchemaGraph = [
 				<li><strong>Размещаем</strong> на сайте с промежуточной страницей перехода или прямыми ссылками на форму отклика работодателя.</li>
 			</ol>
 			<p class="about-note">КурьерОк не является работодателем и не оказывает услуги по трудоустройству. На обычной странице перехода мы не собираем контакты: отклик завершается на сайте работодателя или партнёра.</p>
+		</section>
+
+		<section class="about-section" aria-labelledby="editorial-policy-title">
+			<h2 id="editorial-policy-title">Редакционная политика и актуальность вакансий</h2>
+			<p class="about-policy-date">Политика проверена {new Intl.DateTimeFormat('ru-RU', {
+				day: 'numeric',
+				month: 'long',
+				year: 'numeric',
+			}).format(new Date(`${EDITORIAL_POLICY.updatedAt}T00:00:00Z`))}.</p>
+			<div class="about-policy-grid">
+				{EDITORIAL_POLICY.sections.map((section) => (
+					<article id={`policy-${section.id}`} class="about-policy-card">
+						<h3>{section.title}</h3>
+						{section.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+					</article>
+				))}
+			</div>
+			<p>Сообщить об ошибке можно через <a href="/contacts/">страницу контактов</a>.</p>
 		</section>
 
 		<section class="about-section">
@@ -167,6 +187,31 @@ const pageSchemaGraph = [
 		color: var(--text-main);
 		margin: var(--space-5) 0 0;
 	}
+	.about-policy-date {
+		font-size: var(--fs-14);
+		color: var(--text-muted);
+	}
+	.about-policy-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--space-4);
+		margin: var(--space-5) 0;
+	}
+	.about-policy-card {
+		border: 1px solid var(--ink-200);
+		border-radius: var(--radius-lg);
+		padding: var(--space-5);
+		background: var(--surface-color);
+	}
+	.about-policy-card h3 {
+		margin: 0 0 var(--space-3);
+		font-size: var(--fs-18);
+		line-height: var(--lh-18);
+		color: var(--ink-900);
+	}
+	.about-policy-card p:last-child {
+		margin-bottom: 0;
+	}
 
 	.about-requisites {
 		background: var(--ink-50);
@@ -210,6 +255,9 @@ const pageSchemaGraph = [
 		.about-requisites dl {
 			grid-template-columns: 1fr;
 			gap: var(--space-1);
+		}
+		.about-policy-grid {
+			grid-template-columns: 1fr;
 		}
 		.about-requisites dt {
 			margin-top: var(--space-3);

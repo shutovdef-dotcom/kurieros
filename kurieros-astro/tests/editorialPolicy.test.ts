@@ -16,7 +16,8 @@ describe('editorial and vacancy freshness policy', () => {
   it('distinguishes source checks, content changes and employer publication dates', () => {
     const policyText = EDITORIAL_POLICY.sections
       .flatMap((section) => [section.title, ...section.paragraphs])
-      .join(' ');
+      .join(' ')
+      .toLocaleLowerCase('ru-RU');
 
     expect(policyText).toContain('дата публикации работодателем');
     expect(policyText).toContain('проверка источника');
