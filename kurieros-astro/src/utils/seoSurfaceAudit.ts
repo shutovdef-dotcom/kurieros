@@ -85,6 +85,7 @@ export type SeoGuardFinding = {
 		| 'missing_reviewed_baseline'
 		| 'surface_delta_review_required'
 		| 'job_posting_drop'
+		| 'job_posting_change_review_required'
 		| 'surface_delta_reviewed';
 	message: string;
 };
@@ -408,6 +409,8 @@ const percentDelta = (current: number, baseline: number): number => {
 	return Number((((current - baseline) / baseline) * 100).toFixed(6));
 };
 
+const MAX_UNREVIEWED_SURFACE_URL_DELTA = 14;
+
 const sortFindings = (findings: SeoGuardFinding[]): SeoGuardFinding[] =>
 	findings.sort((a, b) => a.code.localeCompare(b.code) || a.message.localeCompare(b.message));
 
@@ -445,16 +448,25 @@ export const evaluateSeoReleaseGuard = (
 		report.structuredData.jobPostingPages,
 		baseline.report.structuredData.jobPostingPages,
 	);
-	if (Math.abs(sitemapSurfacePercent) > 5) {
+	const sitemapCountDelta = Math.abs(
+		report.sitemap.pageUrlCount - baseline.report.sitemap.pageUrlCount,
+	);
+	const sitemapUrlSetChanged =
+		report.sitemap.urlSetHash !== baseline.report.sitemap.urlSetHash;
+	const sitemapReviewRequired =
+		Math.abs(sitemapSurfacePercent) > 5 ||
+		sitemapCountDelta > MAX_UNREVIEWED_SURFACE_URL_DELTA ||
+		(sitemapUrlSetChanged && sitemapCountDelta === 0);
+	if (sitemapReviewRequired) {
 		if (baseline.reviewedSurfaceUrlSetHashes.includes(report.sitemap.urlSetHash)) {
 			reviewedExceptions.push({
 				code: 'surface_delta_reviewed',
-				message: `Sitemap surface delta ${sitemapSurfacePercent}% matches an explicitly reviewed URL-set hash.`,
+				message: `Sitemap surface delta ${sitemapSurfacePercent}% (${sitemapCountDelta} URL changes) matches an explicitly reviewed URL-set hash.`,
 			});
 		} else {
 			failures.push({
 				code: 'surface_delta_review_required',
-				message: `Sitemap surface delta ${sitemapSurfacePercent}% exceeds the 5% review threshold.`,
+				message: `Sitemap surface delta ${sitemapSurfacePercent}% (${sitemapCountDelta} URL changes) requires review.`,
 			});
 		}
 	}
@@ -462,6 +474,11 @@ export const evaluateSeoReleaseGuard = (
 		failures.push({
 			code: 'job_posting_drop',
 			message: `JobPosting page count changed by ${jobPostingPercent}%, below the -5% release floor.`,
+		});
+	} else if (jobPostingPercent > 5) {
+		failures.push({
+			code: 'job_posting_change_review_required',
+			message: `JobPosting page count changed by +${jobPostingPercent}%, above the +5% review ceiling.`,
 		});
 	}
 
