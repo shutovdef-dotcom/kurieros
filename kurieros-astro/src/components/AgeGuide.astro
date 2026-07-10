@@ -189,6 +189,13 @@ const resolveSources = (sourceIds: readonly string[]) =>
   .age-guide {
     display: grid;
     gap: 36px;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .age-comparison {
+    min-width: 0;
+    max-width: 100%;
   }
 
   .age-methodology {
@@ -264,6 +271,8 @@ const resolveSources = (sourceIds: readonly string[]) =>
   }
 
   .age-table-wrap {
+    min-width: 0;
+    max-width: 100%;
     overflow-x: auto;
     border: 1px solid var(--ink-100);
     border-radius: 16px;
