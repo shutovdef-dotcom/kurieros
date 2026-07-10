@@ -25,6 +25,7 @@ const baseInput: JobPostingInput = {
   cities: ['Москва'],
   hasApplyLink: true,
   applyLink: 'https://example.com/apply',
+  salaryConfidence: 'official',
   datePosted: '2026-05-01T00:00:00.000Z',
   validThrough: '2026-07-30T00:00:00.000Z',
 };
@@ -144,6 +145,29 @@ describe('Fix B (2026-05-25) — isRemote → TELECOMMUTE + country-only jobLoca
 });
 
 describe('JobPosting jobLocation — city-level location hygiene', () => {
+  it('uses Belarus geography for a BYN vacancy instead of marking it as Russia', () => {
+    const out = buildJobPostingSchema({
+      ...baseInput,
+      cities: ['Минск'],
+      currency: 'BYN',
+    });
+
+    expect(out.jobLocation).toEqual([
+      {
+        '@type': 'Place',
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: 'Минск',
+          addressCountry: 'BY',
+        },
+      },
+    ]);
+    expect(out.applicantLocationRequirements).toEqual({
+      '@type': 'Country',
+      name: 'Belarus',
+    });
+  });
+
   it('emits real region but no fabricated street/postalCode for a known city', () => {
     const out = buildJobPostingSchema({ ...baseInput, cities: ['Барнаул'] });
     const address = out.jobLocation[0].address as Record<string, unknown>;
@@ -309,6 +333,24 @@ describe('Fix C (2026-05-25) — real baseSalary range, no 60% heuristic', () =>
     const out = buildJobPostingSchema(baseInput);
 
     expect('baseSalary' in out).toBe(false);
+  });
+
+  it('omits baseSalary when the salary is estimated or lacks a supported confidence', () => {
+    const estimated = buildJobPostingSchema({
+      ...baseInput,
+      salaryConfidence: 'estimated',
+      baseSalaryMonthlyMin: 60_000,
+      baseSalaryMonthlyMax: 94_000,
+    });
+    const unsupported = buildJobPostingSchema({
+      ...baseInput,
+      salaryConfidence: undefined,
+      baseSalaryMonthlyMin: 60_000,
+      baseSalaryMonthlyMax: 94_000,
+    });
+
+    expect(estimated).not.toHaveProperty('baseSalary');
+    expect(unsupported).not.toHaveProperty('baseSalary');
   });
 
   it('ignores zero / negative salary inputs', () => {

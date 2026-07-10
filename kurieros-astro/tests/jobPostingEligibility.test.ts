@@ -5,6 +5,7 @@ const now = new Date('2026-07-10T12:00:00.000Z');
 const eligibleJob = {
   isActive: true,
   roleTitle: 'Курьер',
+  sourceUrl: 'https://employer.example/jobs/123',
   postedAt: '2026-06-20T09:00:00.000Z',
   sourceCheckedAt: '2026-07-08T09:00:00.000Z',
   applyVerifiedAt: '2026-07-08T09:00:00.000Z',
@@ -26,6 +27,15 @@ describe('getJobPostingEligibility', () => {
     expect(getJobPostingEligibility(missingEvidence, { now })).toEqual({
       eligible: false,
       reasons: ['missing_role_title', 'missing_posted_at'],
+    });
+  });
+
+  it('requires an identifiable upstream vacancy source', () => {
+    expect(
+      getJobPostingEligibility({ ...eligibleJob, sourceUrl: undefined }, { now }),
+    ).toEqual({
+      eligible: false,
+      reasons: ['missing_source_url'],
     });
   });
 

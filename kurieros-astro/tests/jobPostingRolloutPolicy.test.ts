@@ -10,6 +10,7 @@ import {
 const verifiedEvidence = {
   isActive: true,
   roleTitle: 'Курьер',
+  sourceUrl: 'https://employer.example/jobs/123',
   postedAt: '2026-07-01T00:00:00.000Z',
   sourceCheckedAt: '2026-07-09T00:00:00.000Z',
   applyVerifiedAt: '2026-07-09T00:00:00.000Z',
@@ -40,7 +41,7 @@ describe('JobPosting rollout policy', () => {
     ).toEqual({ emit: true, mode: 'source_verified', reasons: [] });
   });
 
-  it('temporarily preserves a GSC-valid URL when strict source evidence is incomplete', () => {
+  it('does not let a historical GSC-valid status override missing source evidence', () => {
     expect(
       resolveJobPostingRollout({
         path: LEGACY_GSC_VALID_JOB_PATHS[0]!,
@@ -50,7 +51,35 @@ describe('JobPosting rollout policy', () => {
         },
         now: new Date('2026-07-10T00:00:00.000Z'),
       }),
-    ).toMatchObject({ emit: true, mode: 'legacy_gsc_valid' });
+    ).toMatchObject({
+      emit: false,
+      mode: 'blocked',
+      reasons: expect.arrayContaining(['missing_posted_at']),
+    });
+  });
+
+  it('fails closed for all 29 legacy paths until their current rows carry complete evidence', () => {
+    const eligibleLegacyPaths = LEGACY_GSC_VALID_JOB_PATHS.filter((path) => {
+      const slug = path.replace(/^\/v\//, '').replace(/\/$/, '');
+      const job = detailJobs.find((item) => item.slug === slug)!;
+      return resolveJobPostingRollout({
+        path,
+        evidence: {
+          isActive: true,
+          roleTitle: job.roleTitle,
+          sourceUrl: job.sourceUrl,
+          postedAt: job.postedAt,
+          validThrough: job.validThrough,
+          sourceCheckedAt: job.sourceCheckedAt,
+          applyVerifiedAt: job.applyVerifiedAt,
+          applyFlowVerified: job.applyFlowVerified,
+          salaryConfidence: job.salaryConfidence,
+        },
+        now: new Date('2026-07-10T12:00:00.000Z'),
+      }).emit;
+    });
+
+    expect(eligibleLegacyPaths).toEqual([]);
   });
 
   it('defaults to deny for every other URL without complete source evidence', () => {

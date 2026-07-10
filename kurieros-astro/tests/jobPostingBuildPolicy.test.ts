@@ -20,9 +20,9 @@ const readSchemas = (html: string): Record<string, unknown>[] =>
     });
 
 describe.skipIf(!distExists)('JobPosting rollout build policy', () => {
-  it('keeps JobPosting on the 29 current GSC-valid pages', () => {
+  it('does not preserve JobPosting solely because 29 pages were historically valid in GSC', () => {
     for (const path of LEGACY_GSC_VALID_JOB_PATHS) {
-      expect(readPath(path), path).toContain('"@type":"JobPosting"');
+      expect(readPath(path), path).not.toContain('"@type":"JobPosting"');
     }
   });
 
@@ -38,18 +38,11 @@ describe.skipIf(!distExists)('JobPosting rollout build policy', () => {
     expect(readPath(`/v/${blockedJob!.slug}/`)).not.toContain('"@type":"JobPosting"');
   });
 
-  it('emits a role-only title, canonical URL and no invented expiry', () => {
-    const path = LEGACY_GSC_VALID_JOB_PATHS[0]!;
-    const job = detailJobs.find((item) => `/v/${item.slug}/` === path);
-    const schema = readSchemas(readPath(path)).find(
-      (item) => item['@type'] === 'JobPosting',
+  it('contains no JobPosting items until a current source-qualified cohort exists', () => {
+    const emitted = LEGACY_GSC_VALID_JOB_PATHS.flatMap((path) =>
+      readSchemas(readPath(path)).filter((item) => item['@type'] === 'JobPosting'),
     );
 
-    expect(job).toBeDefined();
-    expect(schema).toBeDefined();
-    expect(schema?.title).toBe(job?.roleTitle);
-    expect(schema?.url).toBe(`https://kurerok.ru${path}`);
-    expect(schema?.directApply).toBe(false);
-    expect(schema).not.toHaveProperty('validThrough');
+    expect(emitted).toEqual([]);
   });
 });

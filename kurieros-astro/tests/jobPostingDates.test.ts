@@ -2,13 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { resolveJobPostingDates } from '../src/utils/jobPostingDates';
 
 describe('resolveJobPostingDates', () => {
-  it('uses the source publication date without inventing an expiry', () => {
+  it('never treats a legacy content update as the original publication date', () => {
     const dates = resolveJobPostingDates({
       updatedAt: '2026-04-17',
       now: new Date('2026-06-24T10:00:00.000Z'),
     });
 
-    expect(dates.datePosted).toBe('2026-04-17T00:00:00.000Z');
+    expect(dates.datePosted).toBeUndefined();
     expect(dates.validThrough).toBeUndefined();
   });
 
