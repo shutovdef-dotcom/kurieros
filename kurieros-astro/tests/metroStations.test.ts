@@ -180,6 +180,20 @@ describe('metro station dataset', () => {
     expect(METRO_LOCAL_OFFER_EVIDENCE).toEqual([]);
   });
 
+  it('separates the sitewide accuracy correction from the five-page treatment', () => {
+    expect(METRO_QUALITY_PILOT.policy).toMatchObject({
+      accuracyBaselineScope: 'all-existing-pages',
+      treatmentPageCount: 5,
+      controlPageCount: 5,
+    });
+    expect(METRO_QUALITY_PILOT.policy.treatmentOnlyFeatures).toEqual(
+      expect.arrayContaining(['source-backed-topology-links']),
+    );
+    expect(metroPageSource).toContain('data-metro-accuracy-scope="sitewide"');
+    expect(metroPageSource).toContain('data-metro-pilot-cohort={pilotPage?.cohort}');
+    expect(metroPageSource).toContain('isMetroTreatment && relatedStations.length > 0');
+  });
+
   it('labels city fallback honestly and keeps JobPosting off metro pages', () => {
     expect(metroPageSource).toContain('partitionMetroOffersForStation');
     expect(metroPageSource).toContain('Городские вакансии без привязки к станции');
