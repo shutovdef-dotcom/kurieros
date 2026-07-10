@@ -1,42 +1,43 @@
 {
   "schemaVersion": 1,
-  "id": "2026-07-10-webmaster-growth-v1",
-  "reviewReason": "Initial versioned baseline for the approved Webmaster growth rollout.",
+  "id": "2026-07-10-jobposting-provenance-gsc-valid-v2",
+  "reviewReason": "Reviewed JobPosting provenance migration: emit JobPosting only on the 29 URLs currently valid in GSC, retain the temporary continuity cohort through its 2026-08-10 review deadline, and add its 10 net-new indexable URLs (19 of 29 already overlapped the prior 635-page indexability surface). Verified 645 indexable vacancy pages, 2026 sitemap URLs, and zero canonical conflicts after the full build.",
   "reviewedSurfaceUrlSetHashes": [
-    "0645e9f9c5c277f3331c40a8609cc2c667e67684c1d03c0ce883b490686ad605"
+    "8011ca86bdb286b5e271c73b49380bab79e8c3377fc71c458c4d9b84b3d44644"
   ],
   "report": {
     "schemaVersion": 1,
     "routes": {
       "total": 8083,
-      "indexable": 2024,
-      "noindex": 6059,
+      "indexable": 2034,
+      "noindex": 6049,
       "urlSetHash": "81f050d7bebaa949fe32d1c8e244a0e9569cca2fd60d770e09b988981243da2d",
-      "indexableUrlSetHash": "ccd039246ac024d819833a5343e100eeacfe8102d746ff3c936f571b7101abb6"
+      "indexableUrlSetHash": "5a95b4cccfcfeb6e153dfaa358a5d22c87721f878b30abe783c21e79c747aa53"
     },
     "sitemap": {
-      "pageUrlCount": 2016,
-      "urlSetHash": "0645e9f9c5c277f3331c40a8609cc2c667e67684c1d03c0ce883b490686ad605",
-      "rawXmlHash": "de5499bdce1331fab9ea7ad6445154610c1f31114e71743ca8e4f90f46982ec1",
+      "pageUrlCount": 2026,
+      "urlSetHash": "8011ca86bdb286b5e271c73b49380bab79e8c3377fc71c458c4d9b84b3d44644",
+      "rawXmlHash": "1f3b8a740f569dda09af3bd6ecc71a3861cffd3affa9607239a0f82edd3c4b29",
       "canonicalConflicts": []
     },
     "structuredData": {
-      "jobPostingPages": 635,
-      "jobPostingItems": 635,
+      "jobPostingPages": 29,
+      "jobPostingItems": 29,
       "breadcrumbPages": 8071,
       "breadcrumbItems": 8071
     },
     "vacancies": {
       "total": 6685,
-      "indexable": 635,
-      "noindex": 6050,
-      "jobPostingPages": 635,
+      "indexable": 645,
+      "noindex": 6040,
+      "jobPostingPages": 29,
       "breadcrumbPages": 6685,
       "indexabilityReasons": {
         "gsc_vacancy_intent": 18,
-        "local_score": 540,
-        "low_unique_search_demand": 6050,
-        "top_city_allowlist": 77
+        "gsc_valid_jobposting": 29,
+        "local_score": 523,
+        "low_unique_search_demand": 6040,
+        "top_city_allowlist": 75
       }
     },
     "feeds": {
@@ -47,8 +48,8 @@
         "physicalPictures": 15
       },
       "pilot": {
-        "offers": 381,
-        "normalizedLandingUrls": 381,
+        "offers": 382,
+        "normalizedLandingUrls": 382,
         "sets": 50,
         "physicalPictures": 15
       }
