@@ -94,13 +94,21 @@ describe('age guide FAQ parity', () => {
     );
   });
 
-  it('renders the shared FAQ collection and age component on the existing topic URL', () => {
+	it('renders the shared FAQ collection and age component on the existing topic URL', () => {
     const page = readFileSync('src/pages/guide/[topic].astro', 'utf8');
     const component = readFileSync('src/components/AgeGuide.astro', 'utf8');
 
     expect(page).toContain("topic === 'возраст'");
     expect(page).toContain('<AgeGuide />');
     expect(page).toContain('buildAgeGuideFaqEntities(AGE_GUIDE.faqItems)');
-    expect(component).toContain('AGE_GUIDE.faqItems.map');
-  });
+		expect(component).toContain('AGE_GUIDE.faqItems.map');
+	});
+
+	it('contains the wide age comparison inside its mobile scroll region', () => {
+		const component = readFileSync('src/components/AgeGuide.astro', 'utf8');
+
+		expect(component).toMatch(/\.age-guide\s*\{[\s\S]*?min-width:\s*0;/);
+		expect(component).toMatch(/\.age-comparison\s*\{[\s\S]*?min-width:\s*0;/);
+		expect(component).toMatch(/\.age-table-wrap\s*\{[\s\S]*?max-width:\s*100%;/);
+	});
 });
