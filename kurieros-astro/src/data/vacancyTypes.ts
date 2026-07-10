@@ -231,6 +231,8 @@ export type GeneratedJob = {
   detailSlug?: string;
   detailAnchor?: string;
   title: string;
+  /** Role-only title used by JobPosting; excludes employer, city and pay. */
+  roleTitle?: string;
   company: string;
   companyLogo: string;
   salary: string;

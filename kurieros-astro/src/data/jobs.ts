@@ -14,6 +14,7 @@ import type {
   VacancySurface,
   VacancySource,
 } from './vacancyTypes';
+import { getJobPostingRoleTitle } from './jobPostingRoleTitles';
 import { isCityBlocked, slugifyCity } from '../utils/cities';
 import { fnv1a } from '../utils/fnv1a';
 import { isFlexibleSchedule } from '../utils/flexibleSchedule';
@@ -647,6 +648,7 @@ export const buildJobsFromVacancies = (
         ...(detailSlug && detailSlug !== slug ? { detailSlug } : {}),
         ...(source.detailRoute?.anchor ? { detailAnchor: source.detailRoute.anchor } : {}),
         title: interpolate(content.title, offer, language),
+        roleTitle: getJobPostingRoleTitle(source.slug, transport),
         company: getCompanyName(source.company.name, language),
         companyLogo: source.company.logo,
         salary,
