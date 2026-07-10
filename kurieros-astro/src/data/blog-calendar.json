@@ -1,0 +1,1978 @@
+{
+  "version": 1,
+  "timezone": "Europe/Moscow",
+  "cadenceHours": 48,
+  "entries": [
+    {
+      "sequence": 1,
+      "slug": "skolko-zarabatyvaet-kurer-yandex-eda-2026",
+      "title": "Доход курьера Яндекс Еды: как посчитать чистую сумму за смену",
+      "type": "rewrite",
+      "nominalPublishAt": "2026-08-03T09:00:00+03:00",
+      "primaryIntent": "сколько зарабатывает курьер Яндекс Еды",
+      "pillarHref": "/guide/dohod/",
+      "commercialHref": "/companies/yandex-eda/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 2,
+      "slug": "kak-vybrat-kompaniyu-dlya-raboty-kurerom",
+      "title": "Как выбрать компанию для работы курьером: 12 проверяемых критериев",
+      "type": "rewrite",
+      "nominalPublishAt": "2026-08-05T09:00:00+03:00",
+      "primaryIntent": "сравнение работодателей",
+      "pillarHref": "/guide/sravnenie/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 3,
+      "slug": "kurer-na-lichnom-avto-rashody-i-pribyl",
+      "title": "Курьер на личном авто: расходы, налоги и чистая прибыль",
+      "type": "rewrite",
+      "nominalPublishAt": "2026-08-07T09:00:00+03:00",
+      "primaryIntent": "доход автокурьера",
+      "pillarHref": "/guide/transport/",
+      "commercialHref": "/rabota-avtokurerom/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 4,
+      "slug": "kak-proyti-pervuyu-nedelyu-kurerom",
+      "title": "Первая неделя курьером: что происходит от анкеты до пятой смены",
+      "type": "rewrite",
+      "nominalPublishAt": "2026-08-09T09:00:00+03:00",
+      "primaryIntent": "работа без опыта",
+      "pillarHref": "/guide/trebovaniya/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 5,
+      "slug": "nuzhen-li-elektrovelosiped-kureru",
+      "title": "Нужен ли электровелосипед курьеру: расчёт окупаемости",
+      "type": "rewrite",
+      "nominalPublishAt": "2026-08-11T09:00:00+03:00",
+      "primaryIntent": "электровелосипед для курьеров",
+      "pillarHref": "/guide/transport/",
+      "commercialHref": "/rabota-velokurerom/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 6,
+      "slug": "dohod-voditelya-ozon-posle-rashodov",
+      "title": "Сколько зарабатывает водитель Ozon: считаем доход после расходов",
+      "type": "new",
+      "nominalPublishAt": "2026-08-13T09:00:00+03:00",
+      "primaryIntent": "водитель Ozon зарплата",
+      "pillarHref": "/guide/dohod/",
+      "commercialHref": "/companies/ozon/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 7,
+      "slug": "skolko-platyat-kureram-kupera",
+      "title": "Сколько платят курьерам Купера: из чего складывается выплата",
+      "type": "new",
+      "nominalPublishAt": "2026-08-15T09:00:00+03:00",
+      "primaryIntent": "Купер сколько платят курьерам",
+      "pillarHref": "/guide/dohod/",
+      "commercialHref": "/companies/kuper-ex-sbermarket/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 8,
+      "slug": "s-kem-kurer-zaklyuchaet-dogovor",
+      "title": "Бренд, партнёр или парк: с кем курьер фактически заключает договор",
+      "type": "new",
+      "nominalPublishAt": "2026-08-17T09:00:00+03:00",
+      "primaryIntent": "сторона договора",
+      "pillarHref": "/guide/oformlenie/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 9,
+      "slug": "kak-proverit-vakansiyu-kurera",
+      "title": "Как проверить вакансию курьера и не попасть на мошенников",
+      "type": "new",
+      "nominalPublishAt": "2026-08-19T09:00:00+03:00",
+      "primaryIntent": "безопасное трудоустройство",
+      "pillarHref": "/guide/trebovaniya/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 10,
+      "slug": "indeks-dohodov-kurerov-q2-2026",
+      "title": "Индекс доходов курьеров: срез вакансий за II квартал 2026",
+      "type": "research",
+      "nominalPublishAt": "2026-08-21T09:00:00+03:00",
+      "primaryIntent": "индекс доходов курьеров",
+      "pillarHref": "/guide/dohod/",
+      "researchGate": {
+        "required": true,
+        "minimumEvidence": "сопоставимая выборка вакансий за II квартал 2026 и опубликованная методика"
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 11,
+      "slug": "podrabotka-kurerom-posle-osnovnoy-raboty",
+      "title": "Подработка курьером после основной работы: реалистичный график",
+      "type": "rewrite",
+      "nominalPublishAt": "2026-08-23T09:00:00+03:00",
+      "primaryIntent": "совмещение",
+      "pillarHref": "/guide/grafik/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 12,
+      "slug": "kak-povysit-dohod-kureru-bez-pererabotok",
+      "title": "Как повысить доход курьеру без переработок",
+      "type": "rewrite",
+      "nominalPublishAt": "2026-08-25T09:00:00+03:00",
+      "primaryIntent": "оптимизация дохода",
+      "pillarHref": "/guide/dohod/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 13,
+      "slug": "sravnenie-yandex-eda-samokat-ozon",
+      "title": "Яндекс Еда, Самокат или Ozon Fresh: сравнение форматов, а не рекламы",
+      "type": "rewrite",
+      "nominalPublishAt": "2026-08-27T09:00:00+03:00",
+      "primaryIntent": "сравнение работодателей",
+      "pillarHref": "/compare/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 14,
+      "slug": "kak-vybrat-rayon-dlya-raboty-kurerom",
+      "title": "Как выбрать район для работы курьером: спрос, расстояния и возврат домой",
+      "type": "rewrite",
+      "nominalPublishAt": "2026-08-29T09:00:00+03:00",
+      "primaryIntent": "выбор зоны",
+      "pillarHref": "/guide/grafik/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 15,
+      "slug": "kak-kureru-vesti-uchet-dohodov-i-rashodov",
+      "title": "Как курьеру вести учёт доходов и расходов",
+      "type": "rewrite",
+      "nominalPublishAt": "2026-08-31T09:00:00+03:00",
+      "primaryIntent": "чистый доход",
+      "pillarHref": "/guide/dohod/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 16,
+      "slug": "chistyy-dohod-kurera-posle-rashodov",
+      "title": "Сколько остаётся курьеру после НПД, связи, питания и транспорта",
+      "type": "new",
+      "nominalPublishAt": "2026-09-02T09:00:00+03:00",
+      "primaryIntent": "чистый доход",
+      "pillarHref": "/guide/dohod/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 17,
+      "slug": "dohod-kurera-za-4-6-8-12-chasov",
+      "title": "Доход курьера за смену 4, 6, 8 и 12 часов: четыре сценария",
+      "type": "new",
+      "nominalPublishAt": "2026-09-04T09:00:00+03:00",
+      "primaryIntent": "доход за день и час",
+      "pillarHref": "/guide/dohod/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 18,
+      "slug": "pochasovaya-stavka-ili-oplata-za-zakaz",
+      "title": "Почасовая ставка или оплата за заказ: какой риск несёт курьер",
+      "type": "new",
+      "nominalPublishAt": "2026-09-06T09:00:00+03:00",
+      "primaryIntent": "модель оплаты",
+      "pillarHref": "/guide/vyplaty/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 19,
+      "slug": "kak-vybirat-sloty-kureru",
+      "title": "Как выбирать слоты: доход, штрафы и право отказаться",
+      "type": "new",
+      "nominalPublishAt": "2026-09-08T09:00:00+03:00",
+      "primaryIntent": "слоты курьера",
+      "pillarHref": "/guide/grafik/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 20,
+      "slug": "dohod-kurera-goroda-millionniki-2026",
+      "title": "Доход курьера в городах-миллионниках: сопоставимый срез вакансий",
+      "type": "research",
+      "nominalPublishAt": "2026-09-10T09:00:00+03:00",
+      "primaryIntent": "сравнение доходов по городам",
+      "pillarHref": "/cities/",
+      "researchGate": {
+        "required": true,
+        "minimumEvidence": "сопоставимая выборка вакансий по городам и опубликованная методика сравнения"
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 21,
+      "slug": "rabota-kurerom-v-malenkom-gorode",
+      "title": "Работа курьером в маленьком городе: спрос, расстояния и простой",
+      "type": "rewrite",
+      "nominalPublishAt": "2026-09-12T09:00:00+03:00",
+      "primaryIntent": "работа курьером в маленьком городе",
+      "pillarHref": "/cities/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 22,
+      "slug": "kak-pereyti-iz-podrabotki-v-polnyy-grafik-kurerom",
+      "title": "Как перейти из подработки в полный график курьером",
+      "type": "rewrite",
+      "nominalPublishAt": "2026-09-14T09:00:00+03:00",
+      "primaryIntent": "смена режима работы",
+      "pillarHref": "/guide/grafik/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 23,
+      "slug": "pochemu-kurery-uhodyat-iz-dostavki",
+      "title": "Почему курьеры уходят из доставки: причины по интервью, а не догадки",
+      "type": "rewrite",
+      "nominalPublishAt": "2026-09-16T09:00:00+03:00",
+      "primaryIntent": "причины ухода из доставки",
+      "pillarHref": "/guide/grafik/",
+      "researchGate": {
+        "required": true,
+        "minimumEvidence": "реальная описанная выборка интервью без выдуманных цитат"
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 24,
+      "slug": "kak-ponyat-chto-vakansiya-kurera-plohaya",
+      "title": "Как понять, что вакансия курьера плохая: красные флаги до отклика",
+      "type": "rewrite",
+      "nominalPublishAt": "2026-09-18T09:00:00+03:00",
+      "primaryIntent": "как распознать плохую вакансию курьера",
+      "pillarHref": "/guide/trebovaniya/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 25,
+      "slug": "podrabotka-kurerom-po-vyhodnym",
+      "title": "Подработка курьером по выходным: сколько смен брать без выгорания",
+      "type": "new",
+      "nominalPublishAt": "2026-09-20T09:00:00+03:00",
+      "primaryIntent": "подработка курьером по выходным",
+      "pillarHref": "/guide/grafik/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 26,
+      "slug": "vechernie-smeny-kurera",
+      "title": "Вечерние смены курьера: часы пик, транспорт и возвращение домой",
+      "type": "new",
+      "nominalPublishAt": "2026-09-22T09:00:00+03:00",
+      "primaryIntent": "вечерняя работа курьером",
+      "pillarHref": "/guide/grafik/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 27,
+      "slug": "kak-sovmeschat-uchebu-i-dostavku",
+      "title": "Как совмещать учёбу и доставку: расписание без пропусков",
+      "type": "new",
+      "nominalPublishAt": "2026-09-24T09:00:00+03:00",
+      "primaryIntent": "совмещать учёбу и доставку",
+      "pillarHref": "/guide/vozrast/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 28,
+      "slug": "nochnaya-smena-kurera",
+      "title": "Ночная смена курьера: когда она выгодна и что проверить заранее",
+      "type": "new",
+      "nominalPublishAt": "2026-09-26T09:00:00+03:00",
+      "primaryIntent": "ночная работа курьером",
+      "pillarHref": "/guide/grafik/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 29,
+      "slug": "prostoy-kurera-net-zakazov",
+      "title": "Нет заказов на смене: почему возникает простой и как его считать",
+      "type": "new",
+      "nominalPublishAt": "2026-09-28T09:00:00+03:00",
+      "primaryIntent": "простой курьера без заказов",
+      "pillarHref": "/guide/dohod/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 30,
+      "slug": "ozon-i-ozon-fresh-razlichiya-rabot",
+      "title": "Ozon и Ozon Fresh: чем отличаются курьерские и складские роли",
+      "type": "new",
+      "nominalPublishAt": "2026-09-30T09:00:00+03:00",
+      "primaryIntent": "различия ролей Ozon и Ozon Fresh",
+      "pillarHref": "/guide/sravnenie/",
+      "commercialHref": "/companies/ozon/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 31,
+      "slug": "chastota-vyplat-i-byudzhet-kurera",
+      "title": "Как частота выплат влияет на бюджет курьера, комиссии и кассовые разрывы",
+      "type": "new",
+      "nominalPublishAt": "2026-10-02T09:00:00+03:00",
+      "primaryIntent": "частота выплат курьеру",
+      "pillarHref": "/guide/vyplaty/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 32,
+      "slug": "zaderzhka-vyplaty-kureru",
+      "title": "Почему задержалась выплата курьеру: проверка статуса по шагам",
+      "type": "new",
+      "nominalPublishAt": "2026-10-04T09:00:00+03:00",
+      "primaryIntent": "задержка выплаты курьеру",
+      "pillarHref": "/guide/vyplaty/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 33,
+      "slug": "skolko-zakazov-dlya-100-150-200-tysyach",
+      "title": "Сколько заказов нужно для 100, 150 и 200 тысяч рублей в месяц",
+      "type": "new",
+      "nominalPublishAt": "2026-10-06T09:00:00+03:00",
+      "primaryIntent": "сколько заказов для целевого дохода",
+      "pillarHref": "/guide/dohod/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 34,
+      "slug": "chasy-pik-dozhd-i-bonusy-kurera",
+      "title": "Часы пик, дождь и бонусные пороги: когда надбавка окупает нагрузку",
+      "type": "new",
+      "nominalPublishAt": "2026-10-08T09:00:00+03:00",
+      "primaryIntent": "бонусы курьеру и часы пик",
+      "pillarHref": "/guide/dohod/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 35,
+      "slug": "predstavitel-banka-ili-kurer-dostavki",
+      "title": "Представитель банка или курьер доставки: сравнение чистого дохода",
+      "type": "new",
+      "nominalPublishAt": "2026-10-10T09:00:00+03:00",
+      "primaryIntent": "представитель банка или курьер",
+      "pillarHref": "/compare/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 36,
+      "slug": "stavka-sborshchika-zakazov-kupera",
+      "title": "Ставка сборщика заказов Купера: час, смена и бонусы",
+      "type": "new",
+      "nominalPublishAt": "2026-10-12T09:00:00+03:00",
+      "primaryIntent": "ставка сборщика заказов Купера",
+      "pillarHref": "/guide/dohod/",
+      "commercialHref": "/companies/kuper-ex-sbermarket/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 37,
+      "slug": "dohod-kurera-samokata",
+      "title": "Доход курьера Самоката: как читать обещанную ставку",
+      "type": "new",
+      "nominalPublishAt": "2026-10-14T09:00:00+03:00",
+      "primaryIntent": "сколько зарабатывает курьер Самоката",
+      "pillarHref": "/guide/dohod/",
+      "commercialHref": "/companies/samokat/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 38,
+      "slug": "ogranicheniya-svobodnogo-grafika-kurera",
+      "title": "Свободный график в договоре и приложении: пять реальных ограничений",
+      "type": "new",
+      "nominalPublishAt": "2026-10-16T09:00:00+03:00",
+      "primaryIntent": "ограничения свободного графика курьера",
+      "pillarHref": "/guide/grafik/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 39,
+      "slug": "otmena-slota-i-nevyhod-na-smenu",
+      "title": "Отмена слота и невыход на смену: какие последствия проверить в договоре",
+      "type": "new",
+      "nominalPublishAt": "2026-10-18T09:00:00+03:00",
+      "primaryIntent": "отмена слота курьера",
+      "pillarHref": "/guide/shtrafy/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 40,
+      "slug": "indeks-dohodov-kurerov-q3-2026",
+      "title": "Индекс доходов курьеров за III квартал 2026",
+      "type": "research",
+      "nominalPublishAt": "2026-10-20T09:00:00+03:00",
+      "primaryIntent": "индекс доходов курьеров за III квартал",
+      "pillarHref": "/guide/dohod/",
+      "researchGate": {
+        "required": true,
+        "minimumEvidence": "сопоставимая выборка вакансий за III квартал 2026 и опубликованная методика"
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 41,
+      "slug": "rabota-kurerom-zimoy",
+      "title": "Работа курьером зимой: доход, одежда, аккумулятор и безопасность",
+      "type": "rewrite",
+      "nominalPublishAt": "2026-10-22T09:00:00+03:00",
+      "primaryIntent": "работа курьером зимой",
+      "pillarHref": "/guide/transport/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 42,
+      "slug": "pogoda-i-bezopasnost-kurera",
+      "title": "Дождь, жара и гололёд: когда курьеру лучше не выходить на линию",
+      "type": "new",
+      "nominalPublishAt": "2026-10-24T09:00:00+03:00",
+      "primaryIntent": "погода и безопасность курьера",
+      "pillarHref": "/guide/transport/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 43,
+      "slug": "skolko-kilometrov-prohodit-peshiy-kurer",
+      "title": "Сколько километров проходит пеший курьер за смену",
+      "type": "new",
+      "nominalPublishAt": "2026-10-26T09:00:00+03:00",
+      "primaryIntent": "сколько километров проходит пеший курьер",
+      "pillarHref": "/guide/transport/",
+      "commercialHref": "/rabota-peshim-kurerom/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 44,
+      "slug": "kak-ustroena-smena-velokurera",
+      "title": "Как устроена смена велокурьера: маршрут, заряд и перерывы",
+      "type": "new",
+      "nominalPublishAt": "2026-10-28T09:00:00+03:00",
+      "primaryIntent": "смена велокурьера",
+      "pillarHref": "/guide/transport/",
+      "commercialHref": "/rabota-velokurerom/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 45,
+      "slug": "velosiped-ili-elektrosamokat-dlya-dostavki",
+      "title": "Велосипед или электросамокат для доставки: сравнение ограничений",
+      "type": "new",
+      "nominalPublishAt": "2026-10-30T09:00:00+03:00",
+      "primaryIntent": "велосипед или электросамокат для доставки",
+      "pillarHref": "/guide/transport/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 46,
+      "slug": "elektrovelosiped-kupit-ili-arendovat",
+      "title": "Электровелосипед курьеру: купить, арендовать или взять посменно",
+      "type": "new",
+      "nominalPublishAt": "2026-11-01T09:00:00+03:00",
+      "primaryIntent": "электровелосипед купить или арендовать",
+      "pillarHref": "/guide/transport/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 47,
+      "slug": "zapas-hoda-elektrovelosipeda-zimoy",
+      "title": "Запас хода электровелосипеда зимой: как планировать смену",
+      "type": "new",
+      "nominalPublishAt": "2026-11-03T09:00:00+03:00",
+      "primaryIntent": "запас хода электровелосипеда зимой",
+      "pillarHref": "/guide/transport/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 48,
+      "slug": "rashody-na-remont-velosipeda-kurera",
+      "title": "Ремонт велосипеда курьера: какие расходы закладывать в месяц",
+      "type": "new",
+      "nominalPublishAt": "2026-11-05T09:00:00+03:00",
+      "primaryIntent": "расходы на ремонт велосипеда курьера",
+      "pillarHref": "/guide/dohod/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 49,
+      "slug": "lichnyy-avtomobil-dlya-dostavki",
+      "title": "Личный автомобиль для доставки: документы, страховка и ограничения",
+      "type": "new",
+      "nominalPublishAt": "2026-11-07T09:00:00+03:00",
+      "primaryIntent": "личный автомобиль для доставки",
+      "pillarHref": "/guide/transport/",
+      "commercialHref": "/rabota-avtokurerom/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 50,
+      "slug": "stoimost-komplekta-kurera-2026",
+      "title": "Стоимость рабочего комплекта курьера: пешком, вело и авто",
+      "type": "research",
+      "nominalPublishAt": "2026-11-09T09:00:00+03:00",
+      "primaryIntent": "стоимость комплекта курьера",
+      "pillarHref": "/guide/transport/",
+      "researchGate": {
+        "required": true,
+        "minimumEvidence": "проверяемый ценовой срез рабочего комплекта с датой и регионом"
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 51,
+      "slug": "anketa-i-offer-kurera-ozon",
+      "title": "Анкета курьера Ozon: что проверить до получения оффера",
+      "type": "new",
+      "nominalPublishAt": "2026-11-11T09:00:00+03:00",
+      "primaryIntent": "анкета курьера Ozon",
+      "pillarHref": "/guide/trebovaniya/",
+      "commercialHref": "/companies/ozon/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 52,
+      "slug": "doroga-na-sklad-ozon-horugvino",
+      "title": "Дорога на склад Ozon в Хоругвино: как посчитать время и стоимость поездки",
+      "type": "new",
+      "nominalPublishAt": "2026-11-13T09:00:00+03:00",
+      "primaryIntent": "дорога на склад Ozon в Хоругвино",
+      "pillarHref": "/guide/transport/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 53,
+      "slug": "operator-sklada-ili-obrabotchik-tovarov-ozon",
+      "title": "Оператор склада и обработчик товаров Ozon: в чём разница",
+      "type": "new",
+      "nominalPublishAt": "2026-11-15T09:00:00+03:00",
+      "primaryIntent": "оператор склада или обработчик товаров Ozon",
+      "pillarHref": "/guide/sravnenie/",
+      "commercialHref": "/companies/ozon/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 54,
+      "slug": "kurer-sklad-ili-voditel-ozon",
+      "title": "Курьер, склад или водитель Ozon: как выбрать подходящую роль",
+      "type": "new",
+      "nominalPublishAt": "2026-11-17T09:00:00+03:00",
+      "primaryIntent": "курьер, склад или водитель Ozon",
+      "pillarHref": "/guide/sravnenie/",
+      "commercialHref": "/companies/ozon/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 55,
+      "slug": "ozon-fresh-usloviya-po-gorodam",
+      "title": "Почему условия Ozon Fresh различаются по городам и партнёрам",
+      "type": "new",
+      "nominalPublishAt": "2026-11-19T09:00:00+03:00",
+      "primaryIntent": "условия Ozon Fresh по городам",
+      "pillarHref": "/guide/oformlenie/",
+      "commercialHref": "/companies/ozon-fresh/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 56,
+      "slug": "kuper-rabotodatel-ili-partner",
+      "title": "Купер в вакансии и в договоре: как проверить работодателя или партнёра",
+      "type": "new",
+      "nominalPublishAt": "2026-11-21T09:00:00+03:00",
+      "primaryIntent": "Купер работодатель или партнёр",
+      "pillarHref": "/guide/oformlenie/",
+      "commercialHref": "/companies/kuper-ex-sbermarket/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 57,
+      "slug": "kurer-ili-sborshchik-kuper",
+      "title": "Курьер или сборщик заказов в Купере: сравнение смены и дохода",
+      "type": "new",
+      "nominalPublishAt": "2026-11-23T09:00:00+03:00",
+      "primaryIntent": "курьер или сборщик заказов в Купере",
+      "pillarHref": "/guide/sravnenie/",
+      "commercialHref": "/companies/kuper-ex-sbermarket/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 58,
+      "slug": "formaty-kurerov-kupera",
+      "title": "Пеший, вело- и автокурьер Купера: что меняется кроме транспорта",
+      "type": "new",
+      "nominalPublishAt": "2026-11-25T09:00:00+03:00",
+      "primaryIntent": "форматы курьеров Купера",
+      "pillarHref": "/guide/transport/",
+      "commercialHref": "/companies/kuper-ex-sbermarket/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 59,
+      "slug": "referalnaya-programma-kupera",
+      "title": "Реферальная программа Купера: как проверить актуальные условия",
+      "type": "new",
+      "nominalPublishAt": "2026-11-27T09:00:00+03:00",
+      "primaryIntent": "реферальная программа Купера",
+      "pillarHref": "/guide/trebovaniya/",
+      "commercialHref": "/companies/kuper-ex-sbermarket/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 60,
+      "slug": "roli-ozon-i-kuper-v-baze-vakansiy",
+      "title": "Какие роли чаще всего публикуют Ozon и Купер: срез собственной базы",
+      "type": "research",
+      "nominalPublishAt": "2026-11-29T09:00:00+03:00",
+      "primaryIntent": "роли Ozon и Купера в базе вакансий",
+      "pillarHref": "/guide/sravnenie/",
+      "researchGate": {
+        "required": true,
+        "minimumEvidence": "описанная выборка собственной базы вакансий и методика классификации ролей"
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 61,
+      "slug": "kak-ustroena-smena-kurera-samokata",
+      "title": "Как устроена смена курьера Самоката: даркстор, зона и заказы",
+      "type": "new",
+      "nominalPublishAt": "2026-12-01T09:00:00+03:00",
+      "primaryIntent": "смена курьера Самоката",
+      "pillarHref": "/guide/grafik/",
+      "commercialHref": "/companies/samokat/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 62,
+      "slug": "vyplaty-kureram-samokata",
+      "title": "Как часто платят курьерам Самоката и что сверять в расчёте",
+      "type": "new",
+      "nominalPublishAt": "2026-12-03T09:00:00+03:00",
+      "primaryIntent": "выплаты курьерам Самоката",
+      "pillarHref": "/guide/vyplaty/",
+      "commercialHref": "/companies/samokat/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 63,
+      "slug": "sloty-samokata-dlya-kurera",
+      "title": "Слоты Самоката: выбор, отмена и дополнительные смены",
+      "type": "new",
+      "nominalPublishAt": "2026-12-05T09:00:00+03:00",
+      "primaryIntent": "слоты Самоката для курьера",
+      "pillarHref": "/guide/grafik/",
+      "commercialHref": "/companies/samokat/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 64,
+      "slug": "kak-chitat-otzyvy-o-samokate",
+      "title": "Отзывы о работе в Самокате: как отделить проверяемый факт от эмоции",
+      "type": "new",
+      "nominalPublishAt": "2026-12-07T09:00:00+03:00",
+      "primaryIntent": "как читать отзывы о Самокате",
+      "pillarHref": "/guide/sravnenie/",
+      "commercialHref": "/companies/samokat/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 65,
+      "slug": "peshiy-ili-velokurer-yandex-edy",
+      "title": "Пеший или велокурьер Яндекс Еды: сравнение одной смены",
+      "type": "new",
+      "nominalPublishAt": "2026-12-09T09:00:00+03:00",
+      "primaryIntent": "пеший или велокурьер Яндекс Еды",
+      "pillarHref": "/guide/transport/",
+      "commercialHref": "/companies/yandex-eda/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 66,
+      "slug": "yandex-eda-ili-yandex-lavka",
+      "title": "Яндекс Еда и Яндекс Лавка: чем отличаются роли курьера",
+      "type": "new",
+      "nominalPublishAt": "2026-12-11T09:00:00+03:00",
+      "primaryIntent": "Яндекс Еда или Яндекс Лавка",
+      "pillarHref": "/guide/sravnenie/",
+      "commercialHref": "/companies/yandex-eda/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "official-role-employer",
+        "requirements": [
+          "официальный источник условий",
+          "подтверждённая роль или вакансия",
+          "понятный фактический работодатель или партнёр",
+          "назначенный владелец company surface"
+        ]
+      },
+      "reserveBrief": {
+        "slug": "efin-kak-proverit-usloviya-predstavitelya",
+        "title": "Efin: как проверить работодателя, обязанности и маршрут представителя",
+        "pillarHref": "/companies/efin/"
+      }
+    },
+    {
+      "sequence": 67,
+      "slug": "pervaya-smena-yandex-eda",
+      "title": "Первая смена в Яндекс Еде: что проверить до выхода",
+      "type": "new",
+      "nominalPublishAt": "2026-12-13T09:00:00+03:00",
+      "primaryIntent": "первая смена в Яндекс Еде",
+      "pillarHref": "/guide/trebovaniya/",
+      "commercialHref": "/companies/yandex-eda/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 68,
+      "slug": "pervyy-vyezd-predstavitelya-alfa-banka",
+      "title": "Первый выезд представителя Альфа-Банка: документы, маршрут и передача карты",
+      "type": "new",
+      "nominalPublishAt": "2026-12-15T09:00:00+03:00",
+      "primaryIntent": "первый выезд представителя Альфа-Банка",
+      "pillarHref": "/guide/trebovaniya/",
+      "commercialHref": "/companies/alfa-bank/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 69,
+      "slug": "alfa-bank-ili-t-bank-predstavitel",
+      "title": "Альфа-Банк или Т-Банк: сравнение работы выездного представителя",
+      "type": "new",
+      "nominalPublishAt": "2026-12-17T09:00:00+03:00",
+      "primaryIntent": "Альфа-Банк или Т-Банк представитель",
+      "pillarHref": "/compare/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 70,
+      "slug": "modeli-oplaty-kurerov-issledovanie-2026",
+      "title": "Как работодатели платят курьерам: за час, заказ, смену или результат",
+      "type": "research",
+      "nominalPublishAt": "2026-12-19T09:00:00+03:00",
+      "primaryIntent": "модели оплаты курьеров",
+      "pillarHref": "/guide/vyplaty/",
+      "researchGate": {
+        "required": true,
+        "minimumEvidence": "описанная выборка офферов и методика классификации моделей оплаты"
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 71,
+      "slug": "kurer-zolotogo-yabloka-pryamaya-ili-partnerskaya-vakansiya",
+      "title": "Курьер Золотого Яблока: как отличить прямую вакансию от партнёрской",
+      "type": "new",
+      "nominalPublishAt": "2026-12-21T09:00:00+03:00",
+      "primaryIntent": "курьер Золотого Яблока",
+      "pillarHref": "/guide/trebovaniya/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "official-role-employer",
+        "requirements": [
+          "официальный источник условий",
+          "подтверждённая роль или вакансия",
+          "понятный фактический работодатель или партнёр",
+          "назначенный владелец company surface"
+        ]
+      },
+      "reserveBrief": {
+        "slug": "mts-bank-predstavitel-ili-kurer",
+        "title": "МТС Банк: чем выездной представитель отличается от курьера",
+        "pillarHref": "/companies/mts-bank/"
+      }
+    },
+    {
+      "sequence": 72,
+      "slug": "x5-pyaterochka-chizhik-oformlenie-kurera",
+      "title": "X5, Пятёрочка и Чижик: кто оформляет курьера и за что платит",
+      "type": "new",
+      "nominalPublishAt": "2026-12-23T09:00:00+03:00",
+      "primaryIntent": "X5, Пятёрочка и Чижик оформление курьера",
+      "pillarHref": "/guide/oformlenie/",
+      "commercialHref": "/companies/x5-dostavka/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 73,
+      "slug": "kurer-magnita-kak-chitat-vakansiyu",
+      "title": "Курьер Магнита: магазин, доставка или партнёр — как читать вакансию",
+      "type": "new",
+      "nominalPublishAt": "2026-12-25T09:00:00+03:00",
+      "primaryIntent": "курьер Магнита",
+      "pillarHref": "/guide/trebovaniya/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "official-role-employer",
+        "requirements": [
+          "официальный источник условий",
+          "подтверждённая роль или вакансия",
+          "понятный фактический работодатель или партнёр",
+          "назначенный владелец company surface"
+        ]
+      },
+      "reserveBrief": {
+        "slug": "pervyy-marshrut-predstavitelya-t-banka",
+        "title": "Первый маршрут представителя Т-Банка: что проверить до встречи",
+        "pillarHref": "/companies/t-bank/"
+      }
+    },
+    {
+      "sequence": 74,
+      "slug": "kurer-wildberries-vidy-roley",
+      "title": "Курьер Wildberries: доставка клиенту, до ПВЗ или партнёрская роль",
+      "type": "new",
+      "nominalPublishAt": "2026-12-27T09:00:00+03:00",
+      "primaryIntent": "курьер Wildberries виды ролей",
+      "pillarHref": "/guide/trebovaniya/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "official-role-employer",
+        "requirements": [
+          "официальный источник условий",
+          "подтверждённая роль или вакансия",
+          "понятный фактический работодатель или партнёр",
+          "назначенный владелец company surface"
+        ]
+      },
+      "reserveBrief": {
+        "slug": "voditel-ekspeditor-ozon-obyazannosti",
+        "title": "Водитель-экспедитор Ozon: груз, документы и ответственность",
+        "pillarHref": "/companies/ozon/"
+      }
+    },
+    {
+      "sequence": 75,
+      "slug": "burger-king-kurer-povar-ili-kassir",
+      "title": "Курьер, повар или кассир Burger King: сравнение обязанностей и смен",
+      "type": "new",
+      "nominalPublishAt": "2026-12-29T09:00:00+03:00",
+      "primaryIntent": "курьер, повар или кассир Burger King",
+      "pillarHref": "/compare/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 76,
+      "slug": "dokumenty-kurera-16-17-let",
+      "title": "Документы курьера в 16–17 лет: согласие родителей и договор",
+      "type": "new",
+      "nominalPublishAt": "2026-12-31T09:00:00+03:00",
+      "primaryIntent": "документы курьера в 16–17 лет",
+      "pillarHref": "/guide/vozrast/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 77,
+      "slug": "formaty-dostavki-do-18-let",
+      "title": "Какие форматы доставки доступны до 18 лет: официальные условия сервисов",
+      "type": "new",
+      "nominalPublishAt": "2027-01-02T09:00:00+03:00",
+      "primaryIntent": "форматы доставки до 18 лет",
+      "pillarHref": "/guide/vozrast/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 78,
+      "slug": "anketa-kurera-bez-opyta",
+      "title": "Анкета курьера без опыта: что писать и чего не обещать",
+      "type": "new",
+      "nominalPublishAt": "2027-01-04T09:00:00+03:00",
+      "primaryIntent": "анкета курьера без опыта",
+      "pillarHref": "/guide/trebovaniya/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 79,
+      "slug": "chto-vzyat-na-pervuyu-smenu-kurera",
+      "title": "Что взять на первую смену курьера: короткий проверяемый чек-лист",
+      "type": "new",
+      "nominalPublishAt": "2027-01-06T09:00:00+03:00",
+      "primaryIntent": "что взять на первую смену курьера",
+      "pillarHref": "/guide/trebovaniya/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 80,
+      "slug": "vakansii-dlya-16-17-let-issledovanie",
+      "title": "Вакансии для 16–17 лет в собственной базе: какие роли действительно встречаются",
+      "type": "research",
+      "nominalPublishAt": "2027-01-08T09:00:00+03:00",
+      "primaryIntent": "вакансии для 16–17 лет в базе",
+      "pillarHref": "/guide/vozrast/",
+      "researchGate": {
+        "required": true,
+        "minimumEvidence": "описанная выборка собственной базы с проверяемыми возрастными требованиями"
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 81,
+      "slug": "samozanyatyy-sborshchik-zakazov",
+      "title": "Самозанятый сборщик заказов: что означает этот статус",
+      "type": "new",
+      "nominalPublishAt": "2027-01-10T09:00:00+03:00",
+      "primaryIntent": "самозанятый сборщик заказов",
+      "pillarHref": "/guide/oformlenie/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 82,
+      "slug": "cheki-npd-dlya-kurera",
+      "title": "Как курьеру формировать чеки НПД и сверять выплаты",
+      "type": "new",
+      "nominalPublishAt": "2027-01-12T09:00:00+03:00",
+      "primaryIntent": "чеки НПД для курьера",
+      "pillarHref": "/guide/oformlenie/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 83,
+      "slug": "dogovor-kurera-chto-proverit",
+      "title": "Договор курьера: 15 пунктов, которые нужно прочитать до подписи",
+      "type": "new",
+      "nominalPublishAt": "2027-01-14T09:00:00+03:00",
+      "primaryIntent": "договор курьера что проверить",
+      "pillarHref": "/guide/oformlenie/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 84,
+      "slug": "proverka-migratsionnyh-dokumentov-kurera",
+      "title": "Проверка миграционных документов перед анкетой: пять типичных несоответствий",
+      "type": "new",
+      "nominalPublishAt": "2027-01-16T09:00:00+03:00",
+      "primaryIntent": "проверка миграционных документов курьера",
+      "pillarHref": "/guide/grazhdanstvo/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 85,
+      "slug": "oplata-i-prodlenie-medknizhki-kurera",
+      "title": "Кто оплачивает и продлевает медкнижку курьера: вопросы работодателю",
+      "type": "new",
+      "nominalPublishAt": "2027-01-18T09:00:00+03:00",
+      "primaryIntent": "оплата и продление медкнижки курьера",
+      "pillarHref": "/guide/medknizhka/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 86,
+      "slug": "voprosy-rekruteru-kurerskoy-vakansii",
+      "title": "Какие вопросы задать рекрутеру курьерской вакансии",
+      "type": "new",
+      "nominalPublishAt": "2027-01-20T09:00:00+03:00",
+      "primaryIntent": "вопросы рекрутеру курьерской вакансии",
+      "pillarHref": "/guide/trebovaniya/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 87,
+      "slug": "kak-proverit-offer-kurera",
+      "title": "Что проверить в оффере: доход, график, удержания и работодатель",
+      "type": "new",
+      "nominalPublishAt": "2027-01-22T09:00:00+03:00",
+      "primaryIntent": "как проверить оффер курьера",
+      "pillarHref": "/guide/trebovaniya/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 88,
+      "slug": "probnaya-smena-kurera-oplata",
+      "title": "Пробная смена курьера: когда и как должна быть описана оплата",
+      "type": "new",
+      "nominalPublishAt": "2027-01-24T09:00:00+03:00",
+      "primaryIntent": "пробная смена курьера оплата",
+      "pillarHref": "/guide/vyplaty/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 89,
+      "slug": "kak-chitat-otzyvy-kurerov",
+      "title": "Как читать отзывы курьеров: выборка, дата и проверяемые факты",
+      "type": "new",
+      "nominalPublishAt": "2027-01-26T09:00:00+03:00",
+      "primaryIntent": "как читать отзывы курьеров",
+      "pillarHref": "/guide/sravnenie/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 90,
+      "slug": "audit-usloviy-raboty-kurerom-2027",
+      "title": "Какие условия работодателей изменились за полгода: аудит источников",
+      "type": "research",
+      "nominalPublishAt": "2027-01-28T09:00:00+03:00",
+      "primaryIntent": "аудит условий работы курьером",
+      "pillarHref": "/guide/sravnenie/",
+      "researchGate": {
+        "required": true,
+        "minimumEvidence": "версионированный аудит источников с датами проверки и изменениями условий"
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 91,
+      "slug": "kak-sravnit-vakansii-kurera",
+      "title": "Как сравнить 2–4 вакансии курьера по единому чек-листу",
+      "type": "new",
+      "nominalPublishAt": "2027-01-30T09:00:00+03:00",
+      "primaryIntent": "как сравнить вакансии курьера",
+      "pillarHref": "/compare/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 92,
+      "slug": "otkaz-posle-ankety-kurera",
+      "title": "Почему отказали после анкеты курьера и что можно проверить",
+      "type": "new",
+      "nominalPublishAt": "2027-02-01T09:00:00+03:00",
+      "primaryIntent": "отказ после анкеты курьера",
+      "pillarHref": "/guide/trebovaniya/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 93,
+      "slug": "rezume-kurera-bez-opyta",
+      "title": "Резюме курьера без опыта: факты вместо шаблонных качеств",
+      "type": "new",
+      "nominalPublishAt": "2027-02-03T09:00:00+03:00",
+      "primaryIntent": "резюме курьера без опыта",
+      "pillarHref": "/guide/trebovaniya/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 94,
+      "slug": "reyting-otmeny-i-blokirovki-kurera",
+      "title": "Рейтинг, отмены и блокировки курьерского аккаунта: как читать правила сервиса",
+      "type": "new",
+      "nominalPublishAt": "2027-02-05T09:00:00+03:00",
+      "primaryIntent": "рейтинг, отмены и блокировки курьера",
+      "pillarHref": "/guide/shtrafy/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 95,
+      "slug": "kak-soobshchit-o-nevyhode-na-smenu",
+      "title": "Как сообщить о невыходе на смену: доказательства, сроки и форс-мажор",
+      "type": "new",
+      "nominalPublishAt": "2027-02-07T09:00:00+03:00",
+      "primaryIntent": "как сообщить о невыходе на смену",
+      "pillarHref": "/guide/shtrafy/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 96,
+      "slug": "dtp-travma-povrezhdenie-zakaza-kurera",
+      "title": "ДТП, травма или повреждение заказа: последовательность действий курьера",
+      "type": "new",
+      "nominalPublishAt": "2027-02-09T09:00:00+03:00",
+      "primaryIntent": "ДТП, травма или повреждение заказа курьера",
+      "pillarHref": "/guide/transport/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 97,
+      "slug": "strahovanie-kurera-riski-i-isklyucheniya",
+      "title": "Страхование курьера: какие риски покрываются, а какие нет",
+      "type": "new",
+      "nominalPublishAt": "2027-02-11T09:00:00+03:00",
+      "primaryIntent": "страхование курьера риски и исключения",
+      "pillarHref": "/guide/trebovaniya/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 98,
+      "slug": "bezopasnyy-marshrut-kurera-vecherom",
+      "title": "Безопасный маршрут вечером и ночью: чек-лист курьера",
+      "type": "new",
+      "nominalPublishAt": "2027-02-13T09:00:00+03:00",
+      "primaryIntent": "безопасный маршрут курьера вечером",
+      "pillarHref": "/guide/grafik/",
+      "researchGate": {
+        "required": false
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 99,
+      "slug": "voronka-trudoustroystva-kurera-issledovanie",
+      "title": "Воронка трудоустройства курьера: от анкеты до первой оплаченной смены",
+      "type": "research",
+      "nominalPublishAt": "2027-02-15T09:00:00+03:00",
+      "primaryIntent": "воронка трудоустройства курьера",
+      "pillarHref": "/guide/trebovaniya/",
+      "researchGate": {
+        "required": true,
+        "minimumEvidence": "анонимизированная собственная выборка без персональных данных и методика воронки"
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    },
+    {
+      "sequence": 100,
+      "slug": "rynok-kurerskih-vakansiy-2026",
+      "title": "Рынок курьерских вакансий 2026: роли, города и работодатели в собственной базе",
+      "type": "research",
+      "nominalPublishAt": "2027-02-17T09:00:00+03:00",
+      "primaryIntent": "рынок курьерских вакансий 2026",
+      "pillarHref": "/guide/sravnenie/",
+      "researchGate": {
+        "required": true,
+        "minimumEvidence": "годовая выборка собственной базы вакансий и опубликованная методика среза"
+      },
+      "sourceGate": {
+        "required": true,
+        "kind": "standard",
+        "requirements": [
+          "проверяемые источники и дата проверки перед выпуском"
+        ]
+      }
+    }
+  ]
+}
