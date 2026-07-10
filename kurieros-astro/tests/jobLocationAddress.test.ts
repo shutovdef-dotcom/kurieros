@@ -20,6 +20,18 @@ describe('buildJobLocationAddress', () => {
     expect(addr).not.toHaveProperty('postalCode');
   });
 
+  it('preserves a source-backed workplace address when explicitly supplied', () => {
+    const addr = buildJobLocationAddress('Москва', 'д. Хоругвино, д. 35/2');
+
+    expect(addr).toMatchObject({
+      addressLocality: 'Москва',
+      addressRegion: 'Москва',
+      streetAddress: 'д. Хоругвино, д. 35/2',
+      addressCountry: 'RU',
+    });
+    expect(addr).not.toHaveProperty('postalCode');
+  });
+
   it('omits addressRegion when the city is absent from geo data', () => {
     const addr = buildJobLocationAddress('Несуществоград');
 

@@ -21,6 +21,7 @@ const baseInput: JobPostingInput = {
   slug: 'test-courier-moskva-foot',
   company: 'Test Company',
   companyUrl: 'https://kurerok.ru/companies/test-company/',
+  jobUrl: 'https://kurerok.ru/v/test-courier-moskva-foot/',
   cities: ['Москва'],
   hasApplyLink: true,
   applyLink: 'https://example.com/apply',
@@ -62,6 +63,20 @@ describe('buildJobPostingSchema — baseline (no regression after fixes)', () =>
     expect(out.hiringOrganization.sameAs).toBe(
       'https://kurerok.ru/companies/test-company/',
     );
+  });
+
+  it('uses the canonical job page URL and never the external affiliate apply URL', () => {
+    const out = buildJobPostingSchema(baseInput);
+
+    expect(out.url).toBe(baseInput.jobUrl);
+    expect(out.url).not.toBe(baseInput.applyLink);
+  });
+
+  it('marks directApply only after the application flow was explicitly verified', () => {
+    expect(buildJobPostingSchema(baseInput).directApply).toBe(false);
+    expect(
+      buildJobPostingSchema({ ...baseInput, directApplyVerified: true }).directApply,
+    ).toBe(true);
   });
 });
 
@@ -112,6 +127,19 @@ describe('Fix B (2026-05-25) — isRemote → TELECOMMUTE + country-only jobLoca
     });
     expect(address).not.toHaveProperty('streetAddress');
     expect(address).not.toHaveProperty('postalCode');
+  });
+
+  it('adds an exact workplace address only when the caller supplies source-backed data', () => {
+    const out = buildJobPostingSchema({
+      ...baseInput,
+      cities: ['Москва'],
+      workplaceAddress: 'д. Хоругвино, д. 35/2',
+    });
+
+    expect(out.jobLocation[0].address).toMatchObject({
+      addressLocality: 'Москва',
+      streetAddress: 'д. Хоругвино, д. 35/2',
+    });
   });
 });
 
