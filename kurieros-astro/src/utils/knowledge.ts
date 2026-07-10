@@ -22,6 +22,7 @@ export type KnowledgeSource = {
 	name: string;
 	kind: string;
 	url: string;
+	verified_at?: string;
 };
 
 export type KnowledgeBase = {
@@ -31,13 +32,20 @@ export type KnowledgeBase = {
 	items: KnowledgeItem[];
 };
 
-export const TOPIC_META: Readonly<
-	Record<string, { slug: string; title: string; description: string }>
-> = {
+export type TopicMeta = {
+	slug: string;
+	title: string;
+	description: string;
+	/** Actual content-change date for this topic; falls back to KB date. */
+	contentUpdatedAt?: string;
+};
+
+export const TOPIC_META: Readonly<Record<string, TopicMeta>> = {
 	возраст: {
 		slug: 'vozrast',
 		title: 'Возраст курьера',
 		description: 'Со скольки лет можно работать курьером в разных сервисах: пеший, вело, авто и банковские форматы.',
+		contentUpdatedAt: '2026-07-10',
 	},
 	медкнижка: {
 		slug: 'medknizhka',

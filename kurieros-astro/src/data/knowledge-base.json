@@ -9,24 +9,32 @@
     { "id": "alfa-bank", "name": "Альфа-Банк", "kind": "bank-representative", "url": "https://alfabank.ru/career/" },
     { "id": "t-bank", "name": "Т-Банк (Тинькофф)", "kind": "bank-representative", "url": "https://www.tbank.ru/career/" },
     { "id": "dostavista", "name": "Достависта", "kind": "delivery-marketplace", "url": "https://dostavista.ru/" },
-    { "id": "fns-npd", "name": "ФНС — Налог на профдоход", "kind": "regulator", "url": "https://npd.nalog.ru/" }
+    { "id": "fns-npd", "name": "ФНС — Налог на профдоход", "kind": "regulator", "url": "https://npd.nalog.ru/" },
+    { "id": "age-kuper-courier", "name": "Купер — возраст курьера", "kind": "official-employer-age", "url": "https://kuper.ru/rabota/articles/so-skolki-let-mozhno-rabotat-kurerom", "verified_at": "2026-07-10" },
+    { "id": "age-kuper-roles", "name": "Купер — требования по ролям", "kind": "official-employer-age", "url": "https://logistics.kuper.ru/", "verified_at": "2026-07-10" },
+    { "id": "age-kuper-picker", "name": "Купер — сборщик с 16 лет", "kind": "official-employer-age", "url": "https://job.kuper.ru/cities/yekaterinburg/sborshchik-zakazov/s-shestnadcati-let", "verified_at": "2026-07-10" },
+    { "id": "age-kuper-employment", "name": "Купер — условия сотрудничества", "kind": "official-employer-employment", "url": "https://kuper.ru/rabota", "verified_at": "2026-07-10" },
+    { "id": "age-yandex-standards", "name": "Яндекс Еда — стандарты курьеров", "kind": "official-employer-age", "url": "https://pro.yandex.ru/ru-ru/moskva/knowledge-base/courier/standarty-servisa/standarty", "verified_at": "2026-07-10" },
+    { "id": "age-tbank-requirements", "name": "Т-Банк — требования к соискателям", "kind": "official-employer-age", "url": "https://www.tbank.ru/career/service/help/requirements/", "verified_at": "2026-07-10" },
+    { "id": "age-tbank-representative", "name": "Т-Банк — вакансия представителя", "kind": "official-employer-employment", "url": "https://www.tbank.ru/career/service/vacancy/moscow/predstavitel/9046f35c-7f9c-41bf-b44a-57cb6fcd00a4/", "verified_at": "2026-07-10" },
+    { "id": "age-alfa-representative", "name": "Альфа-Банк — специалист по доставке карт", "kind": "official-employer-employment", "url": "https://job.alfabank.ru/vacancies/ulkan/client-service/spetsialist-po-dostavke-plastikovyikh-kart_24534", "verified_at": "2026-07-10" }
   ],
   "items": [
     {
       "id": "age-min-courier",
       "topic": "возраст",
       "question": "Со скольки лет можно работать курьером?",
-      "answer_short": "С 18 лет — везде. С 16 лет — в некоторых сервисах (Купер, Яндекс Еда — пеший формат) при письменном согласии родителей.",
-      "answer_long": "Минимальный возраст для большинства сервисов — 18 лет. Для пешего и велоформата некоторые сервисы (Яндекс Еда, Купер) принимают с 16 лет при наличии письменного согласия родителей. Автокурьерам — только с 18 и при наличии прав. Банковским представителям (Альфа-Банк, Т-Банк) — обычно от 18-21 года.",
+      "answer_short": "Единого порога нет: Купер подтверждает 16+ для пеших и велокурьеров, 18+ для автокурьеров и 16+ для сборщиков. По другим брендам смотрите пометки «не указано».",
+      "answer_long": "Возраст зависит от работодателя и роли. На официальных страницах Купера подтверждены 16+ для пешей и велодоставки без согласия родителей, 18+ для автокурьера и 16+ для сборщика. Стандарты Яндекс Еды описывают ограничения для курьеров младше 18 лет, но не называют нижнюю границу и не отвечают на вопрос о согласии. Т-Банк направляет кандидатов младше 18 лет на курсы и стажировки; Альфа-Банк не указывает возраст в проверенной вакансии специалиста по доставке карт.",
       "facts": [
-        { "value": "18 лет — стандартный минимум", "source_id": "kuper" },
-        { "value": "16 лет — Купер с согласием родителей", "source_id": "kuper" },
-        { "value": "16 лет — Яндекс Еда (пеший / вело) с согласием родителей", "source_id": "yandex-eda" },
-        { "value": "от 18 до 50 лет — Ozon водитель-курьер", "source_id": "ozon" }
+        { "value": "Купер: пеший и велокурьер — с 16 лет, согласие родителей с 16 лет не требуется", "source_id": "age-kuper-courier" },
+        { "value": "Купер: автокурьер — с 18 лет, сборщик — с 16 лет", "source_id": "age-kuper-roles" },
+        { "value": "Яндекс Еда: для курьеров младше 18 лет действуют ограничения по времени, нижний возрастной порог на странице не указан", "source_id": "age-yandex-standards" },
+        { "value": "Т-Банк: кандидатам младше 18 лет предлагаются курсы и стажировки", "source_id": "age-tbank-requirements" }
       ],
       "geo_scope": ["all"],
-      "company_scope": ["yandex-eda", "kuper", "ozon", "samokat", "alfa-bank", "t-bank"],
-      "confidence": 0.92
+      "company_scope": ["yandex-eda", "kuper", "alfa-bank", "t-bank"],
+      "confidence": 0.97
     },
     {
       "id": "medical-book",

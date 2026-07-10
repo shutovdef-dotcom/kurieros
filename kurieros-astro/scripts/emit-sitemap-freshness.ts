@@ -32,13 +32,15 @@ for (const job of detailJobs) {
 // can provide the same truthful signal.
 const sources: SitemapFreshnessSource[] = [
   {
-    id: 'knowledge-base',
+    id: 'knowledge-base:index',
     contentUpdatedAt: knowledgeBaseData.generated,
-    paths: [
-      '/guide/',
-      ...Object.values(TOPIC_META).map((topic) => `/guide/${topic.slug}/`),
-    ],
+    paths: ['/guide/'],
   },
+  ...Object.entries(TOPIC_META).map(([topicName, topic]) => ({
+    id: `knowledge-base:${topicName}`,
+    contentUpdatedAt: topic.contentUpdatedAt ?? knowledgeBaseData.generated,
+    paths: [`/guide/${topic.slug}/`],
+  })),
   ...Object.values(INFO_GUIDES).map((guide) => ({
     id: `info-guide:${guide.key}`,
     contentUpdatedAt: guide.modifiedDate,

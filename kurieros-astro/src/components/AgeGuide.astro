@@ -1,0 +1,494 @@
+---
+import {
+  AGE_GUIDE,
+  getAgeGuideSource,
+  getAgeGuideSources,
+} from '../data/ageGuide';
+
+const roleLabels = {
+  foot: 'Пешком',
+  bike: 'Вело',
+  auto: 'Авто',
+  picker: 'Сборщик',
+  bank: 'Банк',
+} as const;
+
+const formatDate = (value: string) =>
+  new Intl.DateTimeFormat('ru-RU', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(value + 'T00:00:00.000Z'));
+
+const sources = getAgeGuideSources();
+const resolveSources = (sourceIds: readonly string[]) =>
+  sourceIds
+    .map(getAgeGuideSource)
+    .filter((source): source is NonNullable<typeof source> => Boolean(source));
+---
+
+<div class="age-guide">
+  <aside class="age-methodology" aria-label="Методика проверки">
+    <strong>Как проверяли:</strong>
+    <span>{AGE_GUIDE.methodology}</span>
+  </aside>
+
+  <nav class="age-role-nav" aria-label="Возраст по формату работы">
+    {AGE_GUIDE.roleSections.map((section) => (
+      <a href={'#age-' + section.id}>{roleLabels[section.id]}</a>
+    ))}
+  </nav>
+
+  <section class="age-comparison" aria-labelledby="age-comparison-heading">
+    <div class="age-section-heading">
+      <div>
+        <p class="age-eyebrow">Сверено {formatDate(AGE_GUIDE.modifiedDate)}</p>
+        <h2 id="age-comparison-heading">Возраст и оформление по брендам и ролям</h2>
+      </div>
+      <p>
+        «Не указано» означает, что работодатель не опубликовал это условие на
+        проверенной странице.
+      </p>
+    </div>
+
+    <div class="age-table-wrap" tabindex="0" role="region" aria-label="Таблица требований по возрасту">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Бренд и роль</th>
+            <th scope="col">Возраст</th>
+            <th scope="col">Согласие родителей</th>
+            <th scope="col">Оформление</th>
+            <th scope="col">Источник и дата</th>
+          </tr>
+        </thead>
+        <tbody>
+          {AGE_GUIDE.rows.map((row) => (
+            <tr id={row.id}>
+              <th scope="row">
+                <strong>{row.brand}</strong>
+                <span>{row.role}</span>
+                <span class="age-internal-links">
+                  <a href={row.companyHref}>О компании</a>
+                  <a href={row.vacancyHref}>Пример вакансии</a>
+                </span>
+              </th>
+              <td>{row.minimumAge}</td>
+              <td>{row.parentalConsent}</td>
+              <td>{row.employment}</td>
+              <td>
+                <ul class="age-source-list age-source-list--compact">
+                  {resolveSources(row.sourceIds).map((source) => (
+                    <li>
+                      <a href={source.url} target="_blank" rel="noopener noreferrer nofollow">
+                        {source.name}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+                <time datetime={row.verifiedAt}>Проверено {formatDate(row.verifiedAt)}</time>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="age-role-sections" aria-label="Разбор по форматам работы">
+    {AGE_GUIDE.roleSections.map((section) => {
+      const rows = AGE_GUIDE.rows.filter((row) => row.roleId === section.id);
+      return (
+        <article class="age-role-card" id={'age-' + section.id}>
+          <p class="age-eyebrow">{roleLabels[section.id]}</p>
+          <h2>{section.heading}</h2>
+          <p>{section.body}</p>
+          <ul class="age-role-links">
+            {rows.map((row) => (
+              <li>
+                <a href={row.vacancyHref}>{row.brand}: {row.role}</a>
+              </li>
+            ))}
+          </ul>
+          <p class="age-citations">
+            Источники:
+            {' '}
+            {resolveSources(section.sourceIds).map((source, index, list) => (
+              <>
+                <a href={source.url} target="_blank" rel="noopener noreferrer nofollow">
+                  {source.name}
+                </a>
+                <time datetime={source.verified_at}>
+                  {' '}(проверено {formatDate(source.verified_at)})
+                </time>
+                {index < list.length - 1 ? '; ' : ''}
+              </>
+            ))}
+          </p>
+        </article>
+      );
+    })}
+  </section>
+
+  <aside class="age-howto-link">
+    <div>
+      <p class="age-eyebrow">Следующий шаг</p>
+      <h2>Документы и порядок отклика</h2>
+      <p>
+        Здесь разобран только возраст. Общая последовательность оформления
+        вынесена в отдельную инструкцию, чтобы не повторять один и тот же текст.
+      </p>
+    </div>
+    <a href="/kak-stat-kurerom/">Как стать курьером →</a>
+  </aside>
+
+  <section class="age-faq" aria-labelledby="age-faq-heading">
+    <h2 id="age-faq-heading">Частые вопросы о возрасте</h2>
+    <div class="age-faq-list">
+      {AGE_GUIDE.faqItems.map((item) => (
+        <article class="age-faq-card" id={'faq-' + item.id}>
+          <h3>{item.question}</h3>
+          <p>{item.answer}</p>
+          <p class="age-citations">
+            {resolveSources(item.sourceIds).map((source, index, list) => (
+              <>
+                <a href={source.url} target="_blank" rel="noopener noreferrer nofollow">
+                  {source.name}
+                </a>
+                <time datetime={source.verified_at}>
+                  {' '}· проверено {formatDate(source.verified_at)}
+                </time>
+                {index < list.length - 1 ? '; ' : ''}
+              </>
+            ))}
+          </p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="age-sources" aria-labelledby="age-sources-heading">
+    <h2 id="age-sources-heading">Официальные источники</h2>
+    <ul class="age-source-list">
+      {sources.map((source) => (
+        <li>
+          <a href={source.url} target="_blank" rel="noopener noreferrer nofollow">
+            {source.name}
+          </a>
+          <time datetime={source.verified_at}>
+            Проверено {formatDate(source.verified_at)}
+          </time>
+        </li>
+      ))}
+    </ul>
+  </section>
+</div>
+
+<style>
+  .age-guide {
+    display: grid;
+    gap: 36px;
+  }
+
+  .age-methodology {
+    display: grid;
+    gap: 6px;
+    padding: 18px 20px;
+    border: 1px solid color-mix(in srgb, var(--brand-700) 35%, transparent);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--brand-700) 7%, var(--surface-100));
+    color: var(--ink-700);
+    line-height: 1.6;
+  }
+
+  .age-methodology strong {
+    color: var(--ink-900);
+  }
+
+  .age-role-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: -20px;
+  }
+
+  .age-role-nav a {
+    padding: 9px 14px;
+    border: 1px solid var(--ink-100);
+    border-radius: 999px;
+    background: var(--surface-100);
+    color: var(--ink-700);
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .age-role-nav a:hover {
+    border-color: var(--brand-700);
+    color: var(--brand-700);
+  }
+
+  .age-section-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 0.55fr);
+    gap: 24px;
+    align-items: end;
+    margin-bottom: 16px;
+  }
+
+  .age-section-heading h2,
+  .age-role-card h2,
+  .age-howto-link h2,
+  .age-faq h2,
+  .age-sources h2 {
+    margin: 0;
+    font-size: clamp(22px, 2.5vw, 28px);
+    line-height: 1.2;
+  }
+
+  .age-section-heading > p {
+    margin: 0;
+    color: var(--ink-500);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .age-eyebrow {
+    margin: 0 0 6px;
+    color: var(--brand-700);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .age-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--ink-100);
+    border-radius: 16px;
+    background: var(--surface-100);
+  }
+
+  table {
+    width: 100%;
+    min-width: 980px;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  th,
+  td {
+    padding: 16px;
+    border-bottom: 1px solid var(--ink-100);
+    text-align: left;
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  thead th {
+    background: var(--surface-200);
+    color: var(--ink-700);
+    font-size: 12px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  tbody tr:last-child th,
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  tbody th {
+    width: 210px;
+  }
+
+  tbody th > strong,
+  tbody th > span {
+    display: block;
+  }
+
+  tbody th > span {
+    color: var(--ink-600);
+    font-weight: 500;
+  }
+
+  .age-internal-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    margin-top: 8px;
+    font-size: 12px;
+  }
+
+  .age-internal-links a,
+  .age-role-links a {
+    color: var(--brand-700);
+    text-decoration: none;
+    border-bottom: 1px dashed currentColor;
+  }
+
+  .age-source-list {
+    display: grid;
+    gap: 10px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .age-source-list--compact {
+    gap: 4px;
+    margin: 0 0 6px;
+  }
+
+  .age-source-list a,
+  .age-citations a {
+    color: var(--brand-700);
+  }
+
+  .age-source-list time,
+  td time {
+    display: block;
+    color: var(--ink-500);
+    font-size: 12px;
+  }
+
+  .age-role-sections {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .age-role-card {
+    scroll-margin-top: 88px;
+    padding: 24px;
+    border: 1px solid var(--ink-100);
+    border-radius: 16px;
+    background: var(--surface-100);
+  }
+
+  .age-role-card > p:not(.age-eyebrow, .age-citations) {
+    margin: 12px 0 0;
+    color: var(--ink-700);
+    line-height: 1.7;
+  }
+
+  .age-role-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 14px;
+  }
+
+  .age-citations {
+    margin: 16px 0 0;
+    padding-top: 12px;
+    border-top: 1px dashed var(--ink-100);
+    color: var(--ink-500);
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .age-howto-link {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px;
+    border-radius: 16px;
+    background: var(--ink-900);
+    color: var(--ink-0);
+  }
+
+  .age-howto-link p:not(.age-eyebrow) {
+    max-width: 680px;
+    margin: 8px 0 0;
+    color: color-mix(in srgb, var(--ink-0) 78%, transparent);
+    line-height: 1.6;
+  }
+
+  .age-howto-link .age-eyebrow {
+    color: var(--brand-400);
+  }
+
+  .age-howto-link a {
+    flex: 0 0 auto;
+    padding: 12px 18px;
+    border-radius: 10px;
+    background: var(--brand-700);
+    color: var(--ink-0);
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .age-faq-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .age-faq-card {
+    padding: 20px 22px;
+    border: 1px solid var(--ink-100);
+    border-radius: 14px;
+    background: var(--surface-100);
+  }
+
+  .age-faq-card h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+  }
+
+  .age-faq-card > p:not(.age-citations) {
+    margin: 0;
+    color: var(--ink-700);
+    line-height: 1.65;
+  }
+
+  .age-sources {
+    padding: 24px;
+    border-radius: 16px;
+    background: var(--surface-200);
+  }
+
+  .age-sources .age-source-list li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: baseline;
+  }
+
+  :global(.dark-mode) .age-methodology,
+  :global(.dark-mode) .age-table-wrap,
+  :global(.dark-mode) .age-role-card,
+  :global(.dark-mode) .age-faq-card,
+  :global(.dark-mode) .age-role-nav a {
+    border-color: var(--ink-200);
+    background: var(--surface-200);
+  }
+
+  @media (max-width: 760px) {
+    .age-section-heading,
+    .age-role-sections {
+      grid-template-columns: 1fr;
+    }
+
+    .age-howto-link {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .age-howto-link a {
+      width: 100%;
+      text-align: center;
+    }
+
+    .age-sources .age-source-list li {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+  }
+</style>

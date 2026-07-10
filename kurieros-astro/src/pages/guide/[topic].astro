@@ -2,6 +2,12 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
+import AgeGuide from '../../components/AgeGuide.astro';
+import {
+	AGE_GUIDE,
+	buildAgeGuideFaqEntities,
+	getAgeGuideSources,
+} from '../../data/ageGuide';
 import {
 	TOPIC_META,
 	getItemsByTopic,
@@ -21,6 +27,7 @@ export function getStaticPaths() {
 
 const { topic, meta } = Astro.props;
 const items = getItemsByTopic(topic);
+const isAgeGuide = topic === 'возраст';
 const allTopics = Object.entries(TOPIC_META)
 	.filter(([key]) => key !== topic)
 	.map(([key, value]) => ({ key, ...value }));
@@ -28,21 +35,31 @@ const allTopics = Object.entries(TOPIC_META)
 const usedSourceIds = Array.from(
 	new Set(items.flatMap((item) => item.facts.map((fact) => fact.source_id))),
 );
-const usedSources = usedSourceIds
-	.map((id) => getSourceById(id))
-	.filter((source): source is NonNullable<typeof source> => Boolean(source));
+const usedSources = isAgeGuide
+	? getAgeGuideSources()
+	: usedSourceIds
+			.map((id) => getSourceById(id))
+			.filter((source): source is NonNullable<typeof source> => Boolean(source));
 
 const pageTitle = `${meta.title} — гид для курьера 2026 | КурьерОк`;
 const pageDescription = meta.description;
+const publishedDate = isAgeGuide ? AGE_GUIDE.publishedDate : knowledgeBaseData.generated;
+const modifiedDate =
+	isAgeGuide
+		? AGE_GUIDE.modifiedDate
+		: (meta.contentUpdatedAt ?? knowledgeBaseData.generated);
+const visibleQuestionCount = isAgeGuide ? AGE_GUIDE.faqItems.length : items.length;
 
-const faqEntities = items.map((item) => ({
-	'@type': 'Question',
-	name: item.question,
-	acceptedAnswer: {
-		'@type': 'Answer',
-		text: item.answer_long,
-	},
-}));
+const faqEntities = isAgeGuide
+	? buildAgeGuideFaqEntities(AGE_GUIDE.faqItems)
+	: items.map((item) => ({
+			'@type': 'Question',
+			name: item.question,
+			acceptedAnswer: {
+				'@type': 'Answer',
+				text: item.answer_long,
+			},
+		}));
 
 const articleSchema = {
 	'@type': 'Article',
@@ -54,12 +71,14 @@ const articleSchema = {
 		'@type': 'WebPage',
 		'@id': Astro.url.href,
 	},
-	datePublished: `${knowledgeBaseData.generated}T00:00:00+03:00`,
-	dateModified: `${knowledgeBaseData.generated}T00:00:00+03:00`,
+	datePublished: publishedDate + 'T00:00:00+03:00',
+	dateModified: modifiedDate + 'T00:00:00+03:00',
 	inLanguage: 'ru-RU',
 	speakable: {
 		'@type': 'SpeakableSpecification',
-		cssSelector: ['.guide-card h2', '.guide-card-short'],
+		cssSelector: isAgeGuide
+			? ['.age-role-card h2', '.age-faq-card h3']
+			: ['.guide-card h2', '.guide-card-short'],
 	},
 	about: {
 		'@type': 'Thing',
@@ -157,8 +176,8 @@ const pageSchemaGraph = [
 	schemaGraph={pageSchemaGraph}
 	ogType="article"
 	articleSection={meta.title}
-	articlePublishedTime={`${knowledgeBaseData.generated}T00:00:00Z`}
-	articleModifiedTime={`${knowledgeBaseData.generated}T00:00:00Z`}
+	articlePublishedTime={publishedDate + 'T00:00:00Z'}
+	articleModifiedTime={modifiedDate + 'T00:00:00Z'}
 >
 	<Header />
 
@@ -173,9 +192,9 @@ const pageSchemaGraph = [
 				<h1>{meta.title}</h1>
 				<p class="guide-lead">{meta.description}</p>
 				<div class="guide-meta">
-					<span>Обновлено: {knowledgeBaseData.generated}</span>
+					<span>Обновлено: {modifiedDate}</span>
 					<span>·</span>
-					<span>{items.length} {items.length === 1 ? 'вопрос' : 'вопросов'}</span>
+					<span>{visibleQuestionCount} {visibleQuestionCount === 1 ? 'вопрос' : 'вопросов'}</span>
 					<span>·</span>
 					<span>Источников: {usedSources.length}</span>
 				</div>
@@ -215,7 +234,9 @@ const pageSchemaGraph = [
 				</section>
 			)}
 
-			<section class="guide-faq">
+			{isAgeGuide && <AgeGuide />}
+
+			{!isAgeGuide && <section class="guide-faq">
 				{items.map((item) => {
 					const companyLinks = resolveCompanyLinks(item.company_scope);
 					const geoLinks = resolveGeoLinks(item.geo_scope);
@@ -278,7 +299,7 @@ const pageSchemaGraph = [
 						</article>
 					);
 				})}
-			</section>
+			</section>}
 
 			<section class="guide-related">
 				<h2>Другие разделы гида</h2>
