@@ -5,7 +5,7 @@
 **Версия:** 0.1.0
 **Обновлено:** 2026-04-26
 **Всего вопросов:** 23
-**Источников:** 8
+**Источников:** 16
 
 ## Источники
 
@@ -17,6 +17,14 @@
 - **Т-Банк (Тинькофф)** (bank-representative) — https://www.tbank.ru/career/
 - **Достависта** (delivery-marketplace) — https://dostavista.ru/
 - **ФНС — Налог на профдоход** (regulator) — https://npd.nalog.ru/
+- **Купер — возраст курьера** (official-employer-age) — https://kuper.ru/rabota/articles/so-skolki-let-mozhno-rabotat-kurerom
+- **Купер — требования по ролям** (official-employer-age) — https://logistics.kuper.ru/
+- **Купер — сборщик с 16 лет** (official-employer-age) — https://job.kuper.ru/cities/yekaterinburg/sborshchik-zakazov/s-shestnadcati-let
+- **Купер — условия сотрудничества** (official-employer-employment) — https://kuper.ru/rabota
+- **Яндекс Еда — стандарты курьеров** (official-employer-age) — https://pro.yandex.ru/ru-ru/moskva/knowledge-base/courier/standarty-servisa/standarty
+- **Т-Банк — требования к соискателям** (official-employer-age) — https://www.tbank.ru/career/service/help/requirements/
+- **Т-Банк — вакансия представителя** (official-employer-employment) — https://www.tbank.ru/career/service/vacancy/moscow/predstavitel/9046f35c-7f9c-41bf-b44a-57cb6fcd00a4/
+- **Альфа-Банк — специалист по доставке карт** (official-employer-employment) — https://job.alfabank.ru/vacancies/ulkan/client-service/spetsialist-po-dostavke-plastikovyikh-kart_24534
 
 ---
 
@@ -28,19 +36,19 @@
 
 Permalink: https://kurerok.ru/guide/vozrast/#age-min-courier
 
-**Кратко:** С 18 лет — везде. С 16 лет — в некоторых сервисах (Купер, Яндекс Еда — пеший формат) при письменном согласии родителей.
+**Кратко:** Единого порога нет: Купер подтверждает 16+ для пеших и велокурьеров, 18+ для автокурьеров и 16+ для сборщиков. По другим брендам смотрите пометки «не указано».
 
-Минимальный возраст для большинства сервисов — 18 лет. Для пешего и велоформата некоторые сервисы (Яндекс Еда, Купер) принимают с 16 лет при наличии письменного согласия родителей. Автокурьерам — только с 18 и при наличии прав. Банковским представителям (Альфа-Банк, Т-Банк) — обычно от 18-21 года.
+Возраст зависит от работодателя и роли. На официальных страницах Купера подтверждены 16+ для пешей и велодоставки без согласия родителей, 18+ для автокурьера и 16+ для сборщика. Стандарты Яндекс Еды описывают ограничения для курьеров младше 18 лет, но не называют нижнюю границу и не отвечают на вопрос о согласии. Т-Банк направляет кандидатов младше 18 лет на курсы и стажировки; Альфа-Банк не указывает возраст в проверенной вакансии специалиста по доставке карт.
 
 **Факты:**
-- 18 лет — стандартный минимум — *Купер (ex. СберМаркет)* (https://kuper.ru/career)
-- 16 лет — Купер с согласием родителей — *Купер (ex. СберМаркет)* (https://kuper.ru/career)
-- 16 лет — Яндекс Еда (пеший / вело) с согласием родителей — *Яндекс Еда* (https://eda.yandex.ru/partner/rabota/)
-- от 18 до 50 лет — Ozon водитель-курьер — *Ozon* (https://job.ozon.ru/)
+- Купер: пеший и велокурьер — с 16 лет, согласие родителей с 16 лет не требуется — *Купер — возраст курьера* (https://kuper.ru/rabota/articles/so-skolki-let-mozhno-rabotat-kurerom)
+- Купер: автокурьер — с 18 лет, сборщик — с 16 лет — *Купер — требования по ролям* (https://logistics.kuper.ru/)
+- Яндекс Еда: для курьеров младше 18 лет действуют ограничения по времени, нижний возрастной порог на странице не указан — *Яндекс Еда — стандарты курьеров* (https://pro.yandex.ru/ru-ru/moskva/knowledge-base/courier/standarty-servisa/standarty)
+- Т-Банк: кандидатам младше 18 лет предлагаются курсы и стажировки — *Т-Банк — требования к соискателям* (https://www.tbank.ru/career/service/help/requirements/)
 
-**География:** all  
-**Работодатели:** yandex-eda, kuper, ozon, samokat, alfa-bank, t-bank  
-**Достоверность:** 92%
+**География:** all
+**Работодатели:** yandex-eda, kuper, alfa-bank, t-bank
+**Достоверность:** 97%
 
 ---
 
@@ -61,8 +69,8 @@ Permalink: https://kurerok.ru/guide/medknizhka/#medical-book
 - Можно оформить в течение 7 дней работы — Яндекс Еда — *Яндекс Еда* (https://eda.yandex.ru/partner/rabota/)
 - Не требуется для банковских представителей — *Альфа-Банк* (https://alfabank.ru/career/)
 
-**География:** all  
-**Работодатели:** yandex-eda, kuper, samokat  
+**География:** all
+**Работодатели:** yandex-eda, kuper, samokat
 **Достоверность:** 95%
 
 ---
@@ -84,8 +92,8 @@ Permalink: https://kurerok.ru/guide/dokumenty/#documents-required
 - Авто/мото — права + СТС — *Купер (ex. СберМаркет)* (https://kuper.ru/career)
 - Иностранцы — миграционная карта (цель: работа) — *Самокат* (https://samokat-courier.ru/)
 
-**География:** all  
-**Работодатели:** yandex-eda, kuper, ozon, samokat  
+**География:** all
+**Работодатели:** yandex-eda, kuper, ozon, samokat
 **Достоверность:** 93%
 
 ---
@@ -107,8 +115,8 @@ Permalink: https://kurerok.ru/guide/grazhdanstvo/#citizenship-eligible
 - Таджикистан / Узбекистан / Молдова — только ГПХ — *Самокат* (https://samokat-courier.ru/)
 - Украина — нужен РВП/ВНЖ — *Самокат* (https://samokat-courier.ru/)
 
-**География:** all  
-**Работодатели:** yandex-eda, kuper, samokat  
+**География:** all
+**Работодатели:** yandex-eda, kuper, samokat
 **Достоверность:** 85%
 
 ---
@@ -130,8 +138,8 @@ Permalink: https://kurerok.ru/guide/oformlenie/#self-employed-registration
 - Налог 4% (физлица) / 6% (юрлица) — *ФНС — Налог на профдоход* (https://npd.nalog.ru/)
 - Регистрация через «Мой налог» / мобильный банк — *ФНС — Налог на профдоход* (https://npd.nalog.ru/)
 
-**География:** all  
-**Работодатели:** yandex-eda, kuper, ozon, samokat, dostavista  
+**География:** all
+**Работодатели:** yandex-eda, kuper, ozon, samokat, dostavista
 **Достоверность:** 97%
 
 ---
@@ -149,8 +157,8 @@ Permalink: https://kurerok.ru/guide/oformlenie/#training-period
 - Альфа-Банк: оплачиваемое обучение 5–10 дней — *Альфа-Банк* (https://alfabank.ru/career/)
 - Испытательный срок до 3 мес — ТК РФ — *Альфа-Банк* (https://alfabank.ru/career/)
 
-**География:** all  
-**Работодатели:** yandex-eda, kuper, samokat, alfa-bank, t-bank  
+**География:** all
+**Работодатели:** yandex-eda, kuper, samokat, alfa-bank, t-bank
 **Достоверность:** 85%
 
 ---
@@ -169,8 +177,8 @@ Permalink: https://kurerok.ru/guide/oformlenie/#tax-self-employed
 - Списание автоматически до 28-го числа — *ФНС — Налог на профдоход* (https://npd.nalog.ru/)
 - Лимит 2,4 млн ₽ в год — *ФНС — Налог на профдоход* (https://npd.nalog.ru/)
 
-**География:** all  
-**Работодатели:** yandex-eda, kuper, ozon, samokat, dostavista  
+**География:** all
+**Работодатели:** yandex-eda, kuper, ozon, samokat, dostavista
 **Достоверность:** 97%
 
 ---
@@ -193,8 +201,8 @@ Permalink: https://kurerok.ru/guide/dohod/#income-foot-courier-msk
 - Час: 350–550 ₽ — *Самокат* (https://samokat-courier.ru/)
 - В регионах ставка на 30–40% ниже Москвы — *Яндекс Еда* (https://eda.yandex.ru/partner/rabota/)
 
-**География:** msk  
-**Работодатели:** yandex-eda, samokat, kuper  
+**География:** msk
+**Работодатели:** yandex-eda, samokat, kuper
 **Достоверность:** 90%
 
 ---
@@ -213,8 +221,8 @@ Permalink: https://kurerok.ru/guide/dohod/#income-bike-courier-msk
 - Самокат: +50 ₽/час за допсмены, +40 ₽/час в выходные — *Самокат* (https://samokat-courier.ru/)
 - Регионы: 80–160 тыс ₽/мес — *Яндекс Еда* (https://eda.yandex.ru/partner/rabota/)
 
-**География:** msk  
-**Работодатели:** yandex-eda, samokat, kuper  
+**География:** msk
+**Работодатели:** yandex-eda, samokat, kuper
 **Достоверность:** 88%
 
 ---
@@ -232,8 +240,8 @@ Permalink: https://kurerok.ru/guide/dohod/#income-auto-courier-msk
 - Ozon Fresh / Я.Про опытный: до 320 тыс ₽/мес — *Ozon* (https://job.ozon.ru/)
 - Регионы: 100 000–200 000 ₽/мес — *Яндекс Еда* (https://eda.yandex.ru/partner/rabota/)
 
-**География:** msk  
-**Работодатели:** yandex-eda, ozon, kuper  
+**География:** msk
+**Работодатели:** yandex-eda, ozon, kuper
 **Достоверность:** 86%
 
 ---
@@ -251,8 +259,8 @@ Permalink: https://kurerok.ru/guide/dohod/#income-bank-rep-msk
 - Т-Банк Москва: ~90 000 ₽/мес — *Т-Банк (Тинькофф)* (https://www.tbank.ru/career/)
 - Гибкий график 5/2, 2/2, 4/2, 3/2 — *Альфа-Банк* (https://alfabank.ru/career/)
 
-**География:** msk  
-**Работодатели:** alfa-bank, t-bank  
+**География:** msk
+**Работодатели:** alfa-bank, t-bank
 **Достоверность:** 86%
 
 ---
@@ -271,8 +279,8 @@ Permalink: https://kurerok.ru/guide/dohod/#income-spb
 - Авто СПб: 100 000–160 000 ₽/мес — *Яндекс Еда* (https://eda.yandex.ru/partner/rabota/)
 - СПб на 10–15% ниже Москвы — *Яндекс Еда* (https://eda.yandex.ru/partner/rabota/)
 
-**География:** spb  
-**Работодатели:** yandex-eda, samokat, kuper  
+**География:** spb
+**Работодатели:** yandex-eda, samokat, kuper
 **Достоверность:** 84%
 
 ---
@@ -290,8 +298,8 @@ Permalink: https://kurerok.ru/guide/dohod/#income-regions
 - Региональные центры от 500 тыс: пеший 30–50 тыс ₽/мес — *Купер (ex. СберМаркет)* (https://kuper.ru/career)
 - Малые города от 100 тыс: 25–45 тыс ₽/мес — *Самокат* (https://samokat-courier.ru/)
 
-**География:** regions  
-**Работодатели:** yandex-eda, kuper, samokat, ozon  
+**География:** regions
+**Работодатели:** yandex-eda, kuper, samokat, ozon
 **Достоверность:** 78%
 
 ---
@@ -313,8 +321,8 @@ Permalink: https://kurerok.ru/guide/vyplaty/#payment-frequency
 - Яндекс Еда — ежедневные/еженедельные — *Яндекс Еда* (https://eda.yandex.ru/partner/rabota/)
 - Достависта — почти сразу после заказа — *Достависта* (https://dostavista.ru/)
 
-**География:** all  
-**Работодатели:** yandex-eda, kuper, samokat, dostavista  
+**География:** all
+**Работодатели:** yandex-eda, kuper, samokat, dostavista
 **Достоверность:** 94%
 
 ---
@@ -336,8 +344,8 @@ Permalink: https://kurerok.ru/guide/grafik/#schedule-flexibility
 - Бронирование за 1-7 дней — *Самокат* (https://samokat-courier.ru/)
 - Подработка от 1 смены в неделю — Достависта — *Достависта* (https://dostavista.ru/)
 
-**География:** all  
-**Работодатели:** yandex-eda, kuper, samokat, dostavista  
+**География:** all
+**Работодатели:** yandex-eda, kuper, samokat, dostavista
 **Достоверность:** 91%
 
 ---
@@ -355,8 +363,8 @@ Permalink: https://kurerok.ru/guide/grafik/#side-hustle-evening
 - До 8000 ₽ в день — Достависта — *Достависта* (https://dostavista.ru/)
 - Слоты вечером с надбавкой за час пик — *Самокат* (https://samokat-courier.ru/)
 
-**География:** all  
-**Работодатели:** yandex-eda, samokat, dostavista, kuper  
+**География:** all
+**Работодатели:** yandex-eda, samokat, dostavista, kuper
 **Достоверность:** 90%
 
 ---
@@ -379,8 +387,8 @@ Permalink: https://kurerok.ru/guide/shtrafy/#fines-yandex-eda
 - Отказ от принятого заказа — до полной стоимости — *Яндекс Еда* (https://eda.yandex.ru/partner/rabota/)
 - Блокировка за мошенничество / кражу / опьянение — *Яндекс Еда* (https://eda.yandex.ru/partner/rabota/)
 
-**География:** all  
-**Работодатели:** yandex-eda  
+**География:** all
+**Работодатели:** yandex-eda
 **Достоверность:** 89%
 
 ---
@@ -398,8 +406,8 @@ Permalink: https://kurerok.ru/guide/shtrafy/#fines-kuper
 - Поздняя отмена слота — штраф — *Купер (ex. СберМаркет)* (https://kuper.ru/career)
 - Отказ от заказа без причины — штраф — *Купер (ex. СберМаркет)* (https://kuper.ru/career)
 
-**География:** all  
-**Работодатели:** kuper  
+**География:** all
+**Работодатели:** kuper
 **Достоверность:** 84%
 
 ---
@@ -421,8 +429,8 @@ Permalink: https://kurerok.ru/guide/transport/#transport-comparison
 - Велокурьер +30–50% к пешему — *Яндекс Еда* (https://eda.yandex.ru/partner/rabota/)
 - Авто требует расходов на ГСМ/амортизацию — *Ozon* (https://job.ozon.ru/)
 
-**География:** all  
-**Работодатели:** yandex-eda, kuper, samokat  
+**География:** all
+**Работодатели:** yandex-eda, kuper, samokat
 **Достоверность:** 86%
 
 ---
@@ -440,8 +448,8 @@ Permalink: https://kurerok.ru/guide/transport/#winter-equipment
 - +10–30 ₽ за заказ при -10°C и ниже — *Яндекс Еда* (https://eda.yandex.ru/partner/rabota/)
 - Велик зимой не работает — *Самокат* (https://samokat-courier.ru/)
 
-**География:** all  
-**Работодатели:** yandex-eda, kuper, samokat  
+**География:** all
+**Работодатели:** yandex-eda, kuper, samokat
 **Достоверность:** 83%
 
 ---
@@ -463,8 +471,8 @@ Permalink: https://kurerok.ru/guide/trebovaniya/#what-equipment
 - Термосумка — выдаёт сервис, иногда под залог — *Яндекс Еда* (https://eda.yandex.ru/partner/rabota/)
 - Авто/мото — личный + права + СТС — *Купер (ex. СберМаркет)* (https://kuper.ru/career)
 
-**География:** all  
-**Работодатели:** yandex-eda, kuper, samokat, ozon  
+**География:** all
+**Работодатели:** yandex-eda, kuper, samokat, ozon
 **Достоверность:** 93%
 
 ---
@@ -482,8 +490,8 @@ Permalink: https://kurerok.ru/guide/trebovaniya/#find-courier-job
 - Каталоги — для сравнения, проверяйте дату обновления — *Купер (ex. СберМаркет)* (https://kuper.ru/career)
 - Предоплата за инвентарь — мошенническая схема — *Самокат* (https://samokat-courier.ru/)
 
-**География:** all  
-**Работодатели:** yandex-eda, kuper, samokat, ozon, alfa-bank, t-bank, dostavista  
+**География:** all
+**Работодатели:** yandex-eda, kuper, samokat, ozon, alfa-bank, t-bank, dostavista
 **Достоверность:** 90%
 
 ---
@@ -504,8 +512,8 @@ Permalink: https://kurerok.ru/guide/sravnenie/#kuper-vs-yandex-eda
 - Яндекс Еда — мягче штрафы — *Яндекс Еда* (https://eda.yandex.ru/partner/rabota/)
 - Купер — выше ставка, жёстче слоты — *Купер (ex. СберМаркет)* (https://kuper.ru/career)
 
-**География:** all  
-**Работодатели:** yandex-eda, kuper  
+**География:** all
+**Работодатели:** yandex-eda, kuper
 **Достоверность:** 78%
 
 ---

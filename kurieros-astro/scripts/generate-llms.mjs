@@ -113,10 +113,10 @@ for (const topic of TOPIC_ORDER) {
 			lines.push('');
 		}
 		if (item.geo_scope.length) {
-			lines.push(`**География:** ${item.geo_scope.join(', ')}  `);
+			lines.push(`**География:** ${item.geo_scope.join(', ')}`);
 		}
 		if (item.company_scope.length) {
-			lines.push(`**Работодатели:** ${item.company_scope.join(', ')}  `);
+			lines.push(`**Работодатели:** ${item.company_scope.join(', ')}`);
 		}
 		lines.push(`**Достоверность:** ${Math.round(item.confidence * 100)}%`);
 		lines.push('');
