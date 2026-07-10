@@ -113,6 +113,34 @@ export const BlogSourceRegistrySchema = z
  */
 export const BLOG_SOURCE_REGISTRY = BlogSourceRegistrySchema.parse(sourceRegistryJson);
 
+export const blogPrimarySourceById = new Map(
+  BLOG_SOURCE_REGISTRY.sources.map((source) => [source.id, source]),
+);
+
+export const blogSourceBriefBySlug = new Map(
+  BLOG_SOURCE_REGISTRY.articleSources.map((brief) => [brief.slug, brief]),
+);
+
+/**
+ * Resolves only declared primary citations for one planned article. This is
+ * intentionally fail-closed: a page cannot silently render a vague
+ * "sources available" marker when its source brief was omitted or corrupted.
+ */
+export const getBlogPrimarySources = (slug: string): BlogPrimarySource[] => {
+  const brief = blogSourceBriefBySlug.get(slug);
+  if (!brief) {
+    throw new Error(`No source brief exists for blog slug: ${slug}`);
+  }
+
+  return brief.sourceIds.map((sourceId) => {
+    const source = blogPrimarySourceById.get(sourceId);
+    if (!source) {
+      throw new Error(`Source brief ${slug} references unknown source: ${sourceId}`);
+    }
+    return source;
+  });
+};
+
 export type BlogSourceRegistry = z.infer<typeof BlogSourceRegistrySchema>;
 export type BlogPrimarySource = z.infer<typeof SourceSchema>;
 export type BlogArticleSource = z.infer<typeof ArticleSourceSchema>;

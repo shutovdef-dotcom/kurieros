@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   BLOG_SOURCE_REGISTRY,
   BlogSourceRegistrySchema,
+  getBlogPrimarySources,
 } from '../src/utils/blogSourceRegistry';
 
 describe('blog source registry', () => {
@@ -61,5 +62,13 @@ describe('blog source registry', () => {
     const unknownCoverage = structuredClone(BLOG_SOURCE_REGISTRY);
     unknownCoverage.articleSources[0].sourceIds = ['not-in-registry'];
     expect(BlogSourceRegistrySchema.safeParse(unknownCoverage).success).toBe(false);
+  });
+
+  it('resolves article citations from the registry and fails closed for an unknown brief', () => {
+    const sources = getBlogPrimarySources('skolko-zarabatyvaet-kurer-yandex-eda-2026');
+
+    expect(sources.length).toBeGreaterThan(0);
+    expect(sources.every((source) => source.url.startsWith('https://'))).toBe(true);
+    expect(() => getBlogPrimarySources('not-a-planned-article')).toThrow(/No source brief/);
   });
 });
