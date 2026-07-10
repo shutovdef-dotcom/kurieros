@@ -55,7 +55,7 @@ const ledgerWithFirstRelease = (): BlogReleaseLedger => ({
       sequence: 1,
       slug: 'article-1',
       releasedAt: '2026-08-03T09:05:00+03:00',
-      datePublished: '2026-08-03T09:05:00+03:00',
+      firstPublishedAt: '2026-08-03T09:05:00+03:00',
       revision: 1,
       contentSha256: sha('1'),
       deploySha: 'abc1234',
@@ -85,7 +85,7 @@ describe('blog release ledger validation', () => {
     const ledger = ledgerWithFirstRelease();
     const {
       releasedAt: _releasedAt,
-      datePublished: _datePublished,
+      firstPublishedAt: _firstPublishedAt,
       ...withoutExplicitDates
     } = ledger.releases[0]!;
     ledger.releases[0] = withoutExplicitDates as typeof ledger.releases[number];
@@ -94,7 +94,7 @@ describe('blog release ledger validation', () => {
       ok: false,
       errors: expect.arrayContaining([
         'missing_released_at',
-        'missing_date_published',
+        'missing_first_published_at',
       ]),
     });
   });
@@ -105,7 +105,7 @@ describe('blog release ledger validation', () => {
       ...ledger.releases[0]!,
       contentSha256: 'not-a-sha',
       deploySha: '',
-      dateModified: '2026-08-02T09:05:00+03:00',
+      modifiedAt: '2026-08-02T09:05:00+03:00',
     };
 
     expect(validateBlogReleaseLedger(calendar(3), ledger)).toMatchObject({
@@ -113,7 +113,7 @@ describe('blog release ledger validation', () => {
       errors: expect.arrayContaining([
         'invalid_content_sha256',
         'missing_deploy_sha',
-        'date_modified_before_date_published',
+        'modified_at_before_first_published_at',
       ]),
     });
   });
@@ -202,7 +202,7 @@ describe('blog release timing and gates', () => {
       candidate: {
         sequence: 1,
         slug: 'article-1',
-        effectiveDueAt: '2026-08-01T06:00:00.000Z',
+        effectiveDueAt: '2026-08-03T06:00:00.000Z',
       },
       readyBuffer: 12,
       requiredReadyBuffer: 12,
@@ -256,7 +256,7 @@ describe('blog release timing and gates', () => {
       calendar: entries,
       ledger: ledgerWithFirstRelease(),
       readinessBySlug: readiness(entries),
-      now: '2026-08-05T12:00:00+03:00',
+      now: '2026-08-05T08:00:00+03:00',
       scheduleEnabled: true,
       paused: false,
     });
@@ -290,7 +290,7 @@ describe('production manifest reconciliation', () => {
       sequence: 2,
       slug: 'article-2',
       releasedAt: '2026-08-05T09:02:00+03:00',
-      datePublished: '2026-08-05T09:02:00+03:00',
+      firstPublishedAt: '2026-08-05T09:02:00+03:00',
       revision: 1,
       contentSha256: sha('2'),
       deploySha: 'def5678',
@@ -311,7 +311,7 @@ describe('production manifest reconciliation', () => {
         sequence: 2,
         slug: 'article-2',
         releasedAt: '2026-08-05T09:02:00+03:00',
-        datePublished: '2026-08-05T09:02:00+03:00',
+        firstPublishedAt: '2026-08-05T09:02:00+03:00',
         revision: 1,
         contentSha256: sha('2'),
         deploySha: 'def5678',
@@ -320,7 +320,7 @@ describe('production manifest reconciliation', () => {
         sequence: 3,
         slug: 'article-3',
         releasedAt: '2026-08-07T09:02:00+03:00',
-        datePublished: '2026-08-07T09:02:00+03:00',
+        firstPublishedAt: '2026-08-07T09:02:00+03:00',
         revision: 1,
         contentSha256: sha('3'),
         deploySha: 'ghi9012',
