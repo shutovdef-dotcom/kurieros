@@ -4,6 +4,7 @@ export type JobPostalAddress = {
   '@type': 'PostalAddress';
   addressLocality: string;
   addressRegion?: string;
+  streetAddress?: string;
   addressCountry: 'RU';
 };
 
@@ -14,12 +15,17 @@ export type JobPostalAddress = {
  * streets or postal codes makes thousands of JobPosting items look more
  * precise than they are, so the structured data stays at city + real region.
  */
-export const buildJobLocationAddress = (city: string): JobPostalAddress => {
+export const buildJobLocationAddress = (
+  city: string,
+  sourceBackedStreetAddress?: string,
+): JobPostalAddress => {
   const region = getCityRegion(city);
+  const streetAddress = sourceBackedStreetAddress?.trim();
   return {
     '@type': 'PostalAddress',
     addressLocality: city,
     ...(region ? { addressRegion: region } : {}),
+    ...(streetAddress ? { streetAddress } : {}),
     addressCountry: 'RU',
   };
 };

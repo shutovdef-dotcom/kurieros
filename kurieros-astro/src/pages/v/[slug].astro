@@ -413,11 +413,12 @@ const sameRoleOtherCities = selectTopN(
 
 const jobPostingSchema = vacancyIndexability.indexable && datePosted
 	? buildJobPostingSchema({
-			title: job.title,
+			title: job.roleTitle ?? job.title,
 			description: job.description,
 			slug: job.slug,
 			company: job.company,
 			companyUrl: new URL(companyUrl, Astro.site).toString(),
+			jobUrl: Astro.url.href,
 			// Fix A — absolute logo URL. Some sources (e.g. Альфа-Банк,
 			// Yandex Eda) carry a relative `companyLogo` (`/logos/foo.svg`),
 			// which Google Rich Results test rejects: schema.org `Organization.logo`
@@ -426,6 +427,7 @@ const jobPostingSchema = vacancyIndexability.indexable && datePosted
 				? new URL(job.companyLogo, Astro.site).toString()
 				: undefined,
 			cities: jobCities,
+			workplaceAddress: job.ozonLeadForm?.hireObjectLabel,
 			employmentTypeLabel: job.details.employment_type,
 			// Fix F (2026-05-25) — combine schedule with employment label
 			// so mixed-graphic roles (Бургер Кинг: «гибкий график:

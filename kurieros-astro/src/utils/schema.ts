@@ -244,8 +244,12 @@ export type JobPostingInput = {
   slug: string;
   company: string;
   companyUrl: string;
+  /** Canonical URL of this single-job detail page. */
+  jobUrl: string;
   companyLogo?: string;
   cities: string[];
+  /** Exact source-backed workplace address; never synthesized locally. */
+  workplaceAddress?: string;
   employmentTypeLabel?: string;
   /**
    * Fix I (2026-05-25) — qualifications as an array of atomic items
@@ -263,6 +267,8 @@ export type JobPostingInput = {
   benefits?: string[];
   hasApplyLink: boolean;
   applyLink?: string;
+  /** True only after the user-visible apply flow passed a manual check. */
+  directApplyVerified?: boolean;
   /**
    * Fix C (2026-05-25) — replace the previous flat `baseSalaryMonthly`
    * (a single number, with `minValue` synthesised as 60% of max — a
@@ -354,7 +360,10 @@ export const buildJobPostingSchema = (input: JobPostingInput) => {
         }
         return {
           '@type': 'Place',
-          address: buildJobLocationAddress(city),
+          address: buildJobLocationAddress(
+            city,
+            cities.length === 1 ? input.workplaceAddress : undefined,
+          ),
         };
       });
 
@@ -441,6 +450,7 @@ export const buildJobPostingSchema = (input: JobPostingInput) => {
       name: 'КурьерОк',
       value: input.slug,
     },
+    url: input.jobUrl,
     datePosted: input.datePosted,
     ...(input.validThrough ? { validThrough: input.validThrough } : {}),
     employmentType,
@@ -460,10 +470,7 @@ export const buildJobPostingSchema = (input: JobPostingInput) => {
       '@type': 'Country',
       name: 'Russia',
     },
-    directApply: input.hasApplyLink,
-    ...(input.hasApplyLink && input.applyLink && input.applyLink !== '#'
-      ? { url: input.applyLink }
-      : {}),
+    directApply: Boolean(input.hasApplyLink && input.directApplyVerified),
     // Fix I (2026-05-25) — emit as array (semantic structure preserved),
     // not joined string. Omit field entirely on empty array.
     ...(input.benefits && input.benefits.length > 0
