@@ -34,6 +34,12 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const emptyListingsPath = resolve(__dirname, 'public/empty-listings.json');
 const vacancyIndexabilityPath = resolve(__dirname, 'src/generated/vacancy-indexability.json');
 const companyIndexabilityPath = resolve(__dirname, 'public/company-indexability.json');
+const sitemapFreshnessPath = resolve(__dirname, 'src/generated/sitemap-freshness.json');
+const isRealDateOnly = (value) => {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+};
 
 // Read failure handling (audit v3 M11): a *missing* file (ENOENT) is an
 // acceptable degradation in local `astro dev` — warn and continue with an
@@ -117,6 +123,44 @@ try {
 }
 const companyNoindexUrlSet = new Set(companyNoindexUrls);
 
+let sitemapFreshnessEntries = {};
+try {
+  const sitemapFreshness = JSON.parse(readFileSync(sitemapFreshnessPath, 'utf8'));
+  const entries = sitemapFreshness?.entries;
+  if (
+    sitemapFreshness?.schemaVersion !== 1 ||
+    !entries ||
+    typeof entries !== 'object' ||
+    Array.isArray(entries) ||
+    Object.entries(entries).some(
+      ([path, date]) =>
+        !path.startsWith('/') ||
+        !path.endsWith('/') ||
+        !isRealDateOnly(date),
+    )
+  ) {
+    throw new Error('Invalid sitemap freshness manifest shape');
+  }
+  sitemapFreshnessEntries = entries;
+} catch (err) {
+  const isMissingFile = err && err.code === 'ENOENT';
+  const isProductionBuild = Boolean(process.env.CI) || import.meta.env.PROD;
+  if (!isMissingFile || isProductionBuild) {
+    console.error(
+      `\n✗ Failed to read ${sitemapFreshnessPath}.\n` +
+      `   ${isMissingFile ? 'File is missing' : 'File is unreadable or corrupt'} ` +
+      `and this is a ${isProductionBuild ? 'production/CI' : 'parse-error'} build.\n` +
+      `   Hint: Run 'npm run emit:sitemap-freshness' before 'astro build'.\n`
+    );
+    throw err;
+  }
+  console.warn(
+    `\n⚠️  ${sitemapFreshnessPath} not found.\n` +
+    `   Hint: Run 'npm run emit:sitemap-freshness' before 'astro dev'.\n` +
+    `   Continuing without sitemap lastmod values.\n`
+  );
+}
+
 const pathnameOf = (url) => new URL(url).pathname;
 const isCommercialHubPath = (pathname) =>
   [
@@ -130,6 +174,9 @@ const canonicalizedListingPaths = new Set([
   '/rabota-kurerom-na-avto/',
   '/rabota-kurerom-na-velosipede/',
   '/rabota-kurerom-podrabotka/',
+  '/rabota-kurerom-kuper/',
+  '/rabota-kurerom-ozon/',
+  '/rabota-kurerom-samokat/',
 ]);
 const sitemapChunks = {
   vacancies: (item) => pathnameOf(item.url).startsWith('/v/') ? item : undefined,
@@ -192,7 +239,6 @@ export default defineConfig({
         !companyNoindexUrlSet.has(page) &&
         !canonicalizedListingPaths.has(pathnameOf(page)),
       changefreq: 'daily',
-      lastmod: new Date(),
       // Split the ~5 460-URL catalogue (88 fresh Ozon offers added
       // in #50 pushed the total above 2 chunks of 2 500) into ~6
       // chunks of ≤1 000 URLs each — keeps every chunked sitemap
@@ -206,6 +252,10 @@ export default defineConfig({
       serialize(item) {
         const url = item.url;
         const siteBase = site.replace(/\/$/, '');
+        const contentUpdatedAt = sitemapFreshnessEntries[pathnameOf(url)];
+        const serializedItem = contentUpdatedAt
+          ? { ...item, lastmod: contentUpdatedAt }
+          : item;
 
         // Decision A: explicit priority overrides for the 8 new flywheel URLs.
         // Closed Set — no substring matching — so only these exact URLs are
@@ -224,37 +274,37 @@ export default defineConfig({
         const OTZYVY_URL = `${siteBase}/otzyvy/`;
 
         if (HUB_URLS.has(url)) {
-          return { ...item, priority: 0.8, changefreq: 'daily' };
+          return { ...serializedItem, priority: 0.8, changefreq: 'daily' };
         }
         if (GUIDE_URLS.has(url)) {
-          return { ...item, priority: 0.7, changefreq: 'weekly' };
+          return { ...serializedItem, priority: 0.7, changefreq: 'weekly' };
         }
         if (url === OTZYVY_URL) {
-          return { ...item, priority: 0.6, changefreq: 'weekly' };
+          return { ...serializedItem, priority: 0.6, changefreq: 'weekly' };
         }
 
         if (url === 'https://kurerok.ru/' || url.endsWith('://kurerok.ru/')) {
-          return { ...item, priority: 1.0, changefreq: 'daily' };
+          return { ...serializedItem, priority: 1.0, changefreq: 'daily' };
         }
         if (url.includes('/v/')) {
-          return { ...item, priority: 0.8, changefreq: 'daily' };
+          return { ...serializedItem, priority: 0.8, changefreq: 'daily' };
         }
         if (url.includes('/rabota-kurerom-')) {
-          return { ...item, priority: 0.7, changefreq: 'daily' };
+          return { ...serializedItem, priority: 0.7, changefreq: 'daily' };
         }
         if (url.includes('/companies/')) {
-          return { ...item, priority: 0.6, changefreq: 'weekly' };
+          return { ...serializedItem, priority: 0.6, changefreq: 'weekly' };
         }
         if (url.includes('/guide/')) {
-          return { ...item, priority: 0.6, changefreq: 'weekly' };
+          return { ...serializedItem, priority: 0.6, changefreq: 'weekly' };
         }
         if (url.includes('/blog/')) {
-          return { ...item, priority: 0.5, changefreq: 'weekly' };
+          return { ...serializedItem, priority: 0.5, changefreq: 'weekly' };
         }
         if (url.includes('/cities/') || url.includes('/compare/') || url.includes('/calculator/')) {
-          return { ...item, priority: 0.5, changefreq: 'weekly' };
+          return { ...serializedItem, priority: 0.5, changefreq: 'weekly' };
         }
-        return { ...item, priority: 0.3, changefreq: 'monthly' };
+        return { ...serializedItem, priority: 0.3, changefreq: 'monthly' };
       }
     })
   ]
