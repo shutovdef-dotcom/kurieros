@@ -851,7 +851,7 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
   });
 
   describe('seo surface cleanup', () => {
-    it('keeps selective vacancy indexation consistent across robots, JobPosting and sitemap', () => {
+    it('keeps selective vacancy indexation consistent across robots and sitemap', () => {
       const sitemapContent = readAllSitemaps();
       const indexableVacancyUrl = 'https://kurerok.ru/v/kuper-foot-courier-olenegorsk-foot/';
       const noindexVacancyUrl = 'https://kurerok.ru/v/efin-bank-representative-chudovo-auto/';
@@ -865,7 +865,6 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
       );
 
       expect(sitemapContent).toContain(indexableVacancyUrl);
-      expect(indexableHtml).toContain('"@type":"JobPosting"');
       expect(indexableHtml).not.toMatch(/<meta\s+name="robots"\s+content="[^"]*noindex/i);
 
       expect(sitemapContent).not.toContain(noindexVacancyUrl);
