@@ -17,6 +17,10 @@ on:
     paths:
       - '.github/workflows/deploy-timeweb.yml'
       - 'kurieros-astro/**'
+  schedule:
+    # 09:05 Europe/Moscow. The cursor still enforces the actual 48-hour
+    # release window, so this daily wake-up can never publish a catch-up burst.
+    - cron: '5 6 * * *'
 
 permissions:
   contents: read
@@ -42,8 +46,16 @@ env:
 
 jobs:
   build:
-    if: github.event_name == 'workflow_dispatch' || vars.TIMEWEB_AUTO_DEPLOY == 'true'
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && vars.TIMEWEB_AUTO_DEPLOY == 'true' && !contains(github.event.head_commit.message, '[blog-ledger]')) ||
+      (github.event_name == 'schedule' && vars.BLOG_SCHEDULE_ENABLED == 'true' && vars.CONTENT_SCHEDULE_PAUSED == 'false')
     runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.decision.outputs.should_deploy }}
+      scheduled_candidate: ${{ steps.decision.outputs.scheduled_candidate }}
+      scheduled_slug: ${{ steps.decision.outputs.scheduled_slug }}
+      recovered: ${{ steps.reconcile.outputs.recovered }}
     defaults:
       run:
         working-directory: ${{ env.PROJECT_DIR }}
@@ -62,28 +74,91 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Reconcile durable blog ledger with production manifest
+        id: reconcile
+        if: github.event_name == 'schedule'
+        env:
+          BLOG_RELEASE_REMOTE_MANIFEST_URL: https://kurerok.ru/api/blog-release-manifest.json
+        run: npm run blog:release -- sync-production-manifest
+
+      - name: Validate full editorial blog corpus
+        if: github.event_name == 'schedule' && steps.reconcile.outputs.recovered != 'true'
+        run: npm run check:blog-content
+
+      - name: Prepare one due blog release candidate
+        id: prepare
+        if: github.event_name == 'schedule' && steps.reconcile.outputs.recovered != 'true'
+        run: |
+          set -euo pipefail
+          BLOG_RELEASE_NOW="$(date --iso-8601=seconds)" \
+          BLOG_SCHEDULE_ENABLED=true \
+          CONTENT_SCHEDULE_PAUSED=false \
+          BLOG_RELEASE_DEPLOY_SHA="$GITHUB_SHA" \
+          npm run blog:release -- prepare
+
+      - name: Decide whether this run has a deployable change
+        id: decision
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RECOVERED: ${{ steps.reconcile.outputs.recovered }}
+          HAS_CANDIDATE: ${{ steps.prepare.outputs.has_candidate }}
+          CANDIDATE_SLUG: ${{ steps.prepare.outputs.slug }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" != 'schedule' ]; then
+            echo 'should_deploy=true' >> "$GITHUB_OUTPUT"
+            echo 'scheduled_candidate=false' >> "$GITHUB_OUTPUT"
+            echo 'scheduled_slug=' >> "$GITHUB_OUTPUT"
+          elif [ "$RECOVERED" = 'true' ]; then
+            echo 'should_deploy=false' >> "$GITHUB_OUTPUT"
+            echo 'scheduled_candidate=false' >> "$GITHUB_OUTPUT"
+            echo 'scheduled_slug=' >> "$GITHUB_OUTPUT"
+          elif [ "$HAS_CANDIDATE" = 'true' ]; then
+            echo 'should_deploy=true' >> "$GITHUB_OUTPUT"
+            echo 'scheduled_candidate=true' >> "$GITHUB_OUTPUT"
+            echo "scheduled_slug=$CANDIDATE_SLUG" >> "$GITHUB_OUTPUT"
+          else
+            echo 'should_deploy=false' >> "$GITHUB_OUTPUT"
+            echo 'scheduled_candidate=false' >> "$GITHUB_OUTPUT"
+            echo 'scheduled_slug=' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Prepare IndexNow ownership file for this release artifact
+        if: steps.decision.outputs.scheduled_candidate == 'true' && vars.BLOG_INDEXNOW_ENABLED == 'true'
+        env:
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+        run: npm run indexnow:prepare-key
+
       - name: Lint
+        if: steps.decision.outputs.should_deploy == 'true'
         run: npm run lint
 
       - name: Type check
+        if: steps.decision.outputs.should_deploy == 'true'
         run: npm run typecheck
 
       - name: Test
+        if: steps.decision.outputs.should_deploy == 'true'
         run: npm run test
 
       - name: Build
+        if: steps.decision.outputs.should_deploy == 'true'
         run: npm run build
 
       - name: Validate Yandex vacancy feed
+        if: steps.decision.outputs.should_deploy == 'true'
         run: npm run check:yandex-feed
 
       - name: Validate generated output
+        if: steps.decision.outputs.should_deploy == 'true'
         run: npm run test:dist
 
       - name: Enforce dist size budget
+        if: steps.decision.outputs.should_deploy == 'true'
         run: npm run size:dist:check
 
       - name: Upload dist artifact
+        if: steps.decision.outputs.should_deploy == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: kurerok-dist
@@ -94,6 +169,7 @@ jobs:
 
   deploy:
     needs: build
+    if: needs.build.outputs.should_deploy == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     environment:
@@ -290,3 +366,63 @@ jobs:
         run: |
           set -euo pipefail
           curl -fsSI "$TIMEWEB_VERIFY_URL" | sed -n '1,20p'
+
+  record-blog-release:
+    needs: [build, deploy]
+    if: >-
+      always() && github.event_name == 'schedule' &&
+      (needs.build.outputs.recovered == 'true' ||
+      (needs.build.outputs.scheduled_candidate == 'true' && needs.deploy.result == 'success'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: ${{ env.PROJECT_DIR }}
+    steps:
+      - name: Checkout main for durable ledger update
+        uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          check-latest: true
+          cache: npm
+          cache-dependency-path: ${{ env.PROJECT_DIR }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Reconcile the manifest actually visible in production
+        id: production
+        env:
+          BLOG_RELEASE_REMOTE_MANIFEST_URL: https://kurerok.ru/api/blog-release-manifest.json?release=${{ github.sha }}
+        run: npm run blog:release -- sync-production-manifest
+
+      - name: Require exactly one recoverable production record
+        env:
+          RECOVERED: ${{ steps.production.outputs.recovered }}
+        run: |
+          test "$RECOVERED" = 'true'
+
+      - name: Commit durable blog release ledger
+        run: |
+          set -euo pipefail
+          git add src/data/blog-release-ledger.json src/generated/blog-release-manifest.json
+          if git diff --cached --quiet; then
+            echo 'No durable ledger change to commit.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore: record blog release [blog-ledger]'
+          git push origin HEAD:main
+
+      - name: Notify IndexNow about the one deployed blog URL
+        if: needs.build.outputs.scheduled_candidate == 'true' && vars.BLOG_INDEXNOW_ENABLED == 'true'
+        env:
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+        run: npm run indexnow:submit -- "https://kurerok.ru/blog/${{ needs.build.outputs.scheduled_slug }}/"
