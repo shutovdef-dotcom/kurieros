@@ -236,7 +236,7 @@ const updatedDate = new Intl.DateTimeFormat('ru-RU', {
 	day: 'numeric',
 	month: 'long',
 	year: 'numeric',
-}).format(new Date());
+}).format(new Date(job.updatedAt));
 
 // Map vacancy-source slugs (e.g. 'yandex-eda-courier') to the
 // knowledge-base company_scope IDs (e.g. 'yandex-eda').
@@ -411,7 +411,7 @@ const sameRoleOtherCities = selectTopN(
 	(a, b) => b - a,
 );
 
-const jobPostingSchema = vacancyIndexability.indexable
+const jobPostingSchema = vacancyIndexability.indexable && datePosted
 	? buildJobPostingSchema({
 			title: job.title,
 			description: job.description,
@@ -481,7 +481,7 @@ const pageSchemaGraph = [
 		name: `${job.title} — Вакансия в ${job.company}`,
 		description: vacancyDescription,
 		url: Astro.url.href,
-		dateModified: new Date().toISOString(),
+		...(datePosted ? { dateModified: datePosted } : {}),
 		about: {
 			'@type': 'Organization',
 			name: job.company,
