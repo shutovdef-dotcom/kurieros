@@ -2,13 +2,16 @@
 import { resolve } from 'node:path';
 import calendar from '../src/data/blog-calendar.json';
 import { BLOG_SOURCE_REGISTRY } from '../src/utils/blogSourceRegistry';
-import { auditBlogContentCorpus } from '../src/utils/blogContent';
+import {
+  auditBlogContentCorpus,
+  type BlogCalendarContentContract,
+} from '../src/utils/blogContent';
 import { loadBlogContentDocuments } from './blog-content';
 
 const contentDirectory = resolve(import.meta.dirname, '../src/content/blog');
 const documents = await loadBlogContentDocuments(contentDirectory);
 const audit = auditBlogContentCorpus(
-  calendar.entries,
+  calendar.entries as BlogCalendarContentContract[],
   BLOG_SOURCE_REGISTRY.articleSources,
   documents,
 );
