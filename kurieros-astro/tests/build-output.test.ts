@@ -898,6 +898,65 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
       expect(sitemapContent).not.toContain('https://kurerok.ru/rabota-kurerom-na-avto/');
       expect(sitemapContent).not.toContain('https://kurerok.ru/rabota-kurerom-na-velosipede/');
       expect(sitemapContent).not.toContain('https://kurerok.ru/rabota-kurerom-podrabotka/');
+      expect(sitemapContent).not.toContain('https://kurerok.ru/rabota-kurerom-kuper/');
+      expect(sitemapContent).not.toContain('https://kurerok.ru/rabota-kurerom-ozon/');
+      expect(sitemapContent).not.toContain('https://kurerok.ru/rabota-kurerom-samokat/');
+    });
+
+    it('emits lastmod only from the explicit content-freshness manifest', () => {
+      const manifestPath = join(
+        ROOT,
+        '..',
+        'src',
+        'generated',
+        'sitemap-freshness.json',
+      );
+      expect(existsSync(manifestPath)).toBe(true);
+
+      const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as {
+        schemaVersion: number;
+        entries: Record<string, string>;
+      };
+      const serializedManifest = JSON.stringify(manifest);
+      expect(manifest.schemaVersion).toBe(1);
+      expect(serializedManifest).not.toContain('generatedAt');
+      expect(serializedManifest).not.toContain('sourceCheckedAt');
+
+      const sitemapContent = readAllSitemaps();
+      const sitemapEntries = Array.from(
+        sitemapContent.matchAll(/<url>([\s\S]*?)<\/url>/g),
+        (match) => {
+          const body = match[1];
+          return {
+            url: body.match(/<loc>([^<]+)<\/loc>/)?.[1] ?? '',
+            lastmod: body.match(/<lastmod>([^<]+)<\/lastmod>/)?.[1],
+          };
+        },
+      );
+      const byUrl = new Map(sitemapEntries.map((entry) => [entry.url, entry]));
+
+      for (const [path, contentUpdatedAt] of Object.entries(manifest.entries)) {
+        const url = new URL(path, 'https://kurerok.ru').toString();
+        const entry = byUrl.get(url);
+        expect(entry, `manifest URL missing from sitemap: ${url}`).toBeDefined();
+        expect(entry?.lastmod?.slice(0, 10), url).toBe(contentUpdatedAt);
+      }
+
+      for (const entry of sitemapEntries) {
+        const pathname = new URL(entry.url).pathname;
+        if (entry.lastmod) {
+          expect(manifest.entries[pathname], `unowned lastmod: ${entry.url}`).toBe(
+            entry.lastmod.slice(0, 10),
+          );
+        } else {
+          expect(manifest.entries[pathname], `missing lastmod: ${entry.url}`).toBeUndefined();
+        }
+      }
+
+      expect(
+        sitemapEntries.filter((entry) => entry.lastmod).length,
+        'unknown freshness must be omitted, not replaced with one build timestamp',
+      ).toBeLessThan(sitemapEntries.length);
     });
 
     it('keeps metro pages indexable without JobPosting structured data', () => {
