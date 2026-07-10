@@ -8,11 +8,12 @@ import {
 import { companiesFromJobs } from '../src/utils/companiesIndex';
 
 describe('company guide overrides', () => {
-  it('ships a compact Купер guide with one primary commercial hub', () => {
+  it('keeps the canonical Купер guide focused on its own live vacancy section', () => {
     const guide = getCompanyGuide('kuper-ex-sbermarket');
 
     expect(guide).toBeDefined();
-    expect(guide?.primaryHubHref).toBe('/rabota-kurerom-kuper/');
+    expect(guide?.primaryHubHref).toBe('#company-vacancies');
+    expect(guide?.primaryHubLabel).toBe('Смотреть вакансии Купер на этой странице');
     expect(guide?.vacancyPreviewLimit).toBe(COMPANY_GUIDE_VACANCY_LIMIT);
     expect(guide?.cityPreviewLimit).toBe(COMPANY_GUIDE_CITY_LIMIT);
     expect(guide?.vacancyPreviewLimit).toBeLessThanOrEqual(8);

@@ -1,11 +1,19 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
+  CITY_GROWTH_COHORT_SLUGS,
   CITY_SEO_CLUSTER_SLUGS,
+  buildCityCohortVacancyLinks,
   getCitySeoCluster,
   getVacancyCityClusterLink,
+  resolveCityClusterNeighbours,
 } from '../src/utils/citySeoClusters';
 import type { GeneratedJob } from '../src/data/vacancyTypes';
+import { getCityJobsFromMap } from '../src/utils/jobFilters';
+import { jobsByCity } from '../src/utils/jobsByCityIndex';
+import { citiesFromJobs } from '../src/utils/citiesIndex';
+import { getNearbyCities } from '../src/utils/cityGeoIndex';
+import { getVacancyDetailPath } from '../src/utils/vacancyUrl';
 
 const source = (path: string) =>
   readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
@@ -104,5 +112,106 @@ describe('city SEO clusters', () => {
     expect(source('src/components/vacancy/VacancyBreadcrumb.astro')).toContain(
       'cityClusterLink',
     );
+  });
+
+  it('defines the six approved city-growth cohort pages without expanding age or metro surfaces', () => {
+    expect(CITY_GROWTH_COHORT_SLUGS).toEqual([
+      'sredneuralsk',
+      'pervomaysk',
+      'timashevsk',
+      'kartaly',
+      'metallostroy',
+      'chkalovsk',
+    ]);
+
+    for (const slug of CITY_GROWTH_COHORT_SLUGS) {
+      const cluster = getCitySeoCluster(slug);
+      expect(cluster?.growthCohort, slug).toBe(true);
+      expect(cluster?.guideLead, slug).not.toMatch(/SEO|URL|кластер|хаб|поисков|дочерн/i);
+    }
+  });
+
+  it('builds exact vacancy links from current source jobs for every cohort city', () => {
+    const cityNamesBySlug = {
+      sredneuralsk: 'Среднеуральск',
+      pervomaysk: 'Первомайск',
+      timashevsk: 'Тимашевск',
+      kartaly: 'Карталы',
+      metallostroy: 'Металлострой',
+      chkalovsk: 'Чкаловск',
+    } as const;
+
+    for (const slug of CITY_GROWTH_COHORT_SLUGS) {
+      const cityJobs = getCityJobsFromMap(jobsByCity, cityNamesBySlug[slug]);
+      const links = buildCityCohortVacancyLinks(cityJobs, 6);
+
+      expect(links.length, slug).toBeGreaterThanOrEqual(2);
+      expect(links.length, slug).toBeLessThanOrEqual(6);
+      expect(new Set(links.map((link) => link.href)).size, slug).toBe(links.length);
+
+      for (const link of links) {
+        const sourceJob = cityJobs.find((entry) => getVacancyDetailPath(entry) === link.href);
+        expect(sourceJob, `${slug}: ${link.href}`).toBeDefined();
+        expect(link, `${slug}: ${link.href}`).toMatchObject({
+          title: sourceJob?.title,
+          company: sourceJob?.company,
+          salary: sourceJob?.salary,
+          sourceSlug: sourceJob?.sourceSlug,
+        });
+        expect(link.companyHref).toMatch(/^\/companies\/[a-z0-9-]+\/$/);
+      }
+    }
+  });
+
+  it('keeps employers diversified and links Купер city evidence to the canonical company page', () => {
+    for (const cityName of ['Среднеуральск', 'Тимашевск']) {
+      const links = buildCityCohortVacancyLinks(
+        getCityJobsFromMap(jobsByCity, cityName),
+        6,
+      );
+
+      expect(new Set(links.map((link) => link.company)).size, cityName)
+        .toBeGreaterThanOrEqual(2);
+      expect(links, cityName).toContainEqual(
+        expect.objectContaining({
+          company: 'Купер (ex. СберМаркет)',
+          companyHref: '/companies/kuper-ex-sbermarket/',
+        }),
+      );
+    }
+  });
+
+  it('resolves useful live neighbour links for all six cities, including Metallostroy fallback', () => {
+    for (const slug of CITY_GROWTH_COHORT_SLUGS) {
+      const cluster = getCitySeoCluster(slug);
+      const neighbours = resolveCityClusterNeighbours(
+        cluster,
+        citiesFromJobs,
+        getNearbyCities(slug),
+      );
+
+      expect(neighbours.length, slug).toBeGreaterThanOrEqual(4);
+      expect(new Set(neighbours.map((city) => city.slug)).size, slug).toBe(neighbours.length);
+      expect(neighbours.some((city) => city.slug === slug), slug).toBe(false);
+      expect(neighbours.every((city) => city.vacancyCount > 0), slug).toBe(true);
+    }
+
+    expect(
+      resolveCityClusterNeighbours(
+        getCitySeoCluster('metallostroy'),
+        citiesFromJobs,
+        [],
+      ).map((city) => city.slug),
+    ).toContain('kolpino');
+  });
+
+  it('does not expose internal SEO labels in the visible city guide', () => {
+    const component = source('src/components/CityClusterGuide.astro');
+
+    expect(component).not.toContain('Главный URL кластера');
+    expect(component).not.toContain('<dt>Интент</dt>');
+    expect(component).not.toContain('{cluster.primaryIntent}');
+    expect(component).toContain('Текущие предложения');
+    expect(component).toContain('vacancyLinks');
   });
 });

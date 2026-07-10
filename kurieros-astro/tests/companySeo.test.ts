@@ -10,7 +10,9 @@ import {
   BRAND_CATEGORY_COMPANY_LINKS,
   COMPANY_COMMERCIAL_HUBS,
   getBrandCategoryCompanyCanonical,
+  getCompanyAlternateNames,
 } from '../src/utils/companySeo';
+import { resolveCompanyLinks } from '../src/utils/knowledge';
 
 const pageSource = (path: string) =>
   readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
@@ -61,5 +63,29 @@ describe('company SEO architecture', () => {
     expect(listingSource).toContain('brandCategoryCompanyCanonical ??');
     expect(vacancySource).toContain('const companyUrl = `/companies/${slugifyCompany(job.company)}/`;');
     expect(guideSource).toContain('getCompanyCommercialHub(company.slug)');
+  });
+
+  it('adds both verified Купер brand names only to the canonical company entity', () => {
+    expect(getCompanyAlternateNames('kuper-ex-sbermarket')).toEqual([
+      'Купер',
+      'СберМаркет',
+    ]);
+    expect(getCompanyAlternateNames('ozon')).toBeUndefined();
+
+    const companyPage = pageSource('src/pages/companies/[slug].astro');
+    expect(companyPage).toContain('getCompanyAlternateNames(company.slug)');
+    expect(companyPage).toContain('alternateName: companyAlternateNames');
+  });
+
+  it('keeps relevant guide and compare surfaces linked to the canonical Купер page', () => {
+    expect(resolveCompanyLinks(['kuper'])).toContainEqual({
+      id: 'kuper',
+      name: 'Купер',
+      href: '/companies/kuper-ex-sbermarket/',
+    });
+
+    const compareHelp = pageSource('src/components/compare/CompareHelpGrid.astro');
+    expect(compareHelp).toContain('href="/companies/kuper-ex-sbermarket/"');
+    expect(compareHelp).toContain('Условия работы в Купере');
   });
 });
