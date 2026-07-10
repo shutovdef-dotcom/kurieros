@@ -1,7 +1,7 @@
 type ResolveJobPostingDatesInput = {
   /** Original publication date when the source exposes it. */
   postedAt?: string | null;
-  /** Legacy source date used while partner data is migrated to postedAt. */
+  /** Legacy content date. Retained for callers but never used as datePosted. */
   updatedAt?: string | null;
   /** Real source deadline. Omitted when the source does not expose one. */
   validThrough?: string | null;
@@ -25,10 +25,9 @@ const parseValidDate = (value: string | null | undefined): Date | null => {
 
 export const resolveJobPostingDates = ({
   postedAt,
-  updatedAt,
   validThrough,
 }: ResolveJobPostingDatesInput): ResolvedJobPostingDates => {
-  const sourcePublicationDate = parseValidDate(postedAt) ?? parseValidDate(updatedAt);
+  const sourcePublicationDate = parseValidDate(postedAt);
   const sourceDeadline = parseValidDate(validThrough);
 
   return {

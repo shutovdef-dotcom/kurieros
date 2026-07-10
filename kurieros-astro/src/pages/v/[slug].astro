@@ -68,7 +68,6 @@ const isLeadFormApply = typeof job.applyLink === 'string' && job.applyLink.start
 const leadFormType = isLeadFormApply ? job.applyLink.slice('lead-form:'.length) : null;
 const hasApplyLink = !isLeadFormApply && Boolean(job.applyLink && job.applyLink !== '#');
 const companyUrl = `/companies/${slugifyCompany(job.company)}/`;
-const salaryValue = parseSalaryValue(job.salary);
 const matchingSource = vacancySources.find((source) => source.id === job.sourceId);
 const matchingOffer =
 	matchingSource?.offers.find(
@@ -231,6 +230,7 @@ const jobPostingRollout = resolveJobPostingRollout({
 	evidence: {
 		isActive: true,
 		roleTitle: job.roleTitle,
+		sourceUrl: job.sourceUrl,
 		postedAt: job.postedAt,
 		validThrough: job.validThrough,
 		sourceCheckedAt: job.sourceCheckedAt,
@@ -241,7 +241,6 @@ const jobPostingRollout = resolveJobPostingRollout({
 });
 const { datePosted, validThrough } = resolveJobPostingDates({
 	postedAt: job.postedAt,
-	updatedAt: jobPostingRollout.mode === 'legacy_gsc_valid' ? job.updatedAt : undefined,
 	validThrough: job.validThrough,
 });
 const contentUpdatedValue = job.contentUpdatedAt ?? job.updatedAt;
@@ -473,15 +472,13 @@ const jobPostingSchema =
 			directApplyVerified: job.directApplyVerified,
 			// Fix C (2026-05-25) — pass REAL min/max from structured pay
 			// data instead of a single point + 60% heuristic. `matchingOffer`
-			// holds the original `VacancyOffer` for this slug; falls back to
-			// `salaryValue` (the legacy parsed display string) when the
-			// vacancy has no structured `pay.monthly`.
+			// holds the original `VacancyOffer` for this slug. Display-text
+			// parsing and calculator estimates are intentionally not eligible.
 			baseSalaryMonthlyMin: matchingOffer?.pay.monthly?.min,
-			baseSalaryMonthlyMax:
-				matchingOffer?.pay.monthly?.max ??
-				(salaryValue > 0 ? salaryValue : undefined),
+			baseSalaryMonthlyMax: matchingOffer?.pay.monthly?.max,
 			hourlyRateMin: matchingOffer?.pay.hourly?.min,
-			hourlyRateMax: matchingOffer?.pay.hourly?.max ?? hourlyRate,
+			hourlyRateMax: matchingOffer?.pay.hourly?.max,
+			salaryConfidence: job.salaryConfidence,
 			currency: job.currency || 'RUB',
 			datePosted,
 			validThrough,

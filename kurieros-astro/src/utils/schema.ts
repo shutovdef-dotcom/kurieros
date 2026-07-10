@@ -1,4 +1,5 @@
 import { buildJobLocationAddress } from './jobLocationAddress';
+import type { SalaryConfidence } from '../data/vacancyTypes';
 
 type BreadcrumbItem = {
   name: string;
@@ -235,8 +236,23 @@ const getJobLocationCities = (cities: readonly string[]): string[] => {
     .map(normalizeJobLocationCity)
     .filter((city): city is string => Boolean(city));
   const unique = Array.from(new Set(normalized));
-  return unique.length ? unique : ['Россия'];
+  return unique;
 };
+
+const JOB_COUNTRY_BY_CURRENCY = {
+  RUB: { code: 'RU', name: 'Russia', localName: 'Россия' },
+  BYN: { code: 'BY', name: 'Belarus', localName: 'Беларусь' },
+  KZT: { code: 'KZ', name: 'Kazakhstan', localName: 'Казахстан' },
+  KGS: { code: 'KG', name: 'Kyrgyzstan', localName: 'Кыргызстан' },
+  UZS: { code: 'UZ', name: 'Uzbekistan', localName: 'Узбекистан' },
+} as const;
+
+const resolveJobCountry = (currency: string | undefined) =>
+  JOB_COUNTRY_BY_CURRENCY[
+    currency && currency in JOB_COUNTRY_BY_CURRENCY
+      ? currency as keyof typeof JOB_COUNTRY_BY_CURRENCY
+      : 'RUB'
+  ];
 
 export type JobPostingInput = {
   title: string;
@@ -286,6 +302,8 @@ export type JobPostingInput = {
    */
   hourlyRateMin?: number | null;
   hourlyRateMax?: number | null;
+  /** Salary must be backed by a supported source confidence. */
+  salaryConfidence?: SalaryConfidence;
   currency?: string;
   datePosted: string;
   validThrough?: string;
@@ -330,40 +348,46 @@ export type JobPostingInput = {
 
 export const buildJobPostingSchema = (input: JobPostingInput) => {
   const cities = getJobLocationCities(input.cities);
+  const country = resolveJobCountry(input.currency);
   // Fix B (2026-05-25) — for fully-remote roles, collapse jobLocation
   // to a country-only Place. Emitting a synthetic city street address
   // for a role that has no physical workplace contradicts the
   // description and risks anti-spam penalties from Google for Jobs.
   // The matching `jobLocationType: 'TELECOMMUTE'` is added below.
-  const jobLocation = input.isRemote
+  const countryOnlyLocation = {
+    '@type': 'Place' as const,
+    address: {
+      '@type': 'PostalAddress' as const,
+      addressCountry: country.code,
+    },
+  };
+  const jobLocation = input.isRemote || cities.length === 0
     ? [
-        {
-          '@type': 'Place',
-          address: {
-            '@type': 'PostalAddress',
-            addressCountry: 'RU',
-          },
-        },
+        countryOnlyLocation,
       ]
     : cities.map((city) => {
         // City-level location only: we do not know real per-vacancy streets
         // or postal codes, so JobPosting must not invent them. Metro/station
         // hints are filtered before this point and stay in page content only.
-        if (city === 'Россия') {
-          return {
-            '@type': 'Place',
-            address: {
-              '@type': 'PostalAddress',
-              addressCountry: 'RU',
-            },
-          };
+        if (city === country.localName) {
+          return countryOnlyLocation;
         }
         return {
           '@type': 'Place',
-          address: buildJobLocationAddress(
-            city,
-            cities.length === 1 ? input.workplaceAddress : undefined,
-          ),
+          address:
+            country.code === 'RU'
+              ? buildJobLocationAddress(
+                  city,
+                  cities.length === 1 ? input.workplaceAddress : undefined,
+                )
+              : {
+                  '@type': 'PostalAddress' as const,
+                  addressLocality: city,
+                  ...(cities.length === 1 && input.workplaceAddress?.trim()
+                    ? { streetAddress: input.workplaceAddress.trim() }
+                    : {}),
+                  addressCountry: country.code,
+                },
         };
       });
 
@@ -389,6 +413,12 @@ export const buildJobPostingSchema = (input: JobPostingInput) => {
   // every vacancy page. Single-point fallback when only one bound is
   // known (no synthetic range).
   const baseSalary: MonetaryAmountSchema | undefined = (() => {
+    if (
+      input.salaryConfidence !== 'official' &&
+      input.salaryConfidence !== 'partner'
+    ) {
+      return undefined;
+    }
     const monthlyMax =
       input.baseSalaryMonthlyMax && input.baseSalaryMonthlyMax > 0
         ? input.baseSalaryMonthlyMax
@@ -468,7 +498,7 @@ export const buildJobPostingSchema = (input: JobPostingInput) => {
     ...(input.isRemote ? { jobLocationType: 'TELECOMMUTE' } : {}),
     applicantLocationRequirements: {
       '@type': 'Country',
-      name: 'Russia',
+      name: country.name,
     },
     directApply: Boolean(input.hasApplyLink && input.directApplyVerified),
     // Fix I (2026-05-25) — emit as array (semantic structure preserved),

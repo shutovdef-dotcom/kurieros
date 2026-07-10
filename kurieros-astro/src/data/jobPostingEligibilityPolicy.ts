@@ -6,8 +6,9 @@ import {
 
 /**
  * Search Console → Job Postings → Valid items, captured read-only on
- * 2026-07-10 from the 2026-07-09 report. This is a temporary continuity
- * bridge, not a substitute for employer-supplied provenance.
+ * 2026-07-10 from the 2026-07-09 report. The historical cohort is retained
+ * for URL/indexability continuity and review tracking only. Membership never
+ * bypasses the current source-provenance gate for JobPosting markup.
  */
 export const LEGACY_GSC_VALID_JOB_PATHS = [
   '/v/voxys-call-center-operator-chelyabinsk-office/',
@@ -60,7 +61,7 @@ type ResolveJobPostingRolloutInput = {
 
 export type JobPostingRolloutDecision = {
   emit: boolean;
-  mode: 'source_verified' | 'legacy_gsc_valid' | 'blocked';
+  mode: 'source_verified' | 'blocked';
   reasons: JobPostingRolloutReason[];
 };
 
@@ -75,21 +76,14 @@ export const resolveJobPostingRollout = ({
   }
 
   const isLegacyPath = legacyValidPathSet.has(path);
-  const bridgeActive = now.getTime() <= legacyReviewDeadline;
-  if (isLegacyPath && bridgeActive) {
-    return {
-      emit: true,
-      mode: 'legacy_gsc_valid',
-      reasons: strictDecision.reasons,
-    };
-  }
+  const bridgeExpired = now.getTime() > legacyReviewDeadline;
 
   return {
     emit: false,
     mode: 'blocked',
     reasons: [
       ...strictDecision.reasons,
-      ...(isLegacyPath && !bridgeActive ? ['legacy_bridge_expired' as const] : []),
+      ...(isLegacyPath && bridgeExpired ? ['legacy_bridge_expired' as const] : []),
     ],
   };
 };

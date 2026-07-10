@@ -6,6 +6,7 @@ const DEFAULT_MAX_VERIFICATION_AGE_DAYS = 30;
 export type JobPostingEligibilityReason =
   | 'inactive'
   | 'missing_role_title'
+  | 'missing_source_url'
   | 'missing_posted_at'
   | 'invalid_posted_at'
   | 'expired'
@@ -22,6 +23,7 @@ export type JobPostingEligibilityReason =
 export type JobPostingEligibilityInput = {
   isActive: boolean;
   roleTitle?: string | null;
+  sourceUrl?: string | null;
   postedAt?: string | null;
   validThrough?: string | null;
   sourceCheckedAt?: string | null;
@@ -75,6 +77,7 @@ export const getJobPostingEligibility = (
 
   if (!job.isActive) reasons.push('inactive');
   if (!job.roleTitle?.trim()) reasons.push('missing_role_title');
+  if (!job.sourceUrl?.trim()) reasons.push('missing_source_url');
 
   const postedAt = parseDate(job.postedAt);
   if (!job.postedAt) reasons.push('missing_posted_at');
