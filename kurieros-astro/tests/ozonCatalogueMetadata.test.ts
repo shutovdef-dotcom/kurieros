@@ -59,4 +59,29 @@ describe('deriveCatalogueMetadata', () => {
       }),
     ).toThrow(/checkedAt/i);
   });
+
+  it('preserves manual apply verification only while the catalogue is unchanged', () => {
+    const verifiedPrevious = {
+      ...previous,
+      applyVerifiedAt: '2026-04-29T13:00:00.000Z',
+      applyFlowVerified: true,
+    };
+
+    expect(deriveCatalogueMetadata({
+      previous: verifiedPrevious,
+      previousCatalogue: [{ slug: 'rocket:courier', cities: [] }],
+      nextCatalogue: [{ slug: 'rocket:courier', cities: [] }],
+      checkedAt: '2026-05-01T09:30:00.000Z',
+    })).toMatchObject({
+      applyVerifiedAt: '2026-04-29T13:00:00.000Z',
+      applyFlowVerified: true,
+    });
+
+    expect(deriveCatalogueMetadata({
+      previous: verifiedPrevious,
+      previousCatalogue: [{ slug: 'rocket:courier', cities: [] }],
+      nextCatalogue: [{ slug: 'rocket:courier', cities: [{ cityName: 'Москва' }] }],
+      checkedAt: '2026-05-01T09:30:00.000Z',
+    })).not.toHaveProperty('applyVerifiedAt');
+  });
 });
