@@ -97,7 +97,7 @@ describe('PII-safe dual-write analytics adapter', () => {
       email: 'ivan@example.com',
       comment: 'Позвоните после 18:00',
       city: 'ivan@example.com',
-      company: '+7 999 123-45-67',
+      company: '79991234567',
       arbitrary_secret: 'do-not-send',
     }, REQUIRED_DIMENSIONS);
 
