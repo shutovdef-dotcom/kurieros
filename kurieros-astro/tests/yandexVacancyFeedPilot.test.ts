@@ -11,7 +11,7 @@ import { getVacancyCanonicalPath } from '../src/utils/vacancyUrl';
 import {
 	buildYandexVacancyFeedPilot,
 	validateYandexVacancyFeedPilot,
-} from '../src/utils/yandexVacancyFeed';
+} from '../src/utils/yandexVacancyFeedPilot';
 
 const siteUrl = 'https://kurerok.ru';
 const pilot = buildYandexVacancyFeedPilot({
