@@ -34,3 +34,7 @@ tests/.tmp-*
 .playwright-cli/
 coverage/
 output/
+
+# A deployment-only record for exactly one scheduled blog release. The
+# durable, reviewed release ledger remains tracked in src/data/.
+src/generated/blog-release-candidate.json

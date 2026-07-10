@@ -7,6 +7,10 @@ import { detailJobs } from '../src/data/jobs';
 import { INFO_GUIDES } from '../src/utils/infoGuides';
 import { knowledgeBaseData, TOPIC_META } from '../src/utils/knowledge';
 import {
+  BLOG_RELEASE_MANIFEST,
+  getSitemapDateForBlogRelease,
+} from '../src/utils/blogManifest';
+import {
   buildSitemapFreshnessManifest,
   type SitemapFreshnessSource,
 } from '../src/utils/sitemapFreshness';
@@ -16,6 +20,20 @@ const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const outputPath = resolve(rootDir, 'src/generated/sitemap-freshness.json');
 const indexableVacancyPaths = new Set(vacancyIndexability.indexablePaths);
 const vacancyPathsByContentDate = new Map<string, string[]>();
+const releasedBlogSources: SitemapFreshnessSource[] = [
+  ...(BLOG_RELEASE_MANIFEST.releases.length > 0
+    ? [{
+        id: 'blog:index',
+        contentUpdatedAt: getSitemapDateForBlogRelease(BLOG_RELEASE_MANIFEST.releases.at(-1)!),
+        paths: ['/blog/'],
+      }]
+    : []),
+  ...BLOG_RELEASE_MANIFEST.releases.map((release) => ({
+    id: `blog:${release.slug}`,
+    contentUpdatedAt: getSitemapDateForBlogRelease(release),
+    paths: [`/blog/${release.slug}/`],
+  })),
+];
 
 for (const job of detailJobs) {
   if (!job.contentUpdatedAt) continue;
@@ -51,6 +69,7 @@ const sources: SitemapFreshnessSource[] = [
     contentUpdatedAt,
     paths,
   })),
+  ...releasedBlogSources,
 ];
 
 const manifest = buildSitemapFreshnessManifest(sources);

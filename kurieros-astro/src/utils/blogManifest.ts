@@ -3,6 +3,7 @@ import manifestData from '../generated/blog-release-manifest.json';
 
 const ISO_TIMESTAMP = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?:Z|[+-]\d{2}:\d{2})$/;
 const SHA256 = /^[a-f0-9]{64}$/;
+const DEPLOY_SHA = /^[a-f0-9]{7,64}$/;
 
 const isIsoTimestamp = (value: string): boolean =>
   ISO_TIMESTAMP.test(value) && !Number.isNaN(Date.parse(value));
@@ -21,7 +22,12 @@ export const BlogReleaseRecordSchema = z.object({
   modifiedAt: z.string().refine(isIsoTimestamp, 'modifiedAt must be an ISO timestamp').optional(),
   revision: z.number().int().positive(),
   contentSha256: z.string().regex(SHA256),
-  deploySha: z.string().min(7).max(128),
+  deploySha: z.string().regex(DEPLOY_SHA),
+  historicalPublicationEvidence: z.object({
+    source: z.string().min(1),
+    verifiedAt: z.string().refine(isIsoTimestamp, 'evidence verifiedAt must be an ISO timestamp'),
+    reference: z.string().min(1),
+  }).optional(),
 });
 
 export const BlogReleaseManifestSchema = z.object({
@@ -46,8 +52,13 @@ const assertManifestIntegrity = (manifest: BlogReleaseManifest): BlogReleaseMani
     if (release.sequence !== index + 1) {
       throw new Error('Blog release manifest must be a strict release prefix');
     }
-    if (new Date(release.firstPublishedAt).getTime() > new Date(release.releasedAt).getTime()) {
+    const firstPublishedAt = new Date(release.firstPublishedAt).getTime();
+    const releasedAt = new Date(release.releasedAt).getTime();
+    if (firstPublishedAt > releasedAt) {
       throw new Error(`Blog release ${release.slug} has a publication date after its release`);
+    }
+    if (firstPublishedAt < releasedAt && !release.historicalPublicationEvidence) {
+      throw new Error(`Blog release ${release.slug} retains an earlier publication date without evidence`);
     }
     if (
       release.modifiedAt &&
