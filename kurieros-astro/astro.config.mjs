@@ -285,7 +285,9 @@ export default defineConfig({
         !page.includes('/api/grid/') &&
         !page.includes('/api/grid-batch/') &&
         !page.includes('/api/company-vacancies/') &&
+        !page.includes('/api/') &&
         !page.endsWith('.md') &&
+        !page.endsWith('.xml') &&
         (hasPublishedBlog || !page.match(/\/blog\/$/)) &&
         !emptyListingUrls.has(page) &&
         !vacancyNoindexUrlSet.has(page) &&

@@ -23,6 +23,7 @@
     "emit:company-indexability": "tsx scripts/emit-company-indexability.ts",
     "emit:blog-release-manifest": "tsx scripts/emit-blog-release-manifest.ts",
     "check:blog-content": "tsx scripts/audit-blog-content.ts",
+    "blog:release": "tsx scripts/blog-release.ts",
     "emit:sitemap-freshness": "tsx scripts/emit-sitemap-freshness.ts",
     "bench:city-neighbours": "node --expose-gc --import tsx scripts/perf/bench-city-neighbours.ts",
     "predev": "npm run generate:data",
