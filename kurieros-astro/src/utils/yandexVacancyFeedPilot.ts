@@ -27,6 +27,7 @@ const MIN_SET_VENDORS = 3;
 const MIN_SET_NAMES = 3;
 const VISIBLE_LISTING_LIMIT = 24;
 const STALE_REPORT_DAYS = 60;
+const APPLY_VERIFICATION_DAYS = 30;
 
 export type YandexVacancyFeedPilotInput = {
 	jobs?: GeneratedJob[];
@@ -66,6 +67,7 @@ export type YandexFeedReasonReport = {
 	duplicateExactPictures: number;
 	physicalPictures: number;
 	staleOffers: number;
+	unverifiedApplyOffers: number;
 };
 
 export type YandexVacancyFeedPilot = YandexVacancyFeed & {
@@ -293,10 +295,22 @@ export const buildYandexVacancyFeedPilot = ({
 		const path = getVacancyCanonicalPath(job);
 		return visibleCanonicalPaths.has(path) && !includedUrls.has(canonicalOfferUrl(job, normalizedSiteUrl));
 	}).length;
+	const includedJobByUrl = new Map(
+		nameUniqueCandidates.map(({ job }) => [canonicalOfferUrl(job, normalizedSiteUrl), job]),
+	);
 	const staleCutoff = generatedAt.getTime() - STALE_REPORT_DAYS * 24 * 60 * 60 * 1_000;
-	const staleOffers = indexableCandidates.filter(({ job }) => {
-		const updatedAt = new Date(job.updatedAt).getTime();
-		return !Number.isFinite(updatedAt) || updatedAt < staleCutoff;
+	const applyCutoff = generatedAt.getTime() - APPLY_VERIFICATION_DAYS * 24 * 60 * 60 * 1_000;
+	const staleOffers = offers.filter((offer) => {
+		const checkedAt = Date.parse(includedJobByUrl.get(offer.url)?.sourceCheckedAt ?? '');
+		return !Number.isFinite(checkedAt) || checkedAt > generatedAt.getTime() || checkedAt < staleCutoff;
+	}).length;
+	const unverifiedApplyOffers = offers.filter((offer) => {
+		const job = includedJobByUrl.get(offer.url);
+		const checkedAt = Date.parse(job?.applyVerifiedAt ?? '');
+		return job?.applyFlowVerified !== true ||
+			!Number.isFinite(checkedAt) ||
+			checkedAt > generatedAt.getTime() ||
+			checkedAt < applyCutoff;
 	}).length;
 	const pictures = offers.map((offer) => offer.picture);
 	const duplicateCanonical = Math.max(0, jobs.length - detailJobByPath.size);
@@ -340,13 +354,20 @@ export const buildYandexVacancyFeedPilot = ({
 			duplicateExactPictures: pictures.length - new Set(pictures).size,
 			physicalPictures: new Set(pictures.map(physicalPictureUrl)).size,
 			staleOffers,
+			unverifiedApplyOffers,
 		},
 	};
 };
 
+export type YandexVacancyFeedPilotValidationOptions = {
+	mode?: 'structure' | 'publication';
+};
+
 export const validateYandexVacancyFeedPilot = (
 	feed: YandexVacancyFeedPilot,
+	options: YandexVacancyFeedPilotValidationOptions = {},
 ): YandexFeedValidationResult => {
+	const mode = options.mode ?? 'publication';
 	const baseValidation = validateYandexVacancyFeed(feed);
 	const errors = [...baseValidation.errors];
 	const warnings = [...baseValidation.warnings];
@@ -446,7 +467,14 @@ export const validateYandexVacancyFeedPilot = (
 		errors.push('Pilot reason report qualifiedSets does not match the emitted set count.');
 	}
 	if (feed.report.staleOffers > 0) {
-		warnings.push(`Pilot has ${feed.report.staleOffers} offers pending source freshness recheck.`);
+		const message = `Pilot publication blocked: ${feed.report.staleOffers} offers lack a fresh sourceCheckedAt.`;
+		if (mode === 'publication') errors.push(message);
+		else warnings.push(message);
+	}
+	if (feed.report.unverifiedApplyOffers > 0) {
+		const message = `Pilot publication blocked: ${feed.report.unverifiedApplyOffers} offers lack a fresh verified apply flow.`;
+		if (mode === 'publication') errors.push(message);
+		else warnings.push(message);
 	}
 
 	return { ok: errors.length === 0, errors, warnings };
