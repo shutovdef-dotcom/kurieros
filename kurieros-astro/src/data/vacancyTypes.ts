@@ -135,6 +135,12 @@ export type VacancyOffer = {
   sourceCheckedAt?: string;
   /** Most recent known semantic change to the local vacancy content. */
   contentUpdatedAt?: string;
+  /** Most recent successful end-to-end check of the application flow. */
+  applyVerifiedAt?: string;
+  /** Whether the current application path still accepts this exact role. */
+  applyFlowVerified?: boolean;
+  /** Whether the flow meets Google's short direct-apply definition. */
+  directApplyVerified?: boolean;
   /** Legacy content date retained while partner sources migrate. */
   updatedAt: string;
   sourceUrl?: string;
@@ -269,6 +275,9 @@ export type GeneratedJob = {
   validThrough?: string;
   sourceCheckedAt?: string;
   contentUpdatedAt?: string;
+  applyVerifiedAt?: string;
+  applyFlowVerified?: boolean;
+  directApplyVerified?: boolean;
   updatedAt: string;
   cityDistricts?: string[];
   subjectVariants?: VacancySubjectVariant[];

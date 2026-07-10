@@ -8,6 +8,7 @@ import {
   INDEXABLE_GSC_RECOMMENDATIONS,
   TOP_INDEXABLE_VACANCY_CITIES,
 } from '../src/data/vacancyIndexabilityPolicy';
+import { LEGACY_GSC_VALID_JOB_PATHS } from '../src/data/jobPostingEligibilityPolicy';
 import { getVacancyCanonicalPath } from '../src/utils/vacancyUrl';
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -120,6 +121,7 @@ const gscIndexablePaths = new Set(
 );
 const hardNoindexPaths = new Set<string>(HARD_NOINDEX_VACANCY_PATHS);
 const topCitySet = new Set<string>(TOP_INDEXABLE_VACANCY_CITIES);
+const gscValidJobPostingPaths = new Set<string>(LEGACY_GSC_VALID_JOB_PATHS);
 
 const allPaths = new Set(detailJobs.map((job) => getVacancyCanonicalPath(job)));
 const indexablePaths = new Set<string>();
@@ -128,7 +130,12 @@ for (const job of detailJobs) {
   const path = getVacancyCanonicalPath(job);
   if (hardNoindexPaths.has(path)) continue;
   const isTopCity = splitJobCities(job.location).some((city) => topCitySet.has(city));
-  if (isTopCity || localIndexablePaths.has(path) || gscIndexablePaths.has(path)) {
+  if (
+    isTopCity ||
+    localIndexablePaths.has(path) ||
+    gscIndexablePaths.has(path) ||
+    gscValidJobPostingPaths.has(path)
+  ) {
     indexablePaths.add(path);
   }
 }
@@ -149,6 +156,7 @@ const payload = {
     topIndexableCities: TOP_INDEXABLE_VACANCY_CITIES,
     gscRecommendations: INDEXABLE_GSC_RECOMMENDATIONS,
     hardNoindexPaths: HARD_NOINDEX_VACANCY_PATHS,
+    gscValidJobPostingContinuityPaths: LEGACY_GSC_VALID_JOB_PATHS,
   },
   localIndexablePaths: Array.from(localIndexablePaths).sort(),
   gscIndexablePaths: Array.from(gscIndexablePaths).sort(),

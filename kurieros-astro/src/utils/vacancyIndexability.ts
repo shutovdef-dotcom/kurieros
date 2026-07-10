@@ -4,6 +4,7 @@ import {
   TOP_INDEXABLE_VACANCY_CITIES,
   type VacancyIndexabilityDecision,
 } from '../data/vacancyIndexabilityPolicy';
+import { LEGACY_GSC_VALID_JOB_PATHS } from '../data/jobPostingEligibilityPolicy';
 import { getVacancyCanonicalPath } from './vacancyUrl';
 
 type VacancyIndexabilityJob = {
@@ -16,6 +17,7 @@ const hardNoindexPaths = new Set<string>(HARD_NOINDEX_VACANCY_PATHS);
 const topIndexableCities = new Set<string>(TOP_INDEXABLE_VACANCY_CITIES);
 const localIndexablePaths = new Set<string>(vacancyIndexability.localIndexablePaths);
 const gscIndexablePaths = new Set<string>(vacancyIndexability.gscIndexablePaths);
+const gscValidJobPostingPaths = new Set<string>(LEGACY_GSC_VALID_JOB_PATHS);
 
 const splitJobCities = (location: string): string[] =>
   location
@@ -32,6 +34,14 @@ export const getVacancyIndexability = (
       indexable: false,
       robots: 'noindex, follow',
       reason: 'hard_noindex',
+    };
+  }
+
+  if (gscValidJobPostingPaths.has(path)) {
+    return {
+      indexable: true,
+      robots: 'index, follow',
+      reason: 'gsc_valid_jobposting',
     };
   }
 

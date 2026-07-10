@@ -694,6 +694,13 @@ export const buildJobsFromVacancies = (
         ...(offer.validThrough ? { validThrough: offer.validThrough } : {}),
         ...(offer.sourceCheckedAt ? { sourceCheckedAt: offer.sourceCheckedAt } : {}),
         ...(offer.contentUpdatedAt ? { contentUpdatedAt: offer.contentUpdatedAt } : {}),
+        ...(offer.applyVerifiedAt ? { applyVerifiedAt: offer.applyVerifiedAt } : {}),
+        ...(offer.applyFlowVerified !== undefined
+          ? { applyFlowVerified: offer.applyFlowVerified }
+          : {}),
+        ...(offer.directApplyVerified !== undefined
+          ? { directApplyVerified: offer.directApplyVerified }
+          : {}),
         updatedAt: offer.updatedAt,
         ...(offer.cityDistricts?.length ? { cityDistricts: offer.cityDistricts } : {}),
         ...(offer.subjectVariants?.length ? { subjectVariants: offer.subjectVariants } : {}),

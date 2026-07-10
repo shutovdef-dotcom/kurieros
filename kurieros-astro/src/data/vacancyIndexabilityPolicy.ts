@@ -12,6 +12,7 @@ export const INDEXABLE_GSC_RECOMMENDATIONS = [
 ] as const;
 
 export type VacancyIndexabilityReason =
+  | 'gsc_valid_jobposting'
   | 'top_city_allowlist'
   | 'local_score'
   | 'gsc_vacancy_intent'
