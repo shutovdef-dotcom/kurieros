@@ -49,6 +49,10 @@ export type SeoSurfaceReport = {
 		pageUrlCount: number;
 		urlSetHash: string;
 		rawXmlHash: string;
+		blogUrlCount: number;
+		blogUrlSetHash: string;
+		nonBlogUrlCount: number;
+		nonBlogUrlSetHash: string;
 		canonicalConflicts: SitemapCanonicalConflict[];
 	};
 	structuredData: {
@@ -76,6 +80,9 @@ export type SeoSurfaceBaseline = {
 	id: string;
 	reviewReason: string;
 	reviewedSurfaceUrlSetHashes: string[];
+	/** Exact blog URLs included when this reviewed baseline was recorded. */
+	blogReleaseSlugs?: string[];
+	blogSitemapUrls?: string[];
 	report: SeoSurfaceReport;
 };
 
@@ -86,7 +93,8 @@ export type SeoGuardFinding = {
 		| 'surface_delta_review_required'
 		| 'job_posting_drop'
 		| 'job_posting_change_review_required'
-		| 'surface_delta_reviewed';
+		| 'surface_delta_reviewed'
+		| 'scheduled_blog_delta_allowed';
 	message: string;
 };
 
@@ -98,6 +106,13 @@ export type SeoReleaseGuardResult = {
 		sitemapSurfacePercent: number;
 		jobPostingPercent: number;
 	};
+};
+
+export type ScheduledBlogReleaseContext = {
+	/** Strict ledger prefix, in release order. */
+	blogReleaseSlugs: readonly string[];
+	/** `/blog/` plus exactly the released article URLs for this build. */
+	expectedBlogSitemapUrls: readonly string[];
 };
 
 type RouteRecord = {
@@ -345,6 +360,9 @@ export const buildSeoSurfaceReport = (input: SeoAuditInput): SeoSurfaceReport =>
 	const indexableRoutes = routes.filter((route) => route.indexable);
 	const vacancies = routes.filter((route) => new URL(route.url).pathname.startsWith('/v/'));
 	const sitemap = sitemapPageUrls(input.sitemapFiles, siteUrl);
+	const blogPrefix = new URL('/blog/', siteUrl).toString();
+	const blogSitemapUrls = sitemap.urls.filter((url) => url.startsWith(blogPrefix));
+	const nonBlogSitemapUrls = sitemap.urls.filter((url) => !url.startsWith(blogPrefix));
 
 	return {
 		schemaVersion: 1,
@@ -359,6 +377,10 @@ export const buildSeoSurfaceReport = (input: SeoAuditInput): SeoSurfaceReport =>
 			pageUrlCount: sitemap.urls.length,
 			urlSetHash: urlSetHash(sitemap.urls),
 			rawXmlHash: rawSitemapHash(input.sitemapFiles),
+			blogUrlCount: blogSitemapUrls.length,
+			blogUrlSetHash: urlSetHash(blogSitemapUrls),
+			nonBlogUrlCount: nonBlogSitemapUrls.length,
+			nonBlogUrlSetHash: urlSetHash(nonBlogSitemapUrls),
 			canonicalConflicts: canonicalConflicts(
 				sitemap.urls,
 				sitemap.duplicateUrls,
@@ -389,7 +411,12 @@ export const buildSeoSurfaceReport = (input: SeoAuditInput): SeoSurfaceReport =>
 
 export const createSeoSurfaceBaseline = (
 	report: SeoSurfaceReport,
-	options: { id: string; reviewReason: string },
+	options: {
+		id: string;
+		reviewReason: string;
+		blogReleaseSlugs?: readonly string[];
+		blogSitemapUrls?: readonly string[];
+	},
 ): SeoSurfaceBaseline => {
 	const id = options.id.trim();
 	const reviewReason = options.reviewReason.trim();
@@ -400,6 +427,8 @@ export const createSeoSurfaceBaseline = (
 		id,
 		reviewReason,
 		reviewedSurfaceUrlSetHashes: [report.sitemap.urlSetHash],
+		blogReleaseSlugs: [...(options.blogReleaseSlugs ?? [])],
+		blogSitemapUrls: [...(options.blogSitemapUrls ?? [])].sort(),
 		report,
 	};
 };
@@ -417,6 +446,7 @@ const sortFindings = (findings: SeoGuardFinding[]): SeoGuardFinding[] =>
 export const evaluateSeoReleaseGuard = (
 	report: SeoSurfaceReport,
 	baseline: SeoSurfaceBaseline | null | undefined,
+	scheduledBlogContext?: ScheduledBlogReleaseContext,
 ): SeoReleaseGuardResult => {
 	const failures: SeoGuardFinding[] = [];
 	const reviewedExceptions: SeoGuardFinding[] = [];
@@ -453,12 +483,39 @@ export const evaluateSeoReleaseGuard = (
 	);
 	const sitemapUrlSetChanged =
 		report.sitemap.urlSetHash !== baseline.report.sitemap.urlSetHash;
+	const baselineBlogSlugs = baseline.blogReleaseSlugs ?? [];
+	const baselineBlogUrls = baseline.blogSitemapUrls ?? [];
+	const currentBlogSlugs = scheduledBlogContext?.blogReleaseSlugs ?? [];
+	const expectedBlogUrls = scheduledBlogContext?.expectedBlogSitemapUrls ?? [];
+	const currentSlugsExtendBaseline =
+		currentBlogSlugs.length >= baselineBlogSlugs.length &&
+		baselineBlogSlugs.every((slug, index) => currentBlogSlugs[index] === slug) &&
+		new Set(currentBlogSlugs).size === currentBlogSlugs.length;
+	const exactScheduledBlogDelta = Boolean(
+		scheduledBlogContext &&
+		baseline.blogReleaseSlugs !== undefined &&
+		baseline.blogSitemapUrls !== undefined &&
+		currentSlugsExtendBaseline &&
+		urlSetHash(baselineBlogUrls) === baseline.report.sitemap.blogUrlSetHash &&
+		baselineBlogUrls.length === baseline.report.sitemap.blogUrlCount &&
+		urlSetHash(expectedBlogUrls) === report.sitemap.blogUrlSetHash &&
+		expectedBlogUrls.length === report.sitemap.blogUrlCount &&
+		report.sitemap.nonBlogUrlSetHash === baseline.report.sitemap.nonBlogUrlSetHash &&
+		report.sitemap.nonBlogUrlCount === baseline.report.sitemap.nonBlogUrlCount &&
+		report.sitemap.pageUrlCount ===
+			baseline.report.sitemap.pageUrlCount + expectedBlogUrls.length - baselineBlogUrls.length,
+	);
 	const sitemapReviewRequired =
 		Math.abs(sitemapSurfacePercent) > 5 ||
 		sitemapCountDelta > MAX_UNREVIEWED_SURFACE_URL_DELTA ||
 		(sitemapUrlSetChanged && sitemapCountDelta === 0);
 	if (sitemapReviewRequired) {
-		if (baseline.reviewedSurfaceUrlSetHashes.includes(report.sitemap.urlSetHash)) {
+		if (exactScheduledBlogDelta) {
+			reviewedExceptions.push({
+				code: 'scheduled_blog_delta_allowed',
+				message: `Sitemap change is exactly the durable blog ledger delta (${expectedBlogUrls.length - baselineBlogUrls.length} URL additions).`,
+			});
+		} else if (baseline.reviewedSurfaceUrlSetHashes.includes(report.sitemap.urlSetHash)) {
 			reviewedExceptions.push({
 				code: 'surface_delta_reviewed',
 				message: `Sitemap surface delta ${sitemapSurfacePercent}% (${sitemapCountDelta} URL changes) matches an explicitly reviewed URL-set hash.`,

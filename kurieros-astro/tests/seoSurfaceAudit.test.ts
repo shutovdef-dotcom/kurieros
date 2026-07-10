@@ -115,6 +115,22 @@ const reportWith = (
 	},
 });
 
+const reportWithReleasedBlogEntries = (slugs: string[]): SeoSurfaceReport => {
+	const input = baseInput();
+	const blogUrls = [`${siteUrl}/blog/`, ...slugs.map((slug) => `${siteUrl}/blog/${slug}/`)];
+	input.htmlFiles.push(...blogUrls.map((url) => ({
+		path: new URL(url).pathname === '/blog/'
+			? 'blog/index.html'
+			: `blog/${new URL(url).pathname.split('/').filter(Boolean).at(-1)}/index.html`,
+		content: html({ canonical: url, structuredTypes: ['BreadcrumbList'] }),
+	})));
+	input.sitemapFiles[0]!.content = input.sitemapFiles[0]!.content.replace(
+		'</urlset>',
+		`${blogUrls.map((url) => `<url><loc>${url}</loc></url>`).join('')}</urlset>`,
+	);
+	return buildSeoSurfaceReport(input);
+};
+
 describe('SEO surface report', () => {
 	it('counts routes, indexability, vacancy schema, breadcrumbs and both feed modes', () => {
 		const report = buildSeoSurfaceReport(baseInput());
@@ -357,6 +373,43 @@ describe('SEO release guard', () => {
 
 		expect(guard.ok).toBe(false);
 		expect(guard.failures.map((failure) => failure.code)).toContain(
+			'surface_delta_review_required',
+		);
+	});
+
+	it('allows only the exact ledger-derived blog URL delta without weakening other sitemap guards', () => {
+		const baselineReport = buildSeoSurfaceReport(baseInput());
+		const baseline = createSeoSurfaceBaseline(baselineReport, {
+			id: 'fixture-v1',
+			reviewReason: 'Initial reviewed fixture.',
+			blogReleaseSlugs: [],
+			blogSitemapUrls: [],
+		});
+		const slugs = Array.from({ length: 15 }, (_, index) => `article-${index + 1}`);
+		const releasedReport = reportWithReleasedBlogEntries(slugs);
+		const expectedBlogSitemapUrls = [`${siteUrl}/blog/`, ...slugs.map((slug) => `${siteUrl}/blog/${slug}/`)];
+
+		const exact = evaluateSeoReleaseGuard(releasedReport, baseline, {
+			blogReleaseSlugs: slugs,
+			expectedBlogSitemapUrls,
+		});
+		expect(exact.ok).toBe(true);
+		expect(exact.reviewedExceptions.map((finding) => finding.code)).toContain(
+			'scheduled_blog_delta_allowed',
+		);
+
+		const unrelatedChange = evaluateSeoReleaseGuard({
+			...releasedReport,
+			sitemap: {
+				...releasedReport.sitemap,
+				nonBlogUrlSetHash: 'unrelated-non-blog-change',
+			},
+		}, baseline, {
+			blogReleaseSlugs: slugs,
+			expectedBlogSitemapUrls,
+		});
+		expect(unrelatedChange.ok).toBe(false);
+		expect(unrelatedChange.failures.map((finding) => finding.code)).toContain(
 			'surface_delta_review_required',
 		);
 	});

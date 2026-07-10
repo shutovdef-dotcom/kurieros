@@ -15,6 +15,7 @@ import {
 	type YandexVacancyFeed,
 } from '../src/utils/yandexVacancyFeed';
 import { buildYandexVacancyFeedPilot } from '../src/utils/yandexVacancyFeedPilot';
+import { BLOG_RELEASE_MANIFEST } from '../src/utils/blogManifest';
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const defaultDistDir = resolve(rootDir, 'dist');
@@ -89,6 +90,10 @@ const readBaseline = async (path: string): Promise<SeoSurfaceBaseline | null> =>
 const distDir = resolve(rootDir, readOption('--dist') ?? defaultDistDir);
 const baselinePath = resolve(rootDir, readOption('--baseline') ?? defaultBaselinePath);
 const siteUrl = (process.env.SITE_URL || 'https://kurerok.ru').replace(/\/+$/, '');
+const blogReleaseSlugs = BLOG_RELEASE_MANIFEST.releases.map((release) => release.slug);
+const blogSitemapUrls = blogReleaseSlugs.length > 0
+	? [`${siteUrl}/blog/`, ...blogReleaseSlugs.map((slug) => `${siteUrl}/blog/${slug}/`)]
+	: [];
 const writeReviewedBaseline = hasFlag('--write-reviewed-baseline');
 const reportOnly = hasFlag('--report-only');
 const auditFiles = await readAuditFiles(distDir);
@@ -114,7 +119,12 @@ if (writeReviewedBaseline) {
 	if (report.sitemap.canonicalConflicts.length > 0) {
 		throw new Error('Refusing to baseline a sitemap with canonical conflicts.');
 	}
-	const baseline = createSeoSurfaceBaseline(report, { id, reviewReason });
+	const baseline = createSeoSurfaceBaseline(report, {
+		id,
+		reviewReason,
+		blogReleaseSlugs,
+		blogSitemapUrls,
+	});
 	await mkdir(dirname(baselinePath), { recursive: true });
 	await writeFile(baselinePath, `${JSON.stringify(baseline, null, 2)}\n`, 'utf8');
 	console.log(JSON.stringify({ baselinePath, baseline }, null, 2));
@@ -127,6 +137,9 @@ if (reportOnly) {
 }
 
 const baseline = await readBaseline(baselinePath);
-const guard = evaluateSeoReleaseGuard(report, baseline);
+const guard = evaluateSeoReleaseGuard(report, baseline, {
+	blogReleaseSlugs,
+	expectedBlogSitemapUrls: blogSitemapUrls,
+});
 console.log(JSON.stringify({ report, guard }, null, 2));
 if (!guard.ok) process.exit(1);
