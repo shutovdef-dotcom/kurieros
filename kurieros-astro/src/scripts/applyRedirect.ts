@@ -1,10 +1,5 @@
 import type { ApplyManifest } from '../utils/applyManifest';
-
-declare global {
-  interface Window {
-    gtag?: (...args: unknown[]) => void;
-  }
-}
+import { trackEvent } from './analyticsAdapter';
 
 type ApplyElements = {
   loading: HTMLElement;
@@ -121,9 +116,7 @@ const emitApplyRedirectStart = (
   applyUrl: string,
   context: ApplyContext,
 ) => {
-  if (typeof window.gtag !== 'function') return;
-
-  window.gtag('event', 'apply_redirect_start', {
+  trackEvent('apply_redirect_start', {
     apply_slug: jobKey,
     vacancy_slug: jobKey.split('--')[0],
     source_slug: context.sourceSlug || '',

@@ -1,3 +1,5 @@
+import { trackEvent } from './analyticsAdapter';
+
 (function () {
 	const modal = document.getElementById('ozon-lead-modal');
 	if (!modal) return;
@@ -33,13 +35,14 @@
 		if (!window.matchMedia('(pointer: coarse)').matches) {
 			setTimeout(() => form?.querySelector('input[name="name"]')?.focus(), 50);
 		}
-		if (typeof window.gtag === 'function') {
-			window.gtag('event', 'ozon_lead_open', {
-				context_company: context?.company || '',
-				context_city: context?.city || '',
-				context_position: context?.position || '',
-			});
-		}
+		trackEvent('ozon_lead_open', {
+			company: context?.company || '',
+			city: context?.city || '',
+			transport: context?.transport || '',
+			source_slug: context?.sourceSlug || '',
+			vacancy_slug: context?.vacancySlug || '',
+			cta_position: context?.position || '',
+		});
 	};
 
 	const close = () => {
@@ -69,6 +72,8 @@
 			company: trigger.dataset.applyCompany || 'Ozon',
 			city: trigger.dataset.applyCity || '',
 			transport: trigger.dataset.applyTransport || '',
+			sourceSlug: trigger.dataset.applySourceSlug || '',
+			vacancySlug: trigger.dataset.applyVacancySlug || '',
 			position: trigger.dataset.applyPosition || '',
 			ozonVacancy: trigger.dataset.ozonVacancy || '',
 			ozonCustomer: trigger.dataset.ozonCustomer || '',
@@ -147,12 +152,14 @@
 				showError('Форма временно недоступна, попробуйте позже.');
 				return;
 			}
-			if (typeof window.gtag === 'function') {
-				window.gtag('event', 'ozon_lead_submit', {
-					transport: transportKey,
-					context_position: ctx.position || '',
-				});
-			}
+			trackEvent('ozon_lead_submit', {
+				company: ctx.company || '',
+				city: ctx.city || '',
+				transport: transportKey,
+				source_slug: ctx.sourceSlug || '',
+				vacancy_slug: ctx.vacancySlug || '',
+				cta_position: ctx.position || '',
+			});
 			stageForm?.classList.add('hidden');
 			stageSuccess?.classList.remove('hidden');
 		} catch (err) {

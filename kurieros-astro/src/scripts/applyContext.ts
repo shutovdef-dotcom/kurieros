@@ -44,13 +44,14 @@ document.addEventListener('click', (event) => {
   if (!jobKey) return;
 
   const data = target.dataset;
+	const vacancyPage = document.querySelector<HTMLElement>('.vacancy-page');
   const context = {
     title: getApplyTitle(target),
-    company: data.applyCompany || '',
-    city: data.applyCity || '',
+    company: data.applyCompany || vacancyPage?.dataset.analyticsCompany || '',
+    city: data.applyCity || vacancyPage?.dataset.analyticsCity || '',
     salary: getApplySalary(target),
-    sourceSlug: data.applySourceSlug || '',
-    transport: data.applyTransport || '',
+    sourceSlug: data.applySourceSlug || vacancyPage?.dataset.vacancySourceSlug || '',
+    transport: data.applyTransport || vacancyPage?.dataset.analyticsTransport || '',
     partnerDomain: data.applyPartnerDomain || '',
   };
 

@@ -1,11 +1,4 @@
-type AnalyticsValue = number | string | undefined;
-type AnalyticsPayload = Record<string, AnalyticsValue>;
-
-declare global {
-	interface Window {
-		gtag?: (...args: unknown[]) => void;
-	}
-}
+import { trackEvent, type AnalyticsPayload } from './analyticsAdapter';
 
 const safeNum = (value: unknown): number | undefined => {
 	if (value === undefined || value === null || value === '') return undefined;
@@ -79,7 +72,7 @@ const getCardEventPayload = (
 
 document.addEventListener('click', (event) => {
 	const target = closestFromEvent<HTMLElement>(event.target, '[data-apply-cta]');
-	if (!target || typeof window.gtag !== 'function') return;
+	if (!target) return;
 
 	const card = target.closest<HTMLElement>('.job-card');
 	const payload = getCardEventPayload(target, card);
@@ -98,12 +91,12 @@ document.addEventListener('click', (event) => {
 
 	payload.partner_domain = partnerDomain;
 	payload.cta_position = target.dataset.applyPosition || '';
-	window.gtag('event', 'apply_click', payload);
+	trackEvent('apply_click', payload);
 }, { passive: true });
 
 document.addEventListener('click', (event) => {
 	const titleLink = closestFromEvent<HTMLElement>(event.target, '.job-card .job-title');
-	if (!titleLink || typeof window.gtag !== 'function') return;
+	if (!titleLink) return;
 
 	const card = titleLink.closest<HTMLElement>('.job-card');
 	if (!card) return;
@@ -111,26 +104,26 @@ document.addEventListener('click', (event) => {
 	const payload = getCardEventPayload(null, card);
 	payload.click_position = 'grid_title';
 	payload.destination_path = getDestinationPath(titleLink);
-	window.gtag('event', 'vacancy_open', payload);
+	trackEvent('vacancy_open', payload);
 }, { passive: true });
 
 document.addEventListener('click', (event) => {
 	const target = closestFromEvent<HTMLElement>(event.target, '#jobs-grid-reveal-more-btn');
-	if (!target || typeof window.gtag !== 'function') return;
+	if (!target) return;
 
 	const payload = getGridContext();
 	payload.next_batch_url = target.getAttribute('href') || '';
-	window.gtag('event', 'grid_reveal_more', payload);
+	trackEvent('grid_reveal_more', payload);
 }, { passive: true });
 
 document.addEventListener('click', (event) => {
 	const target = closestFromEvent<HTMLElement>(event.target, '.btn-compare[data-id]');
-	if (!target || typeof window.gtag !== 'function') return;
+	if (!target) return;
 
 	const card = target.closest<HTMLElement>('.job-card');
 	const payload = getCardEventPayload(null, card);
 	payload.compare_state = target.classList.contains('active') ? 'selected' : 'removed';
-	window.gtag('event', 'compare_toggle', payload);
+	trackEvent('compare_toggle', payload);
 }, { passive: true });
 
 document.addEventListener('change', (event) => {
@@ -138,7 +131,7 @@ document.addEventListener('change', (event) => {
 		event.target,
 		'[data-listing-city-filter], #city-select, #vacancy-age-filter, #vacancy-transport-filter, #vacancy-employment-filter, #vacancy-citizenship-filter',
 	);
-	if (!target || typeof window.gtag !== 'function') return;
+	if (!target) return;
 
 	const payload = getGridContext();
 	const selectedOption = target.selectedOptions[0];
@@ -148,7 +141,7 @@ document.addEventListener('change', (event) => {
 		payload.city_slug = target.value || '';
 		payload.filter_name = 'hub_city';
 		payload.filter_value = target.value || 'all';
-		window.gtag('event', 'grid_city_select', payload);
+		trackEvent('grid_city_select', payload);
 		return;
 	}
 
@@ -156,7 +149,7 @@ document.addEventListener('change', (event) => {
 		payload.city = target.value || '';
 		payload.filter_name = 'home_city';
 		payload.filter_value = target.value || 'all';
-		window.gtag('event', 'grid_city_select', payload);
+		trackEvent('grid_city_select', payload);
 		return;
 	}
 
@@ -168,14 +161,12 @@ document.addEventListener('change', (event) => {
 	};
 	payload.filter_name = filterNames[target.id] || target.id || '';
 	payload.filter_value = target.value || 'all';
-	window.gtag('event', 'grid_filter_change', payload);
+	trackEvent('grid_filter_change', payload);
 }, { passive: true });
 
 window.addEventListener('kurieros:calculator-submit', (event) => {
-	if (typeof window.gtag !== 'function') return;
-
 	const detail = event instanceof CustomEvent && event.detail ? event.detail : {};
-	window.gtag('event', 'calculator_submit', {
+	trackEvent('calculator_submit', {
 		city: detail.city || '',
 		transport: detail.transport || '',
 		hours_per_day: safeNum(detail.hours_per_day),

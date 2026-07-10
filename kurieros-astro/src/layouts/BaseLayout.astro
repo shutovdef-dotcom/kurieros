@@ -167,11 +167,9 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 					<script is:inline id="kurerok-analytics-config" type="application/json" set:html={analyticsConfigJson}></script>
 					<script is:inline src="/bootstrap/analytics-init.js" defer></script>
 
-					{ga4MeasurementId && (
-						<script>
-							import '../scripts/analyticsEvents';
-						</script>
-					)}
+					<script>
+						import '../scripts/analyticsEvents';
+					</script>
 				</>
 			)}
 
