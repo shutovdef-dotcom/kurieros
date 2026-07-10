@@ -6,8 +6,9 @@ import JobGrid from '../../../components/JobGrid.astro';
 import { getCityJobsFromMap } from '../../../utils/jobFilters';
 import { jobsByCity } from '../../../utils/jobsByCityIndex';
 import {
-  getMetroStationsByCity,
+  getRelatedMetroStations,
   metroStations,
+  partitionMetroOffersForStation,
   type MetroStation,
 } from '../../../utils/metroStations';
 import { buildBreadcrumbSchema } from '../../../utils/schema';
@@ -27,33 +28,38 @@ export async function getStaticPaths() {
 
 const { station } = Astro.props as { station: MetroStation };
 const jobs = getCityJobsFromMap(jobsByCity, station.jobsCityName);
+const {
+  verifiedLocalOffers: verifiedLocalJobs,
+  cityFallbackOffers: cityFallbackJobs,
+} = partitionMetroOffersForStation(station, jobs);
 const visibleJobsLimit = 12;
 const vacancyCountText = `${jobs.length} ${getVacancyPluralText(jobs.length)}`;
+const verifiedLocalCountText = `${verifiedLocalJobs.length} ${getVacancyPluralText(verifiedLocalJobs.length)}`;
 const maxSalary = Math.max(0, ...jobs.map((job) => parseSalaryValue(job.salary)));
 const formattedMaxSalary = maxSalary > 0
   ? new Intl.NumberFormat('ru-RU').format(maxSalary)
   : null;
 const companyNames = Array.from(new Set(jobs.map((job) => job.company))).slice(0, 4);
-const sameCityStations = getMetroStationsByCity(station.citySlug);
-const currentStationIndex = sameCityStations.findIndex(
-  (item) => item.stationSlug === station.stationSlug,
-);
-const relatedStations = sameCityStations
-  .slice(Math.max(0, currentStationIndex - 8), currentStationIndex + 9)
-  .filter((item) => item.stationSlug !== station.stationSlug)
-  .slice(0, 12);
-const title = formattedMaxSalary
-  ? `Работа у метро ${station.stationName} — до ${formattedMaxSalary} ₽/мес | КурьерОк`
-  : `Работа у метро ${station.stationName} — ${vacancyCountText} | КурьерОк`;
-const description = `${vacancyCountText} у метро ${station.stationName} в ${station.cityPrepositional}: ${companyNames.join(', ') || 'курьерские компании'}. Сравните доход, график и оформление; вакансии относятся к городу ${station.cityName}.`.slice(0, 170);
+const relatedStations = getRelatedMetroStations(station);
+const title = verifiedLocalJobs.length > 0
+  ? `Работа у метро ${station.stationName} — ${verifiedLocalCountText} | КурьерОк`
+  : `Работа: метро ${station.stationName} как ориентир — ${vacancyCountText} | КурьерОк`;
+const description = (verifiedLocalJobs.length > 0
+  ? `${verifiedLocalCountText} с подтверждённой привязкой к станции ${station.stationName}; отдельно показан городской резерв ${station.cityName}.`
+  : `Метро ${station.stationName} как ориентир: ${vacancyCountText} по городу ${station.cityName} без подтверждённой привязки к станции.`
+).slice(0, 170);
 const faqItems = [
   {
-    question: `Какие вакансии есть у метро ${station.stationName}?`,
-    answer: `На странице показаны ${vacancyCountText} в ${station.cityPrepositional}. Станция помогает выбрать район поиска, а сами вакансии относятся к городскому пулу ${station.cityName}.`,
+    question: `Какие вакансии показаны для станции ${station.stationName}?`,
+    answer: verifiedLocalJobs.length > 0
+      ? `Сначала показаны ${verifiedLocalCountText} с проверенной привязкой к станции. Остальные предложения явно отделены как городской резерв ${station.cityName}.`
+      : `Пока здесь показан только городской резерв: ${vacancyCountText} в ${station.cityPrepositional}. Для этих карточек не подтверждена привязка к станции ${station.stationName}.`,
   },
   {
-    question: `Это отдельные вакансии прямо на станции ${station.stationName}?`,
-    answer: `Нет. Мы не выдаём станцию за точный адрес работодателя. Страница группирует городские вакансии рядом с метро, чтобы быстрее перейти к подходящим предложениям.`,
+    question: `Это отдельные вакансии у станции ${station.stationName}?`,
+    answer: verifiedLocalJobs.length > 0
+      ? `Только блок с пометкой «Подтверждено источником». У таких предложений проверены адрес и измеренная связь со станцией.`
+      : `Нет. Мы не выдаём станцию за адрес работодателя: без источника и измеренной связи предложение остаётся в городском резерве.`,
   },
   {
     question: 'Почему условия могут отличаться?',
@@ -77,8 +83,20 @@ const pageSchemaGraph = [
       address: {
         '@type': 'PostalAddress',
         addressLocality: station.cityName,
+        ...(station.qualityMetadata?.districtName
+          ? { addressRegion: station.qualityMetadata.districtName }
+          : {}),
         addressCountry: 'RU',
       },
+      ...(station.qualityMetadata?.coordinates
+        ? {
+            geo: {
+              '@type': 'GeoCoordinates',
+              latitude: station.qualityMetadata.coordinates.latitude,
+              longitude: station.qualityMetadata.coordinates.longitude,
+            },
+          }
+        : {}),
     },
     mainEntity: {
       '@type': 'ItemList',
@@ -128,14 +146,16 @@ const pageSchemaGraph = [
         </nav>
 
         <div class="metro-hero-content">
-          <p class="eyebrow">Работа у метро</p>
-          <h1>Вакансии у метро {station.stationName}</h1>
+          <p class="eyebrow">Метро как ориентир</p>
+          <h1>Вакансии: метро {station.stationName}</h1>
           <p class="lead">
-            {vacancyCountText} в {station.cityPrepositional}. Станция помогает выбрать район,
-            а условия сравниваются по городским вакансиям без выдуманных точных адресов.
+            {verifiedLocalJobs.length > 0
+              ? `${verifiedLocalCountText} имеют проверенную привязку к станции. Городские предложения показаны отдельно.`
+              : `${vacancyCountText} в ${station.cityPrepositional}. Это городской резерв без подтверждённой привязки к станции.`}
           </p>
           <div class="metro-facts">
-            <span>{vacancyCountText}</span>
+            <span>{vacancyCountText} по городу</span>
+            {verifiedLocalJobs.length > 0 && <span>{verifiedLocalCountText} подтверждено</span>}
             <span>{companyNames.length} компаний</span>
             {formattedMaxSalary && <span>до {formattedMaxSalary} ₽/мес</span>}
             {station.lineNames.length > 0 && <span>{station.lineNames.slice(0, 2).join(', ')}</span>}
@@ -144,23 +164,53 @@ const pageSchemaGraph = [
       </div>
     </section>
 
-    <section class="container metro-section" aria-labelledby="metro-vacancies-title">
-      <div class="section-heading">
-        <div>
-          <p class="eyebrow">Подборка</p>
-          <h2 id="metro-vacancies-title">Вакансии рядом с метро {station.stationName}</h2>
+    {verifiedLocalJobs.length > 0 && (
+      <section class="container metro-section" aria-labelledby="verified-metro-vacancies-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Подтверждено источником</p>
+            <h2 id="verified-metro-vacancies-title">Вакансии с проверенной привязкой к станции</h2>
+          </div>
+          <a href={station.cityHref}>Все вакансии в {station.cityPrepositional}</a>
         </div>
-        <a href={station.cityHref}>Все вакансии в {station.cityPrepositional}</a>
-      </div>
-      <JobGrid
-        jobs={jobs}
-        limit={visibleJobsLimit}
-        revealable={false}
-        moreHref={station.cityHref}
-        moreLabel={`Все вакансии в ${station.cityPrepositional}`}
-        initialCity={station.jobsCityName}
-      />
-    </section>
+        <p class="section-note">
+          Для этих карточек в журнале проверки есть адрес источника и измеренная
+          пешая или транспортная связь со станцией {station.stationName}.
+        </p>
+        <JobGrid
+          jobs={verifiedLocalJobs}
+          limit={visibleJobsLimit}
+          revealable={false}
+          moreHref={station.cityHref}
+          moreLabel={`Все вакансии в ${station.cityPrepositional}`}
+          initialCity={station.jobsCityName}
+        />
+      </section>
+    )}
+
+    {cityFallbackJobs.length > 0 && (
+      <section class="container metro-section" aria-labelledby="metro-vacancies-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Городской резерв</p>
+            <h2 id="metro-vacancies-title">Городские вакансии без привязки к станции</h2>
+          </div>
+          <a href={station.cityHref}>Все вакансии в {station.cityPrepositional}</a>
+        </div>
+        <p class="section-note">
+          Эти предложения относятся к городу {station.cityName}. Точный адрес или
+          транспортная связь со станцией {station.stationName} источником не подтверждены.
+        </p>
+        <JobGrid
+          jobs={cityFallbackJobs}
+          limit={visibleJobsLimit}
+          revealable={false}
+          moreHref={station.cityHref}
+          moreLabel={`Все вакансии в ${station.cityPrepositional}`}
+          initialCity={station.jobsCityName}
+        />
+      </section>
+    )}
 
     <section class="container metro-section metro-info-grid">
       <div>
@@ -168,8 +218,8 @@ const pageSchemaGraph = [
         <h2>Станция не заменяет городскую страницу</h2>
         <p>
           Главная страница по городу остаётся <a href={station.cityHref}>работа курьером в {station.cityName}</a>.
-          Эта страница помогает тем, кто ищет работу у конкретной станции метро, но не создаёт отдельные
-          JobPosting-данные с фиктивным адресом.
+          Эта страница использует станцию как навигационный ориентир и не создаёт разметку вакансии
+          с фиктивным адресом.
         </p>
       </div>
       <div>
@@ -189,8 +239,8 @@ const pageSchemaGraph = [
       <section class="container metro-section" aria-labelledby="nearby-metro-title">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Метро рядом</p>
-            <h2 id="nearby-metro-title">Другие станции в {station.cityPrepositional}</h2>
+            <p class="eyebrow">Топология метро</p>
+            <h2 id="nearby-metro-title">Соседние станции по линии</h2>
           </div>
         </div>
         <div class="station-links">
@@ -294,6 +344,13 @@ const pageSchemaGraph = [
 
   .metro-section {
     padding: var(--space-10) var(--space-4);
+  }
+
+  .section-note {
+    max-width: 780px;
+    margin: calc(var(--space-4) * -1) 0 var(--space-6);
+    color: var(--ink-700);
+    line-height: 1.6;
   }
 
   .section-heading {
