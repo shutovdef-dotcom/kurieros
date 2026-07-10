@@ -6,6 +6,7 @@ type VacancySeoTitleInput = {
 	title: string;
 	salary: string;
 	benefitHook?: string;
+	customTitle?: string;
 	maxLength?: number;
 };
 
@@ -35,8 +36,15 @@ export const buildVacancySeoTitle = ({
 	title,
 	salary,
 	benefitHook,
+	customTitle,
 	maxLength = DEFAULT_MAX_SERP_TITLE_LENGTH,
 }: VacancySeoTitleInput): string => {
+	const normalizedCustomTitle = normalizeTitlePart(customTitle ?? '');
+	if (normalizedCustomTitle) {
+		return withBrandWhenFits(normalizedCustomTitle, maxLength) ??
+			trimAtWordBoundary(normalizedCustomTitle, maxLength);
+	}
+
 	const baseTitle = normalizeTitlePart(`${title} — ${salary}`);
 	const hook = normalizeTitlePart(benefitHook ?? '');
 	const titleWithHook = hook ? `${baseTitle} · ${hook}` : baseTitle;

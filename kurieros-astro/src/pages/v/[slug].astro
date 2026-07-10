@@ -46,6 +46,7 @@ import { formatMoneyWithCurrency } from '../../utils/money';
 import { buildVacancySeoTitle } from '../../utils/vacancySeoTitle';
 import { getVacancyIndexability } from '../../utils/vacancyIndexability';
 import { resolveJobPostingRollout } from '../../data/jobPostingEligibilityPolicy';
+import { getVacancyTitleOverride } from '../../data/seoExperimentCohorts';
 
 export async function getStaticPaths() {
 	return detailJobs.map((job) => ({
@@ -163,6 +164,7 @@ const vacancyTitle = buildVacancySeoTitle({
 	title: job.title,
 	salary: job.salary,
 	benefitHook: benefitHooks[0],
+	customTitle: getVacancyTitleOverride(job.slug),
 });
 
 // Description rewritten for CTR: salary first (numerical hook), then a
