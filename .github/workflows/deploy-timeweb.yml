@@ -145,6 +145,10 @@ jobs:
         if: steps.decision.outputs.should_deploy == 'true'
         run: npm run build
 
+      - name: Audit SEO surface and exact blog ledger delta
+        if: steps.decision.outputs.should_deploy == 'true'
+        run: npm run seo:audit
+
       - name: Validate Yandex vacancy feed
         if: steps.decision.outputs.should_deploy == 'true'
         run: npm run check:yandex-feed

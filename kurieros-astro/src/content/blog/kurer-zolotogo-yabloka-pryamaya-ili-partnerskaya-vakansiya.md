@@ -12,7 +12,6 @@ checkedAt: "2026-07-10"
 relatedSlugs:
   - "kak-proverit-vakansiyu-kurera"
   - "s-kem-kurer-zaklyuchaet-dogovor"
-  - "mts-bank-predstavitel-ili-kurer"
 researchGate: "none"
 ---
 

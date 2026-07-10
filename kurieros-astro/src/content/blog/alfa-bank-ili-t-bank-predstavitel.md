@@ -12,7 +12,6 @@ sourceIds:
 checkedAt: "2026-07-10"
 relatedSlugs:
   - "pervyy-vyezd-predstavitelya-alfa-banka"
-  - "pervyy-marshrut-predstavitelya-t-banka"
   - "s-kem-kurer-zaklyuchaet-dogovor"
 researchGate: "none"
 ---

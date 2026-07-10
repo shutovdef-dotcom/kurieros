@@ -3,7 +3,7 @@ title: "Курьер, повар или кассир Burger King: сравнен
 description: "Как сравнить курьерскую, кухонную и кассовую роль Burger King без выдуманных условий: читать свежую вакансию, проверять договор, график, расчёт и нагрузку."
 author: "КурьерОк"
 type: "new"
-status: "ready"
+status: "blocked"
 primaryIntent: "курьер, повар или кассир Burger King"
 pillarHref: "/compare/"
 sourceIds:

@@ -31,6 +31,7 @@ describe('scheduled blog release workflow', () => {
     expect(workflowText).toContain('src/data/blog-release-ledger.json');
     expect(workflowText).toContain("[blog-ledger]");
     expect(workflowText).toContain('always() && github.event_name == \'schedule\'');
+    expect(workflowText).toContain('npm run seo:audit');
   });
 
   it('only wires Yandex-compatible IndexNow for one deployed URL, never Google Indexing API', () => {
