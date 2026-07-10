@@ -8,6 +8,9 @@ primaryIntent: "работа без опыта"
 pillarHref: "/guide/trebovaniya/"
 sourceIds:
   - "yandex-pro-delivery"
+  - "kuper-courier-work"
+  - "fns-npd-faq"
+  - "fns-npd-receipts"
 checkedAt: "2026-07-10"
 relatedSlugs:
   - "kak-proverit-vakansiyu-kurera"

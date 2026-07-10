@@ -16,6 +16,8 @@ const SourceSchema = z.object({
     'official_terms',
     'partner_primary_data',
   ]),
+  /** Whether this URL is cleared for public citation on an article page. */
+  citationVisibility: z.enum(['public', 'internal']).default('public'),
   verifiedAt: z.iso.date(),
   scope: z.string().min(1),
   allowedClaims: z.array(z.string().min(1)).min(1),
@@ -136,6 +138,9 @@ export const getBlogPrimarySources = (slug: string): BlogPrimarySource[] => {
     const source = blogPrimarySourceById.get(sourceId);
     if (!source) {
       throw new Error(`Source brief ${slug} references unknown source: ${sourceId}`);
+    }
+    if (source.citationVisibility !== 'public') {
+      throw new Error(`Source brief ${slug} references a non-public source: ${sourceId}`);
     }
     return source;
   });

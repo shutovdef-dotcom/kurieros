@@ -10,7 +10,9 @@ sourceIds:
   - "yandex-pro-delivery"
   - "ozon-courier-careers"
   - "kuper-courier-work"
-  - "samokat-primary-partner-brief"
+  - "rostrud-employment-relations"
+  - "fns-npd-faq"
+  - "fns-npd-receipts"
 checkedAt: "2026-07-10"
 relatedSlugs:
   - "sravnenie-yandex-eda-samokat-ozon"

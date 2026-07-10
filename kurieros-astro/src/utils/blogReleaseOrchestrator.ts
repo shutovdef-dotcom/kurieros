@@ -9,6 +9,7 @@ import {
   evaluateBlogEvidenceGate,
   type BlogReleaseEvidence,
 } from './blogReleaseEvidence';
+import { blogPrimarySourceById } from './blogSourceRegistry';
 import {
   planNextBlogRelease,
   type BlogCalendarEntry,
@@ -80,16 +81,23 @@ export const planVerifiedBlogRelease = ({
       now,
       evidence,
     });
+    const restrictedSourceIds = document.frontmatter.sourceIds.filter((sourceId) => {
+      const source = blogPrimarySourceById.get(sourceId);
+      return source?.citationVisibility === 'internal';
+    });
     readinessBySlug[entry.slug] = {
       status: document.frontmatter.status,
       contentSha256: document.contentSha256,
-      sourceGatePassed: evidenceGate.sourceGatePassed,
+      sourceGatePassed: evidenceGate.sourceGatePassed && restrictedSourceIds.length === 0,
       researchGatePassed: evidenceGate.researchGatePassed,
       // A missing later draft, duplicate, or metadata mismatch makes the
       // entire planned corpus unsafe to release from automatically.
       qualityGatePassed: audit.ok,
     };
-    evidenceReasonsBySlug[entry.slug] = evidenceGate.reasons;
+    evidenceReasonsBySlug[entry.slug] = [
+      ...evidenceGate.reasons,
+      ...restrictedSourceIds.map((sourceId) => `source_not_publicly_citable:${sourceId}`),
+    ];
   }
 
   return {

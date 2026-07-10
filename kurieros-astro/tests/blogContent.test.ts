@@ -55,4 +55,25 @@ describe('blog content audit', () => {
     expect(audit.ok).toBe(false);
     expect(audit.issues).toContainEqual(expect.objectContaining({ code: 'calendar_metadata_mismatch' }));
   });
+
+  it('rejects related links to a slug outside the planned calendar', () => {
+    const document = parseBlogContentDocument(
+      'test-article',
+      markdown.replace('relatedSlugs: []', 'relatedSlugs: ["missing-article"]'),
+    );
+    const audit = auditBlogContentCorpus(
+      [{
+        sequence: 1,
+        slug: 'test-article',
+        title: document.frontmatter.title,
+        type: 'new',
+        primaryIntent: document.frontmatter.primaryIntent,
+        pillarHref: document.frontmatter.pillarHref,
+      }],
+      [{ slug: 'test-article', sourceIds: ['official-source'], requiresInternalDataset: false }],
+      [document],
+    );
+
+    expect(audit.issues).toContainEqual(expect.objectContaining({ code: 'unknown_related_slug' }));
+  });
 });

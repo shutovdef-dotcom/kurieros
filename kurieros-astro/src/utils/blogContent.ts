@@ -55,6 +55,8 @@ export type BlogContentAuditIssue = {
     | 'calendar_metadata_mismatch'
     | 'source_ids_mismatch'
     | 'research_gate_mismatch'
+    | 'unknown_related_slug'
+    | 'self_related_slug'
     | 'too_short'
     | 'too_few_headings';
   detail: string;
@@ -151,6 +153,13 @@ export const auditBlogContentCorpus = (
     }
     if (document.headingCount < 3) {
       issues.push({ slug: entry.slug, code: 'too_few_headings', detail: `${document.headingCount} headings; minimum is 3` });
+    }
+    for (const relatedSlug of document.frontmatter.relatedSlugs) {
+      if (relatedSlug === entry.slug) {
+        issues.push({ slug: entry.slug, code: 'self_related_slug', detail: 'cannot link an article to itself' });
+      } else if (!calendarBySlug.has(relatedSlug)) {
+        issues.push({ slug: entry.slug, code: 'unknown_related_slug', detail: `unknown related slug: ${relatedSlug}` });
+      }
     }
   }
 

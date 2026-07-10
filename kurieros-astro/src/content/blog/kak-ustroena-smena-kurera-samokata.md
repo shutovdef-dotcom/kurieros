@@ -3,7 +3,7 @@ title: "Как устроена смена курьера Самоката: да
 description: "Как проверить устройство смены курьера Самоката без догадок: точка старта, зона, задания, перерывы, контакт, расчёт и особенности города."
 author: "КурьерОк"
 type: "new"
-status: "ready"
+status: "blocked"
 primaryIntent: "смена курьера Самоката"
 pillarHref: "/guide/grafik/"
 commercialHref: "/companies/samokat/"

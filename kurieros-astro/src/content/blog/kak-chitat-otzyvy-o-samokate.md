@@ -3,7 +3,7 @@ title: "Отзывы о работе в Самокате: как отделит�
 description: "Как читать отзывы о работе в Самокате критически: отделять личный опыт от условия, проверять дату, город, роль, договор и не переносить чужой вывод на себя."
 author: "КурьерОк"
 type: "new"
-status: "ready"
+status: "blocked"
 primaryIntent: "как читать отзывы о Самокате"
 pillarHref: "/guide/sravnenie/"
 commercialHref: "/companies/samokat/"

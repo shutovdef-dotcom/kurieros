@@ -10,6 +10,7 @@ commercialHref: "/companies/ozon/"
 sourceIds:
   - "ozon-courier-careers"
   - "ozon-warehouse-careers"
+  - "ozon-fresh-recruitment"
 checkedAt: "2026-07-10"
 relatedSlugs:
   - "dohod-voditelya-ozon-posle-rashodov"

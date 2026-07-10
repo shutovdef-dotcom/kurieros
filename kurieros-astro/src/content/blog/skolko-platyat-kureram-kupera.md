@@ -9,6 +9,7 @@ pillarHref: "/guide/dohod/"
 commercialHref: "/companies/kuper-ex-sbermarket/"
 sourceIds:
   - "kuper-courier-work"
+  - "fns-npd-faq"
 checkedAt: "2026-07-10"
 relatedSlugs:
   - "kak-vybrat-kompaniyu-dlya-raboty-kurerom"

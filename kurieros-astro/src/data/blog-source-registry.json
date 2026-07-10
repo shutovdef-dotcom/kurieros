@@ -168,6 +168,7 @@
       "publisher": "Самокат — данные официального партнёра, предоставленные для КурьерОк",
       "url": "https://docs.google.com/spreadsheets/d/1pq7lPgzaipVA1kNjo3brk1eZiADLfsh_siBrC9Px5tU/edit?gid=1564426040",
       "category": "partner_primary_data",
+      "citationVisibility": "internal",
       "verifiedAt": "2026-07-10",
       "scope": "Партнёрская таблица доступных городов и базовых условий; не является публичной политикой всего сервиса.",
       "allowedClaims": [
@@ -290,7 +291,9 @@
         "yandex-pro-delivery",
         "ozon-courier-careers",
         "kuper-courier-work",
-        "samokat-primary-partner-brief"
+        "rostrud-employment-relations",
+        "fns-npd-faq",
+        "fns-npd-receipts"
       ],
       "sourceGate": "required_before_release",
       "requiresInternalDataset": false
@@ -309,7 +312,10 @@
       "sequence": 4,
       "slug": "kak-proyti-pervuyu-nedelyu-kurerom",
       "sourceIds": [
-        "yandex-pro-delivery"
+        "yandex-pro-delivery",
+        "kuper-courier-work",
+        "fns-npd-faq",
+        "fns-npd-receipts"
       ],
       "sourceGate": "required_before_release",
       "requiresInternalDataset": false
@@ -337,7 +343,8 @@
       "sequence": 7,
       "slug": "skolko-platyat-kureram-kupera",
       "sourceIds": [
-        "kuper-courier-work"
+        "kuper-courier-work",
+        "fns-npd-faq"
       ],
       "sourceGate": "required_before_release",
       "requiresInternalDataset": false
@@ -400,7 +407,7 @@
       "sourceIds": [
         "yandex-pro-delivery",
         "ozon-courier-careers",
-        "samokat-primary-partner-brief"
+        "ozon-fresh-recruitment"
       ],
       "sourceGate": "required_before_release",
       "requiresInternalDataset": false
@@ -564,7 +571,8 @@
       "slug": "ozon-i-ozon-fresh-razlichiya-rabot",
       "sourceIds": [
         "ozon-courier-careers",
-        "ozon-warehouse-careers"
+        "ozon-warehouse-careers",
+        "ozon-fresh-recruitment"
       ],
       "sourceGate": "required_before_release",
       "requiresInternalDataset": false
@@ -1253,4 +1261,3 @@
     }
   ]
 }
-

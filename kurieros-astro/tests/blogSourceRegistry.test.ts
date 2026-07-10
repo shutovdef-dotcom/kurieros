@@ -71,4 +71,8 @@ describe('blog source registry', () => {
     expect(sources.every((source) => source.url.startsWith('https://'))).toBe(true);
     expect(() => getBlogPrimarySources('not-a-planned-article')).toThrow(/No source brief/);
   });
+
+  it('does not allow an internal partner document to become a public article citation', () => {
+    expect(() => getBlogPrimarySources('dohod-kurera-samokata')).toThrow(/non-public source/);
+  });
 });

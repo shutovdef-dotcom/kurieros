@@ -3,7 +3,7 @@ title: "Как часто платят курьерам Самоката и чт
 description: "Как проверить период выплат и расчёт для курьера Самоката: вопросы к офферу, отчёт по смене, личные расходы, документы и порядок обращения при расхождении."
 author: "КурьерОк"
 type: "new"
-status: "ready"
+status: "blocked"
 primaryIntent: "выплаты курьерам Самоката"
 pillarHref: "/guide/vyplaty/"
 commercialHref: "/companies/samokat/"
