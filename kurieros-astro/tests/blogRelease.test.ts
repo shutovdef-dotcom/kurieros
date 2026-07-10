@@ -117,6 +117,75 @@ describe('blog release ledger validation', () => {
       ]),
     });
   });
+
+  it('allows a retained historical first-publication date only with explicit evidence', () => {
+    const ledger = ledgerWithFirstRelease();
+    ledger.releases[0] = {
+      ...ledger.releases[0]!,
+      firstPublishedAt: '2026-04-05T09:00:00+03:00',
+    };
+
+    expect(validateBlogReleaseLedger(calendar(3), ledger)).toMatchObject({
+      ok: false,
+      errors: ['missing_historical_publication_evidence'],
+    });
+
+    ledger.releases[0] = {
+      ...ledger.releases[0]!,
+      historicalPublicationEvidence: {
+        source: 'Google Search Console URL history',
+        verifiedAt: '2026-07-10T12:00:00+03:00',
+        reference: 'gsc-url-inspection-export-2026-07-10',
+      },
+    };
+    expect(validateBlogReleaseLedger(calendar(3), ledger)).toEqual({ ok: true, errors: [] });
+  });
+
+  it('rejects releases earlier than their nominal slot or the preceding 48-hour window', () => {
+    const earlyFirst = ledgerWithFirstRelease();
+    earlyFirst.releases[0] = {
+      ...earlyFirst.releases[0]!,
+      releasedAt: '2026-08-03T08:59:00+03:00',
+      firstPublishedAt: '2026-08-03T08:59:00+03:00',
+    };
+    const earlySecond = ledgerWithFirstRelease();
+    earlySecond.releases.push({
+      sequence: 2,
+      slug: 'article-2',
+      releasedAt: '2026-08-05T09:04:00+03:00',
+      firstPublishedAt: '2026-08-05T09:04:00+03:00',
+      revision: 1,
+      contentSha256: sha('2'),
+      deploySha: 'def5678',
+    });
+
+    expect(validateBlogReleaseLedger(calendar(3), earlyFirst)).toMatchObject({
+      ok: false,
+      errors: ['released_before_nominal_slot'],
+    });
+    expect(validateBlogReleaseLedger(calendar(3), earlySecond)).toMatchObject({
+      ok: false,
+      errors: ['released_before_previous_release_window'],
+    });
+  });
+
+  it('fails closed on malformed calendar and ledger envelopes', () => {
+    const brokenLedger = {
+      schemaVersion: 2,
+      timezone: '',
+      releases: null,
+    } as unknown as BlogReleaseLedger;
+
+    expect(validateBlogReleaseLedger([entry(2)], brokenLedger)).toMatchObject({
+      ok: false,
+      errors: expect.arrayContaining([
+        'invalid_calendar',
+        'invalid_ledger_schema_version',
+        'invalid_ledger_timezone',
+        'invalid_ledger_releases',
+      ]),
+    });
+  });
 });
 
 describe('blog release timing and gates', () => {
@@ -165,6 +234,22 @@ describe('blog release timing and gates', () => {
     ).toEqual({ ready: false, reasons: ['missing_content_sha256'] });
   });
 
+  it('does not require a source or research gate that the calendar explicitly marks optional', () => {
+    expect(
+      getBlogReleaseReadiness(
+        entry(1, {
+          sourceGate: { required: false },
+          researchGate: { required: false },
+        }),
+        {
+          status: 'ready',
+          contentSha256: sha('1'),
+          qualityGatePassed: true,
+        },
+      ),
+    ).toEqual({ ready: true, reasons: [] });
+  });
+
   it('honours the disabled and pause switches before selecting a candidate', () => {
     const entries = calendar(12);
     const input = {
@@ -204,7 +289,7 @@ describe('blog release timing and gates', () => {
         slug: 'article-1',
         effectiveDueAt: '2026-08-03T06:00:00.000Z',
       },
-      readyBuffer: 12,
+      readyBuffer: 13,
       requiredReadyBuffer: 12,
     });
     expect(result.candidate).not.toHaveProperty('releasedAt');
@@ -270,6 +355,33 @@ describe('blog release timing and gates', () => {
       },
     });
   });
+
+  it('reports a complete queue and refuses malformed local cursor state', () => {
+    const one = [entry(1)];
+    const complete = planNextBlogRelease({
+      calendar: one,
+      ledger: ledgerWithFirstRelease(),
+      readinessBySlug: readiness(one),
+      now: '2026-08-10T12:00:00+03:00',
+      scheduleEnabled: true,
+      paused: false,
+    });
+    const malformed = planNextBlogRelease({
+      calendar: one,
+      ledger: { ...emptyLedger(), schemaVersion: 2 } as unknown as BlogReleaseLedger,
+      readinessBySlug: readiness(one),
+      now: '2026-08-10T12:00:00+03:00',
+      scheduleEnabled: true,
+      paused: false,
+    });
+
+    expect(complete).toMatchObject({ eligible: false, reasons: ['queue_complete'] });
+    expect(malformed).toMatchObject({
+      eligible: false,
+      reasons: ['ledger_invalid'],
+      ledgerErrors: ['invalid_ledger_schema_version'],
+    });
+  });
 });
 
 describe('production manifest reconciliation', () => {
@@ -289,8 +401,8 @@ describe('production manifest reconciliation', () => {
     remote.releases.push({
       sequence: 2,
       slug: 'article-2',
-      releasedAt: '2026-08-05T09:02:00+03:00',
-      firstPublishedAt: '2026-08-05T09:02:00+03:00',
+      releasedAt: '2026-08-05T09:06:00+03:00',
+      firstPublishedAt: '2026-08-05T09:06:00+03:00',
       revision: 1,
       contentSha256: sha('2'),
       deploySha: 'def5678',
@@ -310,8 +422,8 @@ describe('production manifest reconciliation', () => {
       {
         sequence: 2,
         slug: 'article-2',
-        releasedAt: '2026-08-05T09:02:00+03:00',
-        firstPublishedAt: '2026-08-05T09:02:00+03:00',
+        releasedAt: '2026-08-05T09:06:00+03:00',
+        firstPublishedAt: '2026-08-05T09:06:00+03:00',
         revision: 1,
         contentSha256: sha('2'),
         deploySha: 'def5678',
@@ -319,15 +431,15 @@ describe('production manifest reconciliation', () => {
       {
         sequence: 3,
         slug: 'article-3',
-        releasedAt: '2026-08-07T09:02:00+03:00',
-        firstPublishedAt: '2026-08-07T09:02:00+03:00',
+        releasedAt: '2026-08-07T09:06:00+03:00',
+        firstPublishedAt: '2026-08-07T09:06:00+03:00',
         revision: 1,
         contentSha256: sha('3'),
-        deploySha: 'ghi9012',
+        deploySha: 'fed9012',
       },
     );
     const divergent = structuredClone(local);
-    divergent.releases[0] = { ...divergent.releases[0]!, deploySha: 'different' };
+    divergent.releases[0] = { ...divergent.releases[0]!, deploySha: 'deadbee' };
 
     expect(reconcileBlogReleaseLedgers(calendar(3), local, emptyLedger())).toMatchObject({
       ok: false,
@@ -343,6 +455,22 @@ describe('production manifest reconciliation', () => {
       ok: false,
       mode: 'invalid',
       reason: 'ledger_divergence',
+    });
+  });
+
+  it('fails closed when either side of reconciliation is malformed', () => {
+    const local = ledgerWithFirstRelease();
+    const malformed = { ...emptyLedger(), schemaVersion: 2 } as unknown as BlogReleaseLedger;
+
+    expect(reconcileBlogReleaseLedgers(calendar(3), malformed, local)).toMatchObject({
+      ok: false,
+      mode: 'invalid',
+      reason: 'invalid_local_ledger',
+    });
+    expect(reconcileBlogReleaseLedgers(calendar(3), local, malformed)).toMatchObject({
+      ok: false,
+      mode: 'invalid',
+      reason: 'invalid_remote_ledger',
     });
   });
 });
