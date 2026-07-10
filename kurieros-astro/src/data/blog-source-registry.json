@@ -1,0 +1,1256 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-07-10",
+  "sources": [
+    {
+      "id": "fns-npd-regime",
+      "publisher": "ФНС России",
+      "url": "https://www.nalog.gov.ru/rn77/taxation/princtax/",
+      "category": "regulatory",
+      "verifiedAt": "2026-07-10",
+      "scope": "Федеральный режим налога на профессиональный доход.",
+      "allowedClaims": [
+        "кто может применять НПД при соблюдении условий закона",
+        "ставки НПД 4% и 6%",
+        "налоговый период и порядок уведомления об уплате"
+      ]
+    },
+    {
+      "id": "fns-npd-faq",
+      "publisher": "ФНС России",
+      "url": "https://npd.nalog.ru/faq/",
+      "category": "regulatory",
+      "verifiedAt": "2026-07-10",
+      "scope": "Официальная база знаний ФНС по НПД.",
+      "allowedClaims": [
+        "способы регистрации плательщика НПД",
+        "ограничения применения НПД",
+        "учёт доходов и базовые правила уплаты"
+      ]
+    },
+    {
+      "id": "fns-npd-receipts",
+      "publisher": "ФНС России",
+      "url": "https://www.nalog.gov.ru/rn53/news/activities_fts/14618624/",
+      "category": "regulatory",
+      "verifiedAt": "2026-07-10",
+      "scope": "Формирование и передача чеков плательщиком НПД.",
+      "allowedClaims": [
+        "обязанность формировать чек при расчёте по НПД",
+        "использование приложения или уполномоченного оператора для чека"
+      ]
+    },
+    {
+      "id": "rostrud-minor-work",
+      "publisher": "Государственная инспекция труда (Роструд)",
+      "url": "https://git63.rostrud.gov.ru/news/1568488.html",
+      "category": "regulatory",
+      "verifiedAt": "2026-07-10",
+      "scope": "Особенности трудовых отношений с несовершеннолетними.",
+      "allowedClaims": [
+        "возрастные условия трудового договора",
+        "письменное согласие законного представителя в предусмотренных случаях",
+        "ограничения рабочего времени и лёгкий характер работы"
+      ]
+    },
+    {
+      "id": "rostrud-employment-relations",
+      "publisher": "Государственная инспекция труда (Роструд)",
+      "url": "https://git16.rostrud.gov.ru/deyatelnost-gosudarstvennoy-inspektsii-truda/konsultatsii-razyasneniya/15471.html",
+      "category": "regulatory",
+      "verifiedAt": "2026-07-10",
+      "scope": "Общие стороны и базовые условия трудовых отношений.",
+      "allowedClaims": [
+        "различие работника и работодателя в трудовых отношениях",
+        "необходимость читать фактический договор и условия конкретного работодателя"
+      ]
+    },
+    {
+      "id": "rospotrebnadzor-medical-books",
+      "publisher": "ФБУЗ Центр гигиены и эпидемиологии Роспотребнадзора",
+      "url": "https://46cge.rospotrebnadzor.ru/uslugi/meditsinskikh-knizhek/",
+      "category": "regulatory",
+      "verifiedAt": "2026-07-10",
+      "scope": "Личные медицинские книжки и медосмотры в видах работ, для которых они предусмотрены.",
+      "allowedClaims": [
+        "медицинская книжка относится к отдельным профессиям и видам работ",
+        "необходимость уточнять требования по конкретной роли и работодателю"
+      ]
+    },
+    {
+      "id": "yandex-pro-delivery",
+      "publisher": "Яндекс Про",
+      "url": "https://taxi.yandex.ru/rabota/delivery",
+      "category": "official_recruitment",
+      "verifiedAt": "2026-07-10",
+      "scope": "Публичная страница работы курьером у партнёров Яндекс Про.",
+      "allowedClaims": [
+        "существование пешего, велосипедного, самокатного и автомобильного форматов",
+        "условия на странице зависят от города, графика и партнёра",
+        "договор заключается с компанией-партнёром сервиса"
+      ]
+    },
+    {
+      "id": "yandex-eda-legal",
+      "publisher": "Яндекс",
+      "url": "https://yandex.ru/legal/termsofuse_eda/ru/",
+      "category": "official_terms",
+      "verifiedAt": "2026-07-10",
+      "scope": "Пользовательские условия сервиса Яндекс Еда.",
+      "allowedClaims": [
+        "нельзя смешивать роли сервиса, ресторана, магазина и доставщика",
+        "описание условий доставки относится к конкретной опубликованной услуге"
+      ]
+    },
+    {
+      "id": "ozon-courier-careers",
+      "publisher": "Ozon",
+      "url": "https://job.ozon.ru/perm/courier/vakansiya-kuryer",
+      "category": "official_careers",
+      "verifiedAt": "2026-07-10",
+      "scope": "Публичная страница вакансии курьера Ozon в Перми; локальные условия.",
+      "allowedClaims": [
+        "на странице представлены форматы курьерского сотрудничества Ozon",
+        "точные условия применимы только к указанной странице и требуют повторной проверки перед выпуском"
+      ]
+    },
+    {
+      "id": "ozon-warehouse-careers",
+      "publisher": "Ozon",
+      "url": "https://career.ozon.ru/kolpino/sklad?__rr=1",
+      "category": "official_careers",
+      "verifiedAt": "2026-07-10",
+      "scope": "Публичная карьерная страница склада Ozon в Колпино; локальные условия.",
+      "allowedClaims": [
+        "на странице описывается складское направление Ozon",
+        "условия и транспорт до склада нельзя переносить на другие локации без отдельного источника"
+      ]
+    },
+    {
+      "id": "ozon-fresh-recruitment",
+      "publisher": "Ozon",
+      "url": "https://recruitment.ozon.ru/fresh-referral-office",
+      "category": "official_recruitment",
+      "verifiedAt": "2026-07-10",
+      "scope": "Реферальная recruitment-точка Ozon Fresh.",
+      "allowedClaims": [
+        "наличие отдельного recruitment-потока Ozon Fresh",
+        "перед публикацией нужны актуальные условия именно города и партнёра"
+      ]
+    },
+    {
+      "id": "kuper-courier-work",
+      "publisher": "Купер",
+      "url": "https://kuper.ru/rabota",
+      "category": "official_recruitment",
+      "verifiedAt": "2026-07-10",
+      "scope": "Публичная страница сотрудничества курьеров и сборщиков Купера.",
+      "allowedClaims": [
+        "на странице заявлены пешая, велосипедная, автомобильная и сборочная роли",
+        "условия, калькулятор и доход требуют проверки города и даты",
+        "у страницы есть собственные требования к оформлению и документам"
+      ]
+    },
+    {
+      "id": "kuper-referral-program",
+      "publisher": "Купер",
+      "url": "https://cpa.kuper.ru/courier.html",
+      "category": "official_terms",
+      "verifiedAt": "2026-07-10",
+      "scope": "Официальная партнёрская реферальная программа Купера.",
+      "allowedClaims": [
+        "реферальные условия существуют только в формулировке и периоде, указанном на странице",
+        "размер и доступность вознаграждения нельзя фиксировать без повторной проверки"
+      ]
+    },
+    {
+      "id": "samokat-primary-partner-brief",
+      "publisher": "Самокат — данные официального партнёра, предоставленные для КурьерОк",
+      "url": "https://docs.google.com/spreadsheets/d/1pq7lPgzaipVA1kNjo3brk1eZiADLfsh_siBrC9Px5tU/edit?gid=1564426040",
+      "category": "partner_primary_data",
+      "verifiedAt": "2026-07-10",
+      "scope": "Партнёрская таблица доступных городов и базовых условий; не является публичной политикой всего сервиса.",
+      "allowedClaims": [
+        "только строки, актуально подтверждённые партнёром для конкретного города",
+        "нельзя обобщать запись таблицы как единые условия Самоката"
+      ]
+    },
+    {
+      "id": "alfa-bank-sales-careers",
+      "publisher": "Альфа-Банк",
+      "url": "https://job.alfabank.ru/vacancies/prodazhi",
+      "category": "official_careers",
+      "verifiedAt": "2026-07-10",
+      "scope": "Публичная карьерная страница разъездной роли Альфа-Агента.",
+      "allowedClaims": [
+        "роль предполагает встречи с клиентами и разъездной формат",
+        "конкретная вакансия и её условия требуют актуальной проверки перед выпуском"
+      ]
+    },
+    {
+      "id": "tbank-careers",
+      "publisher": "Т-Банк",
+      "url": "https://www.tbank.ru/career/",
+      "category": "official_careers",
+      "verifiedAt": "2026-07-10",
+      "scope": "Официальный карьерный портал Т-Банка.",
+      "allowedClaims": [
+        "на портале есть вакансии по работе с клиентами и представителей",
+        "термины на карьерной странице не определяют юридический вид отношений без текста конкретного предложения"
+      ]
+    },
+    {
+      "id": "x5-delivery-careers",
+      "publisher": "X5 Доставка",
+      "url": "https://dostavka.x5.ru/",
+      "category": "official_careers",
+      "verifiedAt": "2026-07-10",
+      "scope": "Публичная страница ролей X5 Доставки.",
+      "allowedClaims": [
+        "различие курьерского, сборочного и даркстор-направлений",
+        "опубликованные условия зависят от конкретной роли и требуют повторной проверки"
+      ]
+    },
+    {
+      "id": "x5-career-vacancies",
+      "publisher": "X5",
+      "url": "https://rabota.x5.ru/vacancies?vacancy_categories=%D0%BA%D1%83%D1%80%D1%8C%D0%B5%D1%80%D1%8B",
+      "category": "official_careers",
+      "verifiedAt": "2026-07-10",
+      "scope": "Официальная витрина вакансий X5 по категории курьеров.",
+      "allowedClaims": [
+        "наличие актуальных вакансий нужно подтверждать в день редакционной проверки",
+        "название бренда не доказывает конкретного работодателя или договор"
+      ]
+    },
+    {
+      "id": "goldapple-couriers",
+      "publisher": "Золотое Яблоко",
+      "url": "https://job.goldapple.ru/couriers",
+      "category": "official_careers",
+      "verifiedAt": "2026-07-10",
+      "scope": "Официальная recruitment-страница курьеров Золотого Яблока.",
+      "allowedClaims": [
+        "только текущие роль, регион и условия, доступные на странице",
+        "следует различать прямой оффер и партнёрский оффер по реквизитам и договору"
+      ]
+    },
+    {
+      "id": "wildberries-courier",
+      "publisher": "Wildberries",
+      "url": "https://courier.wb.ru/",
+      "category": "official_careers",
+      "verifiedAt": "2026-07-10",
+      "scope": "Официальный сервис WB Курьер.",
+      "allowedClaims": [
+        "описанные на странице этапы подключения и форматы выполнения заданий",
+        "конкретные доходы и условия действительны только после повторной проверки страницы"
+      ]
+    },
+    {
+      "id": "magnit-official-site",
+      "publisher": "Магнит",
+      "url": "https://magnit.ru/",
+      "category": "official_terms",
+      "verifiedAt": "2026-07-10",
+      "scope": "Официальный сайт сети Магнит со ссылкой на вакансии.",
+      "allowedClaims": [
+        "сам факт существования официального сайта и раздела вакансий",
+        "никакие роли, выплаты или договорные отношения без актуальной конкретной вакансии"
+      ]
+    },
+    {
+      "id": "burger-king-official-site",
+      "publisher": "Burger King Россия",
+      "url": "https://burgerkingrus.ru/",
+      "category": "official_terms",
+      "verifiedAt": "2026-07-10",
+      "scope": "Официальный сайт Burger King Россия.",
+      "allowedClaims": [
+        "сам факт существования официального сайта бренда",
+        "никакие обязанности или условия работы без актуальной первичной вакансии"
+      ]
+    }
+  ],
+  "articleSources": [
+    {
+      "sequence": 1,
+      "slug": "skolko-zarabatyvaet-kurer-yandex-eda-2026",
+      "sourceIds": [
+        "yandex-pro-delivery",
+        "fns-npd-regime"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 2,
+      "slug": "kak-vybrat-kompaniyu-dlya-raboty-kurerom",
+      "sourceIds": [
+        "yandex-pro-delivery",
+        "ozon-courier-careers",
+        "kuper-courier-work",
+        "samokat-primary-partner-brief"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 3,
+      "slug": "kurer-na-lichnom-avto-rashody-i-pribyl",
+      "sourceIds": [
+        "yandex-pro-delivery",
+        "fns-npd-regime"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 4,
+      "slug": "kak-proyti-pervuyu-nedelyu-kurerom",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 5,
+      "slug": "nuzhen-li-elektrovelosiped-kureru",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 6,
+      "slug": "dohod-voditelya-ozon-posle-rashodov",
+      "sourceIds": [
+        "ozon-courier-careers",
+        "fns-npd-regime"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 7,
+      "slug": "skolko-platyat-kureram-kupera",
+      "sourceIds": [
+        "kuper-courier-work"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 8,
+      "slug": "s-kem-kurer-zaklyuchaet-dogovor",
+      "sourceIds": [
+        "yandex-pro-delivery",
+        "yandex-eda-legal",
+        "fns-npd-faq"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 9,
+      "slug": "kak-proverit-vakansiyu-kurera",
+      "sourceIds": [
+        "rostrud-employment-relations"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 10,
+      "slug": "indeks-dohodov-kurerov-q2-2026",
+      "sourceIds": [
+        "ozon-courier-careers",
+        "kuper-courier-work"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": true,
+      "internalDataset": {
+        "id": "kurerok-vacancy-snapshot",
+        "scope": "Версионированная обезличенная выборка вакансий КурьерОк за II квартал 2026."
+      }
+    },
+    {
+      "sequence": 11,
+      "slug": "podrabotka-kurerom-posle-osnovnoy-raboty",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 12,
+      "slug": "kak-povysit-dohod-kureru-bez-pererabotok",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 13,
+      "slug": "sravnenie-yandex-eda-samokat-ozon",
+      "sourceIds": [
+        "yandex-pro-delivery",
+        "ozon-courier-careers",
+        "samokat-primary-partner-brief"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 14,
+      "slug": "kak-vybrat-rayon-dlya-raboty-kurerom",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 15,
+      "slug": "kak-kureru-vesti-uchet-dohodov-i-rashodov",
+      "sourceIds": [
+        "fns-npd-faq",
+        "fns-npd-receipts"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 16,
+      "slug": "chistyy-dohod-kurera-posle-rashodov",
+      "sourceIds": [
+        "fns-npd-regime",
+        "fns-npd-faq"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 17,
+      "slug": "dohod-kurera-za-4-6-8-12-chasov",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 18,
+      "slug": "pochasovaya-stavka-ili-oplata-za-zakaz",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 19,
+      "slug": "kak-vybirat-sloty-kureru",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 20,
+      "slug": "dohod-kurera-goroda-millionniki-2026",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": true,
+      "internalDataset": {
+        "id": "kurerok-vacancy-snapshot",
+        "scope": "Сопоставимая выборка вакансий по городам-миллионникам с периодом и правилами нормализации."
+      }
+    },
+    {
+      "sequence": 21,
+      "slug": "rabota-kurerom-v-malenkom-gorode",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 22,
+      "slug": "kak-pereyti-iz-podrabotki-v-polnyy-grafik-kurerom",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 23,
+      "slug": "pochemu-kurery-uhodyat-iz-dostavki",
+      "sourceIds": [
+        "rostrud-employment-relations"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": true,
+      "internalDataset": {
+        "id": "kurerok-courier-interviews",
+        "scope": "Согласованная и обезличенная выборка интервью; без публикации личных данных и без обобщений вне выборки."
+      }
+    },
+    {
+      "sequence": 24,
+      "slug": "kak-ponyat-chto-vakansiya-kurera-plohaya",
+      "sourceIds": [
+        "rostrud-employment-relations"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 25,
+      "slug": "podrabotka-kurerom-po-vyhodnym",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 26,
+      "slug": "vechernie-smeny-kurera",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 27,
+      "slug": "kak-sovmeschat-uchebu-i-dostavku",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 28,
+      "slug": "nochnaya-smena-kurera",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 29,
+      "slug": "prostoy-kurera-net-zakazov",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 30,
+      "slug": "ozon-i-ozon-fresh-razlichiya-rabot",
+      "sourceIds": [
+        "ozon-courier-careers",
+        "ozon-warehouse-careers"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 31,
+      "slug": "chastota-vyplat-i-byudzhet-kurera",
+      "sourceIds": [
+        "fns-npd-faq"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 32,
+      "slug": "zaderzhka-vyplaty-kureru",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 33,
+      "slug": "skolko-zakazov-dlya-100-150-200-tysyach",
+      "sourceIds": [
+        "yandex-pro-delivery",
+        "fns-npd-regime"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 34,
+      "slug": "chasy-pik-dozhd-i-bonusy-kurera",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 35,
+      "slug": "predstavitel-banka-ili-kurer-dostavki",
+      "sourceIds": [
+        "alfa-bank-sales-careers",
+        "tbank-careers"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 36,
+      "slug": "stavka-sborshchika-zakazov-kupera",
+      "sourceIds": [
+        "kuper-courier-work"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 37,
+      "slug": "dohod-kurera-samokata",
+      "sourceIds": [
+        "samokat-primary-partner-brief"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 38,
+      "slug": "ogranicheniya-svobodnogo-grafika-kurera",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 39,
+      "slug": "otmena-slota-i-nevyhod-na-smenu",
+      "sourceIds": [
+        "rostrud-employment-relations"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 40,
+      "slug": "indeks-dohodov-kurerov-q3-2026",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": true,
+      "internalDataset": {
+        "id": "kurerok-vacancy-snapshot",
+        "scope": "Версионированная обезличенная выборка вакансий КурьерОк за III квартал 2026."
+      }
+    },
+    {
+      "sequence": 41,
+      "slug": "rabota-kurerom-zimoy",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 42,
+      "slug": "pogoda-i-bezopasnost-kurera",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 43,
+      "slug": "skolko-kilometrov-prohodit-peshiy-kurer",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 44,
+      "slug": "kak-ustroena-smena-velokurera",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 45,
+      "slug": "velosiped-ili-elektrosamokat-dlya-dostavki",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 46,
+      "slug": "elektrovelosiped-kupit-ili-arendovat",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 47,
+      "slug": "zapas-hoda-elektrovelosipeda-zimoy",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 48,
+      "slug": "rashody-na-remont-velosipeda-kurera",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 49,
+      "slug": "lichnyy-avtomobil-dlya-dostavki",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 50,
+      "slug": "stoimost-komplekta-kurera-2026",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": true,
+      "internalDataset": {
+        "id": "kurerok-equipment-price-snapshot",
+        "scope": "Снимок цен и комплектаций с датой, регионом, продавцом и правилами сопоставления."
+      }
+    },
+    {
+      "sequence": 51,
+      "slug": "anketa-i-offer-kurera-ozon",
+      "sourceIds": [
+        "ozon-courier-careers"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 52,
+      "slug": "doroga-na-sklad-ozon-horugvino",
+      "sourceIds": [
+        "ozon-warehouse-careers"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 53,
+      "slug": "operator-sklada-ili-obrabotchik-tovarov-ozon",
+      "sourceIds": [
+        "ozon-warehouse-careers"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 54,
+      "slug": "kurer-sklad-ili-voditel-ozon",
+      "sourceIds": [
+        "ozon-courier-careers",
+        "ozon-warehouse-careers"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 55,
+      "slug": "ozon-fresh-usloviya-po-gorodam",
+      "sourceIds": [
+        "ozon-fresh-recruitment"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 56,
+      "slug": "kuper-rabotodatel-ili-partner",
+      "sourceIds": [
+        "kuper-courier-work"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 57,
+      "slug": "kurer-ili-sborshchik-kuper",
+      "sourceIds": [
+        "kuper-courier-work"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 58,
+      "slug": "formaty-kurerov-kupera",
+      "sourceIds": [
+        "kuper-courier-work"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 59,
+      "slug": "referalnaya-programma-kupera",
+      "sourceIds": [
+        "kuper-referral-program"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 60,
+      "slug": "roli-ozon-i-kuper-v-baze-vakansiy",
+      "sourceIds": [
+        "ozon-courier-careers",
+        "kuper-courier-work"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": true,
+      "internalDataset": {
+        "id": "kurerok-vacancy-snapshot",
+        "scope": "Снимок собственной базы вакансий с раскрытой методикой классификации ролей."
+      }
+    },
+    {
+      "sequence": 61,
+      "slug": "kak-ustroena-smena-kurera-samokata",
+      "sourceIds": [
+        "samokat-primary-partner-brief"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 62,
+      "slug": "vyplaty-kureram-samokata",
+      "sourceIds": [
+        "samokat-primary-partner-brief"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 63,
+      "slug": "sloty-samokata-dlya-kurera",
+      "sourceIds": [
+        "samokat-primary-partner-brief"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 64,
+      "slug": "kak-chitat-otzyvy-o-samokate",
+      "sourceIds": [
+        "samokat-primary-partner-brief"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 65,
+      "slug": "peshiy-ili-velokurer-yandex-edy",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 66,
+      "slug": "yandex-eda-ili-yandex-lavka",
+      "sourceIds": [
+        "yandex-eda-legal"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 67,
+      "slug": "pervaya-smena-yandex-eda",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 68,
+      "slug": "pervyy-vyezd-predstavitelya-alfa-banka",
+      "sourceIds": [
+        "alfa-bank-sales-careers"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 69,
+      "slug": "alfa-bank-ili-t-bank-predstavitel",
+      "sourceIds": [
+        "alfa-bank-sales-careers",
+        "tbank-careers"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 70,
+      "slug": "modeli-oplaty-kurerov-issledovanie-2026",
+      "sourceIds": [
+        "yandex-pro-delivery",
+        "ozon-courier-careers",
+        "kuper-courier-work"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": true,
+      "internalDataset": {
+        "id": "kurerok-vacancy-snapshot",
+        "scope": "Снимок собственной базы вакансий с раскрытой методикой классификации моделей оплаты."
+      }
+    },
+    {
+      "sequence": 71,
+      "slug": "kurer-zolotogo-yabloka-pryamaya-ili-partnerskaya-vakansiya",
+      "sourceIds": [
+        "goldapple-couriers"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 72,
+      "slug": "x5-pyaterochka-chizhik-oformlenie-kurera",
+      "sourceIds": [
+        "x5-delivery-careers",
+        "x5-career-vacancies"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 73,
+      "slug": "kurer-magnita-kak-chitat-vakansiyu",
+      "sourceIds": [
+        "magnit-official-site"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 74,
+      "slug": "kurer-wildberries-vidy-roley",
+      "sourceIds": [
+        "wildberries-courier"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 75,
+      "slug": "burger-king-kurer-povar-ili-kassir",
+      "sourceIds": [
+        "burger-king-official-site"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 76,
+      "slug": "dokumenty-kurera-16-17-let",
+      "sourceIds": [
+        "rostrud-minor-work"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 77,
+      "slug": "formaty-dostavki-do-18-let",
+      "sourceIds": [
+        "rostrud-minor-work",
+        "yandex-pro-delivery",
+        "kuper-courier-work",
+        "wildberries-courier"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 78,
+      "slug": "anketa-kurera-bez-opyta",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 79,
+      "slug": "chto-vzyat-na-pervuyu-smenu-kurera",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 80,
+      "slug": "vakansii-dlya-16-17-let-issledovanie",
+      "sourceIds": [
+        "rostrud-minor-work",
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": true,
+      "internalDataset": {
+        "id": "kurerok-vacancy-snapshot",
+        "scope": "Снимок собственной базы с доказуемыми возрастными условиями и исключением неполных записей."
+      }
+    },
+    {
+      "sequence": 81,
+      "slug": "samozanyatyy-sborshchik-zakazov",
+      "sourceIds": [
+        "fns-npd-regime",
+        "fns-npd-faq"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 82,
+      "slug": "cheki-npd-dlya-kurera",
+      "sourceIds": [
+        "fns-npd-receipts",
+        "fns-npd-faq"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 83,
+      "slug": "dogovor-kurera-chto-proverit",
+      "sourceIds": [
+        "rostrud-employment-relations",
+        "fns-npd-faq"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 84,
+      "slug": "proverka-migratsionnyh-dokumentov-kurera",
+      "sourceIds": [
+        "rostrud-employment-relations"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 85,
+      "slug": "oplata-i-prodlenie-medknizhki-kurera",
+      "sourceIds": [
+        "rospotrebnadzor-medical-books"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 86,
+      "slug": "voprosy-rekruteru-kurerskoy-vakansii",
+      "sourceIds": [
+        "rostrud-employment-relations"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 87,
+      "slug": "kak-proverit-offer-kurera",
+      "sourceIds": [
+        "rostrud-employment-relations",
+        "fns-npd-faq"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 88,
+      "slug": "probnaya-smena-kurera-oplata",
+      "sourceIds": [
+        "rostrud-employment-relations"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 89,
+      "slug": "kak-chitat-otzyvy-kurerov",
+      "sourceIds": [
+        "rostrud-employment-relations"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 90,
+      "slug": "audit-usloviy-raboty-kurerom-2027",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": true,
+      "internalDataset": {
+        "id": "kurerok-source-change-log",
+        "scope": "Версионированный журнал изменений первичных источников с URL, датой проверки и снимком условия."
+      }
+    },
+    {
+      "sequence": 91,
+      "slug": "kak-sravnit-vakansii-kurera",
+      "sourceIds": [
+        "rostrud-employment-relations",
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 92,
+      "slug": "otkaz-posle-ankety-kurera",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 93,
+      "slug": "rezume-kurera-bez-opyta",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 94,
+      "slug": "reyting-otmeny-i-blokirovki-kurera",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 95,
+      "slug": "kak-soobshchit-o-nevyhode-na-smenu",
+      "sourceIds": [
+        "rostrud-employment-relations",
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 96,
+      "slug": "dtp-travma-povrezhdenie-zakaza-kurera",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 97,
+      "slug": "strahovanie-kurera-riski-i-isklyucheniya",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 98,
+      "slug": "bezopasnyy-marshrut-kurera-vecherom",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": false
+    },
+    {
+      "sequence": 99,
+      "slug": "voronka-trudoustroystva-kurera-issledovanie",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": true,
+      "internalDataset": {
+        "id": "kurerok-anonymised-application-funnel",
+        "scope": "Агрегированные обезличенные события без PII, с периодом, методикой и порогом подавления малых групп."
+      }
+    },
+    {
+      "sequence": 100,
+      "slug": "rynok-kurerskih-vakansiy-2026",
+      "sourceIds": [
+        "ozon-courier-careers",
+        "kuper-courier-work",
+        "yandex-pro-delivery"
+      ],
+      "sourceGate": "required_before_release",
+      "requiresInternalDataset": true,
+      "internalDataset": {
+        "id": "kurerok-vacancy-snapshot",
+        "scope": "Годовой версионированный снимок собственной базы с методикой включения, дедупликации и ограничениями."
+      }
+    }
+  ]
+}
+

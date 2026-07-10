@@ -13,7 +13,6 @@ describe('blog source registry', () => {
     const ids = BLOG_SOURCE_REGISTRY.sources.map((source) => source.id);
 
     expect(new Set(ids).size).toBe(ids.length);
-    expect(BLOG_SOURCE_REGISTRY.sources).toHaveLength(expect.any(Number));
     expect(BLOG_SOURCE_REGISTRY.sources.length).toBeGreaterThanOrEqual(12);
     expect(BLOG_SOURCE_REGISTRY.sources.every((source) => source.url.startsWith('https://'))).toBe(true);
     expect(
