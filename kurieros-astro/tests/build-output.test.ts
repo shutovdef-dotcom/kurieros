@@ -31,6 +31,16 @@ import { fileURLToPath } from 'url';
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const DIST_DIR = join(ROOT, '..', 'dist');
 const skipIfNoDist = !existsSync(DIST_DIR);
+const blogCalendar = JSON.parse(
+  readFileSync(join(ROOT, '..', 'src', 'data', 'blog-calendar.json'), 'utf8'),
+) as { entries: Array<{ slug: string }> };
+const blogReleaseManifest = JSON.parse(
+  readFileSync(join(ROOT, '..', 'src', 'generated', 'blog-release-manifest.json'), 'utf8'),
+) as { releases: Array<{ slug: string; firstPublishedAt: string; modifiedAt?: string }> };
+const publishedBlogSlugs = new Set(blogReleaseManifest.releases.map((release) => release.slug));
+const futureBlogSlugs = blogCalendar.entries
+  .map((entry) => entry.slug)
+  .filter((slug) => !publishedBlogSlugs.has(slug));
 
 const countHtml = (dir: string): number => {
   let count = 0;
@@ -108,7 +118,9 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     // station pages switched to compact local previews with a city link, and
     // -1 duplicate Yandex Go company alias after canonical company merging.
     // Reference build: 10700.
-    // Band: 10695-10705 (+-5 from reference count, plus intentionally added routes).
+    // Every durable blog ledger row emits exactly one additional article
+    // route. Draft files must not alter this number.
+    // Band: baseline ±5 plus the exact released-article count.
     //
     // NOTE FOR CONTRIBUTORS: always re-derive both bounds from an actual build
     // after adding new routes -- do NOT blindly add N to the upper bound.
@@ -118,8 +130,8 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     //   else if(e.isFile()&&e.name.endsWith('.html'))n++;}return n;}
     //   console.log(c('dist'));"
     const count = countHtml(DIST_DIR);
-    expect(count).toBeGreaterThanOrEqual(10695);
-    expect(count).toBeLessThanOrEqual(10705);
+    expect(count).toBeGreaterThanOrEqual(10695 + publishedBlogSlugs.size);
+    expect(count).toBeLessThanOrEqual(10705 + publishedBlogSlugs.size);
   });
 
   it('keeps the shared apply redirect page non-indexable and out of sitemap fan-out', () => {
@@ -968,26 +980,69 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
       expect(html).not.toContain('data-next-batch-url="/api/grid-batch/metro-moskva-sokol/2/"');
     });
 
-    it('keeps internal and placeholder routes out of the sitemap', () => {
+    it('keeps internal routes and unreleased blog drafts out of the sitemap', () => {
       const sitemapContent = readAllSitemaps();
 
       expect(sitemapContent).not.toContain('https://kurerok.ru/admin/board/');
-      expect(sitemapContent).not.toContain('https://kurerok.ru/blog/');
+      if (publishedBlogSlugs.size === 0) {
+        expect(sitemapContent).not.toContain('https://kurerok.ru/blog/');
+      } else {
+        expect(sitemapContent).toContain('https://kurerok.ru/blog/');
+      }
+      for (const slug of futureBlogSlugs) {
+        expect(sitemapContent).not.toContain(`https://kurerok.ru/blog/${slug}/`);
+      }
       expect(sitemapContent).not.toContain('https://kurerok.ru/guide/dohod.md');
       expect(sitemapContent).not.toContain('https://kurerok.ru/antonovka/');
       expect(sitemapContent).not.toContain('https://kurerok.ru/aprelevka/');
     });
 
-    it('marks internal admin and empty blog pages as noindex when emitted', () => {
-      const pages = [
-        join(DIST_DIR, 'admin', 'board', 'index.html'),
-        join(DIST_DIR, 'blog', 'index.html'),
-      ];
+    it('makes the blog indexable only after a durable release exists', () => {
+      const adminPage = join(DIST_DIR, 'admin', 'board', 'index.html');
+      if (existsSync(adminPage)) {
+        expect(readFileSync(adminPage, 'utf8'), adminPage).toMatch(/<meta\s+name="robots"\s+content="[^"]*noindex/i);
+      }
 
-      for (const page of pages) {
-        if (!existsSync(page)) continue;
-        const html = readFileSync(page, 'utf8');
-        expect(html, page).toMatch(/<meta\s+name="robots"\s+content="[^"]*noindex/i);
+      const blogPage = join(DIST_DIR, 'blog', 'index.html');
+      if (!existsSync(blogPage)) return;
+      const html = readFileSync(blogPage, 'utf8');
+      if (publishedBlogSlugs.size === 0) {
+        expect(html).toMatch(/<meta\s+name="robots"\s+content="[^"]*noindex/i);
+      } else {
+        expect(html).not.toMatch(/<meta\s+name="robots"\s+content="[^"]*noindex/i);
+      }
+    });
+
+    it('emits only durable blog ledger URLs in HTML, RSS, manifest and structured data', () => {
+      const sitemapContent = readAllSitemaps();
+      const rssPath = join(DIST_DIR, 'blog', 'rss.xml');
+      const manifestPath = join(DIST_DIR, 'api', 'blog-release-manifest.json');
+      const rss = existsSync(rssPath) ? readFileSync(rssPath, 'utf8') : '';
+
+      expect(existsSync(manifestPath)).toBe(true);
+      expect(JSON.parse(readFileSync(manifestPath, 'utf8')).releases).toEqual(
+        blogReleaseManifest.releases,
+      );
+      for (const release of blogReleaseManifest.releases) {
+        const articlePath = join(DIST_DIR, 'blog', release.slug, 'index.html');
+        expect(existsSync(articlePath), `missing released blog article: ${release.slug}`).toBe(true);
+        expect(sitemapContent).toContain(`https://kurerok.ru/blog/${release.slug}/`);
+        expect(rss).toContain(`https://kurerok.ru/blog/${release.slug}/`);
+
+        const graph = extractJsonLdGraph(readFileSync(articlePath, 'utf8'));
+        const blogPosting = graph.find((entry) => entry['@type'] === 'BlogPosting');
+        expect(blogPosting).toMatchObject({ datePublished: release.firstPublishedAt });
+        if (release.modifiedAt) {
+          expect(blogPosting).toMatchObject({ dateModified: release.modifiedAt });
+        } else {
+          expect(blogPosting).not.toHaveProperty('dateModified');
+        }
+      }
+
+      for (const slug of futureBlogSlugs) {
+        expect(existsSync(join(DIST_DIR, 'blog', slug, 'index.html')), slug).toBe(false);
+        expect(sitemapContent).not.toContain(`https://kurerok.ru/blog/${slug}/`);
+        expect(rss).not.toContain(`https://kurerok.ru/blog/${slug}/`);
       }
     });
 
