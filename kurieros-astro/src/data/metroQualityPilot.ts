@@ -287,6 +287,17 @@ export const METRO_QUALITY_PILOT = {
     weakPageIndexability: 'unchanged' as const,
     noindexDecision: 'deferred' as const,
     maxNoindexBatchShare: 0.05,
+    // Removing unsupported station-local claims is a correctness correction
+    // across the existing metro surface, not an experiment treatment.
+    accuracyBaselineScope: 'all-existing-pages' as const,
+    accuracyBaselineChanges: [
+      'city-fallback-labels',
+      'no-unsupported-nearby-claims',
+      'no-fabricated-jobposting-addresses',
+    ] as const,
+    treatmentPageCount: 5,
+    controlPageCount: 5,
+    treatmentOnlyFeatures: ['source-backed-topology-links'] as const,
     expansionRequires: [
       'source-backed-local-offers',
       'fixed-cohort-search-console-export',
@@ -311,3 +322,11 @@ export const METRO_QUALITY_PILOT = {
     pilotPage('aeroport', 'control', 'zamoskvoretskaya-north', 'matched-line-control'),
   ],
 };
+
+export const getMetroQualityPilotPage = (
+  citySlug: MetroCitySlug,
+  stationSlug: string,
+): MetroPilotPage | undefined =>
+  METRO_QUALITY_PILOT.pages.find(
+    (page) => page.citySlug === citySlug && page.stationSlug === stationSlug,
+  );

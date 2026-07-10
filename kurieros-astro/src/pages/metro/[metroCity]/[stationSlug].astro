@@ -15,6 +15,7 @@ import { buildBreadcrumbSchema } from '../../../utils/schema';
 import { getVacancyPluralText } from '../../../utils/format';
 import { getVacancyCanonicalUrl } from '../../../utils/vacancyUrl';
 import { parseSalaryValue } from '../../../utils/vacancyPage';
+import { getMetroQualityPilotPage } from '../../../data/metroQualityPilot';
 
 export async function getStaticPaths() {
   return metroStations.map((station) => ({
@@ -40,7 +41,9 @@ const formattedMaxSalary = maxSalary > 0
   ? new Intl.NumberFormat('ru-RU').format(maxSalary)
   : null;
 const companyNames = Array.from(new Set(jobs.map((job) => job.company))).slice(0, 4);
-const relatedStations = getRelatedMetroStations(station);
+const pilotPage = getMetroQualityPilotPage(station.citySlug, station.stationSlug);
+const isMetroTreatment = pilotPage?.cohort === 'treatment';
+const relatedStations = isMetroTreatment ? getRelatedMetroStations(station) : [];
 const title = verifiedLocalJobs.length > 0
   ? `Работа у метро ${station.stationName} — ${verifiedLocalCountText} | КурьерОк`
   : `Работа: метро ${station.stationName} как ориентир — ${vacancyCountText} | КурьерОк`;
@@ -134,7 +137,11 @@ const pageSchemaGraph = [
 <BaseLayout title={title} description={description} schemaGraph={pageSchemaGraph}>
   <Header />
 
-  <main class="metro-page">
+  <main
+    class="metro-page"
+    data-metro-accuracy-scope="sitewide"
+    data-metro-pilot-cohort={pilotPage?.cohort}
+  >
     <section class="metro-hero">
       <div class="container metro-hero-inner">
         <nav class="breadcrumbs" aria-label="Хлебные крошки">
@@ -235,14 +242,18 @@ const pageSchemaGraph = [
       </div>
     </section>
 
-    {relatedStations.length > 0 && (
+    {isMetroTreatment && relatedStations.length > 0 && (
       <section class="container metro-section" aria-labelledby="nearby-metro-title">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Топология метро</p>
+            <p class="eyebrow">Пилот: проверенная топология метро</p>
             <h2 id="nearby-metro-title">Соседние станции по линии</h2>
           </div>
         </div>
+        <p class="section-note">
+          Этот блок входит только в пятистраничную treatment-когорту. Связи
+          станций взяты из источника, указанного в журнале проверки пилота.
+        </p>
         <div class="station-links">
           {relatedStations.map((item) => (
             <a href={item.href}>{item.stationName}</a>
