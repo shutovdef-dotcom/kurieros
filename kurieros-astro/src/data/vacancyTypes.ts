@@ -127,6 +127,15 @@ export type VacancyOffer = {
   transportProvision?: TransportProvision;
   pay: PayModel;
   isActive: boolean;
+  /** Original employer publication date. Never substitute a crawl/build date. */
+  postedAt?: string;
+  /** Real employer deadline when the upstream source exposes one. */
+  validThrough?: string;
+  /** Most recent successful upstream availability check. */
+  sourceCheckedAt?: string;
+  /** Most recent known semantic change to the local vacancy content. */
+  contentUpdatedAt?: string;
+  /** Legacy content date retained while partner sources migrate. */
   updatedAt: string;
   sourceUrl?: string;
   salaryConfidence: SalaryConfidence;
@@ -254,6 +263,10 @@ export type GeneratedJob = {
   salaryConfidence: SalaryConfidence;
   currency: CurrencyCode;
   sourceUrl?: string;
+  postedAt?: string;
+  validThrough?: string;
+  sourceCheckedAt?: string;
+  contentUpdatedAt?: string;
   updatedAt: string;
   cityDistricts?: string[];
   subjectVariants?: VacancySubjectVariant[];

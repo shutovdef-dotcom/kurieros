@@ -34,6 +34,8 @@
 import { z } from 'zod';
 import ozonVacanciesData from './ozon-vacancies.json';
 import ozonFreshVacanciesData from './ozon-fresh-vacancies.json';
+import ozonVacanciesMetadataData from './ozon-vacancies.meta.json';
+import ozonFreshVacanciesMetadataData from './ozon-fresh-vacancies.meta.json';
 import { formatRub } from './sources/shared';
 import type {
   EmploymentFormat,
@@ -67,7 +69,6 @@ const OZON_REF_LANDING_SKLAD = OZON_REF_LANDING_SKLAD_PARTNER;
 const OZON_REF_LANDING_FRESH = OZON_REF_LANDING_FRESH_PARTNER;
 // Backwards-compat alias used by the long-standing courier template.
 const OZON_REF_LANDING = OZON_REF_LANDING_SKLAD;
-const OZON_UPDATED_AT = new Date().toISOString().slice(0, 10);
 
 // === Types ===========================================================
 
@@ -692,6 +693,11 @@ const ozonCatalogueCitySchema = z.object({
   hireObjects: z.array(ozonHireObjectSchema),
 });
 
+export const OzonCatalogueMetadataSchema = z.object({
+  sourceCheckedAt: z.iso.datetime(),
+  contentUpdatedAt: z.iso.datetime(),
+});
+
 /** Schema for `ozon-vacancies.json` (sklad — keyed by raw `combineCustomerVacancy` slug). */
 export const OzonSkladVacanciesSchema = z.array(
   z.object({
@@ -716,6 +722,10 @@ type RawFreshEntry = z.infer<typeof OzonFreshVacanciesSchema>[number];
 
 const ozonVacancies: RawSkladEntry[] = OzonSkladVacanciesSchema.parse(ozonVacanciesData);
 const ozonFreshVacancies: RawFreshEntry[] = OzonFreshVacanciesSchema.parse(ozonFreshVacanciesData);
+const ozonVacanciesMetadata = OzonCatalogueMetadataSchema.parse(ozonVacanciesMetadataData);
+const ozonFreshVacanciesMetadata = OzonCatalogueMetadataSchema.parse(
+  ozonFreshVacanciesMetadataData,
+);
 
 // === Generation ======================================================
 
@@ -740,6 +750,9 @@ const findCatalogueCities = (
 const buildOffersForTemplate = (template: OzonRoleTemplate): VacancyOffer[] => {
   const cities = findCatalogueCities(template);
   if (!cities) return [];
+  const catalogueMetadata = template.customer === 'express'
+    ? ozonFreshVacanciesMetadata
+    : ozonVacanciesMetadata;
 
   return cities.map((city, cityIndex) => {
     // Default to the first hire-object UUID per city — most cities only
@@ -794,7 +807,9 @@ const buildOffersForTemplate = (template: OzonRoleTemplate): VacancyOffer[] => {
         paymentFrequency: template.paymentFrequency,
       },
       isActive: true,
-      updatedAt: OZON_UPDATED_AT,
+      sourceCheckedAt: catalogueMetadata.sourceCheckedAt,
+      contentUpdatedAt: catalogueMetadata.contentUpdatedAt,
+      updatedAt: catalogueMetadata.contentUpdatedAt.slice(0, 10),
       sourceUrl: template.refLanding ?? OZON_REF_LANDING,
       salaryConfidence: 'partner',
       ageFrom: template.ageFrom,

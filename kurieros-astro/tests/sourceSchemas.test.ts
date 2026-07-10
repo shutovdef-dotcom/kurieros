@@ -23,13 +23,20 @@ import alfaBankVacanciesSource from '../src/data/alfa-bank-vacancies.json';
 import burgerKingVacanciesSource from '../src/data/burger-king-vacancies.json';
 import ozonVacanciesSource from '../src/data/ozon-vacancies.json';
 import ozonFreshVacanciesSource from '../src/data/ozon-fresh-vacancies.json';
+import ozonVacanciesMetadataSource from '../src/data/ozon-vacancies.meta.json';
+import ozonFreshVacanciesMetadataSource from '../src/data/ozon-fresh-vacancies.meta.json';
 
 import { KuperPayRatesSchema } from '../src/data/sources/kuper';
 import { TBankVacanciesSchema } from '../src/data/sources/tbank';
 import { EfinVacanciesSchema } from '../src/data/sources/efin';
 import { AlfaBankVacanciesSchema } from '../src/data/sources/alfa-bank';
 import { BurgerKingVacanciesSchema } from '../src/data/sources/burger-king';
-import { OzonSkladVacanciesSchema, OzonFreshVacanciesSchema } from '../src/data/ozonOffers';
+import {
+  OzonCatalogueMetadataSchema,
+  OzonFreshVacanciesSchema,
+  OzonSkladVacanciesSchema,
+  ozonVacancySources,
+} from '../src/data/ozonOffers';
 
 // =====================================================================
 // Helpers
@@ -394,5 +401,28 @@ describe('OzonFreshVacanciesSchema', () => {
     } catch (error) {
       expectIssueAtPath(error, [0, 'cities', 0, 'cityID']);
     }
+  });
+});
+
+describe('Ozon catalogue freshness metadata', () => {
+  it('validates source-check and content-change timestamps separately', () => {
+    expect(() => OzonCatalogueMetadataSchema.parse(ozonVacanciesMetadataSource)).not.toThrow();
+    expect(() => OzonCatalogueMetadataSchema.parse(ozonFreshVacanciesMetadataSource)).not.toThrow();
+  });
+
+  it('uses the catalogue content date instead of the current build date', () => {
+    const skladOffer = ozonVacancySources.find((source) => source.slug === 'ozon-courier')?.offers[0];
+    const freshOffer = ozonVacancySources.find((source) => source.slug === 'ozon-fresh-courier')?.offers[0];
+
+    expect(skladOffer).toMatchObject({
+      updatedAt: ozonVacanciesMetadataSource.contentUpdatedAt.slice(0, 10),
+      contentUpdatedAt: ozonVacanciesMetadataSource.contentUpdatedAt,
+      sourceCheckedAt: ozonVacanciesMetadataSource.sourceCheckedAt,
+    });
+    expect(freshOffer).toMatchObject({
+      updatedAt: ozonFreshVacanciesMetadataSource.contentUpdatedAt.slice(0, 10),
+      contentUpdatedAt: ozonFreshVacanciesMetadataSource.contentUpdatedAt,
+      sourceCheckedAt: ozonFreshVacanciesMetadataSource.sourceCheckedAt,
+    });
   });
 });

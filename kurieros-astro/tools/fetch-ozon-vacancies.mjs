@@ -34,8 +34,16 @@ const result = await crawlVacancyCatalogue({
 });
 
 const outPath = path.join(__dirname, '..', 'src', 'data', 'ozon-vacancies.json');
+const metadataPath = path.join(
+  __dirname,
+  '..',
+  'src',
+  'data',
+  'ozon-vacancies.meta.json',
+);
 await writeOrAbort({
   outPath,
+  metadataPath,
   result,
   formatLabel: (v, cityName) => `${v.slug} → ${cityName}`,
 });
