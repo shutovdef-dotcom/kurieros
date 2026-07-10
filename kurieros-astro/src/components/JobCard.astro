@@ -2,6 +2,7 @@
 import { ozonDataAttrs } from '../utils/ozonAttrs';
 import { getApplyCta } from '../utils/applyCta';
 import { getApplyHref, getApplyPartnerDomain, isExternalApplyLink } from '../utils/applyRoute';
+import { getLeadFormEligibility } from '../utils/leadFormEligibility';
 import { getVacancyDetailPath } from '../utils/vacancyUrl';
 import type { JobCardViewModel } from '../utils/jobCardViewModel';
 import VacancyTKey from './VacancyTKey.astro';
@@ -18,7 +19,10 @@ const { job, isInCompare = false } = Astro.props as Props;
 // offers in src/data/ozonOffers.ts) that swaps the external `<a>` CTA
 // for an in-page modal opener. The `<provider>` segment is forwarded to
 // `data-lead-form-type` and consumed by the matching modal component.
-const isLeadFormApply = typeof job.applyLink === 'string' && job.applyLink.startsWith('lead-form:');
+const isLeadFormMarker = typeof job.applyLink === 'string' && job.applyLink.startsWith('lead-form:');
+const leadFormEligibility = isLeadFormMarker ? getLeadFormEligibility(job) : null;
+const isLeadFormApply = leadFormEligibility?.eligible === true;
+const isLeadFormUnavailable = isLeadFormMarker && !isLeadFormApply;
 const leadFormType = isLeadFormApply ? job.applyLink.slice('lead-form:'.length) : null;
 const detailHref = getVacancyDetailPath(job);
 
@@ -127,7 +131,11 @@ const searchText = [
 			<button class={`btn-compare ${isInCompare ? 'active' : ''}`} data-id={job.id} type="button">
 				{isInCompare ? <><span data-t="job.in_compare">В сравнении</span> ✓</> : <span data-t="job.compare">+ Сравнить</span>}
 			</button>
-			{isLeadFormApply ? (
+			{isLeadFormUnavailable ? (
+				<span class="apply-btn apply-btn-unavailable" aria-disabled="true">
+					Отклик временно недоступен
+				</span>
+			) : isLeadFormApply ? (
 				<button
 					type="button"
 					class="apply-btn"
@@ -446,6 +454,13 @@ const searchText = [
 	}
 	.apply-btn:hover {
 		background: var(--accent-500);
+	}
+	.apply-btn-unavailable,
+	.apply-btn-unavailable:hover {
+		background: var(--ink-100);
+		color: var(--ink-600);
+		border: 1px solid var(--ink-200);
+		cursor: not-allowed;
 	}
 	.btn-compare:focus-visible,
 	.apply-btn:focus-visible {

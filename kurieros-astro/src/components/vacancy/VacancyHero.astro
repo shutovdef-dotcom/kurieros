@@ -16,6 +16,7 @@ interface Props {
 	cityLinks: CityLink[];
 	updatedDate: string;
 	isLeadFormApply: boolean;
+	isLeadFormUnavailable: boolean;
 	leadFormType: string | null;
 	salaryMaxNumeric: number;
 	applyLabel: string;
@@ -28,6 +29,7 @@ const {
 	cityLinks,
 	updatedDate,
 	isLeadFormApply,
+	isLeadFormUnavailable,
 	leadFormType,
 	salaryMaxNumeric,
 	applyLabel,
@@ -120,7 +122,11 @@ const applyPartnerDomain = getApplyPartnerDomain(job);
 			<VacancyTKey jobId={job.id} field="salary" fallback={job.salary} as="strong" />
 			<VacancyTKey jobId={job.id} field="details_rate" fallback={job.details.rate} as="small" class="salary-rate" />
 			<small data-t="vacancy.final_terms_short">Финальные условия уточняются при отклике</small>
-			{isLeadFormApply ? (
+			{isLeadFormUnavailable ? (
+				<span class="apply-btn-large apply-btn-hero apply-btn-unavailable" aria-disabled="true">
+					Отклик временно недоступен
+				</span>
+			) : isLeadFormApply ? (
 				<button
 					type="button"
 					class="apply-btn-large apply-btn-hero"
@@ -161,7 +167,11 @@ const applyPartnerDomain = getApplyPartnerDomain(job);
 		{/* Disabled-fallback CTA («Уточнить условия» → /contacts/) removed
 		    per C3 — site is a CPA-referral aggregator, every vacancy
 		    has a real applyLink. */}
-		<p class="apply-note apply-note-hero" data-t="vacancy.apply_note_hero">Пара секунд ожидания, затем анкета работодателя или партнёра</p>
+		{isLeadFormUnavailable ? (
+			<p class="apply-note apply-note-hero">Проверяем актуальность формы работодателя. Контактные данные сейчас не принимаются.</p>
+		) : (
+			<p class="apply-note apply-note-hero" data-t="vacancy.apply_note_hero">Пара секунд ожидания, затем анкета работодателя или партнёра</p>
+		)}
 	</div>
 </section>
 
@@ -497,6 +507,14 @@ const applyPartnerDomain = getApplyPartnerDomain(job);
 	}
 	.apply-btn-large:hover {
 		background: var(--accent-400);
+	}
+	.apply-btn-unavailable,
+	.apply-btn-unavailable:hover {
+		background: var(--vacancy-soft-strong);
+		color: var(--vacancy-muted);
+		border: 1px solid var(--vacancy-border);
+		box-shadow: none;
+		cursor: not-allowed;
 	}
 	.apply-btn-large:focus-visible {
 		outline: none;

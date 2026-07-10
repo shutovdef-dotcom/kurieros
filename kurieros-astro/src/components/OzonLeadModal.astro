@@ -10,14 +10,14 @@
  * `src/data/vacancies.ts`).
  *
  * Flow:
- *  1. User submits the form (name, phone, transport).
- *  2. Browser POSTs `{ name, phone, transport }` to the Cloudflare
+ *  1. User submits the form (name and phone).
+ *  2. Browser POSTs `{ name, phone }` to the Cloudflare
  *     Worker (PUBLIC_OZON_LEAD_API).
  *  3. Worker fills the Ozon recruitment form on the user's behalf
  *     using the site owner's referrer credentials (Worker secrets)
- *     and pings Telegram for alerts. The user never sees the
- *     referrer phone or the bot token — both stay server-side.
- *  4. On success Ozon sends an SMS directly to the candidate's phone.
+ *     and sends Telegram a PII-free operational status. The user never
+ *     sees the referrer phone or the bot token — both stay server-side.
+ *  4. On success Ozon may send an SMS directly to the candidate's phone.
  *
  * Env var (build-time, prefixed PUBLIC_ so Astro inlines it):
  *  - PUBLIC_OZON_LEAD_API — Worker URL like
@@ -53,9 +53,9 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 				<span class="ozon-lead-eyebrow">Заявка через kurerok.ru</span>
 				<h2 id="ozon-lead-title">Откликнуться на вакансию Ozon</h2>
 				<p class="ozon-lead-lead">
-					Оставьте контакты — мы перезвоним и поможем зарегистрироваться
-					в&nbsp;Ozon Job. После первой смены вы получите бонус +1&nbsp;000&nbsp;₽
-					за&nbsp;регистрацию по&nbsp;нашему реферальному коду.
+					Имя и телефон КурьерОк передаст через Cloudflare Worker в Ozon
+					для передачи заявки на выбранную вакансию. Ozon может отправить
+					SMS с дальнейшими шагами регистрации.
 				</p>
 			</div>
 
@@ -88,23 +88,8 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 				</label>
 				<p class="ozon-lead-privacy">
 					<span aria-hidden="true">🔒</span>
-					Передаём номер только в Ozon. Спама не будет.
+					КурьерОк использует имя и телефон только для этой передачи и не сохраняет их в своей базе.
 				</p>
-				<fieldset class="ozon-lead-fieldset">
-					<legend>Транспорт</legend>
-					<label class="ozon-lead-radio">
-						<input type="radio" name="transport" value="auto" checked />
-						<span>Авто</span>
-					</label>
-					<label class="ozon-lead-radio">
-						<input type="radio" name="transport" value="foot" />
-						<span>Пешком</span>
-					</label>
-					<label class="ozon-lead-radio">
-						<input type="radio" name="transport" value="bicycle" />
-						<span>Велосипед / самокат</span>
-					</label>
-				</fieldset>
 
 				<button type="submit" class="ozon-lead-submit" id="ozon-lead-submit">
 					<span class="ozon-lead-submit-label">Отправить заявку</span>
@@ -114,7 +99,9 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 				<p class="ozon-lead-error hidden" id="ozon-lead-error" role="alert"></p>
 
 				<p class="ozon-lead-fineprint">
-					Нажимая «Отправить», вы соглашаетесь, что мы&nbsp;свяжемся с&nbsp;вами по&nbsp;указанному телефону.
+					Нажимая «Отправить», вы соглашаетесь на обработку имени и телефона КурьерОк
+					только в течение запроса для передачи заявки в Ozon. После передачи Ozon
+					обрабатывает данные по своим правилам. <a href="/privacy/">Подробнее в политике конфиденциальности</a>.
 				</p>
 			</form>
 		</div>
@@ -122,12 +109,12 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		<div class="ozon-lead-stage hidden" data-stage="success">
 			<div class="ozon-lead-success-icon" aria-hidden="true">✓</div>
 			<h2>Заявка отправлена в&nbsp;Ozon</h2>
-			<p>Сейчас Ozon пришлёт SMS на&nbsp;ваш номер с&nbsp;инструкцией. Мы&nbsp;уже передали ваши контакты и&nbsp;закрепили вас за&nbsp;нашим аккаунтом.</p>
+			<p>Контакты переданы в Ozon. Если заявка принята, Ozon может прислать SMS с дальнейшими шагами.</p>
 
 			<ol class="ozon-lead-steps">
 				<li>
-					<strong>Дождитесь SMS от&nbsp;Ozon</strong>
-					<span>В&nbsp;течение нескольких минут на&nbsp;ваш телефон придёт сообщение с&nbsp;ссылкой и&nbsp;дальнейшими шагами.</span>
+					<strong>Проверьте SMS от&nbsp;Ozon</strong>
+					<span>Срок и способ ответа определяет Ozon; сообщение может прийти не сразу.</span>
 				</li>
 				<li>
 					<strong>Установите Ozon Job</strong>
@@ -278,45 +265,6 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		border-color: var(--brand-ozon);
 		box-shadow: 0 0 0 3px rgba(0, 91, 255, 0.18);
 	}
-	.ozon-lead-fieldset {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.4rem;
-		border: none;
-		padding: 0;
-		margin: 0;
-	}
-	.ozon-lead-fieldset legend {
-		display: block;
-		width: 100%;
-		font-size: 0.82rem;
-		font-weight: 700;
-		color: var(--ink-700);
-		margin-bottom: 0.3rem;
-	}
-	.ozon-lead-radio {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.35rem;
-		padding: 0.45rem 0.85rem;
-		border: 1px solid var(--ink-200);
-		border-radius: 999px;
-		font-size: 0.88rem;
-		cursor: pointer;
-		transition: border-color 0.15s ease, background 0.15s ease;
-	}
-	.ozon-lead-radio:hover {
-		border-color: var(--brand-ozon);
-	}
-	.ozon-lead-radio input {
-		accent-color: var(--brand-ozon);
-	}
-	.ozon-lead-radio:has(input:checked) {
-		border-color: var(--brand-ozon);
-		background: rgba(0, 91, 255, 0.08);
-		color: var(--brand-ozon);
-		font-weight: 700;
-	}
 	.ozon-lead-submit {
 		position: relative;
 		min-height: 50px;
@@ -382,6 +330,10 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 		font-size: 0.75rem;
 		color: var(--ink-400);
 		line-height: 1.4;
+	}
+	.ozon-lead-fineprint a {
+		color: inherit;
+		font-weight: 700;
 	}
 	.ozon-lead-privacy {
 		display: flex;
@@ -528,24 +480,13 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 	:global(:where(html, body).dark-mode) .ozon-lead-fineprint {
 		color: rgba(231, 234, 240, 0.7);
 	}
-	:global(:where(html, body).dark-mode) .ozon-lead-field span,
-	:global(:where(html, body).dark-mode) .ozon-lead-fieldset legend {
+	:global(:where(html, body).dark-mode) .ozon-lead-field span {
 		color: var(--ink-300);
 	}
 	:global(:where(html, body).dark-mode) .ozon-lead-field input {
 		background: rgba(15, 23, 36, 0.7);
 		border-color: rgba(195, 204, 216, 0.2);
 		color: var(--ink-800);
-	}
-	:global(:where(html, body).dark-mode) .ozon-lead-radio {
-		background: rgba(15, 23, 36, 0.7);
-		border-color: rgba(195, 204, 216, 0.2);
-		color: var(--ink-800);
-	}
-	:global(:where(html, body).dark-mode) .ozon-lead-radio:has(input:checked) {
-		background: rgba(0, 91, 255, 0.2);
-		border-color: #4b89ff;
-		color: var(--brand-ozon);
 	}
 	:global(:where(html, body).dark-mode) .ozon-lead-steps li {
 		background: rgba(15, 23, 36, 0.7);
@@ -563,10 +504,6 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 	@media (max-width: 480px) {
 		.ozon-lead-card {
 			padding: 1.3rem 1.1rem;
-		}
-		.ozon-lead-radio {
-			flex: 1 1 100%;
-			justify-content: center;
 		}
 	}
 </style>

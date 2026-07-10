@@ -65,6 +65,12 @@ export function deriveCatalogueMetadata({
 			contentChanged || !previousContentUpdatedAt
 				? normalizedCheckedAt
 				: previousContentUpdatedAt,
+		...(!contentChanged && previous?.applyFlowVerified === true && previous?.applyVerifiedAt
+			? {
+				applyVerifiedAt: toIsoOrThrow(previous.applyVerifiedAt, 'previous.applyVerifiedAt'),
+				applyFlowVerified: true,
+			}
+			: {}),
 	};
 }
 

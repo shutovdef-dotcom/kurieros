@@ -38,3 +38,7 @@ OZON_CITIZENSHIP_ID = "7"
 #   wrangler secret put OZON_REFERRER_PHONE
 #   wrangler secret put TELEGRAM_BOT_TOKEN
 #   wrangler secret put TELEGRAM_CHAT_ID
+#   wrangler secret put OZON_LEAD_VERIFIED_AT
+# The last value is an ISO timestamp advanced only after an end-to-end
+# role/city/form check. Missing or older than 30 days fails closed before
+# the Worker parses the request body.

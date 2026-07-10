@@ -7,6 +7,7 @@ import type { GeneratedJob } from '../data/vacancyTypes';
 interface Props {
 	job: GeneratedJob;
 	isLeadFormApply: boolean;
+	isLeadFormUnavailable: boolean;
 	leadFormType: string | null;
 	salaryMaxNumeric: number;
 	applyLabel: string;
@@ -16,6 +17,7 @@ interface Props {
 const {
 	job,
 	isLeadFormApply,
+	isLeadFormUnavailable,
 	leadFormType,
 	salaryMaxNumeric,
 	applyLabel,
@@ -52,7 +54,7 @@ const applyPartnerDomain = getApplyPartnerDomain(job);
  */
 ---
 
-{isLeadFormApply ? (
+{isLeadFormUnavailable ? null : isLeadFormApply ? (
 	<button
 		id="vacancy-sticky-apply"
 		class="vacancy-sticky-apply hidden"
@@ -155,4 +157,4 @@ const applyPartnerDomain = getApplyPartnerDomain(job);
 	}
 </style>
 
-<script is:inline type="module" src={vacancyStickyApplyUrl}></script>
+{!isLeadFormUnavailable && <script is:inline type="module" src={vacancyStickyApplyUrl}></script>}

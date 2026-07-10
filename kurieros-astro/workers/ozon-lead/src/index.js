@@ -5,8 +5,8 @@
  * recruitment.ozon.ru/ref-courier-sklad referral form on behalf of
  * the user (their name + phone + chosen vacancy + city + hire
  * object) using the site owner's referrer credentials stored as
- * Worker secrets, and pings a Telegram bot for owner-side
- * awareness.
+ * Worker secrets. Telegram receives a PII-free operational status
+ * alert; candidate names and phone numbers are never sent there.
  *
  * The user never sees the referrer phone — it lives only in env.
  * After successful submission Ozon sends an SMS directly to the
@@ -18,6 +18,8 @@
  *   OZON_REFERRER_PHONE     — masked +7(XXX)XXX-XX-XX
  *   TELEGRAM_BOT_TOKEN      — same bot used for Telegram alerts
  *   TELEGRAM_CHAT_ID        — destination chat
+ *   OZON_LEAD_VERIFIED_AT   — ISO timestamp of the latest successful
+ *                             end-to-end apply-flow verification
  *
  * Optional vars (in `wrangler.toml` [vars]):
  *   ALLOWED_ORIGINS         — comma-separated list (default: https://kurerok.ru)
@@ -26,8 +28,6 @@
  * Per-request POST body (JSON, kurerok.ru → Worker /lead):
  *   name              — candidate full name
  *   phone             — candidate phone (any format with ≥10 digits)
- *   transport         — "auto" / "foot" / "bicycle" / human label (info only,
- *                       used for the Telegram alert; Ozon ignores it)
  *   vacancy           — combineCustomerVacancy slug, e.g. "rocket:courier"
  *   cityID            — UUID of the operational city
  *   hireObjectUUID    — UUID of the specific hire location
@@ -48,6 +48,8 @@ import { ALLOWED_TUPLES, ALLOWED_VACANCIES } from './whitelist.js';
 
 const OZON_API = 'https://sigma-bff-api.ozon.ru/v1/actions';
 const OZON_REFERER = 'https://recruitment.ozon.ru/ref-courier-sklad';
+const LEAD_VERIFICATION_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
+const FUTURE_CLOCK_SKEW_MS = 5 * 60 * 1000;
 
 // Canonical UUID shape (8-4-4-4-12 hex, 36 chars). cityID / hireObjectUUID
 // are operational-location UUIDs; anything non-empty that isn't this shape
@@ -102,14 +104,18 @@ export function escapeHtml(s) {
 	return String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
 }
 
-export async function notifyTelegram(env, { name, phone, transport, vacancy, cityID, hireObjectUUID, ozonStatus }) {
+export function isLeadFlowFresh(verifiedAt, now = new Date()) {
+	const checked = new Date(verifiedAt);
+	const current = now instanceof Date ? now : new Date(now);
+	if (Number.isNaN(checked.getTime()) || Number.isNaN(current.getTime())) return false;
+	const ageMs = current.getTime() - checked.getTime();
+	return ageMs >= -FUTURE_CLOCK_SKEW_MS && ageMs <= LEAD_VERIFICATION_MAX_AGE_MS;
+}
+
+export async function notifyTelegram(env, { vacancy, cityID, hireObjectUUID, ozonStatus }) {
 	if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return;
 	const text = [
-		'🆕 <b>Новая заявка с kurerok.ru — Ozon</b>',
-		'',
-		`👤 ${escapeHtml(name)}`,
-		`📞 ${escapeHtml(phone)}`,
-		transport ? `🚗 ${escapeHtml(transport)}` : null,
+		'ℹ️ <b>Статус заявки Ozon</b>',
 		'',
 		`💼 Вакансия: <code>${escapeHtml(vacancy)}</code>`,
 		`🏙 Город: <code>${escapeHtml(cityID)}</code>`,
@@ -136,19 +142,17 @@ export async function notifyTelegram(env, { name, phone, transport, vacancy, cit
 		// 400 wrong chat_id) RESOLVES with res.ok === false. Without this
 		// check those failures were SILENT: the lead still reached Ozon but
 		// the owner got no alert and nothing was logged. Surface the status
-		// + Telegram's error description so a stale token is visible in the
-		// Cloudflare Worker logs (this is exactly how alerts broke once).
+		// Log only the status. Telegram response bodies and thrown errors can
+		// contain request context (including the bot-token URL), so do not copy
+		// them into Worker logs.
 		if (!res.ok) {
-			const detail = await res.text().catch(() => '');
-			console.warn(
-				`[ozon-lead] Telegram sendMessage failed: HTTP ${res.status} ${detail.slice(0, 300)}`,
-			);
+			console.warn(`[ozon-lead] Telegram sendMessage failed: HTTP ${res.status}`);
 		}
-	} catch (err) {
+	} catch (_) {
 		// Best-effort — Telegram failure must not break the lead flow.
 		// Log it so a missing/invalid bot token or a Telegram outage is
 		// observable in the Cloudflare Worker logs (audit ref v3 L14).
-		console.warn('[ozon-lead] Telegram notification failed', err);
+		console.warn('[ozon-lead] Telegram notification failed');
 	}
 }
 
@@ -163,7 +167,7 @@ export async function submitToOzon(env, { name, phone, customer, vacancy, cityID
 	const referrerName = String(env.OZON_REFERRER_NAME || '').trim();
 	const referrerPhone = String(env.OZON_REFERRER_PHONE || '').trim();
 	if (!referrerName || !referrerPhone) {
-		throw new Error('worker_misconfigured: missing OZON_REFERRER_* secrets');
+		throw new Error('worker_misconfigured');
 	}
 
 	const isFresh = customer === 'express';
@@ -204,13 +208,18 @@ export async function submitToOzon(env, { name, phone, customer, vacancy, cityID
 		body: JSON.stringify(payload),
 	});
 
-	const text = await res.text();
 	if (!res.ok) {
-		const err = new Error(`ozon_${res.status}`);
-		err.detail = text.slice(0, 400);
-		throw err;
+		// Do not retain or forward the upstream response body: an error payload
+		// may echo the candidate's name or phone.
+		throw new Error(`ozon_${res.status}`);
 	}
-	return { status: res.status, response: text.slice(0, 200) };
+	return { status: res.status };
+}
+
+function operationalErrorCode(error) {
+	const message = error instanceof Error ? error.message : '';
+	if (/^ozon_\d{3}$/.test(message) || message === 'worker_misconfigured') return message;
+	return 'unexpected_error';
 }
 
 export default {
@@ -229,6 +238,16 @@ export default {
 			return jsonResponse({ ok: false, error: 'not_found' }, { status: 404, headers: cors });
 		}
 
+		// Fail closed before request.json() touches candidate PII. A catalogue
+		// crawl alone is not enough: this timestamp is advanced only after an
+		// end-to-end role/city/form verification.
+		if (!isLeadFlowFresh(env.OZON_LEAD_VERIFIED_AT)) {
+			return jsonResponse(
+				{ ok: false, error: 'lead_form_unavailable' },
+				{ status: 503, headers: cors },
+			);
+		}
+
 		// Per-IP rate limit (5 req/60s). Cloudflare-side, applied before
 		// any business logic so spammers can't burn Ozon SMS / Telegram
 		// quota even though CORS doesn't apply to non-browser clients.
@@ -242,13 +261,13 @@ export default {
 				if (!success) {
 					return jsonResponse({ ok: false, error: 'rate_limited' }, { status: 429, headers: cors });
 				}
-			} catch (err) {
+			} catch (_) {
 				// Best-effort: if the rate-limiter binding misbehaves, do
 				// NOT block the lead — fall through to the normal flow.
 				// Log it so a binding misconfiguration is visible in the
 				// Cloudflare Worker logs instead of failing silently
 				// (audit ref v3 L14).
-				console.warn('[ozon-lead] rate limiter unavailable', err);
+				console.warn('[ozon-lead] rate limiter unavailable');
 			}
 		}
 
@@ -261,11 +280,6 @@ export default {
 
 		const name = String(body?.name || '').trim();
 		const phoneRaw = String(body?.phone || '').trim();
-		// `transport` is caller-controlled free-form text forwarded into the
-		// Telegram alert. Truncate rather than reject — it's an info-only
-		// field (Ozon ignores it), so failing a real lead over an oversized
-		// cosmetic value would be worse (audit ref v4 L9).
-		const transport = String(body?.transport || '').trim().slice(0, 100);
 		// `vacancy` / `customer` are whitelist-slug identifiers — every real
 		// value is a short delimiter-free token. Cap rather than reject so a
 		// trailing-junk body still fails cleanly on the whitelist lookup, not
@@ -337,9 +351,6 @@ export default {
 		try {
 			const ozon = await submitToOzon(env, { name, phone, customer, vacancy, cityID, hireObjectUUID });
 			await notifyTelegram(env, {
-				name,
-				phone,
-				transport,
 				vacancy: whitelistSlug,
 				cityID,
 				hireObjectUUID,
@@ -347,21 +358,12 @@ export default {
 			});
 			return jsonResponse({ ok: true }, { status: 200, headers: cors });
 		} catch (err) {
-			// Include err.detail (Ozon API response body, set by submitToOzon
-			// on non-2xx) so debugging from a Telegram alert doesn't require
-			// digging in Cloudflare logs. Truncated to keep the message under
-			// Telegram's 4096-char hard limit.
-			const detail = err && err.detail
-				? ` | ${String(err.detail).slice(0, 600)}`
-				: '';
+			const errorCode = operationalErrorCode(err);
 			await notifyTelegram(env, {
-				name,
-				phone,
-				transport,
 				vacancy: whitelistSlug,
 				cityID,
 				hireObjectUUID,
-				ozonStatus: `ERROR — ${err.message}${detail}`,
+				ozonStatus: `ERROR (${errorCode})`,
 			});
 			return jsonResponse(
 				{ ok: false, error: 'ozon_submit_failed' },

@@ -93,7 +93,6 @@ import { trackEvent } from './analyticsAdapter';
 			body: JSON.stringify({
 				name: data.name,
 				phone: data.phone,
-				transport: data.transport,
 				vacancy: (ctx && ctx.ozonVacancy) || '',
 				customer: (ctx && ctx.ozonCustomer) || '',
 				cityID: (ctx && ctx.ozonCityId) || '',
@@ -113,20 +112,12 @@ import { trackEvent } from './analyticsAdapter';
 		return { sent: true };
 	};
 
-	const transportLabels = {
-		auto: 'Авто',
-		foot: 'Пешком',
-		bicycle: 'Велосипед / самокат',
-	};
-
 	form?.addEventListener('submit', async (event) => {
 		event.preventDefault();
 		clearError();
 		const formData = new FormData(form);
 		const name = String(formData.get('name') ?? '').trim();
 		const phoneRaw = String(formData.get('phone') ?? '').trim();
-		const transportKey = String(formData.get('transport') ?? 'auto');
-		const transport = transportLabels[transportKey] || transportKey;
 
 		if (name.length < 2) {
 			showError('Укажите имя — минимум 2 символа.');
@@ -147,7 +138,7 @@ import { trackEvent } from './analyticsAdapter';
 
 		setBusy(true);
 		try {
-			const result = await submitToWorker({ name, phone: phoneRaw, transport }, ctx);
+			const result = await submitToWorker({ name, phone: phoneRaw }, ctx);
 			if (!result || result.sent !== true) {
 				showError('Форма временно недоступна, попробуйте позже.');
 				return;
@@ -155,7 +146,7 @@ import { trackEvent } from './analyticsAdapter';
 			trackEvent('ozon_lead_submit', {
 				company: ctx.company || '',
 				city: ctx.city || '',
-				transport: transportKey,
+				transport: ctx.transport || '',
 				source_slug: ctx.sourceSlug || '',
 				vacancy_slug: ctx.vacancySlug || '',
 				cta_position: ctx.position || '',
@@ -163,7 +154,6 @@ import { trackEvent } from './analyticsAdapter';
 			stageForm?.classList.add('hidden');
 			stageSuccess?.classList.remove('hidden');
 		} catch (err) {
-			console.warn('[ozon-lead] submit failed', err);
 			const code = String(err?.message || '');
 			let msg = 'Не удалось отправить заявку. Попробуйте ещё раз через минуту.';
 			if (code === 'invalid_phone') msg = 'Похоже, в номере не хватает цифр. Проверьте телефон.';

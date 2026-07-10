@@ -45,6 +45,7 @@ import {
 import { formatMoneyWithCurrency } from '../../utils/money';
 import { buildVacancySeoTitle } from '../../utils/vacancySeoTitle';
 import { getVacancyIndexability } from '../../utils/vacancyIndexability';
+import { getLeadFormEligibility } from '../../utils/leadFormEligibility';
 import { resolveJobPostingRollout } from '../../data/jobPostingEligibilityPolicy';
 import { getVacancyTitleOverride } from '../../data/seoExperimentCohorts';
 
@@ -64,9 +65,12 @@ const { job } = Astro.props;
 // schema marks the post as having no direct apply URL (the apply
 // happens off-site in the partner's app after we capture the lead via
 // the form).
-const isLeadFormApply = typeof job.applyLink === 'string' && job.applyLink.startsWith('lead-form:');
+const isLeadFormMarker = typeof job.applyLink === 'string' && job.applyLink.startsWith('lead-form:');
+const leadFormEligibility = isLeadFormMarker ? getLeadFormEligibility(job) : null;
+const isLeadFormApply = leadFormEligibility?.eligible === true;
+const isLeadFormUnavailable = isLeadFormMarker && !isLeadFormApply;
 const leadFormType = isLeadFormApply ? job.applyLink.slice('lead-form:'.length) : null;
-const hasApplyLink = !isLeadFormApply && Boolean(job.applyLink && job.applyLink !== '#');
+const hasApplyLink = !isLeadFormMarker && Boolean(job.applyLink && job.applyLink !== '#');
 const companyUrl = `/companies/${slugifyCompany(job.company)}/`;
 const matchingSource = vacancySources.find((source) => source.id === job.sourceId);
 const matchingOffer =
@@ -573,6 +577,7 @@ const pageSchemaGraph = [
 				cityLinks={cityLinks}
 				updatedDate={updatedDate}
 				isLeadFormApply={isLeadFormApply}
+				isLeadFormUnavailable={isLeadFormUnavailable}
 				leadFormType={leadFormType}
 				salaryMaxNumeric={salaryMaxNumeric}
 				applyLabel={applyLabel}
@@ -617,6 +622,7 @@ const pageSchemaGraph = [
 				<VacancySidebar
 					job={job}
 					isLeadFormApply={isLeadFormApply}
+					isLeadFormUnavailable={isLeadFormUnavailable}
 					leadFormType={leadFormType}
 					salaryMaxNumeric={salaryMaxNumeric}
 					applyLabel={applyLabel}
@@ -630,6 +636,7 @@ const pageSchemaGraph = [
 		<VacancyStickyApply
 			job={job}
 			isLeadFormApply={isLeadFormApply}
+			isLeadFormUnavailable={isLeadFormUnavailable}
 			leadFormType={leadFormType}
 			salaryMaxNumeric={salaryMaxNumeric}
 			applyLabel={applyLabel}

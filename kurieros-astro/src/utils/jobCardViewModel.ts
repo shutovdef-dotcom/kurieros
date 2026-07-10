@@ -21,6 +21,9 @@ export type JobCardViewModel = Pick<
   | 'transport'
   | 'isHot'
   | 'ozonLeadForm'
+  | 'sourceCheckedAt'
+  | 'applyVerifiedAt'
+  | 'applyFlowVerified'
 > & {
   details: Pick<GeneratedJob['details'], 'schedule' | 'education' | 'payment_freq' | 'employment_type'>;
 };
@@ -55,6 +58,9 @@ export const toJobCardViewModel = (job: GeneratedJob): JobCardViewModel => ({
   transport: job.transport,
   isHot: job.isHot,
   ozonLeadForm: job.ozonLeadForm,
+  sourceCheckedAt: job.sourceCheckedAt,
+  applyVerifiedAt: job.applyVerifiedAt,
+  applyFlowVerified: job.applyFlowVerified,
   details: {
     schedule: job.details.schedule,
     education: job.details.education,

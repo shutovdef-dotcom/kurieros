@@ -696,6 +696,8 @@ const ozonCatalogueCitySchema = z.object({
 export const OzonCatalogueMetadataSchema = z.object({
   sourceCheckedAt: z.iso.datetime(),
   contentUpdatedAt: z.iso.datetime(),
+  applyVerifiedAt: z.iso.datetime().optional(),
+  applyFlowVerified: z.literal(true).optional(),
 });
 
 /** Schema for `ozon-vacancies.json` (sklad — keyed by raw `combineCustomerVacancy` slug). */
@@ -809,6 +811,12 @@ const buildOffersForTemplate = (template: OzonRoleTemplate): VacancyOffer[] => {
       isActive: true,
       sourceCheckedAt: catalogueMetadata.sourceCheckedAt,
       contentUpdatedAt: catalogueMetadata.contentUpdatedAt,
+      ...(catalogueMetadata.applyVerifiedAt
+        ? { applyVerifiedAt: catalogueMetadata.applyVerifiedAt }
+        : {}),
+      ...(catalogueMetadata.applyFlowVerified === true
+        ? { applyFlowVerified: true }
+        : {}),
       updatedAt: catalogueMetadata.contentUpdatedAt.slice(0, 10),
       sourceUrl: template.refLanding ?? OZON_REF_LANDING,
       salaryConfidence: 'partner',

@@ -10,6 +10,7 @@ import vacancyIncomeCalculatorUrl from '../../scripts/vacancyIncomeCalculator.js
 interface Props {
 	job: GeneratedJob;
 	isLeadFormApply: boolean;
+	isLeadFormUnavailable: boolean;
 	leadFormType: string | null;
 	salaryMaxNumeric: number;
 	applyLabel: string;
@@ -20,6 +21,7 @@ interface Props {
 const {
 	job,
 	isLeadFormApply,
+	isLeadFormUnavailable,
 	leadFormType,
 	salaryMaxNumeric,
 	applyLabel,
@@ -54,7 +56,14 @@ const applyPartnerDomain = getApplyPartnerDomain(job);
 			<strong data-t="vacancy.employment">Оформление:</strong> <VacancyTKey jobId={job.id} field="details_employment_type" fallback={job.details.employment_type} />
 		</div>
 
-		{isLeadFormApply ? (
+		{isLeadFormUnavailable ? (
+			<>
+				<span class="apply-btn-large apply-btn-unavailable" aria-disabled="true">
+					Отклик временно недоступен
+				</span>
+				<p class="apply-note">Проверяем актуальность формы работодателя. Контактные данные сейчас не принимаются.</p>
+			</>
+		) : isLeadFormApply ? (
 			<>
 				<button
 					type="button"
@@ -74,7 +83,7 @@ const applyPartnerDomain = getApplyPartnerDomain(job);
 				>
 					{applyLabel}
 				</button>
-				<p class="apply-note">Заполните форму — мы&nbsp;перезвоним и&nbsp;поможем зарегистрироваться с&nbsp;нашим реферальным кодом</p>
+				<p class="apply-note">Имя и телефон будут переданы в Ozon только для выбранной заявки</p>
 			</>
 		) : (
 			<>
@@ -260,6 +269,14 @@ const applyPartnerDomain = getApplyPartnerDomain(job);
 	}
 	.apply-btn-large:hover {
 		background: var(--accent-400);
+	}
+	.apply-btn-unavailable,
+	.apply-btn-unavailable:hover {
+		background: var(--vacancy-soft-strong);
+		color: var(--vacancy-muted);
+		border: 1px solid var(--vacancy-border);
+		box-shadow: none;
+		cursor: not-allowed;
 	}
 	.apply-btn-large:focus-visible {
 		outline: none;

@@ -12,6 +12,7 @@
 [Cloudflare Worker]  ← реф-телефон владельца хранится здесь, в browser НЕ виден
     ↓ POST на https://sigma-bff-api.ozon.ru/v1/actions
 [Ozon Recruitment API]
+    ↘ PII-free статус в Telegram (без имени, телефона и ответа Ozon)
     ↓ SMS на телефон пользователя
 Пользователь регится через Госуслуги в приложении Ozon Job
 ```
@@ -58,6 +59,10 @@ wrangler secret put TELEGRAM_BOT_TOKEN
 
 wrangler secret put TELEGRAM_CHAT_ID
 # Введите ваш chat_id (число)
+
+wrangler secret put OZON_LEAD_VERIFIED_AT
+# ISO-время последней успешной end-to-end проверки role → city → form.
+# Без значения или через 30 дней Worker отвечает 503 до чтения JSON с PII.
 ```
 
 ### 5. Прописать Worker URL в kurerok.ru
@@ -100,15 +105,14 @@ POST в реальные Ozon/Telegram API в тестах не выполняе
 | Метод | Путь | Назначение |
 |-------|------|-----------|
 | `OPTIONS` | `/lead` | CORS preflight (kurerok.ru разрешён) |
-| `POST` | `/lead` | Принять лид и переслать в Ozon + Telegram |
+| `POST` | `/lead` | Передать имя и телефон в Ozon; отправить в Telegram только PII-free статус |
 
 ### Тело POST (от kurerok.ru)
 
 ```json
 {
   "name": "Иванов Иван Иванович",
-  "phone": "+79991234567",
-  "transport": "Авто"          // optional, only for Telegram
+  "phone": "+79991234567"
 }
 ```
 
@@ -122,6 +126,12 @@ POST в реальные Ozon/Telegram API в тестах не выполняе
 
 ```json
 { "ok": false, "error": "ozon_submit_failed" }
+```
+
+При отсутствующей или просроченной проверке поток закрыт до разбора тела запроса:
+
+```json
+{ "ok": false, "error": "lead_form_unavailable" }
 ```
 
 ## Ротация секретов
