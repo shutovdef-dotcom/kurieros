@@ -2,6 +2,7 @@
 // Copyright year is computed at SSR build time so the footer never
 // becomes stale after a year-rollover without a code change. Replaces
 // a hardcoded `2026` that would have read «© 2026 КурьерОк» forever.
+import { hasPublishedBlog } from '../utils/blogManifest';
 const currentYear = new Date().getFullYear();
 ---
 <footer>
@@ -21,7 +22,7 @@ const currentYear = new Date().getFullYear();
             <ul>
                 <li><a href="/companies/" data-t="nav.companies">Компании</a></li>
                 <li><a href="/guide/" data-t="nav.guide">Гид для курьера</a></li>
-                {/* /blog/ link hidden until first article ships. */}
+                {hasPublishedBlog && <li><a href="/blog/">Блог</a></li>}
                 <li><a href="/contacts/" data-t="nav.contacts">Контакты</a></li>
                 <li><a href="/about/" data-t="nav.about">О проекте</a></li>
                 <li><a href="/compare/" data-t="nav.compare">Сравнение вакансий</a></li>

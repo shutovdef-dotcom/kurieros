@@ -17,6 +17,7 @@ import { isHubEmpty, HUB_CONFIGS } from '../utils/transportHubs';
 // rationale) instead of re-derived per render (audit ref v4 MEDIUM-1).
 import { citiesFromJobs, cityNamesFromJobs } from '../utils/citiesIndex';
 import { TOPIC_META, knowledgeBaseData } from '../utils/knowledge';
+import { hasPublishedBlog } from '../utils/blogManifest';
 
 const cities = citiesFromJobs;
 const availableCities = sortCityNamesByPopulation(cityNamesFromJobs);
@@ -80,7 +81,13 @@ const hubLinks = [
 		title: 'Сколько зарабатывает курьер',
 		text: 'Реальные ставки, формула дохода и калькулятор заработка.',
 	},
-	// /blog/ discovery card hidden until first article ships.
+	...(hasPublishedBlog
+		? [{
+			href: '/blog/',
+			title: 'Блог о работе курьером',
+			text: 'Проверенные разборы дохода, условий и выбора формата работы.',
+		}]
+		: []),
 ];
 const transportFormatLinks = [
 	{

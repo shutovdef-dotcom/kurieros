@@ -1,6 +1,7 @@
 ---
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import Logo from './Logo.astro';
+import { hasPublishedBlog } from '../utils/blogManifest';
 ---
 <header class="site-header" aria-label="Шапка сайта">
     <div class="header-left">
@@ -11,8 +12,7 @@ import Logo from './Logo.astro';
         <ul>
             <li><a href="/#vacancies" data-t="nav.vacancies">Вакансии</a></li>
             <li><a href="/companies/" data-t="nav.companies">Компании</a></li>
-            {/* /blog/ link hidden until first article ships (articles.json
-                is currently empty). Restore when content lands. */}
+            {hasPublishedBlog && <li><a href="/blog/">Блог</a></li>}
             <li><a href="/contacts/" data-t="nav.contacts">Контакты</a></li>
             <li><a href="/cities/" data-t="nav.cities">Города</a></li>
             <li><a href="/calculator/" data-t="nav.calculator">Калькулятор</a></li>
@@ -67,7 +67,6 @@ import Logo from './Logo.astro';
         <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="8" y1="18" x2="16" y2="18"></line><line x1="8" y1="14" x2="16" y2="14"></line><line x1="8" y1="10" x2="16" y2="10"></line><line x1="8" y1="6" x2="16" y2="6"></line></svg>
         <span data-t="vacancy.income">Доход</span>
     </a>
-    {/* /blog/ bottom-nav item hidden until first article ships. */}
 </nav>
 
 <script>
