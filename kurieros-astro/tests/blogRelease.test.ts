@@ -156,7 +156,7 @@ describe('blog release ledger validation', () => {
     expect(validateBlogReleaseLedger(calendar(3), ledger)).toEqual({ ok: true, errors: [] });
   });
 
-  it('rejects releases earlier than their nominal slot or the preceding 48-hour window', () => {
+  it('rejects releases earlier than their nominal slot or the preceding 24-hour window', () => {
     const earlyFirst = ledgerWithFirstRelease();
     earlyFirst.releases[0] = {
       ...earlyFirst.releases[0]!,
@@ -180,7 +180,18 @@ describe('blog release ledger validation', () => {
       ok: false,
       errors: ['released_before_nominal_slot'],
     });
-    expect(validateBlogReleaseLedger(calendar(3), earlySecond)).toMatchObject({
+    const dailyCalendar = [
+      entry(1, { nominalPublishAt: '2026-08-03T09:00:00+03:00' }),
+      entry(2, { nominalPublishAt: '2026-08-04T09:00:00+03:00' }),
+      entry(3, { nominalPublishAt: '2026-08-05T09:00:00+03:00' }),
+    ];
+    earlySecond.releases[1] = {
+      ...earlySecond.releases[1]!,
+      releasedAt: '2026-08-04T09:04:00+03:00',
+      firstPublishedAt: '2026-08-04T09:04:00+03:00',
+      sourceCheckedAt: '2026-08-04T09:00:00+03:00',
+    };
+    expect(validateBlogReleaseLedger(dailyCalendar, earlySecond)).toMatchObject({
       ok: false,
       errors: ['released_before_previous_release_window'],
     });
@@ -223,14 +234,14 @@ describe('blog release reservations', () => {
 });
 
 describe('blog release timing and gates', () => {
-  it('uses the later of the nominal slot and the last actual release plus 48 hours', () => {
+  it('uses the later of the nominal slot and the last actual release plus 24 hours', () => {
     const next = entry(2, { nominalPublishAt: '2026-08-05T09:00:00+03:00' });
 
     expect(
       getEffectiveBlogReleaseDueAt(next, {
         releasedAt: '2026-08-04T12:00:00.000Z',
       }),
-    ).toBe('2026-08-06T12:00:00.000Z');
+    ).toBe('2026-08-05T12:00:00.000Z');
     expect(getEffectiveBlogReleaseDueAt(next)).toBe('2026-08-05T06:00:00.000Z');
   });
 
@@ -385,7 +396,7 @@ describe('blog release timing and gates', () => {
       reasons: ['not_due'],
       candidate: {
         sequence: 2,
-        effectiveDueAt: '2026-08-05T06:05:00.000Z',
+        effectiveDueAt: '2026-08-05T06:00:00.000Z',
       },
     });
   });

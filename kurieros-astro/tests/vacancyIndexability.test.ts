@@ -30,13 +30,13 @@ describe('getVacancyIndexability', () => {
     });
   });
 
-  it('marks low-demand duplicate-style detail pages noindex, follow', () => {
+  it('keeps formerly low-demand duplicate-style detail pages indexable for Google restore', () => {
     const decision = getVacancyIndexability(getJob('efin-bank-representative-chudovo-auto'));
 
     expect(decision).toEqual({
-      indexable: false,
-      robots: 'noindex, follow',
-      reason: 'low_unique_search_demand',
+      indexable: true,
+      robots: 'index, follow',
+      reason: 'google_full_restore',
     });
   });
 
@@ -49,7 +49,7 @@ describe('getVacancyIndexability', () => {
 
     expect(generatedPaths).toEqual(currentPaths);
     expect(vacancyIndexability.summary.totalVacancyPages).toBe(currentPaths.size);
-    expect(vacancyIndexability.summary.indexableVacancyPages).toBeGreaterThan(0);
-    expect(vacancyIndexability.summary.noindexVacancyPages).toBeGreaterThan(0);
+    expect(vacancyIndexability.summary.indexableVacancyPages).toBe(currentPaths.size);
+    expect(vacancyIndexability.summary.noindexVacancyPages).toBe(0);
   });
 });

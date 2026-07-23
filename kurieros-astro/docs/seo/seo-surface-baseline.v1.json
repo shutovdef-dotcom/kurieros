@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "2026-07-10-blog-release-ledger-v4",
-  "reviewReason": "Reviewed zero-release blog baseline: future drafts are excluded from routes, sitemap, RSS and internal links; each future production delta is allowed only when it exactly matches the durable release ledger and leaves the non-blog sitemap unchanged. JobPosting remains intentionally zero pending source evidence. Review by 2026-08-10.",
+  "id": "2026-07-23-google-full-vacancy-restore",
+  "reviewReason": "Reviewed Google full vacancy restore: all active /v/ pages are intentionally indexable and present in semantic sitemap chunks to recover the pre-2026-07-01 Google impressions surface; blog remains unpublished and JobPosting remains intentionally zero pending source evidence. Review by 2026-08-06.",
   "reviewedSurfaceUrlSetHashes": [
-    "8011ca86bdb286b5e271c73b49380bab79e8c3377fc71c458c4d9b84b3d44644"
+    "5d7700fd786c6c668b40daa517c73f990bae95e65961a26c48c62e1662973b0d"
   ],
   "blogReleaseSlugs": [],
   "blogSitemapUrls": [],
@@ -11,19 +11,19 @@
     "schemaVersion": 1,
     "routes": {
       "total": 8083,
-      "indexable": 2034,
-      "noindex": 6049,
+      "indexable": 8074,
+      "noindex": 9,
       "urlSetHash": "81f050d7bebaa949fe32d1c8e244a0e9569cca2fd60d770e09b988981243da2d",
-      "indexableUrlSetHash": "5a95b4cccfcfeb6e153dfaa358a5d22c87721f878b30abe783c21e79c747aa53"
+      "indexableUrlSetHash": "6c0f72054143af961f437d0434759a9fffb1dd572eab9737bd883512afc185f8"
     },
     "sitemap": {
-      "pageUrlCount": 2026,
-      "urlSetHash": "8011ca86bdb286b5e271c73b49380bab79e8c3377fc71c458c4d9b84b3d44644",
-      "rawXmlHash": "8844e439feac0fc4e5679cafda1f42a4f2f2411b21070d2e58cb775c85ca2823",
+      "pageUrlCount": 8066,
+      "urlSetHash": "5d7700fd786c6c668b40daa517c73f990bae95e65961a26c48c62e1662973b0d",
+      "rawXmlHash": "cfc7beffe66296109116bfc47bbbf2801198e5e97094c45497d44fe2c083a8d3",
       "blogUrlCount": 0,
       "blogUrlSetHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "nonBlogUrlCount": 2026,
-      "nonBlogUrlSetHash": "8011ca86bdb286b5e271c73b49380bab79e8c3377fc71c458c4d9b84b3d44644",
+      "nonBlogUrlCount": 8066,
+      "nonBlogUrlSetHash": "5d7700fd786c6c668b40daa517c73f990bae95e65961a26c48c62e1662973b0d",
       "canonicalConflicts": []
     },
     "structuredData": {
@@ -34,15 +34,15 @@
     },
     "vacancies": {
       "total": 6685,
-      "indexable": 645,
-      "noindex": 6040,
+      "indexable": 6685,
+      "noindex": 0,
       "jobPostingPages": 0,
       "breadcrumbPages": 6685,
       "indexabilityReasons": {
+        "google_full_restore": 6040,
         "gsc_vacancy_intent": 18,
         "gsc_valid_jobposting": 29,
         "local_score": 523,
-        "low_unique_search_demand": 6040,
         "top_city_allowlist": 75
       }
     },
@@ -54,8 +54,8 @@
         "physicalPictures": 15
       },
       "pilot": {
-        "offers": 382,
-        "normalizedLandingUrls": 382,
+        "offers": 1041,
+        "normalizedLandingUrls": 1041,
         "sets": 50,
         "physicalPictures": 15
       }

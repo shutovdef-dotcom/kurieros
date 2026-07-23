@@ -11,11 +11,14 @@ export const INDEXABLE_GSC_RECOMMENDATIONS = [
   'index_detail_watch',
 ] as const;
 
+export const GOOGLE_FULL_VACANCY_RESTORE = true;
+
 export type VacancyIndexabilityReason =
   | 'gsc_valid_jobposting'
   | 'top_city_allowlist'
   | 'local_score'
   | 'gsc_vacancy_intent'
+  | 'google_full_restore'
   | 'hard_noindex'
   | 'low_unique_search_demand';
 

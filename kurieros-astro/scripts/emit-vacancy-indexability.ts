@@ -4,6 +4,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { detailJobs } from '../src/data/jobs';
 import {
+  GOOGLE_FULL_VACANCY_RESTORE,
   HARD_NOINDEX_VACANCY_PATHS,
   INDEXABLE_GSC_RECOMMENDATIONS,
   TOP_INDEXABLE_VACANCY_CITIES,
@@ -134,7 +135,8 @@ for (const job of detailJobs) {
     isTopCity ||
     localIndexablePaths.has(path) ||
     gscIndexablePaths.has(path) ||
-    gscValidJobPostingPaths.has(path)
+    gscValidJobPostingPaths.has(path) ||
+    GOOGLE_FULL_VACANCY_RESTORE
   ) {
     indexablePaths.add(path);
   }
@@ -153,6 +155,7 @@ const payload = {
     source: canReadLocalInputs ? 'csv' : 'snapshot',
   },
   policy: {
+    googleFullVacancyRestore: GOOGLE_FULL_VACANCY_RESTORE,
     topIndexableCities: TOP_INDEXABLE_VACANCY_CITIES,
     gscRecommendations: INDEXABLE_GSC_RECOMMENDATIONS,
     hardNoindexPaths: HARD_NOINDEX_VACANCY_PATHS,

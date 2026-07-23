@@ -1,5 +1,5 @@
 const MIN_READY_BUFFER = 12;
-const FORTY_EIGHT_HOURS_MS = 48 * 60 * 60 * 1000;
+const RELEASE_CADENCE_WINDOW_MS = 24 * 60 * 60 * 1000;
 const SHA256_PATTERN = /^[a-f0-9]{64}$/;
 const DEPLOY_SHA_PATTERN = /^[a-f0-9]{7,64}$/;
 const ISO_INSTANT_PATTERN =
@@ -273,7 +273,7 @@ export const validateBlogReleaseLedger = (
     if (
       releasedAt &&
       previousReleasedAt &&
-      releasedAt.getTime() < previousReleasedAt.getTime() + FORTY_EIGHT_HOURS_MS
+      releasedAt.getTime() < previousReleasedAt.getTime() + RELEASE_CADENCE_WINDOW_MS
     ) {
       errors.push('released_before_previous_release_window');
     }
@@ -346,7 +346,7 @@ export const getEffectiveBlogReleaseDueAt = (
   const dueAt = Math.max(
     nominal.getTime(),
     minimumAfterLastRelease
-      ? minimumAfterLastRelease.getTime() + FORTY_EIGHT_HOURS_MS
+      ? minimumAfterLastRelease.getTime() + RELEASE_CADENCE_WINDOW_MS
       : Number.NEGATIVE_INFINITY,
   );
   return new Date(dueAt).toISOString();

@@ -128,7 +128,7 @@ describe('Yandex vacancy feed pilot', () => {
 		expect(pilot.report.normalizedUniquePages).toBe(detailJobs.length);
 		expect(pilot.report.indexablePages).toBeGreaterThan(pilot.offers.length);
 		expect(pilot.report.exclusionsByReason.duplicateCanonical).toBeGreaterThan(0);
-		expect(pilot.report.exclusionsByReason.nonIndexableLanding).toBeGreaterThan(0);
+		expect(pilot.report.exclusionsByReason.nonIndexableLanding).toBe(0);
 		expect(pilot.report.exclusionsByReason.duplicateOfferName).toBeGreaterThan(0);
 		expect(pilot.report.exclusionsByReason.notInQualifiedSet).toBeGreaterThan(0);
 		expect(pilot.report.duplicateNames).toEqual(
@@ -138,11 +138,9 @@ describe('Yandex vacancy feed pilot', () => {
 		);
 	});
 
-	it('rejects a pilot that regresses to a hash URL, noindex landing, or tracking employer site', () => {
+	it('rejects a pilot that regresses to a hash URL, unknown landing, or tracking employer site', () => {
 		const badOffer = pilot.offers[0];
-		const noindexJob = detailJobs.find((job) => !getVacancyIndexability(job).indexable);
 		expect(badOffer).toBeDefined();
-		expect(noindexJob).toBeDefined();
 
 		const hashFeed = structuredClone(pilot);
 		hashFeed.offers[0]!.url = `${badOffer!.url}#variant`;
@@ -151,10 +149,7 @@ describe('Yandex vacancy feed pilot', () => {
 		);
 
 		const noindexFeed = structuredClone(pilot);
-		noindexFeed.offers[0]!.url = new URL(
-			getVacancyCanonicalPath(noindexJob!),
-			siteUrl,
-		).toString();
+		noindexFeed.offers[0]!.url = new URL('/v/not-a-real-restored-vacancy/', siteUrl).toString();
 		expect(validateYandexVacancyFeedPilot(noindexFeed).errors).toEqual(
 			expect.arrayContaining([expect.stringContaining('non-indexable landing')]),
 		);

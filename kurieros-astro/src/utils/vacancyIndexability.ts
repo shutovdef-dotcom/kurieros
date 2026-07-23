@@ -1,5 +1,6 @@
 import vacancyIndexability from '../generated/vacancy-indexability.json';
 import {
+  GOOGLE_FULL_VACANCY_RESTORE,
   HARD_NOINDEX_VACANCY_PATHS,
   TOP_INDEXABLE_VACANCY_CITIES,
   type VacancyIndexabilityDecision,
@@ -69,6 +70,14 @@ export const getVacancyIndexability = (
       indexable: true,
       robots: 'index, follow',
       reason: 'gsc_vacancy_intent',
+    };
+  }
+
+  if (GOOGLE_FULL_VACANCY_RESTORE) {
+    return {
+      indexable: true,
+      robots: 'index, follow',
+      reason: 'google_full_restore',
     };
   }
 

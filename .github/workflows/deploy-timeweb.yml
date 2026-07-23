@@ -18,9 +18,10 @@ on:
       - '.github/workflows/deploy-timeweb.yml'
       - 'kurieros-astro/**'
   schedule:
-    # 09:05 Europe/Moscow. The cursor still enforces the actual 48-hour
-    # release window, so this daily wake-up can never publish a catch-up burst.
-    - cron: '5 6 * * *'
+    # 09:05, 12:05, 15:05 and 18:05 Europe/Moscow. The cursor still enforces
+    # the actual 24-hour release window, so extra wake-ups cannot publish a
+    # catch-up burst.
+    - cron: '5 6,9,12,15 * * *'
 
 permissions:
   contents: read

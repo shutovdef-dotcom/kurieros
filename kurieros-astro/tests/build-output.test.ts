@@ -863,15 +863,15 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
   });
 
   describe('seo surface cleanup', () => {
-    it('keeps selective vacancy indexation consistent across robots and sitemap', () => {
+    it('keeps full Google vacancy restore consistent across robots and sitemap', () => {
       const sitemapContent = readAllSitemaps();
       const indexableVacancyUrl = 'https://kurerok.ru/v/kuper-foot-courier-olenegorsk-foot/';
-      const noindexVacancyUrl = 'https://kurerok.ru/v/efin-bank-representative-chudovo-auto/';
+      const restoredVacancyUrl = 'https://kurerok.ru/v/efin-bank-representative-chudovo-auto/';
       const indexableHtml = readFileSync(
         join(DIST_DIR, 'v', 'kuper-foot-courier-olenegorsk-foot', 'index.html'),
         'utf8',
       );
-      const noindexHtml = readFileSync(
+      const restoredHtml = readFileSync(
         join(DIST_DIR, 'v', 'efin-bank-representative-chudovo-auto', 'index.html'),
         'utf8',
       );
@@ -879,22 +879,26 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
       expect(sitemapContent).toContain(indexableVacancyUrl);
       expect(indexableHtml).not.toMatch(/<meta\s+name="robots"\s+content="[^"]*noindex/i);
 
-      expect(sitemapContent).not.toContain(noindexVacancyUrl);
-      expect(noindexHtml).toMatch(/<meta\s+name="robots"\s+content="noindex, follow"/i);
-      expect(noindexHtml).not.toContain('"@type":"JobPosting"');
+      expect(sitemapContent).toContain(restoredVacancyUrl);
+      expect(restoredHtml).not.toMatch(/<meta\s+name="robots"\s+content="[^"]*noindex/i);
+      expect(restoredHtml).toContain('data-vacancy-indexability="google_full_restore"');
     });
 
     it('emits semantic sitemap chunks including metro pages', () => {
       const sitemapIndex = readFileSync(join(DIST_DIR, 'sitemap-index.xml'), 'utf8');
       const metroSitemap = readFileSync(join(DIST_DIR, 'sitemap-metro-0.xml'), 'utf8');
-      const vacancySitemap = readFileSync(join(DIST_DIR, 'sitemap-vacancies-0.xml'), 'utf8');
+      const vacancySitemap = readdirSync(DIST_DIR)
+        .filter((fileName) => /^sitemap-vacancies-\d+\.xml$/.test(fileName))
+        .sort()
+        .map((fileName) => readFileSync(join(DIST_DIR, fileName), 'utf8'))
+        .join('\n');
 
       expect(sitemapIndex).toContain('sitemap-vacancies-0.xml');
       expect(sitemapIndex).toContain('sitemap-listings-0.xml');
       expect(sitemapIndex).toContain('sitemap-metro-0.xml');
       expect(metroSitemap).toContain('https://kurerok.ru/metro/moskva/sokol/');
       expect(vacancySitemap).toContain('https://kurerok.ru/v/kuper-foot-courier-olenegorsk-foot/');
-      expect(vacancySitemap).not.toContain('https://kurerok.ru/v/efin-bank-representative-chudovo-auto/');
+      expect(vacancySitemap).toContain('https://kurerok.ru/v/efin-bank-representative-chudovo-auto/');
     });
 
     it('excludes listing pages that canonicalize to commercial hubs from sitemap', () => {

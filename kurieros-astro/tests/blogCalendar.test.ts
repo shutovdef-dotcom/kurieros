@@ -47,9 +47,10 @@ describe('blog publication calendar', () => {
     }
   });
 
-  it('uses the approved Moscow-time slot every 48 hours without fabricating publication dates', () => {
-    expect(entries[0]?.nominalPublishAt).toBe('2026-08-03T09:00:00+03:00');
-    expect(entries.at(-1)?.nominalPublishAt).toBe('2027-02-17T09:00:00+03:00');
+  it('uses the approved Moscow-time slot every 24 hours without fabricating publication dates', () => {
+    expect(calendar.cadenceHours).toBe(24);
+    expect(entries[0]?.nominalPublishAt).toBe('2026-07-23T09:00:00+03:00');
+    expect(entries.at(-1)?.nominalPublishAt).toBe('2026-10-30T09:00:00+03:00');
 
     for (const [index, entry] of entries.entries()) {
       expect(entry).not.toHaveProperty('datePublished');
@@ -60,7 +61,7 @@ describe('blog publication calendar', () => {
         expect(
           new Date(entry.nominalPublishAt).getTime() -
             new Date(previous.nominalPublishAt).getTime(),
-        ).toBe(48 * 60 * 60 * 1000);
+        ).toBe(24 * 60 * 60 * 1000);
       }
     }
   });

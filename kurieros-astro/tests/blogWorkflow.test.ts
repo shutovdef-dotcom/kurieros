@@ -16,8 +16,8 @@ const workflow = parse(workflowText) as {
 };
 
 describe('scheduled blog release workflow', () => {
-  it('is syntactically parseable and wakes at the documented Moscow release window', () => {
-    expect(workflow.on?.schedule).toEqual([{ cron: '5 6 * * *' }]);
+  it('is syntactically parseable and wakes at the documented Moscow release windows', () => {
+    expect(workflow.on?.schedule).toEqual([{ cron: '5 6,9,12,15 * * *' }]);
     expect(workflow.jobs).toHaveProperty('build');
     expect(workflow.jobs).toHaveProperty('record-blog-release');
   });
