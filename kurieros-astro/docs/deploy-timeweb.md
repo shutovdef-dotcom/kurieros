@@ -126,10 +126,12 @@ technical domain here. After DNS cutover, set both `TIMEWEB_UNPACK_URL` and
 is a slow fallback and should not be used for routine deployments of the full
 generated site.
 
-The scheduled blog cursor requires `ssh-archive` specifically. It stamps the
-final publication time in Timeweb staging immediately before the release is
-promoted, then records the observed production manifest. Archive and FTP modes
-remain manual-only for this purpose.
+The scheduled blog cursor accepts `archive` and `ssh-archive`. The preferred
+`ssh-archive` method stamps the final publication time in Timeweb staging
+immediately before the release is promoted. The `archive` fallback publishes
+the candidate with its prepared timestamp and is valid for the current
+FTP/PHP-unpacker Timeweb configuration. Direct `ftp-mirror` remains manual-only
+for this purpose.
 
 Keep the existing repository variable:
 

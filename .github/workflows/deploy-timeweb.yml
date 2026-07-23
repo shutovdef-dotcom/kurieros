@@ -70,16 +70,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Require SSH transport for automatic blog release
+      - name: Require archive transport for automatic blog release
         id: scheduled-transport
         if: github.event_name == 'schedule'
         run: |
           set -euo pipefail
-          if [ "$TIMEWEB_DEPLOY_METHOD" = 'ssh-archive' ]; then
+          if [ "$TIMEWEB_DEPLOY_METHOD" = 'archive' ] || [ "$TIMEWEB_DEPLOY_METHOD" = 'ssh-archive' ]; then
             echo 'safe=true' >> "$GITHUB_OUTPUT"
           else
             echo 'safe=false' >> "$GITHUB_OUTPUT"
-            echo "::notice::Scheduled blog release requires TIMEWEB_DEPLOY_METHOD=ssh-archive; no candidate or deploy will be created."
+            echo "::notice::Scheduled blog release requires TIMEWEB_DEPLOY_METHOD=archive or ssh-archive; no candidate or deploy will be created."
           fi
 
       - name: Setup Node.js

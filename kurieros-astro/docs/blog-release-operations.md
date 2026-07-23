@@ -57,12 +57,13 @@ CONTENT_SCHEDULE_PAUSED=false
 `CONTENT_SCHEDULE_PAUSED=true` (либо удалить/выключить
 `BLOG_SCHEDULE_ENABLED`). Уже опубликованные URL при этом не меняются.
 
-Для автоматического запуска нужен
-`TIMEWEB_DEPLOY_METHOD=ssh-archive`. Только этот путь умеет поставить
-финальный timestamp в staging непосредственно перед публикацией. При любой
-другой конфигурации плановый job завершается без кандидата и без деплоя;
-archive и FTP остаются только ручными диагностическими путями. Старый GitHub Pages workflow отключён,
-поэтому он не может обойти курсор или отправить sitemap пачкой в IndexNow.
+Для автоматического запуска нужен `TIMEWEB_DEPLOY_METHOD=archive` или
+`TIMEWEB_DEPLOY_METHOD=ssh-archive`. SSH-archive остаётся предпочтительным:
+он умеет поставить финальный timestamp в staging непосредственно перед
+публикацией. Archive использует timestamp подготовки кандидата и подходит для
+текущей Timeweb-конфигурации с FTP/PHP unpacker. `ftp-mirror` остаётся только
+ручным диагностическим путём. Старый GitHub Pages workflow отключён, поэтому
+он не может обойти курсор или отправить sitemap пачкой в IndexNow.
 
 Планировщик перед подготовкой кандидата сверяет production-манифест по HTTPS.
 Обычный запуск принимает только совпадающее состояние: неожиданный production

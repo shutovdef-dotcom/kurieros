@@ -50,9 +50,10 @@ describe('scheduled blog release workflow', () => {
     expect(workflowText).not.toMatch(/urlList:\s*\(/);
   });
 
-  it('only accepts a transient candidate in the scheduled build context and requires SSH production stamping', () => {
+  it('only accepts a transient candidate in the scheduled build context and requires archive-safe production deployment', () => {
     expect(manifestEmitterText).toContain("BLOG_RELEASE_ALLOW_CANDIDATE !== 'true'");
     expect(workflowText).toContain('BLOG_RELEASE_ALLOW_CANDIDATE');
+    expect(workflowText).toContain("TIMEWEB_DEPLOY_METHOD\" = 'archive'");
     expect(workflowText).toContain("TIMEWEB_DEPLOY_METHOD\" = 'ssh-archive'");
     expect(workflowText).toContain('--blog-release-stamp-old');
     expect(workflowText).toContain('--blog-release-stamp-slug');
