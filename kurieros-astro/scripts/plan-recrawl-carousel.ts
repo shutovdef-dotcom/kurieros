@@ -12,10 +12,13 @@ import {
 
 type VacancyIndexabilityManifest = {
   indexablePaths: string[];
+  googleIndexingApiEligiblePaths?: string[];
+  jobPostingPaths?: string[];
   summary?: {
     totalVacancyPages?: number;
     indexableVacancyPages?: number;
     noindexVacancyPages?: number;
+    jobPostingPages?: number;
   };
 };
 
@@ -146,9 +149,19 @@ if (engine === 'google-indexing-api') {
   );
 }
 
+const recrawlPaths = engine === 'google-indexing-api'
+  ? (manifest.googleIndexingApiEligiblePaths ?? manifest.jobPostingPaths ?? [])
+  : manifest.indexablePaths;
+
+if (engine === 'google-indexing-api' && recrawlPaths.length === 0) {
+  warnings.push(
+    'No current JobPosting-eligible URL manifest is available; Google Indexing API queue is intentionally empty.',
+  );
+}
+
 const batch = buildRecrawlCarouselBatch({
   date,
-  indexablePaths: manifest.indexablePaths,
+  indexablePaths: recrawlPaths,
   engine,
   gscRows,
   siteUrl,
