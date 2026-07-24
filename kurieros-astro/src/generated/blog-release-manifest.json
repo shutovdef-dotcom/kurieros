@@ -1,6 +1,17 @@
 {
   "schemaVersion": 1,
   "timezone": "Europe/Moscow",
-  "generatedAt": null,
-  "releases": []
+  "generatedAt": "2026-07-24T04:35:31+00:00",
+  "releases": [
+    {
+      "sequence": 1,
+      "slug": "skolko-zarabatyvaet-kurer-yandex-eda-2026",
+      "releasedAt": "2026-07-24T04:35:31+00:00",
+      "firstPublishedAt": "2026-07-24T04:35:31+00:00",
+      "sourceCheckedAt": "2026-07-24T07:05:00+03:00",
+      "revision": 1,
+      "contentSha256": "d5b92a5a1ffb19a7755e258d3bc5e42db748ed59941172327a859e3d6f8f8116",
+      "deploySha": "6f1ecf9925bb62744639b7bc35856fdedeb1f111"
+    }
+  ]
 }
