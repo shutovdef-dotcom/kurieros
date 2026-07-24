@@ -33,7 +33,7 @@ describe('scheduled blog release workflow', () => {
     expect(workflowText).toContain("needs.deploy.result == 'success'");
     expect(workflowText).toContain('src/data/blog-release-ledger.json');
     expect(workflowText).toContain("[blog-ledger]");
-    expect(workflowText).toContain('always() && github.event_name == \'schedule\'');
+    expect(workflowText).toContain("needs.build.outputs.blog_release_run == 'true'");
     expect(workflowText).toContain('npm run seo:audit');
     expect(workflowText).toContain('BLOG_RELEASE_EXPECTED_CANDIDATE_JSON');
     expect(workflowText).toContain('--allow-missing-remote-if-local-empty');
@@ -53,6 +53,7 @@ describe('scheduled blog release workflow', () => {
   it('only accepts a transient candidate in the scheduled build context and requires archive-safe production deployment', () => {
     expect(manifestEmitterText).toContain("BLOG_RELEASE_ALLOW_CANDIDATE !== 'true'");
     expect(workflowText).toContain('BLOG_RELEASE_ALLOW_CANDIDATE');
+    expect(workflowText).toContain('release_blog_candidate');
     expect(workflowText).toContain("TIMEWEB_DEPLOY_METHOD\" = 'archive'");
     expect(workflowText).toContain("TIMEWEB_DEPLOY_METHOD\" = 'ssh-archive'");
     expect(workflowText).toContain('--blog-release-stamp-old');
