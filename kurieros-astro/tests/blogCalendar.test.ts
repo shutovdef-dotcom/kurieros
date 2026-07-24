@@ -49,8 +49,8 @@ describe('blog publication calendar', () => {
 
   it('uses the approved Moscow-time slot every 24 hours without fabricating publication dates', () => {
     expect(calendar.cadenceHours).toBe(24);
-    expect(entries[0]?.nominalPublishAt).toBe('2026-07-23T09:00:00+03:00');
-    expect(entries.at(-1)?.nominalPublishAt).toBe('2026-10-30T09:00:00+03:00');
+    expect(entries[0]?.nominalPublishAt).toBe('2026-07-24T09:00:00+03:00');
+    expect(entries.at(-1)?.nominalPublishAt).toBe('2026-10-31T09:00:00+03:00');
 
     for (const [index, entry] of entries.entries()) {
       expect(entry).not.toHaveProperty('datePublished');

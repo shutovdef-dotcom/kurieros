@@ -1,5 +1,112 @@
 {
   "schemaVersion": 1,
   "sourceMaxAgeDays": 30,
-  "entries": []
+  "entries": [
+    {
+      "slug": "skolko-zarabatyvaet-kurer-yandex-eda-2026",
+      "sourceIds": [
+        "yandex-pro-delivery",
+        "fns-npd-regime"
+      ],
+      "checkedAt": "2026-07-24T07:05:00+03:00",
+      "evidenceReference": "docs/blog-release-evidence-2026-07-24.md#skolko-zarabatyvaet-kurer-yandex-eda-2026"
+    },
+    {
+      "slug": "kurer-na-lichnom-avto-rashody-i-pribyl",
+      "sourceIds": [
+        "yandex-pro-delivery",
+        "fns-npd-regime"
+      ],
+      "checkedAt": "2026-07-24T07:05:00+03:00",
+      "evidenceReference": "docs/blog-release-evidence-2026-07-24.md#kurer-na-lichnom-avto-rashody-i-pribyl"
+    },
+    {
+      "slug": "kak-proyti-pervuyu-nedelyu-kurerom",
+      "sourceIds": [
+        "yandex-pro-delivery",
+        "kuper-courier-work",
+        "fns-npd-faq",
+        "fns-npd-receipts"
+      ],
+      "checkedAt": "2026-07-24T07:05:00+03:00",
+      "evidenceReference": "docs/blog-release-evidence-2026-07-24.md#kak-proyti-pervuyu-nedelyu-kurerom"
+    },
+    {
+      "slug": "nuzhen-li-elektrovelosiped-kureru",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "checkedAt": "2026-07-24T07:05:00+03:00",
+      "evidenceReference": "docs/blog-release-evidence-2026-07-24.md#nuzhen-li-elektrovelosiped-kureru"
+    },
+    {
+      "slug": "skolko-platyat-kureram-kupera",
+      "sourceIds": [
+        "kuper-courier-work",
+        "fns-npd-faq"
+      ],
+      "checkedAt": "2026-07-24T07:05:00+03:00",
+      "evidenceReference": "docs/blog-release-evidence-2026-07-24.md#skolko-platyat-kureram-kupera"
+    },
+    {
+      "slug": "s-kem-kurer-zaklyuchaet-dogovor",
+      "sourceIds": [
+        "yandex-pro-delivery",
+        "yandex-eda-legal",
+        "fns-npd-faq"
+      ],
+      "checkedAt": "2026-07-24T07:05:00+03:00",
+      "evidenceReference": "docs/blog-release-evidence-2026-07-24.md#s-kem-kurer-zaklyuchaet-dogovor"
+    },
+    {
+      "slug": "podrabotka-kurerom-posle-osnovnoy-raboty",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "checkedAt": "2026-07-24T07:05:00+03:00",
+      "evidenceReference": "docs/blog-release-evidence-2026-07-24.md#podrabotka-kurerom-posle-osnovnoy-raboty"
+    },
+    {
+      "slug": "kak-povysit-dohod-kureru-bez-pererabotok",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "checkedAt": "2026-07-24T07:05:00+03:00",
+      "evidenceReference": "docs/blog-release-evidence-2026-07-24.md#kak-povysit-dohod-kureru-bez-pererabotok"
+    },
+    {
+      "slug": "kak-vybrat-rayon-dlya-raboty-kurerom",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "checkedAt": "2026-07-24T07:05:00+03:00",
+      "evidenceReference": "docs/blog-release-evidence-2026-07-24.md#kak-vybrat-rayon-dlya-raboty-kurerom"
+    },
+    {
+      "slug": "kak-kureru-vesti-uchet-dohodov-i-rashodov",
+      "sourceIds": [
+        "fns-npd-faq",
+        "fns-npd-receipts"
+      ],
+      "checkedAt": "2026-07-24T07:05:00+03:00",
+      "evidenceReference": "docs/blog-release-evidence-2026-07-24.md#kak-kureru-vesti-uchet-dohodov-i-rashodov"
+    },
+    {
+      "slug": "chistyy-dohod-kurera-posle-rashodov",
+      "sourceIds": [
+        "fns-npd-regime",
+        "fns-npd-faq"
+      ],
+      "checkedAt": "2026-07-24T07:05:00+03:00",
+      "evidenceReference": "docs/blog-release-evidence-2026-07-24.md#chistyy-dohod-kurera-posle-rashodov"
+    },
+    {
+      "slug": "dohod-kurera-za-4-6-8-12-chasov",
+      "sourceIds": [
+        "yandex-pro-delivery"
+      ],
+      "checkedAt": "2026-07-24T07:05:00+03:00",
+      "evidenceReference": "docs/blog-release-evidence-2026-07-24.md#dohod-kurera-za-4-6-8-12-chasov"
+    }
+  ]
 }
