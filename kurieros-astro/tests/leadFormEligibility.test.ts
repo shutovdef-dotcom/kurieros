@@ -16,58 +16,47 @@ const verifiedLead = {
 };
 
 describe('lead-form eligibility', () => {
-  it('allows only a recently source-checked and apply-verified lead flow', () => {
-    expect(getLeadFormEligibility(verifiedLead, {
-      now: new Date('2026-07-10T09:00:00.000Z'),
-    })).toEqual({ eligible: true, reasons: [] });
+  it('allows an Ozon lead with complete provider metadata', () => {
+    expect(getLeadFormEligibility(verifiedLead)).toEqual({ eligible: true, reasons: [] });
   });
 
-  it('fails closed when source or apply verification is stale', () => {
+  it('does not disable Ozon leads because old verification timestamps are stale or missing', () => {
     expect(getLeadFormEligibility({
       ...verifiedLead,
       sourceCheckedAt: '2026-05-01T00:00:00.000Z',
-      applyVerifiedAt: '2026-05-02T00:00:00.000Z',
-    }, {
-      now: new Date('2026-07-10T09:00:00.000Z'),
-    })).toEqual({
-      eligible: false,
-      reasons: ['stale_source_check', 'stale_apply_check'],
-    });
-  });
-
-  it('fails closed on missing, invalid, or unconfirmed apply metadata', () => {
-    expect(getLeadFormEligibility({
-      ...verifiedLead,
       applyVerifiedAt: undefined,
       applyFlowVerified: false,
+    })).toEqual({ eligible: true, reasons: [] });
+  });
+
+  it('fails closed on unsupported markers or missing provider metadata', () => {
+    expect(getLeadFormEligibility({
+      ...verifiedLead,
+      applyLink: 'https://example.com/apply',
       ozonLeadForm: undefined,
-    }, {
-      now: new Date('2026-07-10T09:00:00.000Z'),
     })).toEqual({
       eligible: false,
-      reasons: ['missing_apply_check', 'unverified_apply_flow', 'missing_provider_metadata'],
+      reasons: ['not_supported_lead_form', 'missing_provider_metadata'],
     });
 
     expect(getLeadFormEligibility({
       ...verifiedLead,
-      sourceCheckedAt: 'not-a-date',
-      applyVerifiedAt: 'also-not-a-date',
-    }, {
-      now: new Date('2026-07-10T09:00:00.000Z'),
-    }).reasons).toEqual(['invalid_source_check', 'invalid_apply_check']);
+      ozonLeadForm: {
+        ...verifiedLead.ozonLeadForm,
+        hireObjectUUID: '',
+      },
+    })).toEqual({
+      eligible: false,
+      reasons: ['missing_provider_metadata'],
+    });
   });
 
-  it('keeps the current 185 stale Ozon lead vacancies disabled', () => {
+  it('enables the current 185 Ozon lead vacancies', () => {
     const leadJobs = jobs.filter((job) => job.applyLink === 'lead-form:ozon');
-    const decisions = leadJobs.map((job) => getLeadFormEligibility(job, {
-      now: new Date('2026-07-10T09:00:00.000Z'),
-    }));
+    const decisions = leadJobs.map((job) => getLeadFormEligibility(job));
 
     expect(leadJobs).toHaveLength(185);
-    expect(decisions.every((decision) => decision.eligible === false)).toBe(true);
-    expect(decisions.every((decision) =>
-      decision.reasons.includes('stale_source_check')
-      && decision.reasons.includes('missing_apply_check'),
-    )).toBe(true);
+    expect(decisions.every((decision) => decision.eligible === true)).toBe(true);
+    expect(decisions.every((decision) => decision.reasons.length === 0)).toBe(true);
   });
 });

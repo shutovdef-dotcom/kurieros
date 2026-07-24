@@ -18,8 +18,6 @@
  *   OZON_REFERRER_PHONE     — masked +7(XXX)XXX-XX-XX
  *   TELEGRAM_BOT_TOKEN      — same bot used for Telegram alerts
  *   TELEGRAM_CHAT_ID        — destination chat
- *   OZON_LEAD_VERIFIED_AT   — ISO timestamp of the latest successful
- *                             end-to-end apply-flow verification
  *
  * Optional vars (in `wrangler.toml` [vars]):
  *   ALLOWED_ORIGINS         — comma-separated list (default: https://kurerok.ru)
@@ -48,8 +46,6 @@ import { ALLOWED_TUPLES, ALLOWED_VACANCIES } from './whitelist.js';
 
 const OZON_API = 'https://sigma-bff-api.ozon.ru/v1/actions';
 const OZON_REFERER = 'https://recruitment.ozon.ru/ref-courier-sklad';
-const LEAD_VERIFICATION_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
-const FUTURE_CLOCK_SKEW_MS = 5 * 60 * 1000;
 
 // Canonical UUID shape (8-4-4-4-12 hex, 36 chars). cityID / hireObjectUUID
 // are operational-location UUIDs; anything non-empty that isn't this shape
@@ -102,14 +98,6 @@ export function jsonResponse(body, init = {}) {
 
 export function escapeHtml(s) {
 	return String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
-}
-
-export function isLeadFlowFresh(verifiedAt, now = new Date()) {
-	const checked = new Date(verifiedAt);
-	const current = now instanceof Date ? now : new Date(now);
-	if (Number.isNaN(checked.getTime()) || Number.isNaN(current.getTime())) return false;
-	const ageMs = current.getTime() - checked.getTime();
-	return ageMs >= -FUTURE_CLOCK_SKEW_MS && ageMs <= LEAD_VERIFICATION_MAX_AGE_MS;
 }
 
 export async function notifyTelegram(env, { vacancy, cityID, hireObjectUUID, ozonStatus }) {
@@ -236,16 +224,6 @@ export default {
 		const url = new URL(request.url);
 		if (!/^\/lead\/?$/.test(url.pathname)) {
 			return jsonResponse({ ok: false, error: 'not_found' }, { status: 404, headers: cors });
-		}
-
-		// Fail closed before request.json() touches candidate PII. A catalogue
-		// crawl alone is not enough: this timestamp is advanced only after an
-		// end-to-end role/city/form verification.
-		if (!isLeadFlowFresh(env.OZON_LEAD_VERIFIED_AT)) {
-			return jsonResponse(
-				{ ok: false, error: 'lead_form_unavailable' },
-				{ status: 503, headers: cors },
-			);
 		}
 
 		// Per-IP rate limit (5 req/60s). Cloudflare-side, applied before

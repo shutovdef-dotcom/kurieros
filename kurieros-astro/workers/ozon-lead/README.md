@@ -59,10 +59,6 @@ wrangler secret put TELEGRAM_BOT_TOKEN
 
 wrangler secret put TELEGRAM_CHAT_ID
 # Введите ваш chat_id (число)
-
-wrangler secret put OZON_LEAD_VERIFIED_AT
-# ISO-время последней успешной end-to-end проверки role → city → form.
-# Без значения или через 30 дней Worker отвечает 503 до чтения JSON с PII.
 ```
 
 ### 5. Прописать Worker URL в kurerok.ru
@@ -128,11 +124,9 @@ POST в реальные Ozon/Telegram API в тестах не выполняе
 { "ok": false, "error": "ozon_submit_failed" }
 ```
 
-При отсутствующей или просроченной проверке поток закрыт до разбора тела запроса:
-
-```json
-{ "ok": false, "error": "lead_form_unavailable" }
-```
+Worker больше не требует `OZON_LEAD_VERIFIED_AT` и не закрывает поток по 30-дневному timestamp.
+Доступность заявки контролируется metadata вакансии на сайте, whitelist пары
+`vacancy/cityID/hireObjectUUID`, CORS, rate-limit и обязательные Worker secrets.
 
 ## Ротация секретов
 
