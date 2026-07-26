@@ -461,6 +461,23 @@ describe('production manifest reconciliation', () => {
     });
   });
 
+  it('accepts a local content revision of the latest already-published article', () => {
+    const remote = ledgerWithFirstRelease();
+    const local = structuredClone(remote);
+    local.releases[0] = {
+      ...local.releases[0]!,
+      modifiedAt: '2026-08-03T10:00:00+03:00',
+      revision: 2,
+      contentSha256: sha('a'),
+    };
+
+    expect(reconcileBlogReleaseLedgers(calendar(3), local, remote)).toEqual({
+      ok: true,
+      mode: 'local_ahead_revision',
+      releaseToRecover: undefined,
+    });
+  });
+
   it('rejects a remote ledger that is behind, divergent, or more than one release ahead', () => {
     const local = ledgerWithFirstRelease();
     const remoteAheadTwo = structuredClone(local);

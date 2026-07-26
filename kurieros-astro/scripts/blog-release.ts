@@ -186,6 +186,9 @@ const syncProductionManifest = async () => {
     await writeJson(manifestPath, manifest);
     console.log(`✓ Recovered one successful production release: ${reconciliation.releaseToRecover?.slug}`);
     await writeGithubOutput({ recovered: 'true', recovered_slug: reconciliation.releaseToRecover?.slug ?? '' });
+  } else if (reconciliation.mode === 'local_ahead_revision') {
+    console.log('✓ Production manifest contains the prior article revision; local revision is the deploy candidate.');
+    await writeGithubOutput({ recovered: 'false', local_ahead_revision: 'true' });
   } else {
     console.log('✓ Production manifest and durable ledger are equal.');
     await writeGithubOutput({ recovered: 'false' });

@@ -152,7 +152,7 @@ export type BlogReleaseReconciliationReason =
 export type BlogReleaseReconciliation =
   | {
       ok: true;
-      mode: 'equal' | 'remote_ahead_by_one';
+      mode: 'equal' | 'remote_ahead_by_one' | 'local_ahead_revision';
       releaseToRecover: BlogReleaseRecord | undefined;
     }
   | {
@@ -515,10 +515,27 @@ export const isSameBlogReleaseReservation = (
   JSON.stringify(expected.historicalPublicationEvidence ?? null) ===
     JSON.stringify(observed.historicalPublicationEvidence ?? null);
 
+const isLocalRevisionOfRemoteRelease = (
+  local: BlogReleaseRecord,
+  remote: BlogReleaseRecord,
+): boolean =>
+  local.sequence === remote.sequence &&
+  local.slug === remote.slug &&
+  local.releasedAt === remote.releasedAt &&
+  local.firstPublishedAt === remote.firstPublishedAt &&
+  local.sourceCheckedAt === remote.sourceCheckedAt &&
+  local.deploySha === remote.deploySha &&
+  local.revision > remote.revision &&
+  Boolean(local.modifiedAt) &&
+  local.contentSha256 !== remote.contentSha256 &&
+  JSON.stringify(local.historicalPublicationEvidence ?? null) ===
+    JSON.stringify(remote.historicalPublicationEvidence ?? null);
+
 /**
  * Reconciles version-controlled ledger state with the deployed manifest. The
- * only recoverable outage is a production manifest exactly one valid release
- * ahead of the local ledger; any other divergence stops the pipeline.
+ * recoverable states are a production manifest exactly one valid release ahead
+ * of the local ledger, or a local content revision of the latest already
+ * published release. Other divergences still stop the pipeline.
  */
 export const reconcileBlogReleaseLedgers = (
   calendar: readonly BlogCalendarEntry[],
@@ -561,6 +578,20 @@ export const reconcileBlogReleaseLedgers = (
       reason: 'remote_more_than_one_ahead',
       releaseToRecover: undefined,
     };
+  }
+  if (remote.releases.length === local.releases.length) {
+    const localLast = local.releases.at(-1);
+    const remoteLast = remote.releases.at(-1);
+    const localPrefix = local.releases.slice(0, -1);
+    const remotePrefix = remote.releases.slice(0, -1);
+    if (
+      localLast &&
+      remoteLast &&
+      hasStrictRecordPrefix(localPrefix, remotePrefix) &&
+      isLocalRevisionOfRemoteRelease(localLast, remoteLast)
+    ) {
+      return { ok: true, mode: 'local_ahead_revision', releaseToRecover: undefined };
+    }
   }
   if (!hasStrictRecordPrefix(local.releases, remote.releases)) {
     return {
