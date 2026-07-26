@@ -88,6 +88,7 @@ const normalizeSiteUrl = (siteUrl: string): string => siteUrl.replace(/\/+$/, ''
 const resolvePath = (path: string): string => (path.startsWith('/') ? path : resolve(rootDir, path));
 
 const resolveGoogleCredentialAvailable = (): boolean => {
+  if (process.env.GOOGLE_INDEXING_ACCESS_TOKEN) return true;
   if (process.env.GOOGLE_INDEXING_SERVICE_ACCOUNT) return true;
   const serviceAccountPath =
     readOption('--service-account') ??
@@ -214,7 +215,7 @@ const runGoogleIndexingSubmit = async ({
       status: 'skipped_missing_credentials',
       outputPath,
       note:
-        'Missing Google Indexing API service account. Set GOOGLE_APPLICATION_CREDENTIALS, ' +
+        'Missing Google Indexing API credentials. Set GOOGLE_INDEXING_ACCESS_TOKEN, GOOGLE_APPLICATION_CREDENTIALS, ' +
         'GOOGLE_INDEXING_SERVICE_ACCOUNT_PATH, or GOOGLE_INDEXING_SERVICE_ACCOUNT.',
     };
   }

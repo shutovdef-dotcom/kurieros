@@ -164,6 +164,11 @@ const fetchAccessToken = async (key: ServiceAccountKey): Promise<string> => {
   return payload.access_token;
 };
 
+const readAccessTokenFromEnv = (): string | undefined => {
+  const token = process.env.GOOGLE_INDEXING_ACCESS_TOKEN?.trim();
+  return token || undefined;
+};
+
 const submitUrl = async (
   url: string,
   accessToken: string,
@@ -276,7 +281,7 @@ if (dryRun) {
         urlCount: urls.length,
         firstUrls: urls.slice(0, 10),
         nextRealRun:
-          'Add --confirm-submit --confirm-supported-content and provide --service-account or GOOGLE_APPLICATION_CREDENTIALS.',
+          'Add --confirm-submit --confirm-supported-content and provide GOOGLE_INDEXING_ACCESS_TOKEN, --service-account, or GOOGLE_APPLICATION_CREDENTIALS.',
       },
       null,
       2,
@@ -303,15 +308,20 @@ if (unsupportedContentUrls.length > 0) {
 }
 
 const serviceAccountPath = resolveServiceAccountPath();
-const serviceAccountFromEnv = serviceAccountPath ? null : readServiceAccountFromEnv();
-if (!serviceAccountPath && !serviceAccountFromEnv) {
+const accessTokenFromEnv = readAccessTokenFromEnv();
+const serviceAccountFromEnv =
+  accessTokenFromEnv || serviceAccountPath ? null : readServiceAccountFromEnv();
+if (!accessTokenFromEnv && !serviceAccountPath && !serviceAccountFromEnv) {
   throw new Error(
-    'Missing service account. Use --service-account, GOOGLE_INDEXING_SERVICE_ACCOUNT_PATH, GOOGLE_APPLICATION_CREDENTIALS, or GOOGLE_INDEXING_SERVICE_ACCOUNT.',
+    'Missing Google Indexing API credentials. Use GOOGLE_INDEXING_ACCESS_TOKEN, --service-account, GOOGLE_INDEXING_SERVICE_ACCOUNT_PATH, GOOGLE_APPLICATION_CREDENTIALS, or GOOGLE_INDEXING_SERVICE_ACCOUNT.',
   );
 }
 
-const serviceAccount = serviceAccountFromEnv ?? await readServiceAccount(resolvePath(serviceAccountPath!));
-const accessToken = await fetchAccessToken(serviceAccount);
+const serviceAccount =
+  accessTokenFromEnv
+    ? null
+    : serviceAccountFromEnv ?? await readServiceAccount(resolvePath(serviceAccountPath!));
+const accessToken = accessTokenFromEnv ?? await fetchAccessToken(serviceAccount!);
 const results: SubmitResult[] = [];
 
 for (const url of urls) {

@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 concurrency:
   group: google-indexing-api-main
@@ -22,6 +23,7 @@ env:
   PROJECT_DIR: kurieros-astro
   NODE_VERSION: '24.x'
   SITE_URL: https://kurerok.ru
+  GOOGLE_CLOUD_PROJECT_ID: noble-truck-500507-i1
 
 jobs:
   submit:
@@ -52,15 +54,30 @@ jobs:
           fi
           echo "date=$date" >> "$GITHUB_OUTPUT"
 
-      - name: Require Google Indexing API service account secret
+      - name: Require Google keyless auth configuration
         env:
-          GOOGLE_INDEXING_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_INDEXING_SERVICE_ACCOUNT }}
+          GOOGLE_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GOOGLE_WORKLOAD_IDENTITY_PROVIDER }}
+          GOOGLE_INDEXING_SERVICE_ACCOUNT_EMAIL: ${{ vars.GOOGLE_INDEXING_SERVICE_ACCOUNT_EMAIL }}
         run: |
           set -euo pipefail
-          if [ -z "${GOOGLE_INDEXING_SERVICE_ACCOUNT:-}" ]; then
-            echo "::error::Missing GOOGLE_INDEXING_SERVICE_ACCOUNT secret. Add the service account JSON to the timeweb-production environment or repository secrets."
+          if [ -z "${GOOGLE_WORKLOAD_IDENTITY_PROVIDER:-}" ]; then
+            echo "::error::Missing GOOGLE_WORKLOAD_IDENTITY_PROVIDER environment variable."
             exit 1
           fi
+          if [ -z "${GOOGLE_INDEXING_SERVICE_ACCOUNT_EMAIL:-}" ]; then
+            echo "::error::Missing GOOGLE_INDEXING_SERVICE_ACCOUNT_EMAIL environment variable."
+            exit 1
+          fi
+
+      - name: Authenticate to Google Cloud
+        id: google-auth
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ env.GOOGLE_CLOUD_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GOOGLE_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GOOGLE_INDEXING_SERVICE_ACCOUNT_EMAIL }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/indexing
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -75,7 +92,7 @@ jobs:
 
       - name: Submit 200 live JobPosting URLs to Google
         env:
-          GOOGLE_INDEXING_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_INDEXING_SERVICE_ACCOUNT }}
+          GOOGLE_INDEXING_ACCESS_TOKEN: ${{ steps.google-auth.outputs.access_token }}
         run: npm run google:indexing:daily -- --date="${{ steps.params.outputs.date }}"
 
       - name: Upload recrawl report
