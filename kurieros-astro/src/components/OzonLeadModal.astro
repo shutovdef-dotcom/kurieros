@@ -26,8 +26,6 @@
  * If the env var is blank (dev / not deployed yet), submit shows a soft
  * error instead of the success state so previews do not silently drop leads.
  */
-import ozonLeadModalUrl from '../scripts/ozonLeadModal.js?url';
-
 const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 ---
 
@@ -135,7 +133,9 @@ const ozonLeadApi = String(import.meta.env.PUBLIC_OZON_LEAD_API ?? '').trim();
 	</div>
 </div>
 
-<script is:inline type="module" src={ozonLeadModalUrl}></script>
+<script>
+	import '../scripts/ozonLeadModal.js';
+</script>
 
 <style>
 	.ozon-lead-modal {

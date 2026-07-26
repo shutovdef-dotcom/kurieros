@@ -14,7 +14,17 @@ const eligibleJob = {
 };
 
 describe('getJobPostingEligibility', () => {
-  it('allows only a source-backed, active and recently verified vacancy', () => {
+  it('allows an active source-backed vacancy even when optional verification fields are absent', () => {
+    const { sourceCheckedAt: _sourceCheckedAt, applyVerifiedAt: _applyVerifiedAt, ...job } =
+      eligibleJob;
+
+    expect(getJobPostingEligibility(job, { now })).toEqual({
+      eligible: true,
+      reasons: [],
+    });
+  });
+
+  it('allows the fully verified happy path', () => {
     expect(getJobPostingEligibility(eligibleJob, { now })).toEqual({
       eligible: true,
       reasons: [],
@@ -39,7 +49,7 @@ describe('getJobPostingEligibility', () => {
     });
   });
 
-  it('rejects stale source and application verification independently', () => {
+  it('does not treat stale optional checks as a JobPosting blocker', () => {
     const result = getJobPostingEligibility(
       {
         ...eligibleJob,
@@ -50,12 +60,12 @@ describe('getJobPostingEligibility', () => {
     );
 
     expect(result).toEqual({
-      eligible: false,
-      reasons: ['stale_source_check', 'stale_apply_check'],
+      eligible: true,
+      reasons: [],
     });
   });
 
-  it('rejects inactive, expired, estimated-pay and unverified application rows', () => {
+  it('rejects inactive and expired rows, but not estimated-pay or unverified application rows', () => {
     const result = getJobPostingEligibility(
       {
         ...eligibleJob,
@@ -69,12 +79,7 @@ describe('getJobPostingEligibility', () => {
 
     expect(result).toEqual({
       eligible: false,
-      reasons: [
-        'inactive',
-        'expired',
-        'estimated_salary',
-        'unverified_apply_flow',
-      ],
+      reasons: ['inactive', 'expired'],
     });
   });
 

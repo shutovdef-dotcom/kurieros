@@ -10,6 +10,8 @@ import {
   TOP_INDEXABLE_VACANCY_CITIES,
 } from '../src/data/vacancyIndexabilityPolicy';
 import { LEGACY_GSC_VALID_JOB_PATHS } from '../src/data/jobPostingEligibilityPolicy';
+import { resolveJobPostingRollout } from '../src/data/jobPostingEligibilityPolicy';
+import { resolveVerifiedJobPostingEvidence } from '../src/data/jobPostingVerifiedCohort';
 import { getVacancyCanonicalPath } from '../src/utils/vacancyUrl';
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -145,6 +147,33 @@ for (const job of detailJobs) {
 const noindexPaths = Array.from(allPaths)
   .filter((path) => !indexablePaths.has(path))
   .sort();
+const jobPostingPaths = detailJobs
+  .map((job): string | null => {
+    const path = getVacancyCanonicalPath(job);
+    if (!indexablePaths.has(path)) return null;
+    const verifiedEvidence = resolveVerifiedJobPostingEvidence({
+      isActive: true,
+      roleTitle: job.roleTitle,
+      sourceSlug: job.sourceSlug,
+      sourceUrl: job.sourceUrl,
+      postedAt: job.postedAt,
+      validThrough: job.validThrough,
+      sourceCheckedAt: job.sourceCheckedAt,
+      updatedAt: job.updatedAt,
+      applyLink: job.applyLink,
+      applyVerifiedAt: job.applyVerifiedAt,
+      applyFlowVerified: job.applyFlowVerified,
+      salaryConfidence: job.salaryConfidence,
+    });
+    const decision = resolveJobPostingRollout({
+      path,
+      evidence: verifiedEvidence.evidence,
+      now: new Date('2026-07-24T06:52:00.000Z'),
+    });
+    return decision.emit ? path : null;
+  })
+  .filter((path): path is string => Boolean(path))
+  .sort();
 
 const payload = {
   generatedFrom: {
@@ -164,11 +193,14 @@ const payload = {
   localIndexablePaths: Array.from(localIndexablePaths).sort(),
   gscIndexablePaths: Array.from(gscIndexablePaths).sort(),
   indexablePaths: Array.from(indexablePaths).sort(),
+  jobPostingPaths,
+  googleIndexingApiEligiblePaths: jobPostingPaths,
   noindexPaths,
   summary: {
     totalVacancyPages: allPaths.size,
     indexableVacancyPages: indexablePaths.size,
     noindexVacancyPages: noindexPaths.length,
+    jobPostingPages: jobPostingPaths.length,
   },
 };
 

@@ -2,7 +2,9 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { detailJobs } from '../src/data/jobs';
-import { LEGACY_GSC_VALID_JOB_PATHS } from '../src/data/jobPostingEligibilityPolicy';
+import { resolveJobPostingRollout } from '../src/data/jobPostingEligibilityPolicy';
+import { resolveVerifiedJobPostingEvidence } from '../src/data/jobPostingVerifiedCohort';
+import vacancyIndexabilityManifest from '../src/generated/vacancy-indexability.json';
 import { getVacancyIndexability } from '../src/utils/vacancyIndexability';
 
 const distDir = resolve(process.cwd(), 'dist');
@@ -19,30 +21,46 @@ const readSchemas = (html: string): Record<string, unknown>[] =>
       return Array.isArray(graph) ? graph as Record<string, unknown>[] : [parsed];
     });
 
+const hasCurrentJobPostingEvidence = (job: (typeof detailJobs)[number]) => {
+  const verifiedEvidence = resolveVerifiedJobPostingEvidence({
+    isActive: true,
+    roleTitle: job.roleTitle,
+    sourceSlug: job.sourceSlug,
+    sourceUrl: job.sourceUrl,
+    postedAt: job.postedAt,
+    validThrough: job.validThrough,
+    sourceCheckedAt: job.sourceCheckedAt,
+    updatedAt: job.updatedAt,
+    applyLink: job.applyLink,
+    applyVerifiedAt: job.applyVerifiedAt,
+    applyFlowVerified: job.applyFlowVerified,
+    salaryConfidence: job.salaryConfidence,
+  });
+  return resolveJobPostingRollout({
+    path: `/v/${job.slug}/`,
+    evidence: verifiedEvidence.evidence,
+    now: new Date('2026-07-24T07:00:00.000Z'),
+  }).emit;
+};
+
 describe.skipIf(!distExists)('JobPosting rollout build policy', () => {
-  it('does not preserve JobPosting solely because 29 pages were historically valid in GSC', () => {
-    for (const path of LEGACY_GSC_VALID_JOB_PATHS) {
-      expect(readPath(path), path).not.toContain('"@type":"JobPosting"');
-    }
-  });
-
-  it('defaults to no JobPosting on an indexable page outside the evidence cohort', () => {
-    const legacyPaths = new Set<string>(LEGACY_GSC_VALID_JOB_PATHS);
+  it('emits JobPosting for every indexable active vacancy page', () => {
+    const eligibleJobs = detailJobs.filter(
+      (job) => getVacancyIndexability(job).indexable && hasCurrentJobPostingEvidence(job),
+    );
     const blockedJob = detailJobs.find(
-      (job) =>
-        getVacancyIndexability(job).indexable &&
-        !legacyPaths.has(`/v/${job.slug}/`),
+      (job) => getVacancyIndexability(job).indexable && !hasCurrentJobPostingEvidence(job),
     );
-    expect(blockedJob).toBeDefined();
 
-    expect(readPath(`/v/${blockedJob!.slug}/`)).not.toContain('"@type":"JobPosting"');
+    expect(eligibleJobs).toHaveLength(6_685);
+    expect(blockedJob).toBeUndefined();
+    expect(readSchemas(readPath(`/v/${eligibleJobs[0]!.slug}/`)).some((item) => item['@type'] === 'JobPosting')).toBe(true);
   });
 
-  it('contains no JobPosting items until a current source-qualified cohort exists', () => {
-    const emitted = LEGACY_GSC_VALID_JOB_PATHS.flatMap((path) =>
-      readSchemas(readPath(path)).filter((item) => item['@type'] === 'JobPosting'),
+  it('keeps the Google Indexing API manifest aligned with emitted JobPosting pages', () => {
+    expect(vacancyIndexabilityManifest.googleIndexingApiEligiblePaths).toHaveLength(6_685);
+    expect(vacancyIndexabilityManifest.jobPostingPaths).toEqual(
+      vacancyIndexabilityManifest.googleIndexingApiEligiblePaths,
     );
-
-    expect(emitted).toEqual([]);
   });
 });

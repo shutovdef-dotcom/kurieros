@@ -152,8 +152,8 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     expect(html).not.toContain('lead-form:ozon');
     expect(applyCode).not.toBe('');
     expect(applyCode).toContain('/api/v1/apply-jobs.json?v=');
-    expect(applyCode).toContain('cache:"no-cache"');
-    expect(applyCode).not.toContain('cache:"force-cache"');
+    expect(applyCode).toMatch(/cache:(["'`])no-cache\1/);
+    expect(applyCode).not.toMatch(/cache:(["'`])force-cache\1/);
 
     const sitemapXml = readAllSitemaps();
     expect(sitemapXml).not.toContain('/apply/');

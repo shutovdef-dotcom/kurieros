@@ -47,6 +47,7 @@ import { buildVacancySeoTitle } from '../../utils/vacancySeoTitle';
 import { getVacancyIndexability } from '../../utils/vacancyIndexability';
 import { getLeadFormEligibility } from '../../utils/leadFormEligibility';
 import { resolveJobPostingRollout } from '../../data/jobPostingEligibilityPolicy';
+import { resolveVerifiedJobPostingEvidence } from '../../data/jobPostingVerifiedCohort';
 import { getVacancyTitleOverride } from '../../data/seoExperimentCohorts';
 
 export async function getStaticPaths() {
@@ -229,22 +230,26 @@ const vacancyDescription = fullDescription.length <= 170
 	? fullDescription
 	: trimAtWordBoundary(buildVacancyDescription(false), 170);
 const vacancyIndexability = getVacancyIndexability(job);
+const verifiedJobPostingEvidence = resolveVerifiedJobPostingEvidence({
+	isActive: true,
+	roleTitle: job.roleTitle,
+	sourceSlug: job.sourceSlug,
+	sourceUrl: job.sourceUrl,
+	postedAt: job.postedAt,
+	validThrough: job.validThrough,
+	sourceCheckedAt: job.sourceCheckedAt,
+	updatedAt: job.updatedAt,
+	applyLink: job.applyLink,
+	applyVerifiedAt: job.applyVerifiedAt,
+	applyFlowVerified: job.applyFlowVerified,
+	salaryConfidence: job.salaryConfidence,
+});
 const jobPostingRollout = resolveJobPostingRollout({
 	path: Astro.url.pathname,
-	evidence: {
-		isActive: true,
-		roleTitle: job.roleTitle,
-		sourceUrl: job.sourceUrl,
-		postedAt: job.postedAt,
-		validThrough: job.validThrough,
-		sourceCheckedAt: job.sourceCheckedAt,
-		applyVerifiedAt: job.applyVerifiedAt,
-		applyFlowVerified: job.applyFlowVerified,
-		salaryConfidence: job.salaryConfidence,
-	},
+	evidence: verifiedJobPostingEvidence.evidence,
 });
 const { datePosted, validThrough } = resolveJobPostingDates({
-	postedAt: job.postedAt,
+	postedAt: verifiedJobPostingEvidence.evidence.postedAt,
 	validThrough: job.validThrough,
 });
 const contentUpdatedValue = job.contentUpdatedAt ?? job.updatedAt;

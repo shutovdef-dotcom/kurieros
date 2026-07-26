@@ -91,6 +91,20 @@
       ]
     },
     {
+      "id": "yandex-pro-auto-tax",
+      "publisher": "Яндекс Про",
+      "url": "https://pro.yandex.ru/ru-ru/moskva/knowledge-base/courier/dohod/avtouplata-nalogov",
+      "category": "official_terms",
+      "verifiedAt": "2026-07-24",
+      "scope": "Автоуплата налога в Яндекс Про для самозанятых курьеров-партнёров резидентов РФ.",
+      "allowedClaims": [
+        "для указанной категории курьеров действует автоматическая уплата налога",
+        "налог удерживается с дохода от сотрудничества с сервисом Яндекс Еда",
+        "выплата на карту приходит уже с учётом удержанного налога",
+        "в разделе «Деньги» → «Автоуплата налога» отображаются списанные суммы"
+      ]
+    },
+    {
       "id": "yandex-eda-legal",
       "publisher": "Яндекс",
       "url": "https://yandex.ru/legal/termsofuse_eda/ru/",
@@ -279,6 +293,7 @@
       "slug": "skolko-zarabatyvaet-kurer-yandex-eda-2026",
       "sourceIds": [
         "yandex-pro-delivery",
+        "yandex-pro-auto-tax",
         "fns-npd-regime"
       ],
       "sourceGate": "required_before_release",

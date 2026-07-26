@@ -25,6 +25,9 @@
     "check:blog-content": "tsx scripts/audit-blog-content.ts",
     "blog:release": "tsx scripts/blog-release.ts",
     "recrawl:carousel": "tsx scripts/plan-recrawl-carousel.ts",
+    "recrawl:automation": "tsx scripts/run-recrawl-automation.ts",
+    "google:indexing:daily": "tsx scripts/run-recrawl-automation.ts --submit-google --require-google-submit",
+    "google:indexing:submit": "tsx scripts/submit-google-indexing-api.ts",
     "indexnow:prepare-key": "tsx scripts/prepare-indexnow-key.ts",
     "indexnow:submit": "tsx scripts/submit-indexnow.ts",
     "emit:sitemap-freshness": "tsx scripts/emit-sitemap-freshness.ts",
@@ -73,7 +76,7 @@
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.2",
-    "astro": "^6.1.3",
+    "astro": "^7.1.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -92,7 +95,8 @@
   },
   "overrides": {
     "esbuild": "0.28.1",
-    "shell-quote": "1.8.4",
+    "fast-uri": "3.1.4",
+    "shell-quote": "1.10.0",
     "yaml-language-server": {
       "yaml": "2.8.3"
     }

@@ -1,6 +1,5 @@
 import type { SalaryConfidence } from '../data/vacancyTypes';
 
-const DAY_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_MAX_VERIFICATION_AGE_DAYS = 30;
 
 export type JobPostingEligibilityReason =
@@ -64,15 +63,12 @@ const resolveMaxAgeDays = (value: number | undefined): number => {
   return value;
 };
 
-const isStale = (value: Date, now: Date, maxAgeDays: number): boolean =>
-  now.getTime() - value.getTime() > maxAgeDays * DAY_MS;
-
 export const getJobPostingEligibility = (
   job: JobPostingEligibilityInput,
   options: JobPostingEligibilityOptions = {},
 ): JobPostingEligibilityDecision => {
   const now = resolveNow(options.now);
-  const maxAgeDays = resolveMaxAgeDays(options.maxVerificationAgeDays);
+  resolveMaxAgeDays(options.maxVerificationAgeDays);
   const reasons: JobPostingEligibilityReason[] = [];
 
   if (!job.isActive) reasons.push('inactive');
@@ -88,17 +84,10 @@ export const getJobPostingEligibility = (
   else if (validThrough && validThrough.getTime() < now.getTime()) reasons.push('expired');
 
   const sourceCheckedAt = parseDate(job.sourceCheckedAt);
-  if (!job.sourceCheckedAt) reasons.push('missing_source_check');
-  else if (!sourceCheckedAt) reasons.push('invalid_source_check');
-  else if (isStale(sourceCheckedAt, now, maxAgeDays)) reasons.push('stale_source_check');
+  if (job.sourceCheckedAt && !sourceCheckedAt) reasons.push('invalid_source_check');
 
   const applyVerifiedAt = parseDate(job.applyVerifiedAt);
-  if (!job.applyVerifiedAt) reasons.push('missing_apply_check');
-  else if (!applyVerifiedAt) reasons.push('invalid_apply_check');
-  else if (isStale(applyVerifiedAt, now, maxAgeDays)) reasons.push('stale_apply_check');
-
-  if (job.salaryConfidence === 'estimated') reasons.push('estimated_salary');
-  if (!job.applyFlowVerified) reasons.push('unverified_apply_flow');
+  if (job.applyVerifiedAt && !applyVerifiedAt) reasons.push('invalid_apply_check');
 
   return {
     eligible: reasons.length === 0,

@@ -7,8 +7,9 @@ import {
 /**
  * Search Console → Job Postings → Valid items, captured read-only on
  * 2026-07-10 from the 2026-07-09 report. The historical cohort is retained
- * for URL/indexability continuity and review tracking only. Membership never
- * bypasses the current source-provenance gate for JobPosting markup.
+ * for URL/indexability continuity and review tracking only. Since 2026-07-26,
+ * JobPosting markup is controlled by the all-active vacancy policy, not by
+ * this old bridge cohort.
  */
 export const LEGACY_GSC_VALID_JOB_PATHS = [
   '/v/voxys-call-center-operator-chelyabinsk-office/',
@@ -61,7 +62,7 @@ type ResolveJobPostingRolloutInput = {
 
 export type JobPostingRolloutDecision = {
   emit: boolean;
-  mode: 'source_verified' | 'blocked';
+  mode: 'jobposting_markup' | 'blocked';
   reasons: JobPostingRolloutReason[];
 };
 
@@ -72,7 +73,7 @@ export const resolveJobPostingRollout = ({
 }: ResolveJobPostingRolloutInput): JobPostingRolloutDecision => {
   const strictDecision = getJobPostingEligibility(evidence, { now });
   if (strictDecision.eligible) {
-    return { emit: true, mode: 'source_verified', reasons: [] };
+    return { emit: true, mode: 'jobposting_markup', reasons: [] };
   }
 
   const isLegacyPath = legacyValidPathSet.has(path);

@@ -6,6 +6,7 @@ import {
   LEGACY_JOBPOSTING_REVIEW_BY,
   resolveJobPostingRollout,
 } from '../src/data/jobPostingEligibilityPolicy';
+import { resolveVerifiedJobPostingEvidence } from '../src/data/jobPostingVerifiedCohort';
 
 const verifiedEvidence = {
   isActive: true,
@@ -31,17 +32,17 @@ describe('JobPosting rollout policy', () => {
     }
   });
 
-  it('prefers strict source evidence over the legacy bridge', () => {
+  it('emits JobPosting for eligible core vacancy evidence without relying on the legacy bridge', () => {
     expect(
       resolveJobPostingRollout({
         path: LEGACY_GSC_VALID_JOB_PATHS[0]!,
         evidence: verifiedEvidence,
         now: new Date('2026-07-10T00:00:00.000Z'),
       }),
-    ).toEqual({ emit: true, mode: 'source_verified', reasons: [] });
+    ).toEqual({ emit: true, mode: 'jobposting_markup', reasons: [] });
   });
 
-  it('does not let a historical GSC-valid status override missing source evidence', () => {
+  it('does not let a historical GSC-valid status override missing core date evidence', () => {
     expect(
       resolveJobPostingRollout({
         path: LEGACY_GSC_VALID_JOB_PATHS[0]!,
@@ -58,28 +59,32 @@ describe('JobPosting rollout policy', () => {
     });
   });
 
-  it('fails closed for all 29 legacy paths until their current rows carry complete evidence', () => {
+  it('treats legacy paths like every other active vacancy under the all-active policy', () => {
     const eligibleLegacyPaths = LEGACY_GSC_VALID_JOB_PATHS.filter((path) => {
       const slug = path.replace(/^\/v\//, '').replace(/\/$/, '');
       const job = detailJobs.find((item) => item.slug === slug)!;
+      const verifiedEvidence = resolveVerifiedJobPostingEvidence({
+        isActive: true,
+        roleTitle: job.roleTitle,
+        sourceSlug: job.sourceSlug,
+        sourceUrl: job.sourceUrl,
+        postedAt: job.postedAt,
+        validThrough: job.validThrough,
+        sourceCheckedAt: job.sourceCheckedAt,
+        updatedAt: job.updatedAt,
+        applyLink: job.applyLink,
+        applyVerifiedAt: job.applyVerifiedAt,
+        applyFlowVerified: job.applyFlowVerified,
+        salaryConfidence: job.salaryConfidence,
+      });
       return resolveJobPostingRollout({
         path,
-        evidence: {
-          isActive: true,
-          roleTitle: job.roleTitle,
-          sourceUrl: job.sourceUrl,
-          postedAt: job.postedAt,
-          validThrough: job.validThrough,
-          sourceCheckedAt: job.sourceCheckedAt,
-          applyVerifiedAt: job.applyVerifiedAt,
-          applyFlowVerified: job.applyFlowVerified,
-          salaryConfidence: job.salaryConfidence,
-        },
+        evidence: verifiedEvidence.evidence,
         now: new Date('2026-07-10T12:00:00.000Z'),
       }).emit;
     });
 
-    expect(eligibleLegacyPaths).toEqual([]);
+    expect(eligibleLegacyPaths).toEqual([...LEGACY_GSC_VALID_JOB_PATHS]);
   });
 
   it('defaults to deny for every other URL without complete source evidence', () => {
