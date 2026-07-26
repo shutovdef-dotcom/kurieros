@@ -91,6 +91,14 @@ npm run google:indexing:daily
 Для Яндекса следующий шаг остаётся ручным: взять TXT-очередь и отправить её через Webmaster →
 “Переобход страниц”.
 
+В GitHub Actions добавлен workflow `Google Indexing API`:
+
+- ежедневный запуск: 09:20 МСК;
+- ручной запуск: `workflow_dispatch` с опциональной датой `YYYY-MM-DD`;
+- действие: `npm run google:indexing:daily`, то есть 200 URL из текущей Google-карусели;
+- обязательный секрет: `GOOGLE_INDEXING_SERVICE_ACCOUNT` — полный JSON service account, у которого
+  есть доступ к Search Console property `sc-domain:kurerok.ru`.
+
 Dry-run проверки Google submit-скрипта:
 
 ```bash
