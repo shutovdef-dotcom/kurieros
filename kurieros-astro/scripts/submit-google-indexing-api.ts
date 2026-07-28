@@ -22,6 +22,8 @@ type SupportedContentCheck = {
   url: string;
   ok: boolean;
   status: number | 'error';
+  hasJobPosting?: boolean;
+  hasBreadcrumbList?: boolean;
   error?: string;
 };
 
@@ -210,12 +212,20 @@ const checkSupportedContent = async (url: string): Promise<SupportedContentCheck
       signal: AbortSignal.timeout(20_000),
     });
     const html = await response.text();
+    const hasJobPosting = /"@type"\s*:\s*"JobPosting"/.test(html);
+    const hasBreadcrumbList = /"@type"\s*:\s*"BreadcrumbList"/.test(html);
+    const missingMarkup = [
+      ...(!hasJobPosting ? ['JobPosting JSON-LD'] : []),
+      ...(!hasBreadcrumbList ? ['BreadcrumbList JSON-LD'] : []),
+    ];
     return {
       url,
       status: response.status,
-      ok: response.ok && /"@type"\s*:\s*"JobPosting"/.test(html),
-      ...(!/"@type"\s*:\s*"JobPosting"/.test(html)
-        ? { error: 'JobPosting JSON-LD not found in live HTML' }
+      ok: response.ok && hasJobPosting && hasBreadcrumbList,
+      hasJobPosting,
+      hasBreadcrumbList,
+      ...(missingMarkup.length > 0
+        ? { error: `${missingMarkup.join(' and ')} not found in live HTML` }
         : {}),
     };
   } catch (error) {
@@ -302,7 +312,7 @@ const supportedContentChecks = skipSupportedContentPreflight
 const unsupportedContentUrls = supportedContentChecks.filter((check) => !check.ok);
 if (unsupportedContentUrls.length > 0) {
   throw new Error(
-    `Refusing to submit ${unsupportedContentUrls.length} URL(s) without live JobPosting JSON-LD. ` +
+    `Refusing to submit ${unsupportedContentUrls.length} URL(s) without live JobPosting and BreadcrumbList JSON-LD. ` +
       `First failed URL: ${unsupportedContentUrls[0]!.url}`,
   );
 }
@@ -345,7 +355,7 @@ console.log(
       outputPath,
       supportedContentPreflight: skipSupportedContentPreflight
         ? 'skipped'
-        : `${supportedContentChecks.length}/${urls.length} live URLs contain JobPosting JSON-LD`,
+        : `${supportedContentChecks.length}/${urls.length} live URLs contain JobPosting and BreadcrumbList JSON-LD`,
       submitted: results.length,
       failed: failed.length,
       failedUrls: failed.slice(0, 10).map((result) => result.url),

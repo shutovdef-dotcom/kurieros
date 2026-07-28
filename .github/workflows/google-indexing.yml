@@ -8,10 +8,14 @@ on:
         required: false
         type: string
   schedule:
-    # 09:20 Europe/Moscow, after the 09:05 production deploy wake-up.
-    - cron: '20 6 * * *'
+    # 10:20 Europe/Moscow: after the 09:05 production deploy wake-up and
+    # after Google Indexing API's midnight Pacific quota reset (~10:00 MSK
+    # during PDT). Running before the Pacific reset can burn the previous
+    # quota day and make the daily carousel look like it "does nothing".
+    - cron: '20 7 * * *'
 
 permissions:
+  actions: read
   contents: read
   id-token: write
 
@@ -54,7 +58,41 @@ jobs:
           fi
           echo "date=$date" >> "$GITHUB_OUTPUT"
 
+      - name: Skip duplicate successful carousel for the same Moscow date
+        id: duplicate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CURRENT_RUN_ID: ${{ github.run_id }}
+          TARGET_DATE: ${{ steps.params.outputs.date }}
+        run: |
+          set -euo pipefail
+          previous_success="$(
+            gh run list \
+              --repo "$GITHUB_REPOSITORY" \
+              --workflow google-indexing.yml \
+              --branch main \
+              --limit 30 \
+              --json databaseId,conclusion,createdAt \
+            | jq -r \
+                --arg current "$CURRENT_RUN_ID" \
+                --arg target "$TARGET_DATE" \
+                '.[] |
+                  select((.databaseId | tostring) != $current) |
+                  select(.conclusion == "success") |
+                  select(((.createdAt | fromdateiso8601) + 10800 | strftime("%Y-%m-%d")) == $target) |
+                  .databaseId' \
+            | head -n 1
+          )"
+          if [ -n "$previous_success" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "previous_success=$previous_success" >> "$GITHUB_OUTPUT"
+            echo "A successful Google Indexing API run already exists for $TARGET_DATE: $previous_success"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Require Google keyless auth configuration
+        if: steps.duplicate.outputs.skip != 'true'
         env:
           GOOGLE_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GOOGLE_WORKLOAD_IDENTITY_PROVIDER }}
           GOOGLE_INDEXING_SERVICE_ACCOUNT_EMAIL: ${{ vars.GOOGLE_INDEXING_SERVICE_ACCOUNT_EMAIL }}
@@ -70,6 +108,7 @@ jobs:
           fi
 
       - name: Authenticate to Google Cloud
+        if: steps.duplicate.outputs.skip != 'true'
         id: google-auth
         uses: google-github-actions/auth@v3
         with:
@@ -80,6 +119,7 @@ jobs:
           access_token_scopes: https://www.googleapis.com/auth/indexing
 
       - name: Setup Node.js
+        if: steps.duplicate.outputs.skip != 'true'
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -88,9 +128,11 @@ jobs:
           cache-dependency-path: ${{ env.PROJECT_DIR }}/package-lock.json
 
       - name: Install dependencies
+        if: steps.duplicate.outputs.skip != 'true'
         run: npm ci
 
       - name: Submit 200 live JobPosting URLs to Google
+        if: steps.duplicate.outputs.skip != 'true'
         env:
           GOOGLE_INDEXING_ACCESS_TOKEN: ${{ steps.google-auth.outputs.access_token }}
         run: npm run google:indexing:daily -- --date="${{ steps.params.outputs.date }}"
