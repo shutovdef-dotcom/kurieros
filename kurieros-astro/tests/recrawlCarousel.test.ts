@@ -37,6 +37,7 @@ describe('buildRecrawlCarouselBatch', () => {
     const commonInput = {
       limit: 2,
       highPriorityShare: 0.5,
+      epochDate: '2026-07-23',
       indexablePaths: ['/v/a/', '/v/b/', '/v/c/', '/v/d/'],
       gscRows: [
         { path: '/v/a/', clicks: 2, impressions: 20, avgPosition: 2 },

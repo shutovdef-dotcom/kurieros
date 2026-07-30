@@ -2,14 +2,16 @@ import { describe, expect, it } from 'vitest';
 import { resolveJobPostingDates } from '../src/utils/jobPostingDates';
 
 describe('resolveJobPostingDates', () => {
-  it('never treats a legacy content update as the original publication date', () => {
+  it('uses the content snapshot date as a mass-restore publication fallback', () => {
     const dates = resolveJobPostingDates({
       updatedAt: '2026-04-17',
       now: new Date('2026-06-24T10:00:00.000Z'),
     });
 
-    expect(dates.datePosted).toBeUndefined();
-    expect(dates.validThrough).toBeUndefined();
+    expect(dates).toEqual({
+      datePosted: '2026-04-17T00:00:00.000Z',
+      validThrough: '2026-08-23T10:00:00.000Z',
+    });
   });
 
   it('prefers an explicit original publication date and preserves a real deadline', () => {
@@ -26,7 +28,7 @@ describe('resolveJobPostingDates', () => {
     });
   });
 
-  it('never falls back to the build date when source dates are missing or invalid', () => {
+  it('falls back to the build date but never emits an invalid or expired deadline', () => {
     const missing = resolveJobPostingDates({
       now: new Date('2026-06-24T10:00:00.000Z'),
     });
@@ -36,7 +38,13 @@ describe('resolveJobPostingDates', () => {
       now: new Date('2027-01-01T00:00:00.000Z'),
     });
 
-    expect(missing).toEqual({});
-    expect(invalid).toEqual({});
+    expect(missing).toEqual({
+      datePosted: '2026-06-24T10:00:00.000Z',
+      validThrough: '2026-08-23T10:00:00.000Z',
+    });
+    expect(invalid).toEqual({
+      datePosted: '2027-01-01T00:00:00.000Z',
+      validThrough: '2027-03-02T00:00:00.000Z',
+    });
   });
 });

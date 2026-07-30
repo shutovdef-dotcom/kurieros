@@ -19,7 +19,21 @@ import { getVacancyCanonicalPath } from '../src/utils/vacancyUrl';
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const outputPath = resolve(rootDir, 'src/generated/sitemap-freshness.json');
 const indexableVacancyPaths = new Set(vacancyIndexability.indexablePaths);
-const vacancyPathsByContentDate = new Map<string, string[]>();
+const currentMoscowDate = (): string =>
+  new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Moscow',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date());
+const vacancySitemapLastmodDate =
+  process.env.VACANCY_SITEMAP_LASTMOD_DATE ??
+  process.env.JOBPOSTING_FRESHNESS_DATE ??
+  currentMoscowDate();
+const vacancyPaths = detailJobs
+  .map((job) => getVacancyCanonicalPath(job))
+  .filter((path) => indexableVacancyPaths.has(path))
+  .sort();
 const releasedBlogSources: SitemapFreshnessSource[] = [
   ...(BLOG_RELEASE_MANIFEST.releases.length > 0
     ? [{
@@ -35,19 +49,10 @@ const releasedBlogSources: SitemapFreshnessSource[] = [
   })),
 ];
 
-for (const job of detailJobs) {
-  if (!job.contentUpdatedAt) continue;
-  const path = getVacancyCanonicalPath(job);
-  if (!indexableVacancyPaths.has(path)) continue;
-  const contentDate = job.contentUpdatedAt.slice(0, 10);
-  const paths = vacancyPathsByContentDate.get(contentDate) ?? [];
-  vacancyPathsByContentDate.set(contentDate, [...paths, path]);
-}
-
-// Only sources with an explicit content-change date belong here. Vacancy
-// pages join the manifest only after their source exposes contentUpdatedAt;
-// city, metro and aggregate pages remain absent until every rendered input
-// can provide the same truthful signal.
+// Vacancy detail pages are intentionally refreshed daily during the Google
+// Jobs recovery: their template, JobPosting `validThrough`, `dateModified`,
+// visible CTA state and indexability policy are build-time content signals.
+// Non-vacancy aggregate pages still need their own explicit content dates.
 const sources: SitemapFreshnessSource[] = [
   {
     id: 'knowledge-base:index',
@@ -64,11 +69,13 @@ const sources: SitemapFreshnessSource[] = [
     contentUpdatedAt: guide.modifiedDate,
     paths: [`/${guide.slug}/`],
   })),
-  ...[...vacancyPathsByContentDate.entries()].map(([contentUpdatedAt, paths]) => ({
-    id: `vacancies:${contentUpdatedAt}`,
-    contentUpdatedAt,
-    paths,
-  })),
+  ...(vacancyPaths.length > 0
+    ? [{
+        id: `vacancies:google-jobs-restore:${vacancySitemapLastmodDate}`,
+        contentUpdatedAt: vacancySitemapLastmodDate,
+        paths: vacancyPaths,
+      }]
+    : []),
   ...releasedBlogSources,
 ];
 

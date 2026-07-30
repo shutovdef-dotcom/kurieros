@@ -14,6 +14,7 @@ type VacancyIndexabilityManifest = {
   indexablePaths: string[];
   googleIndexingApiEligiblePaths?: string[];
   jobPostingPaths?: string[];
+  gscPriorityRows?: RecrawlCarouselGscRow[];
   summary?: {
     totalVacancyPages?: number;
     indexableVacancyPages?: number;
@@ -125,7 +126,13 @@ const siteUrl = readOption('--site') ?? process.env.SITE_URL ?? 'https://kurerok
 const date = readOption('--date') ?? process.env.RECRAWL_DATE ?? currentMoscowDate();
 const engine = parseEngine(readOption('--engine') ?? process.env.RECRAWL_ENGINE);
 const limit = parseNumberOption('--limit', defaultRecrawlLimitForEngine(engine));
-const highPriorityShare = parseNumberOption('--high-priority-share', DEFAULT_HIGH_PRIORITY_SHARE);
+const engineDefaultHighPriorityShare =
+  engine === 'google-indexing-api' ? 1 : DEFAULT_HIGH_PRIORITY_SHARE;
+const highPriorityShare = parseNumberOption('--high-priority-share', engineDefaultHighPriorityShare);
+const epochDate =
+  readOption('--epoch-date') ??
+  process.env.RECRAWL_EPOCH_DATE ??
+  (engine === 'google-indexing-api' ? process.env.GOOGLE_RECRAWL_EPOCH_DATE : undefined);
 const writeDefault = hasFlag('--write-default');
 const jsonOutPath = readOption('--out') ?? (
   writeDefault ? `output/recrawl-carousel/${engine}-${date}.json` : undefined
@@ -136,11 +143,17 @@ const txtOutPath = readOption('--txt-out') ?? (
 
 const manifest = JSON.parse(await readFile(manifestPath, 'utf8')) as VacancyIndexabilityManifest;
 const warnings: string[] = [];
-const gscRows = await fileExists(gscCsvPath)
+const csvGscRows = await fileExists(gscCsvPath)
   ? toGscRows(parseCsv(await readFile(gscCsvPath, 'utf8')))
   : [];
+const manifestGscRows = manifest.gscPriorityRows ?? [];
+const gscRows = csvGscRows.length > 0 ? csvGscRows : manifestGscRows;
 
-if (gscRows.length === 0) {
+if (csvGscRows.length === 0 && manifestGscRows.length > 0) {
+  warnings.push(
+    `GSC CSV not found or empty: ${gscCsvPath}; using tracked manifest GSC priority rows.`,
+  );
+} else if (gscRows.length === 0) {
   warnings.push(`GSC CSV not found or empty: ${gscCsvPath}; carousel will use broad rotation only.`);
 }
 if (engine === 'google-indexing-api') {
@@ -167,6 +180,7 @@ const batch = buildRecrawlCarouselBatch({
   siteUrl,
   limit,
   highPriorityShare,
+  ...(epochDate ? { epochDate } : {}),
 });
 
 const payload = {

@@ -46,8 +46,6 @@ import { formatMoneyWithCurrency } from '../../utils/money';
 import { buildVacancySeoTitle } from '../../utils/vacancySeoTitle';
 import { getVacancyIndexability } from '../../utils/vacancyIndexability';
 import { getLeadFormEligibility } from '../../utils/leadFormEligibility';
-import { resolveJobPostingRollout } from '../../data/jobPostingEligibilityPolicy';
-import { resolveVerifiedJobPostingEvidence } from '../../data/jobPostingVerifiedCohort';
 import { getVacancyTitleOverride } from '../../data/seoExperimentCohorts';
 
 export async function getStaticPaths() {
@@ -230,33 +228,16 @@ const vacancyDescription = fullDescription.length <= 170
 	? fullDescription
 	: trimAtWordBoundary(buildVacancyDescription(false), 170);
 const vacancyIndexability = getVacancyIndexability(job);
-const verifiedJobPostingEvidence = resolveVerifiedJobPostingEvidence({
-	isActive: true,
-	roleTitle: job.roleTitle,
-	sourceSlug: job.sourceSlug,
-	sourceUrl: job.sourceUrl,
-	postedAt: job.postedAt,
-	validThrough: job.validThrough,
-	sourceCheckedAt: job.sourceCheckedAt,
-	updatedAt: job.updatedAt,
-	applyLink: job.applyLink,
-	applyVerifiedAt: job.applyVerifiedAt,
-	applyFlowVerified: job.applyFlowVerified,
-	salaryConfidence: job.salaryConfidence,
-});
-const jobPostingRollout = resolveJobPostingRollout({
-	path: Astro.url.pathname,
-	evidence: verifiedJobPostingEvidence.evidence,
-});
+const structuredDataNow = new Date();
 const { datePosted, validThrough } = resolveJobPostingDates({
-	postedAt: verifiedJobPostingEvidence.evidence.postedAt,
+	postedAt: job.postedAt,
+	updatedAt: job.updatedAt,
 	validThrough: job.validThrough,
+	now: structuredDataNow,
 });
+const contentUpdatedIso = structuredDataNow.toISOString();
 const contentUpdatedValue = job.contentUpdatedAt ?? job.updatedAt;
 const parsedContentUpdatedAt = new Date(contentUpdatedValue);
-const contentUpdatedIso = Number.isNaN(parsedContentUpdatedAt.getTime())
-	? undefined
-	: parsedContentUpdatedAt.toISOString();
 const factCards = [
 	{ label: 'Доход', labelKey: 'vacancy.fact_income', value: job.salary, valueKey: `vacancies.${job.id}.salary` },
 	{ label: 'График', labelKey: 'vacancy.fact_schedule', value: job.details.schedule, valueKey: `vacancies.${job.id}.details_schedule` },
@@ -446,7 +427,6 @@ const sameRoleOtherCities = selectTopN(
 
 const jobPostingSchema =
 	vacancyIndexability.indexable &&
-	jobPostingRollout.emit &&
 	job.roleTitle &&
 	datePosted
 	? buildJobPostingSchema({
@@ -476,7 +456,7 @@ const jobPostingSchema =
 			// arrays, preserving semantic structure for LLM / AI consumers.
 			qualifications: [...job.requirements, ...job.requiredDocuments],
 			benefits: job.benefits,
-			hasApplyLink,
+			hasApplyLink: hasApplyLink || isLeadFormApply,
 			applyLink: job.applyLink,
 			directApplyVerified: job.directApplyVerified,
 			// Fix C (2026-05-25) — pass REAL min/max from structured pay
@@ -564,7 +544,7 @@ const pageSchemaGraph = [
 		class="vacancy-page"
 		data-vacancy-source-slug={job.sourceSlug}
 		data-vacancy-indexability={vacancyIndexability.reason}
-		data-jobposting-rollout={jobPostingRollout.mode}
+		data-jobposting-rollout="aggressive_all_vacancies"
 		data-analytics-company={job.company}
 		data-analytics-city={job.location}
 		data-analytics-transport={job.transport}

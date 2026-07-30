@@ -11,6 +11,11 @@ type SitemapEntry = {
   priority: number;
 };
 
+type SitemapIndexEntry = {
+  url: string;
+  lastmod?: string;
+};
+
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const distDir = resolve(rootDir, process.env.DIST_DIR ?? 'dist');
 const siteUrl = (process.env.SITE_URL ?? 'https://kurerok.ru').replace(/\/+$/, '');
@@ -178,15 +183,16 @@ const renderUrlset = (entries: readonly SitemapEntry[]): string =>
     '',
   ].join('\n');
 
-const renderSitemapIndex = (sitemapUrls: readonly string[]): string =>
+const renderSitemapIndex = (sitemaps: readonly SitemapIndexEntry[]): string =>
   [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-    ...sitemapUrls.map((url) => [
+    ...sitemaps.map((sitemap) => [
       '  <sitemap>',
-      `    <loc>${escapeXml(url)}</loc>`,
+      `    <loc>${escapeXml(sitemap.url)}</loc>`,
+      sitemap.lastmod ? `    <lastmod>${escapeXml(sitemap.lastmod)}</lastmod>` : '',
       '  </sitemap>',
-    ].join('\n')),
+    ].filter(Boolean).join('\n')),
     '</sitemapindex>',
     '',
   ].join('\n');
@@ -221,7 +227,7 @@ for (const entry of entries) {
 await removeExistingSitemaps();
 await mkdir(distDir, { recursive: true });
 
-const sitemapUrls: string[] = [];
+const sitemapIndexEntries: SitemapIndexEntry[] = [];
 const written: Record<string, number> = {};
 for (const group of groupOrder) {
   const groupEntries = grouped.get(group) ?? [];
@@ -232,19 +238,27 @@ for (const group of groupOrder) {
     const chunkIndex = Math.floor(index / entryLimit);
     const fileName = `sitemap-${group}-${chunkIndex}.xml`;
     await writeFile(resolve(distDir, fileName), renderUrlset(chunk), 'utf8');
-    sitemapUrls.push(new URL(`/${fileName}`, `${siteUrl}/`).toString());
+    const lastmod = chunk
+      .map((entry) => entry.lastmod)
+      .filter((value): value is string => Boolean(value))
+      .sort()
+      .at(-1);
+    sitemapIndexEntries.push({
+      url: new URL(`/${fileName}`, `${siteUrl}/`).toString(),
+      ...(lastmod ? { lastmod } : {}),
+    });
   }
 }
 
 await writeFile(
   resolve(distDir, 'sitemap-index.xml'),
-  renderSitemapIndex(sitemapUrls),
+  renderSitemapIndex(sitemapIndexEntries),
   'utf8',
 );
 
 console.log(JSON.stringify({
   sitemapIndex: 'dist/sitemap-index.xml',
-  sitemapFiles: sitemapUrls.length,
+  sitemapFiles: sitemapIndexEntries.length,
   urls: entries.length,
   groups: written,
 }, null, 2));

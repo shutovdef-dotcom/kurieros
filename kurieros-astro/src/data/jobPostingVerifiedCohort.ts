@@ -13,9 +13,9 @@ import type { JobPostingEligibilityInput } from '../utils/jobPostingEligibility'
  *   existing vacancy `updatedAt` snapshot date;
  * - estimated-pay rows are allowed to emit JobPosting, but `baseSalary` stays
  *   omitted by `buildJobPostingSchema`;
- * - unverified or lead-form apply flows are allowed to emit JobPosting, but
- *   `directApply` stays false unless the row explicitly has direct-apply
- *   verification.
+ * - unverified or lead-form apply flows are allowed to emit JobPosting; the
+ *   final `directApply` value is resolved by the schema builder from the
+ *   visible apply CTA.
  */
 
 export const JOBPOSTING_ALL_ACTIVE_ENABLED_AT = '2026-07-26T12:00:00+03:00';
@@ -25,7 +25,7 @@ export const JOBPOSTING_SOURCE_UPDATED_AFTER = '1970-01-01T00:00:00.000Z';
 export const JOBPOSTING_SOURCE_VERIFICATION_NOTES = [
   '2026-07-26 owner decision: all active vacancy detail pages emit JobPosting.',
   'Rows with estimated salary omit baseSalary; the visible salary text remains on the page.',
-  'Rows without verified direct application flow emit directApply=false.',
+  'Rows with a visible apply CTA emit directApply=true; Google API submit still checks live JobPosting/Breadcrumb markup.',
   'Rows using lead-form apply flows, including Ozon, are still real job pages and remain JobPosting-eligible.',
 ] as const;
 

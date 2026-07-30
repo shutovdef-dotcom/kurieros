@@ -73,10 +73,13 @@ describe('buildJobPostingSchema — baseline (no regression after fixes)', () =>
     expect(out.url).not.toBe(baseInput.applyLink);
   });
 
-  it('marks directApply only after the application flow was explicitly verified', () => {
-    expect(buildJobPostingSchema(baseInput).directApply).toBe(false);
+  it('marks directApply when the vacancy page has a visible apply CTA', () => {
+    expect(buildJobPostingSchema(baseInput).directApply).toBe(true);
     expect(
-      buildJobPostingSchema({ ...baseInput, directApplyVerified: true }).directApply,
+      buildJobPostingSchema({ ...baseInput, hasApplyLink: false }).directApply,
+    ).toBe(false);
+    expect(
+      buildJobPostingSchema({ ...baseInput, directApplyVerified: false }).directApply,
     ).toBe(true);
   });
 });
@@ -430,9 +433,7 @@ describe('Fix I (2026-05-25) — jobBenefits / qualifications as arrays', () => 
     expect('qualifications' in out).toBe(false);
   });
 
-  it('experienceRequirements parser handles array input (no regression)', () => {
-    // Multi-item qualifications array — parser joins with «; » before
-    // matching, so cross-item «опыт ... от N лет» still detected.
+  it('omits volatile experienceRequirements even when free-text mentions experience', () => {
     const out = buildJobPostingSchema({
       ...baseInput,
       qualifications: [
@@ -442,10 +443,7 @@ describe('Fix I (2026-05-25) — jobBenefits / qualifications as arrays', () => 
       ],
     });
 
-    expect(out.experienceRequirements).toEqual({
-      '@type': 'OccupationalExperienceRequirements',
-      monthsOfExperience: 12,
-    });
+    expect('experienceRequirements' in out).toBe(false);
   });
 
   it('experienceRequirements parser still omits for «без опыта» (array form)', () => {

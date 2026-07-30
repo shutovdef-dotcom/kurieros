@@ -10,8 +10,6 @@ import {
   TOP_INDEXABLE_VACANCY_CITIES,
 } from '../src/data/vacancyIndexabilityPolicy';
 import { LEGACY_GSC_VALID_JOB_PATHS } from '../src/data/jobPostingEligibilityPolicy';
-import { resolveJobPostingRollout } from '../src/data/jobPostingEligibilityPolicy';
-import { resolveVerifiedJobPostingEvidence } from '../src/data/jobPostingVerifiedCohort';
 import { getVacancyCanonicalPath } from '../src/utils/vacancyUrl';
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -24,6 +22,14 @@ const generatedOutputPath = resolve(rootDir, 'src/generated/vacancy-indexability
 const publicOutputPath = resolve(rootDir, 'public/vacancy-indexability.json');
 const site = (process.env.SITE_URL || 'https://kurerok.ru').replace(/\/$/, '');
 const disableLocalInputs = process.env.VACANCY_INDEXABILITY_DISABLE_LOCAL_INPUTS === '1';
+
+type GscPriorityRow = {
+  path: string;
+  recommendation?: string;
+  clicks?: string;
+  impressions?: string;
+  avgPosition?: string;
+};
 
 const parseCsvLine = (line: string): string[] => {
   const cells: string[] = [];
@@ -79,11 +85,13 @@ const fileExists = async (path: string): Promise<boolean> => {
 const readSnapshotPayload = async (): Promise<{
   localIndexablePaths?: string[];
   gscIndexablePaths?: string[];
+  gscPriorityRows?: GscPriorityRow[];
 } | null> => {
   if (!(await fileExists(generatedOutputPath))) return null;
   const snapshot = JSON.parse(await readFile(generatedOutputPath, 'utf8')) as {
     localIndexablePaths?: string[];
     gscIndexablePaths?: string[];
+    gscPriorityRows?: GscPriorityRow[];
   };
   return snapshot;
 };
@@ -103,6 +111,7 @@ if (!canReadLocalInputs && !snapshotPayload) {
 const localScoringRows = canReadLocalInputs
   ? parseCsv(await readFile(localScoringCsvPath, 'utf8'))
   : [];
+const rawGscRows = canReadLocalInputs ? parseCsv(await readFile(gscCsvPath, 'utf8')) : [];
 const localIndexablePaths = new Set(
   canReadLocalInputs
     ? localScoringRows
@@ -111,10 +120,9 @@ const localIndexablePaths = new Set(
         .filter((path) => path.startsWith('/v/') && path.endsWith('/'))
     : (snapshotPayload?.localIndexablePaths ?? []),
 );
-const gscRows = canReadLocalInputs ? parseCsv(await readFile(gscCsvPath, 'utf8')) : [];
 const gscIndexablePaths = new Set(
   canReadLocalInputs
-    ? gscRows
+    ? rawGscRows
         .filter((row) =>
           (INDEXABLE_GSC_RECOMMENDATIONS as readonly string[]).includes(row.recommendation),
         )
@@ -148,32 +156,37 @@ const noindexPaths = Array.from(allPaths)
   .filter((path) => !indexablePaths.has(path))
   .sort();
 const jobPostingPaths = detailJobs
-  .map((job): string | null => {
-    const path = getVacancyCanonicalPath(job);
-    if (!indexablePaths.has(path)) return null;
-    const verifiedEvidence = resolveVerifiedJobPostingEvidence({
-      isActive: true,
-      roleTitle: job.roleTitle,
-      sourceSlug: job.sourceSlug,
-      sourceUrl: job.sourceUrl,
-      postedAt: job.postedAt,
-      validThrough: job.validThrough,
-      sourceCheckedAt: job.sourceCheckedAt,
-      updatedAt: job.updatedAt,
-      applyLink: job.applyLink,
-      applyVerifiedAt: job.applyVerifiedAt,
-      applyFlowVerified: job.applyFlowVerified,
-      salaryConfidence: job.salaryConfidence,
-    });
-    const decision = resolveJobPostingRollout({
-      path,
-      evidence: verifiedEvidence.evidence,
-      now: new Date('2026-07-24T06:52:00.000Z'),
-    });
-    return decision.emit ? path : null;
-  })
-  .filter((path): path is string => Boolean(path))
+  .map((job) => getVacancyCanonicalPath(job))
+  .filter((path) => indexablePaths.has(path))
   .sort();
+const metric = (value: string | undefined, fallback: number): number => {
+  if (!value) return fallback;
+  const parsed = Number.parseFloat(value.replace(',', '.').replace('%', ''));
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+const gscPriorityRows = canReadLocalInputs
+  ? rawGscRows
+      .map((row): GscPriorityRow | null => {
+        const path = row.path || row.page || row.url;
+        if (!path || !path.startsWith('/v/') || !path.endsWith('/')) return null;
+        if (!indexablePaths.has(path)) return null;
+        return {
+          path,
+          recommendation: row.recommendation,
+          clicks: row.clicks,
+          impressions: row.impressions,
+          avgPosition: row.avgPosition,
+        };
+      })
+      .filter((row): row is GscPriorityRow => Boolean(row))
+      .sort((a, b) =>
+        metric(b.clicks, 0) - metric(a.clicks, 0) ||
+        metric(b.impressions, 0) - metric(a.impressions, 0) ||
+        metric(a.avgPosition, Number.POSITIVE_INFINITY) -
+          metric(b.avgPosition, Number.POSITIVE_INFINITY) ||
+        a.path.localeCompare(b.path),
+      )
+  : (snapshotPayload?.gscPriorityRows ?? []);
 
 const payload = {
   generatedFrom: {
@@ -195,6 +208,7 @@ const payload = {
   indexablePaths: Array.from(indexablePaths).sort(),
   jobPostingPaths,
   googleIndexingApiEligiblePaths: jobPostingPaths,
+  gscPriorityRows,
   noindexPaths,
   summary: {
     totalVacancyPages: allPaths.size,
@@ -205,8 +219,16 @@ const payload = {
 };
 
 const publicPayload = {
-  ...payload,
+  generatedFrom: payload.generatedFrom,
+  policy: payload.policy,
+  localIndexablePaths: payload.localIndexablePaths,
+  gscIndexablePaths: payload.gscIndexablePaths,
+  indexablePaths: payload.indexablePaths,
+  jobPostingPaths: payload.jobPostingPaths,
+  googleIndexingApiEligiblePaths: payload.googleIndexingApiEligiblePaths,
+  noindexPaths: payload.noindexPaths,
   noindexUrls: noindexPaths.map((path) => `${site}${path}`),
+  summary: payload.summary,
 };
 
 await mkdir(dirname(generatedOutputPath), { recursive: true });
