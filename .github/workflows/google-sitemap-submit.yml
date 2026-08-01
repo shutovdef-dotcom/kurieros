@@ -23,7 +23,7 @@ concurrency:
 env:
   PROJECT_DIR: kurieros-astro
   NODE_VERSION: '24.x'
-  GSC_SITE_URL: sc-domain:kurerok.ru
+  GSC_SITE_URL: https://kurerok.ru/
   GOOGLE_CLOUD_PROJECT_ID: noble-truck-500507-i1
 
 jobs:

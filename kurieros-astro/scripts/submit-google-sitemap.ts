@@ -25,7 +25,7 @@ type SitemapSubmitResult = {
 
 const rootDir = resolve(dirname(new URL(import.meta.url).pathname), '..');
 const DEFAULT_SITEMAP_URL = 'https://kurerok.ru/sitemap-index.xml';
-const DEFAULT_SITE_URL = 'sc-domain:kurerok.ru';
+const DEFAULT_SITE_URL = 'https://kurerok.ru/';
 const DEFAULT_ENDPOINT_BASE = 'https://www.googleapis.com/webmasters/v3/sites';
 
 const readOption = (name: string): string | undefined => {
