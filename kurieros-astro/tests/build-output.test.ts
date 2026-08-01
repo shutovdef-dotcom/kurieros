@@ -27,6 +27,7 @@ import { describe, it, expect } from 'vitest';
 import { existsSync, readdirSync, readFileSync, statSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { comparisonCities } from '../src/utils/courierSalaryComparison';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const DIST_DIR = join(ROOT, '..', 'dist');
@@ -104,7 +105,7 @@ const extractJsonLdGraph = (html: string): Array<Record<string, unknown>> => {
 };
 
 describe.skipIf(skipIfNoDist)('Build output', () => {
-  it('has expected page count (~10700)', () => {
+  it('has expected page count (~11700)', () => {
     // Reference build 2026-06-22 after removing the legacy non-courier
     // `src/pages/[city]/index.astro` route: 10163 HTML files by this
     // recursive counter. Astro logs 10162 page(s), while this guard also
@@ -118,6 +119,9 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     // station pages switched to compact local previews with a city link, and
     // -1 duplicate Yandex Go company alias after canonical company merging.
     // Reference build: 10700.
+    // 2026-08-01: +1,010 canonical city salary-comparison pages. Raw city
+    // spellings that normalize to the same existing listing route share one
+    // comparison page to avoid duplicate SEO URLs.
     // Every durable blog ledger row emits exactly one additional article
     // route. Draft files must not alter this number.
     // Band: baseline ±5 plus the exact released-article count.
@@ -130,8 +134,12 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     //   else if(e.isFile()&&e.name.endsWith('.html'))n++;}return n;}
     //   console.log(c('dist'));"
     const count = countHtml(DIST_DIR);
-    expect(count).toBeGreaterThanOrEqual(10695 + publishedBlogSlugs.size);
-    expect(count).toBeLessThanOrEqual(10705 + publishedBlogSlugs.size);
+    expect(count).toBeGreaterThanOrEqual(
+      10695 + publishedBlogSlugs.size + comparisonCities.length,
+    );
+    expect(count).toBeLessThanOrEqual(
+      10705 + publishedBlogSlugs.size + comparisonCities.length,
+    );
   });
 
   it('keeps the shared apply redirect page non-indexable and out of sitemap fan-out', () => {

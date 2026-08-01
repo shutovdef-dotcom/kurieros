@@ -11,18 +11,22 @@ const DEFAULT_DIST_DIR = 'dist';
  * @typedef {Readonly<{
  *   totalBytes?: number,
  *   topLevelBytes?: Record<string, number>,
+ *   groups?: Record<string, number>,
  *   html?: Record<string, number>,
  * }>} SizeBudget
  */
 
 /** @type {SizeBudget} */
 export const DEFAULT_BUDGET = Object.freeze({
-  totalBytes: 1_150_000_000,
+  totalBytes: 1_210_000_000,
   topLevelBytes: {
     v: 780 * 1024 * 1024,
     api: 220 * 1024 * 1024,
     'api/grid-batch': 160 * 1024 * 1024,
     'vacancy-translations': 16 * 1024 * 1024,
+  },
+  groups: {
+    salaryComparisonPages: 64 * 1024 * 1024,
   },
   html: {
     executableInlineScriptBytes: 2 * 1024 * 1024,
@@ -166,6 +170,7 @@ export function auditDist(distDir = DEFAULT_DIST_DIR) {
     apiGrid: emptyGroup(),
     apiCompanyVacancies: emptyGroup(),
     listingPages: emptyGroup(),
+    salaryComparisonPages: emptyGroup(),
     vacancyTranslations: emptyGroup(),
   };
   const html = {
@@ -216,6 +221,9 @@ export function auditDist(distDir = DEFAULT_DIST_DIR) {
     }
     if (/^rabota-kurerom-[^/]+\/index\.html$/.test(file.relPath)) {
       updateGroup(groups.listingPages, file.bytes);
+    }
+    if (/^sravnenie-zarplat-kurerov-[^/]+\/index\.html$/.test(file.relPath)) {
+      updateGroup(groups.salaryComparisonPages, file.bytes);
     }
   }
 
@@ -275,6 +283,10 @@ export function checkBudgets(report, budget = DEFAULT_BUDGET) {
 
   for (const [key, bytes] of Object.entries(budget.topLevelBytes || {})) {
     pushBudgetFailure(failures, `topLevel.${key}`, report.topLevel[key] || 0, bytes);
+  }
+
+  for (const [key, bytes] of Object.entries(budget.groups || {})) {
+    pushBudgetFailure(failures, `groups.${key}`, report.groups[key]?.bytes || 0, bytes);
   }
 
   for (const [key, bytes] of Object.entries(budget.html || {})) {

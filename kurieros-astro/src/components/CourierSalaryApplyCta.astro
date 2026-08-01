@@ -1,0 +1,69 @@
+---
+import { ozonDataAttrs } from '../utils/ozonAttrs';
+import { getApplyCta } from '../utils/applyCta';
+import {
+  getApplyHref,
+  getApplyPartnerDomain,
+  isExternalApplyLink,
+  isLeadFormApplyLink,
+} from '../utils/applyRoute';
+import { getLeadFormEligibility } from '../utils/leadFormEligibility';
+import { getVacancyDetailPath } from '../utils/vacancyUrl';
+import type { ComparisonSelection } from '../utils/courierSalaryComparison';
+import type { GeneratedJob } from '../data/vacancyTypes';
+
+interface Props {
+  entry: ComparisonSelection<GeneratedJob>;
+}
+
+const { entry } = Astro.props;
+const { job } = entry;
+const detailHref = getVacancyDetailPath(job);
+const isLeadForm = isLeadFormApplyLink(job.applyLink);
+const leadDecision = isLeadForm ? getLeadFormEligibility(job) : null;
+const isLeadFormApply = leadDecision?.eligible === true;
+const isLeadFormUnavailable = isLeadForm && !isLeadFormApply;
+const applyHref = getApplyHref(job, detailHref);
+const applyExternal = isExternalApplyLink(applyHref);
+const applyPartnerDomain = getApplyPartnerDomain(job);
+const { salaryMaxNumeric } = getApplyCta(job);
+const applyData = {
+  'data-apply-cta': true,
+  'data-apply-position': 'comparison_table',
+  'data-apply-company': job.company,
+  'data-apply-city': entry.sourceCity,
+  'data-apply-transport': job.transport,
+  'data-apply-employment': job.details.employment_type,
+  'data-apply-salary-max': salaryMaxNumeric || undefined,
+  'data-apply-vacancy-id': job.id,
+  'data-apply-vacancy-slug': job.slug,
+  'data-apply-source-slug': job.sourceSlug,
+};
+---
+
+{isLeadFormUnavailable ? (
+  <span class="comparison-apply comparison-apply--unavailable" aria-disabled="true">
+    Отклик временно недоступен
+  </span>
+) : isLeadFormApply ? (
+  <button
+    type="button"
+    class="comparison-apply"
+    data-lead-form-type={job.applyLink.slice('lead-form:'.length)}
+    {...applyData}
+    {...ozonDataAttrs(job.ozonLeadForm)}
+  >
+    Откликнуться
+  </button>
+) : (
+  <a
+    href={applyHref}
+    class="comparison-apply"
+    target={applyExternal ? '_blank' : undefined}
+    rel={applyExternal ? 'noopener noreferrer nofollow sponsored' : undefined}
+    data-apply-partner-domain={applyPartnerDomain || undefined}
+    {...applyData}
+  >
+    Откликнуться
+  </a>
+)}

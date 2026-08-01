@@ -39,6 +39,7 @@ import {
 	resolveCityClusterNeighbours,
 } from '../utils/citySeoClusters';
 import { getMetroStationsByCity, type MetroCitySlug } from '../utils/metroStations';
+import { getCourierSalaryComparisonPath } from '../utils/courierSalaryComparison';
 // `jobsByCity` is built ONCE at module load inside jobsByCityIndex.ts
 // (imports are module-cached). It is NOT rebuilt per page — a local
 // `const jobsByCity = buildJobsByCityMap(jobsData)` in this frontmatter
@@ -400,7 +401,7 @@ const pageSchemaGraph = buildPageSchemaGraph({
 					>
 						<div class="listing-hero-actions">
 							<a href="#vacancies" class="listing-primary-link">Смотреть вакансии</a>
-							<a href="/compare/" class="listing-secondary-link">Сравнить</a>
+							<a href={getCourierSalaryComparisonPath(data.slug)} class="listing-secondary-link">Сравнить зарплаты</a>
 							{brandCategoryCompanyLink && (
 								<a href={brandCategoryCompanyLink.companyHref} class="listing-secondary-link">
 									{brandCategoryCompanyLink.label}

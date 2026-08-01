@@ -1,0 +1,597 @@
+---
+import CourierSalaryApplyCta from './CourierSalaryApplyCta.astro';
+import {
+  COMPARISON_MINIMUM,
+  COMPARISON_TRANSPORTS,
+  getComparisonMonthlyEstimate,
+  shouldShowComparisonCompany,
+  type ComparisonSelection,
+  type ComparisonTransport,
+} from '../utils/courierSalaryComparison';
+import { formatRussianPlural } from '../utils/format';
+import { getVacancyDetailPath } from '../utils/vacancyUrl';
+import type { GeneratedJob } from '../data/vacancyTypes';
+
+interface Props {
+  cityName: string;
+  cityPrepName: string;
+  citySlug: string;
+  selections: Record<ComparisonTransport, readonly ComparisonSelection<GeneratedJob>[]>;
+}
+
+const { cityName, cityPrepName, citySlug, selections } = Astro.props;
+
+const TRANSPORT_META: Record<
+  ComparisonTransport,
+  { label: string; shortLabel: string }
+> = {
+  bicycle: {
+    label: 'Велокурьеры',
+    shortLabel: 'Велосипед / самокат',
+  },
+  auto: {
+    label: 'Автокурьеры',
+    shortLabel: 'Авто',
+  },
+  foot: {
+    label: 'Пешие курьеры',
+    shortLabel: 'Пешком',
+  },
+};
+
+---
+
+<section
+  class="courier-comparison"
+  data-comparison-root
+  data-city-slug={citySlug}
+  aria-label={'Сравнение зарплат курьеров ' + cityPrepName}
+>
+  <div class="comparison-switcher" role="tablist" aria-label="Выберите транспорт">
+    {COMPARISON_TRANSPORTS.map((transport) => {
+      const isActive = transport === 'bicycle';
+      const panelId = 'comparison-panel-' + transport;
+      return (
+        <button
+          type="button"
+          class:list={['comparison-switcher-button', { 'is-active': isActive }]}
+          id={'comparison-tab-' + transport}
+          role="tab"
+          aria-selected={isActive ? 'true' : 'false'}
+          aria-controls={panelId}
+          data-comparison-tab={transport}
+        >
+          {TRANSPORT_META[transport].shortLabel}
+        </button>
+      );
+    })}
+  </div>
+
+  {COMPARISON_TRANSPORTS.map((transport) => {
+    const entries = selections[transport];
+    const isActive = transport === 'bicycle';
+    const panelId = 'comparison-panel-' + transport;
+    const employerCount = new Set(entries.map((entry) => entry.job.company)).size;
+    const vacancyLabel = formatRussianPlural(entries.length, ['вакансия', 'вакансии', 'вакансий']);
+    const employerLabel = formatRussianPlural(employerCount, ['работодатель', 'работодателя', 'работодателей']);
+    return (
+      <div
+        id={panelId}
+        class="comparison-panel"
+        role="tabpanel"
+        aria-labelledby={'comparison-tab-' + transport}
+        data-comparison-panel={transport}
+        hidden={!isActive}
+      >
+        <div class="comparison-panel-heading">
+          <div>
+            <h2>{TRANSPORT_META[transport].label} {cityPrepName}</h2>
+            <p>
+              {entries.length} {vacancyLabel} от {employerCount} разных {employerLabel}.
+              В таблице сохранены исходные условия и месячный ориентир для сравнения.
+            </p>
+            {entries.length < COMPARISON_MINIMUM && (
+              <p class="comparison-data-warning">
+                В базе сейчас меньше четырёх доступных вакансий для этого транспорта;
+                показаны все найденные предложения без добавления вакансий из другой страны.
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div class="comparison-table-scroll">
+          <table
+            class="comparison-table"
+            style={`--comparison-jobs: ${Math.max(entries.length, 1)};`}
+          >
+            <caption class="sr-only">
+              Сравнение зарплат и условий {TRANSPORT_META[transport].label.toLowerCase()} {cityPrepName}
+            </caption>
+            <thead>
+              <tr>
+                <th class="comparison-label-cell" scope="col">Параметр</th>
+                {entries.map((entry) => (
+                  <th class="comparison-job-cell" scope="col">
+                    <div class="comparison-job-head">
+                      <img
+                        src={entry.job.companyLogo}
+                        alt={entry.job.company + ' — логотип'}
+                        width="48"
+                        height="48"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      <a href={getVacancyDetailPath(entry.job)} class="comparison-job-title">
+                        {entry.job.title}
+                      </a>
+                      {shouldShowComparisonCompany(entry.job.title, entry.job.company) && (
+                        <strong>{entry.job.company}</strong>
+                      )}
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Зарплата в вакансии</th>
+                {entries.map((entry) => <td>{entry.job.salary}</td>)}
+              </tr>
+              <tr>
+                <th scope="row">Ориентир за месяц</th>
+                {entries.map((entry) => {
+                  const estimate = getComparisonMonthlyEstimate(entry.job);
+                  return <td>{estimate.text ?? 'Не рассчитывается по данным вакансии'}</td>;
+                })}
+              </tr>
+              <tr>
+                <th scope="row">Город вакансии</th>
+                {entries.map((entry) => (
+                  <td>
+                    {entry.isLocal ? cityName : (
+                      <span class="comparison-neighbour-note">
+                        Вакансия из города {entry.sourceCity}
+                      </span>
+                    )}
+                  </td>
+                ))}
+              </tr>
+              <tr>
+                <th scope="row">Выплаты</th>
+                {entries.map((entry) => <td>{entry.job.details.payment_freq}</td>)}
+              </tr>
+              <tr>
+                <th scope="row">График</th>
+                {entries.map((entry) => <td>{entry.job.details.schedule}</td>)}
+              </tr>
+              <tr>
+                <th scope="row">Оформление</th>
+                {entries.map((entry) => <td>{entry.job.details.employment_type}</td>)}
+              </tr>
+              <tr>
+                <th scope="row">Транспорт</th>
+                {entries.map(() => <td>{TRANSPORT_META[transport].shortLabel}</td>)}
+              </tr>
+              <tr class="comparison-actions-row">
+                <th scope="row">Отклик</th>
+                {entries.map((entry) => (
+                  <td><CourierSalaryApplyCta entry={entry} /></td>
+                ))}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="comparison-method-note">
+          Месячный ориентир — не гарантия дохода: месячная сумма берётся из вакансии,
+          а почасовые и посменные ставки пересчитываются на 22 смены.
+          Перед откликом проверьте актуальные условия в карточке вакансии.
+        </p>
+      </div>
+    );
+  })}
+</section>
+
+<script>
+  const comparisonRoot = document.querySelector<HTMLElement>('[data-comparison-root]');
+  if (comparisonRoot) {
+    const tabs = Array.from(
+      comparisonRoot.querySelectorAll<HTMLButtonElement>('[data-comparison-tab]'),
+    );
+    const panels = Array.from(
+      comparisonRoot.querySelectorAll<HTMLElement>('[data-comparison-panel]'),
+    );
+
+    const selectTransport = (transport: string) => {
+      tabs.forEach((tab) => {
+        const isSelected = tab.dataset.comparisonTab === transport;
+        tab.classList.toggle('is-active', isSelected);
+        tab.setAttribute('aria-selected', String(isSelected));
+      });
+      panels.forEach((panel) => {
+        panel.hidden = panel.dataset.comparisonPanel !== transport;
+      });
+    };
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        selectTransport(tab.dataset.comparisonTab || 'bicycle');
+      });
+    });
+  }
+</script>
+
+<style>
+  .courier-comparison {
+    display: grid;
+    gap: 1rem;
+    max-width: var(--content-max-width);
+    min-width: 0;
+    margin: 0 auto;
+    padding: 0 1rem 2.5rem;
+  }
+
+  .comparison-switcher {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.35rem;
+    border: 1px solid var(--ink-200);
+    border-radius: var(--radius-lg, 16px);
+    background: var(--ink-50);
+  }
+
+  .comparison-switcher-button {
+    flex: 1 1 0;
+    min-height: 44px;
+    min-width: 0;
+    padding: 0.65rem 1rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md, 12px);
+    background: transparent;
+    color: var(--ink-700);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .comparison-switcher-button:hover,
+  .comparison-switcher-button:focus-visible {
+    border-color: var(--brand-400);
+    outline: none;
+  }
+
+  .comparison-switcher-button.is-active {
+    background: var(--ink-0);
+    border-color: var(--brand-500);
+    color: var(--brand-700);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .comparison-panel[hidden] {
+    display: none;
+  }
+
+  .comparison-panel,
+  .comparison-panel-heading > div,
+  .comparison-table-scroll {
+    min-width: 0;
+  }
+
+  .comparison-panel-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .comparison-panel-heading h2 {
+    margin: 0;
+    font-size: clamp(1.15rem, 2vw, 1.5rem);
+    line-height: 1.2;
+  }
+
+  .comparison-panel-heading p {
+    margin: 0.35rem 0 0;
+    color: var(--ink-600);
+    font-size: 0.9rem;
+  }
+
+  .comparison-table-scroll {
+    overflow-x: auto;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--radius-lg, 16px);
+    border: 1px solid var(--ink-200);
+    background: var(--ink-0);
+    margin-bottom: 1.75rem;
+    scroll-snap-type: x proximity;
+  }
+
+  .comparison-table {
+    --label-col-width: 180px;
+    --label-col-min: 130px;
+    --job-col-min: 140px;
+    display: grid;
+    width: 100%;
+    min-width: 100%;
+    grid-template-columns: minmax(var(--label-col-min), var(--label-col-width)) repeat(var(--comparison-jobs, 4), minmax(var(--job-col-min), 1fr));
+    gap: 1px;
+    border: 1px solid var(--ink-200);
+    border-radius: var(--radius-lg, 16px);
+    background: var(--ink-0);
+    box-shadow: var(--shadow-xs);
+    color: var(--ink-900);
+    font-size: 0.9rem;
+  }
+
+  .comparison-table thead,
+  .comparison-table tbody,
+  .comparison-table tr {
+    display: contents;
+  }
+
+  .comparison-table > caption.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .comparison-table th,
+  .comparison-table td {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    padding: 1.5rem;
+    background: var(--ink-0);
+    color: var(--ink-900);
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    hyphens: auto;
+    scroll-snap-align: start;
+  }
+
+  .comparison-table thead th {
+    align-items: flex-start;
+  }
+
+  .comparison-table .comparison-label-cell,
+  .comparison-table tbody th {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    background: #fdfdfd;
+    color: var(--ink-700);
+    font-weight: 800;
+    text-align: left;
+    box-shadow: 10px 0 18px var(--scrim-shadow-soft);
+  }
+
+  .comparison-table thead .comparison-label-cell {
+    z-index: 15;
+    align-items: center;
+    font-size: 0.8rem;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  .comparison-table .comparison-job-cell {
+    border-left: 1px solid var(--ink-200);
+  }
+
+  .comparison-table tbody tr:nth-child(even) > th,
+  .comparison-table tbody tr:nth-child(even) > td {
+    background: var(--ink-50);
+  }
+
+  .comparison-job-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    position: relative;
+    width: 100%;
+  }
+
+  .comparison-job-head img {
+    align-self: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 0.75rem;
+    border-radius: 8px;
+    object-fit: contain;
+    background: rgba(var(--brand-700-rgb), 0.12);
+  }
+
+  .comparison-job-title {
+    display: block;
+    color: var(--brand-700);
+    font-size: 1.15rem;
+    font-weight: 800;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .comparison-job-head strong {
+    color: var(--ink-600);
+    font-size: 0.9rem;
+    font-weight: 400;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .comparison-neighbour-note {
+    display: inline-block;
+    color: var(--brand-700);
+    font-weight: 750;
+  }
+
+  .comparison-actions-row th,
+  .comparison-actions-row td {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .comparison-actions-row td {
+    align-items: flex-start;
+  }
+
+  :global(.comparison-apply) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 42px;
+    padding: 0.65rem 0.9rem;
+    border: 1px solid var(--brand-700);
+    border-radius: var(--radius-md, 12px);
+    background: var(--brand-700);
+    color: var(--ink-0);
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 850;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  :global(.comparison-apply:hover),
+  :global(.comparison-apply:focus-visible) {
+    background: var(--brand-600);
+    border-color: var(--brand-600);
+    outline: none;
+  }
+
+  :global(.comparison-apply--unavailable) {
+    background: var(--ink-100);
+    border-color: var(--ink-200);
+    color: var(--ink-500);
+    cursor: not-allowed;
+  }
+
+  .comparison-method-note {
+    max-width: 78ch;
+    margin: 0;
+    color: var(--ink-600);
+    font-size: 0.82rem;
+    line-height: 1.55;
+  }
+
+  :global(:where(html, body).dark-mode) .comparison-switcher {
+    background: var(--surface-200);
+  }
+
+  :global(:where(html, body).dark-mode) .comparison-switcher-button.is-active,
+  :global(:where(html, body).dark-mode) .comparison-table th,
+  :global(:where(html, body).dark-mode) .comparison-table td {
+    background: var(--surface-100);
+  }
+
+  :global(:where(html, body).dark-mode) .comparison-table .comparison-label-cell,
+  :global(:where(html, body).dark-mode) .comparison-table tbody th {
+    background: var(--surface-200);
+  }
+
+  :global(:where(html, body).dark-mode) .comparison-table {
+    border-color: rgba(231, 234, 240, 0.18);
+    background: var(--surface-100);
+  }
+
+  :global(:where(html, body).dark-mode) .comparison-table .comparison-job-cell {
+    border-left-color: rgba(231, 234, 240, 0.18);
+  }
+
+  :global(:where(html, body).dark-mode) .comparison-table tbody tr:nth-child(even) > th,
+  :global(:where(html, body).dark-mode) .comparison-table tbody tr:nth-child(even) > td {
+    background: var(--surface-200);
+  }
+
+  @media (max-width: 700px) {
+    .courier-comparison {
+      padding-inline: 0.65rem;
+    }
+
+    .comparison-switcher {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      position: sticky;
+      top: 5rem;
+      z-index: 40;
+      box-shadow: 0 6px 16px var(--scrim-shadow-soft);
+    }
+
+    .comparison-switcher-button {
+      padding-inline: 0.45rem;
+      font-size: 0.78rem;
+    }
+
+    .comparison-table {
+      --label-col-width: 112px;
+      --label-col-min: 96px;
+      --job-col-min: 96px;
+      font-size: 0.82rem;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 0.75rem 0.5rem;
+      font-size: 0.82rem;
+      line-height: 1.2;
+    }
+
+    .comparison-table .comparison-label-cell,
+    .comparison-table tbody th {
+      font-size: 0.78rem;
+      padding-inline: 0.5rem;
+    }
+
+    .comparison-job-head {
+      gap: 0.35rem;
+    }
+
+    .comparison-job-head img {
+      margin-bottom: 0.45rem;
+    }
+
+    .comparison-job-title {
+      font-size: 0.82rem;
+      line-height: 1.15;
+    }
+
+    .comparison-job-head strong {
+      font-size: 0.72rem;
+      line-height: 1.15;
+    }
+
+    :global(.comparison-apply) {
+      min-height: 40px;
+      padding: 0.65rem 0.35rem;
+      font-size: 0.74rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .comparison-table {
+      /* Keep the feature column only wide enough for its labels. The
+         reclaimed space goes to vacancy columns so their logo and title
+         remain readable on narrow screens. */
+      --label-col-width: 72px;
+      --label-col-min: 64px;
+      --job-col-min: 96px;
+    }
+
+    .comparison-job-head img {
+      width: 36px;
+      height: 36px;
+    }
+  }
+</style>

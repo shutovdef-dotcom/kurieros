@@ -1,0 +1,255 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import CourierSalaryComparison from '../components/CourierSalaryComparison.astro';
+import {
+  COMPARISON_MINIMUM,
+  COMPARISON_TRANSPORTS,
+  comparisonCities,
+  comparisonJobIndex,
+  getComparisonNeighbourCities,
+  getCourierSalaryComparisonPath,
+  selectComparisonJobs,
+  type ComparisonSelection,
+  type ComparisonTransport,
+} from '../utils/courierSalaryComparison';
+import { buildBreadcrumbSchema } from '../utils/schema';
+import { getVacancyCanonicalPath } from '../utils/vacancyUrl';
+import type { GeneratedJob } from '../data/vacancyTypes';
+
+type City = (typeof comparisonCities)[number];
+type Selections = Record<ComparisonTransport, readonly ComparisonSelection<GeneratedJob>[]>;
+
+export function getStaticPaths() {
+  return comparisonCities.map((city) => {
+    const origin = { name: city.name, slug: city.slug };
+    const neighbourCities = getComparisonNeighbourCities(origin);
+    const select = (transport: ComparisonTransport) =>
+      selectComparisonJobs(
+        comparisonJobIndex,
+        origin,
+        neighbourCities,
+        transport,
+        COMPARISON_MINIMUM,
+      );
+    const selections: Selections = {
+      bicycle: select('bicycle'),
+      auto: select('auto'),
+      foot: select('foot'),
+    };
+
+    return {
+      params: { citySlug: city.slug },
+      props: { city, selections },
+    };
+  });
+}
+
+const { city, selections } = Astro.props as {
+  city: City;
+  selections: Selections;
+};
+
+const comparisonPath = getCourierSalaryComparisonPath(city.slug);
+const title = 'Сравнение зарплат курьеров — ' + city.name + ' | КурьерОк';
+const description =
+  'Сравните зарплаты курьеров в ' +
+  city.prep.replace(/^в\s+/i, '') +
+  ': вакансии на велосипеде, авто и пешком от разных работодателей. Условия, выплаты и отклик.';
+const defaultSelections = selections.bicycle;
+const allSelected = COMPARISON_TRANSPORTS.flatMap((transport) => selections[transport]);
+const fallbackRows = allSelected.filter((entry) => !entry.isLocal).length;
+const updatedAt = allSelected
+  .map((entry) => entry.job.contentUpdatedAt ?? entry.job.updatedAt)
+  .sort()
+  .at(-1);
+const dateModified = updatedAt
+  ? new Date(updatedAt).toISOString()
+  : new Date().toISOString();
+
+const pageSchemaGraph = [
+  {
+    '@type': 'CollectionPage',
+    name: 'Сравнение зарплат курьеров ' + city.prep,
+    description,
+    url: new URL(comparisonPath, Astro.site).toString(),
+    dateModified,
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: defaultSelections.length,
+      itemListElement: defaultSelections.map((entry, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: entry.job.title + ' — ' + entry.job.company,
+        url: new URL(getVacancyCanonicalPath(entry.job), Astro.site).toString(),
+      })),
+    },
+  },
+  buildBreadcrumbSchema(
+    [
+      { name: 'Главная', url: '/' },
+      { name: 'Города', url: '/cities/' },
+      { name: 'Сравнение зарплат в ' + city.name, url: comparisonPath },
+    ],
+    Astro.site,
+  ),
+];
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  schemaGraph={pageSchemaGraph}
+>
+  <Header />
+
+  <main class="salary-comparison-page">
+    <section class="salary-comparison-heading">
+      <nav class="salary-comparison-breadcrumb" aria-label="Хлебные крошки">
+        <a href="/">Главная</a>
+        <span aria-hidden="true">›</span>
+        <a href="/cities/">Города</a>
+        <span aria-hidden="true">›</span>
+        <span>Сравнение зарплат</span>
+      </nav>
+      <p class="section-eyebrow">Активные вакансии</p>
+      <h1>Сравнение зарплат курьеров {city.prep}</h1>
+      <p class="salary-comparison-lead">
+        По умолчанию показаны вакансии велокурьеров. Переключите транспорт,
+        чтобы сравнить предложения на авто и пешком.
+      </p>
+    </section>
+
+    <CourierSalaryComparison
+      cityName={city.name}
+      cityPrepName={city.prep}
+      citySlug={city.slug}
+      selections={selections}
+    />
+
+    <section class="salary-comparison-seo-note" aria-labelledby="comparison-note-title">
+      <h2 id="comparison-note-title">Как сравнить зарплату курьера {city.prep}</h2>
+      <p>
+        В таблице собраны активные вакансии от разных работодателей с одинаковым
+        видом транспорта. Для каждой строки указаны зарплата из объявления,
+        ориентир за месяц, график и частота выплат.
+        {fallbackRows > 0
+          ? ' В ' +
+            fallbackRows +
+            ' строках использована вакансия из города-источника — он отмечен прямо в таблице.'
+          : ' Если местных вариантов недостаточно, в таблице явно отмечается город-источник.'}
+      </p>
+      <p>
+        <a href={'/rabota-kurerom-' + city.slug + '/'}>
+          Посмотреть все вакансии курьеров {city.prep}
+        </a>
+      </p>
+    </section>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  .salary-comparison-page {
+    min-height: 60vh;
+    padding-bottom: 3rem;
+  }
+
+  .salary-comparison-heading {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: 1.25rem 1rem 1rem;
+  }
+
+  .salary-comparison-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    align-items: center;
+    margin-bottom: 0.8rem;
+    color: var(--ink-600);
+    font-size: 0.86rem;
+  }
+
+  .salary-comparison-breadcrumb a {
+    color: var(--brand-700);
+    text-decoration: none;
+  }
+
+  .salary-comparison-breadcrumb a:hover,
+  .salary-comparison-breadcrumb a:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  .section-eyebrow {
+    display: inline-flex;
+    margin: 0 0 0.35rem;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--ink-200);
+    border-radius: 999px;
+    color: var(--ink-600);
+    font-size: 0.72rem;
+    font-weight: 850;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .salary-comparison-heading h1 {
+    max-width: 28ch;
+    margin: 0;
+    color: var(--ink-900);
+    font-size: clamp(1.65rem, 4vw, 2.75rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .salary-comparison-lead {
+    max-width: 66ch;
+    margin: 0.65rem 0 0;
+    color: var(--ink-700);
+    font-size: 0.98rem;
+    line-height: 1.5;
+  }
+
+  .salary-comparison-seo-note {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: 0 1rem 1rem;
+  }
+
+  .salary-comparison-seo-note h2 {
+    margin: 0 0 0.55rem;
+    font-size: clamp(1.2rem, 2.2vw, 1.65rem);
+    line-height: 1.2;
+  }
+
+  .salary-comparison-seo-note p {
+    max-width: 78ch;
+    margin: 0 0 0.65rem;
+    color: var(--ink-700);
+    line-height: 1.6;
+  }
+
+  .salary-comparison-seo-note a {
+    color: var(--brand-700);
+    font-weight: 800;
+    text-underline-offset: 0.16em;
+  }
+
+  @media (max-width: 700px) {
+    .salary-comparison-heading {
+      padding-inline: 0.65rem;
+    }
+
+    .salary-comparison-heading h1 {
+      font-size: 1.65rem;
+    }
+
+    .salary-comparison-seo-note {
+      padding-inline: 0.65rem;
+    }
+  }
+</style>

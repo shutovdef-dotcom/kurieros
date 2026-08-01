@@ -17,6 +17,7 @@ function makeDistFixture() {
 
   mkdirSync(join(root, 'v', 'sample-vacancy'), { recursive: true });
   mkdirSync(join(root, 'api', 'grid-batch', 'listing', '2'), { recursive: true });
+  mkdirSync(join(root, 'sravnenie-zarplat-kurerov-moskva'), { recursive: true });
   mkdirSync(join(root, 'vacancy-translations', 'uz'), { recursive: true });
   mkdirSync(join(root, '_astro'), { recursive: true });
 
@@ -35,6 +36,10 @@ function makeDistFixture() {
 
   writeFileSync(join(root, 'v', 'sample-vacancy', 'index.html'), vacancyHtml);
   writeFileSync(join(root, 'api', 'grid-batch', 'listing', '2', 'index.html'), listingHtml);
+  writeFileSync(
+    join(root, 'sravnenie-zarplat-kurerov-moskva', 'index.html'),
+    '<!doctype html><html><body>Comparison</body></html>',
+  );
   writeFileSync(join(root, 'vacancy-translations', 'uz', 'sample.json'), '{"defaults":{},"entries":{}}');
   writeFileSync(join(root, '_astro', 'app.abc123.js'), 'console.log("shared");');
 
@@ -50,11 +55,12 @@ afterEach(() => {
 
 describe('dist-size audit', () => {
   it('keeps default budgets aligned with the post-optimization architecture', () => {
-    expect(DEFAULT_BUDGET.totalBytes).toBe(1_150_000_000);
+    expect(DEFAULT_BUDGET.totalBytes).toBe(1_210_000_000);
     expect(DEFAULT_BUDGET.topLevelBytes?.v).toBe(780 * 1024 * 1024);
     expect(DEFAULT_BUDGET.topLevelBytes?.api).toBe(220 * 1024 * 1024);
     expect(DEFAULT_BUDGET.topLevelBytes?.['api/grid-batch']).toBe(160 * 1024 * 1024);
     expect(DEFAULT_BUDGET.topLevelBytes?.['vacancy-translations']).toBe(16 * 1024 * 1024);
+    expect(DEFAULT_BUDGET.groups?.salaryComparisonPages).toBe(64 * 1024 * 1024);
     expect(DEFAULT_BUDGET.html?.executableInlineScriptBytes).toBe(2 * 1024 * 1024);
     expect(DEFAULT_BUDGET.html?.inlineJsonBytes).toBe(8 * 1024 * 1024);
     expect(DEFAULT_BUDGET.html?.jsonLdBytes).toBe(80 * 1024 * 1024);
@@ -66,9 +72,10 @@ describe('dist-size audit', () => {
     const report = auditDist(root);
     const repeatedControllerBytes = Buffer.byteLength(repeatedController);
 
-    expect(report.html.count).toBe(2);
+    expect(report.html.count).toBe(3);
     expect(report.groups.vacancyPages.count).toBe(1);
     expect(report.groups.apiGridBatch.count).toBe(1);
+    expect(report.groups.salaryComparisonPages.count).toBe(1);
     expect(report.groups.vacancyTranslations.bytes).toBeGreaterThan(0);
     const topLevel = report.topLevel as Record<string, number>;
     expect(topLevel.v).toBeGreaterThan(0);
@@ -91,6 +98,9 @@ describe('dist-size audit', () => {
         v: 1,
         'api/grid-batch': 1,
       },
+      groups: {
+        salaryComparisonPages: 1,
+      },
       html: {
         executableInlineScriptBytes: 1,
         inlineJsonBytes: 1,
@@ -104,6 +114,7 @@ describe('dist-size audit', () => {
       'totalBytes',
       'topLevel.v',
       'topLevel.api/grid-batch',
+      'groups.salaryComparisonPages',
       'html.executableInlineScriptBytes',
       'html.inlineJsonBytes',
     ]);

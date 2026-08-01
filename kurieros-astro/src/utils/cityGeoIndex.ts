@@ -11,7 +11,7 @@
  */
 import cityGeoRaw from '../data/cityGeo.json';
 import { citiesFromJobs } from './citiesIndex';
-import { nearestByDistance } from './geoDistance';
+import { haversineKm } from './geoDistance';
 
 export type CityGeo = {
 	name: string;
@@ -52,16 +52,29 @@ const geoPageCities: GeoPageCity[] = citiesFromJobs.flatMap((city) => {
 		: [];
 });
 
-// Precompute the nearest neighbours per slug once at module load.
+// Precompute the complete nearest-neighbour order per slug once at module
+// load. The public helper still defaults to six cities for the existing
+// internal-link shelf, while comparison pages can request a larger prefix
+// when four distinct employers are not available in the first few cities.
 const neighboursBySlug: ReadonlyMap<string, NearbyCity[]> = (() => {
 	const map = new Map<string, NearbyCity[]>();
 	for (const origin of geoPageCities) {
 		const candidates = geoPageCities.filter((city) => city.slug !== origin.slug);
-		const nearest = nearestByDistance(origin, candidates, NEIGHBOUR_COUNT).map((city) => ({
-			slug: city.slug,
-			name: city.name,
-			vacancyCount: city.vacancyCount,
-		}));
+		const nearest = candidates
+			.map((city, sourceIndex) => ({
+				city,
+				distance: haversineKm(origin.lat, origin.lon, city.lat, city.lon),
+				sourceIndex,
+			}))
+			.sort(
+				(left, right) =>
+					left.distance - right.distance || left.sourceIndex - right.sourceIndex,
+			)
+			.map(({ city }) => ({
+				slug: city.slug,
+				name: city.name,
+				vacancyCount: city.vacancyCount,
+			}));
 		map.set(origin.slug, nearest);
 	}
 	return map;
@@ -71,4 +84,7 @@ const neighboursBySlug: ReadonlyMap<string, NearbyCity[]> = (() => {
  * Up to 6 nearest cities that have listing pages, nearest first. Empty
  * array when the city has no geo data (graceful degradation).
  */
-export const getNearbyCities = (slug: string): NearbyCity[] => neighboursBySlug.get(slug) ?? [];
+export const getNearbyCities = (
+	slug: string,
+	limit = NEIGHBOUR_COUNT,
+): NearbyCity[] => (neighboursBySlug.get(slug) ?? []).slice(0, Math.max(0, limit));

@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "jobposting-all-active-vacancies-2026-07-26",
-  "reviewReason": "Owner-approved expansion of JobPosting markup from the verified cohort to every active vacancy page; estimated salaries omit baseSalary and unverified apply flows keep directApply=false.",
+  "id": "courier-salary-comparison-city-pages-2026-08-01",
+  "reviewReason": "Requested rollout of canonical city salary-comparison pages; each transport table keeps four courier employers and labels city-source fallbacks.",
   "reviewedSurfaceUrlSetHashes": [
-    "0c4fcbb2d5e5da347eceec96f24f7b0586db3d6397fcf19f54b966d74a18e9c5"
+    "94bdf2cf789ee8a9f660224be2364a08f666a19a01c894956af32752648edddf"
   ],
   "blogReleaseSlugs": [
     "skolko-zarabatyvaet-kurer-yandex-eda-2026"
@@ -15,27 +15,27 @@
   "report": {
     "schemaVersion": 1,
     "routes": {
-      "total": 8084,
-      "indexable": 8076,
+      "total": 9094,
+      "indexable": 9086,
       "noindex": 8,
-      "urlSetHash": "446a2ff62507a87d90ead6fe3c5faa079847577824e7f614dc672bcbe8a36c31",
-      "indexableUrlSetHash": "0777f88aec01c191d8a4e06e97a28b1b5674b85173bdf3e69b0b0b05f54e8abc"
+      "urlSetHash": "caf3b427422115637f0cc2c88360ad9304a8326df2b52dd619849d1e56d3c327",
+      "indexableUrlSetHash": "a2c1c7b41983726c98ebbc3d33367078edfbeca602159793f617da01b8fe6149"
     },
     "sitemap": {
-      "pageUrlCount": 8068,
-      "urlSetHash": "0c4fcbb2d5e5da347eceec96f24f7b0586db3d6397fcf19f54b966d74a18e9c5",
-      "rawXmlHash": "c943186b83ce62a11dff5ecedbe3dbf8c20d112fcff7dca2b867fa2161e41a60",
+      "pageUrlCount": 9078,
+      "urlSetHash": "94bdf2cf789ee8a9f660224be2364a08f666a19a01c894956af32752648edddf",
+      "rawXmlHash": "f8dbd3befde8a1c5f7572215cd9ceb1cc8023dda1f903a45d6037f51fe5afa4c",
       "blogUrlCount": 2,
       "blogUrlSetHash": "dff6d05907464ff6b9f39ac6197cafb28493c188a4c6d85c05cee01d41bb758f",
-      "nonBlogUrlCount": 8066,
-      "nonBlogUrlSetHash": "5d7700fd786c6c668b40daa517c73f990bae95e65961a26c48c62e1662973b0d",
+      "nonBlogUrlCount": 9076,
+      "nonBlogUrlSetHash": "2536da21e2b3f66978b549c3aebbbd83a86824ceedde02d400d1201980a2b111",
       "canonicalConflicts": []
     },
     "structuredData": {
       "jobPostingPages": 6685,
       "jobPostingItems": 6685,
-      "breadcrumbPages": 8072,
-      "breadcrumbItems": 8072
+      "breadcrumbPages": 9082,
+      "breadcrumbItems": 9082
     },
     "vacancies": {
       "total": 6685,
