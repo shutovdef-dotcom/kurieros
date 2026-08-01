@@ -28,6 +28,7 @@
     "recrawl:automation": "tsx scripts/run-recrawl-automation.ts",
     "google:indexing:daily": "tsx scripts/run-recrawl-automation.ts --submit-google --require-google-submit",
     "google:indexing:submit": "tsx scripts/submit-google-indexing-api.ts",
+    "google:sitemap:submit": "tsx scripts/submit-google-sitemap.ts",
     "indexnow:prepare-key": "tsx scripts/prepare-indexnow-key.ts",
     "indexnow:submit": "tsx scripts/submit-indexnow.ts",
     "emit:sitemap-freshness": "tsx scripts/emit-sitemap-freshness.ts",

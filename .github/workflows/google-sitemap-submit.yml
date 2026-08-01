@@ -1,0 +1,113 @@
+name: Google Sitemap Submit
+
+on:
+  workflow_dispatch:
+    inputs:
+      sitemap_url:
+        description: Sitemap URL to submit to Google Search Console.
+        required: false
+        type: string
+        default: https://kurerok.ru/sitemap-index.xml
+  workflow_run:
+    workflows: ["Deploy Astro to Timeweb"]
+    types: [completed]
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: google-sitemap-submit-main
+  cancel-in-progress: false
+
+env:
+  PROJECT_DIR: kurieros-astro
+  NODE_VERSION: '24.x'
+  GSC_SITE_URL: sc-domain:kurerok.ru
+  GOOGLE_CLOUD_PROJECT_ID: noble-truck-500507-i1
+
+jobs:
+  submit:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: timeweb-production
+    defaults:
+      run:
+        working-directory: ${{ env.PROJECT_DIR }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Resolve sitemap URL
+        id: params
+        env:
+          INPUT_SITEMAP_URL: ${{ github.event.inputs.sitemap_url }}
+        run: |
+          set -euo pipefail
+          sitemap_url="${INPUT_SITEMAP_URL:-https://kurerok.ru/sitemap-index.xml}"
+          if ! printf '%s' "$sitemap_url" | grep -Eq '^https://kurerok\.ru/sitemap-index\.xml$'; then
+            echo "::error::Only https://kurerok.ru/sitemap-index.xml is allowed, got: $sitemap_url"
+            exit 1
+          fi
+          echo "sitemap_url=$sitemap_url" >> "$GITHUB_OUTPUT"
+
+      - name: Require Google keyless auth configuration
+        env:
+          GOOGLE_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GOOGLE_WORKLOAD_IDENTITY_PROVIDER }}
+          GOOGLE_INDEXING_SERVICE_ACCOUNT_EMAIL: ${{ vars.GOOGLE_INDEXING_SERVICE_ACCOUNT_EMAIL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GOOGLE_WORKLOAD_IDENTITY_PROVIDER:-}" ]; then
+            echo "::error::Missing GOOGLE_WORKLOAD_IDENTITY_PROVIDER environment variable."
+            exit 1
+          fi
+          if [ -z "${GOOGLE_INDEXING_SERVICE_ACCOUNT_EMAIL:-}" ]; then
+            echo "::error::Missing GOOGLE_INDEXING_SERVICE_ACCOUNT_EMAIL environment variable."
+            exit 1
+          fi
+
+      - name: Authenticate to Google Cloud
+        id: google-auth
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ env.GOOGLE_CLOUD_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GOOGLE_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GOOGLE_INDEXING_SERVICE_ACCOUNT_EMAIL }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/webmasters
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          check-latest: true
+          cache: npm
+          cache-dependency-path: ${{ env.PROJECT_DIR }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Submit sitemap index to Google Search Console
+        env:
+          GOOGLE_SEARCH_CONSOLE_ACCESS_TOKEN: ${{ steps.google-auth.outputs.access_token }}
+        run: |
+          npm run google:sitemap:submit -- \
+            --confirm-submit \
+            --sitemap="${{ steps.params.outputs.sitemap_url }}" \
+            --require-url=https://kurerok.ru/sravnenie-zarplat-kurerov-moskva/ \
+            --require-url=https://kurerok.ru/sravnenie-zarplat-kurerov-sankt-peterburg/ \
+            --require-pattern='^https://kurerok\.ru/sravnenie-zarplat-kurerov-' \
+            --min-required-pattern-count=1000
+
+      - name: Upload sitemap submit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: google-sitemap-submit-report
+          path: ${{ env.PROJECT_DIR }}/output/google-sitemap-submit/
+          if-no-files-found: ignore
+          retention-days: 14
