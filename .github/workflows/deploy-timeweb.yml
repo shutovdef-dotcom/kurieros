@@ -157,7 +157,9 @@ jobs:
             echo 'scheduled_candidate=true' >> "$GITHUB_OUTPUT"
             echo "scheduled_slug=$CANDIDATE_SLUG" >> "$GITHUB_OUTPUT"
           else
-            echo 'should_deploy=false' >> "$GITHUB_OUTPUT"
+            # Scheduled runs still refresh vacancy JobPosting/dateModified and
+            # sitemap freshness for Google Jobs even when no blog candidate is due.
+            echo 'should_deploy=true' >> "$GITHUB_OUTPUT"
             echo 'scheduled_candidate=false' >> "$GITHUB_OUTPUT"
             echo 'scheduled_slug=' >> "$GITHUB_OUTPUT"
           fi

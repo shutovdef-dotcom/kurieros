@@ -60,4 +60,13 @@ describe('scheduled blog release workflow', () => {
     expect(workflowText).toContain('--blog-release-stamp-slug');
     expect(workflowText).toContain('name: timeweb-production');
   });
+
+  it('still deploys scheduled freshness updates when no blog candidate is due', () => {
+    expect(workflowText).toContain('sitemap freshness for Google Jobs');
+    expect(workflowText).not.toContain("elif [ \"$HAS_CANDIDATE\" != 'true' ]; then");
+    expect(workflowText).toMatch(
+      /else\s+# Scheduled runs still refresh vacancy JobPosting\/dateModified and\s+# sitemap freshness for Google Jobs even when no blog candidate is due\.\s+echo 'should_deploy=true'/,
+    );
+    expect(workflowText).toContain("needs.build.outputs.scheduled_candidate == 'true' && needs.deploy.result == 'success'");
+  });
 });
