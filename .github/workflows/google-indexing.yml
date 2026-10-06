@@ -58,14 +58,29 @@ jobs:
           fi
           echo "date=$date" >> "$GITHUB_OUTPUT"
 
+      - name: Restore successful carousel marker
+        id: success-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/google-indexing-success-${{ steps.params.outputs.date }}
+          key: google-indexing-success-${{ steps.params.outputs.date }}
+          lookup-only: true
+
       - name: Skip duplicate successful carousel for the same Moscow date
         id: duplicate
         env:
           GH_TOKEN: ${{ github.token }}
           CURRENT_RUN_ID: ${{ github.run_id }}
           TARGET_DATE: ${{ steps.params.outputs.date }}
+          CACHE_HIT: ${{ steps.success-cache.outputs.cache-hit }}
         run: |
           set -euo pipefail
+          if [ "$CACHE_HIT" = "true" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "previous_success=cache:$TARGET_DATE" >> "$GITHUB_OUTPUT"
+            echo "A successful Google Indexing API marker already exists for $TARGET_DATE."
+            exit 0
+          fi
           previous_success="$(
             gh run list \
               --repo "$GITHUB_REPOSITORY" \
@@ -136,6 +151,20 @@ jobs:
         env:
           GOOGLE_INDEXING_ACCESS_TOKEN: ${{ steps.google-auth.outputs.access_token }}
         run: npm run google:indexing:daily -- --date="${{ steps.params.outputs.date }}"
+
+      - name: Write successful carousel marker
+        if: success() && steps.duplicate.outputs.skip != 'true'
+        run: |
+          set -euo pipefail
+          marker="$RUNNER_TEMP/google-indexing-success-${{ steps.params.outputs.date }}"
+          printf '%s\n' "${{ github.run_id }}" > "$marker"
+
+      - name: Save successful carousel marker
+        if: success() && steps.duplicate.outputs.skip != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/google-indexing-success-${{ steps.params.outputs.date }}
+          key: google-indexing-success-${{ steps.params.outputs.date }}
 
       - name: Upload recrawl report
         if: always()
