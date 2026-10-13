@@ -1147,3 +1147,6 @@ footer {
 :where(html, body).dark-mode .faq-item p {
   color: var(--ink-600);
 }
+
+/* Non-JavaScript analytics pixel stays outside the visible layout. */
+.metrika-noscript-pixel { position: absolute; left: -9999px; }

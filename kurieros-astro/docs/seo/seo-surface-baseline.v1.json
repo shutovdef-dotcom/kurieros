@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "courier-salary-comparison-city-pages-2026-08-01",
-  "reviewReason": "Requested rollout of canonical city salary-comparison pages; each transport table keeps four courier employers and labels city-source fallbacks.",
+  "id": "all-vacancy-title-redesign-cpa-release-2026-10-13",
+  "reviewReason": "User-authorized combined release: 104 unverified MTS city routes, 15 paused Voxys and 179 X5 routes with disabled partner link are retained as noindex pages; 21 verified cargo routes added. All 6685 prior vacancy URLs remain available, zero missing; 6408 active JobPosting pages. Sitemap shrinks by 278 URLs including the inactive company hub. Canonicals checked and unchanged blog release retained.",
   "reviewedSurfaceUrlSetHashes": [
-    "94bdf2cf789ee8a9f660224be2364a08f666a19a01c894956af32752648edddf"
+    "a376b9aa9f19521a983f30ddeecf7a465cc40b829b5fd9919255ac1424014412"
   ],
   "blogReleaseSlugs": [
     "skolko-zarabatyvaet-kurer-yandex-eda-2026"
@@ -15,54 +15,54 @@
   "report": {
     "schemaVersion": 1,
     "routes": {
-      "total": 9094,
-      "indexable": 9086,
-      "noindex": 8,
-      "urlSetHash": "caf3b427422115637f0cc2c88360ad9304a8326df2b52dd619849d1e56d3c327",
-      "indexableUrlSetHash": "a2c1c7b41983726c98ebbc3d33367078edfbeca602159793f617da01b8fe6149"
+      "total": 9113,
+      "indexable": 8808,
+      "noindex": 305,
+      "urlSetHash": "fbdd67852e4bfdf6f3cc85d674c1a9692d2e4294b7fd3b6dc370367f7b5e6c51",
+      "indexableUrlSetHash": "51da76af17ac5651423f484b5c7e3f51a84779524773872e53483c8cf672e948"
     },
     "sitemap": {
-      "pageUrlCount": 9078,
-      "urlSetHash": "94bdf2cf789ee8a9f660224be2364a08f666a19a01c894956af32752648edddf",
-      "rawXmlHash": "f8dbd3befde8a1c5f7572215cd9ceb1cc8023dda1f903a45d6037f51fe5afa4c",
+      "pageUrlCount": 8800,
+      "urlSetHash": "a376b9aa9f19521a983f30ddeecf7a465cc40b829b5fd9919255ac1424014412",
+      "rawXmlHash": "eb2915a90a1f1cc8e789c96ab6d14421ff4f7b914d68f336d1ccda3c2e208502",
       "blogUrlCount": 2,
       "blogUrlSetHash": "dff6d05907464ff6b9f39ac6197cafb28493c188a4c6d85c05cee01d41bb758f",
-      "nonBlogUrlCount": 9076,
-      "nonBlogUrlSetHash": "2536da21e2b3f66978b549c3aebbbd83a86824ceedde02d400d1201980a2b111",
+      "nonBlogUrlCount": 8798,
+      "nonBlogUrlSetHash": "978d39311d0dd55e4a0bacac8264e4cbf26aad9fbceb5c5d40551878258bf588",
       "canonicalConflicts": []
     },
     "structuredData": {
-      "jobPostingPages": 6685,
-      "jobPostingItems": 6685,
-      "breadcrumbPages": 9082,
-      "breadcrumbItems": 9082
+      "jobPostingPages": 6408,
+      "jobPostingItems": 6408,
+      "breadcrumbPages": 8804,
+      "breadcrumbItems": 8804
     },
     "vacancies": {
-      "total": 6685,
-      "indexable": 6685,
-      "noindex": 0,
-      "jobPostingPages": 6685,
-      "breadcrumbPages": 6685,
+      "total": 6706,
+      "indexable": 6408,
+      "noindex": 298,
+      "jobPostingPages": 6408,
+      "breadcrumbPages": 6408,
       "indexabilityReasons": {
-        "google_full_restore": 6040,
+        "google_full_restore": 5778,
         "gsc_vacancy_intent": 18,
-        "gsc_valid_jobposting": 29,
-        "local_score": 523,
-        "top_city_allowlist": 75
+        "gsc_valid_jobposting": 27,
+        "local_score": 509,
+        "top_city_allowlist": 76
       }
     },
     "feeds": {
       "legacy": {
-        "offers": 9658,
-        "normalizedLandingUrls": 6634,
-        "sets": 843,
-        "physicalPictures": 15
+        "offers": 9324,
+        "normalizedLandingUrls": 6300,
+        "sets": 837,
+        "physicalPictures": 12
       },
       "pilot": {
-        "offers": 1041,
-        "normalizedLandingUrls": 1041,
+        "offers": 951,
+        "normalizedLandingUrls": 951,
         "sets": 50,
-        "physicalPictures": 15
+        "physicalPictures": 12
       }
     }
   }

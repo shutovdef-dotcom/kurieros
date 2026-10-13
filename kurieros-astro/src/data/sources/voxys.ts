@@ -129,7 +129,8 @@ const voxysCallCenterOperatorOffers = voxysOfficeSalaryByCity.map(
     transport: 'office',
     transportProvision: 'not_required',
     pay: buildVoxysFixedMonthlyPay(monthlyRub),
-    isActive: true,
+    // Saleads paused this offer; retain IDs and source history, hide live jobs.
+    isActive: false,
     updatedAt: VOXYS_UPDATED_AT,
     sourceUrl: VOXYS_SOURCE_URL,
     salaryConfidence: 'partner',

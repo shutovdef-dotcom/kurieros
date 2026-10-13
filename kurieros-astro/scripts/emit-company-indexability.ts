@@ -7,12 +7,16 @@ import {
   isCompanyIndexableByVacancyCount,
 } from '../src/data/companyIndexabilityPolicy';
 import { companiesFromJobs } from '../src/utils/companiesIndex';
+import { retiredCompanyRoutes } from '../src/data/retiredCompanyRoutes';
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const publicOutputPath = resolve(rootDir, 'public/company-indexability.json');
 const site = (process.env.SITE_URL || 'https://kurerok.ru').replace(/\/$/, '');
 
-const noindexCompanies = companiesFromJobs
+const retiredCompanies = retiredCompanyRoutes
+  .filter((company) => !companiesFromJobs.some((active) => active.slug === company.slug))
+  .map((company) => ({ ...company, vacancyCount: 0, url: `${site}/companies/${company.slug}/`, reason: 'partner_offers_unavailable' }));
+const noindexCompanies = [...companiesFromJobs
   .filter((company) => !isCompanyIndexableByVacancyCount(company.vacancyCount))
   .map((company) => ({
     slug: company.slug,
@@ -20,7 +24,7 @@ const noindexCompanies = companiesFromJobs
     vacancyCount: company.vacancyCount,
     url: `${site}${company.href}`,
     reason: 'too_few_vacancies',
-  }))
+  })), ...retiredCompanies]
   .sort((companyA, companyB) => companyA.slug.localeCompare(companyB.slug));
 
 const payload = {
@@ -33,8 +37,8 @@ const payload = {
   noindexCompanies,
   noindexUrls: noindexCompanies.map((company) => company.url),
   summary: {
-    totalCompanyPages: companiesFromJobs.length,
-    indexableCompanyPages: companiesFromJobs.length - noindexCompanies.length,
+    totalCompanyPages: companiesFromJobs.length + retiredCompanies.length,
+    indexableCompanyPages: companiesFromJobs.length + retiredCompanies.length - noindexCompanies.length,
     noindexCompanyPages: noindexCompanies.length,
   },
 };

@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { retiredCompanyRoutes } from '../../data/retiredCompanyRoutes';
+import { companiesFromJobs } from '../../utils/companiesIndex';
+
+export function getStaticPaths() {
+  const active = new Set(companiesFromJobs.map((company) => company.slug));
+  return retiredCompanyRoutes.filter((company) => !active.has(company.slug)).map((company) => ({
+    params: { unavailable: company.slug },
+    props: { company },
+  }));
+}
+const { company } = Astro.props;
+---
+<BaseLayout
+  title={`${company.name}: предложения временно недоступны | КурьерОк`}
+  description={`Предложения ${company.name} через нашего партнёра временно недоступны. Посмотрите актуальные вакансии других компаний на КурьерОк.`}
+  canonicalURL={new URL(Astro.url.pathname, Astro.site)}
+  robots="noindex, follow"
+  includeOzonLeadModal={false}
+>
+  <main class="availability-page">
+    <h1>Предложения {company.name} временно недоступны</h1>
+    <p>Сейчас через нашего партнёра нельзя отправить отклик. Это не означает, что компания прекратила набор. Мы уточняем актуальный способ подачи заявки.</p>
+    <p><a href="/companies/">Посмотреть другие компании</a> · <a href="/">Все доступные вакансии</a></p>
+  </main>
+</BaseLayout>
+<style>
+  .availability-page { max-width: 48rem; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+  h1 { font-size: clamp(1.5rem, 4vw, 2.25rem); line-height: 1.2; margin-bottom: 1.25rem; }
+  p { line-height: 1.65; margin-bottom: 1.5rem; }
+  a { color: #1d4ed8; text-decoration: underline; text-underline-offset: 0.2em; }
+</style>

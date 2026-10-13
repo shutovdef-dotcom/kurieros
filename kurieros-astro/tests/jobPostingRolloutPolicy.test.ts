@@ -7,6 +7,13 @@ import {
   resolveJobPostingRollout,
 } from '../src/data/jobPostingEligibilityPolicy';
 import { resolveVerifiedJobPostingEvidence } from '../src/data/jobPostingVerifiedCohort';
+import { retiredVacancyRoutes } from '../src/data/retiredVacancyRoutes';
+import { mtsLegacyRoutes } from '../src/data/mtsLegacyRoutes';
+
+const unavailableSlugs = new Set([
+  ...retiredVacancyRoutes.map((route) => route.slug),
+  ...mtsLegacyRoutes.map((route) => route.slug),
+]);
 
 const verifiedEvidence = {
   isActive: true,
@@ -20,15 +27,18 @@ const verifiedEvidence = {
 };
 
 describe('JobPosting rollout policy', () => {
-  it('pins the 29 URLs Google reported valid on 2026-07-09 as a temporary bridge', () => {
+  it('retains the 29 historically valid Google URLs and resolves retired rows explicitly', () => {
     expect(LEGACY_GSC_VALID_JOB_PATHS).toHaveLength(29);
     expect(new Set(LEGACY_GSC_VALID_JOB_PATHS).size).toBe(29);
 
     for (const path of LEGACY_GSC_VALID_JOB_PATHS) {
       const slug = path.replace(/^\/v\//, '').replace(/\/$/, '');
       const job = detailJobs.find((item) => item.slug === slug);
-      expect(job, path).toBeDefined();
-      expect(getVacancyIndexability(job!).indexable, path).toBe(true);
+      if (job) {
+        expect(getVacancyIndexability(job).indexable, path).toBe(true);
+      } else {
+        expect(unavailableSlugs.has(slug), path).toBe(true);
+      }
     }
   });
 
@@ -60,7 +70,17 @@ describe('JobPosting rollout policy', () => {
   });
 
   it('treats legacy paths like every other active vacancy under the all-active policy', () => {
-    const eligibleLegacyPaths = LEGACY_GSC_VALID_JOB_PATHS.filter((path) => {
+    const currentLegacyPaths = LEGACY_GSC_VALID_JOB_PATHS.filter((path) => {
+      const slug = path.replace(/^\/v\//, '').replace(/\/$/, '');
+      return detailJobs.some((item) => item.slug === slug);
+    });
+    const retiredLegacyPaths = LEGACY_GSC_VALID_JOB_PATHS.filter((path) => {
+      const slug = path.replace(/^\/v\//, '').replace(/\/$/, '');
+      return !detailJobs.some((item) => item.slug === slug);
+    });
+    expect(retiredLegacyPaths.every((path) => unavailableSlugs.has(path.replace(/^\/v\//, '').replace(/\/$/, '')))).toBe(true);
+
+    const eligibleLegacyPaths = currentLegacyPaths.filter((path) => {
       const slug = path.replace(/^\/v\//, '').replace(/\/$/, '');
       const job = detailJobs.find((item) => item.slug === slug)!;
       const verifiedEvidence = resolveVerifiedJobPostingEvidence({
@@ -84,7 +104,15 @@ describe('JobPosting rollout policy', () => {
       }).emit;
     });
 
-    expect(eligibleLegacyPaths).toEqual([...LEGACY_GSC_VALID_JOB_PATHS]);
+    expect(eligibleLegacyPaths).toEqual([...currentLegacyPaths]);
+
+    for (const path of retiredLegacyPaths) {
+      expect(resolveJobPostingRollout({
+        path,
+        evidence: { ...verifiedEvidence, isActive: false },
+        now: new Date('2026-07-10T12:00:00.000Z'),
+      }).emit, path).toBe(false);
+    }
   });
 
   it('defaults to deny for every other URL without complete source evidence', () => {

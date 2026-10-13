@@ -16,8 +16,8 @@ export const POPULAR_COMPANY_SLUGS = [
   'servis-ruki',
   'qlean',
   'domovenok',
-  'voxys',
   'tetrika',
+  'yandeks-dostavka',
 ] as const;
 
 const POPULARITY_RANK = new Map<string, number>(

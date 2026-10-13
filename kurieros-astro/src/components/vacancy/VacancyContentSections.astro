@@ -7,10 +7,11 @@ interface Props {
 }
 
 const { job } = Astro.props;
+const isCargoPartnership = job.sourceSlug === 'yandex-delivery-cargo-driver';
 ---
 
 <section class="vacancy-section vacancy-description-section">
-	<h2 data-t="vacancy.desc_title">Описание вакансии</h2>
+	<h2 data-t={isCargoPartnership ? undefined : 'vacancy.desc_title'}>{isCargoPartnership ? 'Описание сотрудничества' : 'Описание вакансии'}</h2>
 	<VacancyTKey jobId={job.id} field="description" fallback={job.description} as="p" class="vacancy-description" />
 
 	<div class="vacancy-subsection">

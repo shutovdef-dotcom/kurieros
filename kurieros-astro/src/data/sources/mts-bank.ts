@@ -1,26 +1,21 @@
 import { slugifyCity } from '../../utils/cities';
 import type {
-  EmploymentFormat,
   VacancyContent,
   VacancyOffer,
   VacancySource,
 } from '../vacancyTypes';
 import { MTS_BANK_APPLY, MTS_BANK_LOGO } from '../partnerLinks';
-import { expandCitiesForCapitalRegions } from './geoExpansion';
-import { formatRub } from './shared';
 
 // === Constants =======================================================
 
-const MTS_BANK_COMPANY_NAME = 'МТС Банк';
+const MTS_BANK_COMPANY_NAME = 'МТС';
 const MTS_BANK_COMPANY_LOGO = MTS_BANK_LOGO;
 const MTS_BANK_APPLY_LINK = MTS_BANK_APPLY;
 const MTS_BANK_SOURCE_URL = 'https://agents.pampadu.ru/app/offer/view/1534';
 const MTS_BANK_UPDATED_AT = '2026-06-15';
+const MTS_BANK_CHECKED_AT = '2026-10-13';
 const MTS_BANK_CITIZENSHIP = 'РФ';
-const MTS_BANK_EMPLOYMENT_FORMATS = ['official'] satisfies EmploymentFormat[];
-const MTS_BANK_SCHEDULE = 'Сменный график 2/2 или 5/2, удалённый формат';
-const MTS_BANK_MONTHLY_MIN_RUB = 46_000;
-const MTS_BANK_MONTHLY_MAX_RUB = 68_500;
+const MTS_BANK_SCHEDULE = 'Индивидуальный гибкий график';
 
 const mtsBankRemoteBaseCities = [
   ['Брянск', 'Европа'],
@@ -61,10 +56,7 @@ const mtsBankRemoteBaseCities = [
   ['Пермь', 'Восток'],
 ] as const;
 
-const mtsBankRemoteBaseCityLandings = new Map<string, string>(mtsBankRemoteBaseCities);
-const mtsBankRemoteCities = expandCitiesForCapitalRegions(
-  mtsBankRemoteBaseCities.map(([city]) => city),
-).map((city) => [city, mtsBankRemoteBaseCityLandings.get(city) ?? 'Европа'] as const);
+const mtsBankRemoteCities = mtsBankRemoteBaseCities;
 
 // === Helpers =========================================================
 
@@ -81,70 +73,39 @@ const buildMtsBankApplyLink = (city: string, landing: string) => {
   return url.toString();
 };
 
-const buildMtsBankPay = (): VacancyOffer['pay'] => {
-  const monthlyText =
-    `от ${formatRub(MTS_BANK_MONTHLY_MIN_RUB)} до ${formatRub(MTS_BANK_MONTHLY_MAX_RUB)} ₽/мес`;
-
-  return {
-    currency: 'RUB',
-    monthly: {
-      min: MTS_BANK_MONTHLY_MIN_RUB,
-      max: MTS_BANK_MONTHLY_MAX_RUB,
-      text: monthlyText,
-    },
-    rate: monthlyText,
-    paymentFrequency: '2 раза в месяц (по ТК РФ)',
-  };
-};
-
 // === Content =========================================================
 
 const mtsBankOperatorContent: VacancyContent = {
-  title: 'Оператор МТС Банка {cityPrep}',
+  title: 'Оператор колл-центра МТС {cityPrep}',
   shortDescription:
-    'Удалённая работа оператором МТС Банка: консультации клиентов по банковским продуктам, официальное оформление, ДМС и сменный график.',
+    'Удалённая работа оператором колл-центра МТС. Индивидуальный гибкий график, ДМС с первого месяца и бесплатная мобильная связь. Доход и оформление уточняются.',
   description:
-    'МТС Банк приглашает операторов клиентского сервиса. Нужно консультировать клиентов банка по кредитным продуктам, графику платежей, сумме, срокам и способам оплаты, а также информировать о программах лояльности: кредитных каникулах, рефинансировании, амнистии и других продуктах.',
+    'Карточка оператора колл-центра для проекта МТС. Работа удалённая, график индивидуальный и гибкий. В актуальной карточке партнёра указаны ДМС с первого месяца и бесплатная мобильная связь. Доход, оформление и остальные условия уточняются при отклике.',
   requirements: [
     'Возраст от 18 до 45 лет.',
-    'Гражданство РФ.',
-    'Грамотная устная и письменная речь.',
-    'Умение легко устанавливать контакт с людьми.',
-    'Готовность быстро обучаться и ориентироваться в потоке информации.',
-    'Для удалённой работы нужно тихое место, компьютер, гарнитура и стабильный интернет.',
-    'Опыт работы в клиентском сервисе будет плюсом, но не обязателен.',
+    'Для оформления нужен паспорт РФ; для мужчин — военный билет или приписное свидетельство.',
   ],
   benefits: [
-    'Официальное оформление с первого дня.',
-    'Доход: оклад + ежемесячная премия.',
-    'Сменный график 2/2 или 5/2.',
-    'Доплата за ночные смены 40%.',
-    'ДМС с первого месяца, включая стоматологию.',
-    'Страхование от несчастных случаев и материальная помощь.',
-    'Отпуск 28 календарных дней.',
-    'Мобильная связь за счёт компании и льготные тарифы для близких.',
-    'Скидки и специальные предложения от продуктов экосистемы МТС.',
-    'Корпоративное обучение и онлайн-библиотека.',
+    'ДМС с первого месяца.',
+    'Бесплатная мобильная связь.',
+    'Индивидуальный гибкий график.',
   ],
   requiredDocuments: [
     'Паспорт гражданина РФ.',
-    'Для мужчин: приписное свидетельство или военный билет РФ.',
+    'Для мужчин: военный билет или приписное свидетельство.',
   ],
   labels: [
     'Удалённо',
     'Оператор',
     'Колл-центр',
-    'Без опыта',
-    'Официальное оформление',
+    'Гибкий график',
     'ДМС',
   ],
   searchTags: [
-    'МТС Банк',
-    'оператор МТС Банка',
+    'МТС',
+    'оператор колл-центра МТС',
     'оператор call-центра',
-    'оператор колл-центра',
-    'контактный центр',
-    'поддержка клиентов',
+    'колл-центр',
     'удалённая работа',
   ],
 };
@@ -156,15 +117,16 @@ const mtsBankOperatorOffers = mtsBankRemoteCities.map(
     city,
     transport: 'remote',
     transportProvision: 'not_required',
-    pay: buildMtsBankPay(),
+    pay: { currency: 'RUB', paymentFrequency: 'Уточняется' },
     isActive: true,
     updatedAt: MTS_BANK_UPDATED_AT,
+    contentUpdatedAt: MTS_BANK_CHECKED_AT,
+    sourceCheckedAt: MTS_BANK_CHECKED_AT,
     sourceUrl: MTS_BANK_SOURCE_URL,
     salaryConfidence: 'estimated',
     ageFrom: 18,
     citizenship: MTS_BANK_CITIZENSHIP,
-    medicalBook: 'not_required',
-    employmentFormats: [...MTS_BANK_EMPLOYMENT_FORMATS],
+    medicalBook: 'unknown',
     schedule: MTS_BANK_SCHEDULE,
     applyLink: buildMtsBankApplyLink(city, landing),
     priority: 1625 - cityIndex,
@@ -180,17 +142,17 @@ export const mtsBankSource: VacancySource = {
   content: mtsBankOperatorContent,
   defaults: {
     ageFrom: 18,
-    medicalBook: 'not_required',
-    employmentFormats: [...MTS_BANK_EMPLOYMENT_FORMATS],
+    medicalBook: 'unknown',
+    employmentFormats: [],
     schedule: MTS_BANK_SCHEDULE,
-    education: 'Не требуется',
+    education: 'Уточняется',
     citizenship: MTS_BANK_CITIZENSHIP,
-    uniform: 'Не требуется',
-    os: 'Компьютер, гарнитура и стабильный интернет',
+    uniform: 'Уточняется',
+    os: 'Уточняется',
   },
   offers: mtsBankOperatorOffers,
-  incomeCalculator: { mode: 'monthly' },
-  howToTemplate: 'call_center',
-  extraTags: ['mts-bank', 'operator', 'call-center', 'remote', 'official', 'source:pampadu'],
+  incomeCalculator: { mode: 'hidden' },
+  howToTemplate: 'remote_operator',
+  extraTags: ['mts', 'operator', 'call-center', 'remote', 'source:pampadu'],
   isHot: true,
 };

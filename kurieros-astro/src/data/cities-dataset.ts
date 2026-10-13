@@ -363,7 +363,7 @@ export const CITY_DATASET: readonly CityRecord[] = [
   { name: "Куйбышев", slug: "kuybyshev", prep: "в Куйбышеве", population: 41946 },
   { name: "Малоярославец", slug: "maloyaroslavets", prep: "в Малоярославеце", population: 41836 },
   { name: "Кореновск", slug: "korenovsk", prep: "в Кореновске", population: 41826 },
-  { name: "Большой Камень", slug: "bolshoy-kamen", prep: "в Большой Камени", population: 41825 },
+  { name: "Большой Камень", slug: "bolshoy-kamen", prep: "в Большом Камне", population: 41825 },
   { name: "Аргун", slug: "argun", prep: "в Аргуне", population: 41622 },
   { name: "Темрюк", slug: "temryuk", prep: "в Темрюке", population: 41608 },
   { name: "Ярцево", slug: "yartsevo", prep: "в Ярцеве", population: 41452 },

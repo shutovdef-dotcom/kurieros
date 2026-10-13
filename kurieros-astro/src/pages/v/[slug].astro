@@ -44,9 +44,11 @@ import {
 } from '../../utils/vacancyStructuredData';
 import { formatMoneyWithCurrency } from '../../utils/money';
 import { buildVacancySeoTitle } from '../../utils/vacancySeoTitle';
+import { buildVacancySeoBenefitHooks } from '../../utils/vacancySeoBenefits';
 import { getVacancyIndexability } from '../../utils/vacancyIndexability';
 import { getLeadFormEligibility } from '../../utils/leadFormEligibility';
-import { getFreshTitleTest, getVacancyTitleOverride } from '../../data/seoExperimentCohorts';
+import { getVacancyTitleOverride } from '../../data/seoExperimentCohorts';
+import { usesOwnerSuppliedOzonCourierIncome } from '../../data/seoTitleIncome';
 
 export async function getStaticPaths() {
 	return detailJobs.map((job) => ({
@@ -56,7 +58,7 @@ export async function getStaticPaths() {
 }
 
 const { job } = Astro.props;
-const freshTitleTest = getFreshTitleTest(job.slug);
+const hasOwnerSuppliedDailyIncome = usesOwnerSuppliedOzonCourierIncome(job.sourceSlug);
 // `applyLink: 'lead-form:<provider>'` (the constant `OZON_LEAD_APPLY`
 // defined in src/data/partnerLinks.ts, wired onto offers in
 // src/data/ozonOffers.ts) is a magic marker that swaps the external
@@ -73,6 +75,7 @@ const leadFormType = isLeadFormApply ? job.applyLink.slice('lead-form:'.length) 
 const hasApplyLink = !isLeadFormMarker && Boolean(job.applyLink && job.applyLink !== '#');
 const companyUrl = `/companies/${slugifyCompany(job.company)}/`;
 const matchingSource = vacancySources.find((source) => source.id === job.sourceId);
+const isCargoPartnership = matchingSource?.howToTemplate === 'cargo_driver';
 const matchingOffer =
 	matchingSource?.offers.find(
 		(offer) =>
@@ -88,9 +91,7 @@ const matchingOffer =
 			offer.transport === job.transport,
 	);
 const calculatorModel = buildVacancyCalculatorModel({
-	source: freshTitleTest && matchingSource
-		? { ...matchingSource, incomeCalculator: { mode: 'hidden' } }
-		: matchingSource,
+	source: matchingSource,
 	offer: matchingOffer,
 	sources: vacancySources,
 	city: job.location,
@@ -140,43 +141,21 @@ const similarJobs = selectTopN(
 	(item) => ({ tier: getSimilarityTier(item), salaryValue: parseSalaryValue(item.salary) }),
 	(a, b) => a.tier - b.tier || b.salaryValue - a.salaryValue,
 );
-// Build a tight «benefit tail» — up to 2 hooks NOT redundant with the
-// leading «salary • schedule • payment_freq» line. Used to boost CTR
-// on long-tail SERP queries like «работа курьером без опыта», «без
-// медкнижки», «от 18 лет», «самозанятость». Order reflects observed
-// CTR uplift in job-search SERPs.
-const benefitHooks: string[] = (() => {
-	const labels = (job.labels ?? []).map((l) => l.toLowerCase());
-	const hooks: string[] = [];
-	const noExperience = labels.some((l) => l.includes('без опыта'));
-	const requiresMedical = labels.some((l) => l.includes('медкнижк'));
-	const acceptsAge16 = labels.some((l) => l.includes('16'));
-	const acceptsAge18 = !acceptsAge16 && labels.some((l) => l.includes('18'));
-	const isSelfEmployed = labels.some((l) => l.includes('самозан'));
-	if (noExperience) hooks.push('без опыта');
-	if (!requiresMedical) hooks.push('без медкнижки');
-	if (acceptsAge16) hooks.push('от 16 лет');
-	else if (acceptsAge18) hooks.push('от 18 лет');
-	if (isSelfEmployed && hooks.length < 2) hooks.push('самозанятость');
-	return hooks.slice(0, 2);
-})();
+// Use the offer requirement: a missing label also covers unknown and
+// compensated medical books, so it cannot prove that one is unnecessary.
+const benefitHooks = buildVacancySeoBenefitHooks({
+	labels: job.labels ?? [],
+	medicalBook: matchingOffer?.medicalBook ?? matchingSource?.defaults.medicalBook,
+});
 
-// Number-led, action-led title: front-load salary (Google's primary
-// CTR lever for job-search SERPs), em-dash for visual separation,
-// and the first benefit hook in the trailing slot — but only when
-// the whole thing fits in the 70-char SERP truncation budget.
-const vacancyTitle = (freshTitleTest ? getVacancyTitleOverride(job.slug) : undefined) ?? buildVacancySeoTitle({
+// Keep role, location and source-backed terms within the title budget.
+const vacancyTitle = getVacancyTitleOverride(job.slug) ?? buildVacancySeoTitle({
 	title: job.title,
 	salary: job.salary,
 	benefitHook: benefitHooks[0],
-	customTitle: getVacancyTitleOverride(job.slug),
 });
 
-// Description rewritten for CTR: salary first (numerical hook), then a
-// scannable «график · оплата» bullet, role+city, up to 2 benefit hooks
-// (long-tail), and a concrete same-day-callback CTA. Drops the
-// redundant «{title} в {company}, {city}» preamble — title already
-// carries that, so we save chars for hooks that move clicks.
+// Include vacancy terms and the next action without promising a response time.
 const benefitClause = benefitHooks.length
 	? `${benefitHooks[0].charAt(0).toUpperCase()}${benefitHooks[0].slice(1)}${benefitHooks[1] ? `, ${benefitHooks[1]}` : ''}. `
 	: '';
@@ -212,10 +191,10 @@ const comparisonClause = comparisonAlternatives.length
 	: '';
 
 const buildVacancyDescription = (withBenefits: boolean): string =>
-	[
+	isCargoPartnership ? job.shortDescription : [
 		`${job.salary} • ${job.details.schedule.toLowerCase()} • ${job.details.payment_freq.toLowerCase()}.`,
 		`${job.title}.`,
-		`${withBenefits ? benefitClause : ''}${comparisonClause}${companyShortName} перезвонит сегодня.`,
+		`${withBenefits ? benefitClause : ''}${comparisonClause}Отклик на вакансию ${companyShortName}.`,
 	].join(' ');
 // Word-boundary trim: never cut a description mid-word at 170. If the
 // 170-char window lands inside a word, step back to the previous space
@@ -226,12 +205,12 @@ const trimAtWordBoundary = (s: string, max: number): string => {
 	const lastSpace = cut.lastIndexOf(' ');
 	return lastSpace > max - 40 ? `${cut.slice(0, lastSpace)}…` : `${cut}…`;
 };
-const fullDescription = freshTitleTest
+const fullDescription = hasOwnerSuppliedDailyIncome
 	? `${job.title}. Возможный доход — до 8 000 ₽/день; зависит от смены и заказов. Тариф и условия уточняйте при оформлении.`
 	: buildVacancyDescription(true);
 const vacancyDescription = fullDescription.length <= 170
 	? fullDescription
-	: trimAtWordBoundary(freshTitleTest ? fullDescription : buildVacancyDescription(false), 170);
+	: trimAtWordBoundary(hasOwnerSuppliedDailyIncome ? fullDescription : buildVacancyDescription(false), 170);
 const vacancyIndexability = getVacancyIndexability(job);
 const structuredDataNow = new Date();
 const { datePosted, validThrough } = resolveJobPostingDates({
@@ -245,7 +224,7 @@ const contentUpdatedValue = job.contentUpdatedAt ?? job.updatedAt;
 const parsedContentUpdatedAt = new Date(contentUpdatedValue);
 const factCards = [
 	{ label: 'Доход', labelKey: 'vacancy.fact_income', value: job.salary, valueKey: `vacancies.${job.id}.salary` },
-	{ label: 'График', labelKey: 'vacancy.fact_schedule', value: job.details.schedule, valueKey: `vacancies.${job.id}.details_schedule` },
+	{ label: isCargoPartnership ? 'Расписание' : 'График', labelKey: isCargoPartnership ? undefined : 'vacancy.fact_schedule', value: job.details.schedule, valueKey: `vacancies.${job.id}.details_schedule` },
 	{ label: 'Возраст', labelKey: 'vacancy.fact_age', value: job.details.age, valueKey: `vacancies.${job.id}.details_age` },
 	{ label: 'Выплаты', labelKey: 'vacancy.fact_payments', value: job.details.payment_freq, valueKey: `vacancies.${job.id}.details_payment_freq` },
 	{ label: 'Гражданство', labelKey: 'vacancy.fact_citizenship', value: job.details.citizenship, valueKey: `vacancies.${job.id}.details_citizenship` },
@@ -344,7 +323,7 @@ const pickKbItemsForVacancy = (limit: number): KnowledgeItem[] => {
 		.map((entry) => entry.item);
 };
 
-const selectedKbItems = pickKbItemsForVacancy(6);
+const selectedKbItems = isCargoPartnership ? [] : pickKbItemsForVacancy(6);
 
 // Apply CTA — single source of truth in src/utils/applyCta.ts.
 // Drift between this and the JobCard copy of the computation directly
@@ -385,7 +364,9 @@ const howToSteps = buildVacancyHowToSteps({
 const stepCountWord =
 	howToSteps.length === 1 ? 'шаг' : howToSteps.length < 5 ? 'шага' : 'шагов';
 const howToTitle = `Старт за ${howToSteps.length} ${stepCountWord}: ${job.title}`;
-const howToDescription = `Пошаговый план: с чего начать работу в ${job.company}${jobCities[0] ? ` (${jobCities[0]})` : ''}, что подготовить и в какой срок реально выйти на первую смену.`;
+const howToDescription = howToTemplate === 'cargo_driver'
+	? 'Порядок подключения к партнёру сервиса: анкета, проверка автомобиля и документов, условия сотрудничества и первые поездки.'
+	: `Пошаговый план: с чего начать работу в ${job.company}${jobCities[0] ? ` (${jobCities[0]})` : ''}, что подготовить и в какой срок реально выйти на первую смену.`;
 
 // Block: dense one-paragraph fact summary. Designed for Speakable
 // schema and direct quoting by AI assistants — every clause answers a
@@ -396,7 +377,7 @@ const quickFactSummary = (() => {
 	const parts: string[] = [];
 	parts.push(`${job.title}.`);
 	parts.push(`Доход — ${job.salary}, выплаты ${job.details.payment_freq.toLowerCase()}.`);
-	parts.push(`График — ${job.details.schedule.toLowerCase()}.`);
+	parts.push(`${howToTemplate === 'cargo_driver' ? 'Расписание' : 'График'} — ${job.details.schedule.toLowerCase()}.`);
 	parts.push(`Возраст: ${job.details.age.toLowerCase()}, гражданство — ${job.details.citizenship}.`);
 	parts.push(`Формат оформления: ${employmentTypeText}.`);
 	if (
@@ -407,7 +388,9 @@ const quickFactSummary = (() => {
 	}
 	// Disabled-vacancy summary branch removed per C3 — every vacancy
 	// has a real applyLink, so the message is unconditional.
-	parts.push('Откликнуться можно сразу — после короткого ожидания откроется анкета работодателя.');
+	parts.push(howToTemplate === 'cargo_driver'
+		? 'По кнопке отклика откроется анкета для подключения к партнёру сервиса.'
+		: 'Откликнуться можно сразу — после короткого ожидания откроется анкета работодателя.');
 	return parts.join(' ');
 })();
 
@@ -501,7 +484,7 @@ const jobPostingSchema =
 const pageSchemaGraph = [
 	{
 		'@type': 'WebPage',
-		name: `${job.title} — Вакансия в ${job.company}`,
+		name: isCargoPartnership ? job.title : `${job.title} — Вакансия в ${job.company}`,
 		description: vacancyDescription,
 		url: Astro.url.href,
 		...(contentUpdatedIso ? { dateModified: contentUpdatedIso } : {}),
@@ -522,7 +505,7 @@ const pageSchemaGraph = [
 		steps: howToSteps,
 	}),
 	...(jobPostingSchema ? [jobPostingSchema] : []),
-	buildVacancyFaqSchema(selectedKbItems),
+	...(isCargoPartnership ? [] : [buildVacancyFaqSchema(selectedKbItems)]),
 	buildBreadcrumbSchema(
 		[
 			{ name: 'Главная', url: '/' },
@@ -582,13 +565,13 @@ const pageSchemaGraph = [
 				<div class="vacancy-main">
 					<VacancyContentSections job={job} />
 
-					<VacancyKnowledgeBase
+					{!isCargoPartnership && <VacancyKnowledgeBase
 						companyName={job.company}
 						updatedDate={updatedDate}
 						items={selectedKbItems}
-					/>
+					/>}
 
-					<VacancyQuickSummary summary={quickFactSummary} />
+					<VacancyQuickSummary summary={quickFactSummary} isPartnership={isCargoPartnership} />
 
 					<VacancyHowTo
 						title={howToTitle}

@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { detailJobs } from '../src/data/jobs';
 import { resolveJobPostingRollout } from '../src/data/jobPostingEligibilityPolicy';
 import { resolveVerifiedJobPostingEvidence } from '../src/data/jobPostingVerifiedCohort';
+import { getVacancyIndexability } from '../src/utils/vacancyIndexability';
+import { retiredVacancyRoutes } from '../src/data/retiredVacancyRoutes';
 
 const asRollout = (job: (typeof detailJobs)[number]) => {
   const verifiedEvidence = resolveVerifiedJobPostingEvidence({
@@ -29,20 +31,52 @@ const asRollout = (job: (typeof detailJobs)[number]) => {
 describe('all-active JobPosting vacancy policy', () => {
   it('opens every active vacancy for JobPosting and Google Indexing API rotation', () => {
     const eligibleJobs = detailJobs.filter((job) => asRollout(job).rollout.emit);
+    const indexableSlugs = detailJobs
+      .filter((job) => getVacancyIndexability(job).indexable)
+      .map((job) => job.slug)
+      .sort();
 
-    expect(eligibleJobs).toHaveLength(6_685);
-    expect(new Set(eligibleJobs.map((job) => job.slug)).size).toBe(6_685);
+    expect(eligibleJobs.map((job) => job.slug).sort()).toEqual(indexableSlugs);
+    expect(new Set(eligibleJobs.map((job) => job.slug)).size).toBe(eligibleJobs.length);
   });
 
   it('hydrates datePosted from updatedAt when the source row has no original postedAt', () => {
-    const x5Job = detailJobs.find((job) => job.sourceSlug === 'x5-delivery-auto-courier');
-    expect(x5Job).toBeDefined();
+    const job = detailJobs.find((item) => !item.postedAt && item.updatedAt && item.sourceUrl && item.roleTitle);
+    expect(job).toBeDefined();
 
-    const { verifiedEvidence, rollout } = asRollout(x5Job!);
+    const { verifiedEvidence, rollout } = asRollout(job!);
 
     expect(verifiedEvidence.mode).toBe('all_active_vacancies');
-    expect(verifiedEvidence.evidence.postedAt).toBe('2026-06-30T00:00:00.000Z');
+    expect(verifiedEvidence.evidence.postedAt).toBe(new Date(job!.updatedAt!).toISOString());
     expect(rollout.emit).toBe(true);
+  });
+
+  it('blocks disabled X5 routes from JobPosting even though their IDs remain retired', () => {
+    const x5Routes = retiredVacancyRoutes.filter((route) => route.reason === 'x5_partner_link_disabled');
+    expect(x5Routes.length).toBeGreaterThan(0);
+
+    for (const route of x5Routes) {
+      const decision = resolveJobPostingRollout({
+        path: `/v/${route.slug}/`,
+        evidence: {
+          isActive: false,
+          roleTitle: 'Курьер X5',
+          sourceUrl: 'https://partner.example/vacancies/x5',
+          postedAt: '2026-06-30T00:00:00.000Z',
+          sourceCheckedAt: '2026-06-30',
+          applyVerifiedAt: '2026-06-30',
+          applyFlowVerified: true,
+          salaryConfidence: 'partner',
+        },
+        now: new Date('2026-07-24T07:00:00.000Z'),
+      });
+
+      expect(decision, route.slug).toMatchObject({
+        emit: false,
+        mode: 'blocked',
+        reasons: ['inactive'],
+      });
+    }
   });
 
   it('keeps estimated salary and Ozon lead-form rows eligible without forcing optional rich fields', () => {
@@ -63,5 +97,6 @@ describe('all-active JobPosting vacancy policy', () => {
     });
     expect(mtsJob!.salaryConfidence).toBe('estimated');
     expect(ozonJob!.applyLink).toBe('lead-form:ozon');
+    expect(ozonJob!.salaryConfidence).toBe('estimated');
   });
 });

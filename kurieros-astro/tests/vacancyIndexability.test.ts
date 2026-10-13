@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import vacancyIndexability from '../src/generated/vacancy-indexability.json';
 import { detailJobs } from '../src/data/jobs';
+import { mtsLegacyRoutes } from '../src/data/mtsLegacyRoutes';
+import { retiredVacancyRoutes } from '../src/data/retiredVacancyRoutes';
 import { getVacancyIndexability } from '../src/utils/vacancyIndexability';
 import { getVacancyCanonicalPath } from '../src/utils/vacancyUrl';
 
@@ -47,9 +49,17 @@ describe('getVacancyIndexability', () => {
     ]);
     const currentPaths = new Set(detailJobs.map((job) => getVacancyCanonicalPath(job)));
 
-    expect(generatedPaths).toEqual(currentPaths);
-    expect(vacancyIndexability.summary.totalVacancyPages).toBe(currentPaths.size);
+    const unavailablePaths = [
+      ...mtsLegacyRoutes.map((route) => `/v/${route.slug}/`),
+      ...retiredVacancyRoutes.map((route) => `/v/${route.slug}/`),
+    ].sort();
+    expect(generatedPaths).toEqual(new Set([...currentPaths, ...unavailablePaths]));
+    expect(vacancyIndexability.summary.totalVacancyPages)
+      .toBe(currentPaths.size + unavailablePaths.length);
     expect(vacancyIndexability.summary.indexableVacancyPages).toBe(currentPaths.size);
-    expect(vacancyIndexability.summary.noindexVacancyPages).toBe(0);
+    expect(vacancyIndexability.summary.noindexVacancyPages).toBe(104 + retiredVacancyRoutes.length);
+    expect(vacancyIndexability.noindexPaths).toEqual(unavailablePaths);
+    expect(unavailablePaths.every((path) => !vacancyIndexability.jobPostingPaths.includes(path)))
+      .toBe(true);
   });
 });

@@ -2,6 +2,7 @@ import { CITY_DATASET } from './cities-dataset';
 import { slugifyCity } from '../utils/cities';
 import baseline from './seoTitleTestBaseline.json';
 import freshCatalogue from './ozon-fresh-vacancies.json';
+import expandedBaseline from './seoExpandedTitleBaseline.json';
 
 type VacancyCtrTreatment = {
   id: string;
@@ -48,9 +49,22 @@ const freshTests = new Map<string, FreshTitleTest>(baseline.cohorts.map((row) =>
 
 export const getFreshTitleTest = (slug: string): FreshTitleTest | undefined => freshTests.get(slug);
 
+// This complete, frozen Pages export supersedes the initial Fresh-only test.
+// Keep its archived accessor above for historical reports, not page rendering.
+const expandedTests = new Map(expandedBaseline.cohorts.map((row) => [row.slug, {
+  id: `${expandedBaseline.id}-${row.arm}`,
+  arm: row.arm,
+  city: row.city,
+  titleOverride: row.title,
+  controlSourceSlug: row.sourceSlug,
+  successThreshold: 'Compare complete periods after actual Google title uptake; segment by source, query, device and position; account for concurrent redesign and inconclusive low volume',
+}]));
+
+export const getVacancyTitleExperiment = (slug: string) => expandedTests.get(slug);
+
 export const getVacancyTitleOverride = (slug: string): string | undefined =>
-  freshTests.get(slug)?.titleOverride ?? VACANCY_CTR_TREATMENTS[slug]?.titleOverride;
+  expandedTests.get(slug)?.titleOverride ?? VACANCY_CTR_TREATMENTS[slug]?.titleOverride;
 
 export const getVacancyCtrTreatment = (
   slug: string,
-): VacancyCtrTreatment | undefined => freshTests.get(slug) ?? VACANCY_CTR_TREATMENTS[slug];
+): VacancyCtrTreatment | undefined => expandedTests.get(slug) ?? VACANCY_CTR_TREATMENTS[slug];

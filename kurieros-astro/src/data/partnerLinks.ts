@@ -20,7 +20,12 @@
  */
 
 // === Yandex Eda =====================================================
-export const YANDEX_EDA_APPLY = 'https://my2go.ru/mitpJ?erid=2VtzqwSDctu';
+export const YANDEX_EDA_APPLY = 'https://my.saleads.pro/s/vtg97?erid=2Vtzqv6uPKi';
+
+// === Яндекс Доставка — грузовой автомобиль ==========================
+export const YANDEX_DELIVERY_CARGO_LOGO = '/logos/yandex-delivery-cargo.png';
+export const YANDEX_DELIVERY_CARGO_APPLY =
+  'https://trk.ppdu.ru/click/k3BRrv5U?erid=CQH36pWzJqVGXC5oTTDpMBk8ei82kpZxV9ZJ1ZC292TAKx';
 
 // === Yandex Go international ========================================
 export const YANDEX_GO_BY_LOGO = '/logos/yandex-go-belarus.jpg';

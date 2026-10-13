@@ -1,0 +1,399 @@
+/* Shared Astra Blue chrome. Component layout lives with its markup; this
+   layer reconciles the legacy site-wide rules with the approved design.
+   The root qualifier gives this shared layer priority over Astro scoped rules. */
+:root body[data-design="astra-blue"] {
+  --action-blue: #245ab2;
+  --action-blue-hover: #1d4b96;
+  --action-on-blue: #fff;
+  --mobile-nav-height: 65px;
+  --mobile-nav-offset: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px));
+  background: var(--ink-0);
+  color: var(--ink-700);
+  font-weight: 400;
+}
+:root body[data-design="astra-blue"].dark-mode {
+  --action-blue: #3573dc;
+  --action-blue-hover: #4785ef;
+}
+:root body[data-design="astra-blue"] main {
+  max-width: var(--content-max-width);
+  margin-inline: auto;
+  padding: 32px 32px 48px;
+}
+:root body[data-design="astra-blue"] .home-shell { padding: 0; max-width: none; }
+:root body[data-design="astra-blue"] main:has(.home-shell) { padding-top: 0; }
+:root body[data-design="astra-blue"] :is(h1,h2,h3,h4) { font-weight: 600; letter-spacing: -.025em; }
+:root body[data-design="astra-blue"] a { text-underline-offset: 3px; }
+:root body[data-design="astra-blue"] .hidden { display: none !important; }
+:root body[data-design="astra-blue"] .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+:root body[data-design="astra-blue"] :is(button, a, input, select, summary):focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 3px;
+}
+:root body[data-design="astra-blue"] .site-header {
+  position: sticky;
+  top: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr) auto;
+  gap: 28px;
+  min-height: 68px;
+  padding: 0 max(24px, calc((100vw - 1180px) / 2));
+  background: var(--ink-0);
+  border-color: var(--ink-200);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  z-index: 100;
+}
+:root body[data-design="astra-blue"] .header-left { display: flex; min-width: 0; }
+:root body[data-design="astra-blue"] .kurerok-logo {
+  --logo-pin: var(--brand-500);
+  --logo-dot: var(--ink-0);
+  --logo-fs: 24px;
+  transform: none;
+}
+:root body[data-design="astra-blue"] .main-nav ul { justify-content: flex-start; gap: 18px; }
+:root body[data-design="astra-blue"] .main-nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 68px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ink-500);
+  border-radius: 0;
+  padding: 0;
+  background: none;
+}
+:root body[data-design="astra-blue"] .main-nav a:hover { color: var(--brand-500); }
+:root body[data-design="astra-blue"] .header-controls { position: static; transform: none; gap: 8px; }
+:root body[data-design="astra-blue"] .theme-toggle {
+  border: 0;
+  border-radius: 3px;
+  width: 36px;
+  height: 40px;
+  box-shadow: none;
+  background: transparent;
+}
+:root body[data-design="astra-blue"] .header-lang .lang-toggle {
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  min-width: 44px;
+  min-height: 40px;
+  padding: 0 5px;
+  box-shadow: none;
+  font-weight: 500;
+  font-size: 12px;
+}
+:root body[data-design="astra-blue"] .header-lang .lang-flag { display: none; }
+:root body[data-design="astra-blue"] .header-lang .lang-code { display: inline; }
+:root body[data-design="astra-blue"] .mobile-site-menu { display: none; position: relative; }
+:root body[data-design="astra-blue"] .mobile-site-menu summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 4px;
+  list-style: none;
+  font-size: 13px;
+  cursor: pointer;
+}
+:root body[data-design="astra-blue"] .mobile-site-menu summary::-webkit-details-marker { display: none; }
+:root body[data-design="astra-blue"] .mobile-site-menu nav {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: 216px;
+  padding: 8px;
+  background: var(--ink-0);
+  border: 1px solid var(--ink-200);
+  box-shadow: var(--shadow-lg);
+  z-index: 120;
+}
+:root body[data-design="astra-blue"] .mobile-site-menu nav a {
+  display: block;
+  padding: 10px 12px;
+  min-height: 44px;
+  color: var(--ink-700);
+  text-decoration: none;
+  font-size: 14px;
+}
+:root body[data-design="astra-blue"] .mobile-site-menu nav a:hover { background: var(--ink-50); }
+:root body[data-design="astra-blue"] :is(.btn-primary,.apply-btn,.apply-btn-large,.hero-v2-cta-primary,.jobs-grid-more-btn,.vacancy-sticky-apply) {
+  background: var(--action-blue);
+  color: var(--action-on-blue);
+  border-color: var(--action-blue);
+  border-radius: 3px;
+  box-shadow: none;
+  background-image: none;
+  font-weight: 500;
+  transform: none;
+  animation: none;
+}
+:root body[data-design="astra-blue"] :is(.btn-primary,.apply-btn,.apply-btn-large,.jobs-grid-more-btn):hover {
+  background: var(--action-blue-hover);
+  color: var(--action-on-blue);
+  border-color: var(--action-blue-hover);
+  transform: none;
+  box-shadow: none;
+}
+:root body[data-design="astra-blue"] :is(.apply-btn-unavailable, .apply-btn-unavailable:hover) {
+  background: var(--ink-50);
+  color: var(--ink-500);
+  border-color: var(--ink-200);
+}
+:root body[data-design="astra-blue"] .jobs-grid { grid-template-columns: minmax(0,1fr); gap: 0; }
+:root body[data-design="astra-blue"] .job-grid-container { gap: 0; }
+:root body[data-design="astra-blue"] .job-list-heading {
+  padding: 24px 0 14px;
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.4;
+  border-bottom: 1px solid var(--ink-200);
+}
+:root body[data-design="astra-blue"] .job-grid-container .back-to-top {
+  background: var(--ink-0);
+  border: 1px solid var(--ink-200);
+  box-shadow: var(--shadow-md);
+  color: var(--brand-500);
+  border-radius: 5px;
+}
+:root body[data-design="astra-blue"] footer {
+  background: var(--ink-0);
+  color: var(--ink-700);
+  border-top: 1px solid var(--ink-200);
+  padding: 32px max(24px, calc((100vw - 1056px) / 2));
+}
+:root body[data-design="astra-blue"] .footer-col h4 { text-transform: none; font-size: 15px; color: var(--ink-700); letter-spacing: 0; }
+:root body[data-design="astra-blue"] .footer-cloud span { background: transparent; border: 0; padding: 0; border-radius: 0; }
+:root body[data-design="astra-blue"] .footer-cloud span + span::before { content: '·'; margin-right: 6px; color: var(--ink-400); }
+:root body[data-design="astra-blue"] :is(.footer-content,.footer-bottom) { max-width: var(--content-max-width); }
+
+/* Page families share the same neutral hierarchy; existing content and page
+   grids are retained. Modals, dropdowns and interactive surfaces stay opaque. */
+:root body[data-design="astra-blue"] :is(.hero,.cities-hero,.guide-hero,.calculator-hero,.compare-header,.company-hero,.transport-hero,.listing-hero,.vacancy-header) {
+  background: transparent;
+  background-image: none;
+  border-radius: 0;
+  box-shadow: none;
+  border-color: var(--ink-200);
+}
+:root body[data-design="astra-blue"] :is(.vacancy-header,.guide-hero,.cities-hero,.calculator-hero) { padding-block: 12px 28px; }
+:root body[data-design="astra-blue"] :is(.vacancy-title,.cities-hero h1,.guide-hero h1,.calculator-hero h1,.compare-header h1,.company-hero h1) {
+  color: var(--ink-700);
+  font-size: clamp(28px,3vw,40px);
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -.035em;
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+:root body[data-design="astra-blue"] :is(.vacancy-card-sidebar,.vacancy-salary-card,.vacancy-income-calculator,.income-calculator,.review-card,.faq-item,.info-card,.company-card,.city-tile,.region-block,.knowledge-card,.guide-card,.transport-format-link) {
+  background: var(--ink-0);
+  background-image: none;
+  border-color: var(--ink-200);
+  border-radius: 5px;
+  box-shadow: none;
+  transform: none;
+}
+/* Home's old page-scoped !important rules are reconciled here explicitly. */
+:root body[data-design="astra-blue"] :is(.review-card,.faq-item) {
+  background: var(--ink-0) !important;
+  border-color: var(--ink-200) !important;
+  border-radius: 5px !important;
+  box-shadow: none !important;
+}
+:root body[data-design="astra-blue"] .reviews-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+}
+:root body[data-design="astra-blue"] :is(.home-section,.reviews-section) { min-width: 0; }
+:root body[data-design="astra-blue"] :is(.salary-label,.vacancy-salary-value,.salary-amount) { color: var(--ink-700); }
+:root body[data-design="astra-blue"] :is(.meta-pill,.tag,.transport-tag,.company-tag) { border-radius: 3px; }
+:root body[data-design="astra-blue"] :is(.vacancy-logo,.company-logo img,.company-card-logo) { background: #fff; }
+:root body[data-design="astra-blue"] .vacancy-title { max-width: none; }
+:root body[data-design="astra-blue"] .vacancy-company-name { color: var(--brand-500); font-weight: 500; }
+:root body[data-design="astra-blue"] .vacancy-page {
+  --vacancy-panel-gradient: var(--ink-0);
+  --vacancy-card-gradient: var(--ink-0);
+  --vacancy-route-gradient: var(--ink-0);
+  background: var(--ink-0);
+}
+:root body[data-design="astra-blue"] .vacancy-page > .container-narrow { padding-inline: 0; }
+:root body[data-design="astra-blue"] .vacancy-content-grid { grid-template-columns: minmax(0,2fr) minmax(0,1fr); }
+:root body[data-design="astra-blue"] :is(.vacancy-main,.vacancy-sidebar) { min-width: 0; }
+:root body[data-design="astra-blue"] .vacancy-section { overflow-wrap: anywhere; }
+:root body[data-design="astra-blue"] .vacancy-header { padding: 12px 0 28px; border: 0; gap: 28px; }
+:root body[data-design="astra-blue"] .vacancy-logo { box-shadow: none; border-radius: 5px; }
+:root body[data-design="astra-blue"] :is(.guide-card-link,.age-methodology,.age-table-wrap,.age-role-card,.age-howto-link,.age-faq-card,.age-sources) { border-radius: 5px; background: var(--ink-0); border-color: var(--ink-200); box-shadow: none; }
+:root body[data-design="astra-blue"] .guide-card-link:hover { transform: none; border-color: var(--brand-500); }
+:root body[data-design="astra-blue"] .vacancy-income-calculator { border-top: 1px solid var(--ink-200); }
+:root body[data-design="astra-blue"] .vacancy-sticky-apply { border-radius: 0; }
+:root body[data-design="astra-blue"] .vacancy-sticky-apply-icon { display: none; }
+:root body[data-design="astra-blue"].has-vacancy-sticky-apply { padding-bottom: 64px; }
+:root body[data-design="astra-blue"] .blog-sticky-vacancies { background: var(--action-blue); color: var(--action-on-blue); border-radius: 3px; box-shadow: none; font-weight: 500; }
+:root body[data-design="astra-blue"] .blog-sticky-vacancies:hover { background: var(--action-blue-hover); color: var(--action-on-blue); }
+:root body[data-design="astra-blue"] .blog-sticky-vacancies-icon { display: none; }
+:root body[data-design="astra-blue"].has-blog-sticky-vacancies { padding-bottom: 84px; }
+:root body[data-design="astra-blue"] :is(.blog-hero h1,.article-header h1) { font-size: clamp(28px,3vw,40px); font-weight: 600; line-height: 1.2; }
+:root body[data-design="astra-blue"] :is(.vacancies-grid,.company-vacancies-grid) { grid-template-columns: minmax(0,1fr); gap: 0; }
+:root body[data-design="astra-blue"] :is(.company-header,.contacts-hero,.companies-hero,.company-guide-hero,.compare-header) {
+  background: transparent;
+  background-image: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+:root body[data-design="astra-blue"] :is(.company-listing-card,.partner-card,.company-score-card,.company-answer-panel,.fact-card,.geo-card,.contact-card,.contact-form-card,.calc-card,.compare-empty,.compare-help-card) {
+  background: var(--ink-0);
+  background-image: none;
+  border: 1px solid var(--ink-200);
+  border-radius: 5px;
+  box-shadow: none;
+}
+:root body[data-design="astra-blue"] :is(.company-listing-card,.city-tile,.transport-format-link):hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--brand-400);
+}
+:root body[data-design="astra-blue"] :is(.company-header h1,.contacts-hero h1,.companies-hero h1) {
+  font-size: clamp(28px,3vw,40px);
+  color: var(--ink-700);
+  font-weight: 600;
+  letter-spacing: -.035em;
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+:root body[data-design="astra-blue"] :is(.contacts-hero,.companies-hero) { text-align: left; padding-block: 8px 28px; }
+:root body[data-design="astra-blue"] :is(.compare-page,.compare-container,.compare-header) { border: 0; box-shadow: none; }
+:root body[data-design="astra-blue"] .compare-container { padding: 0; }
+:root body[data-design="astra-blue"] .compare-filters { background: var(--ink-50); border-color: var(--ink-200); border-radius: 5px; }
+:root body[data-design="astra-blue"] .compare-filter select { border-radius: 3px; border-color: var(--ink-200); }
+:root body[data-design="astra-blue"] :is(.compare-table-link,.compare-filter-reset) { border-radius: 3px; font-weight: 500; }
+:root body[data-design="astra-blue"] .compare-table-link { background: var(--action-blue); color: var(--action-on-blue); }
+:root body[data-design="astra-blue"] :is(.company-kicker,.vacancy-kicker,.section-eyebrow) { color: var(--ink-500); font-weight: 500; letter-spacing: .035em; }
+:root body[data-design="astra-blue"] .listing-hero { padding: 12px 0 20px; border: 0; }
+:root body[data-design="astra-blue"] .listing-hero-panel { padding: 12px 0; background: transparent; border: 0; border-radius: 0; box-shadow: none; }
+:root body[data-design="astra-blue"] .listing-hero-panel::before { display: none; }
+:root body[data-design="astra-blue"] :is(.listing-hero h1,.calendar-hero h1) { max-width: none; font-size: clamp(28px,3vw,40px); line-height: 1.2; color: var(--ink-700); font-weight: 600; letter-spacing: -.035em; }
+:root body[data-design="astra-blue"] :is(.listing-eyebrow,.section-eyebrow) { background: transparent; border: 0; padding: 0; color: var(--ink-500); font-weight: 500; }
+:root body[data-design="astra-blue"] :is(.listing-primary-link,.listing-secondary-link) { border-radius: 3px; font-weight: 500; box-shadow: none; transform: none; }
+:root body[data-design="astra-blue"] .listing-primary-link { background: var(--action-blue); border-color: var(--action-blue); color: var(--action-on-blue); }
+:root body[data-design="astra-blue"] .listing-primary-link:hover { background: var(--action-blue-hover); border-color: var(--action-blue-hover); }
+:root body[data-design="astra-blue"] .listing-secondary-link { background: var(--ink-0); border-color: var(--ink-200); color: var(--brand-500); }
+:root body[data-design="astra-blue"] :is(.listing-fact-card,.calendar-hero-copy,.calendar-summary div,.calendar-section) { background: var(--ink-0); border-color: var(--ink-200); border-radius: 5px; box-shadow: none; }
+:root body[data-design="astra-blue"] .hub-link { color: var(--brand-500); }
+:root body[data-design="astra-blue"] .metro-hero { background: transparent; border-color: var(--ink-200); }
+:root body[data-design="astra-blue"] .metro-hero h1 { font-size: clamp(28px,3vw,40px); font-weight: 600; line-height: 1.2; }
+:root body[data-design="astra-blue"] .geo-banner-card { background: var(--ink-0); color: var(--ink-700); border: 1px solid var(--ink-200); border-radius: 5px; box-shadow: var(--shadow-lg); }
+:root body[data-design="astra-blue"] .geo-banner-title { color: var(--ink-700); font-weight: 600; }
+:root body[data-design="astra-blue"] .geo-banner-title strong { color: var(--brand-500); }
+:root body[data-design="astra-blue"] .geo-banner-body { color: var(--ink-500); }
+:root body[data-design="astra-blue"] .geo-banner-icon { display: none; }
+:root body[data-design="astra-blue"] .geo-banner-btn { border-radius: 3px; font-weight: 500; }
+:root body[data-design="astra-blue"] .geo-banner-btn-primary { background: var(--action-blue); border-color: var(--action-blue); color: var(--action-on-blue); }
+:root body[data-design="astra-blue"] .geo-banner-btn-primary:hover { background: var(--action-blue-hover); }
+:root body[data-design="astra-blue"] .geo-banner-btn-secondary { background: var(--ink-0); border-color: var(--ink-200); color: var(--ink-700); }
+:root body[data-design="astra-blue"] .geo-banner-btn-secondary:hover { background: var(--ink-50); }
+
+/* The published employer pages use the editorial guide template. */
+:root body[data-design="astra-blue"] .employer-guide { background: var(--ink-0); }
+:root body[data-design="astra-blue"] .eg-shell { padding-inline: 0; }
+:root body[data-design="astra-blue"] .eg-hero { padding-block: 24px; gap: 28px; }
+:root body[data-design="astra-blue"] :is(.eg-hero,.eg-brief dl div,.eg-verdict,.eg-steps,.eg-vacancies,.eg-cities,.eg-reviews,.eg-faq,.eg-info-grid,.eg-decision-grid,.eg-vacancy-row,.eg-faq-list details) { border-color: var(--ink-200); }
+:root body[data-design="astra-blue"] :is(.eg-hero h1,.eg-section-head h2,.eg-info-block h2,.eg-decision-block h2,.eg-vacancy-row h3,.eg-vacancy-row h3 a,.eg-lead,.eg-brief dd,.eg-vacancy-row strong,.eg-review-list strong,.eg-faq-list summary) { color: var(--ink-700); font-weight: 600; }
+:root body[data-design="astra-blue"] .eg-hero h1 { max-width: none; font-size: clamp(28px,3vw,40px); line-height: 1.2; letter-spacing: -.035em; text-wrap: pretty; }
+:root body[data-design="astra-blue"] .eg-lead { font-size: 17px; font-weight: 400; }
+:root body[data-design="astra-blue"] :is(.eg-summary,.eg-verdict-list p,.eg-info-block p,.eg-decision-block li,.eg-steps li,.eg-vacancy-row p,.eg-review-list p,.eg-faq details p,.eg-source-copy p,.eg-brief p,.eg-brief small,.eg-breadcrumb,.eg-brief dt,.eg-review-list span) { color: var(--ink-500); }
+:root body[data-design="astra-blue"] .eg-kicker { color: var(--ink-500); font-weight: 500; }
+:root body[data-design="astra-blue"] .eg-breadcrumb a { color: var(--brand-500); }
+:root body[data-design="astra-blue"] :is(.eg-primary-link,.eg-secondary-link,.eg-city-row a,.eg-source-links a) { border-radius: 3px; font-weight: 500; min-height: 44px; }
+:root body[data-design="astra-blue"] .eg-primary-link { color: var(--action-on-blue); background: var(--action-blue); border-color: var(--action-blue); }
+:root body[data-design="astra-blue"] .eg-primary-link:hover { background: var(--action-blue-hover); border-color: var(--action-blue-hover); }
+:root body[data-design="astra-blue"] :is(.eg-secondary-link,.eg-city-row a,.eg-source-links a) { background: var(--ink-0); border-color: var(--ink-200); color: var(--brand-500); }
+:root body[data-design="astra-blue"] :is(.eg-brief,.eg-info-block,.eg-decision-block,.eg-review-list article) { background: var(--ink-0); border-color: var(--ink-200); border-radius: 5px; box-shadow: none; }
+:root body[data-design="astra-blue"] .eg-logo { background: #fff; border-color: var(--ink-200); border-radius: 5px; }
+:root body[data-design="astra-blue"] :is(.eg-tag-row span,.eg-verdict-list span) { background: var(--ink-50); color: var(--ink-700); border-radius: 3px; font-weight: 500; }
+:root body[data-design="astra-blue"] :is(.eg-decision-block li,.eg-steps li)::marker { color: var(--brand-500); font-weight: 500; }
+:root body[data-design="astra-blue"] .eg-brief dt { font-weight: 500; }
+:root body[data-design="astra-blue"] .calc-result {
+  background: var(--ink-50);
+  color: var(--ink-700);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+:root body[data-design="astra-blue"] .result-box { background: var(--ink-50); color: var(--ink-700); border-radius: 0; }
+:root body[data-design="astra-blue"] #income-calculator input[type="range"] { background: var(--ink-200); }
+:root body[data-design="astra-blue"] :is(.calc-result h3,.calc-result .disclaimer,.calc-result .result-label,.calc-result .amount,.calc-result .currency) { color: var(--ink-700); }
+:root body[data-design="astra-blue"] :is(.calc-cta-btn,.apply-submit) { background: var(--action-blue); color: var(--action-on-blue); border-radius: 3px; box-shadow: none; font-weight: 500; }
+:root body[data-design="astra-blue"] :is(.calc-cta-btn,.apply-submit):hover { background: var(--action-blue-hover); color: var(--action-on-blue); box-shadow: none; transform: none; }
+:root body[data-design="astra-blue"].dark-mode :is(.company-header,.contacts-hero,.companies-hero,.vacancy-header,.cities-hero,.guide-hero,.calculator-hero,.compare-header) {
+  background: transparent;
+  background-image: none;
+  box-shadow: none;
+}
+:root body[data-design="astra-blue"].dark-mode :is(.vacancy-card-sidebar,.vacancy-salary-card,.vacancy-income-calculator,.company-listing-card,.partner-card,.company-score-card,.company-answer-panel,.fact-card,.geo-card,.contact-card,.contact-form-card,.calc-card,.info-card,.city-tile,.region-block) {
+  background: var(--ink-0);
+  background-image: none;
+  border-color: var(--ink-200);
+  box-shadow: none;
+}
+
+@media (max-width: 920px) {
+  :root body[data-design="astra-blue"] { padding-bottom: var(--mobile-nav-offset); }
+  :root body[data-design="astra-blue"] .site-header { display: flex; justify-content: space-between; gap: 12px; padding: 0 20px; min-height: 64px; }
+  :root body[data-design="astra-blue"] .kurerok-logo { --logo-fs: 22px; }
+  :root body[data-design="astra-blue"] .header-controls { gap: 6px; }
+  :root body[data-design="astra-blue"] .mobile-site-menu { display: block; }
+  :root body[data-design="astra-blue"] .bottom-nav {
+    height: var(--mobile-nav-offset);
+    padding: 0 8px env(safe-area-inset-bottom,0px);
+    background: var(--ink-0);
+    border-top: 1px solid var(--ink-200);
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  :root body[data-design="astra-blue"] .bn-item { min-height: 56px; justify-content: center; font-size: 11px; gap: 4px; }
+  :root body[data-design="astra-blue"] .bn-item svg { width: 21px; height: 21px; stroke-width: 1.7; }
+  :root body[data-design="astra-blue"] .bn-badge { background: var(--action-blue); border-color: var(--ink-0); font-size: 10px; }
+  :root body[data-design="astra-blue"] .vacancy-sticky-apply { bottom: var(--mobile-nav-offset); z-index: 91; }
+  :root body[data-design="astra-blue"].has-vacancy-sticky-apply { padding-bottom: calc(var(--mobile-nav-offset) + 64px); }
+  :root body[data-design="astra-blue"] .blog-sticky-vacancies { bottom: calc(var(--mobile-nav-offset) + 12px); }
+  :root body[data-design="astra-blue"].has-blog-sticky-vacancies { padding-bottom: calc(var(--mobile-nav-offset) + 84px); }
+  :root body[data-design="astra-blue"].has-blog-sticky-vacancies main { padding-bottom: 136px; }
+  :root body[data-design="astra-blue"].has-vacancy-sticky-apply main { padding-bottom: 96px; }
+  :root body[data-design="astra-blue"] .back-to-top { bottom: calc(var(--mobile-nav-offset) + 16px); }
+  :root body[data-design="astra-blue"] .vacancy-content-grid { grid-template-columns: minmax(0,1fr); }
+}
+@media (max-width: 768px) {
+  :root body[data-design="astra-blue"] main { padding: 24px 20px 36px; }
+  :root body[data-design="astra-blue"] main:has(.home-shell) { padding-top: 0; }
+  :root body[data-design="astra-blue"] .home-shell { padding: 0; }
+  :root body[data-design="astra-blue"] .job-list-heading { font-size: 18px; padding-top: 22px; }
+  :root body[data-design="astra-blue"] footer { padding: 28px 20px; }
+  :root body[data-design="astra-blue"] .footer-content { gap: 24px; }
+  :root body[data-design="astra-blue"] .calendar-hero-copy { padding: 16px; }
+  :root body[data-design="astra-blue"] .calendar-hero h1 { font-size: clamp(24px,7vw,28px); }
+  :root body[data-design="astra-blue"] .vacancy-company-info { display: grid; grid-template-columns: 48px minmax(0,1fr); grid-template-areas: "logo kicker" "logo company" "title title"; grid-template-rows: 18px 26px auto; gap: 4px 12px; }
+  :root body[data-design="astra-blue"] .vacancy-company-info > div { display: contents; }
+  :root body[data-design="astra-blue"] .vacancy-logo { grid-area: logo; width: 48px; height: 48px; padding: 4px; }
+  :root body[data-design="astra-blue"] .vacancy-kicker { grid-area: kicker; margin: 0; align-self: end; font-size: 10px; }
+  :root body[data-design="astra-blue"] .vacancy-company-name { grid-area: company; align-self: start; font-size: 14px; }
+  :root body[data-design="astra-blue"] .vacancy-title { grid-area: title; margin-top: 12px; text-wrap: pretty; }
+}
+@media (max-width: 359px) {
+  :root body[data-design="astra-blue"] main { padding-inline: 16px; }
+  :root body[data-design="astra-blue"] .site-header { padding-inline: 16px; gap: 8px; }
+  :root body[data-design="astra-blue"] .header-controls { gap: 3px; }
+  :root body[data-design="astra-blue"] .kurerok-logo { --logo-fs: 20px; }
+}

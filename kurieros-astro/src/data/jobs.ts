@@ -711,7 +711,7 @@ export const buildJobsFromVacancies = (
         // page can emit data-ozon-* attributes consumed by
         // OzonLeadModal → Cloudflare Worker.
         ...(offer.ozonLeadForm ? { ozonLeadForm: offer.ozonLeadForm } : {}),
-      });
+      }, language);
     }),
   );
 };

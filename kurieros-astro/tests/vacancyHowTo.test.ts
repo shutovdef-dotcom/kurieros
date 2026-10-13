@@ -50,6 +50,18 @@ describe('resolveVacancyHowToTemplate', () => {
 });
 
 describe('buildVacancyHowToSteps', () => {
+  it('uses cargo registration and vehicle checks without courier employment promises', () => {
+    const text = stepsText(buildVacancyHowToSteps({
+      job: buildJob({ company: 'Яндекс Доставка', transport: 'auto' }),
+      jobCities: ['Москва'],
+      template: 'cargo_driver',
+    }));
+    expect(text).toContain('СТС');
+    expect(text).toContain('партнёром сервиса');
+    expect(text).toContain('доход зависит от поездок');
+    expect(text).not.toMatch(/смен|трудоустрой|медицинскую книжку|15 минут|гарантир/i);
+  });
+
   it('renders a call-center flow without courier instructions', () => {
     const text = stepsText(
       buildVacancyHowToSteps({

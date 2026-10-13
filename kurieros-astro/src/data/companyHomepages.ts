@@ -20,10 +20,11 @@
  */
 export const COMPANY_HOMEPAGES: Readonly<Record<string, string>> = {
   'Яндекс Еда': 'https://eda.yandex.ru/',
+  'Яндекс Доставка': 'https://dostavka.yandex.ru/',
   'Купер (ex. СберМаркет)': 'https://kuper.ru/',
   'Т-Банк': 'https://www.tbank.ru/',
   'Альфа-Банк': 'https://alfabank.ru/',
-  'МТС Банк': 'https://www.mtsbank.ru/',
+  'МТС': 'https://mts.ru/',
   'Бургер Кинг': 'https://burgerking.ru/',
   Ozon: 'https://www.ozon.ru/',
   'Ozon fresh': 'https://www.ozon.ru/',

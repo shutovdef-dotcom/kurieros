@@ -75,6 +75,7 @@ export const SOURCE_OCCUPATION: Readonly<Record<string, string>> = {
     '53-1042 First-Line Supervisors of Transportation and Material Moving Workers',
   'ff:electricStackerDriver': '53-7051 Industrial Truck and Tractor Operators',
   'ff:truckDriver': '53-3032 Heavy and Tractor-Trailer Truck Drivers',
+  'yandex-delivery-cargo-driver': '53-3032 Heavy and Tractor-Trailer Truck Drivers',
 
   // Administrative office support
   'express:adminPersonal': '43-9061 Office Clerks, General',

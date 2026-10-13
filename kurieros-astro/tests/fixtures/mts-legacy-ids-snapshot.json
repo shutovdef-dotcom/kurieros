@@ -1,0 +1,418 @@
+[
+  {
+    "id": 2702724,
+    "slug": "mts-bank-operator-beloostrov-remote"
+  },
+  {
+    "id": 2703474,
+    "slug": "mts-bank-operator-beloozerskiy-remote"
+  },
+  {
+    "id": 2705334,
+    "slug": "mts-bank-operator-klin-remote"
+  },
+  {
+    "id": 2706654,
+    "slug": "mts-bank-operator-shatura-remote"
+  },
+  {
+    "id": 2707554,
+    "slug": "mts-bank-operator-domodedovo-remote"
+  },
+  {
+    "id": 2708234,
+    "slug": "mts-bank-operator-orehovo-zuevo-remote"
+  },
+  {
+    "id": 2709304,
+    "slug": "mts-bank-operator-luhovitsy-remote"
+  },
+  {
+    "id": 2709534,
+    "slug": "mts-bank-operator-himki-remote"
+  },
+  {
+    "id": 2711614,
+    "slug": "mts-bank-operator-komarovo-remote"
+  },
+  {
+    "id": 2712314,
+    "slug": "mts-bank-operator-taldom-remote"
+  },
+  {
+    "id": 2712974,
+    "slug": "mts-bank-operator-dolgoprudnyy-remote"
+  },
+  {
+    "id": 2713224,
+    "slug": "mts-bank-operator-lomonosov-remote"
+  },
+  {
+    "id": 2714034,
+    "slug": "mts-bank-operator-korolev-remote"
+  },
+  {
+    "id": 2714514,
+    "slug": "mts-bank-operator-ivanteevka-remote"
+  },
+  {
+    "id": 2714994,
+    "slug": "mts-bank-operator-peresvet-remote"
+  },
+  {
+    "id": 2715584,
+    "slug": "mts-bank-operator-noginsk-remote"
+  },
+  {
+    "id": 2716424,
+    "slug": "mts-bank-operator-losino-petrovskiy-remote"
+  },
+  {
+    "id": 2716924,
+    "slug": "mts-bank-operator-aleksandrovskaya-remote"
+  },
+  {
+    "id": 2717384,
+    "slug": "mts-bank-operator-zhukovskiy-remote"
+  },
+  {
+    "id": 2718414,
+    "slug": "mts-bank-operator-voskresensk-remote"
+  },
+  {
+    "id": 2721514,
+    "slug": "mts-bank-operator-drezna-remote"
+  },
+  {
+    "id": 2721644,
+    "slug": "mts-bank-operator-metallostroy-remote"
+  },
+  {
+    "id": 2723134,
+    "slug": "mts-bank-operator-chernogolovka-remote"
+  },
+  {
+    "id": 2724284,
+    "slug": "mts-bank-operator-krasnoe-selo-remote"
+  },
+  {
+    "id": 2726784,
+    "slug": "mts-bank-operator-chehov-remote"
+  },
+  {
+    "id": 2727084,
+    "slug": "mts-bank-operator-krasnoznamensk-remote"
+  },
+  {
+    "id": 2727644,
+    "slug": "mts-bank-operator-petro-slavyanka-remote"
+  },
+  {
+    "id": 2727854,
+    "slug": "mts-bank-operator-serovo-remote"
+  },
+  {
+    "id": 2728594,
+    "slug": "mts-bank-operator-mozhaysk-remote"
+  },
+  {
+    "id": 2729824,
+    "slug": "mts-bank-operator-zelenogorsk-remote"
+  },
+  {
+    "id": 2729904,
+    "slug": "mts-bank-operator-zaraysk-remote"
+  },
+  {
+    "id": 2729994,
+    "slug": "mts-bank-operator-krasnoarmeysk-remote"
+  },
+  {
+    "id": 2730014,
+    "slug": "mts-bank-operator-egorevsk-remote"
+  },
+  {
+    "id": 2730774,
+    "slug": "mts-bank-operator-ust-izhora-remote"
+  },
+  {
+    "id": 2731284,
+    "slug": "mts-bank-operator-strelna-remote"
+  },
+  {
+    "id": 2736734,
+    "slug": "mts-bank-operator-petergof-remote"
+  },
+  {
+    "id": 2737714,
+    "slug": "mts-bank-operator-volokolamsk-remote"
+  },
+  {
+    "id": 2737764,
+    "slug": "mts-bank-operator-kolomna-remote"
+  },
+  {
+    "id": 2738244,
+    "slug": "mts-bank-operator-yahroma-remote"
+  },
+  {
+    "id": 2738904,
+    "slug": "mts-bank-operator-lyubertsy-remote"
+  },
+  {
+    "id": 2739094,
+    "slug": "mts-bank-operator-ruza-remote"
+  },
+  {
+    "id": 2739644,
+    "slug": "mts-bank-operator-aprelevka-remote"
+  },
+  {
+    "id": 2742824,
+    "slug": "mts-bank-operator-ramenskoe-remote"
+  },
+  {
+    "id": 2747864,
+    "slug": "mts-bank-operator-levashovo-remote"
+  },
+  {
+    "id": 2749764,
+    "slug": "mts-bank-operator-elektrougli-remote"
+  },
+  {
+    "id": 2751214,
+    "slug": "mts-bank-operator-hotkovo-remote"
+  },
+  {
+    "id": 2751424,
+    "slug": "mts-bank-operator-kurovskoe-remote"
+  },
+  {
+    "id": 2751674,
+    "slug": "mts-bank-operator-krasnozavodsk-remote"
+  },
+  {
+    "id": 2753284,
+    "slug": "mts-bank-operator-lytkarino-remote"
+  },
+  {
+    "id": 2755544,
+    "slug": "mts-bank-operator-pushkino-remote"
+  },
+  {
+    "id": 2755614,
+    "slug": "mts-bank-operator-mytischi-remote"
+  },
+  {
+    "id": 2756454,
+    "slug": "mts-bank-operator-serpuhov-remote"
+  },
+  {
+    "id": 2756944,
+    "slug": "mts-bank-operator-vidnoe-remote"
+  },
+  {
+    "id": 2757184,
+    "slug": "mts-bank-operator-odintsovo-remote"
+  },
+  {
+    "id": 2757294,
+    "slug": "mts-bank-operator-pavlovsk-remote"
+  },
+  {
+    "id": 2758154,
+    "slug": "mts-bank-operator-naro-fominsk-remote"
+  },
+  {
+    "id": 2758234,
+    "slug": "mts-bank-operator-tyarlevo-remote"
+  },
+  {
+    "id": 2759184,
+    "slug": "mts-bank-operator-istra-remote"
+  },
+  {
+    "id": 2759594,
+    "slug": "mts-bank-operator-elektrogorsk-remote"
+  },
+  {
+    "id": 2760354,
+    "slug": "mts-bank-operator-vereya-remote"
+  },
+  {
+    "id": 2760604,
+    "slug": "mts-bank-operator-puschino-remote"
+  },
+  {
+    "id": 2762744,
+    "slug": "mts-bank-operator-sestroretsk-remote"
+  },
+  {
+    "id": 2764314,
+    "slug": "mts-bank-operator-dzerzhinskiy-remote"
+  },
+  {
+    "id": 2765104,
+    "slug": "mts-bank-operator-solnechnogorsk-remote"
+  },
+  {
+    "id": 2766124,
+    "slug": "mts-bank-operator-kashira-remote"
+  },
+  {
+    "id": 2766624,
+    "slug": "mts-bank-operator-ushkovo-remote"
+  },
+  {
+    "id": 2766744,
+    "slug": "mts-bank-operator-protvino-remote"
+  },
+  {
+    "id": 2767074,
+    "slug": "mts-bank-operator-molodezhnoe-remote"
+  },
+  {
+    "id": 2767134,
+    "slug": "mts-bank-operator-solnechnoe-remote"
+  },
+  {
+    "id": 2767664,
+    "slug": "mts-bank-operator-ozery-remote"
+  },
+  {
+    "id": 2768084,
+    "slug": "mts-bank-operator-sapernyy-remote"
+  },
+  {
+    "id": 2772104,
+    "slug": "mts-bank-operator-dmitrov-remote"
+  },
+  {
+    "id": 2773254,
+    "slug": "mts-bank-operator-kotelniki-remote"
+  },
+  {
+    "id": 2774164,
+    "slug": "mts-bank-operator-shushary-remote"
+  },
+  {
+    "id": 2774244,
+    "slug": "mts-bank-operator-vysokovsk-remote"
+  },
+  {
+    "id": 2774834,
+    "slug": "mts-bank-operator-fryazino-remote"
+  },
+  {
+    "id": 2775174,
+    "slug": "mts-bank-operator-elektrostal-remote"
+  },
+  {
+    "id": 2779134,
+    "slug": "mts-bank-operator-golitsyno-remote"
+  },
+  {
+    "id": 2781784,
+    "slug": "mts-bank-operator-kubinka-remote"
+  },
+  {
+    "id": 2782094,
+    "slug": "mts-bank-operator-dubna-remote"
+  },
+  {
+    "id": 2782364,
+    "slug": "mts-bank-operator-sergiev-posad-remote"
+  },
+  {
+    "id": 2782854,
+    "slug": "mts-bank-operator-pavlovskiy-posad-remote"
+  },
+  {
+    "id": 2783904,
+    "slug": "mts-bank-operator-smolyachkovo-remote"
+  },
+  {
+    "id": 2786014,
+    "slug": "mts-bank-operator-pushkin-remote"
+  },
+  {
+    "id": 2786234,
+    "slug": "mts-bank-operator-kronshtadt-remote"
+  },
+  {
+    "id": 2787014,
+    "slug": "mts-bank-operator-lisiy-nos-remote"
+  },
+  {
+    "id": 2787394,
+    "slug": "mts-bank-operator-pesochnyy-remote"
+  },
+  {
+    "id": 2788294,
+    "slug": "mts-bank-operator-pontonnyy-remote"
+  },
+  {
+    "id": 2789804,
+    "slug": "mts-bank-operator-pargolovo-remote"
+  },
+  {
+    "id": 2789964,
+    "slug": "mts-bank-operator-zvenigorod-remote"
+  },
+  {
+    "id": 2790204,
+    "slug": "mts-bank-operator-balashiha-remote"
+  },
+  {
+    "id": 2790244,
+    "slug": "mts-bank-operator-repino-remote"
+  },
+  {
+    "id": 2790394,
+    "slug": "mts-bank-operator-staraya-kupavna-remote"
+  },
+  {
+    "id": 2791414,
+    "slug": "mts-bank-operator-podolsk-remote"
+  },
+  {
+    "id": 2791764,
+    "slug": "mts-bank-operator-roshal-remote"
+  },
+  {
+    "id": 2793614,
+    "slug": "mts-bank-operator-bronnitsy-remote"
+  },
+  {
+    "id": 2793624,
+    "slug": "mts-bank-operator-lobnya-remote"
+  },
+  {
+    "id": 2794094,
+    "slug": "mts-bank-operator-dedovsk-remote"
+  },
+  {
+    "id": 2794334,
+    "slug": "mts-bank-operator-likino-dulevo-remote"
+  },
+  {
+    "id": 2795014,
+    "slug": "mts-bank-operator-stupino-remote"
+  },
+  {
+    "id": 2796454,
+    "slug": "mts-bank-operator-schelkovo-remote"
+  },
+  {
+    "id": 2798234,
+    "slug": "mts-bank-operator-krasnogorsk-remote"
+  },
+  {
+    "id": 2798964,
+    "slug": "mts-bank-operator-reutov-remote"
+  },
+  {
+    "id": 2799674,
+    "slug": "mts-bank-operator-kolpino-remote"
+  }
+]

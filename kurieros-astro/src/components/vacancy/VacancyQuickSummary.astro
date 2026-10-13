@@ -1,14 +1,15 @@
 ---
 interface Props {
 	summary: string;
+	isPartnership?: boolean;
 }
 
-const { summary } = Astro.props;
+const { summary, isPartnership = false } = Astro.props;
 ---
 
 <section class="vacancy-section vacancy-quick-summary" id="vacancy-quick-summary" aria-labelledby="vacancy-quick-summary-title">
-	<p class="section-eyebrow">Кратко о вакансии</p>
-	<h2 id="vacancy-quick-summary-title">Главное о вакансии в одном абзаце</h2>
+	<p class="section-eyebrow">{isPartnership ? 'Кратко о сотрудничестве' : 'Кратко о вакансии'}</p>
+	<h2 id="vacancy-quick-summary-title">{isPartnership ? 'Главное о сотрудничестве в одном абзаце' : 'Главное о вакансии в одном абзаце'}</h2>
 	<p id="vacancy-quick-summary-text" class="vacancy-quick-summary-text">{summary}</p>
 </section>
 

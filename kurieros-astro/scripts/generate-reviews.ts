@@ -333,6 +333,11 @@ const readIfExists = async (path: string): Promise<string | null> => {
 // Group every vacancy by its brand (company name).
 const jobsByBrand = new Map<string, (typeof jobsData)[number][]>();
 for (const job of jobsData) {
+  // Existing courier review pools contain employment claims and do not
+  // describe cargo partnerships. Leave this new offer without sample reviews.
+  if (job.sourceSlug === 'yandex-delivery-cargo-driver') continue;
+  // Bank review pools do not establish experience with the MTS call centre.
+  if (job.sourceSlug === 'mts-bank-operator') continue;
   const bucket = jobsByBrand.get(job.company);
   if (bucket) {
     bucket.push(job);

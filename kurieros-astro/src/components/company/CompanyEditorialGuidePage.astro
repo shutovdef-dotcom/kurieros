@@ -18,11 +18,12 @@ type Props = {
 };
 
 const { company, guide, updatedDate, featuredReviews } = Astro.props as Props;
+const isCargoPartnership = company.name === 'Яндекс Доставка';
 
 const salaryLabel =
   company.maxSalary && company.maxSalaryCurrency
     ? `до ${formatMoneyPerMonth(company.maxSalary, company.maxSalaryCurrency)}`
-    : 'смотрите по городу';
+    : isCargoPartnership ? 'зависит от заказов' : 'смотрите по городу';
 const paymentLabel = company.paymentPreview.length
   ? company.paymentPreview.join(', ')
   : 'уточняется в карточке';
@@ -54,14 +55,14 @@ const vacancyRows = pickGuideVacancyExamples(
 const reviewRows = featuredReviews.slice(0, 2);
 const guideStats = [
   {
-    label: 'Вакансии',
+    label: isCargoPartnership ? 'Предложения' : 'Вакансии',
     value: `${company.vacancyCount}`,
     note: `${formatRussianPlural(company.vacancyCount, ['активная', 'активные', 'активных'])} на КурьерОк`,
   },
   {
     label: 'Доход',
     value: salaryLabel,
-    note: 'верхняя планка зависит от города и роли',
+    note: isCargoPartnership ? 'условия уточняются у партнёра сервиса' : 'верхняя планка зависит от города и роли',
   },
   {
     label: 'Формат',

@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { mtsLegacyRoutes } from '../../data/mtsLegacyRoutes';
+import { retiredVacancyRoutes } from '../../data/retiredVacancyRoutes';
+
+export function getStaticPaths() {
+  return [
+    ...mtsLegacyRoutes.map((route) => ({
+      params: { unavailable: route.slug },
+      props: { reason: 'mts_geo_unconfirmed' as const, city: route.city },
+    })),
+    ...retiredVacancyRoutes.map((route) => ({
+      params: { unavailable: route.slug },
+      props: { reason: route.reason, city: route.city },
+    })),
+  ];
+}
+
+const { city, reason } = Astro.props;
+const unavailableContent = {
+  mts_geo_unconfirmed: {
+    title: `МТС: ${city} — набор уточняется | КурьерОк`,
+    description: `Приём на удалённую работу оператором МТС из города ${city} пока не подтверждён.`,
+    heading: `Набор операторов МТС в городе ${city} пока не подтверждён`,
+    body: `Мы проверили условия вакансии 13 октября 2026 года. Этот город не указан в списке найма, поэтому отклик с этой страницы временно недоступен. Это не означает, что МТС прекратила набор во всех городах.`,
+  },
+  x5_partner_link_disabled: {
+    title: `X5 Доставка: отклик временно недоступен в городе ${city} | КурьерОк`,
+    description: `Партнёрская ссылка на вакансию водителя X5 Доставки в городе ${city} сейчас не открывает анкету. Статус набора и актуальный способ отклика уточняются.`,
+    heading: `Отклик на вакансию водителя X5 Доставки в городе ${city} временно недоступен`,
+    body: 'Сейчас по партнёрской ссылке нельзя отправить отклик. Мы уточняем актуальный способ подачи заявки. Это не означает, что X5 прекратила набор.',
+  },
+  voxys_partner_offer_paused: {
+    title: `Вакансия Voxys в городе ${city} недоступна через партнёра | КурьерОк`,
+    description: `Партнёрское предложение Voxys для города ${city} приостановлено. Это не подтверждает прекращение набора работодателем; актуальный способ отклика уточняется.`,
+    heading: `Предложение Voxys в городе ${city} сейчас недоступно через партнёра`,
+    body: 'Предложение нашего партнёра приостановлено, поэтому отклик с этой страницы временно недоступен. Это не означает, что Voxys прекратила набор. Мы уточняем актуальный способ подачи заявки.',
+  },
+} satisfies Record<string, { title: string; description: string; heading: string; body: string }>;
+const content = unavailableContent[reason];
+---
+
+<BaseLayout
+  title={content.title}
+  description={content.description}
+  canonicalURL={new URL(Astro.url.pathname, Astro.site)}
+  robots="noindex, follow"
+  includeOzonLeadModal={false}
+>
+  <main class="availability-page">
+    <p class="availability-city">{city}</p>
+    <h1>{content.heading}</h1>
+    <p>{content.body}</p>
+    <p><a href="/">Посмотреть доступные вакансии</a></p>
+  </main>
+</BaseLayout>
+
+<style>
+  .availability-page { max-width: 48rem; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+  .availability-city { color: #64748b; margin-bottom: 0.75rem; }
+  h1 { font-size: clamp(1.5rem, 4vw, 2.25rem); line-height: 1.2; margin-bottom: 1.25rem; }
+  p { line-height: 1.65; margin-bottom: 1.5rem; }
+  a { color: #1d4ed8; text-decoration: underline; text-underline-offset: 0.2em; }
+</style>

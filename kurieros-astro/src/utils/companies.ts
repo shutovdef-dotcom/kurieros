@@ -41,6 +41,7 @@ const COMPANY_SLUGS: Record<string, string> = {
   'Купер (Сбермаркет)': 'kuper-sbermarket',
   'Альфа-Банк': 'alfa-bank',
   'Т-Банк': 't-bank',
+  'МТС': 'mts-bank',
   'Бургер Кинг': 'burger-king',
   'Додо Пицца': 'dodo-pizza',
   'Магнит Доставка': 'magnit-dostavka',
@@ -79,6 +80,7 @@ export const slugifyCompany = (name: string) =>
 
 const companyTypeLabel = (name: string) => {
   if (/банк/i.test(name)) return 'финтех и банковская доставка';
+  if (/^мтс$/i.test(name)) return 'телеком';
   if (/руки|hands/i.test(name)) return 'ремонт и бытовые услуги';
   if (/qlean|домов[её]нок|клин/i.test(name)) return 'клининг и бытовые услуги';
   if (/voxys/i.test(name)) return 'контакт-центр и клиентский сервис';

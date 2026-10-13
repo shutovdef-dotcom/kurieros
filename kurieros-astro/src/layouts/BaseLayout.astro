@@ -1,6 +1,8 @@
 ---
 import '../styles/index.css';
+import '../styles/fonts.css';
 import '../styles/themes.css';
+import '../styles/astra-blue.css';
 import VPNModal from '../components/VPNModal.astro';
 import OzonLeadModal from '../components/OzonLeadModal.astro';
 import jobs from '../data/jobs';
@@ -154,10 +156,7 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 			{googleSiteVerification && <meta name="google-site-verification" content={googleSiteVerification} />}
 		<meta name="format-detection" content="telephone=no" />
 
-		<!-- Manrope (primary UI font, design tokens use it). -->
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
+		<!-- Golos Text is self-hosted to keep font loading independent of Google Fonts. -->
 
 			<!-- Theme Persistence -->
 			<script is:inline src="/bootstrap/theme-init.js"></script>
@@ -216,7 +215,7 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 		<meta property="twitter:image" content={resolvedImageUrl} />
 
 		<!-- theme-color is HTML attribute (no var() support); kept in sync with --brand-700 from src/styles/themes.css -->
-		<meta name="theme-color" content="#1d5634" />
+		<meta name="theme-color" content="#245ab2" />
 		<meta name="mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -224,11 +223,11 @@ const googleSiteVerification = String(import.meta.env.PUBLIC_GOOGLE_SITE_VERIFIC
 		<!-- Schema.org Markup -->
 			<script is:inline type="application/ld+json" set:html={structuredData}></script>
 	</head>
-		<body>
+		<body data-design="astra-blue">
 			{isProduction && yandexMetrikaId && (
 				<noscript>
 					<div>
-						<img src={`https://mc.yandex.ru/watch/${yandexMetrikaId}`} style="position:absolute; left:-9999px;" alt="" />
+						<img src={`https://mc.yandex.ru/watch/${yandexMetrikaId}`} class="metrika-noscript-pixel" alt="" />
 					</div>
 				</noscript>
 			)}

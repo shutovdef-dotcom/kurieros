@@ -1,51 +1,49 @@
 /* ============================================================
    КурьерОк — design tokens
-   Source: docs/design-bundle/tokens.css (Claude Design handoff)
-   Aesthetic: warm trust-green primary, coral accent, stone neutrals.
-   All text/bg pairs verified at WCAG AA (≥4.5:1).
+   Astra Blue: restrained blue actions, neutral surfaces, Golos Text.
    ============================================================ */
 
 :root {
   color-scheme: light dark;
 
   /* ── Brand ─────────────────────────────────────────────── */
-  --brand-50:  #ecf5ef;
-  --brand-100: #d4ebda;
-  --brand-200: #a8d6b6;
-  --brand-300: #74bb8b;
-  --brand-400: #4ba26a;
-  --brand-500: #2f8851;
-  --brand-600: #256d41;
-  --brand-700: #1d5634;
-  --brand-800: #163f27;
-  --brand-900: #0e2818;
+  --brand-50:  #eef4fe;
+  --brand-100: #dce8fb;
+  --brand-200: #b8cff4;
+  --brand-300: #88afe9;
+  --brand-400: #5689d4;
+  --brand-500: #245ab2;
+  --brand-600: #1d4b96;
+  --brand-700: #245ab2;
+  --brand-800: #173b73;
+  --brand-900: #10294f;
   /* RGB channels for use inside rgba(var(--brand-700-rgb), <alpha>).
      Keep in sync with --brand-700 above (and the dark-mode override). */
-  --brand-700-rgb: 29, 86, 52;
+  --brand-700-rgb: 36, 90, 178;
 
-  /* ── Accent (CTA, sun-warm tags) ─────────────────────── */
-  --accent-50:  #fdf1ec;
-  --accent-100: #fbdfd2;
-  --accent-200: #f6bca5;
-  --accent-300: #ee9476;
-  --accent-400: #e57352;
-  --accent-500: #d95a35;
-  --accent-600: #b8471f;
-  --accent-700: #903517;
+  /* ── Accent (actions and highlights) ─────────────────────── */
+  --accent-50:  #eef4fe;
+  --accent-100: #dce8fb;
+  --accent-200: #b8cff4;
+  --accent-300: #88afe9;
+  --accent-400: #5689d4;
+  --accent-500: #245ab2;
+  --accent-600: #1d4b96;
+  --accent-700: #173b73;
 
-  /* ── Neutrals (warm stone, not cold slate) ───────────────── */
+  /* ── Neutrals (cool ink and clean surfaces) ───────────────── */
   --ink-0:  #ffffff;
-  --ink-50: #f3eee4;
-  --ink-100:#e9e1d2;
-  --ink-150:#ddd2bd;
-  --ink-200:#cabea3;
-  --ink-300:#b0a386;
-  --ink-400:#8a7e62;
-  --ink-500:#65594a;
-  --ink-600:#4a4036;
-  --ink-700:#332b24;
-  --ink-800:#211c17;
-  --ink-900:#13100d;
+  --ink-50: #f0f3f8;
+  --ink-100:#e9eef5;
+  --ink-150:#e2e8f0;
+  --ink-200:#dbe1e9;
+  --ink-300:#bbc6d5;
+  --ink-400:#8290a3;
+  --ink-500:#5a6678;
+  --ink-600:#465368;
+  --ink-700:#19273c;
+  --ink-800:#142035;
+  --ink-900:#101b2d;
 
   /* ── Semantic ────────────────────────────────────────────── */
   --success-bg: #e3f2e8;  --success-fg: #1d5634;
@@ -61,7 +59,7 @@
   --brand-ozon: #005bff;
 
   /* ── Type ────────────────────────────────────────────────── */
-  --font-main:    'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-main:    'Golos Text', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-heading: var(--font-main);
   --font-mono:    ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
@@ -83,24 +81,24 @@
   --space-16:80px;
 
   /* ── Radii ───────────────────────────────────────────────── */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 20px;
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
   --radius-pill: 999px;
 
   /* ── Layout widths — single source of truth ──────────────── */
   /* Components reference these tokens; a literal px width is allowed
      ONLY as a deliberate, commented exception (e.g. narrow modals). */
-  --page-max-width: 1680px;      /* outer page frame (only on very wide screens) */
-  --content-max-width: 1560px;   /* main content column: hero, grids, sections */
+  --page-max-width: 1240px;      /* outer page frame (only on very wide screens) */
+  --content-max-width: 1120px;   /* main content column: hero, grids, sections */
   --prose-max-width: 720px;      /* reading/text columns: guides, contacts, descriptions */
 
-  /* ── Shadows (warm tint, not pure black) ─────────────────── */
-  --shadow-xs: 0 1px 2px rgba(38,29,18,0.05);
-  --shadow-sm: 0 1px 2px rgba(38,29,18,0.06), 0 1px 3px rgba(38,29,18,0.04);
-  --shadow-md: 0 4px 12px rgba(38,29,18,0.06), 0 2px 4px rgba(38,29,18,0.04);
-  --shadow-lg: 0 12px 32px rgba(38,29,18,0.08), 0 4px 8px rgba(38,29,18,0.04);
+  /* ── Shadows (subtle neutral tint) ─────────────────── */
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow-md: 0 4px 16px rgba(25,39,60,0.06);
+  --shadow-lg: 0 12px 32px rgba(25,39,60,0.12);
   --shadow-focus: 0 0 0 2px var(--ink-0), 0 0 0 4px var(--brand-600);
 
   /* ── Scrim / glass overlays (translucent UI surfaces) ─────────
@@ -112,7 +110,7 @@
   --scrim-dark-soft:     rgba(15, 17, 16, 0.6);
   --scrim-dark-strong:   rgba(15, 17, 16, 0.85);
   --scrim-border-mid:    rgba(148, 163, 184, 0.16);
-  --scrim-shadow-soft:   rgba(38, 29, 18, 0.06);
+  --scrim-shadow-soft:   rgba(25,39,60,0.06);
 
   /* ── Motion ──────────────────────────────────────────────── */
   --transition: 160ms cubic-bezier(.2,.7,.3,1);
@@ -121,7 +119,7 @@
   /* ── Legacy aliases (back-compat for existing CSS) ─────── */
   --primary-color:  var(--brand-500);
   --primary-hover:  var(--brand-600);
-  --bg-color:       var(--ink-50);
+  --bg-color:       var(--ink-0);
   --surface-color:  var(--ink-0);
   --surface-100:    var(--ink-0);   /* card / elevated surface (light) */
   --surface-200:    var(--ink-50);  /* page recess / pressed surface (light) */
@@ -134,51 +132,51 @@
   --shadow-glass:   var(--shadow-sm);
 }
 
-/* ── Dark mode (warm coal — more contrast, layered) ─────────────
+/* ── Dark mode (navy surfaces, readable blue accents) ─────────────
    Class applied to <html> in <head>-script (before first paint) AND
    to <body> in <body>-script (for legacy body.dark-mode .xxx rules).
    :where() keeps specificity at (0,1,0) — same as plain body.dark-mode. */
 :where(html, body).dark-mode {
-  --ink-0:  #131110;
-  --ink-50: #1a1714;
-  --ink-100:#221e1a;
-  --ink-150:#2c2722;
-  --ink-200:#3a342d;
-  --ink-300:#544c42;
-  --ink-400:#7d7264;
-  --ink-500:#a89c8a;
-  --ink-600:#c8bca8;
-  --ink-700:#e2d8c6;
-  --ink-800:#f1ead9;
-  --ink-900:#fbf6e8;
+  --ink-0:  #131d2b;
+  --ink-50: #1c2a3d;
+  --ink-100:#223148;
+  --ink-150:#2b3b52;
+  --ink-200:#344254;
+  --ink-300:#56667e;
+  --ink-400:#8798b1;
+  --ink-500:#acb8ca;
+  --ink-600:#c8d1df;
+  --ink-700:#edf2fa;
+  --ink-800:#f1f5fc;
+  --ink-900:#ffffff;
 
-  --brand-50:  #1d3a26;
-  --brand-100: #234a31;
-  --brand-200: #2d6041;
-  --brand-500: #6fd093;
-  --brand-600: #8adfa9;
-  --brand-700: #b1ebc4;
-  --brand-700-rgb: 177, 235, 196;
+  --brand-50:  #1c2e4b;
+  --brand-100: #243e63;
+  --brand-200: #355689;
+  --brand-500: #98bcff;
+  --brand-600: #b4ceff;
+  --brand-700: #98bcff;
+  --brand-700-rgb: 152, 188, 255;
 
-  --accent-50: #3a1f15;
-  --accent-100:#4a2618;
-  --accent-500:#ff8862;
-  --accent-400:#ff9c7c;
-  --accent-600:#ffb59c;
+  --accent-50: #1c2e4b;
+  --accent-100:#243e63;
+  --accent-500:#98bcff;
+  --accent-400:#b4ceff;
+  --accent-600:#c4d8ff;
 
   --success-bg:#1f3a28; --success-fg:#a8d6b6;
   --warning-bg:#3a2f15; --warning-fg:#f0c97a;
   --danger-bg: #3a221c; --danger-fg: #f0a48a;
   --info-bg:   #1f2d3a; --info-fg:   #a8c4e0;
 
-  --shadow-sm: 0 1px 2px rgba(0,0,0,.5), 0 1px 3px rgba(0,0,0,.35);
-  --shadow-md: 0 6px 16px rgba(0,0,0,.55), 0 2px 4px rgba(0,0,0,.3);
-  --shadow-lg: 0 16px 36px rgba(0,0,0,.6);
+  --shadow-sm: none;
+  --shadow-md: 0 6px 16px rgba(0,0,0,.18);
+  --shadow-lg: 0 16px 36px rgba(0,0,0,.25);
   --shadow-focus: 0 0 0 2px var(--ink-0), 0 0 0 4px var(--brand-500);
 
   /* Scrim overrides — flip light↔dark so consumers stay scrim-* agnostic. */
-  --scrim-light-soft:    rgba(19, 17, 16, 0.72);
-  --scrim-light-strong:  rgba(19, 17, 16, 0.92);
+  --scrim-light-soft:    rgba(19,29,43,.86);
+  --scrim-light-strong:  rgba(19,29,43,.96);
   --scrim-dark-soft:     rgba(255, 255, 255, 0.08);
   --scrim-dark-strong:   rgba(255, 255, 255, 0.18);
   --scrim-border-mid:    rgba(195, 204, 216, 0.18);
@@ -188,15 +186,15 @@
      CSS custom properties don't auto-recompute through var() across scopes. */
   --primary-color:  var(--brand-500);
   --primary-hover:  var(--brand-600);
-  --bg-color:       var(--ink-50);
-  --surface-color:  var(--ink-100);
-  --surface-100:    var(--ink-100); /* card surface (dark) */
-  --surface-200:    var(--ink-150); /* recess / pressed surface (dark) */
+  --bg-color:       var(--ink-0);
+  --surface-color:  var(--ink-0);
+  --surface-100:    var(--ink-50); /* card surface (dark) */
+  --surface-200:    var(--ink-100); /* recess / pressed surface (dark) */
   --text-main:      var(--ink-700);
   --text-muted:     var(--ink-500);
   --border-color:   var(--ink-200);
   --accent-color:   var(--accent-500);
-  --glass-bg:       var(--ink-100);
+  --glass-bg:       var(--ink-0);
   --glass-border:   var(--ink-200);
   --shadow-glass:   var(--shadow-sm);
 

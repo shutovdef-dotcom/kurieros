@@ -176,7 +176,10 @@ const buildX5DeliveryOffer = (city: string, cityIndex: number): VacancyOffer => 
     transport: 'auto',
     transportProvision: 'own',
     pay: buildX5DeliveryPay(),
-    isActive: true,
+    // The click URL currently redirects to Lovko's Disabled page. Keep the
+    // source and offer IDs, but stop producing live applications until a
+    // working, account-approved offer link is verified.
+    isActive: false,
     updatedAt: x5DeliveryVacancies.updatedAt,
     sourceUrl: x5DeliveryVacancies.sourceUrl,
     salaryConfidence: 'partner',

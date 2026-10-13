@@ -15,13 +15,28 @@
 	}
 
 	if (typeof IntersectionObserver === 'function') {
-		const io = new IntersectionObserver(function (entries) {
-			const heroVisible = entries.some(function (entry) {
-				return entry.isIntersecting;
+		let io;
+		function observeHero() {
+			io?.disconnect();
+			const header = document.querySelector('.site-header');
+			const mobileNav = document.querySelector('.bottom-nav');
+			const headerHeight = header?.getBoundingClientRect().height || 0;
+			const navHeight = mobileNav?.getBoundingClientRect().height || 0;
+			// Keep an available action when fixed navigation covers the hero CTA.
+			// Measurements include the mobile menu's safe-area padding.
+			io = new IntersectionObserver(function (entries) {
+				const heroVisible = entries.some(function (entry) {
+					return entry.isIntersecting && entry.intersectionRatio >= 0.99;
+				});
+				bar.classList.toggle('hidden', heroVisible);
+			}, {
+				rootMargin: `-${headerHeight}px 0px -${navHeight}px 0px`,
+				threshold: [0, 0.99],
 			});
-			bar.classList.toggle('hidden', heroVisible);
-		}, { threshold: 0 });
-		io.observe(heroBtn);
+			io.observe(heroBtn);
+		}
+		observeHero();
+		window.addEventListener('resize', observeHero);
 	} else {
 		bar.classList.remove('hidden');
 	}

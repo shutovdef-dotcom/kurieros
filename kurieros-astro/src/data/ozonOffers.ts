@@ -856,7 +856,9 @@ export const ozonVacancySources: VacancySource[] = TEMPLATES.map((template) => (
     os: 'Android или iOS',
   },
   offers: buildOffersForTemplate(template),
-  incomeCalculator: { mode: 'estimated_hourly' },
+  // The Ozon catalogues do not supply an hourly tariff. Do not calculate
+  // candidate income from other employers' rates.
+  incomeCalculator: { mode: 'hidden' },
   extraTags: template.extraTags,
   ...(template.isHot ? { isHot: true } : {}),
 }));

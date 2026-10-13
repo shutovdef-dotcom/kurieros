@@ -4,6 +4,8 @@ import {
   sortCompaniesByPopularity,
 } from '../src/utils/companyPopularity';
 import { companiesFromJobs } from '../src/utils/companiesIndex';
+import { vacancySources } from '../src/data/vacancies';
+import { slugifyCompany } from '../src/utils/companies';
 
 describe('company popularity sorting', () => {
   it('shows recognizable delivery employers before high-volume generated brands', () => {
@@ -21,9 +23,21 @@ describe('company popularity sorting', () => {
     );
   });
 
-  it('keeps the curated popularity list aligned with real company slugs', () => {
-    const realSlugs = new Set(companiesFromJobs.map((company) => company.slug));
+  it('keeps curated popularity slugs aligned with the full source catalogue', () => {
+    const catalogueSlugs = new Set(vacancySources.map((source) => slugifyCompany(source.company.name)));
 
-    expect(POPULAR_COMPANY_SLUGS.every((slug) => realSlugs.has(slug))).toBe(true);
+    expect(POPULAR_COMPANY_SLUGS.every((slug) => catalogueSlugs.has(slug))).toBe(true);
+  });
+
+  it('does not expose companies whose offers are all inactive', () => {
+    const activeSourceSlugs = new Set(
+      vacancySources
+        .filter((source) => source.offers.some((offer) => offer.isActive))
+        .map((source) => slugifyCompany(source.company.name)),
+    );
+    const outputSlugs = new Set(companiesFromJobs.map((company) => company.slug));
+
+    expect(outputSlugs).toEqual(activeSourceSlugs);
+    expect(outputSlugs.has('x5-dostavka')).toBe(false);
   });
 });

@@ -5,11 +5,11 @@
  * (yandex-eda, yandex-go-international, kuper, tbank, efin, alfa-bank,
  * burger-king, samokat, voxys, mts-bank, qlean, ruki, domovenok,
  * tetrika).
- * Ozon comes from `./ozonOffers.ts`. Hourly-rate post-processor lives in
- * `./sources/ozon-hourly-fallback.ts`.
+ * Ozon comes from `./ozonOffers.ts`. Preserve its own pay and payment
+ * cadence; another employer's hourly rate is not an Ozon tariff.
  *
  * ID stability invariant: each `VacancySource.id` is a hardcoded
- * numeric primary key (1..35 currently) used by `getGeneratedId`
+ * numeric primary key (1..37 currently) used by `getGeneratedId`
  * in `jobs.ts` to derive every Job ID. NEVER reuse, renumber, or
  * remove an existing `id` — external bookmarks, GA4 events, and
  * the `compareList` localStorage all reference these IDs forever.
@@ -17,6 +17,7 @@
  */
 import type { VacancySource } from './vacancyTypes';
 import { yandexEdaSource } from './sources/yandex-eda';
+import { yandexDeliveryCargoSource } from './sources/yandex-delivery-cargo';
 import { kuperSources } from './sources/kuper';
 import { tBankSources } from './sources/tbank';
 import { efinSource } from './sources/efin';
@@ -32,10 +33,10 @@ import { domovenokSource } from './sources/domovenok';
 import { yandexGoInternationalSources } from './sources/yandex-go-international';
 import { tetrikaSources } from './sources/tetrika';
 import { ozonVacancySources } from './ozonOffers';
-import { applyOzonHourlyFallback } from './sources/ozon-hourly-fallback';
 
 const initialSources: VacancySource[] = [
   yandexEdaSource,
+  yandexDeliveryCargoSource,
   ...kuperSources,
   ...tBankSources,
   efinSource,
@@ -53,4 +54,4 @@ const initialSources: VacancySource[] = [
   ...tetrikaSources,
 ];
 
-export const vacancySources: VacancySource[] = applyOzonHourlyFallback(initialSources);
+export const vacancySources: VacancySource[] = initialSources;

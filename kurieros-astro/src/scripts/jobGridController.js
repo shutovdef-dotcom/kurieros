@@ -614,12 +614,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		if (matches.length === 0 && anyDropdownActive) {
 			// Fall back to the full city/category set with a banner.
-			cards.forEach((card) => { card.style.display = 'flex'; });
+			cards.forEach((card) => { card.style.display = ''; });
 			noMatchNotice?.classList.remove('hidden');
 		} else {
 			const matchSet = new Set(matches);
 			cards.forEach((card) => {
-				card.style.display = matchSet.has(card) ? 'flex' : 'none';
+				card.style.display = matchSet.has(card) ? '' : 'none';
 			});
 			noMatchNotice?.classList.add('hidden');
 		}

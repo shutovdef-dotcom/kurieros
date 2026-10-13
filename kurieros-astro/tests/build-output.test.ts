@@ -28,6 +28,10 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { comparisonCities } from '../src/utils/courierSalaryComparison';
+import { CATEGORIES } from '../src/data/constants';
+import jobsData from '../src/data/jobs';
+import { filterJobsByCriteria } from '../src/utils/jobFilters';
+import { buildVacancyCountText } from '../src/utils/cityListingPage';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const DIST_DIR = join(ROOT, '..', 'dist');
@@ -42,6 +46,10 @@ const publishedBlogSlugs = new Set(blogReleaseManifest.releases.map((release) =>
 const futureBlogSlugs = blogCalendar.entries
   .map((entry) => entry.slug)
   .filter((slug) => !publishedBlogSlugs.has(slug));
+const dailyPayCategory = CATEGORIES.find((category) => category.slug === 'ezhednevnaya-oplata');
+const dailyPaySearchTerm = dailyPayCategory && 'query' in dailyPayCategory
+  ? dailyPayCategory.query
+  : '';
 
 const countHtml = (dir: string): number => {
   let count = 0;
@@ -124,7 +132,15 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     // comparison page to avoid duplicate SEO URLs.
     // Every durable blog ledger row emits exactly one additional article
     // route. Draft files must not alter this number.
-    // Band: baseline ±5 plus the exact released-article count.
+    // 2026-10-13: disabled X5 offers and removal of the unused Ozon hourly
+    // fallback changed generated listing/company fragment counts. Actual
+    // rebuilt output: 11,672 HTML files. Current API fragments are included
+    // in this recursive count: 1,010 city grids, 1,164 grid-batch pages, and
+    // 385 company-vacancy pages (2,559 total). The prior captured build had
+    // 48 more grid-batch and 11 more company-vacancy fragments; city grids
+    // were unchanged. Legacy vacancy URLs are checked separately for zero
+    // missing paths, with 298 retired compatibility routes retained noindex.
+    // Band: current baseline ±5 plus the exact released-article count.
     //
     // NOTE FOR CONTRIBUTORS: always re-derive both bounds from an actual build
     // after adding new routes -- do NOT blindly add N to the upper bound.
@@ -135,10 +151,10 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
     //   console.log(c('dist'));"
     const count = countHtml(DIST_DIR);
     expect(count).toBeGreaterThanOrEqual(
-      10695 + publishedBlogSlugs.size + comparisonCities.length,
+      10656 + publishedBlogSlugs.size + comparisonCities.length,
     );
     expect(count).toBeLessThanOrEqual(
-      10705 + publishedBlogSlugs.size + comparisonCities.length,
+      10666 + publishedBlogSlugs.size + comparisonCities.length,
     );
   });
 
@@ -757,11 +773,14 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
         'utf8',
       );
       const cardCount = (html.match(/class="job-card"/g) || []).length;
+      const dailyPayCount = filterJobsByCriteria(jobsData, {
+        tag: 'all',
+        search: dailyPaySearchTerm,
+      }).length;
 
+      expect(dailyPaySearchTerm).toBe('Ежеднев');
       expect(cardCount).toBe(24);
-      // The title-test cohort restores weekly Fresh payouts for 25
-      // jobs that the generic hourly fallback had marked as daily.
-      expect(html).toContain('data-total-count="2072"');
+      expect(html).toContain(`24 вакансии из ${buildVacancyCountText(dailyPayCount)}`);
       expect(html).toMatch(/data-search-text="[^"]*Ежедневно/);
     });
 

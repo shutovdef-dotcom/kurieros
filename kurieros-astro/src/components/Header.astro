@@ -40,6 +40,18 @@ import { hasPublishedBlog } from '../utils/blogManifest';
         <div class="header-lang">
             <LanguageSwitcher />
         </div>
+        <details class="mobile-site-menu">
+            <summary>Меню</summary>
+            <nav aria-label="Разделы сайта">
+                <a href="/#vacancies" data-t="nav.vacancies">Вакансии</a>
+                <a href="/companies/" data-t="nav.companies">Компании</a>
+                {hasPublishedBlog && <a href="/blog/">Блог</a>}
+                <a href="/contacts/" data-t="nav.contacts">Контакты</a>
+                <a href="/cities/" data-t="nav.cities">Города</a>
+                <a href="/calculator/" data-t="nav.calculator">Калькулятор</a>
+                <a href="/compare/" data-t="nav.compare">Сравнение</a>
+            </nav>
+        </details>
     </div>
 </header>
 

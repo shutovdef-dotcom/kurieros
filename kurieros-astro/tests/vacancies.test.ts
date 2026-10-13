@@ -17,9 +17,14 @@ import { fileURLToPath } from 'node:url';
 import { describe, it, expect } from 'vitest';
 import jobs, { detailJobs } from '../src/data/jobs';
 import { CITY_DATASET } from '../src/data/cities-dataset';
+import expectedJobIds from './fixtures/job-ids-snapshot.json';
+import mtsLegacyIds from './fixtures/mts-legacy-ids-snapshot.json';
+import { mtsLegacyRoutes } from '../src/data/mtsLegacyRoutes';
+import { retiredVacancyRoutes } from '../src/data/retiredVacancyRoutes';
 import { vacancySources } from '../src/data/vacancies';
 import type { CurrencyCode, TransportMode, VacancyHowToTemplate } from '../src/data/vacancyTypes';
-import { isCityBlocked, normalizeCityKey } from '../src/utils/cities';
+import { isCityBlocked, normalizeCityKey, slugifyCity } from '../src/utils/cities';
+import { slugifyCompany } from '../src/utils/companies';
 import { getVacancyDetailPath } from '../src/utils/vacancyUrl';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
@@ -27,6 +32,7 @@ const PUBLIC_DIR = join(ROOT, '..', 'public');
 
 const REQUIRED_PARTNER_SLUGS = [
   'yandex-eda-courier',
+  'yandex-delivery-cargo-driver',
   'kuper-foot-courier',
   'kuper-bike-courier',
   'kuper-auto-courier',
@@ -58,6 +64,7 @@ const VALID_TRANSPORT_MODES: TransportMode[] = ['foot', 'bicycle', 'auto', 'remo
 const VALID_CURRENCIES: CurrencyCode[] = ['RUB', 'BYN', 'KZT', 'KGS', 'UZS'];
 const VALID_HOW_TO_TEMPLATES: VacancyHowToTemplate[] = [
   'courier',
+  'cargo_driver',
   'bank_representative',
   'call_center',
   'office_employee',
@@ -193,88 +200,152 @@ describe('vacancySources structural invariants', () => {
     }
   });
 
-  it('renders fixed monthly salaries without a misleading "до" prefix', () => {
-    const voxysJobs = jobs.filter((job) => job.sourceSlug === 'voxys-call-center-operator');
+  it('keeps paused Voxys data while removing its listing and detail jobs', () => {
+    const source = vacancySources.find((item) => item.slug === 'voxys-call-center-operator');
+    const unavailable = retiredVacancyRoutes.filter((route) => route.sourceSlug === source?.slug);
+    const priorIds = [
+      2_100_075, 2_100_105, 2_100_155, 2_104_865, 2_106_675,
+      2_117_775, 2_119_305, 2_127_965, 2_132_195, 2_132_585,
+      2_185_835, 2_189_405, 2_190_575, 2_196_415, 2_199_475,
+    ];
+    expect(source?.id).toBe(21);
+    expect(source?.offers).toHaveLength(15);
+    expect(source?.offers.every((offer) => !offer.isActive)).toBe(true);
+    expect(jobs.some((job) => job.sourceSlug === source?.slug)).toBe(false);
+    expect(detailJobs.some((job) => job.sourceSlug === source?.slug)).toBe(false);
+    expect(unavailable).toHaveLength(15);
+    expect(unavailable.map((route) => route.city).sort())
+      .toEqual(source?.offers.map((offer) => offer.city).sort());
+    expect(unavailable.every((route) => route.reason === 'voxys_partner_offer_paused'))
+      .toBe(true);
+    expect(unavailable.map((route) => route.id).sort((a, b) => a - b)).toEqual(priorIds);
+    expect(unavailable.every((route) => Math.floor(route.id / 100_000) === source?.id))
+      .toBe(true);
+  });
 
-    expect(voxysJobs.length).toBeGreaterThan(0);
-    for (const job of voxysJobs) {
-      expect(job.salary, job.slug).toMatch(/^\d[\d ]+ ₽\/мес$/);
-      expect(job.details.rate, job.slug).toContain('Фиксированная ставка');
+  it('routes every Yandex Eda application through the current active offer', () => {
+    const edaJobs = jobs.filter((job) => job.sourceSlug === 'yandex-eda-courier');
+    expect(edaJobs).toHaveLength(399);
+    for (const job of edaJobs) {
+      const url = new URL(job.applyLink!);
+      expect(url.origin + url.pathname).toBe('https://my.saleads.pro/s/vtg97');
+      expect(url.searchParams.get('erid')).toBe('2Vtzqv6uPKi');
+      expect(url.searchParams.get('utm_content')).toBeTruthy();
     }
   });
 
-  it('generates MTS Bank remote call-center operator offers', () => {
-    const source = vacancySources.find((item) => item.slug === 'mts-bank-operator');
-    const mtsJobs = jobs.filter((job) => job.sourceSlug === 'mts-bank-operator');
-
-    expect(source).toBeDefined();
-    expect(source?.company.name).toBe('МТС Банк');
-    expect(source?.howToTemplate).toBe('call_center');
-    expect(source?.incomeCalculator).toEqual({ mode: 'monthly' });
-    expect(source?.offers).toHaveLength(140);
-    expect(source?.offers.every((offer) => offer.transport === 'remote')).toBe(true);
-    expect(source?.offers.every((offer) => offer.employmentFormats?.includes('official'))).toBe(true);
-
-    expect(mtsJobs).toHaveLength(140);
-    expect(mtsJobs.some((job) => job.location === 'Химки')).toBe(true);
-    expect(mtsJobs.some((job) => job.location === 'Одинцово')).toBe(true);
-    expect(mtsJobs.some((job) => job.location === 'Колпино')).toBe(true);
-    expect(mtsJobs.some((job) => job.location === 'Пушкин')).toBe(true);
-    expect(mtsJobs.some((job) => job.location === 'Шушары')).toBe(true);
-
-    const ryazan = mtsJobs.find((job) => job.location === 'Рязань');
-    expect(ryazan?.slug).toBe('mts-bank-operator-ryazan-remote');
-    expect(ryazan?.title).toBe('Оператор МТС Банка в Рязани');
-    expect(ryazan?.salary).toBe('до 68 500 ₽/мес');
-    expect(ryazan?.details.rate).toBe('от 46 000 до 68 500 ₽/мес');
-    expect(ryazan?.details.employment_type).toBe('Официальное трудоустройство');
-    expect(ryazan?.details.medical_book).toBe('Не требуется');
-    expect(ryazan?.details.os).toContain('Компьютер');
-    expect(ryazan?.applyLink).toContain('https://trk.ppdu.ru/click?');
+  it('adds cargo-driver applications without treating CPA commission as driver income', () => {
+    const cargoJobs = jobs.filter((job) => job.sourceSlug === 'yandex-delivery-cargo-driver');
+    expect(cargoJobs).toHaveLength(21);
+    for (const job of cargoJobs) {
+      expect(job.transport).toBe('auto');
+      expect(job.salary).toBe('Доход зависит от заказов');
+      expect(job.details.rate).not.toMatch(/40[\s\u00a0]?000/);
+      const url = new URL(job.applyLink!);
+      expect(url.origin + url.pathname).toBe('https://trk.ppdu.ru/click/k3BRrv5U');
+      expect(url.searchParams.get('erid')).toBe('CQH36pWzJqVGXC5oTTDpMBk8ei82kpZxV9ZJ1ZC292TAKx');
+    }
   });
 
-  it('generates X5 Delivery auto-courier offers with standard capital-region geo', () => {
+  it('keeps MTS call-center offers accurate and preserves legacy URLs', () => {
+    const source = vacancySources.find((item) => item.slug === 'mts-bank-operator');
+    const mtsJobs = jobs.filter((job) => job.sourceSlug === 'mts-bank-operator');
+    const oldMtsJobs = [
+      ...expectedJobIds.filter((job) => job.slug.startsWith('mts-bank-operator-')),
+      ...mtsLegacyIds,
+    ];
+    const oldSlugs = new Set(oldMtsJobs.map((job) => job.slug));
+    const activeSlugs = new Set(mtsJobs.map((job) => job.slug));
+    const legacySlugs = new Set(mtsLegacyRoutes.map((route) => route.slug));
+
+    expect(source).toBeDefined();
+    expect(source?.id).toBe(27);
+    expect(source?.slug).toBe('mts-bank-operator');
+    expect(source?.company.name).toBe('МТС');
+    expect(slugifyCompany(source!.company.name)).toBe('mts-bank');
+    expect(source?.howToTemplate).toBe('remote_operator');
+    expect(source?.incomeCalculator).toEqual({ mode: 'hidden' });
+    expect(source?.offers).toHaveLength(36);
+    expect(source?.offers.every((offer) => offer.transport === 'remote')).toBe(true);
+    expect(source?.offers.every((offer) => offer.medicalBook === 'unknown')).toBe(true);
+    expect(source?.offers.every((offer) => !offer.employmentFormats?.length)).toBe(true);
+    expect(source?.offers.every((offer) => !offer.pay.monthly && !offer.pay.rate)).toBe(true);
+    expect(source?.offers.every((offer) => offer.salaryConfidence === 'estimated')).toBe(true);
+    expect(source?.offers.every((offer) => offer.sourceCheckedAt === '2026-10-13')).toBe(true);
+    expect(source?.offers.every((offer) => offer.contentUpdatedAt === '2026-10-13')).toBe(true);
+    expect(source?.offers.every((offer) => !offer.postedAt && !offer.applyVerifiedAt)).toBe(true);
+    expect(source?.defaults.employmentFormats).toEqual([]);
+    expect(source?.defaults.education).toBe('Уточняется');
+    expect(source?.content.benefits).toEqual([
+      'ДМС с первого месяца.',
+      'Бесплатная мобильная связь.',
+      'Индивидуальный гибкий график.',
+    ]);
+    expect(source?.content.requirements).toEqual([
+      'Возраст от 18 до 45 лет.',
+      'Для оформления нужен паспорт РФ; для мужчин — военный билет или приписное свидетельство.',
+    ]);
+
+    expect(mtsJobs).toHaveLength(36);
+    expect(mtsJobs.every((job) => job.company === 'МТС')).toBe(true);
+    expect(mtsJobs.every((job) => job.salary === 'Доход уточняется')).toBe(true);
+    expect(mtsJobs.every((job) => job.details.rate === 'Доход уточняется')).toBe(true);
+    expect(mtsJobs.every((job) => job.details.medical_book === 'Уточняется')).toBe(true);
+    expect(mtsJobs.every((job) => job.details.education === 'Уточняется')).toBe(true);
+    expect(mtsJobs.every((job) => job.details.employment_type === '')).toBe(true);
+    expect(mtsJobs.every((job) => job.title.includes('Оператор колл-центра МТС'))).toBe(true);
+    expect(mtsJobs.every((job) => !/МТС Банк|кредитн|рефинансирован|46\s?000|68\s?500/i.test(
+      `${job.title} ${job.description} ${job.shortDescription} ${job.benefits.join(' ')}`,
+    ))).toBe(true);
+
+    expect(mtsLegacyRoutes).toHaveLength(104);
+    expect(new Set(mtsLegacyRoutes.map((route) => route.slug)).size).toBe(104);
+    expect(mtsLegacyRoutes.every((route) =>
+      route.slug === `mts-bank-operator-${slugifyCity(route.city)}-remote`,
+    )).toBe(true);
+    expect([...activeSlugs, ...legacySlugs].sort()).toEqual([...oldSlugs].sort());
+    expect(activeSlugs.size).toBe(36);
+    expect(legacySlugs.size).toBe(104);
+    const oldIdBySlug = new Map(oldMtsJobs.map((job) => [job.slug, job.id]));
+    expect(mtsJobs.every((job) => oldIdBySlug.get(job.slug) === job.id)).toBe(true);
+    expect(mtsJobs.find((job) => job.location === 'Рязань')?.slug)
+      .toBe('mts-bank-operator-ryazan-remote');
+    expect(mtsJobs[0]?.applyLink).toContain('https://trk.ppdu.ru/click?');
+  });
+
+  it('preserves X5 IDs and URLs while suppressing the currently disabled partner offer', () => {
     const source = vacancySources.find((item) => item.slug === 'x5-delivery-auto-courier');
     const x5Jobs = jobs.filter((job) => job.sourceSlug === 'x5-delivery-auto-courier');
+    const unavailable = retiredVacancyRoutes.filter((route) => route.sourceSlug === source?.slug);
+    const previousX5Ids = expectedJobIds
+      .filter((job) => job.slug.startsWith('x5-delivery-auto-courier-'))
+      .sort((a, b) => a.id - b.id);
 
     expect(source).toBeDefined();
     expect(source?.id).toBe(36);
     expect(source?.company.name).toBe('X5 Доставка');
     expect(source?.howToTemplate).toBe('courier');
-    expect(source?.incomeCalculator).toEqual({ mode: 'monthly' });
     expect(source?.offers).toHaveLength(179);
     expect(source?.offers.every((offer) => offer.transport === 'auto')).toBe(true);
     expect(source?.offers.every((offer) => offer.transportProvision === 'own')).toBe(true);
     expect(source?.offers.every((offer) => offer.ageFrom === 18)).toBe(true);
+    expect(source?.offers.every((offer) => !offer.isActive)).toBe(true);
 
-    expect(x5Jobs).toHaveLength(179);
-
-    const cities = new Set(x5Jobs.map((job) => job.location));
-    expect(cities.has('Москва')).toBe(true);
-    expect(cities.has('Химки')).toBe(true);
-    expect(cities.has('Одинцово')).toBe(true);
-    expect(cities.has('Санкт-Петербург')).toBe(true);
-    expect(cities.has('Колпино')).toBe(true);
-    expect(cities.has('Пушкин')).toBe(true);
-    expect(cities.has('Шушары')).toBe(true);
-    expect(cities.has('Мурино')).toBe(true);
-    expect(cities.has('Кудрово')).toBe(true);
-    expect(cities.has('Бугры')).toBe(false);
-    expect(cities.has('Бокситогорск')).toBe(true);
-    expect(cities.has('Пикалёво')).toBe(false);
-    expect(cities.has('Комсомольск-на-Амуре')).toBe(true);
-    expect(cities.has('Солнечный')).toBe(false);
-
-    const moscow = x5Jobs.find((job) => job.location === 'Москва');
-    expect(moscow?.slug).toBe('x5-delivery-auto-courier-moskva-auto');
-    expect(moscow?.title).toBe('Водитель X5 Доставки на личном авто в Москве');
-    expect(moscow?.salary).toBe('до 182 000 ₽/мес');
-    expect(moscow?.details.rate).toContain('от 6 000 ₽/день');
-    expect(moscow?.details.age).toBe('от 18 лет');
-    expect(moscow?.details.employment_type).toBe('Самозанятость');
-    expect(moscow?.requiredDocuments).toContain('Водительское удостоверение РФ.');
-    expect(moscow?.requiredDocuments).toContain('Документы на автомобиль.');
-    expect(moscow?.sourceUrl).toBe('https://lk.lovko.pro/v2/offer/40');
+    expect(x5Jobs).toHaveLength(0);
+    expect(detailJobs.some((job) => job.sourceSlug === source?.slug)).toBe(false);
+    expect(unavailable).toHaveLength(179);
+    expect(unavailable.every((route) => route.reason === 'x5_partner_link_disabled'))
+      .toBe(true);
+    expect(unavailable.map(({ id, slug }) => ({ id, slug })).sort((a, b) => a.id - b.id))
+      .toEqual(previousX5Ids);
+    expect(unavailable.map((route) => route.city).sort())
+      .toEqual(source?.offers.map((offer) => offer.city).sort());
+    expect(new Set(retiredVacancyRoutes.map((route) => route.slug)).size)
+      .toBe(retiredVacancyRoutes.length);
+    expect(new Set(retiredVacancyRoutes.map((route) => route.id)).size)
+      .toBe(retiredVacancyRoutes.length);
+    expect(unavailable.every((route) => Math.floor(route.id / 100_000) === source?.id))
+      .toBe(true);
   });
 
   it('generates Ruki Moscow-region service worker offers only', () => {

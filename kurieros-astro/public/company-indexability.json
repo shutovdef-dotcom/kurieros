@@ -5,11 +5,29 @@
   "policy": {
     "minIndexableCompanyVacancies": 3
   },
-  "noindexCompanies": [],
-  "noindexUrls": [],
+  "noindexCompanies": [
+    {
+      "slug": "voxys",
+      "name": "Voxys",
+      "vacancyCount": 0,
+      "url": "https://kurerok.ru/companies/voxys/",
+      "reason": "partner_offers_unavailable"
+    },
+    {
+      "slug": "x5-dostavka",
+      "name": "X5 Доставка",
+      "vacancyCount": 0,
+      "url": "https://kurerok.ru/companies/x5-dostavka/",
+      "reason": "partner_offers_unavailable"
+    }
+  ],
+  "noindexUrls": [
+    "https://kurerok.ru/companies/voxys/",
+    "https://kurerok.ru/companies/x5-dostavka/"
+  ],
   "summary": {
-    "totalCompanyPages": 17,
-    "indexableCompanyPages": 17,
-    "noindexCompanyPages": 0
+    "totalCompanyPages": 18,
+    "indexableCompanyPages": 16,
+    "noindexCompanyPages": 2
   }
 }

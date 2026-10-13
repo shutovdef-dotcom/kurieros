@@ -165,6 +165,8 @@ const pageSchemaGraph = [
 
 			<JobGrid limit={24} moreHref="/cities/" moreLabel="Открыть все города" />
 
+			<HomeHero variant="details" totalVacancies={totalVacancies} companiesCount={companies.length} citiesCount={cities.length} />
+
 			<nav class="transport-format-nav" aria-label="Форматы работы курьером">
 				<ul class="transport-format-list">
 					{transportFormatLinks.map((link) => (

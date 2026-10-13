@@ -25,20 +25,9 @@ export function fnv1a(input: string): number {
 	return Math.abs(hash | 0);
 }
 
-// --- Ozon hourly-rate fallback jitter -------------------------------
-//
-// Ozon's referral form publishes monthly placeholders, not per-hour
-// rates. Two surfaces backfill a missing Ozon `pay.hourly` from the
-// best known hourly rate in the same city, dropped a few percent via a
-// deterministic FNV-1a-derived jitter so two Ozon offers in one city
-// visually differ but stay reproducible across builds (ID stability):
-//   • build side  — `src/data/sources/ozon-hourly-fallback.ts`
-//   • render side — `src/pages/v/[slug].astro`
-// They previously carried a byte-identical inline copy of the formula
-// with bare magic numbers; `applyHourlyJitter` is the single owner
-// (audit ref v3 M4). The two callers key the hash differently
-// (`slug-city-transport` vs bare `slug`) — that is intentional, so the
-// hash key is a parameter and each caller passes its own.
+// --- Stable adjustment for explicitly estimated hourly benchmarks ---
+// Only calculators that explicitly opt into an estimated benchmark may use
+// this helper. Ozon source offers retain their own pay and hide the calculator.
 
 /** Modulo applied to the FNV-1a hash — yields a jitter bucket 0..99. */
 const HOURLY_JITTER_BUCKETS = 100;

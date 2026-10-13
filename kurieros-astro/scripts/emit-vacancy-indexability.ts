@@ -3,6 +3,8 @@ import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { detailJobs } from '../src/data/jobs';
+import { mtsLegacyRoutes } from '../src/data/mtsLegacyRoutes';
+import { retiredVacancyRoutes } from '../src/data/retiredVacancyRoutes';
 import {
   GOOGLE_FULL_VACANCY_RESTORE,
   HARD_NOINDEX_VACANCY_PATHS,
@@ -134,7 +136,11 @@ const hardNoindexPaths = new Set<string>(HARD_NOINDEX_VACANCY_PATHS);
 const topCitySet = new Set<string>(TOP_INDEXABLE_VACANCY_CITIES);
 const gscValidJobPostingPaths = new Set<string>(LEGACY_GSC_VALID_JOB_PATHS);
 
-const allPaths = new Set(detailJobs.map((job) => getVacancyCanonicalPath(job)));
+const allPaths = new Set([
+  ...detailJobs.map((job) => getVacancyCanonicalPath(job)),
+  ...mtsLegacyRoutes.map((route) => `/v/${route.slug}/`),
+  ...retiredVacancyRoutes.map((route) => `/v/${route.slug}/`),
+]);
 const indexablePaths = new Set<string>();
 
 for (const job of detailJobs) {

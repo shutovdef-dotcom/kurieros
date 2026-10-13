@@ -42,6 +42,7 @@ export type IncomeCalculatorConfig = {
 
 export type VacancyHowToTemplate =
   | 'courier'
+  | 'cargo_driver'
   | 'bank_representative'
   | 'call_center'
   | 'office_employee'

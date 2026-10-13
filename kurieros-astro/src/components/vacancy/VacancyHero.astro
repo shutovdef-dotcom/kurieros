@@ -38,6 +38,7 @@ const {
 
 const applyHref = getApplyHref(job);
 const applyPartnerDomain = getApplyPartnerDomain(job);
+const isCargoPartnership = job.sourceSlug === 'yandex-delivery-cargo-driver';
 ---
 
 <section class="vacancy-header">
@@ -45,14 +46,15 @@ const applyPartnerDomain = getApplyPartnerDomain(job);
 		<div class="vacancy-company-info">
 			<img src={job.companyLogo} alt={job.company} class="vacancy-logo" width="80" height="80" loading="eager" decoding="async" />
 			<div>
-				<div class="vacancy-kicker" data-t="vacancy.card_kicker">Карточка вакансии</div>
+				<div class="vacancy-kicker" data-t={isCargoPartnership ? undefined : 'vacancy.card_kicker'}>{isCargoPartnership ? 'Предложение сотрудничества' : 'Карточка вакансии'}</div>
 				<VacancyTKey jobId={job.id} field="title" fallback={job.title} as="h1" class="vacancy-title" />
 				<VacancyTKey jobId={job.id} field="company" fallback={job.company} as="a" class="vacancy-company-name" href={companyUrl} />
 			</div>
 		</div>
-		<p class="vacancy-ai-summary" data-t="vacancy.hero_summary">
-			{job.title} в {job.company} — это вакансия для кандидатов, которые хотят заранее понять доход, график,
-			требования и формат оформления перед переходом к отклику.
+		<p class="vacancy-ai-summary" data-t={isCargoPartnership ? undefined : 'vacancy.hero_summary'}>
+			{isCargoPartnership
+				? 'Сотрудничество с партнёрами Яндекс Доставки: сравните условия поездок, требования к автомобилю и порядок выплат перед подключением.'
+				: `${job.title} в ${job.company} — это вакансия для кандидатов, которые хотят заранее понять доход, график, требования и формат оформления перед переходом к отклику.`}
 		</p>
 		<div class="vacancy-meta-row">
 			<span class="meta-pill"><span data-t="vacancy.updated">Обновлено</span>&nbsp;<VacancyTKey jobId={job.id} field="updated_date" fallback={updatedDate} /></span>
