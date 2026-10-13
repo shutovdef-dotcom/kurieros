@@ -15,6 +15,7 @@ import type {
   VacancySource,
 } from './vacancyTypes';
 import { getJobPostingRoleTitle } from './jobPostingRoleTitles';
+import { applyTitleTestIncome } from './seoTitleIncome';
 import { isCityBlocked, slugifyCity } from '../utils/cities';
 import { fnv1a } from '../utils/fnv1a';
 import { isFlexibleSchedule } from '../utils/flexibleSchedule';
@@ -640,7 +641,7 @@ export const buildJobsFromVacancies = (
       const benefits = getOfferBenefits(content.benefits, offer, language);
       const requiredDocuments = getOfferRequiredDocuments(content.requiredDocuments ?? [], offer, language);
 
-      return {
+      return applyTitleTestIncome({
         id: getGeneratedId(source, offer),
         sourceId: source.id,
         sourceSlug: source.slug,
@@ -710,7 +711,7 @@ export const buildJobsFromVacancies = (
         // page can emit data-ozon-* attributes consumed by
         // OzonLeadModal → Cloudflare Worker.
         ...(offer.ozonLeadForm ? { ozonLeadForm: offer.ozonLeadForm } : {}),
-      };
+      });
     }),
   );
 };

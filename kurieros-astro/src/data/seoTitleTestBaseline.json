@@ -1,0 +1,334 @@
+{
+  "id": "fresh-title-2026-10-13",
+  "capturedAt": "2026-10-13T17:33:00Z",
+  "source": "Google Search Console, page contains ozon-fresh-courier-, Web, Last 28 days versus Previous 28 days",
+  "selection": "Canonical URLs with positive current impressions; URL parameter variants excluded.",
+  "publicationVerifiedAt": null,
+  "incomeBasis": "Owner-supplied possible ceiling of 8000 RUB per day, not employer-verified. No monthly extrapolation.",
+  "cohorts": [
+    {
+      "slug": "ozon-fresh-courier-nizhniy-novgorod-foot",
+      "arm": "income",
+      "baseline": {
+        "clicks": 3,
+        "impressions": 199,
+        "position": 6.9,
+        "previousClicks": 7,
+        "previousImpressions": 207,
+        "previousPosition": 7.5
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-samara-foot",
+      "arm": "income_emoji",
+      "baseline": {
+        "clicks": 2,
+        "impressions": 48,
+        "position": 8.4,
+        "previousClicks": 2,
+        "previousImpressions": 52,
+        "previousPosition": 7.8
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-chelyabinsk-foot",
+      "arm": "role",
+      "baseline": {
+        "clicks": 1,
+        "impressions": 217,
+        "position": 8.7,
+        "previousClicks": 10,
+        "previousImpressions": 378,
+        "previousPosition": 7.2
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-tver-foot",
+      "arm": "income_emoji",
+      "baseline": {
+        "clicks": 1,
+        "impressions": 47,
+        "position": 8.4,
+        "previousClicks": 0,
+        "previousImpressions": 54,
+        "previousPosition": 7.8
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-korolev-foot",
+      "arm": "role",
+      "baseline": {
+        "clicks": 1,
+        "impressions": 5,
+        "position": 6.4,
+        "previousClicks": 1,
+        "previousImpressions": 17,
+        "previousPosition": 6.2
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-rostov-na-donu-foot",
+      "arm": "role",
+      "baseline": {
+        "clicks": 1,
+        "impressions": 4,
+        "position": 8.8,
+        "previousClicks": 0,
+        "previousImpressions": 7,
+        "previousPosition": 7.4
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-poroshkino-foot",
+      "arm": "income_emoji",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 53,
+        "position": 5.6,
+        "previousClicks": 0,
+        "previousImpressions": 0,
+        "previousPosition": 0.0
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-kazan-foot",
+      "arm": "income_emoji",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 42,
+        "position": 9.7,
+        "previousClicks": 0,
+        "previousImpressions": 25,
+        "previousPosition": 7.3
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-krasnodar-foot",
+      "arm": "role",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 30,
+        "position": 7.5,
+        "previousClicks": 0,
+        "previousImpressions": 40,
+        "previousPosition": 6.8
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-bykovo-foot",
+      "arm": "income",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 27,
+        "position": 6.3,
+        "previousClicks": 1,
+        "previousImpressions": 9,
+        "previousPosition": 10.2
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-schelkovo-foot",
+      "arm": "income",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 26,
+        "position": 19.4,
+        "previousClicks": 1,
+        "previousImpressions": 66,
+        "previousPosition": 6.2
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-volgograd-foot",
+      "arm": "income_emoji",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 20,
+        "position": 12.3,
+        "previousClicks": 0,
+        "previousImpressions": 11,
+        "previousPosition": 7.8
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-sankt-peterburg-foot",
+      "arm": "income_emoji",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 15,
+        "position": 7.2,
+        "previousClicks": 0,
+        "previousImpressions": 12,
+        "previousPosition": 7.5
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-sochi-foot",
+      "arm": "income_emoji",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 14,
+        "position": 6.0,
+        "previousClicks": 0,
+        "previousImpressions": 7,
+        "previousPosition": 9.6
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-podolsk-foot",
+      "arm": "income_emoji",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 4,
+        "position": 4.8,
+        "previousClicks": 0,
+        "previousImpressions": 2,
+        "previousPosition": 6.5
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-naberezhnye-chelny-foot",
+      "arm": "income",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 4,
+        "position": 5.0,
+        "previousClicks": 1,
+        "previousImpressions": 3,
+        "previousPosition": 3.0
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-moskva-foot",
+      "arm": "income_emoji",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 3,
+        "position": 10.0,
+        "previousClicks": 0,
+        "previousImpressions": 0,
+        "previousPosition": 0.0
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-mytischi-foot",
+      "arm": "role",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 2,
+        "position": 2.0,
+        "previousClicks": 0,
+        "previousImpressions": 5,
+        "previousPosition": 9.6
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-ramenskoe-foot",
+      "arm": "income_emoji",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 2,
+        "position": 6.0,
+        "previousClicks": 0,
+        "previousImpressions": 0,
+        "previousPosition": 0.0
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-vidnoe-foot",
+      "arm": "income",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 2,
+        "position": 6.0,
+        "previousClicks": 0,
+        "previousImpressions": 2,
+        "previousPosition": 7.0
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-dolgoprudnyy-foot",
+      "arm": "income_emoji",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 2,
+        "position": 8.5,
+        "previousClicks": 0,
+        "previousImpressions": 3,
+        "previousPosition": 7.3
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-pushkino-foot",
+      "arm": "income_emoji",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 2,
+        "position": 9.5,
+        "previousClicks": 0,
+        "previousImpressions": 1,
+        "previousPosition": 7.0
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-novosibirsk-foot",
+      "arm": "income_emoji",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 2,
+        "position": 10.5,
+        "previousClicks": 0,
+        "previousImpressions": 2,
+        "previousPosition": 6.0
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-odintsovo-foot",
+      "arm": "income_emoji",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 2.0,
+        "previousClicks": 0,
+        "previousImpressions": 1,
+        "previousPosition": 10.0
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-elektrostal-foot",
+      "arm": "income_emoji",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 9.0,
+        "previousClicks": 0,
+        "previousImpressions": 3,
+        "previousPosition": 9.3
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-lyubertsy-foot",
+      "arm": "income_emoji",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 9.0,
+        "previousClicks": 0,
+        "previousImpressions": 2,
+        "previousPosition": 9.0
+      }
+    },
+    {
+      "slug": "ozon-fresh-courier-reutov-foot",
+      "arm": "income_emoji",
+      "baseline": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 9.0,
+        "previousClicks": 0,
+        "previousImpressions": 2,
+        "previousPosition": 11.5
+      }
+    }
+  ]
+}

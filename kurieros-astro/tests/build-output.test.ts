@@ -759,7 +759,9 @@ describe.skipIf(skipIfNoDist)('Build output', () => {
       const cardCount = (html.match(/class="job-card"/g) || []).length;
 
       expect(cardCount).toBe(24);
-      expect(html).toContain('24 вакансии из 2097 вакансий');
+      // The title-test cohort restores weekly Fresh payouts for 25
+      // jobs that the generic hourly fallback had marked as daily.
+      expect(html).toContain('data-total-count="2072"');
       expect(html).toMatch(/data-search-text="[^"]*Ежедневно/);
     });
 

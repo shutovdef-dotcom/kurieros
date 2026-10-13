@@ -46,7 +46,7 @@ import { formatMoneyWithCurrency } from '../../utils/money';
 import { buildVacancySeoTitle } from '../../utils/vacancySeoTitle';
 import { getVacancyIndexability } from '../../utils/vacancyIndexability';
 import { getLeadFormEligibility } from '../../utils/leadFormEligibility';
-import { getVacancyTitleOverride } from '../../data/seoExperimentCohorts';
+import { getFreshTitleTest, getVacancyTitleOverride } from '../../data/seoExperimentCohorts';
 
 export async function getStaticPaths() {
 	return detailJobs.map((job) => ({
@@ -56,6 +56,7 @@ export async function getStaticPaths() {
 }
 
 const { job } = Astro.props;
+const freshTitleTest = getFreshTitleTest(job.slug);
 // `applyLink: 'lead-form:<provider>'` (the constant `OZON_LEAD_APPLY`
 // defined in src/data/partnerLinks.ts, wired onto offers in
 // src/data/ozonOffers.ts) is a magic marker that swaps the external
@@ -87,7 +88,9 @@ const matchingOffer =
 			offer.transport === job.transport,
 	);
 const calculatorModel = buildVacancyCalculatorModel({
-	source: matchingSource,
+	source: freshTitleTest && matchingSource
+		? { ...matchingSource, incomeCalculator: { mode: 'hidden' } }
+		: matchingSource,
 	offer: matchingOffer,
 	sources: vacancySources,
 	city: job.location,
@@ -162,7 +165,7 @@ const benefitHooks: string[] = (() => {
 // CTR lever for job-search SERPs), em-dash for visual separation,
 // and the first benefit hook in the trailing slot — but only when
 // the whole thing fits in the 70-char SERP truncation budget.
-const vacancyTitle = buildVacancySeoTitle({
+const vacancyTitle = (freshTitleTest ? getVacancyTitleOverride(job.slug) : undefined) ?? buildVacancySeoTitle({
 	title: job.title,
 	salary: job.salary,
 	benefitHook: benefitHooks[0],
@@ -223,10 +226,12 @@ const trimAtWordBoundary = (s: string, max: number): string => {
 	const lastSpace = cut.lastIndexOf(' ');
 	return lastSpace > max - 40 ? `${cut.slice(0, lastSpace)}…` : `${cut}…`;
 };
-const fullDescription = buildVacancyDescription(true);
+const fullDescription = freshTitleTest
+	? `${job.title}. Возможный доход — до 8 000 ₽/день; зависит от смены и заказов. Тариф и условия уточняйте при оформлении.`
+	: buildVacancyDescription(true);
 const vacancyDescription = fullDescription.length <= 170
 	? fullDescription
-	: trimAtWordBoundary(buildVacancyDescription(false), 170);
+	: trimAtWordBoundary(freshTitleTest ? fullDescription : buildVacancyDescription(false), 170);
 const vacancyIndexability = getVacancyIndexability(job);
 const structuredDataNow = new Date();
 const { datePosted, validThrough } = resolveJobPostingDates({
