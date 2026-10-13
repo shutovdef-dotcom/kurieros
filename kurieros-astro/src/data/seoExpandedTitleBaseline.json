@@ -11,7 +11,7 @@
     "exactPreviousEndDate": null,
     "dateBoundaryNote": "The selected comparison UI exposed only these relative labels. In the comparison view, the chart text rendered “Invalid Date to January 1, 1970”; no reliable exact calendar boundaries were exposed, so dates are not inferred."
   },
-  "publicationVerifiedAt": null,
+  "publicationVerifiedAt": "2026-10-13T20:34:20.628861+00:00",
   "supersedes": "fresh-title-2026-10-13",
   "allocation": "Fixed URL assignment; balanced counts within source/transport and then overall impressions; descriptive comparison, not a visitor-level randomized test",
   "redesignConcurrent": true,
