@@ -102,6 +102,19 @@ def validate_relative_path(value: Any) -> str:
     return value
 
 
+def validate_private_root_argument(value: str | None) -> str | None:
+    """Validate the syntax of an optional absolute remote private directory."""
+    if value is None:
+        return None
+    if not value.startswith("/") or value == "/" or "\\" in value or "\x00" in value:
+        raise argparse.ArgumentTypeError("--private-root must be a canonical absolute POSIX directory")
+    if re.search(r"[\x00-\x1f\x7f]", value) or any(part in ("", ".", "..") for part in value.split("/")[1:]):
+        raise argparse.ArgumentTypeError("--private-root must be a canonical absolute POSIX directory")
+    if PurePosixPath(value).as_posix() != value:
+        raise argparse.ArgumentTypeError("--private-root must be a canonical absolute POSIX directory")
+    return value
+
+
 def phase_for(path: str) -> str:
     if path.endswith(".html") or path.endswith(".htm"):
         return "html"
@@ -228,11 +241,18 @@ def php_literal(value: str) -> str:
     return "'" + value.replace("\\", "\\\\").replace("'", "\\'") + "'"
 
 
-def helper_source(archive_name: str, manifest_name: str, token: str, nonce: str) -> bytes:
+def helper_source(
+    archive_name: str,
+    manifest_name: str,
+    token: str,
+    nonce: str,
+    private_root: str | None = None,
+) -> bytes:
     q_archive = php_literal(archive_name)
     q_manifest = php_literal(manifest_name)
     q_token = php_literal(token)
     q_nonce = php_literal(nonce)
+    q_private_root = "null" if private_root is None else php_literal(private_root)
     return f'''<?php
 declare(strict_types=1);
 ignore_user_abort(true);
@@ -249,13 +269,40 @@ $expectedToken = {q_token};
 if (!isset($_POST['token']) || !is_string($_POST['token']) || !hash_equals($expectedToken, $_POST['token'])) reply_json(['ok'=>false,'error'=>'Forbidden'], 403);
 
 $root = realpath(__DIR__);
-$privateBase = $root === false ? false : realpath(dirname($root));
+$privateRootConfigured = {q_private_root};
+$privateBase = $root === false ? false : ($privateRootConfigured === null ? realpath(dirname($root)) : realpath($privateRootConfigured));
+$privateBaseError = null;
+if ($privateRootConfigured !== null) {{
+    if (!is_string($privateRootConfigured) || $privateRootConfigured === '' || $privateRootConfigured[0] !== '/' || str_contains($privateRootConfigured, "\\\\") || preg_match('/[\\x00-\\x1f\\x7f]/', $privateRootConfigured) || preg_match('#(?:^|/)\\.{{1,2}}(?:/|$)#', $privateRootConfigured) || str_contains($privateRootConfigured, '//') || str_ends_with($privateRootConfigured, '/')) {{
+        $privateBaseError = 'Explicit private root must be a canonical absolute path';
+    }} elseif ($root === false || $privateBase === false || !is_dir($privateRootConfigured) || is_link($privateRootConfigured) || $privateBase !== $privateRootConfigured) {{
+        $privateBaseError = 'Explicit private root must exist as a canonical non-symlink directory';
+    }} elseif (inside_path($privateBase, $root) || inside_path($root, $privateBase)) {{
+        $privateBaseError = 'Explicit private root must be outside and separate from document root';
+    }} else {{
+        $privateMode = @fileperms($privateBase);
+        $privateOwner = @fileowner($privateBase);
+        $documentOwner = @fileowner($root);
+        $processOwner = function_exists('posix_geteuid') ? @posix_geteuid() : $documentOwner;
+        if ($privateMode === false || ($privateMode & 0777) !== 0700) {{
+            $privateBaseError = 'Explicit private root permissions must be exactly 0700';
+        }} elseif ($privateOwner === false || $processOwner === false || $privateOwner !== $processOwner) {{
+            $privateBaseError = 'Explicit private root must be owned by the PHP account';
+        }} elseif (!is_writable($privateBase)) {{
+            $privateBaseError = 'Explicit private root is not writable by the PHP process';
+        }}
+    }}
+}}
 $archivePath = __DIR__ . DIRECTORY_SEPARATOR . {q_archive};
 $manifestPath = __DIR__ . DIRECTORY_SEPARATOR . {q_manifest};
 $nonce = {q_nonce};
-$stage = $privateBase === false ? false : $privateBase . DIRECTORY_SEPARATOR . '.kurerok-stage-' . $nonce;
-$backup = $privateBase === false ? false : $privateBase . DIRECTORY_SEPARATOR . '.kurerok-backup-' . $nonce;
-$statusPath = $privateBase === false ? false : $privateBase . DIRECTORY_SEPARATOR . '.kurerok-status-' . $nonce . '.json';
+$privatePathIsSeparate = $privateRootConfigured === null
+    ? ($root !== false && !inside_path((string)$privateBase, $root))
+    : ($root !== false && !inside_path((string)$privateBase, $root) && !inside_path($root, (string)$privateBase));
+$privatePathsAllowed = $privateBase !== false && $privateBaseError === null && $privatePathIsSeparate;
+$stage = $privatePathsAllowed ? $privateBase . DIRECTORY_SEPARATOR . '.kurerok-stage-' . $nonce : false;
+$backup = $privatePathsAllowed ? $privateBase . DIRECTORY_SEPARATOR . '.kurerok-backup-' . $nonce : false;
+$statusPath = $privatePathsAllowed ? $privateBase . DIRECTORY_SEPARATOR . '.kurerok-status-' . $nonce . '.json' : false;
 $attempted = [];
 $createdDirs = [];
 $backed = [];
@@ -270,6 +317,7 @@ function write_status(string $path, string $state, array $details = []): void {{
     @chmod($temporary, 0600);
     @rename($temporary, $path);
 }}
+if ($privateBaseError !== null && in_array(($_POST['action'] ?? ''), ['status','cleanup-status'], true)) reply_json(['ok'=>false,'error'=>$privateBaseError], 400);
 if (is_string($statusPath) && ($_POST['action'] ?? '') === 'status') {{
     if (!is_file($statusPath) || is_link($statusPath)) reply_json(['ok'=>false,'error'=>'No remote status is available'], 404);
     $statusRaw = @file_get_contents($statusPath);
@@ -355,6 +403,7 @@ function rollback_files(string $root, string $backup, array $attempted, array $b
 }}
 
 try {{
+    if ($privateBaseError !== null) throw new RuntimeException($privateBaseError);
     if ($root === false || $privateBase === false || $stage === false || $backup === false || !is_dir($root) || !is_writable($privateBase)) throw new RuntimeException('Private staging parent is unavailable');
     if (inside_path($stage, $root) || inside_path($backup, $root)) throw new RuntimeException('Private staging must be outside document root');
     if (!class_exists('ZipArchive')) throw new RuntimeException('ZipArchive unavailable');
@@ -405,7 +454,8 @@ try {{
     if ($privateFree < $privateNeeded || $rootFree < $rootNeeded) throw new RuntimeException('Insufficient verified free disk space for archive overlay, staging, backup, and atomic replacement');
     $space = ['archive_bytes'=>$archiveBytes,'stage_bytes'=>$stageBytes,'backup_upper_bound_bytes'=>$backupEstimate,'max_atomic_temp_bytes'=>$maxAtomicBytes,'safety_margin_bytes'=>$margin,'estimated_peak_footprint_bytes'=>$archiveBytes+$stageBytes+$backupEstimate+$maxAtomicBytes+$margin,'private_free_bytes'=>$privateFree,'root_free_bytes'=>$rootFree,'same_filesystem'=>$sameDevice,'php_memory_limit'=>$memorySetting,'php_max_execution_time'=>ini_get('max_execution_time')];
     write_status((string)$statusPath, 'running', ['phase'=>'disk_preflight','manifest_files'=>count($expected),'space'=>$space]);
-    if (!@mkdir($stage, 0700) || !@mkdir($backup, 0700)) throw new RuntimeException('Cannot create private staging or backup directories');
+    if (!@mkdir($stage, 0700)) throw new RuntimeException('Cannot create private stage directory');
+    if (!@mkdir($backup, 0700)) throw new RuntimeException('Cannot create private backup directory');
     $zip = new ZipArchive();
     if ($zip->open($archivePath) !== true) throw new RuntimeException('Cannot open uploaded archive');
     if ($zip->numFiles !== count($expected)) throw new RuntimeException('Archive count differs from manifest');
@@ -662,7 +712,7 @@ def apply_remote(args: argparse.Namespace, archive_path: Path, manifest_path: Pa
     archive_name = f"codex-deploy-{nonce}.zip"
     manifest_name = f"codex-deploy-{nonce}.json"
     helper_name = f"codex-deploy-{nonce}.php"
-    helper = helper_source(archive_name, manifest_name, token, nonce)
+    helper = helper_source(archive_name, manifest_name, token, nonce, args.private_root)
     ftp = ftp_connect(args, password)
     remote_names: list[str] = []
     terminal_known = True
@@ -751,6 +801,7 @@ def make_parser() -> argparse.ArgumentParser:
     parser.add_argument("--ftp-port", type=int, default=21)
     parser.add_argument("--ftp-password-env", default="TIMEWEB_FTP_PASSWORD", help="Environment variable name; value is never printed")
     parser.add_argument("--remote-root", default="/", help="FTP-scoped site document root")
+    parser.add_argument("--private-root", type=validate_private_root_argument, help="Existing canonical remote directory, owned by the site owner, mode 0700, outside the document root")
     parser.add_argument("--ftp-tls", action=argparse.BooleanOptionalAction, default=True, help="Use explicit FTPS (default)")
     parser.add_argument("--ftp-timeout", type=int, default=120, help="Seconds for FTP connect/data operations")
     parser.add_argument("--base-url", default=CANONICAL_URL, help="Must remain canonical https://kurerok.ru/")
