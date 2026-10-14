@@ -182,6 +182,16 @@ jobs:
         if: steps.decision.outputs.should_deploy == 'true'
         run: npm run test
 
+      - name: Test deployment safety boundaries
+        if: steps.decision.outputs.should_deploy == 'true'
+        run: python3 -m unittest discover -s tests -p 'test_*timeweb*.py'
+
+      - name: Test reviewed deployment helper
+        if: steps.decision.outputs.should_deploy == 'true'
+        run: |
+          php -r 'if (!class_exists("ZipArchive")) { fwrite(STDERR, "PHP ZipArchive is required for deployment integration tests\n"); exit(1); }'
+          python3 -m unittest discover -s tests -p 'test_deploy_reviewed_site*.py'
+
       - name: Build
         if: steps.decision.outputs.should_deploy == 'true'
         env:
@@ -357,7 +367,7 @@ jobs:
 
           "$PROJECT_DIR/scripts/timeweb-ssh-archive-deploy.sh" "${args[@]}"
 
-      - name: Deploy archive to Timeweb
+      - name: Deploy reviewed archive to Timeweb
         if: ${{ env.TIMEWEB_DEPLOY_METHOD == 'archive' }}
         env:
           TIMEWEB_FTP_HOST: ${{ secrets.TIMEWEB_FTP_HOST }}
@@ -366,9 +376,10 @@ jobs:
           TIMEWEB_FTP_PASSWORD: ${{ secrets.TIMEWEB_FTP_PASSWORD }}
           TIMEWEB_FTP_TLS: ${{ vars.TIMEWEB_FTP_TLS }}
           TIMEWEB_UNPACK_URL: ${{ vars.TIMEWEB_UNPACK_URL }}
-          TIMEWEB_UNPACK_INSECURE_HTTPS: ${{ vars.TIMEWEB_UNPACK_INSECURE_HTTPS }}
         run: |
           set -euo pipefail
+
+          mkdir -p output/timeweb-backup
 
           args=(
             --source-dir dist
@@ -377,18 +388,39 @@ jobs:
             --ftp-user "$TIMEWEB_FTP_USER"
             --ftp-password-env TIMEWEB_FTP_PASSWORD
             --remote-root "$TIMEWEB_REMOTE_DIR_NORMALIZED"
-            --unpack-url "$TIMEWEB_UNPACK_URL"
+            --base-url "$TIMEWEB_UNPACK_URL"
+            --managed-private-root
+            --backup-dir output/timeweb-backup/rollback
+            --apply
           )
 
           if [ "${TIMEWEB_FTP_TLS:-false}" = "true" ]; then
             args+=(--ftp-tls)
+          else
+            args+=(--no-ftp-tls)
           fi
 
-          if [ "${TIMEWEB_UNPACK_INSECURE_HTTPS:-false}" = "true" ]; then
-            args+=(--insecure-https)
-          fi
+          python3 "$PROJECT_DIR/scripts/deploy-reviewed-site.py" "${args[@]}" \
+            2>&1 | tee output/timeweb-backup/deploy.jsonl
 
-          python3 "$PROJECT_DIR/scripts/timeweb-archive-deploy.py" "${args[@]}"
+      - name: Verify representative public files against the built artifact
+        if: ${{ env.TIMEWEB_DEPLOY_METHOD == 'archive' }}
+        run: |
+          python3 "$PROJECT_DIR/scripts/verify-timeweb-release.py" \
+            --source-dir dist \
+            --baseline "$PROJECT_DIR/src/data/seoExpandedTitleBaseline.json" \
+            --deploy-log output/timeweb-backup/deploy.jsonl \
+            --output output/timeweb-backup/public-verification.json
+
+      - name: Retain verified rollback backup and deployment evidence
+        if: ${{ always() && env.TIMEWEB_DEPLOY_METHOD == 'archive' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: timeweb-rollback-${{ github.run_id }}-${{ github.run_attempt }}
+          path: output/timeweb-backup/
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 0
 
       - name: Deploy dist to Timeweb with FTP mirror
         if: ${{ env.TIMEWEB_DEPLOY_METHOD == 'ftp-mirror' }}

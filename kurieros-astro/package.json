@@ -57,7 +57,7 @@
     "check": "npm run lint && npm run typecheck && npm run test:coverage && npm run check:worker && npm run check:yandex-feed",
     "check:perf": "npm run bench:city-neighbours",
     "deploy:timeweb:check": "./scripts/check-timeweb-github-env.sh",
-    "deploy:timeweb:archive:dry-run": "python3 scripts/timeweb-archive-deploy.py --source-dir dist --ftp-host localhost --ftp-user dry-run --ftp-password-env TIMEWEB_FTP_PASSWORD --unpack-url http://example.invalid --dry-run",
+    "deploy:timeweb:archive:dry-run": "python3 scripts/deploy-reviewed-site.py --source-dir dist",
     "deploy:timeweb:ssh:dry-run": "scripts/timeweb-ssh-archive-deploy.sh --source-dir dist --host localhost --user dry-run --identity-file /dev/null --known-hosts /dev/null --remote-root /tmp/kurerok --dry-run",
     "deploy:timeweb:run": "gh workflow run deploy-timeweb.yml --repo shutovdef-dotcom/kurieros --ref main",
     "deploy:timeweb:run:archive": "gh workflow run deploy-timeweb.yml --repo shutovdef-dotcom/kurieros --ref main -f deploy_method=archive",

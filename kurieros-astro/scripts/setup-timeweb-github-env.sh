@@ -22,7 +22,7 @@ Required environment variables for TIMEWEB_DEPLOY_METHOD=ssh-archive:
   TIMEWEB_SSH_REMOTE_ROOT
 
 Optional environment variables:
-  TIMEWEB_FTP_HOST                  default: vh440.timeweb.ru
+  TIMEWEB_FTP_HOST                  default: vh472.timeweb.ru
   TIMEWEB_REMOTE_DIR                default: /
   TIMEWEB_REMOTE_ROOT_IS_SITE_ROOT  default: true
   TIMEWEB_FTP_PORT                  default: 21
@@ -42,7 +42,7 @@ Usage:
   ./scripts/setup-timeweb-github-env.sh
 
   TIMEWEB_DEPLOY_METHOD='ssh-archive' \
-  TIMEWEB_SSH_HOST='vh440.timeweb.ru' \
+  TIMEWEB_SSH_HOST='vh472.timeweb.ru' \
   TIMEWEB_SSH_USER='cw556341' \
   TIMEWEB_SSH_PRIVATE_KEY_FILE="$HOME/.ssh/kurerok_timeweb_deploy" \
   TIMEWEB_SSH_REMOTE_ROOT='/home/c/cw556341/public_html' \
@@ -80,7 +80,7 @@ require_env() {
   fi
 }
 
-timeweb_ftp_host="${TIMEWEB_FTP_HOST:-vh440.timeweb.ru}"
+timeweb_ftp_host="${TIMEWEB_FTP_HOST:-vh472.timeweb.ru}"
 timeweb_remote_dir="${TIMEWEB_REMOTE_DIR:-/}"
 timeweb_remote_root_is_site_root="${TIMEWEB_REMOTE_ROOT_IS_SITE_ROOT:-true}"
 timeweb_ftp_port="${TIMEWEB_FTP_PORT:-21}"

@@ -247,12 +247,14 @@ def helper_source(
     token: str,
     nonce: str,
     private_root: str | None = None,
+    managed_private_root: bool = False,
 ) -> bytes:
     q_archive = php_literal(archive_name)
     q_manifest = php_literal(manifest_name)
     q_token = php_literal(token)
     q_nonce = php_literal(nonce)
     q_private_root = "null" if private_root is None else php_literal(private_root)
+    q_managed_private_root = "true" if managed_private_root else "false"
     return f'''<?php
 declare(strict_types=1);
 ignore_user_abort(true);
@@ -267,12 +269,48 @@ function reply_json(array $data, int $status = 200): void {{
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') reply_json(['ok'=>false,'error'=>'POST required'], 405);
 $expectedToken = {q_token};
 if (!isset($_POST['token']) || !is_string($_POST['token']) || !hash_equals($expectedToken, $_POST['token'])) reply_json(['ok'=>false,'error'=>'Forbidden'], 403);
+$action = $_POST['action'] ?? 'apply';
+if (!is_string($action) || !in_array($action, ['apply','status','cleanup-status','export-backup','cleanup-private-storage'], true)) reply_json(['ok'=>false,'state'=>'refused','error'=>'Unknown helper action'], 400);
 
 $root = realpath(__DIR__);
 $privateRootConfigured = {q_private_root};
-$privateBase = $root === false ? false : ($privateRootConfigured === null ? realpath(dirname($root)) : realpath($privateRootConfigured));
+$managedPrivateRoot = {q_managed_private_root};
+$privateParent = $managedPrivateRoot ? realpath(sys_get_temp_dir()) : false;
+$managedBasePath = ($privateParent !== false) ? $privateParent . DIRECTORY_SEPARATOR . 'kurerok-deploy-private-' . {q_nonce} : false;
+$privateBase = $root === false ? false : ($managedPrivateRoot ? (is_dir((string)$managedBasePath) ? realpath((string)$managedBasePath) : false) : ($privateRootConfigured === null ? realpath(dirname($root)) : realpath($privateRootConfigured)));
 $privateBaseError = null;
-if ($privateRootConfigured !== null) {{
+if ($managedPrivateRoot) {{
+    if ($root === false || $privateParent === false || !is_dir($privateParent) || !is_writable($privateParent)) {{
+        $privateBaseError = 'Managed private parent is unavailable';
+    }} elseif (inside_path($privateParent, $root)) {{
+        $privateBaseError = 'Managed private parent must be outside and separate from document root';
+    }} elseif ($privateBase === false && $action !== 'apply') {{
+        $privateBaseError = 'Managed private storage is unavailable';
+    }} elseif ($privateBase !== false && (is_link((string)$managedBasePath) || $privateBase !== $managedBasePath || inside_path($privateBase, $root))) {{
+        $privateBaseError = 'Managed private storage is not a canonical separate directory';
+    }} elseif ($privateBase !== false) {{
+        $privateMode = @fileperms($privateBase);
+        $privateOwner = @fileowner($privateBase);
+        $processOwner = function_exists('posix_geteuid') ? @posix_geteuid() : @fileowner($root);
+        if ($privateMode === false || ($privateMode & 0777) !== 0700) $privateBaseError = 'Managed private storage permissions must be exactly 0700';
+        elseif ($privateOwner === false || $processOwner === false || $privateOwner !== $processOwner) $privateBaseError = 'Managed private storage must be owned by the PHP account';
+        elseif (!is_writable($privateBase)) $privateBaseError = 'Managed private storage is not writable';
+        elseif ($action === 'apply') reply_json(['ok'=>false,'state'=>'refused','error'=>'Managed private storage already exists; refusing duplicate apply'], 409);
+    }} elseif ($action === 'apply') {{
+        $previousUmask = umask(0077);
+        $managedCreated = !file_exists((string)$managedBasePath) && !is_link((string)$managedBasePath) && @mkdir((string)$managedBasePath, 0700);
+        umask($previousUmask);
+        if (!$managedCreated) {{
+            $privateBaseError = 'Cannot create unique managed private storage';
+        }} else {{
+            $privateBase = realpath((string)$managedBasePath);
+            $privateMode = $privateBase === false ? false : @fileperms($privateBase);
+            $privateOwner = $privateBase === false ? false : @fileowner($privateBase);
+            $processOwner = function_exists('posix_geteuid') ? @posix_geteuid() : @fileowner($root);
+            if ($privateBase === false || $privateBase !== $managedBasePath || $privateMode === false || ($privateMode & 0777) !== 0700 || $privateOwner === false || $processOwner === false || $privateOwner !== $processOwner || !is_writable($privateBase)) $privateBaseError = 'Created managed private storage failed ownership or permission checks';
+        }}
+    }}
+}} elseif ($privateRootConfigured !== null) {{
     if (!is_string($privateRootConfigured) || $privateRootConfigured === '' || $privateRootConfigured[0] !== '/' || str_contains($privateRootConfigured, "\\\\") || preg_match('/[\\x00-\\x1f\\x7f]/', $privateRootConfigured) || preg_match('#(?:^|/)\\.{{1,2}}(?:/|$)#', $privateRootConfigured) || str_contains($privateRootConfigured, '//') || str_ends_with($privateRootConfigured, '/')) {{
         $privateBaseError = 'Explicit private root must be a canonical absolute path';
     }} elseif ($root === false || $privateBase === false || !is_dir($privateRootConfigured) || is_link($privateRootConfigured) || $privateBase !== $privateRootConfigured) {{
@@ -296,9 +334,11 @@ if ($privateRootConfigured !== null) {{
 $archivePath = __DIR__ . DIRECTORY_SEPARATOR . {q_archive};
 $manifestPath = __DIR__ . DIRECTORY_SEPARATOR . {q_manifest};
 $nonce = {q_nonce};
-$privatePathIsSeparate = $privateRootConfigured === null
+$privatePathIsSeparate = $managedPrivateRoot
+    ? ($root !== false && $privateBase !== false && !inside_path((string)$privateBase, $root))
+    : ($privateRootConfigured === null
     ? ($root !== false && !inside_path((string)$privateBase, $root))
-    : ($root !== false && !inside_path((string)$privateBase, $root) && !inside_path($root, (string)$privateBase));
+    : ($root !== false && !inside_path((string)$privateBase, $root) && !inside_path($root, (string)$privateBase)));
 $privatePathsAllowed = $privateBase !== false && $privateBaseError === null && $privatePathIsSeparate;
 $stage = $privatePathsAllowed ? $privateBase . DIRECTORY_SEPARATOR . '.kurerok-stage-' . $nonce : false;
 $backup = $privatePathsAllowed ? $privateBase . DIRECTORY_SEPARATOR . '.kurerok-backup-' . $nonce : false;
@@ -317,15 +357,15 @@ function write_status(string $path, string $state, array $details = []): void {{
     @chmod($temporary, 0600);
     @rename($temporary, $path);
 }}
-if ($privateBaseError !== null && in_array(($_POST['action'] ?? ''), ['status','cleanup-status'], true)) reply_json(['ok'=>false,'error'=>$privateBaseError], 400);
-if (is_string($statusPath) && ($_POST['action'] ?? '') === 'status') {{
+if ($privateBaseError !== null && in_array($action, ['status','cleanup-status','export-backup','cleanup-private-storage'], true)) reply_json(['ok'=>false,'error'=>$privateBaseError], 400);
+if (is_string($statusPath) && $action === 'status') {{
     if (!is_file($statusPath) || is_link($statusPath)) reply_json(['ok'=>false,'error'=>'No remote status is available'], 404);
     $statusRaw = @file_get_contents($statusPath);
     $status = $statusRaw === false ? null : json_decode($statusRaw, true);
     if (!is_array($status)) reply_json(['ok'=>false,'error'=>'Remote status is unreadable'], 500);
     reply_json($status);
 }}
-if (is_string($statusPath) && ($_POST['action'] ?? '') === 'cleanup-status') {{
+if (is_string($statusPath) && $action === 'cleanup-status') {{
     $statusRaw = is_file($statusPath) ? @file_get_contents($statusPath) : false;
     $status = $statusRaw === false ? null : json_decode($statusRaw, true);
     if (!is_array($status) || !in_array($status['state'] ?? '', ['complete','failed'], true)) reply_json(['ok'=>false,'error'=>'Status is not terminal'], 409);
@@ -360,8 +400,9 @@ function ensure_no_symlink_ancestors(string $root, string $relative, bool $allow
         if (file_exists($current)) {{
             if (!is_dir($current)) throw new RuntimeException('Non-directory target parent');
         }} elseif ($allowMissingDirs) {{
-            if (!@mkdir($current, 0755)) throw new RuntimeException('Cannot create target directory');
+            if (!@mkdir($current, 0755)) throw new RuntimeException('Cannot create public target directory');
             $createdDirs[] = $current;
+            if (!@chmod($current, 0755) || (fileperms($current) & 0777) !== 0755) throw new RuntimeException('Cannot set public target directory readable permissions');
         }} else {{
             $missingParent = true;
         }}
@@ -375,6 +416,89 @@ function remove_private_tree(string $path): void {{
     if (!is_array($items)) return;
     foreach ($items as $item) if ($item !== '.' && $item !== '..') remove_private_tree($path . DIRECTORY_SEPARATOR . $item);
     @rmdir($path);
+}}
+function list_private_files(string $base): array {{
+    $result = [];
+    $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($base, FilesystemIterator::SKIP_DOTS));
+    foreach ($iterator as $entry) {{
+        if ($entry->isLink() || !$entry->isFile()) throw new RuntimeException('Unexpected non-file in private backup');
+        $result[] = str_replace(DIRECTORY_SEPARATOR, '/', substr($entry->getPathname(), strlen($base) + 1));
+    }}
+    sort($result, SORT_STRING);
+    return $result;
+}}
+if ($privateBaseError === null && is_string($backup) && $action === 'export-backup') {{
+    try {{
+        $statusRaw = is_file((string)$statusPath) ? @file_get_contents((string)$statusPath) : false;
+        $status = $statusRaw === false ? null : json_decode($statusRaw, true);
+        if (!is_array($status) || ($status['state'] ?? '') !== 'complete' || !is_dir((string)$backup) || is_link((string)$backup)) throw new RuntimeException('Completed private backup is unavailable');
+        $manifestPathPrivate = $backup . DIRECTORY_SEPARATOR . 'backup-manifest.json';
+        $manifestRaw = @file_get_contents($manifestPathPrivate);
+        $backupManifest = $manifestRaw === false ? null : json_decode($manifestRaw, true);
+        if (!is_array($backupManifest) || !isset($backupManifest['files']) || !is_array($backupManifest['files'])) throw new RuntimeException('Private backup manifest is unreadable');
+        $expectedPayload = [];
+        foreach ($backupManifest['files'] as $relative => $record) {{
+            if (!safe_relative($relative) || !is_array($record) || !isset($record['was_missing'])) throw new RuntimeException('Private backup manifest contains an invalid record');
+            if ($record['was_missing'] === true) continue;
+            if (($record['was_missing'] ?? null) !== false || ($record['backup'] ?? null) !== str_replace('/', DIRECTORY_SEPARATOR, $relative) || !is_string($record['sha256'] ?? null) || !preg_match('/^[a-f0-9]{{64}}$/', $record['sha256']) || !is_int($record['size'] ?? null) || $record['size'] < 0) throw new RuntimeException('Private backup record is invalid');
+            $file = $backup . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relative);
+            if (is_link($file) || !is_file($file) || filesize($file) !== $record['size'] || hash_file('sha256', $file) !== $record['sha256']) throw new RuntimeException('Private backup file failed hash verification');
+            $expectedPayload[$relative] = $file;
+        }}
+        $actual = list_private_files((string)$backup);
+        $expected = array_keys($expectedPayload); $expected[] = 'backup-manifest.json'; sort($expected, SORT_STRING);
+        if ($actual !== $expected) throw new RuntimeException('Private backup contains unexpected or missing files');
+        $exportPath = $privateBase . DIRECTORY_SEPARATOR . '.kurerok-export-' . $nonce . '.zip';
+        if (file_exists($exportPath) || is_link($exportPath)) throw new RuntimeException('Private backup export already exists');
+        $zip = new ZipArchive();
+        if ($zip->open($exportPath, ZipArchive::CREATE | ZipArchive::EXCL) !== true) throw new RuntimeException('Cannot create private backup export');
+        if (!$zip->addFile($manifestPathPrivate, '__kurerok_backup_manifest__.json')) throw new RuntimeException('Cannot add backup manifest to export');
+        foreach ($expectedPayload as $relative => $file) if (!$zip->addFile($file, $relative)) throw new RuntimeException('Cannot add backup payload to export');
+        if (!$zip->close()) throw new RuntimeException('Cannot finalize private backup export');
+        @chmod($exportPath, 0600);
+        $exportHash = hash_file('sha256', $exportPath);
+        if ($exportHash === false) throw new RuntimeException('Cannot verify private backup export');
+        $status['export_sha256'] = $exportHash;
+        $status['export_bytes'] = filesize($exportPath);
+        write_status((string)$statusPath, 'complete', $status);
+        header('Content-Type: application/zip');
+        header('Content-Length: ' . (string)filesize($exportPath));
+        header('X-Backup-SHA256: ' . $exportHash);
+        header('Cache-Control: no-store, private');
+        readfile($exportPath);
+        @unlink($exportPath);
+        exit;
+    }} catch (Throwable $error) {{
+        if (isset($zip) && $zip instanceof ZipArchive) @$zip->close();
+        if (isset($exportPath)) @unlink($exportPath);
+        reply_json(['ok'=>false,'state'=>'failed','error'=>get_class($error),'message'=>substr($error->getMessage(),0,300)], 500);
+    }}
+}}
+if ($privateBaseError === null && is_string($backup) && $action === 'cleanup-private-storage') {{
+    try {{
+        $statusRaw = is_file((string)$statusPath) ? @file_get_contents((string)$statusPath) : false;
+        $status = $statusRaw === false ? null : json_decode($statusRaw, true);
+        if (!is_array($status) || ($status['state'] ?? '') !== 'complete' || !isset($status['export_sha256']) || !is_string($_POST['export_sha256'] ?? null) || !hash_equals((string)$status['export_sha256'], (string)$_POST['export_sha256'])) throw new RuntimeException('Verified backup export receipt is required');
+        if (is_dir((string)$stage) || is_link((string)$stage)) throw new RuntimeException('Unexpected private staging path remains');
+        $exportPath = $privateBase . DIRECTORY_SEPARATOR . '.kurerok-export-' . $nonce . '.zip';
+        if (file_exists($exportPath) || is_link($exportPath)) {{
+            if (is_link($exportPath) || !is_file($exportPath) || hash_file('sha256', $exportPath) !== $status['export_sha256'] || !@unlink($exportPath)) throw new RuntimeException('Unexpected or unverifiable private export file remains');
+        }}
+        if ($managedPrivateRoot) {{
+            $remaining = @scandir((string)$privateBase);
+            if (!is_array($remaining) || array_diff($remaining, ['.','..',basename((string)$backup),basename((string)$statusPath)]) !== [] || array_diff(['.','..',basename((string)$backup),basename((string)$statusPath)], $remaining) !== []) throw new RuntimeException('Managed private storage contains unexpected files');
+        }}
+        if (is_dir((string)$backup) && !is_link((string)$backup)) remove_private_tree((string)$backup);
+        elseif (file_exists((string)$backup) || is_link((string)$backup)) throw new RuntimeException('Unexpected private backup path type');
+        if (is_file((string)$statusPath) && !is_link((string)$statusPath)) @unlink((string)$statusPath);
+        if ($managedPrivateRoot) {{
+            $remaining = @scandir((string)$privateBase);
+            if (!is_array($remaining) || count(array_diff($remaining, ['.','..'])) !== 0 || !@rmdir((string)$privateBase)) throw new RuntimeException('Managed private storage contains unexpected files or could not be removed');
+        }}
+        reply_json(['ok'=>true,'state'=>'private_storage_removed','managed_private_root'=>$managedPrivateRoot]);
+    }} catch (Throwable $error) {{
+        reply_json(['ok'=>false,'state'=>'cleanup_failed','error'=>get_class($error),'message'=>substr($error->getMessage(),0,300)], 500);
+    }}
 }}
 function atomic_copy(string $source, string $target, int $mode): void {{
     $tmp = $target . '.codex-tmp-' . bin2hex(random_bytes(8));
@@ -449,10 +573,12 @@ try {{
     if ($archiveBytes === false || $privateFree === false || $rootFree === false || !is_array($privateStat) || !is_array($rootStat)) throw new RuntimeException('Cannot verify free disk space; refusing deployment');
     $sameDevice = $privateStat['dev'] === $rootStat['dev'];
     $margin = 268435456;
-    $privateNeeded = $stageBytes + $backupEstimate + $margin + ($sameDevice ? $maxAtomicBytes : 0);
+    // A verified local rollback ZIP is materialized transiently after publish,
+    // so reserve a second backup-sized allowance before any public mutation.
+    $privateNeeded = $stageBytes + (2 * $backupEstimate) + $margin + ($sameDevice ? $maxAtomicBytes : 0);
     $rootNeeded = $sameDevice ? 0 : $maxAtomicBytes + $margin;
     if ($privateFree < $privateNeeded || $rootFree < $rootNeeded) throw new RuntimeException('Insufficient verified free disk space for archive overlay, staging, backup, and atomic replacement');
-    $space = ['archive_bytes'=>$archiveBytes,'stage_bytes'=>$stageBytes,'backup_upper_bound_bytes'=>$backupEstimate,'max_atomic_temp_bytes'=>$maxAtomicBytes,'safety_margin_bytes'=>$margin,'estimated_peak_footprint_bytes'=>$archiveBytes+$stageBytes+$backupEstimate+$maxAtomicBytes+$margin,'private_free_bytes'=>$privateFree,'root_free_bytes'=>$rootFree,'same_filesystem'=>$sameDevice,'php_memory_limit'=>$memorySetting,'php_max_execution_time'=>ini_get('max_execution_time')];
+    $space = ['archive_bytes'=>$archiveBytes,'stage_bytes'=>$stageBytes,'backup_upper_bound_bytes'=>$backupEstimate,'backup_export_upper_bound_bytes'=>$backupEstimate,'max_atomic_temp_bytes'=>$maxAtomicBytes,'safety_margin_bytes'=>$margin,'estimated_peak_footprint_bytes'=>$archiveBytes+$stageBytes+(2*$backupEstimate)+$maxAtomicBytes+$margin,'private_free_bytes'=>$privateFree,'root_free_bytes'=>$rootFree,'same_filesystem'=>$sameDevice,'php_memory_limit'=>$memorySetting,'php_max_execution_time'=>ini_get('max_execution_time')];
     write_status((string)$statusPath, 'running', ['phase'=>'disk_preflight','manifest_files'=>count($expected),'space'=>$space]);
     if (!@mkdir($stage, 0700)) throw new RuntimeException('Cannot create private stage directory');
     if (!@mkdir($backup, 0700)) throw new RuntimeException('Cannot create private backup directory');
@@ -516,7 +642,7 @@ try {{
         $backupRecords[$relative] = ['was_missing'=>false,'backup'=>str_replace('/', DIRECTORY_SEPARATOR, $relative),'sha256'=>$backupHash,'size'=>filesize($backupFile),'mode'=>$state['mode']];
         $backed[$relative] = $backupRecords[$relative];
     }}
-    $backupManifest = ['created_at_utc'=>gmdate('Y-m-d\\TH:i:s\\Z'),'files'=>$backupRecords];
+    $backupManifest = ['created_at_utc'=>gmdate('Y-m-d\\TH:i:s\\Z'),'files'=>(object)$backupRecords];
     $backupManifestPath = $backup . DIRECTORY_SEPARATOR . 'backup-manifest.json';
     if (file_put_contents($backupManifestPath, json_encode($backupManifest, JSON_UNESCAPED_SLASHES)) === false) throw new RuntimeException('Cannot write private backup manifest');
     @chmod($backupManifestPath, 0600);
@@ -524,8 +650,8 @@ try {{
 
     if (count($changed) === 0) {{
         remove_private_tree($stage);
-        remove_private_tree($backup);
-        $done = ['ok'=>true,'state'=>'complete','counts'=>['manifest_files'=>count($expected),'updated_files'=>0,'unchanged_files'=>count($expected),'readback_files'=>count($expected),'backed_up_existing'=>0,'new_targets'=>0],'backup_location'=>null,'space'=>$space];
+        if (!$managedPrivateRoot) remove_private_tree($backup);
+        $done = ['ok'=>true,'state'=>'complete','counts'=>['manifest_files'=>count($expected),'updated_files'=>0,'unchanged_files'=>count($expected),'readback_files'=>count($expected),'backed_up_existing'=>0,'new_targets'=>0],'backup_location'=>$managedPrivateRoot ? $backup : null,'space'=>$space];
         write_status((string)$statusPath, 'complete', $done);
         reply_json($done);
     }}
@@ -658,6 +784,153 @@ def http_post(args: argparse.Namespace, helper_name: str, token: str, action: st
     return result
 
 
+def http_post_form(args: argparse.Namespace, helper_name: str, token: str, action: str, extra: dict[str, str] | None = None) -> urllib.request.Request:
+    fields = {"token": token, "action": action}
+    if extra:
+        fields.update(extra)
+    return urllib.request.Request(
+        args.base_url.rstrip("/") + "/" + urllib.parse.quote(helper_name),
+        data=urllib.parse.urlencode(fields).encode("ascii"),
+        headers={"Content-Type": "application/x-www-form-urlencoded", "User-Agent": "Kurerok-Reviewed-Site-Deploy/1.0"},
+        method="POST",
+    )
+
+
+def export_backup(args: argparse.Namespace, helper_name: str, token: str, nonce: str, entries: list[FileEntry], expected_counts: dict[str, Any]) -> tuple[Path, Path, str]:
+    backup_dir = prepare_backup_dir(args.backup_dir)
+    archive_path = backup_dir / f"timeweb-backup-{nonce}.zip"
+    manifest_path = backup_dir / f"timeweb-backup-{nonce}.json"
+    partial_path = backup_dir / f".{archive_path.name}.part"
+    request = http_post_form(args, helper_name, token, "export-backup")
+    try:
+        with urllib.request.urlopen(request, timeout=args.request_timeout) as response:
+            content_type = response.headers.get_content_type()
+            server_hash = response.headers.get("X-Backup-SHA256", "")
+            if content_type != "application/zip" or not HEX_SHA256.fullmatch(server_hash):
+                raise DeployError("Private backup export response lacks its verified ZIP metadata")
+            digest = hashlib.sha256()
+            with partial_path.open("xb") as output:
+                while True:
+                    block = response.read(1024 * 1024)
+                    if not block:
+                        break
+                    output.write(block)
+                    digest.update(block)
+                output.flush()
+                os.fsync(output.fileno())
+    except urllib.error.HTTPError as exc:
+        details = exc.read(4096).decode("utf-8", errors="replace")
+        partial_path.unlink(missing_ok=True)
+        raise DeployError(f"Private backup export failed (HTTP {exc.code}): {details[:500]}") from exc
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        partial_path.unlink(missing_ok=True)
+        raise DeployError(f"Private backup export outcome is unknown ({type(exc).__name__}); do not reapply") from exc
+    actual_hash = digest.hexdigest()
+    if actual_hash != server_hash:
+        partial_path.unlink(missing_ok=True)
+        raise DeployError("Downloaded private backup ZIP differs from its authenticated server hash")
+    try:
+        payload = verify_backup_archive(partial_path, entries, expected_counts)
+    except Exception:
+        partial_path.unlink(missing_ok=True)
+        raise
+    os.replace(partial_path, archive_path)
+    manifest_path.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    receipt = {
+        "schema": 1,
+        "canonical": CANONICAL_URL,
+        "archive": archive_path.name,
+        "archive_sha256": actual_hash,
+        "archive_bytes": archive_path.stat().st_size,
+        "manifest": manifest_path.name,
+        "manifest_sha256": sha256_file(manifest_path),
+        "backed_up_files": sum(not record.get("was_missing", False) for record in payload["files"].values()),
+        "new_targets": sum(bool(record.get("was_missing", False)) for record in payload["files"].values()),
+        "verification": "all backup payload hashes, sizes, paths, and ZIP CRC passed",
+    }
+    (backup_dir / f"timeweb-backup-{nonce}-receipt.json").write_text(json.dumps(receipt, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    return archive_path, manifest_path, actual_hash
+
+
+def verify_backup_archive(archive_path: Path, deployed_entries: list[FileEntry], expected_counts: dict[str, Any] | None = None) -> dict[str, Any]:
+    expected_deployed = {entry.path for entry in deployed_entries}
+    try:
+        with zipfile.ZipFile(archive_path, "r") as archive:
+            if archive.testzip() is not None:
+                raise DeployError("Private backup ZIP CRC verification failed")
+            names = archive.namelist()
+            manifest_name = "__kurerok_backup_manifest__.json"
+            if len(names) != len(set(names)) or names.count(manifest_name) != 1:
+                raise DeployError("Private backup ZIP has duplicate or missing manifest")
+            if any(name != manifest_name and name not in expected_deployed for name in names):
+                raise DeployError("Private backup ZIP contains a path outside the deployment manifest")
+            payload = json.loads(archive.read(manifest_name).decode("utf-8"))
+            records = payload.get("files") if isinstance(payload, dict) else None
+            if not isinstance(records, dict) or not set(records).issubset(expected_deployed):
+                raise DeployError("Private backup manifest contains a target outside the deployment manifest")
+            expected_payload = set()
+            for path, record in records.items():
+                validate_relative_path(path)
+                if not isinstance(record, dict) or type(record.get("was_missing")) is not bool:
+                    raise DeployError("Private backup manifest contains an invalid record")
+                if record["was_missing"]:
+                    if set(record) != {"was_missing"}:
+                        raise DeployError("New-target backup record contains unexpected fields")
+                    continue
+                if set(record) != {"was_missing", "backup", "sha256", "size", "mode"} or record["backup"] != path:
+                    raise DeployError("Existing-target backup record has an invalid layout")
+                if not isinstance(record["sha256"], str) or not HEX_SHA256.fullmatch(record["sha256"]):
+                    raise DeployError("Existing-target backup record has invalid SHA-256")
+                if type(record["size"]) is not int or record["size"] < 0 or type(record["mode"]) is not int:
+                    raise DeployError("Existing-target backup record has invalid size or mode")
+                expected_payload.add(path)
+                digest = hashlib.sha256()
+                size = 0
+                with archive.open(path, "r") as handle:
+                    for block in iter(lambda: handle.read(1024 * 1024), b""):
+                        digest.update(block)
+                        size += len(block)
+                if size != record["size"] or digest.hexdigest() != record["sha256"]:
+                    raise DeployError(f"Private backup payload failed hash verification: {path}")
+            if expected_counts is not None:
+                expected_updated = expected_counts.get("updated_files")
+                expected_existing = expected_counts.get("backed_up_existing")
+                expected_new = expected_counts.get("new_targets")
+                actual_existing = sum(not record.get("was_missing", False) for record in records.values())
+                actual_new = sum(bool(record.get("was_missing", False)) for record in records.values())
+                if (
+                    type(expected_updated) is not int
+                    or type(expected_existing) is not int
+                    or type(expected_new) is not int
+                    or len(records) != expected_updated
+                    or actual_existing != expected_existing
+                    or actual_new != expected_new
+                ):
+                    raise DeployError("Private backup manifest record counts differ from the authenticated completed deploy result")
+            if set(names) != expected_payload | {manifest_name}:
+                raise DeployError("Private backup ZIP members do not match its manifest")
+            return payload
+    except (OSError, UnicodeError, json.JSONDecodeError, zipfile.BadZipFile, RuntimeError, KeyError, TypeError) as exc:
+        if isinstance(exc, DeployError):
+            raise
+        raise DeployError("Cannot validate downloaded private backup archive") from exc
+
+
+def cleanup_managed_storage(args: argparse.Namespace, helper_name: str, token: str, archive_hash: str) -> dict[str, Any]:
+    request = http_post_form(args, helper_name, token, "cleanup-private-storage", {"export_sha256": archive_hash})
+    try:
+        with urllib.request.urlopen(request, timeout=min(args.request_timeout, 60)) as response:
+            result = json.loads(response.read(4096).decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        details = exc.read(4096).decode("utf-8", errors="replace")
+        raise DeployError(f"Verified backup was saved locally, but remote private cleanup failed (HTTP {exc.code}): {details[:400]}") from exc
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        raise DeployError(f"Verified backup was saved locally; remote cleanup outcome is unknown ({type(exc).__name__})") from exc
+    if not isinstance(result, dict) or not result.get("ok") or result.get("state") != "private_storage_removed":
+        raise DeployError("Verified backup was saved locally, but remote private cleanup was not confirmed")
+    return result
+
+
 def poll_remote_status(args: argparse.Namespace, helper_name: str, token: str) -> dict[str, Any] | None:
     deadline = time.monotonic() + args.status_poll_timeout
     last_state: str | None = None
@@ -700,19 +973,34 @@ def password_from_env(name: str) -> str:
     return value
 
 
+def prepare_backup_dir(path: Path) -> Path:
+    """Create/check the empty local rollback destination before remote mutation."""
+    try:
+        path.mkdir(mode=0o700, parents=True, exist_ok=True)
+        if path.is_symlink() or not path.is_dir() or not os.access(path, os.W_OK | os.X_OK):
+            raise DeployError("--backup-dir must be a writable real local directory")
+        if any(path.iterdir()):
+            raise DeployError("--backup-dir must be empty so backup evidence cannot overwrite prior files")
+        return path
+    except OSError as exc:
+        raise DeployError("Cannot prepare empty writable --backup-dir before deployment") from exc
+
+
 def apply_remote(args: argparse.Namespace, archive_path: Path, manifest_path: Path, entries: list[FileEntry]) -> int:
     if not args.ftp_host or not args.ftp_user:
         raise DeployError("--apply requires --ftp-host and --ftp-user")
     parsed_base = urllib.parse.urlparse(args.base_url)
     if parsed_base.scheme != "https" or parsed_base.hostname != "kurerok.ru" or parsed_base.path not in ("", "/"):
         raise DeployError("--base-url must be exactly the canonical HTTPS site origin https://kurerok.ru/")
+    if args.managed_private_root:
+        prepare_backup_dir(args.backup_dir)
     password = password_from_env(args.ftp_password_env)
     nonce = secrets.token_hex(18)
     token = secrets.token_urlsafe(32)
     archive_name = f"codex-deploy-{nonce}.zip"
     manifest_name = f"codex-deploy-{nonce}.json"
     helper_name = f"codex-deploy-{nonce}.php"
-    helper = helper_source(archive_name, manifest_name, token, nonce, args.private_root)
+    helper = helper_source(archive_name, manifest_name, token, nonce, args.private_root, args.managed_private_root)
     ftp = ftp_connect(args, password)
     remote_names: list[str] = []
     terminal_known = True
@@ -756,10 +1044,25 @@ def apply_remote(args: argparse.Namespace, archive_path: Path, manifest_path: Pa
         print(json.dumps({"phase":"remote_apply_result",**result},ensure_ascii=False,separators=(",",":")))
         if not result.get("ok"):
             return 1
+        if args.managed_private_root:
+            try:
+                backup_archive, backup_manifest, backup_hash = export_backup(args, helper_name, token, nonce, entries, result["counts"])
+                cleanup = cleanup_managed_storage(args, helper_name, token, backup_hash)
+                print(json.dumps({
+                    "phase":"verified_backup_saved_and_private_storage_removed",
+                    "archive":str(backup_archive),
+                    "manifest":str(backup_manifest),
+                    "archive_sha256":backup_hash,
+                    "cleanup":cleanup,
+                },ensure_ascii=False,separators=(",",":")),flush=True)
+            except DeployError:
+                # Publication may already have completed. Preserve the private
+                # server backup and never replay apply after an export/cleanup error.
+                raise
         return 0
     finally:
         if terminal_known:
-            if apply_started:
+            if apply_started and not args.managed_private_root:
                 try:
                     http_post(args, helper_name, token, "cleanup-status")
                 except DeployError:
@@ -802,6 +1105,8 @@ def make_parser() -> argparse.ArgumentParser:
     parser.add_argument("--ftp-password-env", default="TIMEWEB_FTP_PASSWORD", help="Environment variable name; value is never printed")
     parser.add_argument("--remote-root", default="/", help="FTP-scoped site document root")
     parser.add_argument("--private-root", type=validate_private_root_argument, help="Existing canonical remote directory, owned by the site owner, mode 0700, outside the document root")
+    parser.add_argument("--managed-private-root", action="store_true", help="Create nonce-scoped 0700 private storage under PHP sys_get_temp_dir and remove it only after verified local backup export")
+    parser.add_argument("--backup-dir", type=Path, help="Empty local directory for verified remote rollback ZIP, manifest, and receipt (required with --managed-private-root)")
     parser.add_argument("--ftp-tls", action=argparse.BooleanOptionalAction, default=True, help="Use explicit FTPS (default)")
     parser.add_argument("--ftp-timeout", type=int, default=120, help="Seconds for FTP connect/data operations")
     parser.add_argument("--base-url", default=CANONICAL_URL, help="Must remain canonical https://kurerok.ru/")
@@ -814,6 +1119,15 @@ def make_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = make_parser().parse_args(argv)
+    if args.private_root and args.managed_private_root:
+        print("ERROR: --private-root and --managed-private-root are mutually exclusive", file=sys.stderr)
+        return 2
+    if args.managed_private_root and args.backup_dir is None:
+        print("ERROR: --managed-private-root requires --backup-dir", file=sys.stderr)
+        return 2
+    if args.backup_dir is not None and not args.managed_private_root:
+        print("ERROR: --backup-dir is supported only with --managed-private-root", file=sys.stderr)
+        return 2
     if not 1 <= args.ftp_port <= 65535:
         print("ERROR: --ftp-port must be 1..65535", file=sys.stderr)
         return 2
